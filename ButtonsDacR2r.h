@@ -9,8 +9,8 @@
 class ButtonsDacR2r{
   public:
   
-    #define VALUE_MARGIN_FOR_SELECTOR 50    //in order to avoid floats, we "add a value to the read value of the analog input. dision truncates the float, so instead of 1.002, it's better to have 1.502  to get the value of one.
-    #define CYCLES_BEFORE_CONSIDERED_STABLE 3
+    #define VALUE_MARGIN_FOR_SELECTOR 8    //in order to avoid floats, we "add a value to the read value of the analog input. dision truncates the float, so instead of 1.002, it's better to have 1.502  to get the value of one.
+    #define CYCLES_BEFORE_CONSIDERED_STABLE 10 //3 default
     #define NUMBER_OF_KNOB_POSITIONS 8  //provide an equal resistance between each position
     #define ADC_POWERS_OF_TWO 10  //1024 = 2^10
     ButtonsDacR2r();
@@ -18,10 +18,12 @@ class ButtonsDacR2r{
     uint8_t getButtonsValue();
     void refresh();
     bool getValueChangedEdge();
-    
+    bool getButtonValueByIndex(uint8_t index);
+    uint8_t getButtonsValueRaw();
+    int getButtonsValueAnalog();
   private:  
    
-    uint8_t getButtonsValueRaw();
+    
 
     uint8_t buttonsValue;
     uint8_t buttonsEdgeUp;

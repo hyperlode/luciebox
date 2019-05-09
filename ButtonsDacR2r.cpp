@@ -13,18 +13,28 @@ void ButtonsDacR2r::setPin(byte pin, byte buttonsCount){
   this->buttonsCount = buttonsCount;
 }
 
+int ButtonsDacR2r::getButtonsValueAnalog(){
+  return analogRead(this->analogPin);
+}
+
 uint8_t ButtonsDacR2r::getButtonsValueRaw(){
   
   int raw = (analogRead(this->analogPin));
 //  long (analogRead(this->analogPin));
   uint8_t allButtonsState = 0b00000000; //every bit is a button.
   for(uint8_t i=0; i<this->buttonsCount; i++){
-    if (raw > ( ( 0x01 << ADC_POWERS_OF_TWO -1 - i) - VALUE_MARGIN_FOR_SELECTOR)){
+    if (raw > ( ( 0x0001 << ADC_POWERS_OF_TWO -1 - i) - VALUE_MARGIN_FOR_SELECTOR)){
       allButtonsState |= 0b00000001 << this->buttonsCount - 1 - i; 
-      raw -= ( 0x01 << ADC_POWERS_OF_TWO -1 - i);
+      raw -= ( 0x0001 << ADC_POWERS_OF_TWO -1 - i);
+      if (raw<0){
+        raw=0;
+      }
     }
   }
   return allButtonsState;
+}
+bool ButtonsDacR2r::getButtonValueByIndex(uint8_t index){
+  return (0b00000001 << index) & (this->getButtonsValue());
 }
 
 uint8_t ButtonsDacR2r::getButtonsValue(){
