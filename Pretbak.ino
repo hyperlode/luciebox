@@ -49,8 +49,8 @@ void refresh(){
 
   if (buttons_1.getValueChangedEdge()) {
     //Serial.println("analog in buttons:");
-    Serial.println(buttons_1.getButtonsValueAnalog());
-    Serial.println(buttons_1.getButtonsValue());
+//    Serial.println(buttons_1.getButtonsValueAnalog());
+    //Serial.println(buttons_1.getButtonsValue());
     for (uint8_t i=0; i< BUTTONS_1_COUNT; i++){
       binaryInputs[BUTTONS_1_TO_BINARY_INPUT_OFFSET + i].setValue(buttons_1.getButtonValueByIndex(i));
 //      Serial.println("------");
