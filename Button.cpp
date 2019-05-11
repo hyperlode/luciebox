@@ -7,7 +7,7 @@ Button::Button(){
 	// this->twoButtonsOnePinButtonConnectedToGnd = true;
 	//setBit(&this->boolContainer, true, BITLOCATION_TWOBUTTONSONEPINBUTTONCONNECTEDTOGND); //default button connected to gnd for on.
 	setTwoButtonsOnePinButtonConnectedToGnd(true); //default button connected to gnd for on.
-	setButtonPartOfTwoButtonsPerPinSystem(true);//default button is part of a two button per pin system.
+	//setButtonPartOfTwoButtonsPerPinSystem(true);//default button is part of a two button per pin system.
 	
 };
 
@@ -92,30 +92,6 @@ Button::Button(){
 
 //};
 
-#ifdef EXTRAPIN
-void Button::setPin( byte pin1, byte pin2 ){
-	this->pin1 = pin1;
-	pinMode(pin1, INPUT);
-	digitalWrite(pin1, HIGH);  // set pullup on pin
-	this->pin2 = pin2;
-	if (pin2 != NO_EXTRA_INPUTPIN_SET){
-		pinMode(pin2, INPUT);
-		digitalWrite(pin2, HIGH);  // set pullup on pin
-	}
-};
-
-void Button::unsetExtraPin(byte pin){
-	//check if extra pin is the pin we want to unset, if so, do it!
-	if (pin2 == pin){
-		this->pin2 = NO_EXTRA_INPUTPIN_SET;
-	}
-}
-#else
-
-void Button::setButtonPartOfTwoButtonsPerPinSystem(bool isPartOfTwoButtonsPerPin){
-	setBit(&this->boolContainer, isPartOfTwoButtonsPerPin, BITLOCATION_BUTTONISPARTOFTWOBUTTONSPERPINSYSTEM); 
-}
-
 void Button::setPin( byte pin1){
 	this->pin1 = pin1;
 	//Serial.println(pin1);
@@ -125,30 +101,15 @@ void Button::setPin( byte pin1){
 	
 };
 
-#endif
-
 void Button::setTwoButtonsOnePinButtonConnectedToGnd(bool connectedToGnd){
 	//we are talking about pin1 here! this has nothing to do with pin2 (pin2 comes from an external source...not involved in the multiplexing)
 	// this->twoButtonsOnePinButtonConnectedToGnd = connectedToGnd;
 	setBit(&this->boolContainer, connectedToGnd, BITLOCATION_TWOBUTTONSONEPINBUTTONCONNECTEDTOGND);
 }
 
-void Button::oneButtonHandler(){
-	// //connected to ground is "on"
-	// if (this-> pin2 == NO_EXTRA_INPUTPIN_SET){
-		// this->state =  (not digitalRead(this->pin1)  );//  not digitalRead(this->pin2) ); //
-	// }
-	// else{
-		// //state =  (not digitalRead(this->pin2)  );//  not digitalRead(this->pin2) ); //
-		// this->state =  (not digitalRead(this->pin1) || not digitalRead(this->pin2) );//  not digitalRead(this->pin2) ); //
-	// }
-	// refresh();
-	twoButtonsOnePinHandler();
-}
 
 void Button::twoButtonsOnePinHandler(){
 	
-	if ( getBit(&this->boolContainer, BITLOCATION_BUTTONISPARTOFTWOBUTTONSPERPINSYSTEM)){
 		digitalWrite(this->pin1, HIGH);                  // turn on the puillup resistors
 		delay(2);
 		bool stateB = digitalRead(this->pin1);
@@ -207,18 +168,7 @@ void Button::twoButtonsOnePinHandler(){
 		//  || (stateA == 0 && stateB == 0 && getBit(&this->boolContainer, BITLOCATION_TWOBUTTONSONEPINBUTTONCONNECTEDTOGND))
 		//  );
 		
-	#ifdef EXTRAPIN	
-		//check for extra pin...
-		if (this->pin2 != NO_EXTRA_INPUTPIN_SET){
-			setBit(&this->boolContainer, getState() || not digitalRead(this->pin2),BITLOCATION_STATE);
-			// this->state = this->state || not digitalRead(this->pin2);
-		}
-	#endif
-	}else if (this->pin1 !=PIN_FAKE){
-		setBit(&this->boolContainer, !digitalRead(this->pin1),BITLOCATION_STATE);
-		// Serial.println("press but");
-		// Serial.println(digitalRead(this->pin1));
-	}
+
 }
 
 bool Button::getStateEdgeUp(){
