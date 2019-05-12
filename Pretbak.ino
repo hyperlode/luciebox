@@ -28,17 +28,22 @@
 #define BUTTON_MOMENTARY_GREEN 5
 #define BUTTON_MOMENTARY_BLUE 6
 
+#define POTENTIO_SENSITIVITY 5 //value change before value update.
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 
 PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2; // buttons with normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+int16_t potentio_value;
+int16_t potentio_value_stable;
 
 void refresh(){
   selectorDial.refresh();
   buttons_1.refresh();
   buttons_2.refresh();
 
+  potentio_refresh();
+  
   if (buttons_2.getValueChangedEdge()) {
     //Serial.println("analog 2in buttons:");
     //Serial.println(buttons_2.getButtonsValueAnalog());
@@ -73,7 +78,7 @@ void refresh(){
 //  Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
  
   if (selectorDial.getValueChangedEdge()) {
-//    Serial.println(selectorDial.getSelectorValue());
+    Serial.println(selectorDial.getSelectorValue());
     switch (selectorDial.getSelectorValue()) {
       case 0:
 //        Serial.println("zeor");
@@ -86,11 +91,17 @@ void refresh(){
   }  
 }
 
-
 void mode_auto(){
 
 }
 
+void potentio_refresh(){
+  potentio_value = (int16_t)analogRead(PIN_POTENTIO);
+  if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
+    potentio_value_stable = potentio_value;
+    Serial.println(potentio_value_stable);
+  }
+}
 
 void setup() {
   // put your setup code here, to run once:
