@@ -2,11 +2,37 @@
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
 
+#include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
+#include "DisplayDigitsHandler5Digits.h"
+
+
 // Lode Ameije 2019-05
 // Pretbak is a busy box for my newborn niece
 // The hardware is a box with
 // input: buttons, momentary and switches, a potentiometer, a selector dial, some mercury switches.
 // output: lights on buttons, 7seg display (4 digits), buzzer
+
+#define DISPLAY_IS_COMMON_ANODE true  //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
+ 
+#define PIN_DISPLAY_DIGIT_0 6
+#define PIN_DISPLAY_DIGIT_1 5
+#define PIN_DISPLAY_DIGIT_2 9
+#define PIN_DISPLAY_DIGIT_3 10
+#define PIN_DISPLAY_DIGIT_4 11
+
+#define PIN_DISPLAY_SEGMENT_A 7
+#define PIN_DISPLAY_SEGMENT_B 2
+#define PIN_DISPLAY_SEGMENT_C 4
+#define PIN_DISPLAY_SEGMENT_D 8
+#define PIN_DISPLAY_SEGMENT_E 12
+#define PIN_DISPLAY_SEGMENT_F 13
+#define PIN_DISPLAY_SEGMENT_G 3
+#define PIN_DISPLAY_SEGMENT_DP A4
+
+#define PIN_BUZZER 13 
+  
+
+
 
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
@@ -29,15 +55,25 @@
 #define BUTTON_MOMENTARY_BLUE 6
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
-BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 
+// INPUT
+BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2; // buttons with normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 int16_t potentio_value;
 int16_t potentio_value_stable;
 
+// OUTPUT
+DisplayManagement ledDisp;
+char  textBuf [6];
+
 void refresh(){
+
+  ledDisp.refresh();
+
+
+  
   selectorDial.refresh();
   buttons_1.refresh();
   buttons_2.refresh();
@@ -109,6 +145,22 @@ void setup() {
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
 
+  ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+  textBuf[1]='L';
+  textBuf[2]='O';
+  textBuf[3]='D';
+  textBuf[4]='E';
+  textBuf[5]='/0';
+  ledDisp.setDecimalPoint(true, 1);
+  ledDisp.setDecimalPoint(true, 2);
+  ledDisp.setDecimalPoint(true, 3);
+  ledDisp.setDecimalPoint(true, 4);
+  ledDisp.displayHandler(textBuf);
+
+
+//  ledDisp.setIsScrolling(true);
+//  ledDisp.doSequence();
+//  ledDisp.doScroll();
   Serial.begin(9600);
 }
 
