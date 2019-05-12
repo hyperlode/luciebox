@@ -7,7 +7,7 @@ class ButtonsDacR2r{
   public:
   
     #define VALUE_MARGIN_FOR_SELECTOR 15 //8    //fixed value margin for adc TODO should be a relative margin (depending on button  i.e. 1 for 64 , 2 for 128, 4 for 256,...)
-    #define CYCLES_BEFORE_CONSIDERED_STABLE 100 //software debouncing
+    #define CYCLES_BEFORE_CONSIDERED_STABLE 5 //software debouncing
     #define NUMBER_OF_KNOB_POSITIONS 8  //provide an equal resistance between each position
     #define ADC_POWERS_OF_TWO 10  //1024 = 2^10 (adc resolution in bits)
     ButtonsDacR2r();

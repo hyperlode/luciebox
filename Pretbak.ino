@@ -14,11 +14,12 @@
 
 #define DISPLAY_IS_COMMON_ANODE true  //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
  
-#define PIN_DISPLAY_DIGIT_0 6
+#define PIN_DISPLAY_DIGIT_0 0
 #define PIN_DISPLAY_DIGIT_1 5
 #define PIN_DISPLAY_DIGIT_2 9
 #define PIN_DISPLAY_DIGIT_3 10
 #define PIN_DISPLAY_DIGIT_4 11
+#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
 
 #define PIN_DISPLAY_SEGMENT_A 7
 #define PIN_DISPLAY_SEGMENT_B 2
@@ -31,8 +32,13 @@
 
 #define PIN_BUZZER 13 
   
-
-
+#define LIGHT_RED 1
+#define LIGHT_GREEN 6
+#define LIGHT_BLUE 2
+#define LIGHT_YELLOW 0
+#define LIGHT_LED_1 3
+#define LIGHT_LED_2 4
+#define LIGHT_LED_3 5
 
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
@@ -49,10 +55,10 @@
 #define BUTTON_LATCHING_BIG_RED 2
 #define BUTTON_LATCHING_SMALL_RED_LEFT 1
 #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
-#define BUTTON_LATCHING_YELLOW 3
-#define BUTTON_MOMENTARY_RED 4
-#define BUTTON_MOMENTARY_GREEN 5
-#define BUTTON_MOMENTARY_BLUE 6
+#define BUTTON_LATCHING_YELLOW 6
+#define BUTTON_MOMENTARY_RED 5
+#define BUTTON_MOMENTARY_GREEN 4
+#define BUTTON_MOMENTARY_BLUE 3
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
@@ -67,6 +73,7 @@ int16_t potentio_value_stable;
 // OUTPUT
 DisplayManagement ledDisp;
 char  textBuf [6];
+uint8_t lights;
 
 void refresh(){
 
@@ -115,16 +122,66 @@ void refresh(){
  
   if (selectorDial.getValueChangedEdge()) {
     Serial.println(selectorDial.getSelectorValue());
-    switch (selectorDial.getSelectorValue()) {
-      case 0:
-//        Serial.println("zeor");
-        break;
-      case 1:
-        break;
-      default:
-        break;
     }
-  }  
+
+  
+  switch (selectorDial.getSelectorValue()) {
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    case 4:
+      break;
+    case 5:
+      break;
+    case 6:
+      break;
+    case 7:
+      //each button its corresponding light. 
+    
+      lights = 0b00000000;
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+        lights|= 1<<LIGHT_RED;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+        lights|= 1<<LIGHT_BLUE;
+      }
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+        lights|= 1<<LIGHT_YELLOW;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+        lights|= 1<<LIGHT_GREEN;
+      }
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        lights|= 1<<LIGHT_LED_1;
+      }
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+        lights|= 1<<LIGHT_LED_2;
+      }
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        lights|= 1<<LIGHT_LED_3;
+      }
+      
+      ledDisp.SetLedArray(lights);
+    
+      break;
+    case 8:
+      break;
+    case 9:
+      break;
+    case 10:
+      break;
+    case 11:
+      break;
+    
+    default:
+      break;
+  }
+    
 }
 
 void mode_auto(){
@@ -145,7 +202,8 @@ void setup() {
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
 
-  ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+  ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+  //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
   textBuf[1]='L';
   textBuf[2]='O';
   textBuf[3]='D';
@@ -157,6 +215,14 @@ void setup() {
   ledDisp.setDecimalPoint(true, 4);
   ledDisp.displayHandler(textBuf);
 
+  
+  //uint8_t buttonLights = 0b01000111; 
+  lights = 0b00000000;
+  
+//  uint8_t buttonLights = 0b00000010; // 
+  //uint8_t buttonLights = 0b00111000; // 3 extra leds
+  
+  ledDisp.SetLedArray(lights);
 
 //  ledDisp.setIsScrolling(true);
 //  ledDisp.doSequence();
