@@ -7,6 +7,7 @@ DisplayManagement::DisplayManagement (){
 	// brightness = (LED_DISP_BRIGHTNESS - 888)/1000;
 	brightness = (8888 - LED_DISP_BRIGHTNESS )/1000;
 	scrollNextMove.setInitTimeMillis(SCROLLSPEED);
+  
 };
 
 DisplayManagement::~DisplayManagement(){
@@ -57,6 +58,7 @@ void DisplayManagement::displayHandlerSequence(char* movie){
 
 void DisplayManagement::doSequence(){
 	if (this->isScrolling && scrollNextMove.getTimeIsNegative()){
+    
 		this->textStartPos += 5;
 		
 		//check for end of string in "next sequence"
@@ -102,13 +104,13 @@ void DisplayManagement::dispHandlerWithScroll(char* intext, bool comeScrollIn, b
 
 void DisplayManagement::doScroll(){ //char * intext
 	//activate next move
-	if (this->isScrolling && scrollNextMove.getTimeIsNegative()){
+  if (this->isScrolling && !scrollNextMove.getTimeIsNegative()){
 		this->textStartPos++;
 		//check for end of scrollstring
 		if (this->textStartPos>0 && this->scrollTextAddress[textStartPos-1] == '\0'){
-			if (this->scrollOnceElseInfinit){
+      if (this->scrollOnceElseInfinit){
 				this->isScrolling = false;
-			}
+      }
 
 			if (this->comeScrollIn){
 				this->textStartPos = -5;
@@ -170,8 +172,8 @@ void DisplayManagement::setBrightness(byte value){ //smaller number is brighter
 	this->brightness = value*value;
 }
 
-void DisplayManagement::setScrollSpeed(int value){
-	scrollNextMove.setInitTimeMillis(value);
+void DisplayManagement::setScrollSpeed(long value){
+	scrollNextMove.setInitCountDownTimeMillis(value);
 }
 void DisplayManagement::getActiveSegmentAddress(byte** carrier){
 	*carrier = this->activeSegment;

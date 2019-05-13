@@ -2,7 +2,7 @@
 SuperTimer::SuperTimer(){
 	setIsStarted(false);
 	setIsPaused(false);
-	//this->callibrationConstant = 1;
+	this->callibrationConstant = 1; //default is 1 // DISABLED
 	this-> initTimeMillis = 0;
 }
 
@@ -49,8 +49,11 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis){
 // }
 
 void SuperTimer::setInitCountDownTimeSecs(unsigned int countDownSeconds){
-	//setInitTimeSecs(-1 * (int) countDownSeconds); 
-	setInitTimeMillis((long)(countDownSeconds) * -1000);
+	this->setInitCountDownTimeMillis(((long)countDownSeconds) * 1000);
+}
+
+void SuperTimer::setInitCountDownTimeMillis(long countDownMillis){
+  setInitTimeMillis((countDownMillis) * -1);
 }
 
 long SuperTimer::getInitTimeMillis(){
@@ -88,17 +91,14 @@ void SuperTimer::startComplete(bool startInPauseMode, unsigned long startedMilli
 
 		this->startedMillis = (long)startedMillisPassing - this->initTimeMillis; //if initTimeMillis is positive: chronooffset, if negative, countdowntimer (time will be negative until zero reached)
 		setIsStarted( true);
-		//Serial.println(this->initTimeMillis);
-		//Serial.println((long)startedMillisPassing   - this->startedMillis);
-		//Serial.println("end superstarted");
+		
 		//make sure if we start in pause mode, that the exact time of start is the start of the pause.
 		if (startInPauseMode){
 			setIsPaused(true);
-			this->pauseStartedMillis = getMillisCallibrated();
+			this->pauseStartedMillis = (long)getMillisCallibrated();
 		}else{
 			setIsPaused(false);
 		}
-
 }
 
 bool SuperTimer::getIsStarted(){
@@ -126,11 +126,11 @@ void SuperTimer::pause(){
 void SuperTimer::paused(bool pause){
 	if (pause){
 		if (!getIsPaused()){ //only do this when not yet paused!
-			this->pauseStartedMillis =  getMillisCallibrated();
+			this->pauseStartedMillis =  (long)getMillisCallibrated();
 		}
 	}else{
 		if (getIsPaused()){
-			this->startedMillis =  getMillisCallibrated() - (this-> pauseStartedMillis - this-> startedMillis); // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
+			this->startedMillis =  (long)getMillisCallibrated() - (this-> pauseStartedMillis - this-> startedMillis); // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
 		}
 
 	}
@@ -171,12 +171,10 @@ long SuperTimer::getTimeMillis(){
 	
 	if (getIsStarted()){
 		if (getIsPaused()){
-			// this->millisAtLastCheck =  getMillisCallibrated();
 			return this->pauseStartedMillis - this->startedMillis;
 		}else{
-			// this->millisAtLastCheck =  getMillisCallibrated();
-			// return this->millisAtLastCheck - this->startedMillis;
-			return getMillisCallibrated() - this->startedMillis;
+			return (long)getMillisCallibrated() - this->startedMillis;
+      
 		}
 	}else{
 		return getInitTimeMillis();
@@ -249,6 +247,8 @@ float SuperTimer::getCallibrationMillis(){
 }
 
 unsigned long SuperTimer::getMillisCallibrated(){
+  return millis(); // bridge callibration  todo
+  return (unsigned long)millis(); // bridge callibration  todo
 	return (unsigned long)(millis() *
 #if defined DISABLE_CALIBRATION && defined ARDUINO_SIMULATION
 		1

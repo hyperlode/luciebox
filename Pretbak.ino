@@ -69,19 +69,21 @@ ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2; // buttons with normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 int16_t potentio_value;
 int16_t potentio_value_stable;
+SuperTimer tmptimer;
 
 // OUTPUT
 DisplayManagement ledDisp;
 char  textBuf [6];
-char  scrollBuf [60];
+char  scrollBuf [12];
 uint8_t lights;
 
 void refresh(){
 
   //output process
-  
-  ledDisp.doScroll();
   ledDisp.refresh();
+  
+  
+  
   //input process  
   input_process();
   
@@ -91,6 +93,9 @@ void refresh(){
   
   //mode change
   if (selectorDial.getValueChangedEdge()) {
+    //maybe first do a default behaviour.
+    
+    //
     selector_value_changed();
   }
 
@@ -141,7 +146,73 @@ void input_process(){
 
 void selector_value_changed(){
   // as the selector dial is taken for main mode selection, init the mode here when selected
+
+  //default mode (go to default state at each change)
+  setDefaultMode();
+
   Serial.println(selectorDial.getSelectorValue());
+  
+  switch (selectorDial.getSelectorValue()) {
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      
+      scrollBuf[0]='L';
+      scrollBuf[1]='U';
+      scrollBuf[2]='C';
+      scrollBuf[3]='I';
+      scrollBuf[4]='E';
+      scrollBuf[5]=' ';
+      scrollBuf[6]='B';
+      scrollBuf[7]='A';
+      scrollBuf[8]='B';
+      scrollBuf[9]='Y';
+      scrollBuf[10]='/0';
+      ledDisp.dispHandlerWithScroll(scrollBuf, true, false);
+      break;
+    case 4:
+      break;
+    case 5:
+      break;
+    case 6:
+      break;
+    case 7:
+      break;
+    case 8:
+      tmptimer.setInitTimeMillis(-10000);
+      
+      
+      break;
+    case 9:
+      tmptimer.start();
+      
+      break;
+    case 10:
+      Serial.println(tmptimer.getTimeMillis());
+      Serial.println(tmptimer.getTimeIsNegative());
+      
+      break;
+    case 11:
+      break;
+    
+    default:
+      break;
+  }
+}
+
+void setDefaultMode(){
+  lights = 0b00000000; //no lights
+  
+  textBuf[1]='L';
+  textBuf[2]='O';
+  textBuf[3]='D';
+  textBuf[4]='E';
+  textBuf[5]='/0';
+  ledDisp.displayHandler(textBuf);
 }
 
 void mode_refresh(){
@@ -156,6 +227,8 @@ void mode_refresh(){
     case 2:
       break;
     case 3:
+      ledDisp.doScroll();
+      //ledDisp.setScrollSpeed((long)potentio_value_stable);
       break;
     case 4:
       break;
@@ -227,28 +300,15 @@ void setup() {
 
   ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
   //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-  textBuf[1]='L';
-  textBuf[2]='O';
-  textBuf[3]='D';
-  textBuf[4]='E';
-  textBuf[5]='/0';
-  scrollBuf[0]='L';
-  scrollBuf[1]='U';
-  scrollBuf[2]='C';
-  scrollBuf[3]='I';
-  scrollBuf[4]='E';
-  scrollBuf[5]=' ';
-  scrollBuf[6]='B';
-  scrollBuf[7]='A';
-  scrollBuf[8]='B';
-  scrollBuf[9]='Y';
-  scrollBuf[10]='/0';
+
+
+  setDefaultMode();
   ledDisp.setDecimalPoint(true, 1);
   ledDisp.setDecimalPoint(true, 2);
   ledDisp.setDecimalPoint(true, 3);
   ledDisp.setDecimalPoint(true, 4);
   
-//  ledDisp.displayHandler(textBuf);
+
 
   
   //uint8_t buttonLights = 0b01000111; 
@@ -261,7 +321,7 @@ void setup() {
 
 
   //ledDisp.displayHandlerSequence(textBuf);
-  ledDisp.dispHandlerWithScroll(scrollBuf, false, true);
+  
 //  ledDisp.setIsScrolling(true);
 //  ledDisp.doSequence();
 //  ledDisp.doScroll();

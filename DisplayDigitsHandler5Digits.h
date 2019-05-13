@@ -11,7 +11,7 @@
 #include "SuperTimer.h"
 
 #define LED_DISP_BRIGHTNESS 8888
-#define SCROLLSPEED 250
+#define SCROLLSPEED -250
 
 class DisplayManagement {
 	public:
@@ -35,7 +35,7 @@ class DisplayManagement {
 		//set scrollstatus 
 		void setIsScrolling(bool enableScroll);
 		void setBrightness(byte value);
-		void setScrollSpeed(int value);
+		void setScrollSpeed(long value);
 		void refresh();
 		void getActiveSegmentAddress(byte** carrier);
 

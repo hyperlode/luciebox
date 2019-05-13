@@ -15,6 +15,7 @@ class SuperTimer{
 		long getInitTimeMillis();
 		int getInitTimeSecs();
 		void setInitCountDownTimeSecs(unsigned int countDownSeconds);
+    void setInitCountDownTimeMillis(long countDownMillis);
 
 		void start(long initTimeMillis);
 		void startCountDownWithSeconds(unsigned int countDownSeconds);
