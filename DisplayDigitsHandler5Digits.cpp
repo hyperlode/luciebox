@@ -169,8 +169,12 @@ void DisplayManagement::setIsScrolling(bool enableScroll){
 	this->isScrolling = enableScroll;
 }
 
-void DisplayManagement::setBrightness(byte value){ //smaller number is brighter
-	this->brightness = value*value;
+void DisplayManagement::setBrightness(byte value, bool exponential){ //smaller number is brighter
+	if (exponential){
+	  this->brightness = value*value;
+	}else{
+    this->brightness = value;
+	}
 }
 
 void DisplayManagement::setScrollSpeed(long value){

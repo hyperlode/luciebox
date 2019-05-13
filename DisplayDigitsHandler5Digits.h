@@ -34,7 +34,7 @@ class DisplayManagement {
 
 		//set scrollstatus 
 		void setIsScrolling(bool enableScroll);
-		void setBrightness(byte value);
+		void setBrightness(byte value, bool exponential);
 		void setScrollSpeed(long value);
 		void refresh();
 		void getActiveSegmentAddress(byte** carrier);

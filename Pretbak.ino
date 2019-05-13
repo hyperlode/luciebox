@@ -229,12 +229,15 @@ void setDefaultMode(){
   for (int i=1;i<5;i++){
     ledDisp.setDecimalPoint(true, i);
   }
+
+  ledDisp.setBrightness(0,false);
+  
 }
 
 void mode_refresh(){
   
   //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
-  
+  bool aButtonIsPressed = false;
   switch (selectorDial.getSelectorValue()) {
     case 0:
       break;
@@ -261,30 +264,54 @@ void mode_refresh(){
     
       blankDisplay();
       
+      
       lights = 0b00000000; //reset before switch enquiry
       if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
         lights|= 1<<LIGHT_RED;
+        aButtonIsPressed = true;
       }
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
         lights|= 1<<LIGHT_BLUE;
+        aButtonIsPressed = true;
       }
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
         lights|= 1<<LIGHT_YELLOW;
+        aButtonIsPressed = true;
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
         lights|= 1<<LIGHT_GREEN;
+        aButtonIsPressed = true;
       }
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
         lights|= 1<<LIGHT_LED_1;
+        aButtonIsPressed = true;
       }
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
         lights|= 1<<LIGHT_LED_2;
+        aButtonIsPressed = true;
       }
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         lights|= 1<<LIGHT_LED_3;
+        aButtonIsPressed = true;
       }
+      if (aButtonIsPressed){
+        textBuf[1]='8';
+        textBuf[2]='8';
+        textBuf[3]='8';
+        textBuf[4]='8';        
+      }else{
+        //display
+        textBuf[1]='-';
+        textBuf[2]='-';
+        textBuf[3]='-';
+        textBuf[4]='-';
+      }
+      ledDisp.displayHandler(textBuf);
       
       ledDisp.SetLedArray(lights);
+//      Serial.println((byte)(potentio_value_stable/100));
+      ledDisp.setBrightness((byte)(potentio_value_stable/30),false);
+      //ledDisp.setBrightness((byte)(potentio_value_stable/100),true);
     
       break;
     case 8:
