@@ -73,19 +73,38 @@ int16_t potentio_value_stable;
 // OUTPUT
 DisplayManagement ledDisp;
 char  textBuf [6];
+char  scrollBuf [60];
 uint8_t lights;
 
 void refresh(){
 
-  ledDisp.refresh();
-
-
+  //output process
   
+  ledDisp.doScroll();
+  ledDisp.refresh();
+  //input process  
+  input_process();
+  
+  //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
+
+  //modes functionality
+  
+  //mode change
+  if (selectorDial.getValueChangedEdge()) {
+    selector_value_changed();
+  }
+
+  mode_refresh();
+
+    
+}
+
+void input_process(){
   selectorDial.refresh();
   buttons_1.refresh();
   buttons_2.refresh();
-
   potentio_refresh();
+
   
   if (buttons_2.getValueChangedEdge()) {
     //Serial.println("analog 2in buttons:");
@@ -118,12 +137,16 @@ void refresh(){
     }
     binaryInputs[i].refresh();
   }
-//  Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
- 
-  if (selectorDial.getValueChangedEdge()) {
-    Serial.println(selectorDial.getSelectorValue());
-    }
+}
 
+void selector_value_changed(){
+  // as the selector dial is taken for main mode selection, init the mode here when selected
+  Serial.println(selectorDial.getSelectorValue());
+}
+
+void mode_refresh(){
+  
+  //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
   
   switch (selectorDial.getSelectorValue()) {
     case 0:
@@ -141,7 +164,11 @@ void refresh(){
     case 6:
       break;
     case 7:
-      //each button its corresponding light. 
+      // simple repetitive, predictive mode.
+      // each button triggers its corresponding light. 
+      // potentio sets display brightness
+      // no buzzer
+      // display lights up a segment for each button.
     
       lights = 0b00000000;
       if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
@@ -181,11 +208,7 @@ void refresh(){
     default:
       break;
   }
-    
-}
-
-void mode_auto(){
-
+  
 }
 
 void potentio_refresh(){
@@ -209,11 +232,23 @@ void setup() {
   textBuf[3]='D';
   textBuf[4]='E';
   textBuf[5]='/0';
+  scrollBuf[0]='L';
+  scrollBuf[1]='U';
+  scrollBuf[2]='C';
+  scrollBuf[3]='I';
+  scrollBuf[4]='E';
+  scrollBuf[5]=' ';
+  scrollBuf[6]='B';
+  scrollBuf[7]='A';
+  scrollBuf[8]='B';
+  scrollBuf[9]='Y';
+  scrollBuf[10]='/0';
   ledDisp.setDecimalPoint(true, 1);
   ledDisp.setDecimalPoint(true, 2);
   ledDisp.setDecimalPoint(true, 3);
   ledDisp.setDecimalPoint(true, 4);
-  ledDisp.displayHandler(textBuf);
+  
+//  ledDisp.displayHandler(textBuf);
 
   
   //uint8_t buttonLights = 0b01000111; 
@@ -224,6 +259,9 @@ void setup() {
   
   ledDisp.SetLedArray(lights);
 
+
+  //ledDisp.displayHandlerSequence(textBuf);
+  ledDisp.dispHandlerWithScroll(scrollBuf, false, true);
 //  ledDisp.setIsScrolling(true);
 //  ledDisp.doSequence();
 //  ledDisp.doScroll();
