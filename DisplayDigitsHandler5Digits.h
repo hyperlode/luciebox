@@ -11,7 +11,7 @@
 #include "SuperTimer.h"
 
 #define LED_DISP_BRIGHTNESS 8888
-#define SCROLLSPEED -250
+#define SCROLL_SPEED_DELAY_MILLIS 250
 
 class DisplayManagement {
 	public:

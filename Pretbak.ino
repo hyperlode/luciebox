@@ -204,15 +204,31 @@ void selector_value_changed(){
   }
 }
 
-void setDefaultMode(){
-  lights = 0b00000000; //no lights
+void blankDisplay(){
+  textBuf[1]=' ';
+  textBuf[2]=' ';
+  textBuf[3]=' ';
+  textBuf[4]=' ';
+  textBuf[5]='/0';
+  ledDisp.displayHandler(textBuf);
   
+}
+void setDefaultMode(){
+  //button lights
+  lights = 0b00000000; //no lights
+  ledDisp.SetLedArray(lights);
+
+  //display
   textBuf[1]='L';
   textBuf[2]='O';
   textBuf[3]='D';
   textBuf[4]='E';
   textBuf[5]='/0';
   ledDisp.displayHandler(textBuf);
+  
+  for (int i=1;i<5;i++){
+    ledDisp.setDecimalPoint(true, i);
+  }
 }
 
 void mode_refresh(){
@@ -228,7 +244,7 @@ void mode_refresh(){
       break;
     case 3:
       ledDisp.doScroll();
-      //ledDisp.setScrollSpeed((long)potentio_value_stable);
+      ledDisp.setScrollSpeed((long)potentio_value_stable);
       break;
     case 4:
       break;
@@ -243,7 +259,9 @@ void mode_refresh(){
       // no buzzer
       // display lights up a segment for each button.
     
-      lights = 0b00000000;
+      blankDisplay();
+      
+      lights = 0b00000000; //reset before switch enquiry
       if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
         lights|= 1<<LIGHT_RED;
       }
@@ -303,21 +321,7 @@ void setup() {
 
 
   setDefaultMode();
-  ledDisp.setDecimalPoint(true, 1);
-  ledDisp.setDecimalPoint(true, 2);
-  ledDisp.setDecimalPoint(true, 3);
-  ledDisp.setDecimalPoint(true, 4);
   
-
-
-  
-  //uint8_t buttonLights = 0b01000111; 
-  lights = 0b00000000;
-  
-//  uint8_t buttonLights = 0b00000010; // 
-  //uint8_t buttonLights = 0b00111000; // 3 extra leds
-  
-  ledDisp.SetLedArray(lights);
 
 
   //ledDisp.displayHandlerSequence(textBuf);

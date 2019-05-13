@@ -10,21 +10,23 @@ SuperTimer::SuperTimer(){
 //INIT TIME 
 
 void SuperTimer::setInitTimeMillis(long milliSeconds){
-	//if not yet started it is easy, if already started, we don't affect the original time, only the runtime. so, when timer resets, we see again the original time.
-	if (getIsStarted()){
-		//if started, we don't touch the initial init time. only the ingame time!
-		if (getIsPaused()){
-			//this->startedMillis = this->pauseStartedMillis + milliSeconds;
-			//this->pauseStartedMillis = this->pauseStartedMillis - milliSeconds; //to test debug
-//			this->startedMillis = this->startedMillis - milliSeconds; //to test debug
-			this->startedMillis =  this->pauseStartedMillis - milliSeconds;
-		}else{
-			this->startedMillis =  (long)getMillisCallibrated() - milliSeconds; // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
-		}
-		
-	}else{
-		this-> initTimeMillis = milliSeconds;	
-	}	
+//	//if not yet started it is easy, if already started, we don't affect the original time, only the runtime. so, when timer resets, we see again the original time.
+//	if (getIsStarted()){
+//		//if started, we don't touch the initial init time. only the ingame time!
+//		if (getIsPaused()){
+//			//this->startedMillis = this->pauseStartedMillis + milliSeconds;
+//			//this->pauseStartedMillis = this->pauseStartedMillis - milliSeconds; //to test debug
+////			this->startedMillis = this->startedMillis - milliSeconds; //to test debug
+//			this->startedMillis =  this->pauseStartedMillis - milliSeconds;
+//		}else{
+//			this->startedMillis =  (long)getMillisCallibrated() - milliSeconds; // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
+//		}
+//		
+//	}else{
+//		this-> initTimeMillis = milliSeconds;	
+//	}	
+
+  this-> initTimeMillis = milliSeconds;  
 }
 
 
@@ -33,8 +35,6 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis){
 	//if offset is negative, time goes down. if positive, time goes up.
 	if (getIsStarted()){
 		if (getIsPaused()){
-			// this->startedMillis = this->pauseStartedMillis + offsetMillis;
-			//this->pauseStartedMillis = this->pauseStartedMillis - offsetMillis;  //-
 			this->startedMillis =  this->startedMillis - offsetMillis;
 		}else{
 			this->startedMillis =  this->startedMillis - offsetMillis; //-// we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.

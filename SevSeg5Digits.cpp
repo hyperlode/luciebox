@@ -139,9 +139,11 @@ byte* SevSeg5Digits::PrintOutputSeg(byte brightness){
 	if (segActive<8){ //if we don't do this, after a certain amount of time, about more than 50, the device errors.
 		//turn segment line off
 		digitalWrite(SegmentPins[segActive],SEGMENTOFF);
+    pinMode(SegmentPins[segActive], INPUT); 
 		//turn digits off
 		for (byte digit=0;digit<6;digit++){
 			digitalWrite(DigitPins[digit],DIGITOFF);
+      pinMode(DigitPins[digit], INPUT); 
 		}
 	}
 
@@ -155,6 +157,7 @@ byte* SevSeg5Digits::PrintOutputSeg(byte brightness){
 
 	if (segActive<8){
 		//Turn the relevant segment on
+    pinMode(SegmentPins[segActive], OUTPUT);
 		digitalWrite(SegmentPins[segActive],SEGMENTON);
 
 		//For each digit, turn relevant digits on
@@ -164,10 +167,12 @@ byte* SevSeg5Digits::PrintOutputSeg(byte brightness){
 				//led array digit
 				// if (this->ledArrayValues & ( 1 << segActive ) != 0){ //check if segment bit is not zero.
 				if (this->ledArrayValues & ( 1 << segActive ) ){ //check if segment bit is not zero.
+          pinMode(DigitPins[digit], OUTPUT);
 					digitalWrite(DigitPins[digit],DIGITON);
 				}
 			}else{
 				if ( getBit(&lights[digit], segActive)) {
+          pinMode(DigitPins[digit], OUTPUT);
 					digitalWrite(DigitPins[digit],DIGITON);
 				}
 			}

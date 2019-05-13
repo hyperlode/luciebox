@@ -6,7 +6,8 @@ DisplayManagement::DisplayManagement (){
 	this->text[5] = '\0';
 	// brightness = (LED_DISP_BRIGHTNESS - 888)/1000;
 	brightness = (8888 - LED_DISP_BRIGHTNESS )/1000;
-	scrollNextMove.setInitTimeMillis(SCROLLSPEED);
+	this->setScrollSpeed(SCROLL_SPEED_DELAY_MILLIS);
+	//scrollNextMove.setInitTimeMillis();
   
 };
 
@@ -173,8 +174,10 @@ void DisplayManagement::setBrightness(byte value){ //smaller number is brighter
 }
 
 void DisplayManagement::setScrollSpeed(long value){
-	scrollNextMove.setInitCountDownTimeMillis(value);
+	scrollNextMove.setInitTimeMillis(value * -1);
+  //scrollNextMove.start();
 }
+
 void DisplayManagement::getActiveSegmentAddress(byte** carrier){
 	*carrier = this->activeSegment;
 }
