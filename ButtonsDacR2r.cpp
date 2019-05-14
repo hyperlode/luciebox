@@ -11,9 +11,9 @@ void ButtonsDacR2r::setPin(byte pin, byte buttonsCount){
   this->buttonsCount = buttonsCount;
 }
 
-int ButtonsDacR2r::getButtonsValueAnalog(){
-  return analogRead(this->analogPin);
-}
+//int ButtonsDacR2r::getButtonsValueAnalog(){
+//  return analogRead(this->analogPin);
+//}
 
 uint8_t ButtonsDacR2r::getButtonsValueRaw(){
   int raw = (analogRead(this->analogPin));

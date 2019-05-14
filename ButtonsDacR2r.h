@@ -17,8 +17,9 @@ class ButtonsDacR2r{
     bool getValueChangedEdge();
     bool getButtonValueByIndex(uint8_t index);
     uint8_t getButtonsValueRaw();
-    int getButtonsValueAnalog();
+    //int getButtonsValueAnalog();
   private:  
+
     byte buttonsCount;
     byte analogPin;
     long cyclesValueIsStable;
