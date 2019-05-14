@@ -67,8 +67,11 @@ BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2; // buttons with normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+
 int16_t potentio_value;
 int16_t potentio_value_stable;
+bool potentio_value_stable_changed;
+
 SuperTimer tmptimer;
 
 // OUTPUT
@@ -199,17 +202,14 @@ void selector_value_changed(){
     case 7:
       break;
     case 8:
-      tmptimer.setInitTimeMillis(-10000);
+      
       
       
       break;
     case 9:
-      tmptimer.start();
       
       break;
     case 10:
-      Serial.println(tmptimer.getTimeMillis());
-      Serial.println(tmptimer.getTimeIsNegative());
       
       break;
     case 11:
@@ -256,13 +256,8 @@ void mode_refresh(){
   bool aButtonIsPressed = false;
   switch (selectorDial.getSelectorValue()) {
     case 0:
-    
-//      if (players.getNumberOfAlivePlayers() > 9) {
-//        textBuf[4] = 65 + players.getNumberOfAlivePlayers() - 10; //(65 is ascii A so, A = 10 , B=11 , ...)
-//      } else {
-//        textBuf[4] = 48 + players.getNumberOfAlivePlayers() % 10; //(48 is ascii value for '0', 49 for '1',...)
-//      }
-
+      //counting mode: numbers and letters.
+      
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
         
         numberElseAlphabethMode = true;
@@ -290,7 +285,51 @@ void mode_refresh(){
         }
         aButtonIsPressed = true;
       }
-
+      
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeUp()){
+        
+        tmptimer.setInitTimeMillis(-1000);
+        tmptimer.start();
+//        Serial.println(tmptimer.getTimeMillis());
+//        Serial.println(tmptimer.getTimeIsNegative());
+      }  
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown()){
+        tmptimer.pause();        
+        //tmptimer.setInitTimeMillis(-10000);
+        //tmptimer.start();
+//        Serial.println(tmptimer.getTimeMillis());
+//        Serial.println(tmptimer.getTimeIsNegative());
+      }  
+//      
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !tmptimer.getTimeIsNegative()){
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+          counter++;  
+        }else{
+          counter--;
+        }
+        
+        tmptimer.start();
+        aButtonIsPressed = true;
+      }
+      
+      //potentio behaviour
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        if (numberElseAlphabethMode){
+          counter = (int16_t)potentio_value/10;
+        }else{
+          counter = (int16_t)potentio_value/39; //1024 to 26 letters.
+        }
+        aButtonIsPressed = true;
+      }
+      else if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        // if autocounter is on.
+        
+        tmptimer.setInitTimeMillis(-100 * (long)(potentio_value_stable/10)); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+        if (potentio_value_stable_changed){
+          tmptimer.start();
+        }
+      }
+      
       //only do the characters of the alphabet in lettermode.
       if (!numberElseAlphabethMode){
         if (counter > 26){
@@ -307,7 +346,7 @@ void mode_refresh(){
       }
 
       if (aButtonIsPressed){
-        Serial.println(counter);
+        //Serial.println(counter);
         int16_t c;
         c = counter;
         for (int i=0;i<4;i++){
@@ -388,6 +427,7 @@ void mode_refresh(){
         lights|= 1<<LIGHT_LED_3;
         aButtonIsPressed = true;
       }
+
       if (aButtonIsPressed){
         textBuf[1]='8';
         textBuf[2]='8';
@@ -400,6 +440,10 @@ void mode_refresh(){
         textBuf[3]='-';
         textBuf[4]='-';
       }
+
+
+
+      
       ledDisp.displayHandler(textBuf);
       
       ledDisp.SetLedArray(lights);
@@ -424,10 +468,17 @@ void mode_refresh(){
 
 void potentio_refresh(){
   potentio_value = (int16_t)analogRead(PIN_POTENTIO);
+  
   if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
+    potentio_value_stable_changed = true;  //simple edge detection
     potentio_value_stable = potentio_value;
-    Serial.println(potentio_value_stable);
+    
+//    Serial.println(potentio_value_stable);
+  }else{
+    potentio_value_stable_changed = false;  //simple edge detection
+    
   }
+  
 }
 
 void setup() {
