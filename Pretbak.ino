@@ -77,15 +77,28 @@ char  textBuf [6];
 char  scrollBuf [12];
 uint8_t lights;
 
+//global variables
+int16_t counter;
+bool numberElseAlphabethMode;
+
 void refresh(){
 
-  //output process
-  ledDisp.refresh();
-  
-  
-  
+
   //input process  
   input_process();
+
+
+  for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
+    if (binaryInputs[i].getEdgeUp()){
+      Serial.println(i);
+      Serial.println("PRESSED");
+    }
+    if (binaryInputs[i].getEdgeDown()){
+      Serial.println(i);
+      Serial.println("Button released");
+    }
+   // binaryInputs[i].refresh();
+  }
   
   //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
@@ -101,6 +114,13 @@ void refresh(){
 
   mode_refresh();
 
+  //output process
+  ledDisp.refresh();
+  
+  
+  for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
+    binaryInputs[i].refresh();
+  }
     
 }
 
@@ -131,17 +151,7 @@ void input_process(){
     }
   }
  
-  for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
-    if (binaryInputs[i].getEdgeUp()){
-      Serial.println(i);
-      Serial.println("PRESSED");
-    }
-    if (binaryInputs[i].getEdgeDown()){
-      Serial.println(i);
-      Serial.println("Button released");
-    }
-    binaryInputs[i].refresh();
-  }
+
 }
 
 void selector_value_changed(){
@@ -154,6 +164,12 @@ void selector_value_changed(){
   
   switch (selectorDial.getSelectorValue()) {
     case 0:
+      numberElseAlphabethMode = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+      if (numberElseAlphabethMode){
+        counter = 0;
+      }else{
+        counter = 1;
+      }
       break;
     case 1:
       break;
@@ -219,11 +235,11 @@ void setDefaultMode(){
   ledDisp.SetLedArray(lights);
 
   //display
-  textBuf[1]='L';
-  textBuf[2]='O';
-  textBuf[3]='D';
-  textBuf[4]='E';
-  textBuf[5]='/0';
+  textBuf[1]='-';
+  textBuf[2]='-';
+  textBuf[3]='-';
+  textBuf[4]='-';
+  //textBuf[5]='/0';
   ledDisp.displayHandler(textBuf);
   
   for (int i=1;i<5;i++){
@@ -240,16 +256,94 @@ void mode_refresh(){
   bool aButtonIsPressed = false;
   switch (selectorDial.getSelectorValue()) {
     case 0:
+    
+//      if (players.getNumberOfAlivePlayers() > 9) {
+//        textBuf[4] = 65 + players.getNumberOfAlivePlayers() - 10; //(65 is ascii A so, A = 10 , B=11 , ...)
+//      } else {
+//        textBuf[4] = 48 + players.getNumberOfAlivePlayers() % 10; //(48 is ascii value for '0', 49 for '1',...)
+//      }
+
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
+        
+        numberElseAlphabethMode = true;
+        aButtonIsPressed = true;
+      }
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
+        numberElseAlphabethMode = false;
+        aButtonIsPressed = true;
+      }
+
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        counter++;
+        aButtonIsPressed = true;
+      }
+       
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        counter--;
+        aButtonIsPressed = true;
+      } 
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        if (numberElseAlphabethMode){
+          counter = 0;
+        }else{
+          counter = 1;
+        }
+        aButtonIsPressed = true;
+      }
+
+      //only do the characters of the alphabet in lettermode.
+      if (!numberElseAlphabethMode){
+        if (counter > 26){
+            counter = 1;
+        }
+        if (counter < 1){
+          counter = 26;
+        }
+      }else{  
+        //no negative numbers yet for little lucie
+        if (counter < 0){
+          counter = 0;
+        }
+      }
+
+      if (aButtonIsPressed){
+        Serial.println(counter);
+        int16_t c;
+        c = counter;
+        for (int i=0;i<4;i++){
+          if (numberElseAlphabethMode){
+            textBuf[4-i] = 48 + c%10; //ascii 48 = 0
+            c/=10;
+          }else{
+            textBuf[4-i] = 64 + counter; //ascii 65 = a
+          }
+        }
+        ledDisp.displayHandler(textBuf);
+      }
+        
+      
+      
       break;
     case 1:
       break;
     case 2:
       break;
     case 3:
-      ledDisp.doScroll();
-      ledDisp.setScrollSpeed((long)potentio_value_stable);
+      // display scroll mode
+      if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+        ledDisp.doScroll();
+      }
+
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        ledDisp.setScrollSpeed((long)potentio_value_stable);
+      }else{
+        ledDisp.setBrightness((byte)(potentio_value_stable/20),false);
+      }
+      
       break;
     case 4:
+      // counting fun
+      
       break;
     case 5:
       break;
@@ -309,9 +403,8 @@ void mode_refresh(){
       ledDisp.displayHandler(textBuf);
       
       ledDisp.SetLedArray(lights);
-//      Serial.println((byte)(potentio_value_stable/100));
-      ledDisp.setBrightness((byte)(potentio_value_stable/30),false);
-      //ledDisp.setBrightness((byte)(potentio_value_stable/100),true);
+      ledDisp.setBrightness((byte)(potentio_value_stable/20),false);
+      
     
       break;
     case 8:
