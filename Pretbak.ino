@@ -30,7 +30,7 @@
 #define PIN_DISPLAY_SEGMENT_G 3
 #define PIN_DISPLAY_SEGMENT_DP A4
 
-#define PIN_BUZZER 13 
+#define PIN_BUZZER 0
   
 #define LIGHT_RED 1
 #define LIGHT_GREEN 6
@@ -175,6 +175,7 @@ void selector_value_changed(){
       }
       break;
     case 1:
+      
       break;
     case 2:
       break;
@@ -245,9 +246,10 @@ void setDefaultMode(){
   for (int i=1;i<5;i++){
     ledDisp.setDecimalPoint(true, i);
   }
-
   ledDisp.setBrightness(0,false);
-  
+
+  //digitalWrite(PIN_BUZZER, true);
+  noTone(PIN_BUZZER);
 }
 
 void mode_refresh(){
@@ -364,6 +366,7 @@ void mode_refresh(){
       
       break;
     case 1:
+      tone(PIN_BUZZER, (unsigned int)440 , 50); //duration, number is exponent of 2.
       break;
     case 2:
       break;
@@ -407,26 +410,11 @@ void mode_refresh(){
         lights|= 1<<LIGHT_BLUE;
         aButtonIsPressed = true;
       }
-      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-        lights|= 1<<LIGHT_YELLOW;
-        aButtonIsPressed = true;
-      }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
         lights|= 1<<LIGHT_GREEN;
         aButtonIsPressed = true;
       }
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-        lights|= 1<<LIGHT_LED_1;
-        aButtonIsPressed = true;
-      }
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-        lights|= 1<<LIGHT_LED_2;
-        aButtonIsPressed = true;
-      }
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        lights|= 1<<LIGHT_LED_3;
-        aButtonIsPressed = true;
-      }
+      
 
       if (aButtonIsPressed){
         textBuf[1]='8';
@@ -440,7 +428,29 @@ void mode_refresh(){
         textBuf[3]='-';
         textBuf[4]='-';
       }
-
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        lights|= 1<<LIGHT_LED_1;
+      }else{
+        textBuf[1]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+        lights|= 1<<LIGHT_LED_2;
+      }else{
+        textBuf[2]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        lights|= 1<<LIGHT_LED_3;
+        aButtonIsPressed = true;
+      }else{
+        textBuf[3]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+        lights|= 1<<LIGHT_YELLOW;
+        aButtonIsPressed = true;
+      }else{
+        textBuf[4]=' ';
+      }
+      
 
 
       
@@ -487,6 +497,8 @@ void setup() {
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
 
+  pinMode(PIN_BUZZER, OUTPUT);
+
   ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
   //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
 
@@ -494,13 +506,7 @@ void setup() {
   setDefaultMode();
   
 
-
-  //ledDisp.displayHandlerSequence(textBuf);
-  
-//  ledDisp.setIsScrolling(true);
-//  ledDisp.doSequence();
-//  ledDisp.doScroll();
-  Serial.begin(9600);
+//  Serial.begin(9600);
 }
 
 void loop() {

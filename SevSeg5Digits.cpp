@@ -288,44 +288,51 @@ void SevSeg5Digits::CreateArray() {
 	case 'G':
 		lights[digit] = B00111101;
 		break;
-	case 'h':
-		lights[digit] = B01110100;
-		break;
+	//case 'h':
+	//	lights[digit] = B01110100;
+	//	break;
 	case 'H':
-		lights[digit] = B01110110;
+		//lights[digit] = B01110110;
+    lights[digit] = B01110100;
 		break;
 	case 'I':
-		lights[digit] = B00000110;
+//		lights[digit] = B00000110;
+    lights[digit] = B00000100;
 		break;
-	case 'i':
-		lights[digit] = B00000100;
-		break;
-	case 'J':
-		lights[digit] = B00001110;
-		break;
-//	case 'K':
-//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=1;
+//	case 'i':
+//		lights[digit] = B00000100;
 //		break;
+	case 'J':
+//		lights[digit] = B00001110;
+    lights[digit] = B00001100;
+		break;
+	case 'K':
+    lights[digit] = B01110101;
+//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=1;
+		break;
 	case 'L':
 		lights[digit] = B00111000;
 		break;
+//	case 'M':
+//		lights[digit] = B01001001; //hamburger icon
+//		break;
 	case 'M':
-		lights[digit] = B01001001; //hamburger icon
+//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
+    lights[digit] = B01010101;
 		break;
-		//	case 'M':
-		//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
-		//		break;
-	case 'n':
-		lights[digit] = B01010100;
-		break;
+//	case 'n':
+//		lights[digit] = B01010100;
+//		break;
 	case 'N':
-		lights[digit] = B00110111;
+		//lights[digit] = B00110111;
+    lights[digit] = B01010100;
 		break;
-	case 'o':
-		lights[digit] = B01011100;
-		break;
+//	case 'o':
+//		lights[digit] = B01011100;
+//		break;
 	case 'O':
-		lights[digit] = B00111111;
+//		lights[digit] = B00111111;
+    lights[digit] = B01011100;
 		break;
 	case 'P':
 		lights[digit] = B01110011;
@@ -342,27 +349,31 @@ void SevSeg5Digits::CreateArray() {
 	case 'T':
 		lights[digit] = B01111000;
 		break;
-	case 'u':
-		lights[digit] = B00011100;
-		break;
+//	case 'u':
+//		lights[digit] = B00011100;
+//		break;
 	case 'U':
-		lights[digit] = B00111110;
+//		lights[digit] = B00111110;
+    lights[digit] = B00011100;
 		break;
 	case 'V':
-		lights[digit] = B00111110;
+		lights[digit] = B00011110;
 		break;
-//	case 'W':
+	case 'W':
 //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
-//		break;
-//	case 'X':
-//		lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
-//		break;
+    lights[digit] = B00011101;
+		break;
+	case 'X':
+    lights[digit] = B00110110;
+//			lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
+		break;
 	case 'Y':
 		lights[digit] = B01101110;
 		break;
-	// case 'Z':
-		// lights[digit][0]=1; lights[digit][1]=1; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
-		// break;
+	case 'Z':
+    lights[digit] = B00011011;
+//	  lights[digit][0]=1; lights[digit][1]=1; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
+	  break;
 	case ' ':
 		lights[digit] = B00000000;
 		break;
