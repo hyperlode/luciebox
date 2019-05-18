@@ -1,6 +1,7 @@
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
+#include "Buzzer.h"
 
 #include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
@@ -30,7 +31,7 @@
 #define PIN_DISPLAY_SEGMENT_G 3
 #define PIN_DISPLAY_SEGMENT_DP A4
 
-#define PIN_BUZZER 0
+#define PIN_BUZZER A5
   
 #define LIGHT_RED 1
 #define LIGHT_GREEN 6
@@ -62,6 +63,8 @@
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
+const uint8_t song_happy_dryer [] = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
+
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
@@ -79,6 +82,8 @@ DisplayManagement ledDisp;
 char  textBuf [6];
 char  scrollBuf [12];
 uint8_t lights;
+
+Buzzer buzzer;
 
 //global variables
 int16_t counter;
@@ -119,6 +124,7 @@ void refresh(){
 
   //output process
   ledDisp.refresh();
+  buzzer.doBuzzerRoll();
   
   
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
@@ -175,9 +181,10 @@ void selector_value_changed(){
       }
       break;
     case 1:
-      
+      buzzer.addRandomSoundToRoll();
       break;
     case 2:
+      buzzer.loadBuzzerTrack(song_happy_dryer);
       break;
     case 3:
       
@@ -249,7 +256,7 @@ void setDefaultMode(){
   ledDisp.setBrightness(0,false);
 
   //digitalWrite(PIN_BUZZER, true);
-  noTone(PIN_BUZZER);
+  //noTone(PIN_BUZZER);
 }
 
 void mode_refresh(){
@@ -366,7 +373,7 @@ void mode_refresh(){
       
       break;
     case 1:
-      tone(PIN_BUZZER, (unsigned int)440 , 50); //duration, number is exponent of 2.
+      //tone(PIN_BUZZER, (unsigned int)440 , 50); //duration, number is exponent of 2.
       break;
     case 2:
       break;
@@ -497,8 +504,8 @@ void setup() {
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
 
-  pinMode(PIN_BUZZER, OUTPUT);
-
+  buzzer.setPin(PIN_BUZZER);
+  
   ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
   //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
 

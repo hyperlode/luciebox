@@ -13,6 +13,7 @@ Buzzer::Buzzer(){
 
 void Buzzer::setPin(uint8_t pin){
   this->pin = pin;
+  pinMode(this->pin, OUTPUT);
 }
 
 void Buzzer::loadBuzzerTrack(const uint8_t* seq) {
