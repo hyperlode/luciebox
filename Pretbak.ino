@@ -62,8 +62,10 @@
 #define BUTTON_MOMENTARY_BLUE 3
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
+//const uint8_t song_happy_dryer [] PROGMEM = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_unhappy_dryer[] PROGMEM = {226,189,230,189,170,126,167,126,165,126,226,189,189,BUZZER_ROLL_SONG_STOPVALUE};
 
-const uint8_t song_happy_dryer [] = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
+//const uint8_t song_happy_dryer [] = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
 
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
@@ -82,6 +84,8 @@ DisplayManagement ledDisp;
 char  textBuf [6];
 char  scrollBuf [12];
 uint8_t lights;
+
+uint8_t allNotesIndex;
 
 Buzzer buzzer;
 
@@ -184,7 +188,8 @@ void selector_value_changed(){
       buzzer.addRandomSoundToRoll();
       break;
     case 2:
-      buzzer.loadBuzzerTrack(song_happy_dryer);
+      //buzzer.loadBuzzerTrack(song_happy_dryer);
+      buzzer.loadBuzzerTrack(song_unhappy_dryer);
       break;
     case 3:
       
@@ -356,24 +361,47 @@ void mode_refresh(){
 
       if (aButtonIsPressed){
         //Serial.println(counter);
-        int16_t c;
-        c = counter;
-        for (int i=0;i<4;i++){
-          if (numberElseAlphabethMode){
-            textBuf[4-i] = 48 + c%10; //ascii 48 = 0
-            c/=10;
-          }else{
-            textBuf[4-i] = 64 + counter; //ascii 65 = a
-          }
+        if (numberElseAlphabethMode){
+          ledDisp.showNumber(counter);
+        }else{
+          ledDisp.showNumberAsChars(counter);
         }
-        ledDisp.displayHandler(textBuf);
+        
       }
         
       
       
       break;
     case 1:
-      //tone(PIN_BUZZER, (unsigned int)440 , 50); //duration, number is exponent of 2.
+      
+      
+      
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        if (potentio_value_stable_changed){
+          //buzzer.programBuzzerRoll(potentio_value_stable /4);;
+           allNotesIndex = potentio_value_stable /4;
+        }
+        
+        if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+          buzzer.programBuzzerRoll(allNotesIndex);
+          allNotesIndex--;
+        }
+        if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+          buzzer.programBuzzerRoll(allNotesIndex);
+        }
+        
+        if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+          buzzer.programBuzzerRoll(allNotesIndex);
+          allNotesIndex++;
+        }
+      }else{
+        if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+          buzzer.addRandomSoundToRoll();
+        }
+          
+      }
+      
+      
       break;
     case 2:
       break;

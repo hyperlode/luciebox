@@ -20,7 +20,7 @@ void Buzzer::loadBuzzerTrack(const uint8_t* seq) {
       //load a whole track in the buzzer roll
       //load all bytes from sequence in buffer.
       uint8_t i = 0;
-      while (pgm_read_byte_near(seq + i) != 255 and i < BUZZER_ROLL_LENGTH) {
+      while (pgm_read_byte_near(seq + i) != BUZZER_ROLL_SONG_STOPVALUE and i < BUZZER_ROLL_LENGTH) {
         programBuzzerRoll(pgm_read_byte_near(seq + i)); //progmem = special command so arrays are read out of flash directly without being loaded in eeprom.
         i++;
       }

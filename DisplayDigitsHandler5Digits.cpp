@@ -31,6 +31,25 @@ void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte 
 //	sevseg.SetDecPoints(0, 0,  secondsBlink,  0, menuItemValueQuickView );
 //}
 
+void DisplayManagement::showNumberAsChars(int16_t number){
+  int16_t c;
+  c = number;
+  for (int i=0;i<4;i++){
+      text[4-i] = 64 + number; //ascii 65 = a
+  }
+  this->displayHandler(text);
+}
+
+void DisplayManagement::showNumber(int16_t number){
+  int16_t c;
+  c = number;
+  for (int i=0;i<4;i++){
+    text[4-i] = 48 + c%10; //ascii 48 = 0
+    c/=10;
+  }
+  this->displayHandler(text);
+}
+
 void DisplayManagement::setDecimalPoint(boolean isOn, int digit){
 	sevseg.SetDecPointSingle(isOn,digit);
 #ifdef ARDUINO_SIMULATION
