@@ -120,8 +120,11 @@ void refresh(){
   if (selectorDial.getValueChangedEdge()) {
     //maybe first do a default behaviour.
     
-    //
-    selector_value_changed();
+    // as the selector dial is taken for main mode selection, init the mode here when selected
+
+    //default mode (go to default state at each change)
+    setDefaultMode();
+    Serial.println(selectorDial.getSelectorValue());
   }
 
   mode_refresh();
@@ -129,12 +132,10 @@ void refresh(){
   //output process
   ledDisp.refresh();
   buzzer.doBuzzerRoll();
-  
-  
+    
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
     binaryInputs[i].refresh();
   }
-    
 }
 
 void input_process(){
@@ -143,7 +144,6 @@ void input_process(){
   buttons_2.refresh();
   potentio_refresh();
 
-  
   if (buttons_2.getValueChangedEdge()) {
     //Serial.println("analog 2in buttons:");
     //Serial.println(buttons_2.getButtonsValueAnalog());
@@ -159,89 +159,10 @@ void input_process(){
     //Serial.println(buttons_1.getButtonsValue());
     for (uint8_t i=0; i< BUTTONS_1_COUNT; i++){
       binaryInputs[BUTTONS_1_TO_BINARY_INPUT_OFFSET + i].setValue(buttons_1.getButtonValueByIndex(i));
-      //Serial.println("------");
-      //Serial.println(i);
     }
   }
- 
-
 }
 
-void selector_value_changed(){
-  // as the selector dial is taken for main mode selection, init the mode here when selected
-
-  //default mode (go to default state at each change)
-  setDefaultMode();
-
-  Serial.println(selectorDial.getSelectorValue());
-  
-  switch (selectorDial.getSelectorValue()) {
-    case 0:
-      numberElseAlphabethMode = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
-      if (numberElseAlphabethMode){
-        counter = 0;
-      }else{
-        counter = 1;
-      }
-      break;
-    case 1:
-      buzzer.addRandomSoundToRoll();
-      break;
-    case 2:
-      //buzzer.loadBuzzerTrack(song_happy_dryer);
-      buzzer.loadBuzzerTrack(song_unhappy_dryer);
-      break;
-    case 3:
-      
-      scrollBuf[0]='L';
-      scrollBuf[1]='U';
-      scrollBuf[2]='C';
-      scrollBuf[3]='I';
-      scrollBuf[4]='E';
-      scrollBuf[5]=' ';
-      scrollBuf[6]='B';
-      scrollBuf[7]='A';
-      scrollBuf[8]='B';
-      scrollBuf[9]='Y';
-      scrollBuf[10]='/0';
-      ledDisp.dispHandlerWithScroll(scrollBuf, true, false);
-      break;
-    case 4:
-      break;
-    case 5:
-      break;
-    case 6:
-      break;
-    case 7:
-      break;
-    case 8:
-      
-      
-      
-      break;
-    case 9:
-      
-      break;
-    case 10:
-      
-      break;
-    case 11:
-      break;
-    
-    default:
-      break;
-  }
-}
-
-void blankDisplay(){
-  textBuf[1]=' ';
-  textBuf[2]=' ';
-  textBuf[3]=' ';
-  textBuf[4]=' ';
-  textBuf[5]='/0';
-  ledDisp.displayHandler(textBuf);
-  
-}
 void setDefaultMode(){
   //button lights
   lights = 0b00000000; //no lights
@@ -260,28 +181,225 @@ void setDefaultMode(){
   }
   ledDisp.setBrightness(0,false);
 
-  //digitalWrite(PIN_BUZZER, true);
-  //noTone(PIN_BUZZER);
+  //buzzer
+  buzzer.buzzerOff();
 }
+
+
+void blankDisplay(){
+  textBuf[1]=' ';
+  textBuf[2]=' ';
+  textBuf[3]=' ';
+  textBuf[4]=' ';
+  textBuf[5]='/0';
+  ledDisp.displayHandler(textBuf);
+  
+}
+
 
 void mode_refresh(){
   
   //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
-  bool aButtonIsPressed = false;
+
+  bool init = selectorDial.getValueChangedEdge();
   switch (selectorDial.getSelectorValue()) {
     case 0:
-      //counting mode: numbers and letters.
+      modeCountingLettersAndChars(init);
+      break;
       
-      if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
-        
-        numberElseAlphabethMode = true;
-        aButtonIsPressed = true;
-      }
-      if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
-        numberElseAlphabethMode = false;
-        aButtonIsPressed = true;
-      }
+    case 1:
+      //sound fun with notes
+      modeSoundNotes();
+      
+      break;
+    case 2:
+      //sound fun with frequncies.
+      buzzer.buzzerOn(potentio_value/4);
+      break;
+      
+    case 3:
+      modeScroll(init);
+      break;
+    case 4:
+      // counting fun
+      
+      
+      break;
+    case 5:
+      modeSoundSong(init);
+      break;
+    case 6:
+      break;
+    case 7:
+      modeSimpleButtonsAndLights();    
+      break;
+    case 8:
+      break;
+    case 9:
+      break;
+    case 10:
+      break;
+    case 11:
+      break;
+    
+    default:
+      break;
+  }
+  
+}
 
+void potentio_refresh(){
+  potentio_value = (int16_t)analogRead(PIN_POTENTIO);
+  
+  if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
+    potentio_value_stable_changed = true;  //simple edge detection
+    potentio_value_stable = potentio_value;
+    
+//    Serial.println(potentio_value_stable);
+  }else{
+    potentio_value_stable_changed = false;  //simple edge detection
+    
+  }
+  
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  selectorDial.setPin(PIN_SELECTOR_DIAL);
+  buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
+  buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
+
+  buzzer.setPin(PIN_BUZZER);
+  
+  ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+  //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+
+
+  setDefaultMode();
+  
+
+//  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  refresh();
+}
+
+void modeScroll(bool init){
+  
+  // display scroll mode
+  
+  if (init){
+    // display scroll mode
+    scrollBuf[0]='L';
+    scrollBuf[1]='U';
+    scrollBuf[2]='C';
+    scrollBuf[3]='I';
+    scrollBuf[4]='E';
+    scrollBuf[5]=' ';
+    scrollBuf[6]='B';
+    scrollBuf[7]='A';
+    scrollBuf[8]='B';
+    scrollBuf[9]='Y';
+    scrollBuf[10]='/0';
+    ledDisp.dispHandlerWithScroll(scrollBuf, true, false);
+      
+  }
+  
+  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+    ledDisp.doScroll();
+  }
+
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+    ledDisp.setScrollSpeed((long)potentio_value_stable);
+  }else{
+    ledDisp.setBrightness((byte)(potentio_value_stable/20),false);
+  }
+  
+}
+void modeSimpleButtonsAndLights(){
+  
+      // simple repetitive, predictive mode.
+      // each button triggers its corresponding light. 
+      // potentio sets display brightness
+      // no buzzer
+      // display lights up a segment for each button.
+      bool aButtonIsPressed = false;
+  
+      blankDisplay();
+      
+      
+      lights = 0b00000000; //reset before switch enquiry
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+        lights|= 1<<LIGHT_RED;
+        aButtonIsPressed = true;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+        lights|= 1<<LIGHT_BLUE;
+        aButtonIsPressed = true;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+        lights|= 1<<LIGHT_GREEN;
+        aButtonIsPressed = true;
+      }
+      
+
+      if (aButtonIsPressed){
+        textBuf[1]='8';
+        textBuf[2]='8';
+        textBuf[3]='8';
+        textBuf[4]='8';        
+      }else{
+        //display
+        textBuf[1]='-';
+        textBuf[2]='-';
+        textBuf[3]='-';
+        textBuf[4]='-';
+      }
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        lights|= 1<<LIGHT_LED_1;
+      }else{
+        textBuf[1]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+        lights|= 1<<LIGHT_LED_2;
+      }else{
+        textBuf[2]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        lights|= 1<<LIGHT_LED_3;
+        aButtonIsPressed = true;
+      }else{
+        textBuf[3]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+        lights|= 1<<LIGHT_YELLOW;
+        aButtonIsPressed = true;
+      }else{
+        textBuf[4]=' ';
+      }
+      
+      ledDisp.displayHandler(textBuf);
+      
+      ledDisp.SetLedArray(lights);
+      ledDisp.setBrightness((byte)(potentio_value_stable/20),false);
+}
+
+void modeCountingLettersAndChars(bool init){
+        //counting mode: numbers and letters.
+      bool aButtonIsPressed = false;
+
+      if (init){
+        aButtonIsPressed = true;
+      }
+      
+      numberElseAlphabethMode = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+  
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
+        aButtonIsPressed = true;
+      }
+    
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         counter++;
         aButtonIsPressed = true;
@@ -366,15 +484,18 @@ void mode_refresh(){
         }else{
           ledDisp.showNumberAsChars(counter);
         }
-        
       }
-        
-      
-      
-      break;
-    case 1:
-      
-      
+}
+
+void modeSoundSong(bool init){
+  //buzzer.loadBuzzerTrack(song_happy_dryer);
+  if (init){
+    buzzer.loadBuzzerTrack(song_unhappy_dryer);
+  }
+}
+
+void modeSoundNotes(){
+  //buzzer with buzzer roll (notes).
       
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         if (potentio_value_stable_changed){
@@ -394,157 +515,20 @@ void mode_refresh(){
           buzzer.programBuzzerRoll(allNotesIndex);
           allNotesIndex++;
         }
+        ledDisp.showNumber(allNotesIndex);
       }else{
         if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-          buzzer.addRandomSoundToRoll();
-        }
+          ledDisp.showNumber(buzzer.addRandomSoundToRoll(223, 235));
           
+        }
+        if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+          ledDisp.showNumber(buzzer.addRandomSoundToRoll(160, 223));
+          
+        }
+        if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+          ledDisp.showNumber(buzzer.addRandomSoundToRoll(97, 160));
+          
+        }  
       }
-      
-      
-      break;
-    case 2:
-      break;
-    case 3:
-      // display scroll mode
-      if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-        ledDisp.doScroll();
-      }
-
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        ledDisp.setScrollSpeed((long)potentio_value_stable);
-      }else{
-        ledDisp.setBrightness((byte)(potentio_value_stable/20),false);
-      }
-      
-      break;
-    case 4:
-      // counting fun
-      
-      break;
-    case 5:
-      break;
-    case 6:
-      break;
-    case 7:
-      // simple repetitive, predictive mode.
-      // each button triggers its corresponding light. 
-      // potentio sets display brightness
-      // no buzzer
-      // display lights up a segment for each button.
-    
-      blankDisplay();
-      
-      
-      lights = 0b00000000; //reset before switch enquiry
-      if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
-        lights|= 1<<LIGHT_RED;
-        aButtonIsPressed = true;
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-        lights|= 1<<LIGHT_BLUE;
-        aButtonIsPressed = true;
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
-        lights|= 1<<LIGHT_GREEN;
-        aButtonIsPressed = true;
-      }
-      
-
-      if (aButtonIsPressed){
-        textBuf[1]='8';
-        textBuf[2]='8';
-        textBuf[3]='8';
-        textBuf[4]='8';        
-      }else{
-        //display
-        textBuf[1]='-';
-        textBuf[2]='-';
-        textBuf[3]='-';
-        textBuf[4]='-';
-      }
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-        lights|= 1<<LIGHT_LED_1;
-      }else{
-        textBuf[1]=' ';
-      }
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-        lights|= 1<<LIGHT_LED_2;
-      }else{
-        textBuf[2]=' ';
-      }
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        lights|= 1<<LIGHT_LED_3;
-        aButtonIsPressed = true;
-      }else{
-        textBuf[3]=' ';
-      }
-      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-        lights|= 1<<LIGHT_YELLOW;
-        aButtonIsPressed = true;
-      }else{
-        textBuf[4]=' ';
-      }
-      
-
-
-      
-      ledDisp.displayHandler(textBuf);
-      
-      ledDisp.SetLedArray(lights);
-      ledDisp.setBrightness((byte)(potentio_value_stable/20),false);
-      
-    
-      break;
-    case 8:
-      break;
-    case 9:
-      break;
-    case 10:
-      break;
-    case 11:
-      break;
-    
-    default:
-      break;
-  }
-  
 }
 
-void potentio_refresh(){
-  potentio_value = (int16_t)analogRead(PIN_POTENTIO);
-  
-  if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
-    potentio_value_stable_changed = true;  //simple edge detection
-    potentio_value_stable = potentio_value;
-    
-//    Serial.println(potentio_value_stable);
-  }else{
-    potentio_value_stable_changed = false;  //simple edge detection
-    
-  }
-  
-}
-
-void setup() {
-  // put your setup code here, to run once:
-  selectorDial.setPin(PIN_SELECTOR_DIAL);
-  buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
-  buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
-
-  buzzer.setPin(PIN_BUZZER);
-  
-  ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-  //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-
-
-  setDefaultMode();
-  
-
-//  Serial.begin(9600);
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  refresh();
-}

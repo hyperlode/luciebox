@@ -32,8 +32,6 @@ void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte 
 //}
 
 void DisplayManagement::showNumberAsChars(int16_t number){
-  int16_t c;
-  c = number;
   for (int i=0;i<4;i++){
       text[4-i] = 64 + number; //ascii 65 = a
   }
@@ -41,6 +39,7 @@ void DisplayManagement::showNumberAsChars(int16_t number){
 }
 
 void DisplayManagement::showNumber(int16_t number){
+  //negative numbers not yet working.
   int16_t c;
   c = number;
   for (int i=0;i<4;i++){

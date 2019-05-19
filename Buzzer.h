@@ -57,11 +57,15 @@ class Buzzer{
     void setPin(uint8_t pin);
     void loadBuzzerTrack(const uint8_t* seq);
     void programBuzzerRoll(uint8_t sound);
-    void addRandomSoundToRoll();
+    uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);
     void doBuzzerRoll();
     uint8_t getNextBuzzerRollSlot ( bool getNextEmptySlot);
     uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty(); 
+
+    void cleanBuzzerRoll();
+    void buzzerOn(uint8_t freq);
+    void buzzerOff();
 
   private:
     uint8_t pin;

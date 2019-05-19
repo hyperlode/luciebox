@@ -45,11 +45,14 @@ void Buzzer::programBuzzerRoll(uint8_t sound) {
   //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
 }
 
-void Buzzer::addRandomSoundToRoll(){
+uint8_t Buzzer::addRandomSoundToRoll(uint8_t lowest, uint8_t highest){
   if (getBuzzerRollEmpty()) {
-    programBuzzerRoll(random(223, 235));
+    uint8_t r = random(lowest, highest); //223, 235
+    programBuzzerRoll(r);
     //programBuzzerRoll(random(1,60));
+    return r;
   }
+  return 0;
 }
 
 void Buzzer::doBuzzerRoll() {
@@ -98,22 +101,29 @@ uint8_t Buzzer::getNextBuzzerRollSlot ( bool getNextEmptySlot) {
   //if argument true, will search for next free slot. If no free slots, returns current slot.
   uint8_t slot = this->playSlotCounter;
   do {
-    slot ++;
-    if (slot >= BUZZER_ROLL_LENGTH) {
-      slot = 0;
-    }
-    //if (getNextEmptySlot){
-    //Serial.println(slot);
-    //}
+    slot >= BUZZER_ROLL_LENGTH - 1 ? slot = 0: slot ++;    
   } while ( getNextEmptySlot
             && buzzerRoll[slot] != BUZZER_ROLL_EMPTY_SLOT
-            && this->playSlotCounter != slot  //
+            && this->playSlotCounter != slot 
           );
-  //if (getNextEmptySlot){
-  //Serial.println(slot);
-  //  Serial.println("end");
-  //}
   return slot;
+}
+
+void Buzzer::cleanBuzzerRoll(){
+  //all slots empty
+  for(uint8_t i=0; i<BUZZER_ROLL_LENGTH; i++){
+    buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
+  }
+}
+
+void Buzzer::buzzerOff(){
+  //erase contents of buzzerRoll and switch off.
+  this->cleanBuzzerRoll();
+  noTone(this->pin);
+}
+
+void Buzzer::buzzerOn(uint8_t freq){
+  tone(this->pin, freq);
 }
 
 uint8_t Buzzer::getBuzzerRollFull() {
