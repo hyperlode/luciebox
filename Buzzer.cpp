@@ -122,7 +122,7 @@ void Buzzer::buzzerOff(){
   noTone(this->pin);
 }
 
-void Buzzer::buzzerOn(uint8_t freq){
+void Buzzer::buzzerOn(uint16_t freq){
   tone(this->pin, freq);
 }
 

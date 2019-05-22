@@ -62,10 +62,9 @@
 #define BUTTON_MOMENTARY_BLUE 3
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
-//const uint8_t song_happy_dryer [] PROGMEM = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_happy_dryer [] PROGMEM = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_unhappy_dryer[] PROGMEM = {226,189,230,189,170,126,167,126,165,126,226,189,189,BUZZER_ROLL_SONG_STOPVALUE};
-
-//const uint8_t song_happy_dryer [] = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_attack [] PROGMEM = {162,126,162,126,162,126, 167,189,189,162,126,  230,230,230 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
 
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
@@ -185,7 +184,6 @@ void setDefaultMode(){
   buzzer.buzzerOff();
 }
 
-
 void blankDisplay(){
   textBuf[1]=' ';
   textBuf[2]=' ';
@@ -193,9 +191,7 @@ void blankDisplay(){
   textBuf[4]=' ';
   textBuf[5]='/0';
   ledDisp.displayHandler(textBuf);
-  
 }
-
 
 void mode_refresh(){
   
@@ -213,17 +209,30 @@ void mode_refresh(){
       
       break;
     case 2:
-      //sound fun with frequncies.
-      buzzer.buzzerOn(potentio_value/4);
+      //sound fun with frequencies.
+      //long freqq = 0;
+      //freqq = map((long)potentio_value, 0, 1023, 0 , 65535);
+      //buzzer.buzzerOn((uint16_t) freqq);
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        if (potentio_value_stable_changed){      
+          buzzer.buzzerOn( (uint16_t) map((long)potentio_value_stable, 0, 1023, 0 , 65535));
+        }
+      }else{
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+          if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+            buzzer.buzzerOn( (uint16_t) map((long)potentio_value_stable, 0, 1023, 0 , 65535));
+          }
+        }else if (true) {
+          
+        }
+        
+      }
       break;
       
     case 3:
       modeScroll(init);
       break;
     case 4:
-      // counting fun
-      
-      
       break;
     case 5:
       modeSoundSong(init);
@@ -488,10 +497,26 @@ void modeCountingLettersAndChars(bool init){
 }
 
 void modeSoundSong(bool init){
-  //buzzer.loadBuzzerTrack(song_happy_dryer);
   if (init){
+    buzzer.loadBuzzerTrack(song_happy_dryer);
+//    buzzer.loadBuzzerTrack(song_unhappy_dryer);
+  }
+
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+    buzzer.loadBuzzerTrack(song_happy_dryer);
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
     buzzer.loadBuzzerTrack(song_unhappy_dryer);
   }
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+    buzzer.loadBuzzerTrack(song_attack );
+  }
+
+  
+
+
 }
 
 void modeSoundNotes(){

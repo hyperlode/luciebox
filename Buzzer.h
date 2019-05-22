@@ -64,7 +64,7 @@ class Buzzer{
     uint8_t getBuzzerRollEmpty(); 
 
     void cleanBuzzerRoll();
-    void buzzerOn(uint8_t freq);
+    void buzzerOn(uint16_t freq);
     void buzzerOff();
 
   private:
