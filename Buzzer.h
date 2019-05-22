@@ -23,7 +23,7 @@
 //#define BUZZER_ROLLVALUE_
 
 
-#define BUZZER_ROLL_LENGTH 20
+#define BUZZER_ROLL_LENGTH 40
 #define BUZZER_ROLL_EMPTY_SLOT 255
 // #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 63
 #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 15
@@ -66,8 +66,10 @@ class Buzzer{
     void cleanBuzzerRoll();
     void buzzerOn(uint16_t freq);
     void buzzerOff();
+    void setSpeedRatio(float speedMultiplier);
 
   private:
+    float speedScale;
     uint8_t pin;
     uint8_t buzzerRoll[BUZZER_ROLL_LENGTH];
     uint8_t playSlotCounter;

@@ -64,7 +64,10 @@
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 const uint8_t song_happy_dryer [] PROGMEM = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_unhappy_dryer[] PROGMEM = {226,189,230,189,170,126,167,126,165,126,226,189,189,BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t song_attack [] PROGMEM = {162,126,162,126,162,126, 167,189,189,162,126,  230,230,230 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
+const uint8_t song_attack [] PROGMEM = {162,126,162,126,162,126, 167,189,189,162,126,230,230,230 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
+const uint8_t song_retreat [] PROGMEM = {162,126,162,126,162,126,162,189,189,162,126,218,218,218 ,BUZZER_ROLL_SONG_STOPVALUE};  //retreat!
+const uint8_t scale_major [] PROGMEM = {163,126,165,126,167,126,168,126,170,126,172,126,174,126,175,126,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t scale_major_reversed [] PROGMEM = {175,126,174,126,172,126,170,126,168,126,167,126,165,126,163,126,BUZZER_ROLL_SONG_STOPVALUE};
 
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
@@ -499,22 +502,63 @@ void modeCountingLettersAndChars(bool init){
 void modeSoundSong(bool init){
   if (init){
     buzzer.loadBuzzerTrack(song_happy_dryer);
+    buzzer.setSpeedRatio((float)1);
 //    buzzer.loadBuzzerTrack(song_unhappy_dryer);
   }
 
-  
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-    buzzer.loadBuzzerTrack(song_happy_dryer);
+  if (potentio_value_stable_changed){
+    buzzer.setSpeedRatio((float)(potentio_value_stable) / 256 );
   }
   
-  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-    buzzer.loadBuzzerTrack(song_unhappy_dryer);
-  }
-  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-    buzzer.loadBuzzerTrack(song_attack );
-  }
-
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+    
+    if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_happy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        //buzzer.loadBuzzerTrack(song_unhappy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_attack );
+      }
+    }else{
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_unhappy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        //buzzer.loadBuzzerTrack(song_unhappy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_retreat );
+      }
+      
+    }
+  }else{
+    //scales
+     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer.loadBuzzerTrack(scale_major);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        //buzzer.loadBuzzerTrack(song_unhappy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        //buzzer.loadBuzzerTrack(song_attack );
+      }
+    }else{
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer.loadBuzzerTrack(scale_major_reversed);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        //buzzer.loadBuzzerTrack(song_unhappy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        //buzzer.loadBuzzerTrack(song_retreat );
+      }
+    }
   
+  }
 
 
 }

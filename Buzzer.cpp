@@ -9,6 +9,7 @@ Buzzer::Buzzer(){
         this->buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
       }
       this->soundFinishedTimeMillis = 0;
+      this->speedScale = 1;
 }
 
 void Buzzer::setPin(uint8_t pin){
@@ -83,7 +84,7 @@ void Buzzer::doBuzzerRoll() {
       }
       //Serial.println((unsigned int)freq);
       //noTone(PIN_BUZZER); //remedy against disappearing digit problem?! there were problems with the 4th digit of the main display going black. Maybe resetting it does the trick?! //not working! Problem persists...
-      tone(this->pin, (unsigned int)freq , (unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter] / 63))); //duration, number is exponent of 2.
+      tone(this->pin, (unsigned int)freq , (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter] / 63))); //duration, number is exponent of 2.
 
       //tone(PIN_BUZZER, (unsigned int)freq , 50); //duration, number is exponent of 2.
       //tone(PIN_BUZZER, 3000 , (unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63))); //duration, number is exponent of 2.
@@ -91,9 +92,14 @@ void Buzzer::doBuzzerRoll() {
       //Serial.println((unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63)));
       //Serial.println((unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63)));
 
-      this->soundFinishedTimeMillis = millis() + BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter] / 63);
+      this->soundFinishedTimeMillis = millis() + (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter] / 63));
     }
   }
+}
+
+void Buzzer::setSpeedRatio(float speedMultiplier){
+  // argument is a long: 1 is normal speed, 0.5 is half, 2 is double, ....
+  this->speedScale = speedMultiplier;
 }
 
 uint8_t Buzzer::getNextBuzzerRollSlot ( bool getNextEmptySlot) {
