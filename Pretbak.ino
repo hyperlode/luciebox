@@ -236,6 +236,8 @@ void mode_refresh(){
       modeScroll(init);
       break;
     case 4:
+
+      modeGeiger(init);
       break;
     case 5:
       modeSoundSong(init);
@@ -569,9 +571,10 @@ void modeSoundNotes(){
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         if (potentio_value_stable_changed){
           //buzzer.programBuzzerRoll(potentio_value_stable /4);;
-           allNotesIndex = potentio_value_stable /4;
+           allNotesIndex = potentio_value /4;
+           buzzer.programBuzzerRoll(allNotesIndex);
         }
-        
+          
         if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
           buzzer.programBuzzerRoll(allNotesIndex);
           allNotesIndex--;
@@ -588,7 +591,7 @@ void modeSoundNotes(){
       }else{
         if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
           ledDisp.showNumber(buzzer.addRandomSoundToRoll(223, 235));
-          
+          //0 -> 63 short
         }
         if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
           ledDisp.showNumber(buzzer.addRandomSoundToRoll(160, 223));
@@ -600,4 +603,36 @@ void modeSoundNotes(){
         }  
       }
 }
+
+void modeGeiger(bool init){
+
+  if (init){
+      textBuf[4]=' ';
+  }
+  
+    
+  //play tick. 
+  //wait random time.
+  //X = - log(1 - Y)/ K   with Y a random value ( 0<Y<1) and K a constant ?
+  long r = random(0, 1024)*random(0, 1024); 
+
+  if (r > (long)potentio_value*1024){
+//    buzzer.programBuzzerRoll(1); //not beep but "puck"
+    tone(PIN_BUZZER, (unsigned int)50, 10);
+    textBuf[1]='K';
+    textBuf[2]='B';
+    textBuf[3]='M';
+    textBuf[4]='Z';
+    
+  }else{
+    textBuf[1]=' ';
+    textBuf[2]=' ';
+    textBuf[3]=' ';
+    textBuf[4]=' ';
+  }
+  ledDisp.displayHandler(textBuf);  
+  
+}
+
+
 
