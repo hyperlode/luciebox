@@ -14,8 +14,10 @@
 // output: lights on buttons, 7seg display (4 digits), buzzer
 
 #define DISPLAY_IS_COMMON_ANODE true  //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
+
+#define PIN_DUMMY 66
  
-#define PIN_DISPLAY_DIGIT_0 5
+#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
 #define PIN_DISPLAY_DIGIT_1 5
 #define PIN_DISPLAY_DIGIT_2 9
 #define PIN_DISPLAY_DIGIT_3 10
@@ -97,6 +99,7 @@ Buzzer buzzer;
 
 //global variables
 int16_t counter;
+uint8_t geiger_counter;
 bool numberElseAlphabethMode;
 uint8_t animation_step;
 
@@ -658,6 +661,7 @@ void modeGeiger(bool init){
 
   if (init){
       textBuf[4]=' ';
+      geiger_counter = 0;
   }
   
     
@@ -666,22 +670,36 @@ void modeGeiger(bool init){
   //X = - log(1 - Y)/ K   with Y a random value ( 0<Y<1) and K a constant ?
   long r = random(0, 1024)*random(0, 1024); 
 
-  if (r > (long)potentio_value*1024){
-//    buzzer.programBuzzerRoll(1); //not beep but "puck"
-    tone(PIN_BUZZER, (unsigned int)50, 10);
-    textBuf[1]='?';
-    textBuf[2]='?';
-    textBuf[3]='?';
-    textBuf[4]='?';
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+      
+    if (r > (long)potentio_value*1024){
+      tone(PIN_BUZZER, (unsigned int)50, 10);
+    
+      geiger_counter++;
+      ledDisp.SetSingleDigit(geiger_counter, 1);  
+      ledDisp.SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
+  
+      (animation_step>=5)?animation_step=0:animation_step++;
+      
+    }
     
   }else{
-    textBuf[1]=' ';
-    textBuf[2]=' ';
-    textBuf[3]=' ';
-    textBuf[4]=' ';
+    if (r > (long)potentio_value*1024){
+  //    buzzer.programBuzzerRoll(1); //not beep but "puck"
+      tone(PIN_BUZZER, (unsigned int)50, 10);
+      textBuf[1]='?';
+      textBuf[2]='?';
+      textBuf[3]='?';
+      textBuf[4]='?';
+      
+    }else{
+      textBuf[1]=' ';
+      textBuf[2]=' ';
+      textBuf[3]=' ';
+      textBuf[4]=' ';
+    }
+    ledDisp.displayHandler(textBuf);  
   }
-  ledDisp.displayHandler(textBuf);  
-  
 }
 
 
