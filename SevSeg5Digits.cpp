@@ -184,6 +184,11 @@ byte* SevSeg5Digits::PrintOutputSeg(byte brightness){
 //New Number
 /*******************************************************************************************/
 
+void SevSeg5Digits::SetSingleDigit(int8_t value, int digit){
+  //value =  bits. Segment bit0=segmentA, bit6=segmentG, bit7 = decimal point. 
+  this->lights[digit] = value;
+}
+
 void SevSeg5Digits::SetDecPointSingle(boolean pointIsOn, int digit){
 	setBit(&this->lights[digit],pointIsOn,7);
 	//CreateArray();
@@ -208,216 +213,209 @@ void SevSeg5Digits::NewText(char* text)
 void SevSeg5Digits::CreateArray() {
 
 	for (byte digit=0;digit<5;digit++) {
-	 
-	//temporary save the decimal point of the segment. 
-	setBit(&this->boolContainer, getBit(&this->lights[digit],7), TEMPDECPOINTMEMORY);
-	
-	
-	byte i = random(0,7);
-		switch (text[digit]){
-	/**/
-	
-	case '?' :
-		
-		// for (byte i=0;i<8;i++ ){
-			// setBit(&this->lights[digit], (int)random(2), i); //random on or off...
-		// }
-			
-			setBit(&this->lights[digit],  !getBit(&this->lights[digit],i), i); //random on or off...
-		
-		break;
-	case '0' :
-		lights[digit] = B00111111;
-		break;
-	case '1':
-		lights[digit] = B00000110;
-		break;
-	case '2' :
-	 lights[digit] = B01011011; 
-		break;
-	case '3' :
-		lights[digit] = B01001111;
-		break;
-	case '4' :
-	 lights[digit] = B01100110;
-		break;
-	case '5' :
-		lights[digit] = B01101101;
-		break;
-	case '6' :
-		lights[digit] = B01111101;
-		break;
-	case '7' :
-		lights[digit] = B00000111;
-		break;
-	case '8' :
-		lights[digit] = B01111111;
-		break;
-	case '9' :
-		lights[digit] = B01101111;
-		break;
-		/*
-	case 20:
-		lights[digit][0]=0;lights[digit][1]=0;lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-		break;
-	case 21:
-		lights[digit][0]=0;lights[digit][1]=0;lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=1;
-		break;
-	/**/
-	case 'A':
-		lights[digit] = B01110111;
-		break;
-	case 'B':
-		lights[digit] = B01111100;
-		break;	
-	case 'C':
-		lights[digit] = B00111001;
-		break;
-	case 'c':
-		lights[digit] = B01011000;
-		break;
-	case 'D':
-		lights[digit] = B01011110;
-		break;
-	case 'E':
-		lights[digit] = B01111001;
-		break;
-	case 'F':
-		lights[digit] = B01110001;
-		break;
-	case 'G':
-		lights[digit] = B00111101;
-		break;
-	//case 'h':
-	//	lights[digit] = B01110100;
-	//	break;
-	case 'H':
-		//lights[digit] = B01110110;
-    lights[digit] = B01110100;
-		break;
-	case 'I':
-//		lights[digit] = B00000110;
-    lights[digit] = B00000100;
-		break;
-//	case 'i':
-//		lights[digit] = B00000100;
-//		break;
-	case 'J':
-//		lights[digit] = B00001110;
-    lights[digit] = B00001100;
-		break;
-	case 'K':
-    lights[digit] = B01110101;
-//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=1;
-		break;
-	case 'L':
-		lights[digit] = B00111000;
-		break;
-//	case 'M':
-//		lights[digit] = B01001001; //hamburger icon
-//		break;
-	case 'M':
-//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
-    lights[digit] = B01010101;
-		break;
-//	case 'n':
-//		lights[digit] = B01010100;
-//		break;
-	case 'N':
-		//lights[digit] = B00110111;
-    lights[digit] = B01010100;
-		break;
-//	case 'o':
-//		lights[digit] = B01011100;
-//		break;
-	case 'O':
-//		lights[digit] = B00111111;
-    lights[digit] = B01011100;
-		break;
-	case 'P':
-		lights[digit] = B01110011;
-		break;
-	case 'Q':
-		lights[digit] = B01100111;
-		break;
-	case 'R':
-		lights[digit] = B01010000;
-		break;
-	case 'S':
-		lights[digit] = B01101101;
-		break;
-	case 'T':
-		lights[digit] = B01111000;
-		break;
-//	case 'u':
-//		lights[digit] = B00011100;
-//		break;
-	case 'U':
-//		lights[digit] = B00111110;
-    lights[digit] = B00011100;
-		break;
-	case 'V':
-		lights[digit] = B00011110;
-		break;
-	case 'W':
-//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
-    lights[digit] = B00011101;
-		break;
-	case 'X':
-    lights[digit] = B00110110;
-//			lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
-		break;
-	case 'Y':
-		lights[digit] = B01101110;
-		break;
-	case 'Z':
-    lights[digit] = B00011011;
-//	  lights[digit][0]=1; lights[digit][1]=1; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
-	  break;
-	case ' ':
-		lights[digit] = B00000000;
-		break;
-//	case '~': //only upper (seg A)
-//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-//		break;
-	case '-': //only middle (seg G)
-		lights[digit] = B01000000;
-		break;
-	case '_': //only bottom (seg D)
-		// lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-		lights[digit] = B00001000;
-		break;
-	case '|': //only left (seg E,F)	 (only right =	I)
-		lights[digit] = B00110000;
-		break;
-//
-//	case '^': //only left and right
-//		lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
-//		break;
-//
-//	case '(':
-//		lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
-//		break;
-//	case ')':
-//		lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-//		break;
-//	case '[':
-//		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
-//		break;
-//	case ']':
-//		lights[digit][0]=1; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-//		break;
-	
-//	case ':': //only left under (segE)
-//		lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
-//		break;
-//	case '+': //mirrored t
-//		lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=1;
-//		break;
-		 
-	default:
-		lights[digit] = B01011100;
-		break;
+  	 
+  	//temporary save the decimal point of the segment. 
+  	setBit(&this->boolContainer, getBit(&this->lights[digit],7), TEMPDECPOINTMEMORY);
+  	
+  	
+  	byte i = random(0,7);
+  	
+  	switch (text[digit]){
+  	case '?' :
+     	setBit(&this->lights[digit],  !getBit(&this->lights[digit],i), i); //random on or off...
+  		break;
+  	case '0' :
+  		lights[digit] = B00111111;
+  		break;
+  	case '1':
+  		lights[digit] = B00000110;
+  		break;
+  	case '2' :
+  	 lights[digit] = B01011011; 
+  		break;
+  	case '3' :
+  		lights[digit] = B01001111;
+  		break;
+  	case '4' :
+  	 lights[digit] = B01100110;
+  		break;
+  	case '5' :
+  		lights[digit] = B01101101;
+  		break;
+  	case '6' :
+  		lights[digit] = B01111101;
+  		break;
+  	case '7' :
+  		lights[digit] = B00000111;
+  		break;
+  	case '8' :
+  		lights[digit] = B01111111;
+  		break;
+  	case '9' :
+  		lights[digit] = B01101111;
+  		break;
+  		/*
+  	case 20:
+  		lights[digit][0]=0;lights[digit][1]=0;lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
+  		break;
+  	case 21:
+  		lights[digit][0]=0;lights[digit][1]=0;lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=1;
+  		break;
+  	/**/
+  	case 'A':
+  		lights[digit] = B01110111;
+  		break;
+  	case 'B':
+  		lights[digit] = B01111100;
+  		break;	
+  	case 'C':
+  		lights[digit] = B00111001;
+  		break;
+  	case 'c':
+  		lights[digit] = B01011000;
+  		break;
+  	case 'D':
+  		lights[digit] = B01011110;
+  		break;
+  	case 'E':
+  		lights[digit] = B01111001;
+  		break;
+  	case 'F':
+  		lights[digit] = B01110001;
+  		break;
+  	case 'G':
+  		lights[digit] = B00111101;
+  		break;
+  	//case 'h':
+  	//	lights[digit] = B01110100;
+  	//	break;
+  	case 'H':
+  		//lights[digit] = B01110110;
+      lights[digit] = B01110100;
+  		break;
+  	case 'I':
+  //		lights[digit] = B00000110;
+      lights[digit] = B00000100;
+  		break;
+  //	case 'i':
+  //		lights[digit] = B00000100;
+  //		break;
+  	case 'J':
+  //		lights[digit] = B00001110;
+      lights[digit] = B00001100;
+  		break;
+  	case 'K':
+      lights[digit] = B01110101;
+  //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=1;
+  		break;
+  	case 'L':
+  		lights[digit] = B00111000;
+  		break;
+  //	case 'M':
+  //		lights[digit] = B01001001; //hamburger icon
+  //		break;
+  	case 'M':
+  //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
+      lights[digit] = B01010101;
+  		break;
+  //	case 'n':
+  //		lights[digit] = B01010100;
+  //		break;
+  	case 'N':
+  		//lights[digit] = B00110111;
+      lights[digit] = B01010100;
+  		break;
+  //	case 'o':
+  //		lights[digit] = B01011100;
+  //		break;
+  	case 'O':
+  //		lights[digit] = B00111111;
+      lights[digit] = B01011100;
+  		break;
+  	case 'P':
+  		lights[digit] = B01110011;
+  		break;
+  	case 'Q':
+  		lights[digit] = B01100111;
+  		break;
+  	case 'R':
+  		lights[digit] = B01010000;
+  		break;
+  	case 'S':
+  		lights[digit] = B01101101;
+  		break;
+  	case 'T':
+  		lights[digit] = B01111000;
+  		break;
+  //	case 'u':
+  //		lights[digit] = B00011100;
+  //		break;
+  	case 'U':
+  //		lights[digit] = B00111110;
+      lights[digit] = B00011100;
+  		break;
+  	case 'V':
+  		lights[digit] = B00011110;
+  		break;
+  	case 'W':
+  //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
+      lights[digit] = B00011101;
+  		break;
+  	case 'X':
+      lights[digit] = B00110110;
+  //			lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
+  		break;
+  	case 'Y':
+  		lights[digit] = B01101110;
+  		break;
+  	case 'Z':
+      lights[digit] = B00011011;
+  //	  lights[digit][0]=1; lights[digit][1]=1; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=1;
+  	  break;
+  	case ' ':
+  		lights[digit] = B00000000;
+  		break;
+  //	case '~': //only upper (seg A)
+  //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
+  //		break;
+  	case '-': //only middle (seg G)
+  		lights[digit] = B01000000;
+  		break;
+  	case '_': //only bottom (seg D)
+  		// lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
+  		lights[digit] = B00001000;
+  		break;
+  	case '|': //only left (seg E,F)	 (only right =	I)
+  		lights[digit] = B00110000;
+  		break;
+  //
+  //	case '^': //only left and right
+  //		lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
+  //		break;
+  //
+  //	case '(':
+  //		lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
+  //		break;
+  //	case ')':
+  //		lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
+  //		break;
+  //	case '[':
+  //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=1;lights[digit][4]=1;lights[digit][5]=1;lights[digit][6]=0;
+  //		break;
+  //	case ']':
+  //		lights[digit][0]=1; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=1;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
+  //		break;
+  	
+  //	case ':': //only left under (segE)
+  //		lights[digit][0]=0; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=1;lights[digit][5]=0;lights[digit][6]=0;
+  //		break;
+  //	case '+': //mirrored t
+  //		lights[digit][0]=0; lights[digit][1]=1; lights[digit][2]=1;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=1;
+  //		break;
+  		 
+  	default:
+  		lights[digit] = B01011100;
+  		break;
 	}
 	//Set the decimal place lights
 	setBit(&this->lights[digit], getBit(&this->boolContainer,TEMPDECPOINTMEMORY), 7);

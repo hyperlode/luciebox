@@ -15,7 +15,7 @@
 
 #define DISPLAY_IS_COMMON_ANODE true  //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
  
-#define PIN_DISPLAY_DIGIT_0 0
+#define PIN_DISPLAY_DIGIT_0 5
 #define PIN_DISPLAY_DIGIT_1 5
 #define PIN_DISPLAY_DIGIT_2 9
 #define PIN_DISPLAY_DIGIT_3 10
@@ -69,6 +69,10 @@ const uint8_t song_retreat [] PROGMEM = {162,126,162,126,162,126,162,189,189,162
 const uint8_t scale_major [] PROGMEM = {163,126,165,126,167,126,168,126,170,126,172,126,174,126,175,126,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t scale_major_reversed [] PROGMEM = {175,126,174,126,172,126,170,126,168,126,167,126,165,126,163,126,BUZZER_ROLL_SONG_STOPVALUE};
 
+const uint8_t disp_digit_animate [] PROGMEM = {1,2,4,8,16,32};
+//const uint8_t disp_digit_animate_double [] PROGMEM = {9,18,36,9,18,36};
+//const uint8_t disp_digit_animate_inverted [] PROGMEM = {62,61,59,55,47,31};
+
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
@@ -84,7 +88,7 @@ SuperTimer tmptimer;
 // OUTPUT
 DisplayManagement ledDisp;
 char  textBuf [6];
-char  scrollBuf [12];
+char  scrollBuf [40];
 uint8_t lights;
 
 uint8_t allNotesIndex;
@@ -94,6 +98,7 @@ Buzzer buzzer;
 //global variables
 int16_t counter;
 bool numberElseAlphabethMode;
+uint8_t animation_step;
 
 void refresh(){
 
@@ -243,6 +248,7 @@ void mode_refresh(){
       modeSoundSong(init);
       break;
     case 6:
+      modeSingleSegmentManipulation(init);
       break;
     case 7:
       modeSimpleButtonsAndLights();    
@@ -268,13 +274,10 @@ void potentio_refresh(){
   if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
     potentio_value_stable_changed = true;  //simple edge detection
     potentio_value_stable = potentio_value;
-    
-//    Serial.println(potentio_value_stable);
+    Serial.println(potentio_value_stable);
   }else{
     potentio_value_stable_changed = false;  //simple edge detection
-    
   }
-  
 }
 
 void setup() {
@@ -292,7 +295,7 @@ void setup() {
   setDefaultMode();
   
 
-//  Serial.begin(9600);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -306,17 +309,36 @@ void modeScroll(bool init){
   
   if (init){
     // display scroll mode
-    scrollBuf[0]='L';
-    scrollBuf[1]='U';
-    scrollBuf[2]='C';
-    scrollBuf[3]='I';
-    scrollBuf[4]='E';
+//    scrollBuf[0]='L';
+//    scrollBuf[1]='U';
+//    scrollBuf[2]='C';
+//    scrollBuf[3]='I';
+//    scrollBuf[4]='E';
+//    scrollBuf[5]=' ';
+//    scrollBuf[6]='B';
+//    scrollBuf[7]='A';
+//    scrollBuf[8]='B';
+//    scrollBuf[9]='Y';
+//
+
+    scrollBuf[0]='H';
+    scrollBuf[1]='A';
+    scrollBuf[2]='P';
+    scrollBuf[3]='P';
+    scrollBuf[4]='Y';
     scrollBuf[5]=' ';
     scrollBuf[6]='B';
-    scrollBuf[7]='A';
-    scrollBuf[8]='B';
+    scrollBuf[7]='D';
+    scrollBuf[8]='A';
     scrollBuf[9]='Y';
-    scrollBuf[10]='/0';
+    scrollBuf[10]=' ';
+    scrollBuf[11]='B';
+    scrollBuf[12]='R';
+    scrollBuf[13]='A';
+    scrollBuf[14]='M';
+    scrollBuf[15]='Z';
+    scrollBuf[16]='Y';
+    //scrollBuf[10]='/0';
     ledDisp.dispHandlerWithScroll(scrollBuf, true, false);
       
   }
@@ -595,13 +617,41 @@ void modeSoundNotes(){
         }
         if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
           ledDisp.showNumber(buzzer.addRandomSoundToRoll(160, 223));
-          
         }
         if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
           ledDisp.showNumber(buzzer.addRandomSoundToRoll(97, 160));
-          
         }  
       }
+}
+
+void modeSingleSegmentManipulation(bool init){
+
+  if (init){
+
+    animation_step = 0;
+  }
+  if (potentio_value_stable_changed){
+    //uint8_t tmp = (uint8_t) (potentio_value_stable/4);
+    //ledDisp.SetSingleDigit(tmp, 2);  
+    
+  }
+  
+  //ledDisp.displayHandler(textBuf);  
+//  ledDisp.SetSingleDigit(B11111111, 1);  
+//  ledDisp.SetSingleDigit((uint8_t) (potentio_value_stable/4), 3);  
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+    ledDisp.SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),1);  
+    //ledDisp.SetSingleDigit(pgm_read_byte_near(disp_digit_animate_double + animation_step),2);  
+    //ledDisp.SetSingleDigit(pgm_read_byte_near(disp_digit_animate_inverted + animation_step),3);  
+    ledDisp.SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
+
+     (animation_step>=5)?animation_step=0:animation_step++;
+//     Serial.println(animation_step);
+//     Serial.println(pgm_read_byte_near(disp_digit_animate + animation_step));
+  }
+  
+  
 }
 
 void modeGeiger(bool init){
@@ -619,10 +669,10 @@ void modeGeiger(bool init){
   if (r > (long)potentio_value*1024){
 //    buzzer.programBuzzerRoll(1); //not beep but "puck"
     tone(PIN_BUZZER, (unsigned int)50, 10);
-    textBuf[1]='K';
-    textBuf[2]='B';
-    textBuf[3]='M';
-    textBuf[4]='Z';
+    textBuf[1]='?';
+    textBuf[2]='?';
+    textBuf[3]='?';
+    textBuf[4]='?';
     
   }else{
     textBuf[1]=' ';
