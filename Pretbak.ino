@@ -121,6 +121,9 @@ int16_t counter;
 uint8_t geiger_counter;
 bool numberElseAlphabethMode;
 uint8_t animation_step;
+uint8_t game_x_pos;
+uint8_t game_y_pos;
+SuperTimer animation_speed;
 
 void refresh(){
 
@@ -723,32 +726,63 @@ void modeGeiger(bool init){
 }
 
 void fullScreenMovie(bool init){
+  bool nextStep = 0;
   if (init){
     counter = 0;
+    game_x_pos =0;
+    game_y_pos =0;
+    animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
+    animation_speed.start();
   }
 
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-      
-      uint32_t screen = 0;
 
-      
-//      ledDisp.SetFourDigits(0b11110000111100001111000011110000);
-      
-//      screen = (uint32_t)0b00000100 << 24;
-//      screen |= (uint32_t)0b00000010 << 16 ;
-//      screen |= (uint32_t)0b00000001 << 8;
-//      screen |=  (uint32_t)0b00000000;
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
+    //movie mode
+    if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
-      for (uint8_t i=0;i<4;i++){
-        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter + (i)) << (8*i); 
+      if (potentio_value_stable_changed){
+        animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
+//        animation_speed.start();
       }
+      
+      if (!animation_speed.getTimeIsNegative()){
+        nextStep = true;
+        animation_speed.start();
+       
+      }
+       //Serial.println(animation_speed.getTimeMillis());
+    }
+    
+    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+      nextStep = true;
+    }
+    
+    if (nextStep){
+        
+        uint32_t screen = 0;
+  //      ledDisp.SetFourDigits(0b11110000111100001111000011110000);
+        
+  //      screen = (uint32_t)0b00000100 << 24;
+  //      screen |= (uint32_t)0b00000010 << 16 ;
+  //      screen |= (uint32_t)0b00000001 << 8;
+  //      screen |=  (uint32_t)0b00000000;
+  
+        for (uint8_t i=0;i<4;i++){
+          screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); 
+        }
+        ledDisp.SetFourDigits(screen);
+      counter < 11? counter++ : counter=0;
+      
+    }
+  }else{
+    //interactive mode
+    // game: x,y 0,0 = bottom left 
+    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+      
+    }
+    
 
-      ledDisp.SetFourDigits(screen);
-    counter+=4;
   }
   
-  
-  
-
 }
 
