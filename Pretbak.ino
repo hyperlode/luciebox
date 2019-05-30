@@ -118,6 +118,7 @@ Buzzer buzzer;
 
 //global variables
 int16_t counter;
+int16_t counter2;
 uint8_t geiger_counter;
 bool numberElseAlphabethMode;
 uint8_t animation_step;
@@ -729,13 +730,22 @@ void fullScreenMovie(bool init){
   bool nextStep = 0;
   if (init){
     counter = 0;
-    game_x_pos =0;
-    game_y_pos =0;
+    counter2 = 3;
+    game_x_pos = 0;
+    game_y_pos = 0;
     animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
     animation_speed.start();
   }
-
-
+  bool direction1 = true;
+  if(BUTTON_LATCHING_SMALL_RED_LEFT){
+    direction1 = false;
+  }
+  
+  bool direction2 = true;
+  if(BUTTON_LATCHING_SMALL_RED_RIGHT){
+    direction2 = false;
+  }
+  
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
     //movie mode
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
@@ -756,24 +766,36 @@ void fullScreenMovie(bool init){
     if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
       nextStep = true;
     }
+
+    if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+      if (direction2){
+        counter2 < 11? counter2++ : counter2=0;
+      }else{
+        counter2 < 1? counter2=11 : counter2--;
+      }
+    }
     
     if (nextStep){
-        
-        uint32_t screen = 0;
-  //      ledDisp.SetFourDigits(0b11110000111100001111000011110000);
-        
-  //      screen = (uint32_t)0b00000100 << 24;
-  //      screen |= (uint32_t)0b00000010 << 16 ;
-  //      screen |= (uint32_t)0b00000001 << 8;
-  //      screen |=  (uint32_t)0b00000000;
-  
-        for (uint8_t i=0;i<4;i++){
-          screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); 
-        }
-        ledDisp.SetFourDigits(screen);
-      counter < 11? counter++ : counter=0;
+      uint32_t screen = 0;
+      for (uint8_t i=0;i<4;i++){
+        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); 
+        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
+      }
+      ledDisp.SetFourDigits(screen);
       
+      if (direction1){
+        counter < 11? counter++ : counter=0;
+      }else{
+        counter < 1? counter=11 : counter--;
+      }
+      
+      if (direction2){
+        counter2 < 11? counter2++ : counter2=0;
+      }else{
+        counter2 < 1? counter2=11 : counter2--;
+      }
     }
+    
   }else{
     //interactive mode
     // game: x,y 0,0 = bottom left 
