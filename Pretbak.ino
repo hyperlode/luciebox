@@ -71,6 +71,25 @@ const uint8_t song_retreat [] PROGMEM = {162,126,162,126,162,126,162,189,189,162
 const uint8_t scale_major [] PROGMEM = {163,126,165,126,167,126,168,126,170,126,172,126,174,126,175,126,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t scale_major_reversed [] PROGMEM = {175,126,174,126,172,126,170,126,168,126,167,126,165,126,163,126,BUZZER_ROLL_SONG_STOPVALUE};
 
+const uint32_t disp_4digits_animate [] PROGMEM = {
+    0x00,0xFF, 0xF0,0x0F,
+    0xFF,0x00, 0x00,0x01,
+    0x01,0x02, 0x04,0x08
+    };
+const uint32_t disp_4digits_animate_circle [] PROGMEM = {
+    0x01,0x00,0x00,0x00,
+    0x00,0x01,0x00,0x00,
+    0x00,0x00,0x01,0x00,
+    0x00,0x00,0x00,0x01,
+    0x00,0x00,0x00,0x02,
+    0x00,0x00,0x00,0x04,
+    0x00,0x00,0x00,0x08,
+    0x00,0x00,0x08,0x00,
+    0x00,0x08,0x00,0x00,    
+    0x08,0x00,0x00,0x00,    
+    0x10,0x00,0x00,0x00,    
+    0x20,0x00,0x00,0x00    
+    };
 const uint8_t disp_digit_animate [] PROGMEM = {1,2,4,8,16,32};
 //const uint8_t disp_digit_animate_double [] PROGMEM = {9,18,36,9,18,36};
 //const uint8_t disp_digit_animate_inverted [] PROGMEM = {62,61,59,55,47,31};
@@ -257,6 +276,7 @@ void mode_refresh(){
       modeSimpleButtonsAndLights();    
       break;
     case 8:
+      fullScreenMovie(init);
       break;
     case 9:
       break;
@@ -702,5 +722,33 @@ void modeGeiger(bool init){
   }
 }
 
+void fullScreenMovie(bool init){
+  if (init){
+    counter = 0;
+  }
 
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+      
+      uint32_t screen = 0;
+
+      
+//      ledDisp.SetFourDigits(0b11110000111100001111000011110000);
+      
+//      screen = (uint32_t)0b00000100 << 24;
+//      screen |= (uint32_t)0b00000010 << 16 ;
+//      screen |= (uint32_t)0b00000001 << 8;
+//      screen |=  (uint32_t)0b00000000;
+
+      for (uint8_t i=0;i<4;i++){
+        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter + (i)) << (8*i); 
+      }
+
+      ledDisp.SetFourDigits(screen);
+    counter+=4;
+  }
+  
+  
+  
+
+}
 

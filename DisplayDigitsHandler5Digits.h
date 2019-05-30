@@ -23,6 +23,7 @@ class DisplayManagement {
     void showNumber(int16_t number);
 		void setDecimalPoint(boolean isOn, int digit);
     void SetSingleDigit(uint8_t value, int digit);
+    void SetFourDigits(uint32_t value);
 		void SetLedArray(byte ledsAsBits);
 		void displayHandler(char* inText);
 		void displayHandlerSequence(char* movie);

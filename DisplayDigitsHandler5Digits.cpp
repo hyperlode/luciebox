@@ -61,6 +61,10 @@ void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
   sevseg.SetSingleDigit(value, digit);
 }
 
+void DisplayManagement::SetFourDigits(uint32_t value){
+  sevseg.SetFourDigits(value);
+}
+
 void DisplayManagement::SetLedArray(byte ledsAsBits){
 	sevseg.SetLedArray(ledsAsBits);
 };

@@ -189,6 +189,12 @@ void SevSeg5Digits::SetSingleDigit(int8_t value, int digit){
   this->lights[digit] = value;
 }
 
+void SevSeg5Digits::SetFourDigits(uint32_t value){
+  for (uint8_t i = 0;i<4;i++){
+    this->SetSingleDigit(value>>(8*i),i+1);
+  }
+}
+
 void SevSeg5Digits::SetDecPointSingle(boolean pointIsOn, int digit){
 	setBit(&this->lights[digit],pointIsOn,7);
 	//CreateArray();
