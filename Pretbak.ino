@@ -730,49 +730,52 @@ void fullScreenMovie(bool init){
   bool nextStep = 0;
   if (init){
     counter = 0;
-    counter2 = 3;
+    counter2 = 0;
     game_x_pos = 0;
     game_y_pos = 0;
     animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
     animation_speed.start();
-  }
-  bool direction1 = true;
-  if(BUTTON_LATCHING_SMALL_RED_LEFT){
-    direction1 = false;
+    nextStep = true;
   }
   
+  bool direction1 = true;
+  if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+    direction1 = false;
+  }  
+  
   bool direction2 = true;
-  if(BUTTON_LATCHING_SMALL_RED_RIGHT){
+  if(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
     direction2 = false;
   }
   
-  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
+ // if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
     //movie mode
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
       if (potentio_value_stable_changed){
         animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
-//        animation_speed.start();
+//        animation_speed.start(); //during turning it pauses because of the continuous restarting.
       }
       
       if (!animation_speed.getTimeIsNegative()){
         nextStep = true;
         animation_speed.start();
-       
       }
-       //Serial.println(animation_speed.getTimeMillis());
     }
     
     if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
       nextStep = true;
     }
+    
+    if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+      counter = nextStepRotate(counter, !direction1, 0, 11);
+      counter2 = counter;
+      nextStep = true;
+    }
 
     if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-      if (direction2){
-        counter2 < 11? counter2++ : counter2=0;
-      }else{
-        counter2 < 1? counter2=11 : counter2--;
-      }
+      counter2 = nextStepRotate(counter2, !direction2, 0, 11);
+      nextStep = true;
     }
     
     if (nextStep){
@@ -783,28 +786,37 @@ void fullScreenMovie(bool init){
       }
       ledDisp.SetFourDigits(screen);
       
-      if (direction1){
-        counter < 11? counter++ : counter=0;
-      }else{
-        counter < 1? counter=11 : counter--;
-      }
-      
-      if (direction2){
-        counter2 < 11? counter2++ : counter2=0;
-      }else{
-        counter2 < 1? counter2=11 : counter2--;
-      }
+      counter = nextStepRotate(counter, direction1, 0, 11);
+      counter2 = nextStepRotate(counter2, direction2, 0, 11);
     }
     
-  }else{
-    //interactive mode
-    // game: x,y 0,0 = bottom left 
-    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-      
-    }
-    
-
-  }
+//  }else{
+//    //interactive mode
+//    // game: x,y 0,0 = bottom left 
+//    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+//      
+//    }
+//    
+//
+//  }
   
+}
+
+int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue){
+
+     if (countUpElseDown){
+        counter++;
+     }else{
+        counter--;
+     }
+
+     if (counter > maxValue){
+        counter = minValue;
+     }
+     if (counter < minValue){
+        counter = maxValue;
+     }
+     
+     return counter;
 }
 
