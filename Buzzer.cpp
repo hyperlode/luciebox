@@ -74,16 +74,16 @@ void Buzzer::doBuzzerRoll() {
       //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
       float freq = 1;
 
-      for (uint8_t i = 1; i < buzzerRoll[this->playSlotCounter] % 63; i++) {
+
+      for (uint8_t i = 1; i < buzzerRoll[this->playSlotCounter] % 64; i++) {
+        //same result as: (but 2K less memory!!)
+        //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63); 
         freq *= 1.059463;
       }
-
-      if (buzzerRoll[this->playSlotCounter] % 63 != 0) {
-        //no sound, stop. (rust)
+      
+      if (buzzerRoll[this->playSlotCounter] % 64 != 0) { //no sound, stop. (rust)
         freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
       }
-      //Serial.println((unsigned int)freq);
-      //noTone(PIN_BUZZER); //remedy against disappearing digit problem?! there were problems with the 4th digit of the main display going black. Maybe resetting it does the trick?! //not working! Problem persists...
       tone(this->pin, (unsigned int)freq , (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter] / 63))); //duration, number is exponent of 2.
 
       //tone(PIN_BUZZER, (unsigned int)freq , 50); //duration, number is exponent of 2.

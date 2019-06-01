@@ -64,12 +64,12 @@
 #define BUTTON_MOMENTARY_BLUE 3
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
-const uint8_t song_happy_dryer [] PROGMEM = {163,126,189,167,126,189,107,63,126,104,63,126,107,63,126,238,238,189,BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t song_unhappy_dryer[] PROGMEM = {226,189,230,189,170,126,167,126,165,126,226,189,189,BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t song_attack [] PROGMEM = {162,126,162,126,162,126, 167,189,189,162,126,230,230,230 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
-const uint8_t song_retreat [] PROGMEM = {162,126,162,126,162,126,162,189,189,162,126,218,218,218 ,BUZZER_ROLL_SONG_STOPVALUE};  //retreat!
-const uint8_t scale_major [] PROGMEM = {163,126,165,126,167,126,168,126,170,126,172,126,174,126,175,126,BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t scale_major_reversed [] PROGMEM = {175,126,174,126,172,126,170,126,168,126,167,126,165,126,163,126,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_happy_dryer [] PROGMEM = {A6_2,rest_4,rest_2,Cs7_2,rest_4,rest_2,E7_4,rest_8,rest_4,Cs7_4,rest_8,rest_4,E7_4,rest_8,rest_4,A7_1,A7_1,rest_2,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1,rest_2,Cs7_1,rest_2,E7_2,rest_4,Cs7_2,rest_4,B6_2,rest_4,A6_1,rest_2,rest_2,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_attack [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
+const uint8_t song_retreat [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_2,rest_2,Gs6_2,rest_4,Cs6_1,Cs6_1,Cs6_1 ,BUZZER_ROLL_SONG_STOPVALUE};  //retreat!
+const uint8_t scale_major [] PROGMEM = {C7_2,rest_4,D7_2,rest_4,E7_2,rest_4,F7_2,rest_4,G7_2,rest_4,A7_2,rest_4,B7_2,rest_4,C8_2,rest_4,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,rest_4,G7_2,rest_4,F7_2,rest_4,E7_2,rest_4,D7_2,rest_4,C7_2,rest_4,BUZZER_ROLL_SONG_STOPVALUE};
 
 const uint32_t disp_4digits_animate [] PROGMEM = {
     0x00,0xFF, 0xF0,0x0F,
