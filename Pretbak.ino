@@ -152,7 +152,8 @@ int16_t potentio_value;
 int16_t potentio_value_stable;
 bool potentio_value_stable_changed;
 
-
+uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE};
+uint8_t buttons_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
 SuperTimer tmptimer;
 
 // OUTPUT
@@ -874,7 +875,7 @@ void gameButtonInteraction(bool init){
 //    
 //  }
  
-  ledDisp.showNumber(counter ); //score display leave before counter update, to display high score blinking.
+  ledDisp.showNumber(counter ); //score display. Leave at beginning, to display high score blinking.
   
   if (!tmptimer.getTimeIsNegative()){
     //end of display high score.
@@ -887,15 +888,25 @@ void gameButtonInteraction(bool init){
      if (tmptimer.getInFirstGivenHundredsPartOfSecond(500)){
         ledDisp.setBlankDisplay(); //make high score blink
      }   
-  }else if ((binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()&& reactionGameHotButtons == 0)  ||
-      (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()&& reactionGameHotButtons == 1)  ||
-      (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()&& reactionGameHotButtons == 2))
+  }else if (binaryInputs[buttons_indexed[reactionGameHotButtons]].getEdgeUp() ||
+      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameHotButtons == 0)
+  
+    
+//    (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()&& reactionGameHotButtons == 0)  ||
+//      (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()&& reactionGameHotButtons == 1)  ||
+//      (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()&& reactionGameHotButtons == 2)
+      
+      )
+
   {
       //right button
       counter++;
       getNewNumber = true;
       buzzer.programBuzzerRoll(C7_8);
-    
+//    }else if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
+//      counter++;
+//      getNewNumber = true;
+//      buzzer.programBuzzerRoll(C7_8);
   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
       binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
       binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp())
@@ -916,25 +927,28 @@ void gameButtonInteraction(bool init){
   if (getNewNumber){
     ledDisp.setBlankDisplay();
     lights = 0b00000000; //reset before switch enquiry
-    reactionGameHotButtons = (uint8_t)random(0, 3);
+    reactionGameHotButtons = (uint8_t)random(0, 4);
 
-    switch (reactionGameHotButtons ){
-      case 0:
-        lights|=1<<LIGHT_RED;
-        ledDisp.setDecimalPoint(true,2);
-        break;
-      case 1:
-        lights|=1<<LIGHT_GREEN;
-        ledDisp.setDecimalPoint(true,3);
-        break;       
-      case 2:
-        lights|=1<<LIGHT_BLUE;
-        ledDisp.setDecimalPoint(true,4);
-        break;
-      default:
-        break;
-        
-    }
+    ledDisp.setDecimalPoint(true, reactionGameHotButtons+1);
+    lights |= 1<<lights_indexed[reactionGameHotButtons];
+    
+    
+//    switch (reactionGameHotButtons ){
+//      case 0:
+//        lights|=1<<LIGHT_RED;
+//        ledDisp.setDecimalPoint(true,2);
+//        break;
+//      case 1:
+//        lights|=1<<LIGHT_GREEN;
+//        ledDisp.setDecimalPoint(true,3);
+//        break;       
+//      case 2:
+//        lights|=1<<LIGHT_BLUE;
+//        ledDisp.setDecimalPoint(true,4);
+//        break;
+//      default:
+//        break;    
+//    }
     
     
     ledDisp.SetLedArray(lights);
