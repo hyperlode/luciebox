@@ -64,9 +64,57 @@
 #define BUTTON_MOMENTARY_BLUE 3
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
-const uint8_t song_happy_dryer [] PROGMEM = {A6_2,rest_4,rest_2,Cs7_2,rest_4,rest_2,E7_4,rest_8,rest_4,Cs7_4,rest_8,rest_4,E7_4,rest_8,rest_4,A7_1,A7_1,rest_2,BUZZER_ROLL_SONG_STOPVALUE};
+const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
+  C7_4,rest_4,rest_2,
+  C7_4,rest_2, C7_8,rest_8,
+  C7_4,rest_4,rest_2,
+  G6_2,G6_4,rest_2, 
+
+  E7_4,rest_4,rest_2,
+  E7_4,rest_2, E7_8,rest_8,
+  E7_4,rest_4,rest_2,
+  C7_2,C7_4,rest_2, 
+
+  G7_4,rest_4,rest_2,
+  G7_4,rest_2, G7_8,rest_8,
+  
+  A7_8,rest_8,rest_4,
+  G7_8,rest_8,rest_4,
+  
+  F7_8,rest_8,rest_4,
+  E7_8,rest_8,rest_4,
+  
+  D7_2,D7_4,rest_4,
+  D7_2,D7_4,rest_4,
+  D7_2,D7_4,rest_4,
+  rest_4,
+  G7_8,rest_8,rest_4,
+  F7_8,rest_8,rest_4,
+
+  E7_1,E7_2,rest_2,
+  F7_1,F7_2,rest_2,
+
+  G7_1,G7_2,rest_2,
+  A7_2,A7_4,rest_4,
+  F7_2,F7_4,rest_4,
+
+  E7_1,E7_2,rest_2,
+  D7_1,D7_2,rest_2,
+  C7_1,C7_1,BUZZER_ROLL_SONG_STOPVALUE
+  };
+const uint8_t song_happy_dryer [] PROGMEM = {
+  A6_2,rest_4,rest_2,
+  Cs7_2,rest_4,rest_2,
+  E7_4,rest_8,rest_4,
+  Cs7_4,rest_8,rest_4,
+  E7_4,rest_8,rest_4,
+  A7_1,A7_1,
+  rest_2,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1,rest_2,Cs7_1,rest_2,E7_2,rest_4,Cs7_2,rest_4,B6_2,rest_4,A6_1,rest_2,rest_2,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_attack [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
+//const uint8_t kindeke_douwen [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE};  //kleine kleine moederke alleen
+
+
 const uint8_t song_retreat [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_2,rest_2,Gs6_2,rest_4,Cs6_1,Cs6_1,Cs6_1 ,BUZZER_ROLL_SONG_STOPVALUE};  //retreat!
 const uint8_t scale_major [] PROGMEM = {C7_2,rest_4,D7_2,rest_4,E7_2,rest_4,F7_2,rest_4,G7_2,rest_4,A7_2,rest_4,B7_2,rest_4,C8_2,rest_4,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,rest_4,G7_2,rest_4,F7_2,rest_4,E7_2,rest_4,D7_2,rest_4,C7_2,rest_4,BUZZER_ROLL_SONG_STOPVALUE};
@@ -104,6 +152,7 @@ int16_t potentio_value;
 int16_t potentio_value_stable;
 bool potentio_value_stable_changed;
 
+
 SuperTimer tmptimer;
 
 // OUTPUT
@@ -112,11 +161,14 @@ char  textBuf [6];
 char  scrollBuf [40];
 uint8_t lights;
 
-uint8_t allNotesIndex;
-
 Buzzer buzzer;
 
 //global variables
+
+uint8_t* game_random;
+
+SuperTimer animation_speed;
+uint8_t allNotesIndex;
 int16_t counter;
 int16_t counter2;
 uint8_t geiger_counter;
@@ -124,7 +176,7 @@ bool numberElseAlphabethMode;
 uint8_t animation_step;
 uint8_t game_x_pos;
 uint8_t game_y_pos;
-SuperTimer animation_speed;
+uint8_t reactionGameHotButtons;
 
 void refresh(){
 
@@ -231,7 +283,9 @@ void mode_refresh(){
   
   //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
 
+  //check if first iteration at new selector value.
   bool init = selectorDial.getValueChangedEdge();
+  
   switch (selectorDial.getSelectorValue()) {
     case 0:
       modeCountingLettersAndChars(init);
@@ -240,8 +294,8 @@ void mode_refresh(){
     case 1:
       //sound fun with notes
       modeSoundNotes();
-      
       break;
+      
     case 2:
       //sound fun with frequencies.
       //long freqq = 0;
@@ -266,10 +320,11 @@ void mode_refresh(){
     case 3:
       modeScroll(init);
       break;
+      
     case 4:
-
       modeGeiger(init);
       break;
+      
     case 5:
       modeSoundSong(init);
       break;
@@ -283,6 +338,8 @@ void mode_refresh(){
       fullScreenMovie(init);
       break;
     case 9:
+      gameButtonInteraction(init);
+      
       break;
     case 10:
       break;
@@ -553,7 +610,7 @@ void modeCountingLettersAndChars(bool init){
 void modeSoundSong(bool init){
   if (init){
     buzzer.loadBuzzerTrack(song_happy_dryer);
-    buzzer.setSpeedRatio((float)1);
+    buzzer.setSpeedRatio((float)2);
 //    buzzer.loadBuzzerTrack(song_unhappy_dryer);
   }
 
@@ -564,17 +621,7 @@ void modeSoundSong(bool init){
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
     
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-        buzzer.loadBuzzerTrack(song_happy_dryer);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-        //buzzer.loadBuzzerTrack(song_unhappy_dryer);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        buzzer.loadBuzzerTrack(song_attack );
-      }
-    }else{
-      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+     if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         buzzer.loadBuzzerTrack(song_unhappy_dryer);
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
@@ -583,7 +630,16 @@ void modeSoundSong(bool init){
       if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
         buzzer.loadBuzzerTrack(song_retreat );
       }
-      
+    }else{
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_happy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_lang_zal_ze_leven);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer.loadBuzzerTrack(song_attack );
+      }
     }
   }else{
     //scales
@@ -693,6 +749,8 @@ void modeGeiger(bool init){
   //wait random time.
   //X = - log(1 - Y)/ K   with Y a random value ( 0<Y<1) and K a constant ?
   long r = random(0, 1024)*random(0, 1024); 
+  //long r = random(0, 1024);
+  r = r*r;
 
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
       
@@ -816,7 +874,60 @@ int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, 
      if (counter < minValue){
         counter = maxValue;
      }
-     
      return counter;
+}
+
+void gameButtonInteraction(bool init){
+  if (init){
+    counter = 0; // holds score
+//    buttonLights = 0;
+//    game_random
+    randomSeed(123456);
+  }
+
+  bool getNewNumber = false;
+  bool state;
+//  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && reactionGameHotButtons == 0){
+//    
+//  }
+//  
+
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+    if (reactionGameHotButtons == 0){
+      counter++;
+    }else{
+      counter = 0;
+    }
+    getNewNumber = true;
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+    if (reactionGameHotButtons == 1){
+      counter++;
+    }else{
+      counter = 0;
+    }
+    getNewNumber = true;
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+    if (reactionGameHotButtons == 2){
+      counter++;
+    }else{
+      counter = 0;
+    }
+    getNewNumber = true;
+    //ledDisp.SetSingleDigit(&counter,3);
+//    ledDisp.SetSingleDigit(*(&game_random+counter),3);
+//      ledDisp.SetSingleDigit(,3);
+  }
+  //reactionGameActiveButtons
+
+  ledDisp.showNumber(counter*1000 + reactionGameHotButtons );
+  if (getNewNumber){
+    reactionGameHotButtons = (uint8_t)random(0, 3);
+  //  ledDisp.showNumber(reactionGameHotButtons );
+  }
+
 }
 
