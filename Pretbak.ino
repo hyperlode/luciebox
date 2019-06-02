@@ -254,16 +254,7 @@ void setDefaultMode(){
   ledDisp.SetLedArray(lights);
 
   //display
-  textBuf[1]='-';
-  textBuf[2]='-';
-  textBuf[3]='-';
-  textBuf[4]='-';
-  //textBuf[5]='/0';
-  ledDisp.displayHandler(textBuf);
-  
-  for (int i=1;i<5;i++){
-    ledDisp.setDecimalPoint(true, i);
-  }
+  ledDisp.SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
   ledDisp.setBrightness(0,false);
 
   //buzzer
@@ -878,54 +869,99 @@ int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, 
 }
 
 void gameButtonInteraction(bool init){
+  bool getNewNumber = false;
+  bool state;
   if (init){
     counter = 0; // holds score
 //    buttonLights = 0;
 //    game_random
     randomSeed(123456);
+    getNewNumber = true;
+    tmptimer.setInitTimeMillis(0);
+    
   }
 
-  bool getNewNumber = false;
-  bool state;
+  
 //  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && reactionGameHotButtons == 0){
 //    
 //  }
 //  
 
-  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-    if (reactionGameHotButtons == 0){
-      counter++;
-    }else{
-      counter = 0;
-    }
+  if (!tmptimer.getTimeIsNegative()){
+    //end of display high score.
+    counter = 0;
     getNewNumber = true;
+    tmptimer.reset();
+    
+  }else if(tmptimer.getIsStarted()){
+     //do nothing.  wait for display high score is finished.
+     
+  }else if ((binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()&& reactionGameHotButtons == 0)  ||
+      (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()&& reactionGameHotButtons == 1)  ||
+      (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()&& reactionGameHotButtons == 2))
+  {
+      //right button
+      counter++;
+      getNewNumber = true;
+      buzzer.programBuzzerRoll(C7_8);
+    
+  }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
+      binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
+      binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp())
+  {
+      //wrong button      
+      tmptimer.setInitTimeMillis(-1000);
+      tmptimer.start();
+//      buzzer.programBuzzerRoll(C6_1);  
+//      buzzer.programBuzzerRoll(rest_8);
+      buzzer.programBuzzerRoll(Fs5_1);  
+      buzzer.programBuzzerRoll(Fs5_1);  
+      buzzer.programBuzzerRoll(Fs5_1);  
+      buzzer.programBuzzerRoll(Fs5_1);  
   }
   
-  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-    if (reactionGameHotButtons == 1){
-      counter++;
-    }else{
-      counter = 0;
-    }
-    getNewNumber = true;
-  }
   
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-    if (reactionGameHotButtons == 2){
-      counter++;
-    }else{
-      counter = 0;
-    }
-    getNewNumber = true;
-    //ledDisp.SetSingleDigit(&counter,3);
+  
+  
+     //ledDisp.SetSingleDigit(&counter,3);
 //    ledDisp.SetSingleDigit(*(&game_random+counter),3);
 //      ledDisp.SetSingleDigit(,3);
-  }
+  
   //reactionGameActiveButtons
 
-  ledDisp.showNumber(counter*1000 + reactionGameHotButtons );
+  ledDisp.showNumber(counter );
+ 
+    
   if (getNewNumber){
+
+
+    ledDisp.SetFourDigits(0x00000000); //default dispaly 4x minus and decimal point.
+
+    lights = 0b00000000; //reset before switch enquiry
+     
     reactionGameHotButtons = (uint8_t)random(0, 3);
+
+    switch (reactionGameHotButtons ){
+      case 0:
+        lights|=1<<LIGHT_RED;
+        ledDisp.setDecimalPoint(true,2);
+        break;
+      case 1:
+        lights|=1<<LIGHT_GREEN;
+        ledDisp.setDecimalPoint(true,3);
+        break;       
+      case 2:
+        lights|=1<<LIGHT_BLUE;
+        ledDisp.setDecimalPoint(true,4);
+        break;
+      default:
+        break;
+        
+    }
+    
+    
+    ledDisp.SetLedArray(lights);
+    
   //  ledDisp.showNumber(reactionGameHotButtons );
   }
 
