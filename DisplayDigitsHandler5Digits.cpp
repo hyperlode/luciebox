@@ -61,7 +61,11 @@ void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
   sevseg.SetSingleDigit(value, digit);
 }
 
+void DisplayManagement::setBlankDisplay(){
+  this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
+}
 void DisplayManagement::SetFourDigits(uint32_t value){
+  // value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
   sevseg.SetFourDigits(value);
 }
 
