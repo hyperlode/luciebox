@@ -154,7 +154,8 @@ bool potentio_value_stable_changed;
 
 uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE};
 uint8_t buttons_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
-SuperTimer tmptimer;
+SuperTimer generalTimer;
+SuperTimer gameTimer;
 
 // OUTPUT
 DisplayManagement ledDisp;
@@ -167,7 +168,7 @@ Buzzer buzzer;
 //global variables
 
 uint8_t* game_random;
-
+uint32_t screenPersistenceOfVision;
 SuperTimer animation_speed;
 uint8_t allNotesIndex;
 int16_t counter;
@@ -524,27 +525,27 @@ void modeCountingLettersAndChars(bool init){
       
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeUp()){
         
-        tmptimer.setInitTimeMillis(-1000);
-        tmptimer.start();
-//        Serial.println(tmptimer.getTimeMillis());
-//        Serial.println(tmptimer.getTimeIsNegative());
+        generalTimer.setInitTimeMillis(-1000);
+        generalTimer.start();
+//        Serial.println(generalTimer.getTimeMillis());
+//        Serial.println(generalTimer.getTimeIsNegative());
       }  
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown()){
-        tmptimer.pause();        
-        //tmptimer.setInitTimeMillis(-10000);
-        //tmptimer.start();
-//        Serial.println(tmptimer.getTimeMillis());
-//        Serial.println(tmptimer.getTimeIsNegative());
+        generalTimer.pause();        
+        //generalTimer.setInitTimeMillis(-10000);
+        //generalTimer.start();
+//        Serial.println(generalTimer.getTimeMillis());
+//        Serial.println(generalTimer.getTimeIsNegative());
       }  
 //      
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !tmptimer.getTimeIsNegative()){
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !generalTimer.getTimeIsNegative()){
         if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
           counter++;  
         }else{
           counter--;
         }
         
-        tmptimer.start();
+        generalTimer.start();
         aButtonIsPressed = true;
       }
       
@@ -560,9 +561,9 @@ void modeCountingLettersAndChars(bool init){
       else if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
         // if autocounter is on.
         
-        tmptimer.setInitTimeMillis(-100 * (long)(potentio_value_stable/10)); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+        generalTimer.setInitTimeMillis(-100 * (long)(potentio_value_stable/10)); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
         if (potentio_value_stable_changed){
-          tmptimer.start();
+          generalTimer.start();
         }
       }
       
@@ -863,98 +864,105 @@ int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, 
 
 void gameButtonInteraction(bool init){
   bool getNewNumber = false;
-  bool state;
+  bool isDead = false;
+  
   if (init){
     counter = 0; // holds score
     randomSeed(123456);
     getNewNumber = true;
-    tmptimer.setInitTimeMillis(0);
+    generalTimer.setInitTimeMillis(0);
+
+    animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
+    animation_speed.start();
+    counter2 = 0;
+    screenPersistenceOfVision = 0;
+  }
+
+  //ledDisp.setBlankDisplay();
+  ledDisp.setDecimalPoint(true, reactionGameHotButtons+1);
+
+  if (!animation_speed.getTimeIsNegative()){
+    // game timing animation update.
+    for (uint8_t i=0;i<4;i++){
+      screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
+    }
+    ledDisp.SetFourDigits(screenPersistenceOfVision);
+     
+    counter2 = nextStepRotate(counter2, true, 0, 12);
+    
+    animation_speed.reset();
+    if (counter2 == 12){
+      counter2 = 0;
+      screenPersistenceOfVision=0;    
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
+        // timed out.
+        isDead = true;
+      }else{
+        // time out not enabled.
+        animation_speed.start();
+      }
+      //
+    }else{
+      animation_speed.start();
+    }
+   
   }
   
-//  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && reactionGameHotButtons == 0){
-//    
-//  }
- 
-  ledDisp.showNumber(counter ); //score display. Leave at beginning, to display high score blinking.
-  
-  if (!tmptimer.getTimeIsNegative()){
+  if (!generalTimer.getTimeIsNegative()){
     //end of display high score.
     counter = 0;
     getNewNumber = true;
-    tmptimer.reset();
+    generalTimer.reset();
+    animation_speed.start();
     
-  }else if(tmptimer.getIsStarted()){
+  }else if(generalTimer.getIsStarted()){
      //do nothing.  wait for display high score is finished.
-     if (tmptimer.getInFirstGivenHundredsPartOfSecond(500)){
+     if (generalTimer.getInFirstGivenHundredsPartOfSecond(500)){
         ledDisp.setBlankDisplay(); //make high score blink
-     }   
+     }else{
+        ledDisp.showNumber(counter ); //score display. Leave at beginning, to display high score blinking.
+     }
   }else if (binaryInputs[buttons_indexed[reactionGameHotButtons]].getEdgeUp() ||
-      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameHotButtons == 0)
-  
-    
-//    (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()&& reactionGameHotButtons == 0)  ||
-//      (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()&& reactionGameHotButtons == 1)  ||
-//      (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()&& reactionGameHotButtons == 2)
-      
-      )
-
+      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameHotButtons == 0))
   {
       //right button
       counter++;
       getNewNumber = true;
       buzzer.programBuzzerRoll(C7_8);
-//    }else if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
-//      counter++;
-//      getNewNumber = true;
-//      buzzer.programBuzzerRoll(C7_8);
+
   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
       binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
-      binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp())
+      binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() ||
+      binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged())
   {
-      //wrong button      
-      tmptimer.setInitTimeMillis(-2000);
-      tmptimer.start();
-      buzzer.programBuzzerRoll(F4_1);  
-      buzzer.programBuzzerRoll(F4_1);  
-      buzzer.programBuzzerRoll(F4_1);  
-      buzzer.programBuzzerRoll(F4_1);  
+    //wrong button
+      isDead = true;
   }
   
   // ledDisp.SetSingleDigit(&counter,3);
   // ledDisp.SetSingleDigit(*(&game_random+counter),3);
+  if (isDead){
+          
+    generalTimer.setInitTimeMillis(-2000);
+    generalTimer.start();
+    buzzer.programBuzzerRoll(F4_1);  
+    buzzer.programBuzzerRoll(F4_1);  
+    buzzer.programBuzzerRoll(F4_1);  
+    buzzer.programBuzzerRoll(F4_1);  
+    
+  }
   
- 
   if (getNewNumber){
     ledDisp.setBlankDisplay();
     lights = 0b00000000; //reset before switch enquiry
     reactionGameHotButtons = (uint8_t)random(0, 4);
-
-    ledDisp.setDecimalPoint(true, reactionGameHotButtons+1);
     lights |= 1<<lights_indexed[reactionGameHotButtons];
     
-    
-//    switch (reactionGameHotButtons ){
-//      case 0:
-//        lights|=1<<LIGHT_RED;
-//        ledDisp.setDecimalPoint(true,2);
-//        break;
-//      case 1:
-//        lights|=1<<LIGHT_GREEN;
-//        ledDisp.setDecimalPoint(true,3);
-//        break;       
-//      case 2:
-//        lights|=1<<LIGHT_BLUE;
-//        ledDisp.setDecimalPoint(true,4);
-//        break;
-//      default:
-//        break;    
-//    }
-    
+    screenPersistenceOfVision = 0;
+    counter2= 0;
     
     ledDisp.SetLedArray(lights);
     
-  //  ledDisp.showNumber(reactionGameHotButtons );
   }
-
 }
 
