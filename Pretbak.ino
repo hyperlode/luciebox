@@ -179,6 +179,7 @@ uint8_t animation_step;
 uint8_t game_x_pos;
 uint8_t game_y_pos;
 uint8_t reactionGameHotButtons;
+long initTime;
 
 void refresh(){
 
@@ -863,6 +864,12 @@ int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, 
 }
 
 void gameButtonInteraction(bool init){
+  //yellow button pressed at start: yellow button is also a game button
+  // big red active: timed game
+  // small red right active: time progressively shorter as game advances
+  // small red left active: play by sound.(not yet implemented).
+  
+  
   bool getNewNumber = false;
   bool isDead = false;
   
@@ -872,8 +879,9 @@ void gameButtonInteraction(bool init){
     getNewNumber = true;
     generalTimer.setInitTimeMillis(0);
 
-    animation_speed.setInitTimeMillis((long)potentio_value_stable * -1);
-    animation_speed.start();
+    initTime = (long)potentio_value_stable * -1; // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+    animation_speed.setInitTimeMillis(initTime);
+    
     counter2 = 0;
     screenPersistenceOfVision = 0;
   }
@@ -901,20 +909,19 @@ void gameButtonInteraction(bool init){
         // time out not enabled.
         animation_speed.start();
       }
-      //
+      
     }else{
       animation_speed.start();
-    }
-   
+    }   
   }
   
   if (!generalTimer.getTimeIsNegative()){
-    //end of display high score.
+    //end of display high score, next number
     counter = 0;
     getNewNumber = true;
     generalTimer.reset();
-    animation_speed.start();
-    
+    animation_speed.setInitTimeMillis(initTime);
+       
   }else if(generalTimer.getIsStarted()){
      //do nothing.  wait for display high score is finished.
      if (generalTimer.getInFirstGivenHundredsPartOfSecond(500)){
@@ -942,14 +949,12 @@ void gameButtonInteraction(bool init){
   // ledDisp.SetSingleDigit(&counter,3);
   // ledDisp.SetSingleDigit(*(&game_random+counter),3);
   if (isDead){
-          
     generalTimer.setInitTimeMillis(-2000);
     generalTimer.start();
     buzzer.programBuzzerRoll(F4_1);  
     buzzer.programBuzzerRoll(F4_1);  
     buzzer.programBuzzerRoll(F4_1);  
     buzzer.programBuzzerRoll(F4_1);  
-    
   }
   
   if (getNewNumber){
@@ -958,11 +963,16 @@ void gameButtonInteraction(bool init){
     reactionGameHotButtons = (uint8_t)random(0, 4);
     lights |= 1<<lights_indexed[reactionGameHotButtons];
     
-    screenPersistenceOfVision = 0;
-    counter2= 0;
-    
+    screenPersistenceOfVision = 0; //reset animation graphics screen
+    counter2= 0; //reset animation step
+        
     ledDisp.SetLedArray(lights);
-    
+
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+      animation_speed.setInitTimeMillis(animation_speed.getInitTimeMillis()*0.99);
+    }
+        
+    animation_speed.start();    
   }
 }
 
