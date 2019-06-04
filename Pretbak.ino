@@ -178,10 +178,10 @@ bool numberElseAlphabethMode;
 uint8_t animation_step;
 uint8_t game_x_pos;
 uint8_t game_y_pos;
-uint8_t reactionGameHotButtons;
+uint8_t reactionGameTarget;
 long initTime;
-bool reactionGamePlayBySoundElseVisual;
-bool yellowButtonIsIncluded;
+bool reactionGameYellowButtonIsIncluded;
+uint8_t selectedSounds[4];
 
 void refresh(){
 
@@ -866,18 +866,17 @@ int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, 
 }
 
 void gameButtonInteraction(bool init){
-  //yellow button pressed at start: yellow button is also a game button
+  //yellow button active at start: yellow button is also a guess button
   // big red active: timed game
   // small red right active: time progressively shorter as game advances
-  // small red left active: play by sound.(not yet implemented).
-  
+  // small red left active: play by sound.
   
   bool getNewNumber = false;
   bool isDead = false;
   
   if (init){
     counter = 0; // holds score
-    randomSeed(123456);
+    //randomSeed(123456);
     getNewNumber = true;
     generalTimer.setInitTimeMillis(0);
 
@@ -886,13 +885,17 @@ void gameButtonInteraction(bool init){
     
     counter2 = 0;
     screenPersistenceOfVision = 0;
-    yellowButtonIsIncluded = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
-
+    reactionGameYellowButtonIsIncluded = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
     
+    for (uint8_t i=0;i<4;i++){
+      selectedSounds[i] = (uint8_t)random(100, 114);
+    }
   }
 
-  //ledDisp.setBlankDisplay();
-  ledDisp.setDecimalPoint(true, reactionGameHotButtons+1);
+  if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
+     //always show unless in soundmode->competition
+    ledDisp.setDecimalPoint(true, reactionGameTarget+1);
+  }
 
   if (!animation_speed.getTimeIsNegative()){
     // game timing animation update.
@@ -933,14 +936,17 @@ void gameButtonInteraction(bool init){
      }else{
         ledDisp.showNumber(counter ); //score display. Leave at beginning, to display high score blinking.
      }
-  }else if (binaryInputs[buttons_indexed[reactionGameHotButtons]].getEdgeUp() ||
-      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameHotButtons == 0))
+  }else if (binaryInputs[buttons_indexed[reactionGameTarget]].getEdgeUp() ||
+      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameTarget == 0))
   {
       //right button
       counter++;
       getNewNumber = true;
-      buzzer.programBuzzerRoll(C7_8);
-
+      if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+         //play by sounds
+        buzzer.programBuzzerRoll(C7_8);
+      }
+      
   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
       binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
       binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() ||
@@ -953,26 +959,43 @@ void gameButtonInteraction(bool init){
   // ledDisp.SetSingleDigit(&counter,3);
   // ledDisp.SetSingleDigit(*(&game_random+counter),3);
   if (isDead){
-    generalTimer.setInitTimeMillis(-2000);
-    generalTimer.start();
-    buzzer.programBuzzerRoll(F4_1);  
-    buzzer.programBuzzerRoll(F4_1);  
-    buzzer.programBuzzerRoll(F4_1);  
-    buzzer.programBuzzerRoll(F4_1);  
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+      generalTimer.setInitTimeMillis(-2000);
+      generalTimer.start();
+      //play by sounds
+      for (uint8_t i=reactionGameYellowButtonIsIncluded?0:1;i<4;i++){
+        buzzer.programBuzzerRoll(selectedSounds[i]+128);
+        buzzer.programBuzzerRoll(rest_1);
+      }
+       
+    }else{
+      generalTimer.setInitTimeMillis(-2000);
+      generalTimer.start();
+      buzzer.programBuzzerRoll(F4_1);  
+      buzzer.programBuzzerRoll(F4_1);  
+      buzzer.programBuzzerRoll(F4_1);  
+      buzzer.programBuzzerRoll(F4_1);  
+    }
   }
   
   if (getNewNumber){
     ledDisp.setBlankDisplay();
     lights = 0b00000000; //reset before switch enquiry
     
-    reactionGameHotButtons = (uint8_t)random(yellowButtonIsIncluded?0:1, 4);
-    lights |= 1<<lights_indexed[reactionGameHotButtons];
+    reactionGameTarget = (uint8_t)random(reactionGameYellowButtonIsIncluded?0:1, 4);
+    
     
     screenPersistenceOfVision = 0; //reset animation graphics screen
     counter2= 0; //reset animation step
-        
-    ledDisp.SetLedArray(lights);
 
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+       //play by sounds
+       buzzer.programBuzzerRoll(selectedSounds[reactionGameTarget]);
+    }else{
+      lights |= 1<<lights_indexed[reactionGameTarget];
+      
+    }
+    ledDisp.SetLedArray(lights); 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
       animation_speed.setInitTimeMillis(animation_speed.getInitTimeMillis()*0.99);
     }
