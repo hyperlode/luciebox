@@ -180,6 +180,8 @@ uint8_t game_x_pos;
 uint8_t game_y_pos;
 uint8_t reactionGameHotButtons;
 long initTime;
+bool reactionGamePlayBySoundElseVisual;
+bool yellowButtonIsIncluded;
 
 void refresh(){
 
@@ -884,6 +886,9 @@ void gameButtonInteraction(bool init){
     
     counter2 = 0;
     screenPersistenceOfVision = 0;
+    yellowButtonIsIncluded = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+
+    
   }
 
   //ledDisp.setBlankDisplay();
@@ -909,7 +914,6 @@ void gameButtonInteraction(bool init){
         // time out not enabled.
         animation_speed.start();
       }
-      
     }else{
       animation_speed.start();
     }   
@@ -960,7 +964,8 @@ void gameButtonInteraction(bool init){
   if (getNewNumber){
     ledDisp.setBlankDisplay();
     lights = 0b00000000; //reset before switch enquiry
-    reactionGameHotButtons = (uint8_t)random(0, 4);
+    
+    reactionGameHotButtons = (uint8_t)random(yellowButtonIsIncluded?0:1, 4);
     lights |= 1<<lights_indexed[reactionGameHotButtons];
     
     screenPersistenceOfVision = 0; //reset animation graphics screen
