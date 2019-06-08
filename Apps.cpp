@@ -1,14 +1,26 @@
 #include "Apps.h"
 #include "Arduino.h"
+#include "PretbakSettings.h"
 
 Apps::Apps(){
 //  
 };
 
-void Apps::setPeripherals( BinaryInput* binaryInputs, DisplayManagement* ledDisp, Buzzer* buzzer){
+void Apps::setPeripherals( BinaryInput binaryInputs[], DisplayManagement* ledDisp, Buzzer* buzzer){
   this->buzzer = buzzer;
   this->binaryInputs = binaryInputs;
   this->ledDisp = ledDisp;
+}
+
+void Apps::test(){
+  Serial.println("okkekekeke");
+  //(*this->buzzer).programBuzzerRoll(45);
+  (*this->ledDisp).showNumber(666);
+//  if (*this->binaryInputs)[BUTTON_MOMENTARY_RED].getValue()){
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+    buzzer->programBuzzerRoll(45);
+  }
+  
 }
 
 //void Apps::modeScroll(bool init){

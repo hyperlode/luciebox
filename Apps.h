@@ -105,6 +105,7 @@ class Apps{
   
 //  
  void setPeripherals( BinaryInput* binaryInput, DisplayManagement* ledDisp, Buzzer* buzzer);
+ void test();
 //
 //  void init()
 //  void modeScroll(bool init);
