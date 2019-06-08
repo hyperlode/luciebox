@@ -3,6 +3,7 @@
 #include "BinaryInput.h"
 #include "Buzzer.h"
 #include "Apps.h"
+#include "Potentio.h"
 
 #include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
@@ -26,10 +27,7 @@ BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2; // buttons with normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
-
-int16_t potentio_value;
-int16_t potentio_value_stable;
-bool potentio_value_stable_changed;
+Potentio potentio;
 
 // OUTPUT
 DisplayManagement ledDisp;
@@ -41,13 +39,9 @@ char  textBuf [6];
 char  scrollBuf [40];
 uint8_t lights;
 
-
 void refresh(){
-
-
   //input process  
   input_process();
-
 
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
     if (binaryInputs[i].getEdgeUp()){
@@ -58,19 +52,13 @@ void refresh(){
       Serial.println(i);
       Serial.println("Button released");
     }
-   // binaryInputs[i].refresh();
   }
-  
   //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
   //modes functionality
   
   //mode change
   if (selectorDial.getValueChangedEdge()) {
-    //maybe first do a default behaviour.
-    
-    // as the selector dial is taken for main mode selection, init the mode here when selected
-
     //default mode (go to default state at each change)
     setDefaultMode();
     Serial.println(selectorDial.getSelectorValue());
@@ -91,7 +79,7 @@ void input_process(){
   selectorDial.refresh();
   buttons_1.refresh();
   buttons_2.refresh();
-  potentio_refresh();
+  potentio.refresh();
 
   if (buttons_2.getValueChangedEdge()) {
     //Serial.println("analog 2in buttons:");
@@ -132,89 +120,75 @@ void mode_refresh(){
 
   //check if first iteration at new selector value.
   bool init = selectorDial.getValueChangedEdge();
-  if (init){
-    pretbak_apps.test();
-    
-    
-  }
-  
-//  
-//  switch (selectorDial.getSelectorValue()) {
-//    case 0:
-//      modeCountingLettersAndChars(init);
-//      break;
-//      
-//    case 1:
-//      //sound fun with notes
-//      modeSoundNotes();
-//      break;
-//      
-//    case 2:
-//      //sound fun with frequencies.
-//      //long freqq = 0;
-//      //freqq = map((long)potentio_value, 0, 1023, 0 , 65535);
-//      //buzzer.buzzerOn((uint16_t) freqq);
-//      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-//        if (potentio_value_stable_changed){      
-//          buzzer.buzzerOn( (uint16_t) map((long)potentio_value_stable, 0, 1023, 0 , 65535));
-//        }
-//      }else{
-//        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-//          if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-//            buzzer.buzzerOn( (uint16_t) map((long)potentio_value_stable, 0, 1023, 0 , 65535));
-//          }
-//        }else if (true) {
-//          
-//        }
-//        
-//      }
-//      break;
-//      
-//    case 3:
-//      modeScroll(init);
-//      break;
-//      
-//    case 4:
-//      modeGeiger(init);
-//      break;
-//      
-//    case 5:
-//      modeSoundSong(init);
-//      break;
-//    case 6:
-//      modeSingleSegmentManipulation(init);
-//      break;
-//    case 7:
-//      modeSimpleButtonsAndLights();    
-//      break;
-//    case 8:
-//      fullScreenMovie(init);
-//      break;
-//    case 9:
-//      gameButtonInteraction(init);
-//      
-//      break;
-//    case 10:
-//      break;
-//    case 11:
-//      break;
-//    
-//    default:
-//      break;
+//  if (init){
+//    pretbak_apps.test();
 //  }
-//  
-}
-
-void potentio_refresh(){
-  potentio_value = (int16_t)analogRead(PIN_POTENTIO);
   
-  if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
-    potentio_value_stable_changed = true;  //simple edge detection
-    potentio_value_stable = potentio_value;
-    Serial.println(potentio_value_stable);
-  }else{
-    potentio_value_stable_changed = false;  //simple edge detection
+  
+  switch (selectorDial.getSelectorValue()) {
+    case 0:
+      pretbak_apps.modeCountingLettersAndChars(init);
+      break;
+      
+    case 1:
+      //sound fun with notes
+      pretbak_apps.modeSoundNotes();
+      break;
+      
+    case 2:
+      //sound fun with frequencies.
+      //long freqq = 0;
+      //freqq = map((long)potentio_value, 0, 1023, 0 , 65535);
+      //buzzer.buzzerOn((uint16_t) freqq);
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        if (potentio.getValueStableChangedEdge()){      
+          buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
+        }
+      }else{
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+          if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+            buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
+          }
+        }else if (true) {
+          
+        }
+        
+      }
+      break;
+      
+    case 3:
+      pretbak_apps.modeScroll(init);
+      break;
+      
+    case 4:
+      pretbak_apps.modeGeiger(init);
+      break;
+      
+    case 5:
+      pretbak_apps.modeSoundSong(init);
+      break;
+    case 6:
+      pretbak_apps.modeSingleSegmentManipulation(init);
+      break;
+    case 7:
+      pretbak_apps.modeSimpleButtonsAndLights();    
+      break;
+    case 8:
+      pretbak_apps.fullScreenMovie(init);
+      break;
+    case 9:
+      pretbak_apps.gameButtonInteraction(init);
+      
+      break;
+    case 10:
+      break;
+    case 11:
+      break;
+    
+    default:
+      break;
   }
+  
 }
 
 void setup() {
@@ -224,13 +198,16 @@ void setup() {
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
 
   buzzer.setPin(PIN_BUZZER);
+
+  potentio.setPin(PIN_POTENTIO);
   
   ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
   //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
 
 
   setDefaultMode();
-  pretbak_apps.setPeripherals(binaryInputs, &ledDisp, &buzzer);
+  pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
+  pretbak_apps.setBuffers(scrollBuf, textBuf);
 
   Serial.begin(9600);
 }
