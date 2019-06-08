@@ -2,7 +2,7 @@
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
 #include "Buzzer.h"
-//#include "Apps.h"
+#include "Apps.h"
 
 #include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
@@ -67,6 +67,8 @@
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
+//pretbak
+Apps pretbak_apps;
 
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
@@ -179,6 +181,11 @@ void mode_refresh(){
 
   //check if first iteration at new selector value.
   bool init = selectorDial.getValueChangedEdge();
+  if (init){
+    
+    
+  }
+  
 //  
 //  switch (selectorDial.getSelectorValue()) {
 //    case 0:
@@ -271,7 +278,7 @@ void setup() {
 
 
   setDefaultMode();
-  
+  pretbak_apps.setPeripherals(binaryInputs, &ledDisp, &buzzer);
 
   Serial.begin(9600);
 }

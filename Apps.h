@@ -103,51 +103,50 @@ class Apps{
   DisplayManagement* ledDisp;
   Buzzer* buzzer;
   
-  
-  void setPeripherals(Buzzer* buzzer, BinaryInput* binaryInput, DisplayDigitsHandler5Digits* ledDisp);
-
-  
-  void init()
-  void modeScroll(bool init);
-  void modeSimpleButtonsAndLights();
-  void modeCountingLettersAndChars(bool init);
-  void modeSoundSong(bool init);
-  void modeSoundNotes();
-  void modeSingleSegmentManipulation(bool init);
-  void modeGeiger(bool init);
-  void fullScreenMovie(bool init);
-  void gameButtonInteraction(bool init);
-  
-  
-  
-  int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-
-  private:
-  
-  uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE};
-  uint8_t buttons_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
-  SuperTimer generalTimer;
-  SuperTimer gameTimer;
-  
-  //global app variables
-  
-  uint8_t* game_random;
-  uint32_t screenPersistenceOfVision;
-  SuperTimer animation_speed;
-  uint8_t allNotesIndex;
-  int16_t counter;
-  int16_t counter2;
-  uint8_t geiger_counter;
-  bool numberElseAlphabethMode;
-  uint8_t animation_step;
-  uint8_t game_x_pos;
-  uint8_t game_y_pos;
-  uint8_t reactionGameTarget;
-  long initTime;
-  bool reactionGameYellowButtonIsIncluded;
-  uint8_t selectedSounds[4];
-  
-  
+//  
+ void setPeripherals( BinaryInput* binaryInput, DisplayManagement* ledDisp, Buzzer* buzzer);
+//
+//  void init()
+//  void modeScroll(bool init);
+//  void modeSimpleButtonsAndLights();
+//  void modeCountingLettersAndChars(bool init);
+//  void modeSoundSong(bool init);
+//  void modeSoundNotes();
+//  void modeSingleSegmentManipulation(bool init);
+//  void modeGeiger(bool init);
+//  void fullScreenMovie(bool init);
+//  void gameButtonInteraction(bool init);
+//  
+//  
+//  
+//  int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+//
+//  private:
+//  
+//  uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE};
+//  uint8_t buttons_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
+//  SuperTimer generalTimer;
+//  SuperTimer gameTimer;
+//  
+//  //global app variables
+//  
+//  uint8_t* game_random;
+//  uint32_t screenPersistenceOfVision;
+//  SuperTimer animation_speed;
+//  uint8_t allNotesIndex;
+//  int16_t counter;
+//  int16_t counter2;
+//  uint8_t geiger_counter;
+//  bool numberElseAlphabethMode;
+//  uint8_t animation_step;
+//  uint8_t game_x_pos;
+//  uint8_t game_y_pos;
+//  uint8_t reactionGameTarget;
+//  long initTime;
+//  bool reactionGameYellowButtonIsIncluded;
+//  uint8_t selectedSounds[4];
+//  
+};
 
 #endif 
 
