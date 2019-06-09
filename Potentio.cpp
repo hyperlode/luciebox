@@ -8,11 +8,15 @@ void Potentio::setPin(byte pin){
 	this->analogPin = pin;
 }
 
-uint8_t Potentio::getValue(){
+uint16_t Potentio::getValue(){
 	return (int16_t)analogRead(this->analogPin);
 }
 
-uint8_t Potentio::getValueStable(){
+long Potentio::getValueMapped(long minimumValue, long maximumValue){
+   return map((long)this->getValueStable(), 0, 1023, minimumValue , maximumValue);
+}
+
+uint16_t Potentio::getValueStable(){
 	// returns the STABLE value
 	return this->potentio_value_stable ;
 }

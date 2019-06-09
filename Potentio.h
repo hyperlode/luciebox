@@ -14,9 +14,12 @@ class Potentio {
 		// #define NUMBER_OF_KNOB_POSITIONS 12  //provide an equal resistance between each position
 		#define POTENTIO_SENSITIVITY 5
 		Potentio();
+
+    long getValueMapped(long minimumValue, long maximumValue);
+    
 		void setPin( byte pin);
-		uint8_t getValue();
-		uint8_t getValueStable();
+		uint16_t getValue();
+		uint16_t getValueStable();
 		void refresh();
 			
 		bool getValueStableChangedEdge();

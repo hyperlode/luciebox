@@ -78,7 +78,7 @@ void Apps::modeScroll(bool init){
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
     ledDisp->setScrollSpeed((long)potentio->getValueStable());
   }else{
-    ledDisp->setBrightness((byte)(potentio->getValueStable()/20),false);
+    ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
   }
   
 }
@@ -147,7 +147,7 @@ void Apps::modeSimpleButtonsAndLights(){
       ledDisp->displayHandler(textBuf);
       
       ledDisp->SetLedArray(lights);
-      ledDisp->setBrightness((byte)(potentio->getValueStable()/20),false);
+      ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
 }
 
 void Apps::modeCountingLettersAndChars(bool init){
@@ -211,16 +211,18 @@ void Apps::modeCountingLettersAndChars(bool init){
       //potentio behaviour
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         if (numberElseAlphabethMode){
-          counter = (int16_t)potentio->getValue()/10;
+          counter = (int16_t)(potentio->getValueMapped(0,100));
         }else{
-          counter = (int16_t)potentio->getValue()/39; //1024 to 26 letters.
+          counter = (int16_t)(potentio->getValueMapped(1,26)); //1024 to 26 letters.
         }
         aButtonIsPressed = true;
       }
       else if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
         // if autocounter is on.
         
-        generalTimer.setInitTimeMillis(-100 * (long)(potentio->getValueStable()/10)); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+        //generalTimer.setInitTimeMillis(-100 * (long)(potentio->getValueStable()/10)); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+        generalTimer.setInitTimeMillis((long)(potentio->getValueMapped(-10000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+        
         if (potentio->getValueStableChangedEdge()){
           generalTimer.start();
         }
@@ -259,7 +261,7 @@ void Apps::modeSoundSong(bool init){
   }
 
   if (potentio->getValueStableChangedEdge()){
-    buzzer->setSpeedRatio((float)(potentio->getValueStable()) / 256 );
+    buzzer->setSpeedRatio((float)(potentio->getValue()) / 256 );
   }
   
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
@@ -320,7 +322,7 @@ void Apps::modeSoundNotes(){
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         if (potentio->getValueStableChangedEdge()){
           //buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
-           allNotesIndex = potentio->getValue() /4;
+           allNotesIndex = potentio->getValueMapped(0,255);
            buzzer->programBuzzerRoll(allNotesIndex);
         }
           
@@ -394,11 +396,18 @@ void Apps::modeGeiger(bool init){
   //X = - log(1 - Y)/ K   with Y a random value ( 0<Y<1) and K a constant ?
   long r = random(0, 1024)*random(0, 1024); 
   //long r = random(0, 1024);
-  r = r*r;
+  //r = r*r;
 
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-      
-    if (r > (long)potentio->getValue()*1024){
+
+//    if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+//      Serial.println(potentio->getValueMapped(0,1000000));
+//      Serial.println(r);
+//      Serial.println(r > potentio->getValueMapped(0,1000000));
+//      Serial.println("eifjiaesjifjisej");
+//      
+//    }
+    if (r > potentio->getValueMapped(0,1048576)){
       tone(PIN_BUZZER, (unsigned int)50, 10);
     
       geiger_counter++;
@@ -410,7 +419,7 @@ void Apps::modeGeiger(bool init){
     }
     
   }else{
-    if (r > (long)potentio->getValue()*1024){
+    if (r > potentio->getValueMapped(0,1048576)){
   //    buzzer->programBuzzerRoll(1); //not beep but "puck"
       tone(PIN_BUZZER, (unsigned int)50, 10);
       textBuf[1]='?';
@@ -455,7 +464,7 @@ void Apps::fullScreenMovie(bool init){
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
       if (potentio->getValueStableChangedEdge()){
-        animation_speed.setInitTimeMillis((long)potentio->getValueStable() * -1);
+        animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 //        animation_speed.start(); //during turning it pauses because of the continuous restarting.
       }
       
@@ -536,7 +545,7 @@ void Apps::gameButtonInteraction(bool init){
     getNewNumber = true;
     generalTimer.setInitTimeMillis(0);
 
-    initTime = (long)potentio->getValueStable() * -1; // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+    initTime = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
     animation_speed.setInitTimeMillis(initTime);
     
     counter2 = 0;

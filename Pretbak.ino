@@ -12,8 +12,8 @@
 
 
 // Lode Ameije 2019-05
-// Pretbak is a busy box for my newleborn niece
-// The hardware is a box with
+// Pretbak is a busy box for my newly born niece
+// The hardware is a box with:
 // input: buttons, momentary and switches, a potentiometer, a selector dial, some mercury switches.
 // output: lights on buttons, 7seg display (4 digits), buzzer
 
@@ -31,7 +31,6 @@ Potentio potentio;
 
 // OUTPUT
 DisplayManagement ledDisp;
-
 Buzzer buzzer;
 
 //output
@@ -137,9 +136,10 @@ void mode_refresh(){
       
     case 2:
       //sound fun with frequencies.
-      //long freqq = 0;
-      //freqq = map((long)potentio_value, 0, 1023, 0 , 65535);
-      //buzzer.buzzerOn((uint16_t) freqq);
+     if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+      Serial.println(potentio.getValueMapped(0,1023));
+     }
+/*
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         if (potentio.getValueStableChangedEdge()){      
           buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
@@ -154,6 +154,7 @@ void mode_refresh(){
         }
         
       }
+ */
       break;
       
     case 3:
