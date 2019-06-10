@@ -20,13 +20,17 @@ void Apps::setBuffers(  char*  textBuf, char*  scrollBuf){
 }
 
 void Apps::test(){
-  Serial.println("okkekekeke");
+  
   //(*this->buzzer).programBuzzerRoll(45);
   (*this->ledDisp).showNumber(666);
 //  if (*this->binaryInputs)[BUTTON_MOMENTARY_RED].getValue()){
   if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
     buzzer->programBuzzerRoll(45);
+    
+    #ifdef DEBUG_POTENTIO
     Serial.println(potentio->getValue());
+    #endif
+    
   }
   
 }
@@ -186,15 +190,9 @@ void Apps::modeCountingLettersAndChars(bool init){
         
         generalTimer.setInitTimeMillis(-1000);
         generalTimer.start();
-//        Serial.println(generalTimer.getTimeMillis());
-//        Serial.println(generalTimer.getTimeIsNegative());
       }  
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown()){
         generalTimer.pause();        
-        //generalTimer.setInitTimeMillis(-10000);
-        //generalTimer.start();
-//        Serial.println(generalTimer.getTimeMillis());
-//        Serial.println(generalTimer.getTimeIsNegative());
       }  
 //      
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !generalTimer.getTimeIsNegative()){
@@ -244,7 +242,6 @@ void Apps::modeCountingLettersAndChars(bool init){
       }
 
       if (aButtonIsPressed){
-        //Serial.println(counter);
         if (numberElseAlphabethMode){
           ledDisp->showNumber(counter);
         }else{
@@ -257,7 +254,6 @@ void Apps::modeSoundSong(bool init){
   if (init){
     buzzer->loadBuzzerTrack(song_happy_dryer);
     buzzer->setSpeedRatio((float)2);
-//    buzzer->loadBuzzerTrack(song_unhappy_dryer);
   }
 
   if (potentio->getValueStableChangedEdge()){
@@ -310,10 +306,7 @@ void Apps::modeSoundSong(bool init){
         //buzzer->loadBuzzerTrack(song_retreat );
       }
     }
-  
   }
-
-
 }
 
 void Apps::modeSoundNotes(){
@@ -374,13 +367,8 @@ void Apps::modeSingleSegmentManipulation(bool init){
     //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_double + animation_step),2);  
     //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_inverted + animation_step),3);  
     ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
-
      (animation_step>=5)?animation_step=0:animation_step++;
-//     Serial.println(animation_step);
-//     Serial.println(pgm_read_byte_near(disp_digit_animate + animation_step));
   }
-  
-  
 }
 
 void Apps::modeGeiger(bool init){
@@ -401,10 +389,6 @@ void Apps::modeGeiger(bool init){
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
 //    if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
-//      Serial.println(potentio->getValueMapped(0,1000000));
-//      Serial.println(r);
-//      Serial.println(r > potentio->getValueMapped(0,1000000));
-//      Serial.println("eifjiaesjifjisej");
 //      
 //    }
     if (r > potentio->getValueMapped(0,1048576)){
@@ -414,8 +398,7 @@ void Apps::modeGeiger(bool init){
       ledDisp->SetSingleDigit(geiger_counter, 1);  
       ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
   
-      (animation_step>=5)?animation_step=0:animation_step++;
-      
+      (animation_step>=5)?animation_step=0:animation_step++;      
     }
     
   }else{
@@ -656,14 +639,12 @@ void Apps::gameButtonInteraction(bool init){
        //play by sounds
        buzzer->programBuzzerRoll(selectedSounds[reactionGameTarget]);
     }else{
-      lights |= 1<<lights_indexed[reactionGameTarget];
-      
+      lights |= 1<<lights_indexed[reactionGameTarget];     
     }
     ledDisp->SetLedArray(lights); 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
       animation_speed.setInitTimeMillis(animation_speed.getInitTimeMillis()*0.99);
-    }
-        
+    }        
     animation_speed.start();    
   }
 }
