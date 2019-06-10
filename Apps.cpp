@@ -371,6 +371,42 @@ void Apps::modeSingleSegmentManipulation(bool init){
   }
 }
 
+
+void Apps::tiltSwitchTest(bool init){
+  
+  if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
+    buzzer->programBuzzerRoll(1); //not beep but "puck"
+    textBuf[4]='F';  
+  }
+  
+  if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){
+    buzzer->programBuzzerRoll(1); //not beep but "puck"
+    textBuf[4]='B';  
+  }
+
+  if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){
+    buzzer->programBuzzerRoll(1); //not beep but "puck"
+    textBuf[4]='L';  
+  }
+  
+  if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){
+    buzzer->programBuzzerRoll(1); //not beep but "puck"
+    textBuf[4]='R';  
+  }
+
+
+  if (binaryInputs[SWITCH_TILT_RIGHT].getValue() &&
+  binaryInputs[SWITCH_TILT_LEFT].getValue() &&
+  binaryInputs[SWITCH_TILT_FORWARD].getValue() &&
+  binaryInputs[SWITCH_TILT_BACKWARD].getValue()
+  ){
+    
+    textBuf[4]='O';  
+  }
+
+  ledDisp->displayHandler(textBuf);  
+}
+
 void Apps::modeGeiger(bool init){
 
   if (init){

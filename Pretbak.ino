@@ -10,7 +10,7 @@
 #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 
 #ifdef ENABLE_SERIAL
-  #define DEBUG_MERCURY
+  //#define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
   //#define DEBUG_BUTTONS
   #define DEBUG_SELECTOR_KNOB
@@ -122,10 +122,14 @@ void input_process(){
       #ifdef DEBUG_MERCURY
       Serial.println("analog in mercury switches:");
       Serial.println(analogRead(A4));
-      Serial.println(mercurySwitches.getButtonsValueRaw());
+      Serial.println(mercurySwitches.getButtonsValueRaw(), BIN);
       Serial.println(mercurySwitches.getButtonsValue());
       #endif
     for (uint8_t i=0; i< MERCURY_SWITCHES_COUNT; i++){
+       #ifdef DEBUG_MERCURY
+      Serial.println(MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET );
+      Serial.println(i);
+      #endif
       binaryInputs[MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET + i].setValue(mercurySwitches.getButtonValueByIndex(i));
     }
   }
@@ -218,6 +222,7 @@ void mode_refresh(){
       break;
       
     case 10:
+      pretbak_apps.tiltSwitchTest(init);
       break;
       
     case 11:
@@ -233,7 +238,7 @@ void setup() {
   selectorDial.setPin(PIN_SELECTOR_DIAL);
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
-  mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET);
+  mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT);
 
   buzzer.setPin(PIN_BUZZER);
 

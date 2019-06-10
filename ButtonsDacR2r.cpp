@@ -19,10 +19,11 @@ uint8_t ButtonsDacR2r::getButtonsValueRaw(){
   int raw = (analogRead(this->analogPin));
   uint8_t allButtonsState = 0b00000000; //every bit is a button.
   for(uint8_t i=0; i<this->buttonsCount; i++){
-    
-    if (raw > ( ( 0x0001 << ADC_POWERS_OF_TWO -1 - i) - VALUE_MARGIN_FOR_SELECTOR )){   //for 10bit (max1024) adc, first check for higher than 512-margin, then 256-margin,...
+
+    uint16_t checkValue = ( 0x0001 << ADC_POWERS_OF_TWO -1 - i); 
+    if (raw > (checkValue - VALUE_MARGIN_FOR_SELECTOR )){   //for 10bit (max1024) adc, first check for higher than 512-margin, then 256-margin,...
       allButtonsState |= 0b00000001 << this->buttonsCount - 1 - i; 
-      raw -= ( 0x0001 << ADC_POWERS_OF_TWO -1 - i);
+      raw -= checkValue;  
       if (raw<0){
         raw=0;
       }

@@ -125,7 +125,7 @@ class Apps{
   void modeGeiger(bool init);
   void fullScreenMovie(bool init);
   void gameButtonInteraction(bool init);
-  
+  void tiltSwitchTest(bool init);
   
   
   

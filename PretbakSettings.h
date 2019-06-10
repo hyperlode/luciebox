@@ -54,4 +54,9 @@
 #define BUTTON_MOMENTARY_GREEN 4
 #define BUTTON_MOMENTARY_BLUE 3
 
+#define SWITCH_TILT_FORWARD 10
+#define SWITCH_TILT_BACKWARD 8
+#define SWITCH_TILT_LEFT 7
+#define SWITCH_TILT_RIGHT 9
+
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
