@@ -27,6 +27,18 @@ void MiniMultiTimer::init(){
 	this->state = playing;
 }
 
+void MiniMultiTimer::pause(){
+	this->state == paused;
+	this->timers[this->activeTimer].pause();
+}
+
+
+void MiniMultiTimer::continu(){
+	this->state == playing;
+	this->timers[this->activeTimer].continu();
+}
+
+
 void MiniMultiTimer::refresh(){
 	
 	if (this->state == playing){
@@ -41,6 +53,8 @@ void MiniMultiTimer::refresh(){
 				this->next();
 			}
 		}
+	}else if (this->state == paused){
+		
 	}else if (this->state == finished){
 		
 	}
@@ -55,6 +69,11 @@ void MiniMultiTimer::getDisplay(char* disp){
 		disp[2] = 69;	
 		disp[3] = 78;	
 		disp[4] = 68;	
+	}else if (this->state == paused){
+		disp[1] = 80;	
+		disp[2] = 65;	
+		disp[3] = 'U';	
+		disp[4] = 83;	
 	}
 }
 

@@ -14,7 +14,8 @@ class MiniMultiTimer{
 	enum state{
 		initialized=0,
 		playing,
-		finished
+		finished,
+		paused
 	};
 	
 	public:
@@ -28,6 +29,7 @@ class MiniMultiTimer{
 		void next();
 		void start();
 		void pause();
+		void continu();
 		void reset();
 		
 	private:

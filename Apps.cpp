@@ -384,6 +384,17 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.next();
   }
   
+  
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
+	  this->multiTimer.pause();
+  }
+  
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
+	  this->multiTimer.continu();
+  }
+  
+  
+  
   this->multiTimer.refresh();
   this->multiTimer.getDisplay(textBuf);
   ledDisp->displayHandler(textBuf);
