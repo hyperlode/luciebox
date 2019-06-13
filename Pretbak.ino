@@ -226,6 +226,7 @@ void mode_refresh(){
       break;
       
     case 11:
+	  pretbak_apps.miniMultiTimer(init);
       break;
     
     default:
@@ -239,6 +240,7 @@ void setup() {
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
   mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT);
+  mercurySwitches.setDebouncingCycles(100);
 
   buzzer.setPin(PIN_BUZZER);
 

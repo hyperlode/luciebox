@@ -14,12 +14,15 @@ class ButtonsDacR2r{
     void setPin( byte pin, byte buttonsCount);
     uint8_t getButtonsValue();
     void refresh();
+    void setSoftwareDebouncing(uint8_t cycleBeforeConsideredStable);
     bool getValueChangedEdge();
     bool getButtonValueByIndex(uint8_t index);
     uint8_t getButtonsValueRaw();
     //int getButtonsValueAnalog();
+    void setDebouncingCycles(uint8_t value);
   private:  
 
+    uint8_t debouncingCycles;
     byte buttonsCount;
     byte analogPin;
     long cyclesValueIsStable;

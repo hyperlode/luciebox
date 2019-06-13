@@ -370,18 +370,36 @@ void Apps::modeSingleSegmentManipulation(bool init){
      (animation_step>=5)?animation_step=0:animation_step++;
   }
 }
+void Apps::miniMultiTimer(bool init){
 
+  // every player: init time, time left, alive? 
+  // game: pause, player alive? ,fishertimer active?/time, random starter
+
+  if (init){
+	  this->multiTimer.init();
+  }
+  
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+	  this->multiTimer.next();
+  }
+  
+  this->multiTimer.refresh();
+  this->multiTimer.getDisplay(textBuf);
+  ledDisp->displayHandler(textBuf);
+  
+}
 
 void Apps::tiltSwitchTest(bool init){
   
   if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
     buzzer->programBuzzerRoll(1); //not beep but "puck"
-    textBuf[4]='F';  
+    textBuf[3]='F';  
   }
   
   if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){
     buzzer->programBuzzerRoll(1); //not beep but "puck"
-    textBuf[4]='B';  
+    textBuf[3]='B';  
   }
 
   if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){
@@ -394,16 +412,17 @@ void Apps::tiltSwitchTest(bool init){
     textBuf[4]='R';  
   }
 
-
   if (binaryInputs[SWITCH_TILT_RIGHT].getValue() &&
-  binaryInputs[SWITCH_TILT_LEFT].getValue() &&
-  binaryInputs[SWITCH_TILT_FORWARD].getValue() &&
+  binaryInputs[SWITCH_TILT_LEFT].getValue()){
+    textBuf[4]='O';  
+  }
+  
+  if( binaryInputs[SWITCH_TILT_FORWARD].getValue() &&
   binaryInputs[SWITCH_TILT_BACKWARD].getValue()
   ){
     
-    textBuf[4]='O';  
+    textBuf[3]='O';  
   }
-
   ledDisp->displayHandler(textBuf);  
 }
 
@@ -413,7 +432,6 @@ void Apps::modeGeiger(bool init){
       textBuf[4]=' ';
       geiger_counter = 0;
   }
-  
     
   //play tick. 
   //wait random time.

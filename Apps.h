@@ -6,6 +6,7 @@
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
+#include "MiniMultiTimer.h"
 
 #include "SevSeg5Digits.h" sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
@@ -127,10 +128,14 @@ class Apps{
   void gameButtonInteraction(bool init);
   void tiltSwitchTest(bool init);
   
+  void miniMultiTimer(bool init);
+  
   
   
   private:
 
+  MiniMultiTimer multiTimer;
+  
   int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
   
   SuperTimer generalTimer;

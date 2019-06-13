@@ -5,11 +5,18 @@
 
 //empty constructor
 ButtonsDacR2r::ButtonsDacR2r(){
+  this->debouncingCycles = CYCLES_BEFORE_CONSIDERED_STABLE;
 }
+
+void ButtonsDacR2r::setDebouncingCycles(uint8_t value){
+  this->debouncingCycles = value;  
+}
+
 void ButtonsDacR2r::setPin(byte pin, byte buttonsCount){
   this->analogPin = pin;
   this->buttonsCount = buttonsCount;
 }
+
 
 //int ButtonsDacR2r::getButtonsValueAnalog(){
 //  return analogRead(this->analogPin);
@@ -59,7 +66,7 @@ void ButtonsDacR2r::refresh(){
     this->cyclesValueIsStable = 0;
   }
   
-  if (this->cyclesValueIsStable >=CYCLES_BEFORE_CONSIDERED_STABLE ){
+  if (this->cyclesValueIsStable >= this->debouncingCycles ){
     this->buttonsCurrentStableValue = buttonsValue ;
     this->cyclesValueIsStable = 0;
   }
