@@ -27,17 +27,22 @@ void MiniMultiTimer::init(){
 	this->state = playing;
 }
 
+void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
+	// every timer index is linked to a button index.
+	if (this->activeTimer == index){
+		this->next();
+	}
+}
+
 void MiniMultiTimer::pause(){
 	this->state == paused;
 	this->timers[this->activeTimer].pause();
 }
 
-
 void MiniMultiTimer::continu(){
 	this->state == playing;
 	this->timers[this->activeTimer].continu();
 }
-
 
 void MiniMultiTimer::refresh(){
 	
@@ -60,10 +65,12 @@ void MiniMultiTimer::refresh(){
 	}
 }
 
-void MiniMultiTimer::getDisplay(char* disp){
+void MiniMultiTimer::getDisplay(char* disp, uint8_t* lights){
 	//what should be showing on the display right now?
+	lights = 0b00000000;
 	if (this->state == playing){
 		this->timers[this->activeTimer].getTimeString(disp+1);	
+		*lights |= 1 << this->activeTimer;
 	}else if (this->state == finished){
 		disp[1] = 32;	
 		disp[2] = 69;	
@@ -74,6 +81,7 @@ void MiniMultiTimer::getDisplay(char* disp){
 		disp[2] = 65;	
 		disp[3] = 'U';	
 		disp[4] = 83;	
+		*lights |= 1 << this->activeTimer;
 	}
 }
 

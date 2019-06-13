@@ -381,7 +381,13 @@ void Apps::miniMultiTimer(bool init){
   
   
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-	  this->multiTimer.next();
+	  this->multiTimer.playerButtonPressEdgeUp(2);
+  }
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+	  this->multiTimer.playerButtonPressEdgeUp(1);
+  }
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+	  this->multiTimer.playerButtonPressEdgeUp(0);
   }
   
   
@@ -394,10 +400,12 @@ void Apps::miniMultiTimer(bool init){
   }
   
   
-  
+  uint8_t lights;
   this->multiTimer.refresh();
-  this->multiTimer.getDisplay(textBuf);
+  
+  this->multiTimer.getDisplay(textBuf, &lights);
   ledDisp->displayHandler(textBuf);
+  ledDisp->SetLedArray(lights); 
   
 }
 
@@ -434,7 +442,9 @@ void Apps::tiltSwitchTest(bool init){
     
     textBuf[3]='O';  
   }
+  
   ledDisp->displayHandler(textBuf);  
+  
 }
 
 void Apps::modeGeiger(bool init){

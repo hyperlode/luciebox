@@ -7,7 +7,7 @@
 class MiniMultiTimer{
 	
 	#define MAX_TIMERS_COUNT 3
-	#define DEFAULT_INIT_TIME_SECS 3  //600
+	#define DEFAULT_INIT_TIME_SECS 600  //600
 	#define DEFAULT_RANDOM_STARTER true
 	#define DEFAULT_FISHER_TIMER false
 	
@@ -22,9 +22,10 @@ class MiniMultiTimer{
 		MiniMultiTimer();
 		void init();
 		void setCountDownTimeSeconds(uint16_t initTimeSecs);
-		void getDisplay(char* disp);
+		void getDisplay(char* disp, uint8_t* lights);
 		bool getTimerFinished(uint8_t timerIndex);
 		bool checkAllTimersFinished();
+		void playerButtonPressEdgeUp(uint8_t index);
 		void refresh();
 		void next();
 		void start();
