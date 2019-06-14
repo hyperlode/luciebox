@@ -48,7 +48,7 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis){
 	// setInitTimeMillis((long)(seconds) * 1000); //FIRST convert seconds to long, THEN *1000!!!
 // }
 
-void SuperTimer::setInitCountDownTimeSecs(unsigned int countDownSeconds){
+void SuperTimer::setInitCountDownTimeSecs(uint16_t countDownSeconds){
 	this->setInitCountDownTimeMillis(((long)countDownSeconds) * 1000);
 }
 

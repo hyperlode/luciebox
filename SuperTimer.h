@@ -7,6 +7,7 @@
 #include "WProgram.h" 
 #endif 
 #include "Utilitieslode.h"
+
 class SuperTimer{ 
 	public: 
 		SuperTimer();
@@ -14,8 +15,8 @@ class SuperTimer{
 		void setInitTimeSecs(long seconds);
 		long getInitTimeMillis();
 		int getInitTimeSecs();
-		void setInitCountDownTimeSecs(unsigned int countDownSeconds);
-    void setInitCountDownTimeMillis(long countDownMillis);
+		void setInitCountDownTimeSecs(uint16_t countDownSeconds);
+		void setInitCountDownTimeMillis(long countDownMillis);
 
 		void start(long initTimeMillis);
 		void startCountDownWithSeconds(unsigned int countDownSeconds);

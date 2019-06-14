@@ -12,16 +12,28 @@ void MiniMultiTimer::setDefaults(){
 	// general init
 	this->fisherTimer = DEFAULT_FISHER_TIMER;
 	this->randomStarter = DEFAULT_RANDOM_STARTER;
-	for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
-		this->timers[i].setInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
-	}
+	
+	this->setAllInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
+	
 	this->state = initialized;
 	this->activeTimer = 0;
 }
 
+uint16_t MiniMultiTimer::getIndexedTime(uint8_t index){
+	// instead of all seconds, only 
+	//index max = length of timeDialDiscreteSeconds
+	return timeDialDiscreteSeconds[index];
+}
+
+void MiniMultiTimer::setAllInitCountDownTimeSecs(uint16_t initTimeSecs){
+	if (this->state == initialized){
+		for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
+			this->timers[i].setInitCountDownTimeSecs(initTimeSecs);
+		}
+	}
+}
+
 void MiniMultiTimer::init(){
-	
-	
 	for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
 		this->timers[i].reset();
 		this->timers[i].setInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);

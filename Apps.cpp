@@ -380,7 +380,6 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.init();
   }
   
-  
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(2);
   }
@@ -400,8 +399,6 @@ void Apps::miniMultiTimer(bool init){
   
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 	  // on = start game.
-	  
-		
 	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
 		  this->multiTimer.pause();
 	  }
@@ -410,7 +407,12 @@ void Apps::miniMultiTimer(bool init){
 		  this->multiTimer.continu();
 	  }
   }
-	  
+
+  if (potentio->getValueStableChangedEdge()){
+	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
+	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
+	  // this->multiTimer.setAllInitCountDownTimeSecs(potentio->getValue());
+  }
   
   this->multiTimer.refresh();
   

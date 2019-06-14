@@ -15,7 +15,7 @@ class Potentio {
 		#define POTENTIO_SENSITIVITY 5
 		Potentio();
 
-    long getValueMapped(long minimumValue, long maximumValue);
+		long getValueMapped(long minimumValue, long maximumValue);
     
 		void setPin( byte pin);
 		uint16_t getValue();
