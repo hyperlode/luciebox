@@ -21,7 +21,8 @@ class MiniMultiTimer{
 	
 	public:
 		MiniMultiTimer();
-		void init();
+		
+		void setDefaults();
 		void setBuzzer(Buzzer* buzzer);
 		void setCountDownTimeSeconds(uint16_t initTimeSecs);
 		void getDisplay(char* disp, uint8_t* playerLights, uint8_t* settingsLights);
@@ -30,6 +31,8 @@ class MiniMultiTimer{
 		void playerButtonPressEdgeUp(uint8_t index);
 		void refresh();
 		void next();
+		
+		void init();
 		void start();
 		void pause();
 		void continu();

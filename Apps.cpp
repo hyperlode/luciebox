@@ -391,15 +391,26 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.playerButtonPressEdgeUp(0);
   }
   
-  
-  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
-	  this->multiTimer.pause();
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
+	  this->multiTimer.start();
+  }
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
+	  this->multiTimer.init();
   }
   
-  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
-	  this->multiTimer.continu();
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+	  // on = start game.
+	  
+		
+	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
+		  this->multiTimer.pause();
+	  }
+	  
+	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
+		  this->multiTimer.continu();
+	  }
   }
-  
+	  
   
   this->multiTimer.refresh();
   

@@ -14,6 +14,7 @@
   //#define DEBUG_POTENTIO
   //#define DEBUG_BUTTONS
   #define DEBUG_SELECTOR_KNOB
+  //#define DEBUG_MINIMULTITIMER
 
 #endif 
 
