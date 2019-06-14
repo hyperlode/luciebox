@@ -376,6 +376,7 @@ void Apps::miniMultiTimer(bool init){
   // game: pause, player alive? ,fishertimer active?/time, random starter
 
   if (init){
+	  this->multiTimer.setBuzzer(this->buzzer);
 	  this->multiTimer.init();
   }
   
@@ -400,12 +401,30 @@ void Apps::miniMultiTimer(bool init){
   }
   
   
-  uint8_t lights;
   this->multiTimer.refresh();
   
-  this->multiTimer.getDisplay(textBuf, &lights);
-  ledDisp->displayHandler(textBuf);
+  uint8_t buttonLights;
+  
+  uint8_t settingsLights;
+  this->multiTimer.getDisplay(textBuf, &buttonLights, &settingsLights);
+  
+  
+  uint8_t lights=0b00000000;
+  for(uint8_t i=0;i<4;i++){
+	if (1<<i & buttonLights){
+			lights |= 1<<lights_indexed[i+1];    
+	}
+  }
+  
+  //set pause light
+  (0b00000001 & settingsLights)? lights|= 1<<LIGHT_YELLOW:false;
+  #ifdef DEBUG_MINIMULTITIMER
+  Serial.println(settingsLights);
+  #endif
   ledDisp->SetLedArray(lights); 
+  
+
+  ledDisp->displayHandler(textBuf);
   
 }
 

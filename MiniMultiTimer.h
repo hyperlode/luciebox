@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "SuperTimer.h"
+#include "Buzzer.h"
 
 class MiniMultiTimer{
 	
@@ -21,8 +22,9 @@ class MiniMultiTimer{
 	public:
 		MiniMultiTimer();
 		void init();
+		void setBuzzer(Buzzer* buzzer);
 		void setCountDownTimeSeconds(uint16_t initTimeSecs);
-		void getDisplay(char* disp, uint8_t* lights);
+		void getDisplay(char* disp, uint8_t* playerLights, uint8_t* settingsLights);
 		bool getTimerFinished(uint8_t timerIndex);
 		bool checkAllTimersFinished();
 		void playerButtonPressEdgeUp(uint8_t index);
@@ -34,6 +36,7 @@ class MiniMultiTimer{
 		void reset();
 		
 	private:
+		Buzzer* buzzer;
 		SuperTimer timers [MAX_TIMERS_COUNT];
 		state state;
 		uint8_t activeTimer;

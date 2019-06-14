@@ -4,6 +4,10 @@
 MiniMultiTimer::MiniMultiTimer(){
 }
 
+void MiniMultiTimer::setBuzzer(Buzzer* buzzer){
+	this->buzzer = buzzer;
+}
+
 void MiniMultiTimer::init(){
 	
 	// general init
@@ -29,18 +33,26 @@ void MiniMultiTimer::init(){
 
 void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 	// every timer index is linked to a button index.
-	if (this->activeTimer == index){
-		this->next();
+	
+	if (this->state == playing){
+		if (this->activeTimer == index){
+			this->next();
+			(*this->buzzer).programBuzzerRoll(35);
+		}else{
+			(*this->buzzer).programBuzzerRoll(129);	
+		}
+	}else if (this->state == paused){
+		(*this->buzzer).programBuzzerRoll(230);	
 	}
 }
 
 void MiniMultiTimer::pause(){
-	this->state == paused;
+	this->state = paused;
 	this->timers[this->activeTimer].pause();
 }
 
 void MiniMultiTimer::continu(){
-	this->state == playing;
+	this->state = playing;
 	this->timers[this->activeTimer].continu();
 }
 
@@ -65,12 +77,13 @@ void MiniMultiTimer::refresh(){
 	}
 }
 
-void MiniMultiTimer::getDisplay(char* disp, uint8_t* lights){
+void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 settingsLights){
 	//what should be showing on the display right now?
-	lights = 0b00000000;
+	*playerLights = 0b00000000; //lsb is timer 0, 2nd bit is timer 1, ....
+	*settingsLights = 0b00000000; // bit0 = pause light
 	if (this->state == playing){
 		this->timers[this->activeTimer].getTimeString(disp+1);	
-		*lights |= 1 << this->activeTimer;
+		*playerLights |= 1 << this->activeTimer;
 	}else if (this->state == finished){
 		disp[1] = 32;	
 		disp[2] = 69;	
@@ -81,7 +94,8 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* lights){
 		disp[2] = 65;	
 		disp[3] = 'U';	
 		disp[4] = 83;	
-		*lights |= 1 << this->activeTimer;
+		*playerLights |= 1 << this->activeTimer;		
+		*settingsLights |= 0b00000001; //pause light on.
 	}
 }
 
