@@ -3,7 +3,10 @@
 #include "PretbakSettings.h"
 
 Apps::Apps(){
-//  
+	//initialize sequencer note only at apps startup.  
+	for (uint8_t i=0;i<32;i++){
+		this->sequencer_song[i] = C7_8;
+	}
 };
 
 void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer){
@@ -483,7 +486,10 @@ void Apps::modeGeiger(bool init){
 
   if (init){
       textBuf[4]=' ';
-      geiger_counter = 0;
+      this->geiger_counter = 0;
+	  this->frequency_lower = 2000;
+	  this->frequency_upper = 4000;
+	  this->tone_length_millis = 10;
   }
     
   //play tick. 
@@ -493,25 +499,55 @@ void Apps::modeGeiger(bool init){
   //long r = random(0, 1024);
   //r = r*r;
 
-  if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 
-//    if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
-//      
-//    }
-    if (r > potentio->getValueMapped(0,1048576)){
-      tone(PIN_BUZZER, (unsigned int)50, 10);
+	if (potentio->getValueStableChangedEdge()){
+		Serial.println(potentio->getValueStable());
+		if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+			this->frequency_lower = potentio->getValueMapped(0,5000);
+			if (this->frequency_lower >= this->frequency_upper){
+				this->frequency_lower = this->frequency_upper;
+			}
+			Serial.println("lower");
+		}else if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+			
+			this->frequency_upper = potentio->getValueMapped(0,5000);
+			if (this->frequency_upper <= this->frequency_lower){
+				this->frequency_upper = this->frequency_lower;
+			} 
+			Serial.println("upper");
+		}else if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+		    this->tone_length_millis = potentio->getValueMapped(0,500);
+			Serial.println("length");
+		}else{
+			this->geiger_trigger_chance = potentio->getValueMapped(0,1048576);
+		}
+		
+	}
+
+    if (r > this->geiger_trigger_chance){ // 1024*1024
+		
+	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+		 // when tone playing, play it until next tone
+		 tone(PIN_BUZZER, random(this->frequency_lower,this->frequency_upper));
+	  }else{
+		// limited time length tone
+		tone(PIN_BUZZER, random(this->frequency_lower,this->frequency_upper), this->tone_length_millis);
+	  }
     
       geiger_counter++;
       ledDisp->SetSingleDigit(geiger_counter, 1);  
       ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
-  
       (animation_step>=5)?animation_step=0:animation_step++;      
     }
     
   }else{
+	// simple Geiger mode
+	// todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
     if (r > potentio->getValueMapped(0,1048576)){
   //    buzzer->programBuzzerRoll(1); //not beep but "puck"
-      tone(PIN_BUZZER, (unsigned int)50, 10);
+ 	  tone(PIN_BUZZER, (unsigned int)50, 10);
+    
       textBuf[1]='?';
       textBuf[2]='?';
       textBuf[3]='?';
@@ -527,7 +563,101 @@ void Apps::modeGeiger(bool init){
   }
 }
 
-void Apps::fullScreenMovie(bool init){
+void Apps::modeSequencer(bool init){
+	bool nextStep = 0;
+	 if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
+		 if (init){
+			counter = 0;   // step counter
+			counter2 = 0;  // measure counter
+			animation_speed.setInitTimeMillis((long)potentio->getValueStable() * -1);
+			animation_speed.start();
+			nextStep = true;
+			
+			// for (uint8_t i=0;i<32;i++){
+				// this->sequencer_song[i] = C7_8;
+			// }
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+		  nextStep = true;
+		}
+	
+		if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+			if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){ 
+				if (potentio->getValueStableChangedEdge()){
+					animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+				}
+			}
+
+			if (!animation_speed.getTimeIsNegative()){
+				nextStep = true;
+				animation_speed.start();
+			}
+		}
+    
+
+	
+		if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+			
+			uint8_t note = potentio->getValueMapped(0,255);
+			
+			buzzer->programBuzzerRoll(note);
+
+			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
+				//copy to all measures
+				for (uint8_t i=0;i<4;i++){
+					this->sequencer_song[(counter%8) + 8*i] = note;
+				}
+			}else{
+				this->sequencer_song[counter] = note;
+			}
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+			// just listen to the potentio note
+		    buzzer->programBuzzerRoll(potentio->getValueMapped(0,255));
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+			// if red button continuously pressed, rotate potentio to hear all notes.
+			if (potentio->getValueStableChangedEdge()){
+				buzzer->programBuzzerRoll(potentio->getValueMapped(0,255));
+			}
+		}
+		
+		if (nextStep){
+			counter++;
+			if (counter > 31){
+				counter = 0;
+			}
+			buzzer->programBuzzerRoll(this->sequencer_song[counter]);
+			
+			// sequencer shows every step in 32 notes bar. 8steps (circle) times 4 measures (bar on bottom)
+			uint32_t screen = 0;
+			if (counter % 8 < 4){
+				screen |=  (uint32_t)0x1 << (8* (counter % 8)) ; 
+			}else{
+				screen |=  (uint32_t)0x1 << ((8*( 3 - ( counter % 8 -4 ))) + 6); 
+			}
+			
+			screen |=  (uint32_t)0x1 << ((8*(counter / 8))+3) ;  // bar at bottom.
+						
+			//#ifdef DEBUG_SEQUENCER
+			Serial.println(counter);
+			Serial.println(counter, "BIN");
+			//#endif 
+			
+			ledDisp->SetFourDigits(screen);
+		}
+		
+		
+	 }else{
+		 this->modeMetronome(init);
+	 }
+  
+}
+
+void Apps::modeMetronome(bool init){
   bool nextStep = 0;
   if (init){
     counter = 0;
@@ -538,6 +668,9 @@ void Apps::fullScreenMovie(bool init){
     animation_speed.start();
     nextStep = true;
   }
+  
+
+  
   
   bool direction1 = true;
   if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
@@ -550,7 +683,6 @@ void Apps::fullScreenMovie(bool init){
   }
   
  // if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
-    //movie mode
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
       if (potentio->getValueStableChangedEdge()){
@@ -582,13 +714,20 @@ void Apps::fullScreenMovie(bool init){
     if (nextStep){
       uint32_t screen = 0;
       for (uint8_t i=0;i<4;i++){
-        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); 
+        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
         screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
       }
       ledDisp->SetFourDigits(screen);
       
       counter = this->nextStepRotate(counter, direction1, 0, 11);
       counter2 = this->nextStepRotate(counter2, direction2, 0, 11);
+	  
+	  if (counter == 0){
+		  buzzer->programBuzzerRoll(C7_8);
+	  }
+	  if (counter2 == 0){
+		  buzzer->programBuzzerRoll(C6_4);
+	  }
     }
     
 //  }else{

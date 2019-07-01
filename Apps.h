@@ -124,7 +124,8 @@ class Apps{
   void modeSoundNotes();
   void modeSingleSegmentManipulation(bool init);
   void modeGeiger(bool init);
-  void fullScreenMovie(bool init);
+  void modeSequencer(bool init);
+  void modeMetronome(bool init);
   void gameButtonInteraction(bool init);
   void tiltSwitchTest(bool init);
   
@@ -142,7 +143,7 @@ class Apps{
   SuperTimer gameTimer;
   
   //global app variables
-  
+  uint8_t sequencer_song [32] ;
   uint8_t* game_random;
   uint32_t screenPersistenceOfVision;
   SuperTimer animation_speed;
@@ -155,6 +156,12 @@ class Apps{
   uint8_t game_x_pos;
   uint8_t game_y_pos;
   uint8_t reactionGameTarget;
+  
+  long frequency_lower;
+  long frequency_upper;
+  long tone_length_millis;
+  long geiger_trigger_chance;
+  
   long initTime;
   bool reactionGameYellowButtonIsIncluded;
   uint8_t selectedSounds[4];

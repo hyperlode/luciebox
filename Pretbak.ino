@@ -15,7 +15,7 @@
   //#define DEBUG_BUTTONS
   #define DEBUG_SELECTOR_KNOB
   //#define DEBUG_MINIMULTITIMER
-
+	#define DEBUG_SEQUENCER
 #endif 
 
 // Lode Ameije 2019-05
@@ -215,7 +215,7 @@ void mode_refresh(){
       break;
       
     case 8:
-      pretbak_apps.fullScreenMovie(init);
+      pretbak_apps.modeSequencer(init);
       break;
       
     case 9:
