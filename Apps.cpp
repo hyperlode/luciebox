@@ -96,7 +96,7 @@ void Apps::modeSimpleButtonsAndLights(){
       // potentio sets display brightness
       // no buzzer
       // display lights up a segment for each button.
-      bool aButtonIsPressed = false;
+      bool updateScreen = false;
 
       //delete all content from screen.
       ledDisp->setBlankDisplay();      
@@ -104,19 +104,19 @@ void Apps::modeSimpleButtonsAndLights(){
       lights = 0b00000000; //reset before switch enquiry
       if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
         lights|= 1<<LIGHT_RED;
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
         lights|= 1<<LIGHT_BLUE;
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
         lights|= 1<<LIGHT_GREEN;
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
       
 
-      if (aButtonIsPressed){
+      if (updateScreen){
         textBuf[1]='8';
         textBuf[2]='8';
         textBuf[3]='8';
@@ -140,13 +140,13 @@ void Apps::modeSimpleButtonsAndLights(){
       }
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
         lights|= 1<<LIGHT_LED_3;
-        aButtonIsPressed = true;
+        updateScreen = true;
       }else{
         textBuf[3]=' ';
       }
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
         lights|= 1<<LIGHT_YELLOW;
-        aButtonIsPressed = true;
+        updateScreen = true;
       }else{
         textBuf[4]=' ';
       }
@@ -159,26 +159,27 @@ void Apps::modeSimpleButtonsAndLights(){
 
 void Apps::modeCountingLettersAndChars(bool init){
         //counting mode: numbers and letters.
-      bool aButtonIsPressed = false;
+      bool updateScreen = false;
 
       if (init){
-        aButtonIsPressed = true;
+        updateScreen = true;
+		generalTimer.setInitTimeMillis(-1000);
       }
       
-      numberElseAlphabethMode = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+      numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
   
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
     
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         counter++;
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
        
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
         counter--;
-        aButtonIsPressed = true;
+        updateScreen = true;
       } 
       if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
         if (numberElseAlphabethMode){
@@ -186,47 +187,44 @@ void Apps::modeCountingLettersAndChars(bool init){
         }else{
           counter = 1;
         }
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
       
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeUp()){
-        
-        generalTimer.setInitTimeMillis(-1000);
+	  // auto count
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
         generalTimer.start();
       }  
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown()){
+      
+	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
         generalTimer.pause();        
       }  
-//      
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !generalTimer.getTimeIsNegative()){
-        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+	  
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() && !generalTimer.getTimeIsNegative()){
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
           counter++;  
         }else{
           counter--;
         }
-        
         generalTimer.start();
-        aButtonIsPressed = true;
+        updateScreen = true;
       }
       
       //potentio behaviour
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+		if (potentio->getValueStableChangedEdge()){
+			
+			generalTimer.setInitTimeMillis((long)(potentio->getValueMapped(-10000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+			generalTimer.start();
+			ledDisp->showNumber( (int16_t)10000 - potentio->getValueMapped(0,10000));
+			
+		}
+	  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
         if (numberElseAlphabethMode){
           counter = (int16_t)(potentio->getValueMapped(0,100));
         }else{
           counter = (int16_t)(potentio->getValueMapped(1,26)); //1024 to 26 letters.
         }
-        aButtonIsPressed = true;
-      }
-      else if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-        // if autocounter is on.
-        
-        //generalTimer.setInitTimeMillis(-100 * (long)(potentio->getValueStable()/10)); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-        generalTimer.setInitTimeMillis((long)(potentio->getValueMapped(-10000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-        
-        if (potentio->getValueStableChangedEdge()){
-          generalTimer.start();
-        }
+        updateScreen = true;
       }
       
       //only do the characters of the alphabet in lettermode.
@@ -244,12 +242,13 @@ void Apps::modeCountingLettersAndChars(bool init){
         }
       }
 
-      if (aButtonIsPressed){
-        if (numberElseAlphabethMode){
-          ledDisp->showNumber(counter);
-        }else{
-          ledDisp->showNumberAsChars(counter);
-        }
+      if (updateScreen){
+			// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
+			if (numberElseAlphabethMode){
+			  ledDisp->showNumber(counter);
+			}else{
+			  ledDisp->showNumberAsChars(counter);
+			}
       }
 }
 
