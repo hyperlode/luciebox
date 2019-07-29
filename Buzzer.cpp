@@ -98,7 +98,7 @@ void Buzzer::doBuzzerRoll() {
 }
 
 void Buzzer::setSpeedRatio(float speedMultiplier){
-  // argument is a long: 1 is normal speed, 0.5 is half, 2 is double, ....
+  // argument is a long: 1 is normal speed, 0.5 is double, 2 is half, ....
   this->speedScale = speedMultiplier;
 }
 

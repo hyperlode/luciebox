@@ -167,9 +167,15 @@ void Apps::modeCountingLettersAndChars(bool init){
       }
       
       numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+	  
   
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
         updateScreen = true;
+		if (!numberElseAlphabethMode){
+			buzzer->buzzerOff();
+			buzzer->setSpeedRatio(4);
+			buzzer->loadBuzzerTrack(alphabeth_song);
+		}
       }
     
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
@@ -213,9 +219,9 @@ void Apps::modeCountingLettersAndChars(bool init){
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 		if (potentio->getValueStableChangedEdge()){
 			
-			generalTimer.setInitTimeMillis((long)(potentio->getValueMapped(-10000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+			generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
 			generalTimer.start();
-			ledDisp->showNumber( (int16_t)10000 - potentio->getValueMapped(0,10000));
+			ledDisp->showNumber( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));
 			
 		}
 	  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
