@@ -30,14 +30,10 @@ void MiniMultiTimer::setTimersCount(uint8_t timers_count){
 	if (this->state == setTimers){
 		this->timers_count = timers_count;
 		this->activeTimer = 0;
-		Serial.println("efefe");
-		Serial.println(this->timers_count);
 	}
-	
 }
 
 void MiniMultiTimer::setStateTimersCount(bool set){
-	
 	if(!set && this->state == setTimers){
 		this->state = initialized;
 	}else if (set && this->state == initialized){
@@ -97,6 +93,15 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 	}
 }
 
+void MiniMultiTimer::setStatePause(bool set){
+	// pause button is latching
+	if(set && this->state == playing){
+		this->pause();
+	}else if (!set && this->state == paused){
+		this->continu();
+	}
+}
+
 void MiniMultiTimer::start(){
 	//start and pause all timers.
 	for (uint8_t i=0;i<this->timers_count;i++){
@@ -144,21 +149,62 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 	//what should be showing on the display right now?
 	*playerLights = 0b00000000; //lsb is timer 0, 2nd bit is timer 1, ....
 	*settingsLights = 0b00000000; // bit0 = pause light
-	if (this->state == playing || this-> state == initialized){
+	if ( this-> state == initialized){
 		this->timers[this->activeTimer].getTimeString(disp+1);	
-		*playerLights |= 1 << this->activeTimer;
+		
+		for (uint8_t i=0;i<this->timers_count;i++){
+			if ( i != this->activeTimer  || millis()%250 > 125){
+				// active timer is blinking. others are solid on.
+				*playerLights |= 1 << i;
+			}
+		}
+	}else if (this->state == playing ){
+		this->timers[this->activeTimer].getTimeString(disp+1);	
+		
+		// active timer seconds blink
+		if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
+			*playerLights |= 1 << this->activeTimer;
+		}
+		
+		// other alive timers solid on.
+		for (uint8_t i=0;i<this->timers_count;i++){
+			//other lights solid on if still alive.
+			if (i != this->activeTimer && !this->getTimerFinished(i) ) {
+				*playerLights |= 1 << i;
+			}
+		}
+		
 	}else if (this->state == finished){
 		disp[1] = 32;	
 		disp[2] = 69;	
 		disp[3] = 78;	
 		disp[4] = 68;	
+		
+		//fast blink last surviving timer light.
+		if (millis()%250 > 125){
+			*playerLights |= 1 << this->activeTimer;
+		}
+		
 	}else if (this->state == paused){
 		disp[1] = 80;	
 		disp[2] = 65;	
 		disp[3] = 'U';	
 		disp[4] = 83;	
-		*playerLights |= 1 << this->activeTimer;		
+		
 		*settingsLights |= 0b00000001; //pause light on.
+		
+		// timer lights
+		for (uint8_t i=0;i<this->timers_count;i++){
+			//other lights solid on if still alive.
+			if (i == this->activeTimer){
+				if (millis()%250 > 125){
+					*playerLights |= 1 << i;
+				}
+			}else if( !this->getTimerFinished(i) ) {
+				*playerLights |= 1 << i;
+			}
+		}
+		
 	}else if (this->state == setTimers){
 		disp[1] = 'S';	
 		disp[2] = 'E';	

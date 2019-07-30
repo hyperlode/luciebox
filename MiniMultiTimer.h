@@ -53,6 +53,7 @@ class MiniMultiTimer{
 		void playerButtonPressEdgeUp(uint8_t index);
 		void setTimersCount(uint8_t timers_count);
 		void setStateTimersCount(bool set);
+		void setStatePause(bool set);
 		void refresh();
 		void next();
 		//state getState();

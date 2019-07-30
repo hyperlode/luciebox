@@ -410,10 +410,7 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.init();
   }  
   
-  // if (this->multitimer.getstate()==this->multitimer.init){
-	  
-  // }
-  
+  // TIMER BUTTONS
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(2);
   }
@@ -425,7 +422,7 @@ void Apps::miniMultiTimer(bool init){
   }
   
 
-  
+  // START STOP Button
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
 	  this->multiTimer.start();
   }
@@ -433,42 +430,29 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.init();
   }
   
-  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-	  // on = start game.
-	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
-		  this->multiTimer.pause();
-	  }
-	  
-	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
-		  this->multiTimer.continu();
-	  }
-  }
-  // BUTTON_LATCHING_SMALL_RED_LEFT	
+  // PAUSE BUTTON
+  this->multiTimer.setStatePause(binaryInputs[BUTTON_LATCHING_YELLOW].getValue()); // do not only work on edge here, as latching switch can  be in any state.
+  
+  // SET NUMBER OF TIMERS BUTTON	
   this->multiTimer.setStateTimersCount(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()); // do not only work on edge here, as latching switch can  be in any state.
   
+  // THE DIAL
   if (potentio->getValueStableChangedEdge()){
-	    // #ifdef DEBUG_MINIMULTITIMER
-	      //Serial.println("allo");
-	      
-		  //#endif
-	      this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
-			
-	  // }else{
-			
-		  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
-		  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
-		  // this->multiTimer.setAllInitCountDownTimeSecs(potentio->getValue());
-	  // }
-	  
+	  // number of timers
+	  this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
+  
+      // set time
+	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
+	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
   }
   
+  // UPDATE CYCLIC
   this->multiTimer.refresh();
   
   uint8_t buttonLights;
   
   uint8_t settingsLights;
   this->multiTimer.getDisplay(textBuf, &buttonLights, &settingsLights);
-  
   
   uint8_t lights=0b00000000;
   for(uint8_t i=0;i<4;i++){
@@ -479,14 +463,9 @@ void Apps::miniMultiTimer(bool init){
   
   //set pause light
   (0b00000001 & settingsLights)? lights|= 1<<LIGHT_YELLOW:false;
-  #ifdef DEBUG_MINIMULTITIMER
-  Serial.println(settingsLights);
-  #endif
-  ledDisp->SetLedArray(lights); 
-  
 
+  ledDisp->SetLedArray(lights); 
   ledDisp->displayHandler(textBuf);
-  
 }
 
 void Apps::tiltSwitchTest(bool init){
