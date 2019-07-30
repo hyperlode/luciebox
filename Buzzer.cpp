@@ -47,13 +47,12 @@ void Buzzer::programBuzzerRoll(uint8_t sound) {
 }
 
 uint8_t Buzzer::addRandomSoundToRoll(uint8_t lowest, uint8_t highest){
-  if (getBuzzerRollEmpty()) {
-    uint8_t r = random(lowest, highest); //223, 235
+  // if (getBuzzerRollEmpty()) {
+    uint8_t r = random(lowest, highest); 
     programBuzzerRoll(r);
-    //programBuzzerRoll(random(1,60));
     return r;
-  }
-  return 0;
+  // }
+  // return 0;
 }
 
 void Buzzer::doBuzzerRoll() {

@@ -271,7 +271,7 @@ void Apps::modeSoundSong(bool init){
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
     
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-     if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_unhappy_dryer);
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
@@ -293,7 +293,7 @@ void Apps::modeSoundSong(bool init){
     }
   }else{
     //scales
-     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+    if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         buzzer->loadBuzzerTrack(scale_major);
       }
@@ -320,38 +320,58 @@ void Apps::modeSoundSong(bool init){
 void Apps::modeSoundNotes(){
   //buzzer with buzzer roll (notes).
       
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        if (potentio->getValueStableChangedEdge()){
-          //buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
-           allNotesIndex = potentio->getValueMapped(0,255);
-           buzzer->programBuzzerRoll(allNotesIndex);
-        }
-          
-        if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-          buzzer->programBuzzerRoll(allNotesIndex);
-          allNotesIndex--;
-        }
-        if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-          buzzer->programBuzzerRoll(allNotesIndex);
-        }
-        
-        if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-          buzzer->programBuzzerRoll(allNotesIndex);
-          allNotesIndex++;
-        }
-        ledDisp->showNumber(allNotesIndex);
-      }else{
-        if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-          ledDisp->showNumber(buzzer->addRandomSoundToRoll(223, 235));
-          //0 -> 63 short
-        }
-        if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-          ledDisp->showNumber(buzzer->addRandomSoundToRoll(160, 223));
-        }
-        if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-          ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));
-        }  
-      }
+      if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+		  
+		// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
+		  // if (potentio->getValueStableChangedEdge()){
+			 
+			 // buzzer->buzzerOff();
+		     // allNotesIndex = potentio->getValueMapped(0,255);
+			 // ledDisp->showNumber(allNotesIndex);
+			 // buzzer->programBuzzerRoll(allNotesIndex);
+		  // }
+		// }else  
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+			
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+			  buzzer->buzzerOff();
+			  ledDisp->showNumber(buzzer->addRandomSoundToRoll(223, 235));
+			  //0 -> 63 short
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+			  buzzer->buzzerOff();
+			  ledDisp->showNumber(buzzer->addRandomSoundToRoll(160, 223));
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+			  buzzer->buzzerOff();
+			  ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));
+			}  
+		}else{ 
+			// simple mode.
+			if (potentio->getValueStableChangedEdge()){
+			  //buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
+			   allNotesIndex = potentio->getValueMapped(0,255);
+			  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
+			    buzzer->buzzerOff();
+			} 
+			  buzzer->programBuzzerRoll(allNotesIndex);
+			}
+			  
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+			  buzzer->programBuzzerRoll(allNotesIndex);
+			  allNotesIndex--;
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+			  buzzer->programBuzzerRoll(allNotesIndex);
+			}
+			
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+			  buzzer->programBuzzerRoll(allNotesIndex);
+			  allNotesIndex++;
+			}
+			ledDisp->showNumber(allNotesIndex);
+		}
+	  }
 }
 
 void Apps::modeSingleSegmentManipulation(bool init){
@@ -366,9 +386,9 @@ void Apps::modeSingleSegmentManipulation(bool init){
     
   }
   
-  //ledDisp->displayHandler(textBuf);  
-//  ledDisp->SetSingleDigit(B11111111, 1);  
-//  ledDisp->SetSingleDigit((uint8_t) (potentio->getValueStable()/4), 3);  
+// ledDisp->displayHandler(textBuf);  
+// ledDisp->SetSingleDigit(B11111111, 1);  
+// ledDisp->SetSingleDigit((uint8_t) (potentio->getValueStable()/4), 3);  
   
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
     ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),1);  
@@ -378,6 +398,7 @@ void Apps::modeSingleSegmentManipulation(bool init){
      (animation_step>=5)?animation_step=0:animation_step++;
   }
 }
+
 void Apps::miniMultiTimer(bool init){
 
   // every player: init time, time left, alive? 
@@ -386,8 +407,7 @@ void Apps::miniMultiTimer(bool init){
   if (init){
 	  this->multiTimer.setBuzzer(this->buzzer);
 	  this->multiTimer.init();
-  }
-  
+  }  
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(2);
   }
@@ -599,8 +619,6 @@ void Apps::modeSequencer(bool init){
 				animation_speed.start();
 			}
 		}
-    
-
 	
 		if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
 			

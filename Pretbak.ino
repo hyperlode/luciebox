@@ -145,6 +145,7 @@ void setDefaultMode(){
   ledDisp.setBrightness(0,false);
 
   //buzzer
+  buzzer.setSpeedRatio(1);
   buzzer.buzzerOff();
 }
 
