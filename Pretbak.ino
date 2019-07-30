@@ -13,9 +13,9 @@
   //#define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
   //#define DEBUG_BUTTONS
-  #define DEBUG_SELECTOR_KNOB
-  //#define DEBUG_MINIMULTITIMER
-	#define DEBUG_SEQUENCER
+  //#define DEBUG_SELECTOR_KNOB
+  #define DEBUG_MINIMULTITIMER
+  //#define DEBUG_SEQUENCER
 #endif 
 
 // Lode Ameije 2019-05

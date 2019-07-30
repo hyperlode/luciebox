@@ -29,12 +29,14 @@ class MiniMultiTimer{
 	#define DEFAULT_INIT_TIME_SECS 600  //600
 	#define DEFAULT_RANDOM_STARTER true
 	#define DEFAULT_FISHER_TIMER false
+	#define DEFAULT_TIMERS_COUNT 2
 	
 	enum state{
 		initialized=0,
 		playing,
 		finished,
-		paused
+		paused,
+		setTimers
 	};
 	
 	public:
@@ -49,8 +51,11 @@ class MiniMultiTimer{
 		bool getTimerFinished(uint8_t timerIndex);
 		bool checkAllTimersFinished();
 		void playerButtonPressEdgeUp(uint8_t index);
+		void setTimersCount(uint8_t timers_count);
+		void setStateTimersCount(bool set);
 		void refresh();
 		void next();
+		//state getState();
 		
 		void init();
 		void start();
@@ -65,6 +70,8 @@ class MiniMultiTimer{
 		uint8_t activeTimer;
 		bool randomStarter;
 		bool fisherTimer;
+		uint16_t initTimeSecs;
+		uint8_t timers_count;
 	
 };
 

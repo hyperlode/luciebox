@@ -2,21 +2,42 @@
 
 
 MiniMultiTimer::MiniMultiTimer(){
+	
 }
 
-void MiniMultiTimer::setBuzzer(Buzzer* buzzer){
-	this->buzzer = buzzer;
-}
 
 void MiniMultiTimer::setDefaults(){
 	// general init
 	this->fisherTimer = DEFAULT_FISHER_TIMER;
 	this->randomStarter = DEFAULT_RANDOM_STARTER;
-	
+	this->timers_count = DEFAULT_TIMERS_COUNT;
 	this->setAllInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
 	
 	this->state = initialized;
 	this->activeTimer = 0;
+}
+void MiniMultiTimer::setBuzzer(Buzzer* buzzer){
+	this->buzzer = buzzer;
+	this->initTimeSecs = DEFAULT_INIT_TIME_SECS;
+	
+}
+// state MiniMultiTimer::getState(){
+	// return this->state;
+// }
+
+void MiniMultiTimer::setTimersCount(uint8_t timers_count){
+	if (this->state == setTimers){
+		this->timers_count = timers_count;
+	}
+}
+void MiniMultiTimer::setStateTimersCount(bool set){
+	
+	if(!set && this->state == setTimers){
+		this->state = initialized;
+	}else if (set && this->state == initialized){
+		this->state = setTimers;
+	}
+	
 }
 
 uint16_t MiniMultiTimer::getIndexedTime(uint8_t index){
@@ -27,8 +48,9 @@ uint16_t MiniMultiTimer::getIndexedTime(uint8_t index){
 
 void MiniMultiTimer::setAllInitCountDownTimeSecs(uint16_t initTimeSecs){
 	if (this->state == initialized){
+		this->initTimeSecs = initTimeSecs;
 		for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
-			this->timers[i].setInitCountDownTimeSecs(initTimeSecs);
+			this->timers[i].setInitCountDownTimeSecs(this->initTimeSecs );
 		}
 	}
 }
@@ -36,7 +58,7 @@ void MiniMultiTimer::setAllInitCountDownTimeSecs(uint16_t initTimeSecs){
 void MiniMultiTimer::init(){
 	for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
 		this->timers[i].reset();
-		this->timers[i].setInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
+		this->timers[i].setInitCountDownTimeSecs(this->initTimeSecs);
 		//this->timers[i].startPaused(true);
 	}
 	this->state = initialized;
@@ -63,15 +85,13 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 
 void MiniMultiTimer::start(){
 	//start and pause all timers.
-	for (uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
+	for (uint8_t i=0;i<this->timers_count;i++){
 		this->timers[i].start();
 		this->timers[i].pause();
 	}
 	this->timers[this->activeTimer].continu();
 	this->state = playing;
 }
-
-
 
 void MiniMultiTimer::pause(){
 	this->state = paused;
@@ -101,6 +121,8 @@ void MiniMultiTimer::refresh(){
 		
 	}else if (this->state == finished){
 		
+	}else if (this->state == setTimers){
+		
 	}
 }
 
@@ -123,7 +145,13 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		disp[4] = 83;	
 		*playerLights |= 1 << this->activeTimer;		
 		*settingsLights |= 0b00000001; //pause light on.
+	}else if (this->state == setTimers){
+		disp[1] = 'S';	
+		disp[2] = 'E';	
+		disp[3] = 'T';	
+		disp[4] = ' ';
 	}
+	//#ifdef DEBUG_MINIMULTITIMER
 }
 
 bool MiniMultiTimer::getTimerFinished(uint8_t timerIndex){
@@ -132,10 +160,10 @@ bool MiniMultiTimer::getTimerFinished(uint8_t timerIndex){
 
 bool MiniMultiTimer::checkAllTimersFinished(){
 	uint8_t count = 0;
-	for (uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
+	for (uint8_t i=0;i<this->timers_count;i++){
 		this->getTimerFinished(i) ? count++ : count+=0;
 	}
-	return count == MAX_TIMERS_COUNT;
+	return count == this->timers_count;
 }
 
 void MiniMultiTimer::next(){
@@ -147,7 +175,7 @@ void MiniMultiTimer::next(){
 	if (this->state == playing){
 		this->timers[this->activeTimer].pause();
 		do{
-			this->activeTimer >=(MAX_TIMERS_COUNT-1) ? this->activeTimer=0 : this->activeTimer++;
+			this->activeTimer >=(this->timers_count-1) ? this->activeTimer=0 : this->activeTimer++;
 		}while(this->getTimerFinished(this->activeTimer)  //if finished go to next timer.
 		);	
 		this->timers[this->activeTimer].continu();

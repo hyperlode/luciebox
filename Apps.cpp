@@ -408,6 +408,11 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.setBuzzer(this->buzzer);
 	  this->multiTimer.init();
   }  
+  
+  // if (this->multitimer.getstate()==this->multitimer.init){
+	  
+  // }
+  
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(2);
   }
@@ -417,6 +422,8 @@ void Apps::miniMultiTimer(bool init){
   if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(0);
   }
+  
+
   
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
 	  this->multiTimer.start();
@@ -435,11 +442,23 @@ void Apps::miniMultiTimer(bool init){
 		  this->multiTimer.continu();
 	  }
   }
-
+  // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+	
+  this->multiTimer.setStateTimersCount(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()); // do not only work on edge here, as latching switch can  be in any state.
+  
   if (potentio->getValueStableChangedEdge()){
-	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
-	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
-	  // this->multiTimer.setAllInitCountDownTimeSecs(potentio->getValue());
+	     #ifdef DEBUG_MINIMULTITIMER
+	      Serial.println(potentio->getValueMapped(1,3));
+		  #endif
+	      this->multiTimer.setTimersCount(potentio->getValueMapped(1,3));
+			
+	  // }else{
+			
+		  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
+		  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
+		  // this->multiTimer.setAllInitCountDownTimeSecs(potentio->getValue());
+	  // }
+	  
   }
   
   this->multiTimer.refresh();
