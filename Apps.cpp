@@ -405,6 +405,7 @@ void Apps::miniMultiTimer(bool init){
   // game: pause, player alive? ,fishertimer active?/time, random starter
 
   if (init){
+	 
 	  this->multiTimer.setBuzzer(this->buzzer);
 	  this->multiTimer.init();
   }  

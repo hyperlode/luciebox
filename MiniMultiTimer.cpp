@@ -2,7 +2,8 @@
 
 
 MiniMultiTimer::MiniMultiTimer(){
-	
+	 // this->multiTimer.setDefaults();
+	 setDefaults();
 }
 
 
@@ -29,7 +30,10 @@ void MiniMultiTimer::setTimersCount(uint8_t timers_count){
 	if (this->state == setTimers){
 		this->timers_count = timers_count;
 		this->activeTimer = 0;
+		Serial.println("efefe");
+		Serial.println(this->timers_count);
 	}
+	
 }
 
 void MiniMultiTimer::setStateTimersCount(bool set){
@@ -72,10 +76,15 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 	// every timer index is linked to a button index.
 	
 	if (this->state == initialized){
-		if (index+1 < this->timers_count){
-			this->activeTimer == index;
-		}
-		
+		// Serial.println(index);
+		// Serial.println(this->timers_count);
+		// Serial.println((index+1) <= this->timers_count);
+		if ( (index+1) <= this->timers_count){
+			this->activeTimer = index;
+			// Serial.println("accgge");
+			// Serial.println(this->activeTimer);
+			// Serial.println(index);
+		}	
 	}else if (this->state == playing){
 		if (this->activeTimer == index){
 			this->next();
