@@ -4,7 +4,7 @@
 #include "Arduino.h"
 #include "SuperTimer.h"
 #include "Buzzer.h"
-
+#include "Utilitieslode.h"
 
 const uint16_t timeDialDiscreteSeconds [] = {
 	0,1,2,3,4,5,6,7,8,9,
@@ -28,7 +28,7 @@ class MiniMultiTimer{
 	#define MAX_TIMERS_COUNT 3
 	#define DEFAULT_INIT_TIME_SECS 600  //600
 	#define DEFAULT_RANDOM_STARTER true
-	#define DEFAULT_FISHER_TIMER false
+	#define DEFAULT_FISCHER_TIMER_SECS 0
 	#define DEFAULT_TIMERS_COUNT 2
 	
 	enum state{
@@ -36,7 +36,8 @@ class MiniMultiTimer{
 		playing,
 		finished,
 		paused,
-		setTimers
+		setTimers,
+        setFischer
 	};
 	
 	public:
@@ -53,7 +54,9 @@ class MiniMultiTimer{
 		void playerButtonPressEdgeUp(uint8_t index);
 		void playerButtonPressEdgeDown();
 		void setTimersCount(uint8_t timers_count);
+		void setFischerTimer(uint16_t seconds);
 		void setStateTimersCount(bool set);
+		void setStateFischerTimer(bool set);
 		void setStatePause(bool set);
 		void refresh();
 		void next();
@@ -73,8 +76,11 @@ class MiniMultiTimer{
 		uint8_t timerDisplayed;
 		bool randomStarter;
 		bool fisherTimer;
-		uint16_t initTimeSecs;
+		
+        uint16_t initTimeSecs;
 		uint8_t timers_count;
+        
+        uint16_t fisherSecs;
 	
 };
 

@@ -9,7 +9,8 @@ MiniMultiTimer::MiniMultiTimer(){
 
 void MiniMultiTimer::setDefaults(){
 	// general init
-	this->fisherTimer = DEFAULT_FISHER_TIMER;
+	//this->fisherTimer = DEFAULT_FISHER_TIMER;
+    this->fischerSecs = DEFAULT_FISCHER_TIMER_SECS;
 	this->randomStarter = DEFAULT_RANDOM_STARTER;
 	this->timers_count = DEFAULT_TIMERS_COUNT;
 	this->setAllInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
@@ -43,6 +44,18 @@ void MiniMultiTimer::setStateTimersCount(bool set){
 		this->state = initialized;
 	}else if (set && this->state == initialized){
 		this->state = setTimers;
+	}
+}
+
+void MiniMultiTimer::setFischerTimer(uint16_t seconds){
+    this->fischerSecs = seconds;
+}
+
+void MiniMultiTimer::setStateFischerTimer(bool set){
+    if(!set && this->state == setFischer){
+		this->state = initialized;
+	}else if (set && this->state == initialized){
+		this->state = setFischer;
 	}
 }
 
@@ -159,6 +172,12 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 	//what should be showing on the display right now?
 	*playerLights = 0b00000000; //lsb is timer 0, 2nd bit is timer 1, ....
 	*settingsLights = 0b00000000; // bit0 = pause light
+    
+    disp[1] = ' ';	
+    disp[2] = ' ';	
+    disp[3] = ' ';	
+    disp[4] = ' ';
+    
 	if ( this-> state == initialized){
 		this->timers[this->activeTimer].getTimeString(disp+1);	
 		
@@ -223,12 +242,24 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 			}
 		}
 		
+	}else if (this->state == setFischer){
+        if (millis()%250 > 125){
+        disp[1] = 'F';	
+		disp[2] = 'I';	
+		disp[3] = 'S';	
+		disp[4] = 'H';
+        }else{
+            intToDigitsString(disp+1, (unsigned int) this->fischerSecs, false)  // utilities lode
+        }
 	}else if (this->state == setTimers){
-		disp[1] = 'S';	
-		disp[2] = 'E';	
-		disp[3] = 'T';	
-		disp[4] = ' ';
-		// Serial.println(potentio->getValueMapped(1,3));
+        if (millis()%250 > 125){
+			disp[1] = 'U';	
+            disp[2] = 'N';	
+            disp[3] = 'I';	
+            disp[4] = 'T';
+		}else{
+            intToDigitsString(disp+1, (unsigned int) this->timers_count, false)  // utilities lode
+        }
 		
 		// all active timers lights on
 		for (uint8_t i=0;i<this->timers_count;i++){
@@ -258,6 +289,10 @@ void MiniMultiTimer::next(){
 	
 	if (this->state == playing){
 		this->timers[this->activeTimer].pause();
+        
+        // add fischer timer (disabled just means: zero seconds).
+		this->timers[this->activeTimer].setOffsetInitTimeMillis(1000 * long(this->fischerSecs));
+        
 		do{
 			this->activeTimer >=(this->timers_count-1) ? this->activeTimer=0 : this->activeTimer++;
 		}while(this->getTimerFinished(this->activeTimer)  //if finished go to next timer.

@@ -21,7 +21,6 @@ void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte 
 	textStartPos = 0;
 }
 
-
 void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8){
 	sevseg.Begin(dispHasCommonAnode, D0,  D1,  D2,  D3, D4,  S1,  S2,  S3,  S4,  S5,  S6,  S7,  S8); 
 	textStartPos = 0;

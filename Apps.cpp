@@ -437,20 +437,27 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.init();
   }
   
-  // PAUSE BUTTON
+  // PAUSE Switch
   this->multiTimer.setStatePause(binaryInputs[BUTTON_LATCHING_YELLOW].getValue()); // do not only work on edge here, as latching switch can  be in any state.
   
-  // SET NUMBER OF TIMERS BUTTON	
+  // # set number of timers SWITCH	
   this->multiTimer.setStateTimersCount(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()); // do not only work on edge here, as latching switch can  be in any state.
+  
+  // set fischer timer SWITCH	
+  this->multiTimer.setStateFischerTimer(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()); // do not only work on edge here, as latching switch can  be in any state.
   
   // THE DIAL
   if (potentio->getValueStableChangedEdge()){
 	  // number of timers
 	  this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
-  
-      // set time
+
+      // 
 	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
+      
+       // set time
 	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
+      this->multiTimer.setFisherTimer(seconds);
+      
   }
   
   // UPDATE CYCLIC
