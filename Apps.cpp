@@ -421,6 +421,13 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.playerButtonPressEdgeUp(0);
   }
   
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeDown() || 
+      binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeDown() || 
+      binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeDown() || ){
+	  this->multiTimer.playerButtonPressEdgeDown();
+  }
+  
+  
 
   // START STOP Button
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){

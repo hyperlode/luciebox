@@ -16,6 +16,9 @@ void MiniMultiTimer::setDefaults(){
 	
 	this->state = initialized;
 	this->activeTimer = 0;
+    this->timerDisplayed = this->activeTimer ;
+
+    
 }
 void MiniMultiTimer::setBuzzer(Buzzer* buzzer){
 	this->buzzer = buzzer;
@@ -30,6 +33,8 @@ void MiniMultiTimer::setTimersCount(uint8_t timers_count){
 	if (this->state == setTimers){
 		this->timers_count = timers_count;
 		this->activeTimer = 0;
+        this->timerDisplayed = this->activeTimer ;
+
 	}
 }
 
@@ -68,18 +73,18 @@ void MiniMultiTimer::init(){
 	this->activeTimer = 0;
 }
 
+void MiniMultiTimer::playerButtonPressEdgeDown(){
+    // if button released, always display active Timer time.
+    this->timerDisplayed = this->activeTimer;
+}
+
 void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 	// every timer index is linked to a button index.
 	
 	if (this->state == initialized){
-		// Serial.println(index);
-		// Serial.println(this->timers_count);
-		// Serial.println((index+1) <= this->timers_count);
 		if ( (index+1) <= this->timers_count){
 			this->activeTimer = index;
-			// Serial.println("accgge");
-			// Serial.println(this->activeTimer);
-			// Serial.println(index);
+            this->timerDisplayed = this->activeTimer ;
 		}	
 	}else if (this->state == playing){
 		if (this->activeTimer == index){
@@ -87,9 +92,11 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 			(*this->buzzer).programBuzzerRoll(35);
 		}else{
 			(*this->buzzer).programBuzzerRoll(129);	
+            this->timerDisplayed = index; //display time of pressed timer button 
 		}
 	}else if (this->state == paused){
 		(*this->buzzer).programBuzzerRoll(230);	
+        this->timerDisplayed = index; //display time of pressed timer button 
 	}
 }
 
@@ -136,12 +143,15 @@ void MiniMultiTimer::refresh(){
 				this->next();
 			}
 		}
+        
+	}else if (this->state == initialized){
+        
 	}else if (this->state == paused){
 		
 	}else if (this->state == finished){
 		
 	}else if (this->state == setTimers){
-		
+        
 	}
 }
 
@@ -159,19 +169,27 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 			}
 		}
 	}else if (this->state == playing ){
-		this->timers[this->activeTimer].getTimeString(disp+1);	
-		
-		// active timer seconds blink
-		if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
-			*playerLights |= 1 << this->activeTimer;
-		}
+        
+        // displayed timer is not always the active timer (i.e. non active player wants to check his time).
+		this->timers[this->timerDisplayed].getTimeString(disp+1);	
 		
 		// other alive timers solid on.
 		for (uint8_t i=0;i<this->timers_count;i++){
-			//other lights solid on if still alive.
-			if (i != this->activeTimer && !this->getTimerFinished(i) ) {
+			
+            if (i == activeTimer){
+                // active timer seconds blink
+                if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
+                    *playerLights |= 1 << i;
+                }
+            }else if (i == timerDisplayed){
+                // displayed timer is not always the active timer (i.e. non active player wants to check his time).
+                if (millis()%250 > 125){
+                    *playerLights |= 1 << i;
+                }
+            }else if (i != this->activeTimer && !this->getTimerFinished(i) ) {
+                //other lights solid on if still alive.
 				*playerLights |= 1 << i;
-			}
+			} 
 		}
 		
 	}else if (this->state == finished){

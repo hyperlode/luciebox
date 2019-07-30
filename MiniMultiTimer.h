@@ -51,6 +51,7 @@ class MiniMultiTimer{
 		bool getTimerFinished(uint8_t timerIndex);
 		bool checkAllTimersFinished();
 		void playerButtonPressEdgeUp(uint8_t index);
+		void playerButtonPressEdgeDown();
 		void setTimersCount(uint8_t timers_count);
 		void setStateTimersCount(bool set);
 		void setStatePause(bool set);
@@ -69,6 +70,7 @@ class MiniMultiTimer{
 		SuperTimer timers [MAX_TIMERS_COUNT];
 		state state;
 		uint8_t activeTimer;
+		uint8_t timerDisplayed;
 		bool randomStarter;
 		bool fisherTimer;
 		uint16_t initTimeSecs;
