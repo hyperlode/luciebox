@@ -442,15 +442,15 @@ void Apps::miniMultiTimer(bool init){
 		  this->multiTimer.continu();
 	  }
   }
-  // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-	
+  // BUTTON_LATCHING_SMALL_RED_LEFT	
   this->multiTimer.setStateTimersCount(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()); // do not only work on edge here, as latching switch can  be in any state.
   
   if (potentio->getValueStableChangedEdge()){
-	     #ifdef DEBUG_MINIMULTITIMER
-	      Serial.println(potentio->getValueMapped(1,3));
-		  #endif
-	      this->multiTimer.setTimersCount(potentio->getValueMapped(1,3));
+	    // #ifdef DEBUG_MINIMULTITIMER
+	      //Serial.println("allo");
+	      
+		  //#endif
+	      this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
 			
 	  // }else{
 			

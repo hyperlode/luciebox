@@ -28,8 +28,10 @@ void MiniMultiTimer::setBuzzer(Buzzer* buzzer){
 void MiniMultiTimer::setTimersCount(uint8_t timers_count){
 	if (this->state == setTimers){
 		this->timers_count = timers_count;
+		this->activeTimer = 0;
 	}
 }
+
 void MiniMultiTimer::setStateTimersCount(bool set){
 	
 	if(!set && this->state == setTimers){
@@ -37,7 +39,6 @@ void MiniMultiTimer::setStateTimersCount(bool set){
 	}else if (set && this->state == initialized){
 		this->state = setTimers;
 	}
-	
 }
 
 uint16_t MiniMultiTimer::getIndexedTime(uint8_t index){
@@ -65,13 +66,17 @@ void MiniMultiTimer::init(){
 	
 	// specific
 	this->activeTimer = 0;
-	
 }
 
 void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 	// every timer index is linked to a button index.
 	
-	if (this->state == playing){
+	if (this->state == initialized){
+		if (index+1 < this->timers_count){
+			this->activeTimer == index;
+		}
+		
+	}else if (this->state == playing){
 		if (this->activeTimer == index){
 			this->next();
 			(*this->buzzer).programBuzzerRoll(35);
@@ -150,6 +155,12 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		disp[2] = 'E';	
 		disp[3] = 'T';	
 		disp[4] = ' ';
+		// Serial.println(potentio->getValueMapped(1,3));
+		
+		// all active timers lights on
+		for (uint8_t i=0;i<this->timers_count;i++){
+			*playerLights |= 1 << i;
+		}
 	}
 	//#ifdef DEBUG_MINIMULTITIMER
 }

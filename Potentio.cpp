@@ -13,7 +13,14 @@ uint16_t Potentio::getValue(){
 }
 
 long Potentio::getValueMapped(long minimumValue, long maximumValue){
-   return map((long)this->getValueStable(), 0, 1023, minimumValue , maximumValue);
+   long value = map((long)this->getValueStable(), 0, 1023, minimumValue , maximumValue+1);
+   if (value > maximumValue){
+	   //+1 is a little hack because map function has only at the end the maximum value, better would be to middle the values out (range wise).
+	   value = maximumValue;
+   }else if(value < minimumValue){
+       value = minimumValue;
+   }
+   return value;
 }
 
 uint16_t Potentio::getValueStable(){
