@@ -86,9 +86,11 @@ void MiniMultiTimer::init(){
 	this->activeTimer = 0;
 }
 
-void MiniMultiTimer::playerButtonPressEdgeDown(){
+void MiniMultiTimer::playerButtonPressEdgeDown(uint8_t index){
     // if button released, always display active Timer time.
-    this->timerDisplayed = this->activeTimer;
+	// if (index +1) <= this->timers_count){
+		this->timerDisplayed = this->activeTimer;
+	// }
 }
 
 void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
@@ -103,9 +105,10 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 		if (this->activeTimer == index){
 			this->next();
 			(*this->buzzer).programBuzzerRoll(35);
-		}else{
+		}else if ( (index+1) <= this->timers_count){
 			(*this->buzzer).programBuzzerRoll(129);	
-            this->timerDisplayed = index; //display time of pressed timer button 
+			this->timerDisplayed = index; //display time of pressed timer button 
+			
 		}
 	}else if (this->state == paused){
 		(*this->buzzer).programBuzzerRoll(230);	
@@ -228,8 +231,11 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		disp[3] = 'U';	
 		disp[4] = 83;	
 		
-		*settingsLights |= 0b00000001; //pause light on.
-		
+        // pause light blinking.
+        if (millis()%250 > 125){
+            *settingsLights |= 0b00000001; //pause light on.
+        }
+
 		// timer lights
 		for (uint8_t i=0;i<this->timers_count;i++){
 			//other lights solid on if still alive.
@@ -243,22 +249,22 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		}
 		
 	}else if (this->state == setFischer){
-        if (millis()%250 > 125){
+        if (millis()%1000 > 650){
         disp[1] = 'F';	
 		disp[2] = 'I';	
 		disp[3] = 'S';	
 		disp[4] = 'H';
         }else{
-            intToDigitsString(disp+1, (unsigned int) this->fischerSecs, false)  // utilities lode
+            intToDigitsString(disp+1, (unsigned int) this->fischerSecs, false);  // utilities lode
         }
 	}else if (this->state == setTimers){
-        if (millis()%250 > 125){
-			disp[1] = 'U';	
-            disp[2] = 'N';	
-            disp[3] = 'I';	
-            disp[4] = 'T';
+        if (millis()%1000 > 650){
+			disp[1] = 'Q';	
+            disp[2] = 'T';	
+            disp[3] = 'Y';	
+            disp[4] = ' ';
 		}else{
-            intToDigitsString(disp+1, (unsigned int) this->timers_count, false)  // utilities lode
+            intToDigitsString(disp+1, (unsigned int) this->timers_count, false);  // utilities lode
         }
 		
 		// all active timers lights on
@@ -291,7 +297,7 @@ void MiniMultiTimer::next(){
 		this->timers[this->activeTimer].pause();
         
         // add fischer timer (disabled just means: zero seconds).
-		this->timers[this->activeTimer].setOffsetInitTimeMillis(1000 * long(this->fischerSecs));
+		this->timers[this->activeTimer].setOffsetInitTimeMillis(-1000 * long(this->fischerSecs));
         
 		do{
 			this->activeTimer >=(this->timers_count-1) ? this->activeTimer=0 : this->activeTimer++;

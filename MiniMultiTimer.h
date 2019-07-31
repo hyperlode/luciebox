@@ -52,7 +52,7 @@ class MiniMultiTimer{
 		bool getTimerFinished(uint8_t timerIndex);
 		bool checkAllTimersFinished();
 		void playerButtonPressEdgeUp(uint8_t index);
-		void playerButtonPressEdgeDown();
+		void playerButtonPressEdgeDown(uint8_t index);
 		void setTimersCount(uint8_t timers_count);
 		void setFischerTimer(uint16_t seconds);
 		void setStateTimersCount(bool set);
@@ -80,7 +80,7 @@ class MiniMultiTimer{
         uint16_t initTimeSecs;
 		uint8_t timers_count;
         
-        uint16_t fisherSecs;
+        uint16_t fischerSecs;
 	
 };
 

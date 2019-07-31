@@ -402,7 +402,7 @@ void Apps::modeSingleSegmentManipulation(bool init){
 void Apps::miniMultiTimer(bool init){
 
   // every player: init time, time left, alive? 
-  // game: pause, player alive? ,fishertimer active?/time, random starter
+  // game: pause, player alive? ,fischertimer active?/time, random starter
 
   if (init){
 	 
@@ -421,13 +421,15 @@ void Apps::miniMultiTimer(bool init){
 	  this->multiTimer.playerButtonPressEdgeUp(0);
   }
   
-  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeDown() || 
-      binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeDown() || 
-      binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeDown() || ){
-	  this->multiTimer.playerButtonPressEdgeDown();
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeDown()){
+	  this->multiTimer.playerButtonPressEdgeDown(2);
   }
-  
-  
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeDown()){
+	  this->multiTimer.playerButtonPressEdgeDown(1);
+  }
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeDown()){
+	  this->multiTimer.playerButtonPressEdgeDown(0);
+  }
 
   // START STOP Button
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
@@ -456,7 +458,7 @@ void Apps::miniMultiTimer(bool init){
       
        // set time
 	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
-      this->multiTimer.setFisherTimer(seconds);
+      this->multiTimer.setFischerTimer(seconds);
       
   }
   
