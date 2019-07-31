@@ -31,6 +31,11 @@ class MiniMultiTimer{
 	#define DEFAULT_FISCHER_TIMER_SECS 0
 	#define DEFAULT_TIMERS_COUNT 2
 	
+	#define LIGHT_PAUSE 0x01
+	#define LIGHT_PLAYING 0x02
+	#define LIGHT_FISCHER 0x04
+	#define LIGHT_SET_TIMERS_COUNT 0x08
+	
 	enum state{
 		initialized=0,
 		playing,

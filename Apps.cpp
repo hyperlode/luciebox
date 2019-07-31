@@ -453,13 +453,12 @@ void Apps::miniMultiTimer(bool init){
 	  // number of timers
 	  this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
 
-      // 
+	  // convert value to predefined amount of seconds.
 	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
       
-       // set time
+      // pass through to multitimer app, it has to decide about validity.
 	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
       this->multiTimer.setFischerTimer(seconds);
-      
   }
   
   // UPDATE CYCLIC
@@ -470,16 +469,21 @@ void Apps::miniMultiTimer(bool init){
   uint8_t settingsLights;
   this->multiTimer.getDisplay(textBuf, &buttonLights, &settingsLights);
   
+  
   uint8_t lights=0b00000000;
+  // timer buttons lights to real lights
   for(uint8_t i=0;i<4;i++){
 	if (1<<i & buttonLights){
 			lights |= 1<<lights_indexed[i+1];    
 	}
   }
   
-  //set pause light
-  (0b00000001 & settingsLights)? lights|= 1<<LIGHT_YELLOW:false;
-
+  // settings light to real lights
+  (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_YELLOW:false;
+  (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LED_3:false;
+  (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LED_2:false;
+  (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LED_1:false;
+  
   ledDisp->SetLedArray(lights); 
   ledDisp->displayHandler(textBuf);
 }
