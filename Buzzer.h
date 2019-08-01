@@ -317,13 +317,14 @@ class Buzzer{
     uint8_t getNextBuzzerRollSlot ( bool getNextEmptySlot);
     uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty(); 
-
+	void setTranspose(int8_t offset);
     void cleanBuzzerRoll();
     void buzzerOn(uint16_t freq);
     void buzzerOff();
     void setSpeedRatio(float speedMultiplier);
 
   private:
+    int8_t transpose; 
     float speedScale;
     uint8_t pin;
     uint8_t buzzerRoll[BUZZER_ROLL_LENGTH];

@@ -11,7 +11,6 @@ void MiniMultiTimer::setDefaults(){
 	// general init
 	//this->fisherTimer = DEFAULT_FISHER_TIMER;
     this->fischerSecs = DEFAULT_FISCHER_TIMER_SECS;
-	this->randomStarter = DEFAULT_RANDOM_STARTER;
 	this->timers_count = DEFAULT_TIMERS_COUNT;
 	this->setAllInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
 	
@@ -110,7 +109,6 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index){
 		}else if ( (index+1) <= this->timers_count){
 			(*this->buzzer).programBuzzerRoll(129);	
 			this->timerDisplayed = index; //display time of pressed timer button 
-			
 		}
 	}else if (this->state == paused){
 		(*this->buzzer).programBuzzerRoll(230);	
@@ -268,7 +266,6 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 			disp[4] = 83;	
 		}
         
-
 		// timer lights
 		for (uint8_t i=0;i<this->timers_count;i++){
 			//other lights solid on if still alive.
@@ -324,7 +321,6 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		if (millis()%250 > 125){
             *settingsLights |= LIGHT_SET_TIMERS_COUNT; 
         }
-		
 	}
 	
 	// settings lights exceptions
@@ -332,7 +328,6 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		// fischer light always solid on when not zero seconds added. (except during setting, then blinking).
 		*settingsLights |= LIGHT_FISCHER; 
 	}
-	
 }
 
 bool MiniMultiTimer::getTimerFinished(uint8_t timerIndex){

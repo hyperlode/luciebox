@@ -175,6 +175,8 @@ void Apps::modeCountingLettersAndChars(bool init){
 			buzzer->buzzerOff();
 			buzzer->setSpeedRatio(4);
 			buzzer->loadBuzzerTrack(alphabeth_song);
+		}else{
+			buzzer->buzzerOff();
 		}
       }
     
@@ -265,34 +267,15 @@ void Apps::modeSoundSong(bool init){
   }
 
   if (potentio->getValueStableChangedEdge()){
-    buzzer->setSpeedRatio((float)(potentio->getValue()) / 256 );
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12,12)));
+	}else{
+		buzzer->setSpeedRatio((float)(potentio->getValue()) / 256 );
+	}
   }
   
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-    
-    if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_unhappy_dryer);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-        //buzzer->loadBuzzerTrack(song_unhappy_dryer);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_retreat );
-      }
-    }else{
-      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_happy_dryer);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_lang_zal_ze_leven);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_attack );
-      }
-    }
-  }else{
-    //scales
+    // advanced mode scales
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         buzzer->loadBuzzerTrack(scale_major);
@@ -312,6 +295,29 @@ void Apps::modeSoundSong(bool init){
       }
       if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
         //buzzer->loadBuzzerTrack(song_retreat );
+      }
+    }
+  }else{
+    // simple mode: songs!
+    if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_unhappy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        buzzer->loadBuzzerTrack(kindeke_douwen);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_retreat );
+      }
+    }else{
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_happy_dryer);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_lang_zal_ze_leven);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_attack );
       }
     }
   }
@@ -378,25 +384,133 @@ void Apps::modeSingleSegmentManipulation(bool init){
 
   if (init){
 
-    animation_step = 0;
+    // animation_step = 0;
+	
+	//bottom left is origin
+	game_x_pos = 0;
+    game_y_pos = 0;
+	counter = 0; // segment active
+	// counter2 = 0; 
+	
   }
+  
   if (potentio->getValueStableChangedEdge()){
     //uint8_t tmp = (uint8_t) (potentio->getValueStable()/4);
     //ledDisp->SetSingleDigit(tmp, 2);  
     
   }
   
+  
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+	  //move right
+	  game_x_pos++;
+	  if (game_x_pos > 2){
+		  counter++;
+		  if (counter> 3){
+			  counter = 0;
+		  }
+		  game_x_pos = 0;
+	  }
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){ 
+	  //move left
+	  if (game_x_pos == 0){
+		counter = (counter == 0)?3:(counter-1);
+		game_x_pos = 2;
+	  }else{
+		game_x_pos--;
+	  }
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+	  //move up
+	   switch (game_y_pos){
+		case 0:
+			game_y_pos = (game_x_pos == 1)?1:3;
+			break;
+		case 1:
+			game_y_pos = 3;
+			break;
+		case 2:
+			game_y_pos = 3;
+			break;
+		case 3:
+			game_y_pos = 0;
+			break;
+	  }
+  }
+  
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
+	  //move down
+	  switch (game_y_pos){
+		case 0:
+			game_y_pos = 3;
+			break;
+		case 1:
+			game_y_pos = 0;
+			break;
+		case 2:
+			game_y_pos = 0;
+			break;
+		case 3:
+			
+			game_y_pos = (game_x_pos == 1)?2:0;
+			break;
+	  }	
+  }
+
+  uint8_t seg;
+  switch (10*game_y_pos + game_x_pos){
+	  case 0:
+	  case 10:
+		seg = 0b00010000;  //E
+	    break;
+	  case 1:
+		seg = 0b00001000;  //D
+		break;
+	  case 32:
+	  case 22:
+	    seg = 0b00000010;  //B
+		break;
+	  case 20:
+	  case 30:
+		seg = 0b00100000;  //F
+		break;
+	  case 12:
+	  case 2:
+		seg = 0b00000100;  //C
+		break;
+	  case 11:
+	  case 21:
+		seg = 0b01000000;  //G
+		break;
+	  
+	  case 31:
+		seg = 0b00000001;  //A
+		break;
+	  default:
+		seg = 0b01010101;
+		break;
+  }
+  
+  for (uint8_t i=0;i<4;i++){
+	  ledDisp->SetSingleDigit(0,i+1);  
+  }
+  ledDisp->SetSingleDigit(seg,counter+1);  
+  
 // ledDisp->displayHandler(textBuf);  
 // ledDisp->SetSingleDigit(B11111111, 1);  
 // ledDisp->SetSingleDigit((uint8_t) (potentio->getValueStable()/4), 3);  
   
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-    ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),1);  
-    //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_double + animation_step),2);  
-    //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_inverted + animation_step),3);  
-    ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
-     (animation_step>=5)?animation_step=0:animation_step++;
-  }
+  // if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+    // ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),1);  
+    // //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_double + animation_step),2);  
+    // //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_inverted + animation_step),3);  
+    // ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
+     // (animation_step>=5)?animation_step=0:animation_step++;
+  // }
+  
 }
 
 void Apps::miniMultiTimer(bool init){
@@ -489,40 +603,70 @@ void Apps::miniMultiTimer(bool init){
 }
 
 void Apps::tiltSwitchTest(bool init){
+  // four tilt switches are positioned as such that they are "ON" in rest position. 
+  uint32_t screen = 0;
+  if (init){
+	  textBuf[1]='T'; 
+	  textBuf[2]='I'; 
+	  textBuf[3]='L'; 
+	  textBuf[4]='T'; 
+	  counter = 0;
+	  counter2 = 0; // counts progress in movement.
+	  buzzer->setSpeedRatio(2.0);
+  }
   
   if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
     buzzer->programBuzzerRoll(1); //not beep but "puck"
-    textBuf[3]='F';  
+	counter2|=0x01<<TILT_FORWARD;
   }
   
   if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){
     buzzer->programBuzzerRoll(1); //not beep but "puck"
-    textBuf[3]='B';  
+	counter2|=0x01<<TILT_BACKWARD;
   }
 
   if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){
     buzzer->programBuzzerRoll(1); //not beep but "puck"
-    textBuf[4]='L';  
+	counter2|=0x01<<TILT_LEFT;
   }
   
   if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){
     buzzer->programBuzzerRoll(1); //not beep but "puck"
-    textBuf[4]='R';  
+	counter2|=0x01<<TILT_RIGHT;
   }
 
-  if (binaryInputs[SWITCH_TILT_RIGHT].getValue() &&
-  binaryInputs[SWITCH_TILT_LEFT].getValue()){
-    textBuf[4]='O';  
+  if (counter2>0 || counter > 0){
+	  for (uint8_t i=0;i<=counter;i++){
+		  
+		  if (1<<TILT_FORWARD & counter2 || i<counter){
+			screen |= (uint32_t)pgm_read_byte_near(tilt_forward + i)<< (8*i); //* 4 --> 4 bytes per dword
+		  }
+		  if (1<<TILT_BACKWARD & counter2 || i<counter){
+			screen |= (uint32_t)pgm_read_byte_near(tilt_backward + i)<< (8*i); //* 4 --> 4 bytes per dword
+		  }
+		  if (1<<TILT_LEFT & counter2 || i<counter){
+			screen |= (uint32_t)pgm_read_byte_near(tilt_left + i)<< (8*i); //* 4 --> 4 bytes per dword
+		  }
+		  if (1<<TILT_RIGHT & counter2 || i<counter){
+			screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword
+		  }
+	  }	
+	  
+	  ledDisp->SetFourDigits(screen);  
+  }else{
+	  ledDisp->displayHandler(textBuf);
   }
   
-  if( binaryInputs[SWITCH_TILT_FORWARD].getValue() &&
-  binaryInputs[SWITCH_TILT_BACKWARD].getValue()
-  ){
-    
-    textBuf[3]='O';  
+  // keep track of progress
+  if (counter2 == 0x0F){ //if a digit is complete
+	counter++;
+	Serial.println(counter);
+	if (counter == 4){
+		buzzer->loadBuzzerTrack(song_happy_dryer);
+		counter = 0;
+	}
+	counter2 = 0;
   }
-  
-  ledDisp->displayHandler(textBuf);  
   
 }
 

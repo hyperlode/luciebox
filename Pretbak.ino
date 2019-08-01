@@ -147,6 +147,7 @@ void setDefaultMode(){
   //buzzer
   buzzer.setSpeedRatio(1);
   buzzer.buzzerOff();
+  buzzer.setTranspose(0);
 }
 
 

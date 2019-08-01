@@ -13,6 +13,16 @@
 #include "PretbakSettings.h"
 #include "Potentio.h"
 
+// #define TILT_FORWARD 	0x00000001
+// #define TILT_BACKWARD 	0x00000010
+// #define TILT_LEFT 		0x00000100
+// #define TILT_RIGHT 		0x00001000
+#define TILT_FORWARD 	0
+#define TILT_BACKWARD 	1
+#define TILT_LEFT 		2
+#define TILT_RIGHT 		3
+
+
 const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
   C7_4,rest_4,rest_2,
   C7_4,rest_2, C7_8,rest_8,
@@ -81,6 +91,19 @@ const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,re
 const uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE, LIGHT_LED_1, LIGHT_LED_2, LIGHT_LED_3};
 const uint8_t buttons_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
   
+
+const uint32_t tilt_forward [] PROGMEM = {
+	0x08,0x08,0x08,0x08
+};
+const uint32_t tilt_backward [] PROGMEM = {
+	0x01,0x01,0x01,0x01
+};
+const uint32_t tilt_left [] PROGMEM = {
+	0x30,0x30,0x30,0x30
+};
+const uint32_t tilt_right [] PROGMEM = {
+	0x06,0x06,0x06,0x06
+};
 
 const uint32_t disp_4digits_animate [] PROGMEM = {
     0x00,0xFF, 0xF0,0x0F,

@@ -27,7 +27,6 @@ class MiniMultiTimer{
 	
 	#define MAX_TIMERS_COUNT 3
 	#define DEFAULT_INIT_TIME_SECS 600  //600
-	#define DEFAULT_RANDOM_STARTER true
 	#define DEFAULT_FISCHER_TIMER_SECS 0
 	#define DEFAULT_TIMERS_COUNT 2
 	
