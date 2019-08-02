@@ -31,7 +31,7 @@ void Apps::test(){
     buzzer->programBuzzerRoll(45);
     
     #ifdef DEBUG_POTENTIO
-    Serial.println(potentio->getValue());
+    //Serial.println(potentio->getValue());
     #endif
     
   }
@@ -381,7 +381,8 @@ void Apps::modeSoundNotes(){
 }
 
 void Apps::modeSingleSegmentManipulation(bool init){
-
+  uint8_t moveDir;
+  moveDir = DO_NOTHING;
   if (init){
 
     // animation_step = 0;
@@ -391,17 +392,34 @@ void Apps::modeSingleSegmentManipulation(bool init){
     game_y_pos = 0;
 	counter = 0; // segment active
 	// counter2 = 0; 
-	
   }
   
   if (potentio->getValueStableChangedEdge()){
-    //uint8_t tmp = (uint8_t) (potentio->getValueStable()/4);
-    //ledDisp->SetSingleDigit(tmp, 2);  
-    
+	moveDir = MOVE_RIGHT;
+	// if (counter == 0 ){
+		// moveDir = MOVE_UP; //&& game_x_pos == 0  && game_y_pos ==0
+	// }
+	// this->frequency_lower = potentio->getValueMapped(0,5000);
+  }
+  
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+	  
+  }else{
+	  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+		  moveDir = MOVE_RIGHT;
+	  }
+	  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+		  moveDir = MOVE_LEFT;
+	  }
+	  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+		  moveDir = MOVE_UP;
+	  }
   }
   
   
-  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+  // set x and y coords
+  switch(moveDir){
+	case MOVE_RIGHT:{
 	  //move right
 	  game_x_pos++;
 	  if (game_x_pos > 2){
@@ -411,19 +429,31 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		  }
 		  game_x_pos = 0;
 	  }
-  }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){ 
-	  //move left
-	  if (game_x_pos == 0){
-		counter = (counter == 0)?3:(counter-1);
-		game_x_pos = 2;
-	  }else{
-		game_x_pos--;
-	  }
-  }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+	}
+	break;
+	
+	case MOVE_DOWN:
+	{
+	  //move down
+	  switch (game_y_pos){
+		case 0:
+			game_y_pos = 3;
+			break;
+		case 1:
+			game_y_pos = 0;
+			break;
+		case 2:
+			game_y_pos = 0;
+			break;
+		case 3:
+			game_y_pos = (game_x_pos == 1)?2:0;
+			break;
+	  }	
+	}
+	break;
+
+	case MOVE_UP:
+	{	
 	  //move up
 	   switch (game_y_pos){
 		case 0:
@@ -439,25 +469,23 @@ void Apps::modeSingleSegmentManipulation(bool init){
 			game_y_pos = 0;
 			break;
 	  }
-  }
-  
-  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp()){
-	  //move down
-	  switch (game_y_pos){
-		case 0:
-			game_y_pos = 3;
-			break;
-		case 1:
-			game_y_pos = 0;
-			break;
-		case 2:
-			game_y_pos = 0;
-			break;
-		case 3:
-			
-			game_y_pos = (game_x_pos == 1)?2:0;
-			break;
-	  }	
+    }
+    break;
+    
+    case MOVE_LEFT:
+    { 
+	  //move left
+	  if (game_x_pos == 0){
+		counter = (counter == 0)?3:(counter-1);
+		game_x_pos = 2;
+	  }else{
+		game_x_pos--;
+	  }
+    }
+	break;
+	 
+	default:
+      break;
   }
 
   uint8_t seg;
@@ -485,7 +513,6 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	  case 21:
 		seg = 0b01000000;  //G
 		break;
-	  
 	  case 31:
 		seg = 0b00000001;  //A
 		break;
@@ -510,7 +537,6 @@ void Apps::modeSingleSegmentManipulation(bool init){
     // ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
      // (animation_step>=5)?animation_step=0:animation_step++;
   // }
-  
 }
 
 void Apps::miniMultiTimer(bool init){
@@ -660,7 +686,7 @@ void Apps::tiltSwitchTest(bool init){
   // keep track of progress
   if (counter2 == 0x0F){ //if a digit is complete
 	counter++;
-	Serial.println(counter);
+	//Serial.println(counter);
 	if (counter == 4){
 		buzzer->loadBuzzerTrack(song_happy_dryer);
 		counter = 0;
@@ -690,27 +716,26 @@ void Apps::modeGeiger(bool init){
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 
 	if (potentio->getValueStableChangedEdge()){
-		Serial.println(potentio->getValueStable());
+		//Serial.println(potentio->getValueStable());
 		if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+			//lower
 			this->frequency_lower = potentio->getValueMapped(0,5000);
 			if (this->frequency_lower >= this->frequency_upper){
 				this->frequency_lower = this->frequency_upper;
 			}
-			Serial.println("lower");
 		}else if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+			//upper
 			
 			this->frequency_upper = potentio->getValueMapped(0,5000);
 			if (this->frequency_upper <= this->frequency_lower){
 				this->frequency_upper = this->frequency_lower;
 			} 
-			Serial.println("upper");
 		}else if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+			//length
 		    this->tone_length_millis = potentio->getValueMapped(0,500);
-			Serial.println("length");
 		}else{
 			this->geiger_trigger_chance = potentio->getValueMapped(0,1048576);
-		}
-		
+		}		
 	}
 
     if (r > this->geiger_trigger_chance){ // 1024*1024
@@ -829,8 +854,8 @@ void Apps::modeSequencer(bool init){
 			screen |=  (uint32_t)0x1 << ((8*(counter / 8))+3) ;  // bar at bottom.
 						
 			//#ifdef DEBUG_SEQUENCER
-			Serial.println(counter);
-			Serial.println(counter, "BIN");
+			//Serial.println(counter);
+			//Serial.println(counter, "BIN");
 			//#endif 
 			
 			ledDisp->SetFourDigits(screen);

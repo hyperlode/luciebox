@@ -22,6 +22,12 @@
 #define TILT_LEFT 		2
 #define TILT_RIGHT 		3
 
+#define DO_NOTHING		0
+#define TOGGLE_SEGMENT	1
+#define MOVE_RIGHT		2
+#define MOVE_LEFT		3
+#define MOVE_DOWN		4
+#define MOVE_UP	  	    5
 
 const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
   C7_4,rest_4,rest_2,

@@ -42,7 +42,9 @@ void Potentio::refresh(){
 	if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
 		this->potentio_value_stable_changed = true;  //simple edge detection
 		this->potentio_value_stable = potentio_value;
+		#ifdef DEBUG_POTENTIO
 		Serial.println(potentio_value_stable);
+		#endif
 	}else{
 		this->potentio_value_stable_changed = false;  //simple edge detection
 	}
