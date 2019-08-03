@@ -397,6 +397,9 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	for (uint8_t i=0;i<4;i++){
 		this->dispState[i]=0;
 	}
+	
+	generalTimer.setInitTimeMillis(3000);
+	generalTimer.start();
   }
   
   if (potentio->getValueStableChangedEdge()){
@@ -544,7 +547,13 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	  ledDisp->SetSingleDigit(this->dispState[i],i+1);  
   }
   // ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively. (ideally, it should blink).  
-  ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively. (ideally, it should blink).  
+  
+  if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+	ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively.  
+  }else{
+	  //only show the saved state.
+	  ledDisp->SetSingleDigit(this->dispState[counter],counter+1);
+  }
   
 // ledDisp->displayHandler(textBuf);  
 // ledDisp->SetSingleDigit(B11111111, 1);  
