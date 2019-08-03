@@ -392,6 +392,11 @@ void Apps::modeSingleSegmentManipulation(bool init){
     game_y_pos = 0;
 	counter = 0; // segment active
 	// counter2 = 0; 
+	
+	//reset saved led disp state.
+	for (uint8_t i=0;i<4;i++){
+		this->dispState[i]=0;
+	}
   }
   
   if (potentio->getValueStableChangedEdge()){
@@ -403,7 +408,15 @@ void Apps::modeSingleSegmentManipulation(bool init){
   }
   
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-	  
+	  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+		  moveDir = MOVE_RIGHT;
+	  }
+	  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+		  moveDir = TOGGLE_SEGMENT;
+	  }
+	  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+		  moveDir = MOVE_UP;
+	  }
   }else{
 	  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 		  moveDir = MOVE_RIGHT;
@@ -419,6 +432,8 @@ void Apps::modeSingleSegmentManipulation(bool init){
   
   // set x and y coords
   switch(moveDir){
+
+	
 	case MOVE_RIGHT:{
 	  //move right
 	  game_x_pos++;
@@ -521,10 +536,15 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		break;
   }
   
-  for (uint8_t i=0;i<4;i++){
-	  ledDisp->SetSingleDigit(0,i+1);  
+  if (moveDir == TOGGLE_SEGMENT){
+		this->dispState[counter]  ^= seg;
   }
-  ledDisp->SetSingleDigit(seg,counter+1);  
+  
+  for (uint8_t i=0;i<4;i++){
+	  ledDisp->SetSingleDigit(this->dispState[i],i+1);  
+  }
+  // ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively. (ideally, it should blink).  
+  ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively. (ideally, it should blink).  
   
 // ledDisp->displayHandler(textBuf);  
 // ledDisp->SetSingleDigit(B11111111, 1);  

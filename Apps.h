@@ -203,6 +203,7 @@ class Apps{
   long initTime;
   bool reactionGameYellowButtonIsIncluded;
   uint8_t selectedSounds[4];
+  uint8_t dispState[4];
 
   char*  textBuf;
   char*  scrollBuf;
