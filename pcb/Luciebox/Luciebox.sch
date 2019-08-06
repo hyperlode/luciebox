@@ -1,0 +1,1120 @@
+EESchema Schematic File Version 4
+LIBS:Luciebox-cache
+LIBS:R-2R_DAC-cache
+EELAYER 29 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 3
+Title ""
+Date "lun. 30 mars 2015"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Label 8950 1450 1    60   ~ 0
+Vin
+Text Label 9350 1450 1    60   ~ 0
+IOREF
+Text Label 8900 2500 0    60   ~ 0
+A0
+Text Label 8900 2600 0    60   ~ 0
+A1
+Text Label 8900 2700 0    60   ~ 0
+A2
+Text Label 8900 2800 0    60   ~ 0
+A3
+Text Label 8900 2900 0    60   ~ 0
+A4(SDA)
+Text Label 8900 3000 0    60   ~ 0
+A5(SCL)
+Text Label 10550 3000 0    60   ~ 0
+0(Rx)
+Text Label 10550 2800 0    60   ~ 0
+2
+Text Label 10550 2900 0    60   ~ 0
+1(Tx)
+Text Label 10550 2700 0    60   ~ 0
+3(PWM)
+Text Label 10550 2600 0    60   ~ 0
+4
+Text Label 10550 2500 0    60   ~ 0
+5(PWM)
+Text Label 10550 2400 0    60   ~ 0
+6(PWM)
+Text Label 10550 2300 0    60   ~ 0
+7
+Text Label 10550 2100 0    60   ~ 0
+8
+Text Label 10550 2000 0    60   ~ 0
+9(PWM)
+Text Label 10550 1900 0    60   ~ 0
+10(PWM-SS)
+Text Label 10550 1700 0    60   ~ 0
+12(MISO)
+Text Label 10550 1600 0    60   ~ 0
+13(SCK)
+Text Label 10550 1400 0    60   ~ 0
+AREF
+NoConn ~ 9400 1600
+Text Label 10550 1300 0    60   ~ 0
+A4(SDA)
+Text Label 10550 1200 0    60   ~ 0
+A5(SCL)
+Text Notes 10850 1000 0    60   ~ 0
+Holes
+Text Notes 8550 750  0    60   ~ 0
+Shield for Arduino that uses\nthe same pin disposition\nlike "Uno" board Rev 3.
+$Comp
+L Connector_Generic:Conn_01x08 P1
+U 1 1 56D70129
+P 9600 1900
+F 0 "P1" H 9600 2350 50  0000 C CNN
+F 1 "Power" V 9700 1900 50  0000 C CNN
+F 2 "Socket_Arduino_Uno:Socket_Strip_Arduino_1x08" V 9750 1900 20  0000 C CNN
+F 3 "" H 9600 1900 50  0000 C CNN
+	1    9600 1900
+	1    0    0    -1  
+$EndComp
+Text Label 8650 1800 0    60   ~ 0
+Reset
+$Comp
+L power:+3.3V #PWR01
+U 1 1 56D70538
+P 9150 1450
+F 0 "#PWR01" H 9150 1300 50  0001 C CNN
+F 1 "+3.3V" V 9150 1700 50  0000 C CNN
+F 2 "" H 9150 1450 50  0000 C CNN
+F 3 "" H 9150 1450 50  0000 C CNN
+	1    9150 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR02
+U 1 1 56D707BB
+P 9050 1350
+F 0 "#PWR02" H 9050 1200 50  0001 C CNN
+F 1 "+5V" V 9050 1550 50  0000 C CNN
+F 2 "" H 9050 1350 50  0000 C CNN
+F 3 "" H 9050 1350 50  0000 C CNN
+	1    9050 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR03
+U 1 1 56D70CC2
+P 9300 3150
+F 0 "#PWR03" H 9300 2900 50  0001 C CNN
+F 1 "GND" H 9300 3000 50  0000 C CNN
+F 2 "" H 9300 3150 50  0000 C CNN
+F 3 "" H 9300 3150 50  0000 C CNN
+	1    9300 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR04
+U 1 1 56D70CFF
+P 10300 3150
+F 0 "#PWR04" H 10300 2900 50  0001 C CNN
+F 1 "GND" H 10300 3000 50  0000 C CNN
+F 2 "" H 10300 3150 50  0000 C CNN
+F 3 "" H 10300 3150 50  0000 C CNN
+	1    10300 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x06 P2
+U 1 1 56D70DD8
+P 9600 2700
+F 0 "P2" H 9600 2300 50  0000 C CNN
+F 1 "Analog" V 9700 2700 50  0000 C CNN
+F 2 "Socket_Arduino_Uno:Socket_Strip_Arduino_1x06" V 9750 2750 20  0000 C CNN
+F 3 "" H 9600 2700 50  0000 C CNN
+	1    9600 2700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 P5
+U 1 1 56D71177
+P 10800 650
+F 0 "P5" V 10900 650 50  0000 C CNN
+F 1 "CONN_01X01" V 10900 650 50  0001 C CNN
+F 2 "Socket_Arduino_Uno:Arduino_1pin" H 10721 724 20  0000 C CNN
+F 3 "" H 10800 650 50  0000 C CNN
+	1    10800 650 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 P6
+U 1 1 56D71274
+P 10900 650
+F 0 "P6" V 11000 650 50  0000 C CNN
+F 1 "CONN_01X01" V 11000 650 50  0001 C CNN
+F 2 "Socket_Arduino_Uno:Arduino_1pin" H 10900 650 20  0001 C CNN
+F 3 "" H 10900 650 50  0000 C CNN
+	1    10900 650 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 P7
+U 1 1 56D712A8
+P 11000 650
+F 0 "P7" V 11100 650 50  0000 C CNN
+F 1 "CONN_01X01" V 11100 650 50  0001 C CNN
+F 2 "Socket_Arduino_Uno:Arduino_1pin" V 11000 650 20  0001 C CNN
+F 3 "" H 11000 650 50  0000 C CNN
+	1    11000 650 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x01 P8
+U 1 1 56D712DB
+P 11100 650
+F 0 "P8" V 11200 650 50  0000 C CNN
+F 1 "CONN_01X01" V 11200 650 50  0001 C CNN
+F 2 "Socket_Arduino_Uno:Arduino_1pin" H 11024 572 20  0000 C CNN
+F 3 "" H 11100 650 50  0000 C CNN
+	1    11100 650 
+	0    -1   -1   0   
+$EndComp
+NoConn ~ 10800 850 
+NoConn ~ 10900 850 
+NoConn ~ 11000 850 
+NoConn ~ 11100 850 
+$Comp
+L Connector_Generic:Conn_01x08 P4
+U 1 1 56D7164F
+P 10000 2600
+F 0 "P4" H 10000 2100 50  0000 C CNN
+F 1 "Digital" V 10100 2600 50  0000 C CNN
+F 2 "Socket_Arduino_Uno:Socket_Strip_Arduino_1x08" V 10150 2550 20  0000 C CNN
+F 3 "" H 10000 2600 50  0000 C CNN
+	1    10000 2600
+	-1   0    0    -1  
+$EndComp
+Wire Notes Line
+	8525 825  9925 825 
+Wire Notes Line
+	9925 825  9925 475 
+Wire Wire Line
+	9350 1450 9350 1700
+Wire Wire Line
+	9350 1700 9400 1700
+Wire Wire Line
+	9400 1900 9150 1900
+Wire Wire Line
+	9400 2000 9050 2000
+Wire Wire Line
+	9400 2300 8950 2300
+Wire Wire Line
+	9400 2100 9300 2100
+Wire Wire Line
+	9400 2200 9300 2200
+Connection ~ 9300 2200
+Wire Wire Line
+	8950 2300 8950 1450
+Wire Wire Line
+	9050 2000 9050 1350
+Wire Wire Line
+	9150 1900 9150 1450
+Wire Wire Line
+	9400 2500 8900 2500
+Wire Wire Line
+	9400 2600 8900 2600
+Wire Wire Line
+	9400 2700 8900 2700
+Wire Wire Line
+	9400 2800 8900 2800
+Wire Wire Line
+	9400 2900 8900 2900
+Wire Wire Line
+	9400 3000 8900 3000
+$Comp
+L Connector_Generic:Conn_01x10 P3
+U 1 1 56D721E0
+P 10000 1600
+F 0 "P3" H 10000 2150 50  0000 C CNN
+F 1 "Digital" V 10100 1600 50  0000 C CNN
+F 2 "Socket_Arduino_Uno:Socket_Strip_Arduino_1x10" V 10150 1600 20  0000 C CNN
+F 3 "" H 10000 1600 50  0000 C CNN
+	1    10000 1600
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	10200 2100 10550 2100
+Wire Wire Line
+	10200 2000 10550 2000
+Wire Wire Line
+	10200 1900 10550 1900
+Wire Wire Line
+	10200 1700 10550 1700
+Wire Wire Line
+	10200 1600 10550 1600
+Wire Wire Line
+	10200 1400 10550 1400
+Wire Wire Line
+	10200 1300 10550 1300
+Wire Wire Line
+	10200 1200 10550 1200
+Wire Wire Line
+	10200 3000 10550 3000
+Wire Wire Line
+	10200 2900 10550 2900
+Wire Wire Line
+	10200 2800 10550 2800
+Wire Wire Line
+	10200 2700 10550 2700
+Wire Wire Line
+	10200 2600 10550 2600
+Wire Wire Line
+	10200 2500 10550 2500
+Wire Wire Line
+	10200 2400 10550 2400
+Wire Wire Line
+	10200 2300 10550 2300
+Wire Wire Line
+	10200 1500 10300 1500
+Wire Wire Line
+	10300 1500 10300 3150
+Wire Wire Line
+	9300 2100 9300 2200
+Wire Wire Line
+	9300 2200 9300 3150
+Wire Notes Line
+	8500 500  8500 3450
+Wire Notes Line
+	8500 3450 11200 3450
+Wire Wire Line
+	9400 1800 8650 1800
+Text Notes 9700 1600 0    60   ~ 0
+1
+Wire Notes Line
+	11200 1000 10700 1000
+Wire Notes Line
+	10700 1000 10700 500 
+$Comp
+L Luciebox_components:4digit_7segments_common_anode_CA56-12SRWA U1
+U 1 1 5D48F293
+P 5300 1350
+F 0 "U1" H 5300 2017 50  0000 C CNN
+F 1 "CA56-12SRWA" H 5300 1926 50  0000 C CNN
+F 2 "Luciebox:CA56-12SRWA" H 5300 750 50  0001 C CNN
+F 3 "http://www.kingbrightusa.com/images/catalog/SPEC/CA56-12SRWA.pdf" H 4870 1380 50  0001 C CNN
+	1    5300 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R2
+U 1 1 5D49734E
+P 7350 2450
+F 0 "R2" H 7409 2496 50  0000 L CNN
+F 1 "R_Small" H 7409 2405 50  0000 L CNN
+F 2 "Luciebox:1206" H 7350 2450 50  0001 C CNN
+F 3 "~" H 7350 2450 50  0001 C CNN
+	1    7350 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R3
+U 1 1 5D497707
+P 7600 2450
+F 0 "R3" H 7659 2496 50  0000 L CNN
+F 1 "R_Small" H 7659 2405 50  0000 L CNN
+F 2 "Luciebox:1206" H 7600 2450 50  0001 C CNN
+F 3 "~" H 7600 2450 50  0001 C CNN
+	1    7600 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R4
+U 1 1 5D49796F
+P 7850 2450
+F 0 "R4" H 7909 2496 50  0000 L CNN
+F 1 "R_Small" H 7909 2405 50  0000 L CNN
+F 2 "Luciebox:1206" H 7850 2450 50  0001 C CNN
+F 3 "~" H 7850 2450 50  0001 C CNN
+	1    7850 2450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6400 1650 7350 1650
+Wire Wire Line
+	7350 1650 7350 2350
+Wire Wire Line
+	6400 1550 7600 1550
+Wire Wire Line
+	7600 1550 7600 2350
+Wire Wire Line
+	6400 1450 7850 1450
+Wire Wire Line
+	7850 1450 7850 2350
+Text Label 10550 1800 0    60   ~ 0
+11(PWM-MOSI)
+Wire Wire Line
+	10200 1800 10550 1800
+Text Label 7850 2550 3    50   ~ 0
+11(PWM-MOSI)
+Text Label 7600 2550 3    50   ~ 0
+10(PWM-SS)
+Text Label 7350 2550 3    50   ~ 0
+9(PWM)
+Text Label 3700 1050 2    50   ~ 0
+7
+Wire Wire Line
+	4200 1050 4150 1050
+Wire Wire Line
+	4200 1150 4100 1150
+Text Label 3700 1150 2    50   ~ 0
+2
+Text Label 3700 1250 2    50   ~ 0
+4
+Text Label 3700 1350 2    50   ~ 0
+8
+Text Label 3700 1450 2    50   ~ 0
+12(MISO)
+Text Label 3700 1550 2    50   ~ 0
+13(SCK)
+Text Label 3700 1650 2    50   ~ 0
+3(PWM)
+Text Label 3700 1750 2    50   ~ 0
+0(Rx)
+$Comp
+L Transistor_Array:ULN2003A U2
+U 1 1 5D4C411F
+P 4600 2550
+F 0 "U2" H 4600 3217 50  0000 C CNN
+F 1 "ULN2003A" H 4600 3126 50  0000 C CNN
+F 2 "Luciebox:DIP-16_W7.62mm" H 4650 2000 50  0001 L CNN
+F 3 "http://www.ti.com/lit/ds/symlink/uln2003a.pdf" H 4700 2350 50  0001 C CNN
+	1    4600 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4150 2350 4200 2350
+Wire Wire Line
+	4100 2450 4100 1150
+Wire Wire Line
+	3700 1050 4150 1050
+Connection ~ 4150 1050
+Wire Wire Line
+	3700 1150 4100 1150
+Connection ~ 4100 1150
+Wire Wire Line
+	3700 1250 4050 1250
+Wire Wire Line
+	3700 1350 4000 1350
+Wire Wire Line
+	3700 1450 3950 1450
+Wire Wire Line
+	3700 1550 3900 1550
+Wire Wire Line
+	4150 1050 4150 2350
+Wire Wire Line
+	3700 1650 3850 1650
+Wire Wire Line
+	3700 1750 4200 1750
+Wire Wire Line
+	4050 2550 4050 1250
+Connection ~ 4050 1250
+Wire Wire Line
+	4050 1250 4200 1250
+Wire Wire Line
+	4000 1350 4000 2650
+Connection ~ 4000 1350
+Wire Wire Line
+	4000 1350 4200 1350
+Wire Wire Line
+	3950 2750 3950 1450
+Connection ~ 3950 1450
+Wire Wire Line
+	3950 1450 4200 1450
+Wire Wire Line
+	3900 1550 3900 2850
+Connection ~ 3900 1550
+Wire Wire Line
+	3900 1550 4200 1550
+Wire Wire Line
+	3850 2950 3850 1650
+Connection ~ 3850 1650
+Wire Wire Line
+	3850 1650 4200 1650
+Text Label 7100 2550 3    50   ~ 0
+5(PWM)
+Wire Wire Line
+	7100 1750 7100 2350
+Wire Wire Line
+	6400 1750 7100 1750
+$Comp
+L Device:R_Small R1
+U 1 1 5D496C09
+P 7100 2450
+F 0 "R1" H 7159 2496 50  0000 L CNN
+F 1 "R_Small" H 7159 2405 50  0000 L CNN
+F 2 "Luciebox:1206" H 7100 2450 50  0001 C CNN
+F 3 "~" H 7100 2450 50  0001 C CNN
+	1    7100 2450
+	1    0    0    -1  
+$EndComp
+Text Label 6850 2550 3    50   ~ 0
+6(PWM)
+$Comp
+L Device:R_Small R5
+U 1 1 5D4E6F2F
+P 6850 2450
+F 0 "R5" H 6909 2496 50  0000 L CNN
+F 1 "R_Small" H 6909 2405 50  0000 L CNN
+F 2 "Luciebox:1206" H 6850 2450 50  0001 C CNN
+F 3 "~" H 6850 2450 50  0001 C CNN
+	1    6850 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Transistor_BJT:BC558 Q1
+U 1 1 5D50231A
+P 6450 2350
+F 0 "Q1" H 6641 2304 50  0000 L CNN
+F 1 "BC558" H 6641 2395 50  0000 L CNN
+F 2 "Luciebox:TO-92-3" H 6650 2275 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/BC/BC557.pdf" H 6450 2350 50  0001 L CNN
+	1    6450 2350
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	6650 2350 6850 2350
+$Comp
+L Connector:Screw_Terminal_01x07 J2
+U 1 1 5D506721
+P 5300 2650
+F 0 "J2" H 5380 2692 50  0000 L CNN
+F 1 "Screw_Terminal_01x07" H 5380 2601 50  0000 L CNN
+F 2 "Luciebox:Term_Block_1x7_P5.08mm" H 5300 2650 50  0001 C CNN
+F 3 "~" H 5300 2650 50  0001 C CNN
+	1    5300 2650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5000 2350 5100 2350
+Wire Wire Line
+	5100 2450 5000 2450
+Wire Wire Line
+	5000 2550 5100 2550
+Wire Wire Line
+	5100 2650 5000 2650
+Wire Wire Line
+	5000 2750 5100 2750
+Wire Wire Line
+	5100 2850 5000 2850
+Wire Wire Line
+	5000 2950 5100 2950
+Wire Wire Line
+	6050 2350 6050 2450
+Wire Wire Line
+	6000 2350 6050 2350
+Wire Wire Line
+	6000 2450 6050 2450
+Wire Wire Line
+	6050 2550 6000 2550
+Wire Wire Line
+	6050 2550 6050 2650
+Wire Wire Line
+	6050 2650 6000 2650
+Wire Wire Line
+	6000 2750 6050 2750
+Wire Wire Line
+	6050 2750 6050 2650
+Connection ~ 6050 2650
+Wire Wire Line
+	6000 2850 6050 2850
+Wire Wire Line
+	6050 2850 6050 2750
+Connection ~ 6050 2750
+Wire Wire Line
+	6000 2950 6050 2950
+Wire Wire Line
+	6050 2950 6050 2850
+Connection ~ 6050 2850
+Wire Wire Line
+	6050 2550 6050 2450
+Connection ~ 6050 2550
+Connection ~ 6050 2450
+Wire Wire Line
+	6350 2550 6050 2550
+$Comp
+L Luciebox_components:Screw_Terminal_01x07_mirror J3
+U 1 1 5D50A31C
+P 5800 2650
+F 0 "J3" H 5882 3167 50  0000 C CNN
+F 1 "Screw_Terminal_01x07" H 5882 3076 50  0000 C CNN
+F 2 "Luciebox:Term_Block_1x7_P5.08mm" H 5800 2650 50  0001 C CNN
+F 3 "~" H 5800 2650 50  0001 C CNN
+	1    5800 2650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:Screw_Terminal_01x07_mirror J1
+U 1 1 5D554824
+P 3550 2650
+F 0 "J1" H 3632 3167 50  0000 C CNN
+F 1 "Screw_Terminal_01x07" H 3632 3076 50  0000 C CNN
+F 2 "Luciebox:Term_Block_1x7_P5.08mm" H 3550 2650 50  0001 C CNN
+F 3 "~" H 3550 2650 50  0001 C CNN
+	1    3550 2650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4100 2450 4200 2450
+Wire Wire Line
+	4050 2550 4200 2550
+Wire Wire Line
+	4000 2650 4200 2650
+Wire Wire Line
+	3950 2750 4200 2750
+Wire Wire Line
+	3900 2850 4200 2850
+Wire Wire Line
+	3850 2950 4200 2950
+Wire Wire Line
+	3750 2950 3850 2950
+Connection ~ 3850 2950
+Wire Wire Line
+	3750 2850 3900 2850
+Connection ~ 3900 2850
+Wire Wire Line
+	3750 2750 3950 2750
+Connection ~ 3950 2750
+Wire Wire Line
+	4000 2650 3750 2650
+Connection ~ 4000 2650
+Wire Wire Line
+	3750 2550 4050 2550
+Connection ~ 4050 2550
+Wire Wire Line
+	3750 2450 4100 2450
+Connection ~ 4100 2450
+Connection ~ 4150 2350
+Wire Wire Line
+	3750 2350 4150 2350
+$Comp
+L power:GND #PWR0101
+U 1 1 5D5B7F6D
+P 4600 3150
+F 0 "#PWR0101" H 4600 2900 50  0001 C CNN
+F 1 "GND" H 4605 2977 50  0000 C CNN
+F 2 "" H 4600 3150 50  0001 C CNN
+F 3 "" H 4600 3150 50  0001 C CNN
+	1    4600 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+12V #PWR0102
+U 1 1 5D5B8568
+P 6350 2150
+F 0 "#PWR0102" H 6350 2000 50  0001 C CNN
+F 1 "+12V" H 6365 2323 50  0000 C CNN
+F 2 "" H 6350 2150 50  0001 C CNN
+F 3 "" H 6350 2150 50  0001 C CNN
+	1    6350 2150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:ATmega328-PU U3
+U 1 1 5D492254
+P 7900 4950
+F 0 "U3" H 7256 4996 50  0000 R CNN
+F 1 "ATmega328-PU" H 7256 4905 50  0000 R CNN
+F 2 "Luciebox:DIP-28_W7.62mm" H 7900 4950 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20with%20picoPower%20Technology%20Data%20Sheet%2040001984A.pdf" H 7900 4950 50  0001 C CNN
+	1    7900 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7087D3
+P 2100 6100
+F 0 "R?" H 2159 6146 50  0000 L CNN
+F 1 "R_Small" H 2159 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 2100 6100 50  0001 C CNN
+F 3 "~" H 2100 6100 50  0001 C CNN
+	1    2100 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7087D9
+P 2100 6400
+F 0 "R?" H 2159 6446 50  0000 L CNN
+F 1 "R_Small" H 2159 6355 50  0000 L CNN
+F 2 "Luciebox:1206" H 2100 6400 50  0001 C CNN
+F 3 "~" H 2100 6400 50  0001 C CNN
+	1    2100 6400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7087DF
+P 2250 6250
+F 0 "R?" H 2309 6296 50  0000 L CNN
+F 1 "R_Small" H 2309 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 2250 6250 50  0001 C CNN
+F 3 "~" H 2250 6250 50  0001 C CNN
+	1    2250 6250
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2100 6300 2100 6250
+Wire Wire Line
+	2150 6250 2100 6250
+Connection ~ 2100 6250
+Wire Wire Line
+	2100 6250 2100 6200
+$Comp
+L Device:R_Small R?
+U 1 1 5D7087E9
+P 3200 4750
+F 0 "R?" H 3259 4796 50  0000 L CNN
+F 1 "R_Small" H 3259 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 3200 4750 50  0001 C CNN
+F 3 "~" H 3200 4750 50  0001 C CNN
+	1    3200 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Luciebox_components:terminal_8x1 T?
+U 1 1 5D7087EF
+P 2800 5600
+F 0 "T?" V 3315 6200 50  0000 C CNN
+F 1 "terminal_8x1" V 3224 6200 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 2800 5600 50  0001 C CNN
+F 3 "" H 2800 5600 50  0001 C CNN
+	1    2800 5600
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7087F5
+P 3050 4750
+F 0 "R?" H 3109 4796 50  0000 L CNN
+F 1 "R_Small" H 3109 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 3050 4750 50  0001 C CNN
+F 3 "~" H 3050 4750 50  0001 C CNN
+	1    3050 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7087FB
+P 2900 4750
+F 0 "R?" H 2959 4796 50  0000 L CNN
+F 1 "R_Small" H 2959 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 2900 4750 50  0001 C CNN
+F 3 "~" H 2900 4750 50  0001 C CNN
+	1    2900 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708801
+P 2750 4750
+F 0 "R?" H 2809 4796 50  0000 L CNN
+F 1 "R_Small" H 2809 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 2750 4750 50  0001 C CNN
+F 3 "~" H 2750 4750 50  0001 C CNN
+	1    2750 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708807
+P 2600 4750
+F 0 "R?" H 2659 4796 50  0000 L CNN
+F 1 "R_Small" H 2659 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 2600 4750 50  0001 C CNN
+F 3 "~" H 2600 4750 50  0001 C CNN
+	1    2600 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D70880D
+P 2450 4750
+F 0 "R?" H 2509 4796 50  0000 L CNN
+F 1 "R_Small" H 2509 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 2450 4750 50  0001 C CNN
+F 3 "~" H 2450 4750 50  0001 C CNN
+	1    2450 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708813
+P 2300 4750
+F 0 "R?" H 2359 4796 50  0000 L CNN
+F 1 "R_Small" H 2359 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 2300 4750 50  0001 C CNN
+F 3 "~" H 2300 4750 50  0001 C CNN
+	1    2300 4750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708819
+P 2400 6100
+F 0 "R?" H 2459 6146 50  0000 L CNN
+F 1 "R_Small" H 2459 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 2400 6100 50  0001 C CNN
+F 3 "~" H 2400 6100 50  0001 C CNN
+	1    2400 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D70881F
+P 2550 6250
+F 0 "R?" H 2609 6296 50  0000 L CNN
+F 1 "R_Small" H 2609 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 2550 6250 50  0001 C CNN
+F 3 "~" H 2550 6250 50  0001 C CNN
+	1    2550 6250
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2400 6250 2350 6250
+Wire Wire Line
+	2400 6250 2400 6200
+$Comp
+L Device:R_Small R?
+U 1 1 5D708827
+P 2700 6100
+F 0 "R?" H 2759 6146 50  0000 L CNN
+F 1 "R_Small" H 2759 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 2700 6100 50  0001 C CNN
+F 3 "~" H 2700 6100 50  0001 C CNN
+	1    2700 6100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2400 6250 2450 6250
+Connection ~ 2400 6250
+$Comp
+L Device:R_Small R?
+U 1 1 5D70882F
+P 2850 6250
+F 0 "R?" H 2909 6296 50  0000 L CNN
+F 1 "R_Small" H 2909 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 2850 6250 50  0001 C CNN
+F 3 "~" H 2850 6250 50  0001 C CNN
+	1    2850 6250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708835
+P 3150 6250
+F 0 "R?" H 3209 6296 50  0000 L CNN
+F 1 "R_Small" H 3209 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 3150 6250 50  0001 C CNN
+F 3 "~" H 3150 6250 50  0001 C CNN
+	1    3150 6250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D70883B
+P 3000 6100
+F 0 "R?" H 3059 6146 50  0000 L CNN
+F 1 "R_Small" H 3059 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 3000 6100 50  0001 C CNN
+F 3 "~" H 3000 6100 50  0001 C CNN
+	1    3000 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708841
+P 3300 6100
+F 0 "R?" H 3359 6146 50  0000 L CNN
+F 1 "R_Small" H 3359 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 3300 6100 50  0001 C CNN
+F 3 "~" H 3300 6100 50  0001 C CNN
+	1    3300 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708847
+P 3450 6250
+F 0 "R?" H 3509 6296 50  0000 L CNN
+F 1 "R_Small" H 3509 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 3450 6250 50  0001 C CNN
+F 3 "~" H 3450 6250 50  0001 C CNN
+	1    3450 6250
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2650 6250 2700 6250
+Wire Wire Line
+	2700 6200 2700 6250
+Connection ~ 2700 6250
+Wire Wire Line
+	2700 6250 2750 6250
+Wire Wire Line
+	3000 6200 3000 6250
+Wire Wire Line
+	3000 6250 3050 6250
+Wire Wire Line
+	2950 6250 3000 6250
+Connection ~ 3000 6250
+Wire Wire Line
+	3250 6250 3300 6250
+Wire Wire Line
+	3300 6200 3300 6250
+Connection ~ 3300 6250
+Wire Wire Line
+	3300 6250 3350 6250
+$Comp
+L Device:R_Small R?
+U 1 1 5D708859
+P 3600 6100
+F 0 "R?" H 3659 6146 50  0000 L CNN
+F 1 "R_Small" H 3659 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 3600 6100 50  0001 C CNN
+F 3 "~" H 3600 6100 50  0001 C CNN
+	1    3600 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D70885F
+P 3750 6250
+F 0 "R?" H 3809 6296 50  0000 L CNN
+F 1 "R_Small" H 3809 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 3750 6250 50  0001 C CNN
+F 3 "~" H 3750 6250 50  0001 C CNN
+	1    3750 6250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708865
+P 4050 6250
+F 0 "R?" H 4109 6296 50  0000 L CNN
+F 1 "R_Small" H 4109 6205 50  0000 L CNN
+F 2 "Luciebox:1206" H 4050 6250 50  0001 C CNN
+F 3 "~" H 4050 6250 50  0001 C CNN
+	1    4050 6250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D70886B
+P 3900 6100
+F 0 "R?" H 3959 6146 50  0000 L CNN
+F 1 "R_Small" H 3959 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 3900 6100 50  0001 C CNN
+F 3 "~" H 3900 6100 50  0001 C CNN
+	1    3900 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D708871
+P 4200 6100
+F 0 "R?" H 4259 6146 50  0000 L CNN
+F 1 "R_Small" H 4259 6055 50  0000 L CNN
+F 2 "Luciebox:1206" H 4200 6100 50  0001 C CNN
+F 3 "~" H 4200 6100 50  0001 C CNN
+	1    4200 6100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3550 6250 3600 6250
+Wire Wire Line
+	3600 6200 3600 6250
+Connection ~ 3600 6250
+Wire Wire Line
+	3600 6250 3650 6250
+Wire Wire Line
+	3900 6200 3900 6250
+Wire Wire Line
+	3900 6250 3950 6250
+Wire Wire Line
+	3850 6250 3900 6250
+Connection ~ 3900 6250
+Wire Wire Line
+	4150 6250 4200 6250
+Wire Wire Line
+	4200 6200 4200 6250
+Connection ~ 4200 6250
+Wire Wire Line
+	4200 6250 4250 6250
+$Comp
+L power:GND #PWR?
+U 1 1 5D708883
+P 2100 6500
+F 0 "#PWR?" H 2100 6250 50  0001 C CNN
+F 1 "GND" H 2105 6327 50  0000 C CNN
+F 2 "" H 2100 6500 50  0001 C CNN
+F 3 "" H 2100 6500 50  0001 C CNN
+	1    2100 6500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3200 4650 3050 4650
+Wire Wire Line
+	3050 4650 2900 4650
+Connection ~ 3050 4650
+Wire Wire Line
+	2900 4650 2750 4650
+Connection ~ 2900 4650
+Wire Wire Line
+	2750 4650 2600 4650
+Connection ~ 2750 4650
+Wire Wire Line
+	2450 4650 2600 4650
+Connection ~ 2600 4650
+Wire Wire Line
+	2450 4650 2300 4650
+Connection ~ 2450 4650
+Connection ~ 2300 4650
+$Comp
+L power:GND #PWR?
+U 1 1 5D708895
+P 3400 4450
+F 0 "#PWR?" H 3400 4200 50  0001 C CNN
+F 1 "GND" H 3405 4277 50  0000 C CNN
+F 2 "" H 3400 4450 50  0001 C CNN
+F 3 "" H 3400 4450 50  0001 C CNN
+	1    3400 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3400 4450 3050 4450
+Wire Wire Line
+	3050 4450 3050 4650
+Wire Wire Line
+	2100 4850 2100 5650
+Wire Wire Line
+	2300 4850 2300 4900
+Wire Wire Line
+	2300 4900 2200 4900
+Wire Wire Line
+	2200 4900 2200 5650
+Wire Wire Line
+	2450 4850 2450 4950
+Wire Wire Line
+	2450 4950 2300 4950
+Wire Wire Line
+	2300 4950 2300 5650
+Wire Wire Line
+	2400 5000 2600 5000
+Wire Wire Line
+	2600 5000 2600 4850
+Wire Wire Line
+	2750 4850 2750 5050
+Wire Wire Line
+	2750 5050 2500 5050
+Wire Wire Line
+	2500 5050 2500 5650
+Wire Wire Line
+	2600 5650 2600 5100
+Wire Wire Line
+	2600 5100 2900 5100
+Wire Wire Line
+	2900 5100 2900 4850
+Wire Wire Line
+	3050 4850 3050 5150
+Wire Wire Line
+	3050 5150 2700 5150
+Wire Wire Line
+	2700 5150 2700 5650
+Wire Wire Line
+	2800 5650 2800 5200
+Wire Wire Line
+	2800 5200 3200 5200
+Wire Wire Line
+	3200 5200 3200 4850
+Wire Wire Line
+	2100 5650 2100 6000
+Connection ~ 2100 5650
+Wire Wire Line
+	2200 5650 2200 6000
+Wire Wire Line
+	2200 6000 2400 6000
+Connection ~ 2200 5650
+Wire Wire Line
+	2300 5650 2300 5950
+Wire Wire Line
+	2300 5950 2700 5950
+Wire Wire Line
+	2700 5950 2700 6000
+Connection ~ 2300 5650
+Wire Wire Line
+	3000 6000 3000 5900
+Wire Wire Line
+	3000 5900 2400 5900
+Wire Wire Line
+	2400 5000 2400 5650
+Connection ~ 2400 5650
+Wire Wire Line
+	2400 5650 2400 5900
+Wire Wire Line
+	2500 5650 2500 5850
+Wire Wire Line
+	2500 5850 3300 5850
+Wire Wire Line
+	3300 5850 3300 6000
+Connection ~ 2500 5650
+Wire Wire Line
+	3600 6000 3600 5800
+Wire Wire Line
+	3600 5800 2600 5800
+Wire Wire Line
+	2600 5800 2600 5650
+Connection ~ 2600 5650
+Wire Wire Line
+	2700 5650 2700 5750
+Wire Wire Line
+	2700 5750 3900 5750
+Wire Wire Line
+	3900 5750 3900 6000
+Connection ~ 2700 5650
+Wire Wire Line
+	2800 5650 2800 5700
+Wire Wire Line
+	2800 5700 4200 5700
+Wire Wire Line
+	4200 5700 4200 6000
+Connection ~ 2800 5650
+Wire Wire Line
+	2300 4650 2150 4650
+Wire Wire Line
+	2150 4850 2100 4850
+$Comp
+L Device:R_Small R?
+U 1 1 5D7088D2
+P 2150 4750
+F 0 "R?" H 2209 4796 50  0000 L CNN
+F 1 "R_Small" H 2209 4705 50  0000 L CNN
+F 2 "Luciebox:1206" H 2150 4750 50  0001 C CNN
+F 3 "~" H 2150 4750 50  0001 C CNN
+	1    2150 4750
+	-1   0    0    1   
+$EndComp
+$Sheet
+S 1000 2000 500  800 
+U 5D74964C
+F0 "R2-R_ladder_dac" 50
+F1 "R2-R_ladder_dac.sch" 50
+F2 "DAC_analog" O L 1000 2200 50 
+$EndSheet
+$Sheet
+S 900  3250 500  800 
+U 5D761BCA
+F0 "sheet5D761BCA" 50
+F1 "R2-R_ladder_dac.sch" 50
+F2 "DAC_analog" O L 900 3450 50 
+$EndSheet
+$EndSCHEMATC

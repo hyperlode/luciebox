@@ -1,0 +1,559 @@
+EESchema Schematic File Version 4
+LIBS:Luciebox-cache
+LIBS:R-2R_DAC-cache
+EELAYER 29 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 2 3
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526B9
+P 2550 3550
+AR Path="/5D74964C/5D7526B9" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526B9" Ref="R?"  Part="1" 
+F 0 "R?" H 2609 3596 50  0000 L CNN
+F 1 "R_Small" H 2609 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 2550 3550 50  0001 C CNN
+F 3 "~" H 2550 3550 50  0001 C CNN
+	1    2550 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526BF
+P 2550 3850
+AR Path="/5D74964C/5D7526BF" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526BF" Ref="R?"  Part="1" 
+F 0 "R?" H 2609 3896 50  0000 L CNN
+F 1 "R_Small" H 2609 3805 50  0000 L CNN
+F 2 "Luciebox:1206" H 2550 3850 50  0001 C CNN
+F 3 "~" H 2550 3850 50  0001 C CNN
+	1    2550 3850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526C5
+P 2700 3700
+AR Path="/5D74964C/5D7526C5" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526C5" Ref="R?"  Part="1" 
+F 0 "R?" H 2759 3746 50  0000 L CNN
+F 1 "R_Small" H 2759 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 2700 3700 50  0001 C CNN
+F 3 "~" H 2700 3700 50  0001 C CNN
+	1    2700 3700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2550 3750 2550 3700
+Wire Wire Line
+	2600 3700 2550 3700
+Connection ~ 2550 3700
+Wire Wire Line
+	2550 3700 2550 3650
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526CF
+P 3650 2200
+AR Path="/5D74964C/5D7526CF" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526CF" Ref="R?"  Part="1" 
+F 0 "R?" H 3709 2246 50  0000 L CNN
+F 1 "R_Small" H 3709 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 3650 2200 50  0001 C CNN
+F 3 "~" H 3650 2200 50  0001 C CNN
+	1    3650 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Luciebox_components:terminal_8x1 T?
+U 1 1 5D7526D5
+P 3250 3050
+AR Path="/5D74964C/5D7526D5" Ref="T?"  Part="1" 
+AR Path="/5D761BCA/5D7526D5" Ref="T?"  Part="1" 
+F 0 "T?" V 3765 3650 50  0000 C CNN
+F 1 "terminal_8x1" V 3674 3650 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 3250 3050 50  0001 C CNN
+F 3 "" H 3250 3050 50  0001 C CNN
+	1    3250 3050
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526DB
+P 3500 2200
+AR Path="/5D74964C/5D7526DB" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526DB" Ref="R?"  Part="1" 
+F 0 "R?" H 3559 2246 50  0000 L CNN
+F 1 "R_Small" H 3559 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 3500 2200 50  0001 C CNN
+F 3 "~" H 3500 2200 50  0001 C CNN
+	1    3500 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526E1
+P 3350 2200
+AR Path="/5D74964C/5D7526E1" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526E1" Ref="R?"  Part="1" 
+F 0 "R?" H 3409 2246 50  0000 L CNN
+F 1 "R_Small" H 3409 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 3350 2200 50  0001 C CNN
+F 3 "~" H 3350 2200 50  0001 C CNN
+	1    3350 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526E7
+P 3200 2200
+AR Path="/5D74964C/5D7526E7" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526E7" Ref="R?"  Part="1" 
+F 0 "R?" H 3259 2246 50  0000 L CNN
+F 1 "R_Small" H 3259 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 3200 2200 50  0001 C CNN
+F 3 "~" H 3200 2200 50  0001 C CNN
+	1    3200 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526ED
+P 3050 2200
+AR Path="/5D74964C/5D7526ED" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526ED" Ref="R?"  Part="1" 
+F 0 "R?" H 3109 2246 50  0000 L CNN
+F 1 "R_Small" H 3109 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 3050 2200 50  0001 C CNN
+F 3 "~" H 3050 2200 50  0001 C CNN
+	1    3050 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526F3
+P 2900 2200
+AR Path="/5D74964C/5D7526F3" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526F3" Ref="R?"  Part="1" 
+F 0 "R?" H 2959 2246 50  0000 L CNN
+F 1 "R_Small" H 2959 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 2900 2200 50  0001 C CNN
+F 3 "~" H 2900 2200 50  0001 C CNN
+	1    2900 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526F9
+P 2750 2200
+AR Path="/5D74964C/5D7526F9" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526F9" Ref="R?"  Part="1" 
+F 0 "R?" H 2809 2246 50  0000 L CNN
+F 1 "R_Small" H 2809 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 2750 2200 50  0001 C CNN
+F 3 "~" H 2750 2200 50  0001 C CNN
+	1    2750 2200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D7526FF
+P 2850 3550
+AR Path="/5D74964C/5D7526FF" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7526FF" Ref="R?"  Part="1" 
+F 0 "R?" H 2909 3596 50  0000 L CNN
+F 1 "R_Small" H 2909 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 2850 3550 50  0001 C CNN
+F 3 "~" H 2850 3550 50  0001 C CNN
+	1    2850 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D752705
+P 3000 3700
+AR Path="/5D74964C/5D752705" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752705" Ref="R?"  Part="1" 
+F 0 "R?" H 3059 3746 50  0000 L CNN
+F 1 "R_Small" H 3059 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 3000 3700 50  0001 C CNN
+F 3 "~" H 3000 3700 50  0001 C CNN
+	1    3000 3700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2850 3700 2800 3700
+Wire Wire Line
+	2850 3700 2850 3650
+$Comp
+L Device:R_Small R?
+U 1 1 5D75270D
+P 3150 3550
+AR Path="/5D74964C/5D75270D" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D75270D" Ref="R?"  Part="1" 
+F 0 "R?" H 3209 3596 50  0000 L CNN
+F 1 "R_Small" H 3209 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 3150 3550 50  0001 C CNN
+F 3 "~" H 3150 3550 50  0001 C CNN
+	1    3150 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2850 3700 2900 3700
+Connection ~ 2850 3700
+$Comp
+L Device:R_Small R?
+U 1 1 5D752715
+P 3300 3700
+AR Path="/5D74964C/5D752715" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752715" Ref="R?"  Part="1" 
+F 0 "R?" H 3359 3746 50  0000 L CNN
+F 1 "R_Small" H 3359 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 3300 3700 50  0001 C CNN
+F 3 "~" H 3300 3700 50  0001 C CNN
+	1    3300 3700
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D75271B
+P 3600 3700
+AR Path="/5D74964C/5D75271B" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D75271B" Ref="R?"  Part="1" 
+F 0 "R?" H 3659 3746 50  0000 L CNN
+F 1 "R_Small" H 3659 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 3600 3700 50  0001 C CNN
+F 3 "~" H 3600 3700 50  0001 C CNN
+	1    3600 3700
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D752721
+P 3450 3550
+AR Path="/5D74964C/5D752721" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752721" Ref="R?"  Part="1" 
+F 0 "R?" H 3509 3596 50  0000 L CNN
+F 1 "R_Small" H 3509 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 3450 3550 50  0001 C CNN
+F 3 "~" H 3450 3550 50  0001 C CNN
+	1    3450 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D752727
+P 3750 3550
+AR Path="/5D74964C/5D752727" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752727" Ref="R?"  Part="1" 
+F 0 "R?" H 3809 3596 50  0000 L CNN
+F 1 "R_Small" H 3809 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 3750 3550 50  0001 C CNN
+F 3 "~" H 3750 3550 50  0001 C CNN
+	1    3750 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D75272D
+P 3900 3700
+AR Path="/5D74964C/5D75272D" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D75272D" Ref="R?"  Part="1" 
+F 0 "R?" H 3959 3746 50  0000 L CNN
+F 1 "R_Small" H 3959 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 3900 3700 50  0001 C CNN
+F 3 "~" H 3900 3700 50  0001 C CNN
+	1    3900 3700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3100 3700 3150 3700
+Wire Wire Line
+	3150 3650 3150 3700
+Connection ~ 3150 3700
+Wire Wire Line
+	3150 3700 3200 3700
+Wire Wire Line
+	3450 3650 3450 3700
+Wire Wire Line
+	3450 3700 3500 3700
+Wire Wire Line
+	3400 3700 3450 3700
+Connection ~ 3450 3700
+Wire Wire Line
+	3700 3700 3750 3700
+Wire Wire Line
+	3750 3650 3750 3700
+Connection ~ 3750 3700
+Wire Wire Line
+	3750 3700 3800 3700
+$Comp
+L Device:R_Small R?
+U 1 1 5D75273F
+P 4050 3550
+AR Path="/5D74964C/5D75273F" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D75273F" Ref="R?"  Part="1" 
+F 0 "R?" H 4109 3596 50  0000 L CNN
+F 1 "R_Small" H 4109 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 4050 3550 50  0001 C CNN
+F 3 "~" H 4050 3550 50  0001 C CNN
+	1    4050 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D752745
+P 4200 3700
+AR Path="/5D74964C/5D752745" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752745" Ref="R?"  Part="1" 
+F 0 "R?" H 4259 3746 50  0000 L CNN
+F 1 "R_Small" H 4259 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 4200 3700 50  0001 C CNN
+F 3 "~" H 4200 3700 50  0001 C CNN
+	1    4200 3700
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D75274B
+P 4500 3700
+AR Path="/5D74964C/5D75274B" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D75274B" Ref="R?"  Part="1" 
+F 0 "R?" H 4559 3746 50  0000 L CNN
+F 1 "R_Small" H 4559 3655 50  0000 L CNN
+F 2 "Luciebox:1206" H 4500 3700 50  0001 C CNN
+F 3 "~" H 4500 3700 50  0001 C CNN
+	1    4500 3700
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D752751
+P 4350 3550
+AR Path="/5D74964C/5D752751" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752751" Ref="R?"  Part="1" 
+F 0 "R?" H 4409 3596 50  0000 L CNN
+F 1 "R_Small" H 4409 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 4350 3550 50  0001 C CNN
+F 3 "~" H 4350 3550 50  0001 C CNN
+	1    4350 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 5D752757
+P 4650 3550
+AR Path="/5D74964C/5D752757" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D752757" Ref="R?"  Part="1" 
+F 0 "R?" H 4709 3596 50  0000 L CNN
+F 1 "R_Small" H 4709 3505 50  0000 L CNN
+F 2 "Luciebox:1206" H 4650 3550 50  0001 C CNN
+F 3 "~" H 4650 3550 50  0001 C CNN
+	1    4650 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4000 3700 4050 3700
+Wire Wire Line
+	4050 3650 4050 3700
+Connection ~ 4050 3700
+Wire Wire Line
+	4050 3700 4100 3700
+Wire Wire Line
+	4350 3650 4350 3700
+Wire Wire Line
+	4350 3700 4400 3700
+Wire Wire Line
+	4300 3700 4350 3700
+Connection ~ 4350 3700
+Wire Wire Line
+	4600 3700 4650 3700
+Wire Wire Line
+	4650 3650 4650 3700
+Connection ~ 4650 3700
+Wire Wire Line
+	4650 3700 4700 3700
+$Comp
+L power:GND #PWR?
+U 1 1 5D752769
+P 2550 3950
+AR Path="/5D74964C/5D752769" Ref="#PWR?"  Part="1" 
+AR Path="/5D761BCA/5D752769" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 2550 3700 50  0001 C CNN
+F 1 "GND" H 2555 3777 50  0000 C CNN
+F 2 "" H 2550 3950 50  0001 C CNN
+F 3 "" H 2550 3950 50  0001 C CNN
+	1    2550 3950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3650 2100 3500 2100
+Wire Wire Line
+	3500 2100 3350 2100
+Connection ~ 3500 2100
+Wire Wire Line
+	3350 2100 3200 2100
+Connection ~ 3350 2100
+Wire Wire Line
+	3200 2100 3050 2100
+Connection ~ 3200 2100
+Wire Wire Line
+	2900 2100 3050 2100
+Connection ~ 3050 2100
+Wire Wire Line
+	2900 2100 2750 2100
+Connection ~ 2900 2100
+Connection ~ 2750 2100
+$Comp
+L power:GND #PWR?
+U 1 1 5D75277B
+P 3850 1900
+AR Path="/5D74964C/5D75277B" Ref="#PWR?"  Part="1" 
+AR Path="/5D761BCA/5D75277B" Ref="#PWR?"  Part="1" 
+F 0 "#PWR?" H 3850 1650 50  0001 C CNN
+F 1 "GND" H 3855 1727 50  0000 C CNN
+F 2 "" H 3850 1900 50  0001 C CNN
+F 3 "" H 3850 1900 50  0001 C CNN
+	1    3850 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3850 1900 3500 1900
+Wire Wire Line
+	3500 1900 3500 2100
+Wire Wire Line
+	2550 2300 2550 3100
+Wire Wire Line
+	2750 2300 2750 2350
+Wire Wire Line
+	2750 2350 2650 2350
+Wire Wire Line
+	2650 2350 2650 3100
+Wire Wire Line
+	2900 2300 2900 2400
+Wire Wire Line
+	2900 2400 2750 2400
+Wire Wire Line
+	2750 2400 2750 3100
+Wire Wire Line
+	2850 2450 3050 2450
+Wire Wire Line
+	3050 2450 3050 2300
+Wire Wire Line
+	3200 2300 3200 2500
+Wire Wire Line
+	3200 2500 2950 2500
+Wire Wire Line
+	2950 2500 2950 3100
+Wire Wire Line
+	3050 3100 3050 2550
+Wire Wire Line
+	3050 2550 3350 2550
+Wire Wire Line
+	3350 2550 3350 2300
+Wire Wire Line
+	3500 2300 3500 2600
+Wire Wire Line
+	3500 2600 3150 2600
+Wire Wire Line
+	3150 2600 3150 3100
+Wire Wire Line
+	3250 3100 3250 2650
+Wire Wire Line
+	3250 2650 3650 2650
+Wire Wire Line
+	3650 2650 3650 2300
+Wire Wire Line
+	2550 3100 2550 3450
+Connection ~ 2550 3100
+Wire Wire Line
+	2650 3100 2650 3450
+Wire Wire Line
+	2650 3450 2850 3450
+Connection ~ 2650 3100
+Wire Wire Line
+	2750 3100 2750 3400
+Wire Wire Line
+	2750 3400 3150 3400
+Wire Wire Line
+	3150 3400 3150 3450
+Connection ~ 2750 3100
+Wire Wire Line
+	3450 3450 3450 3350
+Wire Wire Line
+	3450 3350 2850 3350
+Wire Wire Line
+	2850 2450 2850 3100
+Connection ~ 2850 3100
+Wire Wire Line
+	2850 3100 2850 3350
+Wire Wire Line
+	2950 3100 2950 3300
+Wire Wire Line
+	2950 3300 3750 3300
+Wire Wire Line
+	3750 3300 3750 3450
+Connection ~ 2950 3100
+Wire Wire Line
+	4050 3450 4050 3250
+Wire Wire Line
+	4050 3250 3050 3250
+Wire Wire Line
+	3050 3250 3050 3100
+Connection ~ 3050 3100
+Wire Wire Line
+	3150 3100 3150 3200
+Wire Wire Line
+	3150 3200 4350 3200
+Wire Wire Line
+	4350 3200 4350 3450
+Connection ~ 3150 3100
+Wire Wire Line
+	3250 3100 3250 3150
+Wire Wire Line
+	3250 3150 4650 3150
+Wire Wire Line
+	4650 3150 4650 3450
+Connection ~ 3250 3100
+Wire Wire Line
+	2750 2100 2600 2100
+Wire Wire Line
+	2600 2300 2550 2300
+$Comp
+L Device:R_Small R?
+U 1 1 5D7527B8
+P 2600 2200
+AR Path="/5D74964C/5D7527B8" Ref="R?"  Part="1" 
+AR Path="/5D761BCA/5D7527B8" Ref="R?"  Part="1" 
+F 0 "R?" H 2659 2246 50  0000 L CNN
+F 1 "R_Small" H 2659 2155 50  0000 L CNN
+F 2 "Luciebox:1206" H 2600 2200 50  0001 C CNN
+F 3 "~" H 2600 2200 50  0001 C CNN
+	1    2600 2200
+	-1   0    0    1   
+$EndComp
+Text HLabel 4700 3700 2    50   Output ~ 0
+DAC_analog
+Wire Notes Line
+	5250 2800 5850 2800
+Wire Notes Line
+	5850 2800 5850 3550
+Wire Notes Line
+	5850 3550 6750 3550
+Wire Notes Line
+	6750 3550 6750 2950
+Wire Notes Line
+	6750 2950 6200 2950
+Wire Notes Line
+	6200 2950 6200 2600
+$EndSCHEMATC
