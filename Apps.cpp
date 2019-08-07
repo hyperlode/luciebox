@@ -398,16 +398,20 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		this->dispState[i]=0;
 	}
 	
-	generalTimer.setInitTimeMillis(3000);
-	generalTimer.start();
+	//generalTimer.setInitTimeMillis(3000);
+	//generalTimer.start();
   }
   
   if (potentio->getValueStableChangedEdge()){
-	moveDir = MOVE_RIGHT;
-	// if (counter == 0 ){
-		// moveDir = MOVE_UP; //&& game_x_pos == 0  && game_y_pos ==0
-	// }
-	// this->frequency_lower = potentio->getValueMapped(0,5000);
+		  uint16_t val;
+		  // val = (uint16_t)potentio->getValueMapped(0,96); // 2 cycli of 48 pos.
+		  // val = (uint16_t)potentio->getValueMapped(0,192); // 2 cycli of 48 pos.
+		  val = (uint16_t)potentio->getValueMapped(0,102); // 2 cycli of 48 pos.
+		  val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
+		  counter = val/12; // get digit
+		  val = val%12; 
+		  game_x_pos = val/4; // get xpos
+		  game_y_pos = val%4; // get ypos
   }
   
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
@@ -432,17 +436,16 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	  }
   }
   
-  
   // set x and y coords
+  // 3 (x) * 4(y) matrix. (y is 4 positions to "remember" if low or high part when passing through segment G)
   switch(moveDir){
-
 	
 	case MOVE_RIGHT:{
 	  //move right
 	  game_x_pos++;
 	  if (game_x_pos > 2){
-		  counter++;
-		  if (counter> 3){
+		  counter++; // next digit
+		  if (counter> 3){ 
 			  counter = 0;
 		  }
 		  game_x_pos = 0;
@@ -494,7 +497,7 @@ void Apps::modeSingleSegmentManipulation(bool init){
     { 
 	  //move left
 	  if (game_x_pos == 0){
-		counter = (counter == 0)?3:(counter-1);
+		counter = (counter == 0)?3:(counter-1); // previous digit
 		game_x_pos = 2;
 	  }else{
 		game_x_pos--;
@@ -539,21 +542,38 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		break;
   }
   
+  // toggle active segment.
   if (moveDir == TOGGLE_SEGMENT){
-		this->dispState[counter]  ^= seg;
+	    // toggle segment with xor old^toggleval=new  
+		//	toggleval==0: 0^0=0, 1^0=1 , 
+		//  toggleval==1: 1^1=0, 0^1=1
+		this->dispState[counter]  ^= seg; 
   }
   
+  //invert all data in picture 
+  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValueChanged()){
+      //i can typ whatever i want mlem mlem mlem
+	  // negative .
+	  for (uint8_t i=0;i<4;i++){
+		  this->dispState[i] = ~this->dispState[i] ;
+	  }  
+  }
+  
+  
+  // set display
   for (uint8_t i=0;i<4;i++){
 	  ledDisp->SetSingleDigit(this->dispState[i],i+1);  
   }
-  // ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively. (ideally, it should blink).  
-  
-  if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+
+  //show active segment on display
+  // if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+  if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 	ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively.  
-  }else{
-	  //only show the saved state.
-	  ledDisp->SetSingleDigit(this->dispState[counter],counter+1);
   }
+  // else{
+	  // //only show the saved state, no blinking of active segment. 
+	  // ledDisp->SetSingleDigit(this->dispState[counter],counter+1);
+  // }
   
 // ledDisp->displayHandler(textBuf);  
 // ledDisp->SetSingleDigit(B11111111, 1);  

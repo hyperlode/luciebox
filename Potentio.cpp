@@ -33,6 +33,12 @@ bool Potentio::getValueStableChangedEdge(){
 	return this->potentio_value_stable_changed;
 }
 
+bool Potentio::getLastStableValueChangedUp(){
+	// if last stable value change resulted in a higher value, return True, if lower, return False. 
+	return this->potentio_value_last_change_up_else_down ;
+}
+
+
 void Potentio::refresh(){
 	//call this to update the value of the analog input. call multiple times to check for stable value.
 	
@@ -41,6 +47,7 @@ void Potentio::refresh(){
 
 	if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY  ){
 		this->potentio_value_stable_changed = true;  //simple edge detection
+		this->potentio_value_last_change_up_else_down = this->potentio_value_stable > potentio_value;
 		this->potentio_value_stable = potentio_value;
 		#ifdef DEBUG_POTENTIO
 		Serial.println(potentio_value_stable);
