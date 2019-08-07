@@ -458,12 +458,12 @@ void Apps::movieAnimationMode(bool init){
 	}else{
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
-			// if (potentio->getLastStableValueChangedUp()){
-				// animation_step++;
-			// }else{
-				// animation_step--;
-			// }
-			nextStep = true;
+			if (potentio->getLastStableValueChangedUp()){
+				animation_step++;
+			}else{
+				animation_step--;
+			}
+			// nextStep = true;
 		}
 		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
 			 animation_step++;
