@@ -382,16 +382,19 @@ void Apps::modeSoundNotes(){
 
 void Apps::draw(bool init){
 	
-	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+	if(binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
+		this->movieAnimationMode(true);
 		
+	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
+		this->modeSingleSegmentManipulation(false);
+		
+	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 		this->movieAnimationMode(init);
+		
 	}else{
 		this->modeSingleSegmentManipulation(init);
 	}
 }
-
-
-
 
 void Apps::movieAnimationMode(bool init){
 	
@@ -400,7 +403,7 @@ void Apps::movieAnimationMode(bool init){
 		// this->dispState[i]=0;
 		//ledDisp->SetSingleDigit(0b01010101,i+1);
 		counter = 0;
-	    animation_speed.setInitTimeMillis(-1000);
+	    animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 		animation_speed.start();
 	}
 	
@@ -442,7 +445,7 @@ void Apps::movieAnimationMode(bool init){
 			 counter--;
 		}
 	}
-	if (counter>13){
+	if (counter>12){
 		counter = 0;
 	}else if (counter < 0){
 		counter = 12;
