@@ -29,6 +29,7 @@
 #define MOVE_DOWN		4
 #define MOVE_UP	  	    5
 
+#define ANIMATION_STOP_CODE 0x00
 const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
   C7_4,rest_4,rest_2,
   C7_4,rest_2, C7_8,rest_8,
@@ -132,9 +133,9 @@ const uint32_t disp_4digits_animate_circle [] PROGMEM = {
     };
 	
 	
-// const uint32_t disp_4digits_animations [] PROGMEM = {
-	// 0x34,  // first byte = length of animation in bytes  (here 52, excluding the length byte)
-const uint32_t disp_4digits_swoosh [] PROGMEM = {
+const uint32_t disp_4digits_animations [] PROGMEM = {
+	0x34,  // first byte = length of animation in bytes  (here 53, including the length byte)
+// const uint32_t disp_4digits_swoosh [] PROGMEM = {
     0x00,0x00,0x00,0x00, // horizontal right to left sweep.
     0x00,0x00,0x00,0x06,
     0x00,0x00,0x00,0x49,
@@ -147,7 +148,17 @@ const uint32_t disp_4digits_swoosh [] PROGMEM = {
     0x00,0x30,0x00,0x00,
 	0x06,0x00,0x00,0x00,
     0x49,0x00,0x00,0x00,
-    0x30,0x00,0x00,0x00,
+    0x30,0x00,0x00,0x00, //last byte is byte 52.
+	0x18,  //length of next animation (25 including the length)  byte53
+	0x00,0x00,0x00,0x00, // vertical swoop     
+	0x01,0x01,0x01,0x01,
+	0x42,0x42,0x42,0x42,
+	0x80,0x80,0x80,0x80,
+	0x24,0x24,0x24,0x24,
+	0x04,0x04,0x04,0x04,   // byte 77,
+	0x04, // (5 including the length byte)  byte 78
+	0xFF,0xFF,0xFF,0xFF, //byte 82
+	ANIMATION_STOP_CODE   //length 0 byte is stop byte.
 };	
 	
 const uint8_t disp_digit_animate [] PROGMEM = {1,2,4,8,16,32};
@@ -182,6 +193,7 @@ class Apps{
   void modeSoundNotes();
   void draw(bool init);
   void movieAnimationMode(bool init);
+  uint16_t _animationGetStartByte(uint8_t number);
   void modeSingleSegmentManipulation(bool init);
   void modeGeiger(bool init);
   void modeSequencer(bool init);
@@ -210,9 +222,10 @@ class Apps{
   uint8_t allNotesIndex;
   int16_t counter;
   int16_t counter2;
+  int16_t counter3;
   uint8_t geiger_counter;
   bool numberElseAlphabethMode;
-  uint8_t animation_step;
+  int16_t animation_step;
   uint8_t game_x_pos;
   uint8_t game_y_pos;
   uint8_t reactionGameTarget;

@@ -396,22 +396,42 @@ void Apps::draw(bool init){
 	}
 }
 
+uint16_t Apps::_animationGetStartByte(uint8_t number){
+	//counter contains length of animation in bytes.
+	uint16_t startByte = 0;
+	for (uint8_t i=0;i<number;i++){
+		if ((uint16_t)pgm_read_byte_near(disp_4digits_animations + startByte) == ANIMATION_STOP_CODE){
+			startByte = 0; //if there are for example only 2 animations,and 4 is given, will continue to overflow. (modulo)
+		}else{
+			startByte += (uint16_t)pgm_read_byte_near(disp_4digits_animations + startByte); 
+		}
+	}
+	
+	return startByte;
+}
+
 void Apps::movieAnimationMode(bool init){
 	
 	 //reset saved led disp state.
 	if (init){
 		// this->dispState[i]=0;
 		//ledDisp->SetSingleDigit(0b01010101,i+1);
-		counter = 0;
+		animation_step = 0; // frame
+		
 	    animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 		animation_speed.start();
+		
+		counter2 = 1; //contains animation number. (saved as a big array with multiple animation behind oneother, divided by length bytes.
+		
+		counter3 = this->_animationGetStartByte(counter2); // animation offset (start byte)
+		counter = (uint32_t)pgm_read_byte_near(disp_4digits_animations + counter3) - 1; // length of animation
 	}
+	
 	
 	screenPersistenceOfVision = 0;
 	for (uint8_t i=0;i<4;i++){
-		screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_swoosh + counter*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+		screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animations + (counter3 + 1) + animation_step*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
 	}
-	
 	
 	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 		// auto mode.
@@ -421,7 +441,7 @@ void Apps::movieAnimationMode(bool init){
 		  }
 		  
 		  if (!animation_speed.getTimeIsNegative()){
-			counter++;
+			animation_step++;
 			animation_speed.start();
 			  ledDisp->SetLedArray(0b00001111); 
 		  }else{
@@ -432,23 +452,24 @@ void Apps::movieAnimationMode(bool init){
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
 			if (potentio->getLastStableValueChangedUp()){
-				counter++;
+				animation_step++;
 			}else{
-				counter--;
+				animation_step--;
 			}
 		}
 		
 		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
-			 counter++;
+			 animation_step++;
 		}
 		if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
-			 counter--;
+			 animation_step--;
 		}
 	}
-	if (counter>12){
-		counter = 0;
-	}else if (counter < 0){
-		counter = 12;
+	// animation step
+	if (animation_step*4 > counter){
+		animation_step = 0;
+	}else if (animation_step < 0){
+		animation_step = counter;
 	}
 	ledDisp->SetFourDigits(screenPersistenceOfVision);
 	// drawings in memory.
