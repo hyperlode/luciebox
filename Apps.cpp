@@ -380,6 +380,79 @@ void Apps::modeSoundNotes(){
 	  }
 }
 
+void Apps::draw(bool init){
+	
+	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+		
+		this->movieAnimationMode(init);
+	}else{
+		this->modeSingleSegmentManipulation(init);
+	}
+}
+
+
+
+
+void Apps::movieAnimationMode(bool init){
+	
+	 //reset saved led disp state.
+	if (init){
+		// this->dispState[i]=0;
+		//ledDisp->SetSingleDigit(0b01010101,i+1);
+		counter = 0;
+	    animation_speed.setInitTimeMillis(-1000);
+		animation_speed.start();
+	}
+	
+	screenPersistenceOfVision = 0;
+	for (uint8_t i=0;i<4;i++){
+		screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_swoosh + counter*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+	}
+	
+	
+	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+		// auto mode.
+		  if (potentio->getValueStableChangedEdge()){
+			animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+	//        animation_speed.start(); //during turning it pauses because of the continuous restarting.
+		  }
+		  
+		  if (!animation_speed.getTimeIsNegative()){
+			counter++;
+			animation_speed.start();
+			  ledDisp->SetLedArray(0b00001111); 
+		  }else{
+			  ledDisp->SetLedArray(0b00110000); 
+		  }
+		
+	}else{
+		// manual mode
+		if (potentio->getValueStableChangedEdge()){
+			if (potentio->getLastStableValueChangedUp()){
+				counter++;
+			}else{
+				counter--;
+			}
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+			 counter++;
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+			 counter--;
+		}
+	}
+	if (counter>13){
+		counter = 0;
+	}else if (counter < 0){
+		counter = 12;
+	}
+	ledDisp->SetFourDigits(screenPersistenceOfVision);
+	// drawings in memory.
+	// scroll through individual images.
+	// in singlesegmentmanipulation, a drawing can be changed.
+}
+
 void Apps::modeSingleSegmentManipulation(bool init){
   uint8_t moveDir;
   moveDir = DO_NOTHING;
@@ -404,9 +477,7 @@ void Apps::modeSingleSegmentManipulation(bool init){
   
   if (potentio->getValueStableChangedEdge()){
 		  uint16_t val;
-		  // val = (uint16_t)potentio->getValueMapped(0,96); // 2 cycli of 48 pos.
-		  // val = (uint16_t)potentio->getValueMapped(0,192); // 2 cycli of 48 pos.
-		  val = (uint16_t)potentio->getValueMapped(0,102); // 2 cycli of 48 pos.
+		  val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments. 
 		  val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
 		  counter = val/12; // get digit
 		  val = val%12; 

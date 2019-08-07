@@ -130,6 +130,26 @@ const uint32_t disp_4digits_animate_circle [] PROGMEM = {
     0x10,0x00,0x00,0x00,    
     0x20,0x00,0x00,0x00    
     };
+	
+	
+// const uint32_t disp_4digits_animations [] PROGMEM = {
+	// 0x34,  // first byte = length of animation in bytes  (here 52, excluding the length byte)
+const uint32_t disp_4digits_swoosh [] PROGMEM = {
+    0x00,0x00,0x00,0x00, // horizontal right to left sweep.
+    0x00,0x00,0x00,0x06,
+    0x00,0x00,0x00,0x49,
+    0x00,0x00,0x00,0x30,
+    0x00,0x00,0x06,0x00,
+    0x00,0x00,0x49,0x00,
+    0x00,0x00,0x30,0x00,
+	0x00,0x06,0x00,0x00,
+    0x00,0x49,0x00,0x00,
+    0x00,0x30,0x00,0x00,
+	0x06,0x00,0x00,0x00,
+    0x49,0x00,0x00,0x00,
+    0x30,0x00,0x00,0x00,
+};	
+	
 const uint8_t disp_digit_animate [] PROGMEM = {1,2,4,8,16,32};
 const uint8_t disp_digit_animate_double [] PROGMEM = {9,18,36,9,18,36};
 const uint8_t disp_digit_animate_inverted [] PROGMEM = {62,61,59,55,47,31};
@@ -160,6 +180,8 @@ class Apps{
   void modeCountingLettersAndChars(bool init);
   void modeSoundSong(bool init);
   void modeSoundNotes();
+  void draw(bool init);
+  void movieAnimationMode(bool init);
   void modeSingleSegmentManipulation(bool init);
   void modeGeiger(bool init);
   void modeSequencer(bool init);
@@ -204,6 +226,8 @@ class Apps{
   bool reactionGameYellowButtonIsIncluded;
   uint8_t selectedSounds[4];
   uint8_t dispState[4];
+  
+  uint8_t movie[40];
 
   char*  textBuf;
   char*  scrollBuf;

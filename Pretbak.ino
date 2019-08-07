@@ -209,7 +209,7 @@ void mode_refresh(){
       break;
       
     case 6:
-      pretbak_apps.modeSingleSegmentManipulation(init);
+      pretbak_apps.draw(init);
       break;
       
     case 7:
