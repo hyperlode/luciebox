@@ -435,7 +435,7 @@ void Apps::movieAnimationMode(bool init){
 	}
 	
 	
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+	if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
 		
 			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && counter2 > 0){
@@ -469,7 +469,7 @@ void Apps::movieAnimationMode(bool init){
 			animation_direction = !animation_direction;
 		  }
 		  
-		  if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
 			 animation_step = (uint16_t)(counter/4) - 1; // last step
 			}
@@ -486,7 +486,7 @@ void Apps::movieAnimationMode(bool init){
 				animation_step--;
 			}
 		}
-		if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
 				 animation_step++;
 			}
