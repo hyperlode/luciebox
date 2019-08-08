@@ -210,6 +210,7 @@ class Apps{
   MiniMultiTimer multiTimer;
   
   int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+  void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
   
   SuperTimer generalTimer;
   SuperTimer gameTimer;
@@ -225,6 +226,7 @@ class Apps{
   int16_t counter3;
   uint8_t geiger_counter;
   bool numberElseAlphabethMode;
+  bool animation_direction;
   int16_t animation_step;
   uint8_t game_x_pos;
   uint8_t game_y_pos;

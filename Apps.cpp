@@ -417,6 +417,7 @@ void Apps::movieAnimationMode(bool init){
 		// this->dispState[i]=0;
 		//ledDisp->SetSingleDigit(0b01010101,i+1);
 		animation_step = 0; // frame
+		animation_direction = 0;
 		
 	    animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 		animation_speed.start();
@@ -433,8 +434,16 @@ void Apps::movieAnimationMode(bool init){
 		screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animations + (counter3 + 1) + animation_step*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
 	}
 	
-	if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-			counter2++;
+	
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+		
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && counter2 > 0){
+					counter2--;
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+					counter2++;
+			}
 			counter3 = this->_animationGetStartByte(counter2); // animation offset (start byte)
 			counter = (int16_t)pgm_read_byte_near(disp_4digits_animations + counter3) - 1; // length of animation
 			animation_step = 0;
@@ -443,6 +452,7 @@ void Apps::movieAnimationMode(bool init){
 			// Serial.println(counter2);
 			// Serial.println(counter3);
 			// Serial.println(animation_step);
+		}
 	}
 	
 	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
@@ -455,6 +465,18 @@ void Apps::movieAnimationMode(bool init){
 			nextStep = true;
 			animation_speed.start();
 		  }
+          if(binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+			animation_direction = !animation_direction;
+		  }
+		  
+		  if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+			 animation_step = (uint16_t)(counter/4) - 1; // last step
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+				 animation_step = 0; // first step
+			}
+		  }
 	}else{
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
@@ -463,29 +485,40 @@ void Apps::movieAnimationMode(bool init){
 			}else{
 				animation_step--;
 			}
-			// nextStep = true;
 		}
-		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
-			 animation_step++;
-		}
-		if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
-			 animation_step--;
+		if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+				 animation_step++;
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+				 animation_step--;	
+			}	
 		}
 	}
 	
-	// animation next step
+
+	
+	// animation next step direction
 	if (nextStep){
-		if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		// if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		if(animation_direction){
 			animation_step++;
 		}else{
 			animation_step--;
 		}
 	}
+	
 	// animation step
 	if (animation_step*4 >= counter){
 		animation_step = 0;
 	}else if (animation_step < 0){
 		animation_step = (uint16_t)(counter/4) - 1;
+	}
+	
+	//invert all data in picture 
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+	  // negative .
+	  screenPersistenceOfVision = ~screenPersistenceOfVision ;
 	}
 	
 	// set to display 
@@ -1266,4 +1299,11 @@ void Apps::gameButtonInteraction(bool init){
     }        
     animation_speed.start();    
   }
+}
+
+void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
+	//as the number of write operations to eeprom is limited, only write when different value.
+	if (eeprom_read_byte(address) != value) {
+		eeprom_write_byte(address, value);
+	}
 }
