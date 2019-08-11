@@ -403,35 +403,45 @@ void Apps::movieAnimationMode(bool init){
 	bool nextStep = 0;
 	 //reset saved led disp state.
 	if (init){
+		counter = 4; // dispay is four characters. Four bytes.So, it should advance four bytes every step (default). But, it could give fun effects to change that number and see what happens... 
 		this->dataPlayer.loadDataSet(1);
 		this->dataPlayer.setAutoSteps(4);
+		
+		// this->dataPlayer.loadAllData(&disp_4digits_animations);
+		this->dataPlayer.loadAllData(allData);
 	}
-	
-	if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
-		//Serial.println("ttmtme");
-		//this->dataPlayer.setIndex(0); // reset animation at start.
-		// reset animation at start.
-	}
-	
+
 	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-		//this->dataPlayer.setAutoStep(0); 
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
 			if (potentio->getLastStableValueChangedUp()){
-				this->dataPlayer.moveIndexSteps(4);
+				this->dataPlayer.setSetIndexDirection(1);
+				this->dataPlayer.moveIndexSteps(counter);
 			}else{
-				this->dataPlayer.moveIndexSteps(-4);
+				this->dataPlayer.setSetIndexDirection(0);
+				this->dataPlayer.moveIndexSteps(counter);
 			}
 		}
+		
 		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
-			 this->dataPlayer.moveIndexSteps(4);
+			 this->dataPlayer.setSetIndexDirection(1);
+			 this->dataPlayer.moveIndexSteps(counter);
 		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){	
+			counter++;
+			if (counter>4){
+				counter = 1;
+			}
+			this->dataPlayer.setAutoSteps(counter);
+		}
+		
 		if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
-			 this->dataPlayer.moveIndexSteps(-4);
+			this->dataPlayer.setSetIndexDirection(0);
+			 this->dataPlayer.moveIndexSteps(counter);
 		}	
 		
 	}else{
-		//this->dataPlayer.setAutoStep(1); 
 		// auto mode.
 		this->dataPlayer.update();
 		if (potentio->getValueStableChangedEdge()){
@@ -454,16 +464,16 @@ void Apps::movieAnimationMode(bool init){
 		  
 		  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
 		
-			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && counter2 > 0){
-					counter2--;
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+				this->dataPlayer.nextDataSet(false);
 			}
 			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-					counter2++;
+				this->dataPlayer.nextDataSet(true);
 			}
 		}
 	}
 	
-	// get the data.
+	// get the display data.
 	screenPersistenceOfVision = this->dataPlayer.getActive32bit();
 	
 	//invert all data in picture 
@@ -474,9 +484,6 @@ void Apps::movieAnimationMode(bool init){
 	
 	// set to display 
 	ledDisp->SetFourDigits(screenPersistenceOfVision);
-	// drawings in memory.
-	// scroll through individual images.
-	// in singlesegmentmanipulation, a drawing can be changed.
 }
 
 void Apps::modeSingleSegmentManipulation(bool init){
