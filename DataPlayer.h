@@ -76,15 +76,21 @@ class DataPlayer{
 	
 	void setSetIndexDirection(uint8_t dir);
 	
-	
+	void setAutoStepSpeed(long millis);
     uint8_t getActiveByte();
     uint32_t getActive32bit();
     void next(); // next index step IN data set.
 	void moveIndexSteps(int8_t steps);
     void update();
+	void setAutoSteps(uint8_t steps);
+	void setIndex(uint8_t index);
+	void setAutoStep(bool enable);
+	bool getAutoStep();
     
   private:
-	
+    bool auto_step_enabled;
+	SuperTimer auto_step_timer;
+	int8_t auto_steps;
     uint8_t data_set; // the number of the active data set
 	uint8_t data_set_length; // length of the active data set.
 	uint8_t data_set_start_index;

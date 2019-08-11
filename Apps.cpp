@@ -399,76 +399,22 @@ void Apps::draw(bool init){
 	}
 }
 
-
 void Apps::movieAnimationMode(bool init){
 	bool nextStep = 0;
 	 //reset saved led disp state.
 	if (init){
-		// this->dispState[i]=0;
-		//ledDisp->SetSingleDigit(0b01010101,i+1);
-		// animation_step = 0; // frame
-		// animation_direction = 0;
 		this->dataPlayer.loadDataSet(1);
-		
-	    animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
-		animation_speed.start();
-		
-		// counter2 = 0; //contains animation number. (saved as a big array with multiple animation behind oneother, divided by length bytes.
-		
-		// counter3 = this->_animationGetStartByte(counter2); // animation offset (start byte)
-		// counter = (int16_t)pgm_read_byte_near(disp_4digits_animations + counter3) - 1; // length of animation
+		this->dataPlayer.setAutoSteps(4);
 	}
 	
+	if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown()){
+		//Serial.println("ttmtme");
+		//this->dataPlayer.setIndex(0); // reset animation at start.
+		// reset animation at start.
+	}
 	
-	screenPersistenceOfVision = this->dataPlayer.getActive32bit();
-	
-	
-	
-	// if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		
-	// }
-	
-	if (!binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-		// // auto mode.
-		  // if (potentio->getValueStableChangedEdge()){
-			// animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
-			// // animation_speed.start(); //during turning it pauses because of the continuous restarting.
-		  // }
-		  // if (!animation_speed.getTimeIsNegative()){
-			// nextStep = true;
-			// animation_speed.start();
-		  // }
-          // if(binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-			// animation_direction = !animation_direction;
-		  // }
-		  
-		  // // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-			// // if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
-			 // // animation_step = (uint16_t)(counter/4) - 1; // last step
-			// // }
-			// // if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
-				 // // animation_step = 0; // first step
-			// // }
-		  // // }
-		  
-		  // if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-		
-			// if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && counter2 > 0){
-					// counter2--;
-			// }
-			// if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-					// counter2++;
-			// }
-			// counter3 = this->_animationGetStartByte(counter2); // animation offset (start byte)
-			// counter = (int16_t)pgm_read_byte_near(disp_4digits_animations + counter3) - 1; // length of animation
-			// animation_step = 0;
-			// // Serial.println("counter:");
-			// // Serial.println(counter);
-			// // Serial.println(counter2);
-			// // Serial.println(counter3);
-			// // Serial.println(animation_step);
-		// }
-	}else{
+	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+		//this->dataPlayer.setAutoStep(0); 
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
 			if (potentio->getLastStableValueChangedUp()){
@@ -483,26 +429,43 @@ void Apps::movieAnimationMode(bool init){
 		if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
 			 this->dataPlayer.moveIndexSteps(-4);
 		}	
+		
+	}else{
+		//this->dataPlayer.setAutoStep(1); 
+		// auto mode.
+		this->dataPlayer.update();
+		if (potentio->getValueStableChangedEdge()){
+		//animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+			dataPlayer.setAutoStepSpeed(potentio->getValueMapped(-1024,0));
+		}
+
+		if(binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+			this->dataPlayer.setSetIndexDirection(2);
+		}
+		  
+		  // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			// if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+			 // animation_step = (uint16_t)(counter/4) - 1; // last step
+			// }
+			// if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+				 // animation_step = 0; // first step
+			// }
+		  // }
+		  
+		  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+		
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && counter2 > 0){
+					counter2--;
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+					counter2++;
+			}
+		}
 	}
 	
-
+	// get the data.
+	screenPersistenceOfVision = this->dataPlayer.getActive32bit();
 	
-	// // animation next step direction
-	// if (nextStep){
-		// // if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		// if(animation_direction){
-			// animation_step++;
-		// }else{
-			// animation_step--;
-		// }
-	// }
-	
-	// // animation step
-	// if (animation_step*4 >= counter){
-		// animation_step = 0;
-	// }else if (animation_step < 0){
-		// animation_step = (uint16_t)(counter/4) - 1;
-	// }
 	//invert all data in picture 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 	  // negative .

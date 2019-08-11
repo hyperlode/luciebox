@@ -8,7 +8,8 @@ DataPlayer::DataPlayer() {
 	
 	set_move_forward_else_backward = true;
 	
-	
+	auto_step_timer.setInitTimeMillis(-1000);
+	auto_step_timer.start();
 	// animation_step = 0; // frame
 	// animation_direction = 0;
 
@@ -31,7 +32,6 @@ uint16_t DataPlayer::getStartIndexByDataSet(uint8_t data_set){
 	return startByte;
 }
 
-
 void DataPlayer::loadDataSet(uint8_t data_set){
 	this->data_set = data_set;
 	this->data_set_start_index = this->getStartIndexByDataSet(data_set); // animation offset (start byte)
@@ -51,6 +51,25 @@ uint32_t DataPlayer::getActive32bit(){
 	return dw;
 }
 
+void DataPlayer::setAutoStep(bool enable){
+	this->auto_step_enabled = enable;
+	this->auto_step_timer.start();
+	this->setIndex(0); // restart data set index
+}
+
+bool DataPlayer::getAutoStep(){
+	return this->auto_step_enabled;
+}
+	
+void DataPlayer::setAutoStepSpeed(long millis){
+	this->auto_step_timer.setInitTimeMillis(millis);
+	this->auto_step_timer.start();
+}
+
+void DataPlayer::setAutoSteps(uint8_t steps){
+	this->auto_steps = steps;
+}
+
 void DataPlayer::moveIndexSteps(int8_t steps){
 	this->setSetIndexDirection(steps>0);
 	
@@ -63,6 +82,7 @@ void DataPlayer::next(){
 	// only take into account the data bytes, not the "lenght byte" in the beginning of a data set.
 	// will always be circular: if limit reached, go back to the other side.
 	if (this->set_move_forward_else_backward){
+		
 		if (this->index >= this->data_set_length - 1){
 			this->index = 0;
 		}else{
@@ -75,6 +95,11 @@ void DataPlayer::next(){
 			this->index--;
 		}
 	}
+	// Serial.println(this->index);
+}
+void DataPlayer::setIndex(uint8_t index){
+	// for manual reset: set to 0.
+	this->index = index;
 }
 
 void DataPlayer::setSetIndexDirection(uint8_t dir){
@@ -89,6 +114,16 @@ void DataPlayer::setSetIndexDirection(uint8_t dir){
 	}
 }
 
+void DataPlayer::update(){
+	// this->auto_step_timer()
+	if (!this->auto_step_timer.getTimeIsNegative()){
+		Serial.println("enxt sstsetplll");
+		if (this->auto_step_enabled){
+			this->moveIndexSteps(this->auto_steps);
+		}
+		this->auto_step_timer.start();
+	}
+}
 // void DataPlayer::get(uint8_t movieNumber){
 	// // load animation, start first byte. 
 	
