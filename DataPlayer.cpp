@@ -12,8 +12,8 @@ DataPlayer::DataPlayer() {
 	auto_step_timer.start();
 }
 
-void DataPlayer::loadAllData(const uint8_t** data){
-	this->allData = data[0];
+void DataPlayer::loadAllData(const uint8_t* data){
+	this->allData = data;
 }
 
 void DataPlayer::nextDataSet(bool stepForwardElseBackward){

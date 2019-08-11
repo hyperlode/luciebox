@@ -408,7 +408,8 @@ void Apps::movieAnimationMode(bool init){
 		this->dataPlayer.setAutoSteps(4);
 		
 		// this->dataPlayer.loadAllData(&disp_4digits_animations);
-		this->dataPlayer.loadAllData(allData);
+		//this->dataPlayer.loadAllData(allData[0]);
+		this->dataPlayer.loadAllData(disp_4digits_animations);
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
