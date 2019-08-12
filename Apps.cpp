@@ -446,7 +446,6 @@ void Apps::movieAnimationMode(bool init){
 		// auto mode.
 		this->dataPlayer.update();
 		if (potentio->getValueStableChangedEdge()){
-		//animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 			dataPlayer.setAutoStepSpeed(potentio->getValueMapped(-1024,0));
 		}
 
@@ -910,9 +909,9 @@ void Apps::modeGeiger(bool init){
 	  }
     
       geiger_counter++;
-      ledDisp->SetSingleDigit(geiger_counter, 1);  
-      ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
-      (animation_step>=5)?animation_step=0:animation_step++;      
+	  ledDisp->showNumber(geiger_counter);
+      // ledDisp->SetSingleDigit(geiger_counter, 1);  
+	  
     }
     
   }else{
@@ -943,8 +942,8 @@ void Apps::modeSequencer(bool init){
 		 if (init){
 			counter = 0;   // step counter
 			counter2 = 0;  // measure counter
-			animation_speed.setInitTimeMillis((long)potentio->getValueStable() * -1);
-			animation_speed.start();
+			generalTimer.setInitTimeMillis((long)potentio->getValueStable() * -1);
+			generalTimer.start();
 			nextStep = true;
 			
 			// for (uint8_t i=0;i<32;i++){
@@ -959,13 +958,13 @@ void Apps::modeSequencer(bool init){
 		if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 			if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){ 
 				if (potentio->getValueStableChangedEdge()){
-					animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+					generalTimer.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 				}
 			}
 
-			if (!animation_speed.getTimeIsNegative()){
+			if (!generalTimer.getTimeIsNegative()){
 				nextStep = true;
-				animation_speed.start();
+				generalTimer.start();
 			}
 		}
 	
@@ -1036,8 +1035,8 @@ void Apps::modeMetronome(bool init){
     counter2 = 0;
     game_x_pos = 0;
     game_y_pos = 0;
-    animation_speed.setInitTimeMillis((long)potentio->getValueStable() * -1);
-    animation_speed.start();
+    TIMER_METRONOME.setInitTimeMillis((long)potentio->getValueStable() * -1);
+    TIMER_METRONOME.start();
     nextStep = true;
   }
   
@@ -1058,13 +1057,13 @@ void Apps::modeMetronome(bool init){
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
       if (potentio->getValueStableChangedEdge()){
-        animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
-//        animation_speed.start(); //during turning it pauses because of the continuous restarting.
+        TIMER_METRONOME.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+//        TIMER_METRONOME.start(); //during turning it pauses because of the continuous restarting.
       }
       
-      if (!animation_speed.getTimeIsNegative()){
+      if (!TIMER_METRONOME.getTimeIsNegative()){
         nextStep = true;
-        animation_speed.start();
+        TIMER_METRONOME.start();
       }
     }
     
@@ -1142,12 +1141,12 @@ void Apps::gameButtonInteraction(bool init){
   
   if (init){
     counter = 0; // holds score
-    //randomSeed(123456);
+    randomSeed(millis());
     getNewNumber = true;
-    generalTimer.setInitTimeMillis(0);
+    TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
 
     initTime = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-    animation_speed.setInitTimeMillis(initTime);
+    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(initTime);
     
     counter2 = 0;
     screenPersistenceOfVision = 0;
@@ -1158,12 +1157,14 @@ void Apps::gameButtonInteraction(bool init){
     }
   }
 
+  // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
   if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
      //always show unless in soundmode->competition
     ledDisp->setDecimalPoint(true, reactionGameTarget+1);
   }
 
-  if (!animation_speed.getTimeIsNegative()){
+  // animation next step
+  if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
     // game timing animation update.
     for (uint8_t i=0;i<4;i++){
       screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
@@ -1172,7 +1173,9 @@ void Apps::gameButtonInteraction(bool init){
      
     counter2 = this->nextStepRotate(counter2, true, 0, 12);
     
-    animation_speed.reset();
+    TIMER_REACTION_GAME_SPEED.reset();
+	
+	// check game status 'dead'
     if (counter2 == 12){
       counter2 = 0;
       screenPersistenceOfVision=0;    
@@ -1181,23 +1184,23 @@ void Apps::gameButtonInteraction(bool init){
         isDead = true;
       }else{
         // time out not enabled.
-        animation_speed.start();
+        TIMER_REACTION_GAME_SPEED.start();
       }
     }else{
-      animation_speed.start();
+      TIMER_REACTION_GAME_SPEED.start();
     }   
   }
   
-  if (!generalTimer.getTimeIsNegative()){
+  if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative()){
     //end of display high score, next number
     counter = 0;
     getNewNumber = true;
-    generalTimer.reset();
-    animation_speed.setInitTimeMillis(initTime);
+    TIMER_REACTION_GAME_RESTART_DELAY.reset();
+    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(initTime);
        
-  }else if(generalTimer.getIsStarted()){
+  }else if(TIMER_REACTION_GAME_RESTART_DELAY.getIsStarted()){
      //do nothing.  wait for display high score is finished.
-     if (generalTimer.getInFirstGivenHundredsPartOfSecond(500)){
+     if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
         ledDisp->setBlankDisplay(); //make high score blink
      }else{
         ledDisp->showNumber(counter ); //score display. Leave at beginning, to display high score blinking.
@@ -1208,9 +1211,11 @@ void Apps::gameButtonInteraction(bool init){
       //right button
       counter++;
       getNewNumber = true;
-      if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
          //play by sounds
-        buzzer->programBuzzerRoll(C7_8);
+        //buzzer->programBuzzerRoll(C7_8);
+		buzzer->programBuzzerRoll(rest_1);
+		//buzzer->programBuzzerRoll(rest_1);
       }
       
   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
@@ -1226,17 +1231,18 @@ void Apps::gameButtonInteraction(bool init){
   // ledDisp->SetSingleDigit(*(&game_random+counter),3);
   if (isDead){
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-      generalTimer.setInitTimeMillis(-2000);
-      generalTimer.start();
+      TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
+      TIMER_REACTION_GAME_RESTART_DELAY.start();
       //play by sounds
       for (uint8_t i=reactionGameYellowButtonIsIncluded?0:1;i<4;i++){
+        // buzzer->programBuzzerRoll(selectedSounds[i]+128);
         buzzer->programBuzzerRoll(selectedSounds[i]+128);
         buzzer->programBuzzerRoll(rest_1);
       }
        
     }else{
-      generalTimer.setInitTimeMillis(-2000);
-      generalTimer.start();
+      TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
+      TIMER_REACTION_GAME_RESTART_DELAY.start();
       buzzer->programBuzzerRoll(F4_1);  
       buzzer->programBuzzerRoll(F4_1);  
       buzzer->programBuzzerRoll(F4_1);  
@@ -1261,9 +1267,9 @@ void Apps::gameButtonInteraction(bool init){
     }
     ledDisp->SetLedArray(lights); 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-      animation_speed.setInitTimeMillis(animation_speed.getInitTimeMillis()*0.99);
+      TIMER_REACTION_GAME_SPEED.setInitTimeMillis(TIMER_REACTION_GAME_SPEED.getInitTimeMillis()*0.99);
     }        
-    animation_speed.start();    
+    TIMER_REACTION_GAME_SPEED.start();    
   }
 }
 
