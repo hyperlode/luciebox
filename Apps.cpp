@@ -38,7 +38,72 @@ void Apps::test(){
     #endif
     
   }
-  
+}
+
+void Apps::appSelector(bool init, uint8_t selector){
+	
+	switch (selector) {
+    case 0:
+      this->modeCountingLettersAndChars(init);
+      break;
+      
+    case 1:
+      //sound fun with notes
+      this->modeSoundNotes();
+      break;
+      
+    case 2:
+      //sound fun with frequencies.
+      
+      #ifdef DEBUG_BUTTONS
+      
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        Serial.println(potentio.getValueMapped(0,1023));
+      }
+
+      #endif
+
+      break;
+      
+    case 3:
+      this->modeScroll(init);
+      break;
+      
+    case 4:
+      this->modeGeiger(init);
+      break;
+      
+    case 5:
+      this->modeSoundSong(init);
+      break;
+      
+    case 6:
+      this->draw(init);
+      break;
+      
+    case 7:
+      this->modeSimpleButtonsAndLights();    
+      break;
+      
+    case 8:
+      this->modeSequencer(init);
+      break;
+      
+    case 9:
+      this->gameButtonInteraction(init);
+      break;
+      
+    case 10:
+      this->tiltSwitchTest(init);
+      break;
+      
+    case 11:
+	  this->miniMultiTimer(init);
+      break;
+    
+    default:
+      break;
+	}
 }
 
 void Apps::modeScroll(bool init){
@@ -92,6 +157,7 @@ void Apps::modeScroll(bool init){
   }
   
 }
+
 void Apps::modeSimpleButtonsAndLights(){
   
       // simple repetitive, predictive mode.

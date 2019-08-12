@@ -157,84 +157,85 @@ void mode_refresh(){
 
   //check if first iteration at new selector value.
   bool init = selectorDial.getValueChangedEdge();
- 
-  switch (selectorDial.getSelectorValue()) {
-    case 0:
-      pretbak_apps.modeCountingLettersAndChars(init);
-      break;
+  pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
+  
+  // switch (selectorDial.getSelectorValue()) {
+    // case 0:
+      // pretbak_apps.modeCountingLettersAndChars(init);
+      // break;
       
-    case 1:
-      //sound fun with notes
-      pretbak_apps.modeSoundNotes();
-      break;
+    // case 1:
+      // //sound fun with notes
+      // pretbak_apps.modeSoundNotes();
+      // break;
       
-    case 2:
-      //sound fun with frequencies.
+    // case 2:
+      // //sound fun with frequencies.
       
-      #ifdef DEBUG_BUTTONS
+      // #ifdef DEBUG_BUTTONS
       
-      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        Serial.println(potentio.getValueMapped(0,1023));
-      }
+      // if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        // Serial.println(potentio.getValueMapped(0,1023));
+      // }
 
-      #endif
-/*
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        if (potentio.getValueStableChangedEdge()){      
-          buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
-        }
-      }else{
-        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-          if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-            buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
-          }
-        }else if (true) {
+      // #endif
+// /*
+      // if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        // if (potentio.getValueStableChangedEdge()){      
+          // buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
+        // }
+      // }else{
+        // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+          // if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+            // buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
+          // }
+        // }else if (true) {
           
-        }
+        // }
         
-      }
- */
-      break;
+      // }
+ // */
+      // break;
       
-    case 3:
-      pretbak_apps.modeScroll(init);
-      break;
+    // case 3:
+      // pretbak_apps.modeScroll(init);
+      // break;
       
-    case 4:
-      pretbak_apps.modeGeiger(init);
-      break;
+    // case 4:
+      // pretbak_apps.modeGeiger(init);
+      // break;
       
-    case 5:
-      pretbak_apps.modeSoundSong(init);
-      break;
+    // case 5:
+      // pretbak_apps.modeSoundSong(init);
+      // break;
       
-    case 6:
-      pretbak_apps.draw(init);
-      break;
+    // case 6:
+      // pretbak_apps.draw(init);
+      // break;
       
-    case 7:
-      pretbak_apps.modeSimpleButtonsAndLights();    
-      break;
+    // case 7:
+      // pretbak_apps.modeSimpleButtonsAndLights();    
+      // break;
       
-    case 8:
-      pretbak_apps.modeSequencer(init);
-      break;
+    // case 8:
+      // pretbak_apps.modeSequencer(init);
+      // break;
       
-    case 9:
-      pretbak_apps.gameButtonInteraction(init);
-      break;
+    // case 9:
+      // pretbak_apps.gameButtonInteraction(init);
+      // break;
       
-    case 10:
-      pretbak_apps.tiltSwitchTest(init);
-      break;
+    // case 10:
+      // pretbak_apps.tiltSwitchTest(init);
+      // break;
       
-    case 11:
-	  pretbak_apps.miniMultiTimer(init);
-      break;
+    // case 11:
+	  // pretbak_apps.miniMultiTimer(init);
+      // break;
     
-    default:
-      break;
-  } 
+    // default:
+      // break;
+  // } 
 }
 
 void setup() {
