@@ -5,7 +5,7 @@ EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 2 4
+Sheet 4 4
 Title ""
 Date ""
 Rev ""
@@ -15,55 +15,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L Device:R_Small R28
-U 1 1 5D7526B9
-P 2550 3550
-AR Path="/5D74964C/5D7526B9" Ref="R28"  Part="1" 
-AR Path="/5D761BCA/5D7526B9" Ref="R52"  Part="1" 
-AR Path="/5D9307E8/5D7526B9" Ref="R76"  Part="1" 
-F 0 "R76" H 2609 3596 50  0000 L CNN
-F 1 "R_Small" H 2609 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 2550 3550 50  0001 C CNN
-F 3 "~" H 2550 3550 50  0001 C CNN
-	1    2550 3550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R43
-U 1 1 5D7526BF
-P 2550 3850
-AR Path="/5D74964C/5D7526BF" Ref="R43"  Part="1" 
-AR Path="/5D761BCA/5D7526BF" Ref="R67"  Part="1" 
-AR Path="/5D9307E8/5D7526BF" Ref="R91"  Part="1" 
-F 0 "R91" H 2609 3896 50  0000 L CNN
-F 1 "R_Small" H 2609 3805 50  0000 L CNN
-F 2 "Luciebox:1206" H 2550 3850 50  0001 C CNN
-F 3 "~" H 2550 3850 50  0001 C CNN
-	1    2550 3850
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R36
-U 1 1 5D7526C5
-P 2700 3700
-AR Path="/5D74964C/5D7526C5" Ref="R36"  Part="1" 
-AR Path="/5D761BCA/5D7526C5" Ref="R60"  Part="1" 
-AR Path="/5D9307E8/5D7526C5" Ref="R84"  Part="1" 
-F 0 "R84" H 2759 3746 50  0000 L CNN
-F 1 "R_Small" H 2759 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 2700 3700 50  0001 C CNN
-F 3 "~" H 2700 3700 50  0001 C CNN
-	1    2700 3700
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	2550 3750 2550 3700
-Wire Wire Line
-	2600 3700 2550 3700
-Connection ~ 2550 3700
-Wire Wire Line
-	2550 3700 2550 3650
 $Comp
 L Device:R_Small R27
 U 1 1 5D7526CF
@@ -77,20 +28,6 @@ F 2 "Luciebox:1206" H 3650 2200 50  0001 C CNN
 F 3 "~" H 3650 2200 50  0001 C CNN
 	1    3650 2200
 	-1   0    0    1   
-$EndComp
-$Comp
-L Luciebox_components:terminal_8x1 T2
-U 1 1 5D7526D5
-P 3250 3050
-AR Path="/5D74964C/5D7526D5" Ref="T2"  Part="1" 
-AR Path="/5D761BCA/5D7526D5" Ref="T3"  Part="1" 
-AR Path="/5D9307E8/5D7526D5" Ref="T4"  Part="1" 
-F 0 "T4" V 3765 3650 50  0000 C CNN
-F 1 "terminal_8x1" V 3674 3650 50  0000 C CNN
-F 2 "Luciebox:Terminal_8x1_100mil" H 3250 3050 50  0001 C CNN
-F 3 "" H 3250 3050 50  0001 C CNN
-	1    3250 3050
-	0    -1   -1   0   
 $EndComp
 $Comp
 L Device:R_Small R26
@@ -176,251 +113,6 @@ F 3 "~" H 2750 2200 50  0001 C CNN
 	1    2750 2200
 	-1   0    0    1   
 $EndComp
-$Comp
-L Device:R_Small R29
-U 1 1 5D7526FF
-P 2850 3550
-AR Path="/5D74964C/5D7526FF" Ref="R29"  Part="1" 
-AR Path="/5D761BCA/5D7526FF" Ref="R53"  Part="1" 
-AR Path="/5D9307E8/5D7526FF" Ref="R77"  Part="1" 
-F 0 "R77" H 2909 3596 50  0000 L CNN
-F 1 "R_Small" H 2909 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 2850 3550 50  0001 C CNN
-F 3 "~" H 2850 3550 50  0001 C CNN
-	1    2850 3550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R37
-U 1 1 5D752705
-P 3000 3700
-AR Path="/5D74964C/5D752705" Ref="R37"  Part="1" 
-AR Path="/5D761BCA/5D752705" Ref="R61"  Part="1" 
-AR Path="/5D9307E8/5D752705" Ref="R85"  Part="1" 
-F 0 "R85" H 3059 3746 50  0000 L CNN
-F 1 "R_Small" H 3059 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 3000 3700 50  0001 C CNN
-F 3 "~" H 3000 3700 50  0001 C CNN
-	1    3000 3700
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	2850 3700 2800 3700
-Wire Wire Line
-	2850 3700 2850 3650
-$Comp
-L Device:R_Small R30
-U 1 1 5D75270D
-P 3150 3550
-AR Path="/5D74964C/5D75270D" Ref="R30"  Part="1" 
-AR Path="/5D761BCA/5D75270D" Ref="R54"  Part="1" 
-AR Path="/5D9307E8/5D75270D" Ref="R78"  Part="1" 
-F 0 "R78" H 3209 3596 50  0000 L CNN
-F 1 "R_Small" H 3209 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 3150 3550 50  0001 C CNN
-F 3 "~" H 3150 3550 50  0001 C CNN
-	1    3150 3550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	2850 3700 2900 3700
-Connection ~ 2850 3700
-$Comp
-L Device:R_Small R38
-U 1 1 5D752715
-P 3300 3700
-AR Path="/5D74964C/5D752715" Ref="R38"  Part="1" 
-AR Path="/5D761BCA/5D752715" Ref="R62"  Part="1" 
-AR Path="/5D9307E8/5D752715" Ref="R86"  Part="1" 
-F 0 "R86" H 3359 3746 50  0000 L CNN
-F 1 "R_Small" H 3359 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 3300 3700 50  0001 C CNN
-F 3 "~" H 3300 3700 50  0001 C CNN
-	1    3300 3700
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R_Small R39
-U 1 1 5D75271B
-P 3600 3700
-AR Path="/5D74964C/5D75271B" Ref="R39"  Part="1" 
-AR Path="/5D761BCA/5D75271B" Ref="R63"  Part="1" 
-AR Path="/5D9307E8/5D75271B" Ref="R87"  Part="1" 
-F 0 "R87" H 3659 3746 50  0000 L CNN
-F 1 "R_Small" H 3659 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 3600 3700 50  0001 C CNN
-F 3 "~" H 3600 3700 50  0001 C CNN
-	1    3600 3700
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R_Small R31
-U 1 1 5D752721
-P 3450 3550
-AR Path="/5D74964C/5D752721" Ref="R31"  Part="1" 
-AR Path="/5D761BCA/5D752721" Ref="R55"  Part="1" 
-AR Path="/5D9307E8/5D752721" Ref="R79"  Part="1" 
-F 0 "R79" H 3509 3596 50  0000 L CNN
-F 1 "R_Small" H 3509 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 3450 3550 50  0001 C CNN
-F 3 "~" H 3450 3550 50  0001 C CNN
-	1    3450 3550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R32
-U 1 1 5D752727
-P 3750 3550
-AR Path="/5D74964C/5D752727" Ref="R32"  Part="1" 
-AR Path="/5D761BCA/5D752727" Ref="R56"  Part="1" 
-AR Path="/5D9307E8/5D752727" Ref="R80"  Part="1" 
-F 0 "R80" H 3809 3596 50  0000 L CNN
-F 1 "R_Small" H 3809 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 3750 3550 50  0001 C CNN
-F 3 "~" H 3750 3550 50  0001 C CNN
-	1    3750 3550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R40
-U 1 1 5D75272D
-P 3900 3700
-AR Path="/5D74964C/5D75272D" Ref="R40"  Part="1" 
-AR Path="/5D761BCA/5D75272D" Ref="R64"  Part="1" 
-AR Path="/5D9307E8/5D75272D" Ref="R88"  Part="1" 
-F 0 "R88" H 3959 3746 50  0000 L CNN
-F 1 "R_Small" H 3959 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 3900 3700 50  0001 C CNN
-F 3 "~" H 3900 3700 50  0001 C CNN
-	1    3900 3700
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	3100 3700 3150 3700
-Wire Wire Line
-	3150 3650 3150 3700
-Connection ~ 3150 3700
-Wire Wire Line
-	3150 3700 3200 3700
-Wire Wire Line
-	3450 3650 3450 3700
-Wire Wire Line
-	3450 3700 3500 3700
-Wire Wire Line
-	3400 3700 3450 3700
-Connection ~ 3450 3700
-Wire Wire Line
-	3700 3700 3750 3700
-Wire Wire Line
-	3750 3650 3750 3700
-Connection ~ 3750 3700
-Wire Wire Line
-	3750 3700 3800 3700
-$Comp
-L Device:R_Small R33
-U 1 1 5D75273F
-P 4050 3550
-AR Path="/5D74964C/5D75273F" Ref="R33"  Part="1" 
-AR Path="/5D761BCA/5D75273F" Ref="R57"  Part="1" 
-AR Path="/5D9307E8/5D75273F" Ref="R81"  Part="1" 
-F 0 "R81" H 4109 3596 50  0000 L CNN
-F 1 "R_Small" H 4109 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 4050 3550 50  0001 C CNN
-F 3 "~" H 4050 3550 50  0001 C CNN
-	1    4050 3550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R41
-U 1 1 5D752745
-P 4200 3700
-AR Path="/5D74964C/5D752745" Ref="R41"  Part="1" 
-AR Path="/5D761BCA/5D752745" Ref="R65"  Part="1" 
-AR Path="/5D9307E8/5D752745" Ref="R89"  Part="1" 
-F 0 "R89" H 4259 3746 50  0000 L CNN
-F 1 "R_Small" H 4259 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 4200 3700 50  0001 C CNN
-F 3 "~" H 4200 3700 50  0001 C CNN
-	1    4200 3700
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R_Small R42
-U 1 1 5D75274B
-P 4500 3700
-AR Path="/5D74964C/5D75274B" Ref="R42"  Part="1" 
-AR Path="/5D761BCA/5D75274B" Ref="R66"  Part="1" 
-AR Path="/5D9307E8/5D75274B" Ref="R90"  Part="1" 
-F 0 "R90" H 4559 3746 50  0000 L CNN
-F 1 "R_Small" H 4559 3655 50  0000 L CNN
-F 2 "Luciebox:1206" H 4500 3700 50  0001 C CNN
-F 3 "~" H 4500 3700 50  0001 C CNN
-	1    4500 3700
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R_Small R34
-U 1 1 5D752751
-P 4350 3550
-AR Path="/5D74964C/5D752751" Ref="R34"  Part="1" 
-AR Path="/5D761BCA/5D752751" Ref="R58"  Part="1" 
-AR Path="/5D9307E8/5D752751" Ref="R82"  Part="1" 
-F 0 "R82" H 4409 3596 50  0000 L CNN
-F 1 "R_Small" H 4409 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 4350 3550 50  0001 C CNN
-F 3 "~" H 4350 3550 50  0001 C CNN
-	1    4350 3550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R35
-U 1 1 5D752757
-P 4650 3550
-AR Path="/5D74964C/5D752757" Ref="R35"  Part="1" 
-AR Path="/5D761BCA/5D752757" Ref="R59"  Part="1" 
-AR Path="/5D9307E8/5D752757" Ref="R83"  Part="1" 
-F 0 "R83" H 4709 3596 50  0000 L CNN
-F 1 "R_Small" H 4709 3505 50  0000 L CNN
-F 2 "Luciebox:1206" H 4650 3550 50  0001 C CNN
-F 3 "~" H 4650 3550 50  0001 C CNN
-	1    4650 3550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4000 3700 4050 3700
-Wire Wire Line
-	4050 3650 4050 3700
-Connection ~ 4050 3700
-Wire Wire Line
-	4050 3700 4100 3700
-Wire Wire Line
-	4350 3650 4350 3700
-Wire Wire Line
-	4350 3700 4400 3700
-Wire Wire Line
-	4300 3700 4350 3700
-Connection ~ 4350 3700
-Wire Wire Line
-	4600 3700 4650 3700
-Wire Wire Line
-	4650 3650 4650 3700
-Connection ~ 4650 3700
-Wire Wire Line
-	4650 3700 4700 3700
-$Comp
-L power:GND #PWR020
-U 1 1 5D752769
-P 2550 3950
-AR Path="/5D74964C/5D752769" Ref="#PWR020"  Part="1" 
-AR Path="/5D761BCA/5D752769" Ref="#PWR022"  Part="1" 
-AR Path="/5D9307E8/5D752769" Ref="#PWR024"  Part="1" 
-F 0 "#PWR024" H 2550 3700 50  0001 C CNN
-F 1 "GND" H 2555 3777 50  0000 C CNN
-F 2 "" H 2550 3950 50  0001 C CNN
-F 3 "" H 2550 3950 50  0001 C CNN
-	1    2550 3950
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	3650 2100 3500 2100
 Wire Wire Line
@@ -458,19 +150,13 @@ Wire Wire Line
 Wire Wire Line
 	3500 1900 3500 2100
 Wire Wire Line
-	2550 2300 2550 3100
-Wire Wire Line
 	2750 2300 2750 2350
 Wire Wire Line
 	2750 2350 2650 2350
 Wire Wire Line
-	2650 2350 2650 3100
-Wire Wire Line
 	2900 2300 2900 2400
 Wire Wire Line
 	2900 2400 2750 2400
-Wire Wire Line
-	2750 2400 2750 3100
 Wire Wire Line
 	2850 2450 3050 2450
 Wire Wire Line
@@ -480,10 +166,6 @@ Wire Wire Line
 Wire Wire Line
 	3200 2500 2950 2500
 Wire Wire Line
-	2950 2500 2950 3100
-Wire Wire Line
-	3050 3100 3050 2550
-Wire Wire Line
 	3050 2550 3350 2550
 Wire Wire Line
 	3350 2550 3350 2300
@@ -492,65 +174,9 @@ Wire Wire Line
 Wire Wire Line
 	3500 2600 3150 2600
 Wire Wire Line
-	3150 2600 3150 3100
-Wire Wire Line
-	3250 3100 3250 2650
-Wire Wire Line
 	3250 2650 3650 2650
 Wire Wire Line
 	3650 2650 3650 2300
-Wire Wire Line
-	2550 3100 2550 3450
-Connection ~ 2550 3100
-Wire Wire Line
-	2650 3100 2650 3450
-Wire Wire Line
-	2650 3450 2850 3450
-Connection ~ 2650 3100
-Wire Wire Line
-	2750 3100 2750 3400
-Wire Wire Line
-	2750 3400 3150 3400
-Wire Wire Line
-	3150 3400 3150 3450
-Connection ~ 2750 3100
-Wire Wire Line
-	3450 3450 3450 3350
-Wire Wire Line
-	3450 3350 2850 3350
-Wire Wire Line
-	2850 2450 2850 3100
-Connection ~ 2850 3100
-Wire Wire Line
-	2850 3100 2850 3350
-Wire Wire Line
-	2950 3100 2950 3300
-Wire Wire Line
-	2950 3300 3750 3300
-Wire Wire Line
-	3750 3300 3750 3450
-Connection ~ 2950 3100
-Wire Wire Line
-	4050 3450 4050 3250
-Wire Wire Line
-	4050 3250 3050 3250
-Wire Wire Line
-	3050 3250 3050 3100
-Connection ~ 3050 3100
-Wire Wire Line
-	3150 3100 3150 3200
-Wire Wire Line
-	3150 3200 4350 3200
-Wire Wire Line
-	4350 3200 4350 3450
-Connection ~ 3150 3100
-Wire Wire Line
-	3250 3100 3250 3150
-Wire Wire Line
-	3250 3150 4650 3150
-Wire Wire Line
-	4650 3150 4650 3450
-Connection ~ 3250 3100
 Wire Wire Line
 	2750 2100 2600 2100
 Wire Wire Line
@@ -569,6 +195,92 @@ F 3 "~" H 2600 2200 50  0001 C CNN
 	1    2600 2200
 	-1   0    0    1   
 $EndComp
-Text HLabel 4700 3700 2    50   Output ~ 0
+Text HLabel 2450 3700 1    50   Output ~ 0
 DAC_analog
+$Comp
+L Luciebox_components:DAC_R-2R R28
+U 1 1 5DABC300
+P 2450 3700
+AR Path="/5D74964C/5DABC300" Ref="R28"  Part="1" 
+AR Path="/5D761BCA/5DABC300" Ref="R29"  Part="1" 
+AR Path="/5D9307E8/5DABC300" Ref="R30"  Part="1" 
+F 0 "R30" V 2746 4778 50  0000 L CNN
+F 1 "DAC_R-2R" V 2837 4778 50  0000 L CNN
+F 2 "Luciebox:SIP-10" H 2450 3700 50  0001 C CNN
+F 3 "https://www.bourns.com/docs/Product-Datasheets/R2R.pdf" H 2450 3700 50  0001 C CNN
+	1    2450 3700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2850 2450 2850 3100
+Wire Wire Line
+	3250 3100 3250 2650
+Wire Wire Line
+	3150 2600 3150 3100
+Wire Wire Line
+	3050 3100 3050 2550
+Wire Wire Line
+	2950 2500 2950 3100
+Wire Wire Line
+	2750 2400 2750 3100
+Wire Wire Line
+	2650 2350 2650 3100
+Wire Wire Line
+	2550 2300 2550 3100
+$Comp
+L Luciebox_components:terminal_8x1 T2
+U 1 1 5D7526D5
+P 3250 3050
+AR Path="/5D74964C/5D7526D5" Ref="T2"  Part="1" 
+AR Path="/5D761BCA/5D7526D5" Ref="T3"  Part="1" 
+AR Path="/5D9307E8/5D7526D5" Ref="T4"  Part="1" 
+F 0 "T4" V 3765 3650 50  0000 C CNN
+F 1 "terminal_8x1" V 3674 3650 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 3250 3050 50  0001 C CNN
+F 3 "" H 3250 3050 50  0001 C CNN
+	1    3250 3050
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	2550 3100 2550 3700
+Connection ~ 2550 3100
+Wire Wire Line
+	2650 3700 2650 3100
+Connection ~ 2650 3100
+Wire Wire Line
+	2750 3100 2750 3700
+Wire Wire Line
+	2850 3100 2850 3700
+Wire Wire Line
+	2950 3100 2950 3700
+Wire Wire Line
+	3050 3100 3050 3700
+Wire Wire Line
+	3150 3100 3150 3700
+Wire Wire Line
+	3250 3100 3250 3700
+$Comp
+L power:GND #PWR0101
+U 1 1 5DACA23D
+P 3600 3550
+AR Path="/5D74964C/5DACA23D" Ref="#PWR0101"  Part="1" 
+AR Path="/5D761BCA/5DACA23D" Ref="#PWR0102"  Part="1" 
+AR Path="/5D9307E8/5DACA23D" Ref="#PWR0103"  Part="1" 
+F 0 "#PWR0103" H 3600 3300 50  0001 C CNN
+F 1 "GND" H 3605 3377 50  0000 C CNN
+F 2 "" H 3600 3550 50  0001 C CNN
+F 3 "" H 3600 3550 50  0001 C CNN
+	1    3600 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3600 3550 3350 3550
+Wire Wire Line
+	3350 3550 3350 3700
+Connection ~ 3250 3100
+Connection ~ 3150 3100
+Connection ~ 3050 3100
+Connection ~ 2950 3100
+Connection ~ 2850 3100
+Connection ~ 2750 3100
 $EndSCHEMATC
