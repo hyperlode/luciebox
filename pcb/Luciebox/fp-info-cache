@@ -1,4 +1,4 @@
-10955356027288
+18781718492690
 Luciebox
 0805
 
@@ -9,6 +9,13 @@ Luciebox
 Luciebox
 1206
 http://media.digikey.com/pdf/Data%20Sheets/Lite-On%20PDFs/LTST-C230KFKT_5-24-06.pdf
+
+0
+2
+2
+Luciebox
+buzzer
+
 
 0
 2
@@ -34,6 +41,34 @@ http://www.digikey.com/products/en?formaction=on&lang=en&site=us&KeyWords=296-19
 0
 28
 28
+Luciebox
+Terminal_7x1_100mil
+
+
+0
+7
+7
+Luciebox
+Terminal_8x1_100mil
+
+
+0
+8
+8
+Luciebox
+Terminal_12x1_100mil
+
+
+0
+12
+12
+Luciebox
+Terminal_13x1_100mil
+
+
+0
+13
+13
 Luciebox
 Term_Block_1x7_P5.08mm
 http://www.on-shore.com/wp-content/uploads/2015/09/osttcxx2162.pdf
