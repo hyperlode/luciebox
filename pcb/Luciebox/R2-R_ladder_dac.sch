@@ -146,10 +146,6 @@ F 3 "" H 3850 1900 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3850 1900 3500 1900
-Wire Wire Line
-	3500 1900 3500 2100
-Wire Wire Line
 	2750 2300 2750 2350
 Wire Wire Line
 	2750 2350 2650 2350
@@ -283,4 +279,118 @@ Connection ~ 3050 3100
 Connection ~ 2950 3100
 Connection ~ 2850 3100
 Connection ~ 2750 3100
+$Comp
+L Luciebox_components:terminal_8x1 T?
+U 1 1 5DAEA72B
+P 3300 1700
+AR Path="/5D74964C/5DAEA72B" Ref="T?"  Part="1" 
+AR Path="/5D761BCA/5DAEA72B" Ref="T?"  Part="1" 
+AR Path="/5D9307E8/5DAEA72B" Ref="T?"  Part="1" 
+F 0 "T?" V 3815 2300 50  0000 C CNN
+F 1 "terminal_8x1" V 3724 2300 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 3300 1700 50  0001 C CNN
+F 3 "" H 3300 1700 50  0001 C CNN
+	1    3300 1700
+	0    -1   -1   0   
+$EndComp
+Connection ~ 2600 2100
+Wire Wire Line
+	2700 1900 2750 1900
+Wire Wire Line
+	2750 1900 2750 2100
+Wire Wire Line
+	2800 2050 2900 2050
+Wire Wire Line
+	2900 2050 2900 2100
+Wire Wire Line
+	2900 2000 3050 2000
+Wire Wire Line
+	3050 2000 3050 2100
+Wire Wire Line
+	3000 1950 3200 1950
+Wire Wire Line
+	3200 1950 3200 2100
+Wire Wire Line
+	2600 1750 2600 2100
+Wire Wire Line
+	2700 1900 2700 1750
+Wire Wire Line
+	2800 1750 2800 2050
+Wire Wire Line
+	2900 1750 2900 2000
+Wire Wire Line
+	3000 1750 3000 1950
+Wire Wire Line
+	3100 1750 3100 1900
+Wire Wire Line
+	3100 1900 3350 1900
+Wire Wire Line
+	3350 1900 3350 2100
+Wire Wire Line
+	3200 1750 3200 1850
+Wire Wire Line
+	3200 1850 3500 1850
+Wire Wire Line
+	3500 1850 3500 2100
+Wire Wire Line
+	3300 1750 3300 1800
+Wire Wire Line
+	3300 1800 3650 1800
+Wire Wire Line
+	3650 1800 3650 2100
+Connection ~ 3650 2100
+Wire Wire Line
+	3850 1900 3750 1900
+Wire Wire Line
+	3750 1900 3750 2100
+Wire Wire Line
+	3750 2100 3650 2100
+$Comp
+L Luciebox_components:terminal_8x1 T?
+U 1 1 5DB0039D
+P 3300 950
+AR Path="/5D74964C/5DB0039D" Ref="T?"  Part="1" 
+AR Path="/5D761BCA/5DB0039D" Ref="T?"  Part="1" 
+AR Path="/5D9307E8/5DB0039D" Ref="T?"  Part="1" 
+F 0 "T?" V 3815 1550 50  0000 C CNN
+F 1 "terminal_8x1" V 3724 1550 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 3300 950 50  0001 C CNN
+F 3 "" H 3300 950 50  0001 C CNN
+	1    3300 950 
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3300 1000 3200 1000
+Connection ~ 2700 1000
+Wire Wire Line
+	2700 1000 2600 1000
+Connection ~ 2800 1000
+Wire Wire Line
+	2800 1000 2700 1000
+Connection ~ 2900 1000
+Wire Wire Line
+	2900 1000 2800 1000
+Connection ~ 3000 1000
+Wire Wire Line
+	3000 1000 2900 1000
+Connection ~ 3100 1000
+Wire Wire Line
+	3100 1000 3000 1000
+Connection ~ 3200 1000
+Wire Wire Line
+	3200 1000 3100 1000
+Wire Wire Line
+	3300 1000 3400 1000
+Connection ~ 3300 1000
+$Comp
+L power:VCC #PWR?
+U 1 1 5DB05874
+P 3400 1000
+F 0 "#PWR?" H 3400 850 50  0001 C CNN
+F 1 "VCC" H 3417 1173 50  0000 C CNN
+F 2 "" H 3400 1000 50  0001 C CNN
+F 3 "" H 3400 1000 50  0001 C CNN
+	1    3400 1000
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
