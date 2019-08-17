@@ -236,7 +236,8 @@ class Apps{
   void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer);
   void setBuffers(char* textBuf, char*  scrollBuf);
   void test();
-
+  
+  void setDefaultMode();
   void appSelector(bool init, uint8_t selector);
   bool init_app(bool init);
   void modeScroll(bool init);

@@ -130,11 +130,27 @@ void Apps::appSelector(bool init, uint8_t selector){
 	}
 }
 
+
+void Apps:: setDefaultMode(){
+  //button lights
+  ledDisp->SetLedArray(0b00000000);  // no lights
+
+  //display
+  ledDisp->SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
+  ledDisp->setBrightness(0,false);
+
+  //buzzer
+  buzzer->setSpeedRatio(1);
+  buzzer->buzzerOff();
+  buzzer->setTranspose(0);
+}
+
+
 bool Apps::init_app(bool init){
 	if(init){
 		this->fadeInList(displaySequence, 32);
-		counter = 0;
-		counter2= true;
+		counter = 31;
+		// counter2= true;
 		this->TIMER_INIT_APP.setInitTimeMillis(-200); // little pause at start
 		this->TIMER_INIT_APP.start();
 	}
@@ -142,27 +158,29 @@ bool Apps::init_app(bool init){
 	if(!this->TIMER_INIT_APP.getTimeIsNegative()){
 		this->TIMER_INIT_APP.setInitTimeMillis(-30);
 		  this->TIMER_INIT_APP.start();
-		  counter++;
+		  counter--;
 	  }
 	  
-	  if (counter>31){
-			counter = 0;
-			this->fadeInList(displaySequence, 32);
-			if (counter2){
-				return true; // finished one cycle.
-			}
-			counter2  = !counter2;
-		}
+	  if (counter==0){
+		this->setDefaultMode();
+		return true;
+		// counter = 0;
+		// this->fadeInList(displaySequence, 32);
+		// if (counter2){
+			// return true; // finished one cycle.
+		// }
+		// counter2  = !counter2;
+	  }
 		
 	  if (potentio->getValueStableChangedEdge()){
 		this->TIMER_INIT_APP.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
 	  }
 	  
 	  screenPersistenceOfVision = displaySequence[counter];
-	  if (counter2){
-		  // negative ==> which makes it fade out.
-		  screenPersistenceOfVision = ~screenPersistenceOfVision;
-	  }
+	  // if (counter2){
+		  // // negative ==> which makes it fade out.
+		  // screenPersistenceOfVision = ~screenPersistenceOfVision;
+	  // }
 		  
 	  ledDisp->SetFourDigits(screenPersistenceOfVision);
 	  return false;

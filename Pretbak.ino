@@ -77,7 +77,7 @@ void refresh(){
   //mode change
   if (selectorDial.getValueChangedEdge()) {
     //default mode (go to default state at each change)
-    setDefaultMode();
+    pretbak_apps.setDefaultMode();
     
     #ifdef DEBUG_SELECTOR_KNOB
     Serial.println("selector:");
@@ -136,19 +136,6 @@ void input_process(){
   }
 }
 
-void setDefaultMode(){
-  //button lights
-  ledDisp.SetLedArray(0b00000000);  // no lights
-
-  //display
-  ledDisp.SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
-  ledDisp.setBrightness(0,false);
-
-  //buzzer
-  buzzer.setSpeedRatio(1);
-  buzzer.buzzerOff();
-  buzzer.setTranspose(0);
-}
 
 
 void mode_refresh(){
@@ -261,7 +248,7 @@ void setup() {
 
   pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
   pretbak_apps.setBuffers(scrollBuf, textBuf);
-  setDefaultMode();
+  pretbak_apps.setDefaultMode();
 }
 
 void loop() {
