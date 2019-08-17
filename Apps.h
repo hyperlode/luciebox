@@ -239,7 +239,7 @@ class Apps{
   
   void setDefaultMode();
   void appSelector(bool init, uint8_t selector);
-  bool init_app(bool init);
+  bool init_app(bool init, uint8_t selector);
   void modeScroll(bool init);
   void modeSimpleButtonsAndLights();
   void modeCountingLettersAndChars(bool init);

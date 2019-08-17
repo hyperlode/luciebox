@@ -31,6 +31,7 @@ void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte 
 //}
 
 void DisplayManagement::showNumberAsChars(int16_t number){
+  // chars as in the alphabet: A=1, B=2,...
   for (int i=0;i<4;i++){
       text[4-i] = 64 + number; //ascii 65 = a
   }

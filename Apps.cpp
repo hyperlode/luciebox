@@ -55,7 +55,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 		// if (this->TIMER_INIT_APP.getTimeIsNegative()){
 			// 
 		// }
-		if (this->init_app(init)){ 
+		if (this->init_app(init, selector)){ 
 			// do init routine, if finished,end of init.
 			this->app_init_mode = false;
 			init = true;
@@ -145,44 +145,46 @@ void Apps:: setDefaultMode(){
   buzzer->setTranspose(0);
 }
 
-
-bool Apps::init_app(bool init){
+bool Apps::init_app(bool init, uint8_t selector){
 	if(init){
 		this->fadeInList(displaySequence, 32);
-		counter = 31;
-		// counter2= true;
+		counter = 0;
 		this->TIMER_INIT_APP.setInitTimeMillis(-200); // little pause at start
 		this->TIMER_INIT_APP.start();
 	}
 	
 	if(!this->TIMER_INIT_APP.getTimeIsNegative()){
 		this->TIMER_INIT_APP.setInitTimeMillis(-30);
-		  this->TIMER_INIT_APP.start();
-		  counter--;
-	  }
-	  
-	  if (counter==0){
+		this->TIMER_INIT_APP.start();
+		counter++;
+	}
+	
+	// init states sequence
+    if (counter == 0){
+		ledDisp->SetFourDigits(0xffffffff);
+		
+	}else if (counter < 32){
+		ledDisp->SetFourDigits(31-displaySequence[counter]);
+		
+	}else if (counter < 50){
+		ledDisp->showNumber(selector);
+		
+	}else if (counter >= 50){
 		this->setDefaultMode();
 		return true;
-		// counter = 0;
-		// this->fadeInList(displaySequence, 32);
-		// if (counter2){
-			// return true; // finished one cycle.
-		// }
-		// counter2  = !counter2;
-	  }
-		
-	  if (potentio->getValueStableChangedEdge()){
-		this->TIMER_INIT_APP.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-	  }
+	}
+	
+	  // if (potentio->getValueStableChangedEdge()){
+		// this->TIMER_INIT_APP.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+	  // }
 	  
-	  screenPersistenceOfVision = displaySequence[counter];
+	  
 	  // if (counter2){
 		  // // negative ==> which makes it fade out.
 		  // screenPersistenceOfVision = ~screenPersistenceOfVision;
 	  // }
 		  
-	  ledDisp->SetFourDigits(screenPersistenceOfVision);
+	  
 	  return false;
 }
 
