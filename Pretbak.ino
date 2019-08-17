@@ -239,6 +239,11 @@ void mode_refresh(){
 }
 
 void setup() {
+  
+  #ifdef ENABLE_SERIAL
+  Serial.begin(9600);
+  #endif
+  
   // put your setup code here, to run once:
   selectorDial.setPin(PIN_SELECTOR_DIAL);
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
@@ -254,16 +259,9 @@ void setup() {
   //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
 
 
-  setDefaultMode();
   pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
   pretbak_apps.setBuffers(scrollBuf, textBuf);
-  
-  #ifdef ENABLE_SERIAL
-  
-  Serial.begin(9600);
-
-  #endif
-  
+  setDefaultMode();
 }
 
 void loop() {
