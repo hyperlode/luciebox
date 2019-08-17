@@ -40,68 +40,132 @@ void Apps::test(){
 
 void Apps::appSelector(bool init, uint8_t selector){
 	
-	switch (selector) {
-    case 0:
-      this->modeCountingLettersAndChars(init);
-      break;
-      
-    case 1:
-      //sound fun with notes
-      this->modeSoundNotes();
-      break;
-      
-    case 2:
-      //sound fun with frequencies.
-      
-      #ifdef DEBUG_BUTTONS
-      
-      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        Serial.println(potentio.getValueMapped(0,1023));
-      }
-
-      #endif
-
-      break;
-      
-    case 3:
-      this->modeScroll(init);
-      break;
-      
-    case 4:
-      this->modeGeiger(init);
-      break;
-      
-    case 5:
-      this->modeSoundSong(init);
-      break;
-      
-    case 6:
-      this->draw(init);
-      break;
-      
-    case 7:
-      this->modeSimpleButtonsAndLights();    
-      break;
-      
-    case 8:
-      this->modeSequencer(init);
-      break;
-      
-    case 9:
-      this->gameButtonInteraction(init);
-      break;
-      
-    case 10:
-      this->tiltSwitchTest(init);
-      break;
-      
-    case 11:
-	  this->miniMultiTimer(init);
-      break;
-    
-    default:
-      break;
+	if (init){
+		// title mode (title screen will be displayed before real app starts)
+		this->app_init_mode = true;
+		
+		// this->TIMER_INIT_APP.setInitTimeMillis(-2000);
+		// this->TIMER_INIT_APP.start();
+		ledDisp->SetFourDigits(0x0ff00f0f); 
+		
+		
 	}
+	
+	if (this->app_init_mode){
+		// if (this->TIMER_INIT_APP.getTimeIsNegative()){
+			// 
+		// }
+		if (this->init_app(init)){ 
+			// do init routine, if finished,end of init.
+			this->app_init_mode = false;
+			init = true;
+		}
+	}
+	
+	// not as else statement, to have the init properly transferred after app beginning screen.
+	if (!this->app_init_mode){
+		
+		switch (selector) {
+		case 0:
+		  this->modeCountingLettersAndChars(init);
+		  break;
+		  
+		case 1:
+		  //sound fun with notes
+		  this->modeSoundNotes();
+		  break;
+		  
+		case 2:
+		  //sound fun with frequencies.
+		  
+		  #ifdef DEBUG_BUTTONS
+		  
+		  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+			Serial.println(potentio.getValueMapped(0,1023));
+		  }
+
+		  #endif
+
+		  break;
+		  
+		case 3:
+		  this->modeScroll(init);
+		  break;
+		  
+		case 4:
+		  this->modeGeiger(init);
+		  break;
+		  
+		case 5:
+		  this->modeSoundSong(init);
+		  break;
+		  
+		case 6:
+		  this->draw(init);
+		  break;
+		  
+		case 7:
+		  this->modeSimpleButtonsAndLights();    
+		  break;
+		  
+		case 8:
+		  this->modeSequencer(init);
+		  break;
+		  
+		case 9:
+		  this->gameButtonInteraction(init);
+		  break;
+		  
+		case 10:
+		  this->tiltSwitchTest(init);
+		  break;
+		  
+		case 11:
+		  this->miniMultiTimer(init);
+		  break;
+		
+		default:
+		  break;
+		}
+	}
+}
+
+bool Apps::init_app(bool init){
+	if(init){
+		this->fadeInList(displaySequence, 32);
+		counter = 0;
+		counter2= true;
+		this->TIMER_INIT_APP.setInitTimeMillis(-200); // little pause at start
+		this->TIMER_INIT_APP.start();
+	}
+	
+	if(!this->TIMER_INIT_APP.getTimeIsNegative()){
+		this->TIMER_INIT_APP.setInitTimeMillis(-30);
+		  this->TIMER_INIT_APP.start();
+		  counter++;
+	  }
+	  
+	  if (counter>31){
+			counter = 0;
+			this->fadeInList(displaySequence, 32);
+			if (counter2){
+				return true; // finished one cycle.
+			}
+			counter2  = !counter2;
+		}
+		
+	  if (potentio->getValueStableChangedEdge()){
+		this->TIMER_INIT_APP.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+	  }
+	  
+	  screenPersistenceOfVision = displaySequence[counter];
+	  if (counter2){
+		  // negative ==> which makes it fade out.
+		  screenPersistenceOfVision = ~screenPersistenceOfVision;
+	  }
+		  
+	  ledDisp->SetFourDigits(screenPersistenceOfVision);
+	  return false;
 }
 
 void Apps::modeScroll(bool init){
@@ -986,7 +1050,7 @@ void Apps::modeGeiger(bool init){
 
   if (init){
       textBuf[4]=' ';
-      this->geiger_counter = 0;
+      this->COUNTER_GEIGER = 0;
 	  this->frequency_lower = 2000;
 	  this->frequency_upper = 4000;
 	  this->tone_length_millis = 10;
@@ -999,6 +1063,8 @@ void Apps::modeGeiger(bool init){
   //long r = random(0, 1024);
   //r = r*r;
 
+  
+  
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 
 	if (potentio->getValueStableChangedEdge()){
@@ -1034,15 +1100,27 @@ void Apps::modeGeiger(bool init){
 		tone(PIN_BUZZER, random(this->frequency_lower,this->frequency_upper), this->tone_length_millis);
 	  }
     
-      geiger_counter++;
-	  ledDisp->showNumber(geiger_counter);
-      // ledDisp->SetSingleDigit(geiger_counter, 1);  
-	  
+      this->COUNTER_GEIGER++;
+	  ledDisp->showNumber(this->COUNTER_GEIGER);
+      
     }
     
   }else{
 	// simple Geiger mode
 	// todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
+	
+	// If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
+	if ( binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+		// binaryInputs[SWITCH_TILT_FORWARD].getValue() ||
+		// r *= 2; //
+		GEIGER_INCREASE_CHANCE+=1000;
+	}else{
+		if (GEIGER_INCREASE_CHANCE > 0){
+			GEIGER_INCREASE_CHANCE-=1500;
+		}
+	}
+	r+=GEIGER_INCREASE_CHANCE;
+	
     if (r > potentio->getValueMapped(0,1048576)){
   //    buzzer->programBuzzerRoll(1); //not beep but "puck"
  	  tone(PIN_BUZZER, (unsigned int)50, 10);

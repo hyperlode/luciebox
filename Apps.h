@@ -40,6 +40,10 @@
 #define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer2
 
+#define COUNTER_GEIGER counter3
+#define GEIGER_INCREASE_CHANCE counter_long
+
+#define TIMER_INIT_APP generalTimer
 
 const uint8_t disp_4digits_animations [] PROGMEM = {
 	0x35,  // first byte = length of animation in bytes  (here 53, including the length byte)
@@ -234,7 +238,7 @@ class Apps{
   void test();
 
   void appSelector(bool init, uint8_t selector);
-  
+  bool init_app(bool init);
   void modeScroll(bool init);
   void modeSimpleButtonsAndLights();
   void modeCountingLettersAndChars(bool init);
@@ -276,7 +280,7 @@ class Apps{
   int16_t counter;
   int16_t counter2;
   int16_t counter3;
-  uint8_t geiger_counter;
+  long counter_long;
   bool numberElseAlphabethMode;
   // int16_t animation_step;
   uint8_t game_x_pos;
@@ -298,6 +302,8 @@ class Apps{
   char*  textBuf;
   char*  scrollBuf;
   uint8_t lights;
+  
+  bool app_init_mode;
   
 };
 
