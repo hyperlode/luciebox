@@ -6,7 +6,10 @@
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
+
+#ifdef ENABLE_MULTITIMER
 #include "MiniMultiTimer.h"
+#endif
 
 #include "DataPlayer.h"
 
@@ -332,11 +335,14 @@ class Apps{
   void miniMultiTimer(bool init);
   
   
+  void fadeInList(uint32_t* movie, uint8_t length);
+  void shuffle(uint8_t* list, uint8_t length);
   
   private:
   DataPlayer dataPlayer;
+  #ifdef ENABLE_MULTITIMER
   MiniMultiTimer multiTimer;
-  
+  #endif
   int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
   void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
   
@@ -369,7 +375,7 @@ class Apps{
   uint8_t selectedSounds[4];
   uint8_t dispState[4];
   
-  uint8_t movie[40];
+  uint32_t displaySequence[32];
 
   char*  textBuf;
   char*  scrollBuf;

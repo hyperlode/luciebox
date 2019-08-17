@@ -144,18 +144,34 @@ void Apps::modeScroll(bool init){
     //scrollBuf[10]='/0';
     ledDisp->dispHandlerWithScroll(scrollBuf, true, false);
       
+	  
+	this->fadeInList(displaySequence, 32);
+	counter = 0;
   }
   
-  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-    ledDisp->doScroll();
-  }
+  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+	  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+		counter++;
+		if (counter>31){
+			counter = 0;
+		}
+		// Serial.println(displaySequence[counter], BIN);
+	  }
+	  
+	  ledDisp->SetFourDigits(displaySequence[counter]);
 
-  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-    ledDisp->setScrollSpeed((long)potentio->getValueStable());
+	 
   }else{
-    ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
+	  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+		ledDisp->doScroll();
+	  }
+
+	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+		ledDisp->setScrollSpeed((long)potentio->getValueStable());
+	  }else{
+		ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
+	  }
   }
-  
 }
 
 void Apps::modeSimpleButtonsAndLights(){
@@ -469,13 +485,10 @@ void Apps::movieAnimationMode(bool init){
 	bool nextStep = 0;
 	 //reset saved led disp state.
 	if (init){
-		counter = 4; // dispay is four characters. Four bytes.So, it should advance four bytes every step (default). But, it could give fun effects to change that number and see what happens... 
+		counter = 4; // display is four characters. Four bytes.So, it should advance four bytes every step (default). But, it could give fun effects to change that number and see what happens... 
+		this->dataPlayer.loadAllData(disp_4digits_animations);
 		this->dataPlayer.loadDataSet(1);
 		this->dataPlayer.setAutoSteps(4);
-		
-		// this->dataPlayer.loadAllData(&disp_4digits_animations);
-		//this->dataPlayer.loadAllData(allData[0]);
-		this->dataPlayer.loadAllData(disp_4digits_animations);
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
@@ -758,8 +771,9 @@ void Apps::modeSingleSegmentManipulation(bool init){
   // }
 }
 
-void Apps::miniMultiTimer(bool init){
 
+void Apps::miniMultiTimer(bool init){
+#ifdef ENABLE_MULTITIMER
   // every player: init time, time left, alive? 
   // game: pause, player alive? ,fischertimer active?/time, random starter
 
@@ -845,6 +859,7 @@ void Apps::miniMultiTimer(bool init){
   
   ledDisp->SetLedArray(lights); 
   ledDisp->displayHandler(textBuf);
+#endif
 }
 
 void Apps::tiltSwitchTest(bool init){
@@ -858,55 +873,81 @@ void Apps::tiltSwitchTest(bool init){
 	  counter = 0;
 	  counter2 = 0; // counts progress in movement.
 	  buzzer->setSpeedRatio(2.0);
-  }
-  
-  if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
-    buzzer->programBuzzerRoll(1); //not beep but "puck"
-	counter2|=0x01<<TILT_FORWARD;
-  }
-  
-  if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){
-    buzzer->programBuzzerRoll(1); //not beep but "puck"
-	counter2|=0x01<<TILT_BACKWARD;
-  }
-
-  if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){
-    buzzer->programBuzzerRoll(1); //not beep but "puck"
-	counter2|=0x01<<TILT_LEFT;
-  }
-  
-  if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){
-    buzzer->programBuzzerRoll(1); //not beep but "puck"
-	counter2|=0x01<<TILT_RIGHT;
-  }
-
-  
-  // if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 	  
-	  
+	  this->dataPlayer.loadAllData(disp_4digits_animations);
 	 
-  // }
-  // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() &&  
-  if(counter2>0 || counter > 0){
-	  for (uint8_t i=0;i<=counter;i++){
-		  
-		  if (1<<TILT_FORWARD & counter2 || i<counter){
-			screen |= (uint32_t)pgm_read_byte_near(tilt_forward + i)<< (8*i); //* 4 --> 4 bytes per dword
-		  }
-		  if (1<<TILT_BACKWARD & counter2 || i<counter){
-			screen |= (uint32_t)pgm_read_byte_near(tilt_backward + i)<< (8*i); //* 4 --> 4 bytes per dword
-		  }
-		  if (1<<TILT_LEFT & counter2 || i<counter){
-			screen |= (uint32_t)pgm_read_byte_near(tilt_left + i)<< (8*i); //* 4 --> 4 bytes per dword
-		  }
-		  if (1<<TILT_RIGHT & counter2 || i<counter){
-			screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword
-		  }
-	  }	
+	  this->dataPlayer.setAutoSteps(4);
+	  this->dataPlayer.setAutoStep(true);
+	  this->dataPlayer.setAutoStepSpeed(-30);
+  }
+  
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+	  // movie for each gesture
 	  
-	  ledDisp->SetFourDigits(screen);  
+     if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
+		 this->dataPlayer.loadDataSet(1);
+		 this->dataPlayer.setSetIndexDirection(1);
+	 }
+	 if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){
+		 this->dataPlayer.loadDataSet(1);
+		 this->dataPlayer.setSetIndexDirection(0);
+	 }
+	 if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){
+		 this->dataPlayer.loadDataSet(0);
+		 this->dataPlayer.setSetIndexDirection(1);
+	 }
+	 if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){
+		 this->dataPlayer.loadDataSet(0);
+		 this->dataPlayer.setSetIndexDirection(0);
+	 }
+	 this->dataPlayer.update();
+	 screen = this->dataPlayer.getActive32bit();
+
+	 ledDisp->SetFourDigits(screen);  
   }else{
-	  ledDisp->displayHandler(textBuf);
+		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
+			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			counter2|=0x01<<TILT_FORWARD;
+		}
+
+		if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){
+			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			counter2|=0x01<<TILT_BACKWARD;
+		}
+
+		if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){
+			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			counter2|=0x01<<TILT_LEFT;
+		}
+
+		if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){
+			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			counter2|=0x01<<TILT_RIGHT;
+		}
+
+		if(counter2>0 || counter > 0){  
+	  
+		  for (uint8_t i=0;i<=counter;i++){
+			  
+			  if (1<<TILT_FORWARD & counter2 || i<counter){
+				screen |= (uint32_t)pgm_read_byte_near(tilt_forward + i)<< (8*i); //* 4 --> 4 bytes per dword
+			  }
+			  if (1<<TILT_BACKWARD & counter2 || i<counter){
+				screen |= (uint32_t)pgm_read_byte_near(tilt_backward + i)<< (8*i); //* 4 --> 4 bytes per dword
+			  }
+			  if (1<<TILT_LEFT & counter2 || i<counter){
+				screen |= (uint32_t)pgm_read_byte_near(tilt_left + i)<< (8*i); //* 4 --> 4 bytes per dword
+			  }
+			  if (1<<TILT_RIGHT & counter2 || i<counter){
+				screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword
+			  }
+		  }	
+		
+  
+		ledDisp->SetFourDigits(screen);  
+	}else{
+		ledDisp->displayHandler(textBuf);
+	}
   }
   
   // keep track of progress
@@ -1343,5 +1384,52 @@ void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
 	//as the number of write operations to eeprom is limited, only write when different value.
 	if (eeprom_read_byte(address) != value) {
 		eeprom_write_byte(address, value);
+	}
+}
+
+void Apps::fadeInList(uint32_t* movie, uint8_t length){
+// void fadeInList(uint32_t* movie){
+	
+	uint8_t sequence[32];
+	for (uint8_t i = 0; i < 32; i++) {
+		sequence[i] = i;
+	}
+	
+	// shuffle in place
+	this->shuffle(sequence, 32);
+	
+	// fade in effect, enable random segments.
+	uint32_t fullScreen = 0x00000000;
+	uint32_t ppp ;
+	for (uint8_t i=0; i<32;i++){
+		ppp = 0;
+		// = 1<<sequence[i];
+		// Serial.println(sequence[i]);
+		ppp = 1UL <<sequence[i]; // UL because if just 1 it's a 16 bit constant.
+		// Serial.println(&ppp);
+		// Serial.println("====-=-==");
+		// Serial.println(ppp, BIN);
+		fullScreen |= ppp;
+		// Serial.println(fullScreen, BIN);
+		// fullScreen |= 2**sequence[i];
+		//fullScreen |= (uint32_t)pow(2,sequence[i]);
+		movie[i] = fullScreen;
+	}
+}
+
+void Apps::shuffle(uint8_t* listToShuffle, uint8_t length) {
+	// byte ids[getNumberOfPlayers()];
+	//create array with numbers going up...
+	
+	//shuffle the array:
+	//http://www.geeksforgeeks.org/shuffle-a-given-array/
+	for (int i = 0; i < length; i++) {
+		uint8_t randomIndex = random( i, length);
+		
+		// swap contents of current index with content further index.
+		uint8_t tmp = listToShuffle[i];
+		listToShuffle[i] = listToShuffle[randomIndex];
+		listToShuffle[randomIndex] = tmp;
+		
 	}
 }
