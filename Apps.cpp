@@ -588,13 +588,74 @@ void Apps::movieAnimationMode(bool init){
 	bool nextStep = 0;
 	 //reset saved led disp state.
 	if (init){
-		counter = 4; // display is four characters. Four bytes.So, it should advance four bytes every step (default). But, it could give fun effects to change that number and see what happens... 
-		this->dataPlayer.loadAllData(disp_4digits_animations);
-		this->dataPlayer.loadDataSet(1);
-		this->dataPlayer.setAutoSteps(4);
+
+		// this->dispState[i]=0;
+		//ledDisp->SetSingleDigit(0b01010101,i+1);
+		animation_step = 0; // frame
+		animation_direction = 0;
+		
+	    animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+		animation_speed.start();
+		
+		counter2 = 0; //contains animation number. (saved as a big array with multiple animation behind oneother, divided by length bytes.
+		
+		counter3 = this->_animationGetStartByte(counter2); // animation offset (start byte)
+		counter = (int16_t)pgm_read_byte_near(disp_4digits_animations + counter3) - 1; // length of animation
+	}
+	
+	
+	screenPersistenceOfVision = 0;
+	for (uint8_t i=0;i<4;i++){
+		screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animations + (counter3 + 1) + animation_step*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+	}
+	
+	
+	if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+		
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp() && counter2 > 0){
+					counter2--;
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+					counter2++;
+			}
+			counter3 = this->_animationGetStartByte(counter2); // animation offset (start byte)
+			counter = (int16_t)pgm_read_byte_near(disp_4digits_animations + counter3) - 1; // length of animation
+			animation_step = 0;
+			// Serial.println("counter:");
+			// Serial.println(counter);
+			// Serial.println(counter2);
+			// Serial.println(counter3);
+			// Serial.println(animation_step);
+		}
+
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+
+		// auto mode.
+		  if (potentio->getValueStableChangedEdge()){
+			animation_speed.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+			// animation_speed.start(); //during turning it pauses because of the continuous restarting.
+		  }
+		  if (!animation_speed.getTimeIsNegative()){
+			nextStep = true;
+			animation_speed.start();
+		  }
+          if(binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+			animation_direction = !animation_direction;
+		  }
+		  
+		  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+			 animation_step = (uint16_t)(counter/4) - 1; // last step
+			}
+			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){	
+				 animation_step = 0; // first step
+			}
+		  }
+	}else{
+
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
 			if (potentio->getLastStableValueChangedUp()){
@@ -605,16 +666,11 @@ void Apps::movieAnimationMode(bool init){
 				this->dataPlayer.moveIndexSteps(counter);
 			}
 		}
-		
-		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
-			 this->dataPlayer.setSetIndexDirection(1);
-			 this->dataPlayer.moveIndexSteps(counter);
-		}
-		
-		if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){	
-			counter++;
-			if (counter>4){
-				counter = 1;
+
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){	
+				 animation_step++;
+
 			}
 			this->dataPlayer.setAutoSteps(counter);
 		}

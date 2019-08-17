@@ -90,6 +90,10 @@ K AVR 8bit Microcontroller MegaAVR
 F http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-8025-8-bit-AVR-Microcontroller-ATmega48P-88P-168P_Datasheet.pdf
 $ENDCMP
 #
+$CMP DAC_R-2R
+F https://www.bourns.com/docs/Product-Datasheets/R2R.pdf
+$ENDCMP
+#
 $CMP Screw_Terminal_01x07
 D Generic screw terminal, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)
 K screw terminal
