@@ -146,30 +146,54 @@ void Apps:: setDefaultMode(){
 }
 
 bool Apps::init_app(bool init, uint8_t selector){
+	// shows splash screen
+	
+	// uint32_t startScreen = 0x00737377; // " PPA" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
+	// uint32_t startScreen = 0x795E3F38; // "EDOL" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
+	// uint32_t startScreen = 0x00000000; // " PPA" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
+	// uint32_t startScreen = 0x5F015E5E; // " PPA" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
 	if(init){
-		this->fadeInList(displaySequence, 32);
-		counter = 0;
-		this->TIMER_INIT_APP.setInitTimeMillis(-200); // little pause at start
+		// init of the init_app...
+		this->screenPersistenceOfVision = 0;
+		  for (uint8_t i=0;i<4;i++){
+			this->screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+			
+		  }
+		
+		this->fadeInList(displaySequence, 32, this->screenPersistenceOfVision);
+		counter = 27;
+		this->TIMER_INIT_APP.setInitTimeMillis(-20); 
 		this->TIMER_INIT_APP.start();
 	}
 	
+	// advance one frame
 	if(!this->TIMER_INIT_APP.getTimeIsNegative()){
-		this->TIMER_INIT_APP.setInitTimeMillis(-30);
+		// this->TIMER_INIT_APP.setInitTimeMillis(-30);
 		this->TIMER_INIT_APP.start();
 		counter++;
 	}
 	
 	// init states sequence
-    if (counter == 0){
-		ledDisp->SetFourDigits(0xffffffff);
+    // if (counter == 0){
+		// ledDisp->SetFourDigits(this->screenPersistenceOfVision);
 		
-	}else if (counter < 32){
-		ledDisp->SetFourDigits(31-displaySequence[counter]);
-		
+	// Serial.println(counter);
+	// }else
+	if (counter < 32){
+		// ledDisp->SetFourDigits(displaySequence[31-counter]); // use fade in as fade out to set text.
+		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
+		// Serial.println();
 	}else if (counter < 50){
-		ledDisp->showNumber(selector);
+		ledDisp->SetFourDigits(this->screenPersistenceOfVision);
+		// ledDisp->showNumber(selector);
 		
-	}else if (counter >= 50){
+	}else if (counter == 50){
+		this->fadeInList(displaySequence, 32, ~this->screenPersistenceOfVision);
+		
+	}else if (counter < 82 ){
+		ledDisp->SetFourDigits(~displaySequence[counter-51]);
+		
+	}else {
 		this->setDefaultMode();
 		return true;
 	}
@@ -227,7 +251,7 @@ void Apps::modeScroll(bool init){
     ledDisp->dispHandlerWithScroll(scrollBuf, true, false);
       
 	  
-	this->fadeInList(displaySequence, 32);
+	this->fadeInList(displaySequence, 32, 0);
 	counter = 0;
 	counter2= false;
 	
@@ -247,7 +271,7 @@ void Apps::modeScroll(bool init){
 	  }
 	  if (counter>31){
 			counter = 0;
-			this->fadeInList(displaySequence, 32);
+			this->fadeInList(displaySequence, 32, 0);
 			counter2  = !counter2;
 		}
 		
@@ -1503,7 +1527,7 @@ void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
 	}
 }
 
-void Apps::fadeInList(uint32_t* movie, uint8_t length){
+void Apps::fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen){
 	uint8_t sequence[32];
 	for (uint8_t i = 0; i < 32; i++) {
 		sequence[i] = i;
@@ -1513,12 +1537,13 @@ void Apps::fadeInList(uint32_t* movie, uint8_t length){
 	this->shuffle(sequence, 32);
 	
 	// fade in effect, enable random segments.
-	uint32_t fullScreen = 0x00000000;
+	// uint32_t fullScreen = 0x00000000;
+	uint32_t fullScreen = startScreen;
 	 // ppp ;
 	for (uint8_t i=0; i<32;i++){
-		// uint32_t ppp = 1UL <<sequence[i]; // UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
-		fullScreen |= 1UL <<sequence[i];
+		fullScreen |= 1UL <<sequence[i];// 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
 		movie[i] = fullScreen;
+		// Serial.println(movie[i], BIN);
 	}
 }
 

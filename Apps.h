@@ -45,6 +45,32 @@
 
 #define TIMER_INIT_APP generalTimer
 
+
+const uint8_t app_splash_screens [] PROGMEM = {
+	//sorted by selector number
+	
+	// 0x38, 0x3F, 0x5E, 0x79, // LODE minimultitimer
+	// 0x5E, 0x5E, 0x01, 0x5F, // music notes. duh!  (doesn't show nicely)
+	0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
+	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol of tank
+	// 0x00, 0x7C, 0x5E, 0x6F, // BdG
+	0x39, 0x09, 0x09, 0x0F, // abstractbig circle
+	0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
+	// 0x6F, 0x79, 0x06, 0x6F, // GEIG geiger
+	// 0x70, 0x06, 0x38, 0x70, // TILT
+	// 0x9B, 0x2D, 0x9B, 0x2D, // abstract.  "river" --> looks too much like 2 and 5's
+	0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
+	0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
+	0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
+	0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
+	// 0xB7, 0xB7, 0xB7, 0x37, // abstract snake   boring!
+	0x08, 0xCE, 0x78, 0x08, // abstract piramid
+	0x40, 0x4F, 0x79, 0x40, // abstract art deco 
+	0x36, 0x36, 0x36, 0x36, // abstract vertical lines
+	0x00, 0x63, 0xDA, 0x63   // abstract face 0x63, 0xDA, 0x6C, 0x63
+		
+};
+
 const uint8_t disp_4digits_animations [] PROGMEM = {
 	0x35,  // first byte = length of animation in bytes  (here 53, including the length byte)
 // const uint32_t disp_4digits_swoosh [] PROGMEM = {
@@ -258,7 +284,7 @@ class Apps{
   void miniMultiTimer(bool init);
   
   
-  void fadeInList(uint32_t* movie, uint8_t length);
+  void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen);
   void shuffle(uint8_t* list, uint8_t length);
   
   private:
@@ -309,4 +335,3 @@ class Apps{
 };
 
 #endif 
-
