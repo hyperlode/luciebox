@@ -148,42 +148,35 @@ void Apps:: setDefaultMode(){
 bool Apps::init_app(bool init, uint8_t selector){
 	// shows splash screen
 	
-	// uint32_t startScreen = 0x00737377; // " PPA" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
-	// uint32_t startScreen = 0x795E3F38; // "EDOL" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
-	// uint32_t startScreen = 0x00000000; // " PPA" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
-	// uint32_t startScreen = 0x5F015E5E; // " PPA" will show app. let's not fix this. You see Lucie, sometimes, you just have to go with the flow.
 	if(init){
 		// init of the init_app...
 		this->screenPersistenceOfVision = 0;
 		  for (uint8_t i=0;i<4;i++){
 			this->screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
-			
 		  }
 		
 		this->fadeInList(displaySequence, 32, this->screenPersistenceOfVision);
+		// counter = 0;
+		// this->TIMER_INIT_APP.setInitTimeMillis(-5); 
+
 		counter = 27;
 		this->TIMER_INIT_APP.setInitTimeMillis(-20); 
+
 		this->TIMER_INIT_APP.start();
 	}
 	
 	// advance one frame
 	if(!this->TIMER_INIT_APP.getTimeIsNegative()){
-		// this->TIMER_INIT_APP.setInitTimeMillis(-30);
 		this->TIMER_INIT_APP.start();
 		counter++;
 	}
-	
-	// init states sequence
-    // if (counter == 0){
-		// ledDisp->SetFourDigits(this->screenPersistenceOfVision);
-		
-	// Serial.println(counter);
-	// }else
+
 	if (counter < 32){
 		// ledDisp->SetFourDigits(displaySequence[31-counter]); // use fade in as fade out to set text.
 		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
-		// Serial.println();
+
 	}else if (counter < 50){
+		// this->TIMER_INIT_APP.setInitTimeMillis(-20); 
 		ledDisp->SetFourDigits(this->screenPersistenceOfVision);
 		// ledDisp->showNumber(selector);
 		
@@ -476,6 +469,7 @@ void Apps::modeSoundSong(bool init){
   if (init){
     buzzer->loadBuzzerTrack(song_happy_dryer);
     buzzer->setSpeedRatio((float)2);
+	
   }
 
   if (potentio->getValueStableChangedEdge()){
@@ -514,12 +508,15 @@ void Apps::modeSoundSong(bool init){
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_unhappy_dryer);
+		Serial.println("unhappy");
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
         buzzer->loadBuzzerTrack(kindeke_douwen);
+		Serial.println("dow");
       }
       if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_retreat );
+		Serial.println("rettr");
       }
     }else{
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){

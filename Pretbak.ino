@@ -12,9 +12,9 @@
 #ifdef ENABLE_SERIAL
   //#define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
-  //#define DEBUG_BUTTONS
+  #define DEBUG_BUTTONS
   //#define DEBUG_SELECTOR_KNOB
-  #define DEBUG_MINIMULTITIMER
+  //#define DEBUG_MINIMULTITIMER
   //#define DEBUG_SEQUENCER
 #endif 
 
@@ -52,14 +52,14 @@ void refresh(){
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
     if (binaryInputs[i].getEdgeUp()){
       
+      Serial.println("PRESS:");
       Serial.println(i);
-//      Serial.println("PRESSED");
-//      Serial.println("analog in mercury switches edge up:");
-//      Serial.println(mercurySwitches.getButtonsValueRaw());
-       Serial.println( (analogRead(A4)));
+       Serial.println( (analogRead(PIN_BUTTONS_1)));
+       Serial.println( (analogRead(PIN_BUTTONS_2)));
   
     }
     if (binaryInputs[i].getEdgeDown()){
+      Serial.println("RELEASE:");
       Serial.println(i);
 //      Serial.println("Button released");
 //      Serial.println("analog in mercury switches edge down:");
@@ -146,83 +146,6 @@ void mode_refresh(){
   bool init = selectorDial.getValueChangedEdge();
   pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
   
-  // switch (selectorDial.getSelectorValue()) {
-    // case 0:
-      // pretbak_apps.modeCountingLettersAndChars(init);
-      // break;
-      
-    // case 1:
-      // //sound fun with notes
-      // pretbak_apps.modeSoundNotes();
-      // break;
-      
-    // case 2:
-      // //sound fun with frequencies.
-      
-      // #ifdef DEBUG_BUTTONS
-      
-      // if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        // Serial.println(potentio.getValueMapped(0,1023));
-      // }
-
-      // #endif
-// /*
-      // if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        // if (potentio.getValueStableChangedEdge()){      
-          // buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
-        // }
-      // }else{
-        // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-          // if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-            // buzzer.buzzerOn( (uint16_t) map((long)potentio.getValueStable(), 0, 1023, 0 , 65535));
-          // }
-        // }else if (true) {
-          
-        // }
-        
-      // }
- // */
-      // break;
-      
-    // case 3:
-      // pretbak_apps.modeScroll(init);
-      // break;
-      
-    // case 4:
-      // pretbak_apps.modeGeiger(init);
-      // break;
-      
-    // case 5:
-      // pretbak_apps.modeSoundSong(init);
-      // break;
-      
-    // case 6:
-      // pretbak_apps.draw(init);
-      // break;
-      
-    // case 7:
-      // pretbak_apps.modeSimpleButtonsAndLights();    
-      // break;
-      
-    // case 8:
-      // pretbak_apps.modeSequencer(init);
-      // break;
-      
-    // case 9:
-      // pretbak_apps.gameButtonInteraction(init);
-      // break;
-      
-    // case 10:
-      // pretbak_apps.tiltSwitchTest(init);
-      // break;
-      
-    // case 11:
-	  // pretbak_apps.miniMultiTimer(init);
-      // break;
-    
-    // default:
-      // break;
-  // } 
 }
 
 void setup() {
@@ -231,12 +154,13 @@ void setup() {
   Serial.begin(9600);
   #endif
   
-  // put your setup code here, to run once:
+  // put your setup code here, to run once
+  
   selectorDial.setPin(PIN_SELECTOR_DIAL);
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
   mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT);
-  mercurySwitches.setDebouncingCycles(100);
+  mercurySwitches.setDebounceMillis(30);
 
   buzzer.setPin(PIN_BUZZER);
 
