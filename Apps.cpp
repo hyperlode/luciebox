@@ -1371,6 +1371,9 @@ void Apps::modeSimon(bool init)
   const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
   const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
 
+  const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+  const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
+
   if (init) {
     randomSeed(millis());
     for (int k = 0; k < simonBufSize; ++k) {
@@ -1400,8 +1403,8 @@ void Apps::modeSimon(bool init)
     } else if (simonIndex < simonLength) {
       // show one button from the sequence
       const uint8_t button = simonSequence[simonIndex];
-      ledDisp->SetLedArray(lights[button]);
-      buzzer->programBuzzerRoll(sounds[button]); 
+      if (hasLight) ledDisp->SetLedArray(lights[button]);
+      if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
       ++simonIndex;
     } else {
       // sequence has finished, give command to player
@@ -1421,11 +1424,11 @@ void Apps::modeSimon(bool init)
         if (pressed) {
           if (k == button) {
             // correct button
-            buzzer->programBuzzerRoll(sounds[button]);
+            if (hasSound) buzzer->programBuzzerRoll(sounds[button]);
             ++simonIndex;
           } else {
             // player made mistake, start new game
-            buzzer->loadBuzzerTrack(scale_major_reversed);
+            if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
             modeSimon(true);
             return;
           }
@@ -1436,7 +1439,7 @@ void Apps::modeSimon(bool init)
       ++simonLength;
       if (simonLength > simonBufSize) {
         // reached maximum length
-        buzzer->loadBuzzerTrack(song_attack);
+        if (hasSound) buzzer->loadBuzzerTrack(song_attack);
         modeSimon(true);
         return;
       }
