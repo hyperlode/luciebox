@@ -1,5 +1,5 @@
 #include "Apps.h"
-#include "Arduino.h"
+//#include "Arduino.h"
 #include "PretbakSettings.h"
 
 Apps::Apps(){
@@ -83,6 +83,10 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
 			Serial.println(potentio.getValueMapped(0,1023));
 		  }
+
+      #else
+
+     this->modeSimon(init);
 
 		  #endif
 
@@ -1358,6 +1362,80 @@ void Apps::modeMetronome(bool init){
 //
 //  }
   
+}
+
+void Apps::modeSimon(bool init)
+{
+  const int numButtons = 3;
+  const int buttons[numButtons] = { BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
+  const byte lights[numButtons] = { 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
+  const uint8_t sounds[numButtons] = { F4_1, A4_1, C5_1};
+  if (init) {
+    randomSeed(millis());
+    for (int k = 0; k < simonBufSize; ++k) {
+      simonSequence[k] = random(numButtons);
+    }    
+    simonLength = 1;
+    simonIndex = 0;
+    simonShow = true;
+  }
+
+  if (init || potentio->getValueStableChangedEdge()) {
+    generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
+    generalTimer.start();
+  }
+
+  if (simonShow) {
+    // show the sequence to the player
+    if (generalTimer.getTimeIsNegative())
+      return;
+    generalTimer.start();
+
+    ledDisp->showNumber(simonLength);
+    if (simonIndex < simonLength) {
+      // show one button from the sequence
+      const uint8_t button = simonSequence[simonIndex];
+      ledDisp->SetLedArray(lights[button]);
+      buzzer->programBuzzerRoll(sounds[button]); 
+      ++simonIndex;
+    } else {
+      // sequence has finished, give command to player
+      ledDisp->SetLedArray(0);
+      simonShow = false;
+      simonIndex = 0;
+    }
+  } else {
+    // player needs to enter the sequence
+    if (simonIndex < simonLength) {
+      // wait for next button in sequence
+      const uint8_t button = simonSequence[simonIndex];
+      for (int k = 0; k < numButtons; ++k) {
+        if (binaryInputs[buttons[k]].getEdgeUp()) {
+          if (k == button) {
+            buzzer->programBuzzerRoll(sounds[button]);
+            ++simonIndex;
+          } else {
+            // player made mistake, start new game
+            buzzer->loadBuzzerTrack(scale_major_reversed);
+            modeSimon(true);
+            return;
+          }
+        }
+      }
+    } else {
+      // player has entered sequence correctly, add one more button to sequence
+      ++simonLength;
+      if (simonLength > simonBufSize) {
+        // reached maximum length
+        buzzer->loadBuzzerTrack(song_attack);
+        modeSimon(true);
+        return;
+      }
+      simonIndex = 0;
+      simonShow = true;
+      generalTimer.start();
+    }
+  }
 }
 
 int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue){

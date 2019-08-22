@@ -278,6 +278,7 @@ class Apps{
   void modeGeiger(bool init);
   void modeSequencer(bool init);
   void modeMetronome(bool init);
+  void modeSimon(bool init);
   void gameButtonInteraction(bool init);
   void tiltSwitchTest(bool init);
   
@@ -325,6 +326,15 @@ class Apps{
   uint8_t dispState[4];
   
   uint32_t displaySequence[32];
+
+  // simon
+  enum {
+    simonBufSize = 32,
+  };
+  uint8_t simonSequence[simonBufSize]; // can we share it with displaySequence?
+  uint8_t simonLength;
+  uint8_t simonIndex;
+  bool simonShow;
 
   char*  textBuf;
   char*  scrollBuf;
