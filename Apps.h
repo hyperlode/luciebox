@@ -333,7 +333,7 @@ class Apps{
   };
   uint8_t simonSequence[simonBufSize]; // can we share it with displaySequence?
   uint8_t simonLength;
-  uint8_t simonIndex;
+  int simonIndex;
   bool simonShow;
 
   char*  textBuf;

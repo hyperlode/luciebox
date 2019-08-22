@@ -1377,7 +1377,7 @@ void Apps::modeSimon(bool init)
       simonSequence[k] = random(numButtons);
     }    
     simonLength = 1;
-    simonIndex = 0;
+    simonIndex = -1;
     simonShow = true;
   }
 
@@ -1391,9 +1391,12 @@ void Apps::modeSimon(bool init)
     if (generalTimer.getTimeIsNegative())
       return;
     generalTimer.start();
-
     ledDisp->showNumber(simonLength);
-    if (simonIndex < simonLength) {
+
+    if (simonIndex < 0) {
+      // negative start indices give lead-in time without anything happening
+      ++simonIndex;
+    } else if (simonIndex < simonLength) {
       // show one button from the sequence
       const uint8_t button = simonSequence[simonIndex];
       ledDisp->SetLedArray(lights[button]);
@@ -1408,7 +1411,7 @@ void Apps::modeSimon(bool init)
   } else {
     // player needs to enter the sequence
     if (simonIndex < simonLength) {
-      // wait for next button in sequence
+      // check the pressed buttons
       const uint8_t button = simonSequence[simonIndex];
       for (int k = 0; k < numButtons; ++k) {
         const bool pressed = buttons[k] == BUTTON_LATCHING_YELLOW
@@ -1416,6 +1419,7 @@ void Apps::modeSimon(bool init)
           : binaryInputs[buttons[k]].getEdgeUp();
         if (pressed) {
           if (k == button) {
+            // correct button
             buzzer->programBuzzerRoll(sounds[button]);
             ++simonIndex;
           } else {
@@ -1435,7 +1439,7 @@ void Apps::modeSimon(bool init)
         modeSimon(true);
         return;
       }
-      simonIndex = 0;
+      simonIndex = -1;
       simonShow = true;
       generalTimer.start();
     }
