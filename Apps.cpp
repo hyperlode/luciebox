@@ -1366,10 +1366,11 @@ void Apps::modeMetronome(bool init){
 
 void Apps::modeSimon(bool init)
 {
-  const int numButtons = 3;
-  const int buttons[numButtons] = { BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
-  const byte lights[numButtons] = { 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
-  const uint8_t sounds[numButtons] = { F4_1, A4_1, C5_1};
+  const int numButtons = 4;
+  const int buttons[numButtons] = { BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
+  const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
+  const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
+
   if (init) {
     randomSeed(millis());
     for (int k = 0; k < simonBufSize; ++k) {
@@ -1410,7 +1411,10 @@ void Apps::modeSimon(bool init)
       // wait for next button in sequence
       const uint8_t button = simonSequence[simonIndex];
       for (int k = 0; k < numButtons; ++k) {
-        if (binaryInputs[buttons[k]].getEdgeUp()) {
+        const bool pressed = buttons[k] == BUTTON_LATCHING_YELLOW
+          ? binaryInputs[buttons[k]].getValueChanged()
+          : binaryInputs[buttons[k]].getEdgeUp();
+        if (pressed) {
           if (k == button) {
             buzzer->programBuzzerRoll(sounds[button]);
             ++simonIndex;
