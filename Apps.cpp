@@ -1374,8 +1374,9 @@ void Apps::modeSimon(bool init)
   if (init) {
     randomSeed(millis());
     for (int k = 0; k < simonBufSize; ++k) {
-      simonSequence[k] = random(numButtons);
-    }    
+      simonSequence[k] = k % numButtons;
+    }
+    shuffle(simonSequence, simonBufSize);
     simonLength = 1;
     simonIndex = -1;
     simonShow = true;
