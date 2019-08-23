@@ -300,7 +300,10 @@ class Apps{
   SuperTimer generalTimer2;
   
   //global app variables
-  uint8_t sequencer_song [32] ;
+  enum {
+    sequencer_bufsize = 32,
+  };
+  uint8_t sequencer_song[sequencer_bufsize];
   uint8_t* game_random;
   uint32_t screenPersistenceOfVision;
   //SuperTimer animation_speed;
@@ -328,13 +331,16 @@ class Apps{
   uint32_t displaySequence[32];
 
   // simon
-  enum {
-    simonBufSize = 32,
+  enum SimonState {
+      simonNewGame,
+      simonWaitForStart,
+      simonNewLevel,
+      simonPlaySequence,
+      simonUserRepeats,
   };
-  uint8_t simonSequence[simonBufSize]; // can we share it with displaySequence?
+  SimonState simonState;
   uint8_t simonLength;
-  int simonIndex;
-  bool simonShow;
+  int8_t simonIndex;
 
   char*  textBuf;
   char*  scrollBuf;

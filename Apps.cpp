@@ -1376,13 +1376,8 @@ void Apps::modeSimon(bool init)
 
   if (init) {
     randomSeed(millis());
-    for (int k = 0; k < simonBufSize; ++k) {
-      simonSequence[k] = k % numButtons;
-    }
-    shuffle(simonSequence, simonBufSize);
     simonLength = 1;
     simonIndex = -1;
-    simonShow = true;
   }
 
   if (init || potentio->getValueStableChangedEdge()) {
@@ -1390,62 +1385,98 @@ void Apps::modeSimon(bool init)
     generalTimer.start();
   }
 
-  if (simonShow) {
-    // show the sequence to the player
-    if (generalTimer.getTimeIsNegative())
-      return;
-    generalTimer.start();
-    ledDisp->showNumber(simonLength);
+  uint8_t buttonsChanged = 0;
+  for (int k = 0; k < numButtons; ++k) {
+    const bool changed = (buttons[k] == BUTTON_LATCHING_YELLOW)
+      ? binaryInputs[buttons[k]].getValueChanged()
+      : binaryInputs[buttons[k]].getEdgeUp();
+    if (changed) {
+      buttonsChanged |= (1 << k);
+    }
+  }
 
-    if (simonIndex < 0) {
-      // negative start indices give lead-in time without anything happening
-      ++simonIndex;
-    } else if (simonIndex < simonLength) {
+  switch (simonState) {
+    case simonNewGame: {
+      // generate new sequence
+      for (int k = 0; k < sequencer_bufsize; ++k) {
+        sequencer_song[k] = k % numButtons;
+      }
+      shuffle(sequencer_song, sequencer_bufsize);
+      simonLength = 0;
+      // all lights on
+      byte allLights = 0;
+      for (int k = 0; k < numButtons; ++k) {
+        allLights |= lights[k];
+      }
+      ledDisp->SetLedArray(allLights);
+      simonState = simonWaitForStart;
+      break;
+    }
+    case simonWaitForStart: {
+      if (!buttonsChanged) {
+        break;
+      }
+      ledDisp->SetLedArray(0);
+      simonState = simonNewLevel;
+      break;
+    }
+    case simonNewLevel: {
+      ledDisp->showNumber(simonLength);
+      ++simonLength;
+      if (simonLength >= sequencer_bufsize) {
+          // reached maximum length
+          if (hasSound) buzzer->loadBuzzerTrack(song_attack);
+          simonState = simonNewGame;
+          break;
+      }
+      simonIndex = -1; // negative index allows for lead-in time
+      simonState = simonPlaySequence;
+      generalTimer.start();
+      break;
+    }
+    case simonPlaySequence: {
+      if (generalTimer.getTimeIsNegative()) {
+        break;
+      }
+      generalTimer.start();
+      if (simonIndex < 0) {
+        ++simonIndex; // do-nothing lead in time
+        break;
+      }
+      if (simonIndex >= simonLength) {
+        // sequence finished, give control to user
+        ledDisp->SetLedArray(0);
+        simonIndex = 0;
+        simonState = simonUserRepeats;
+        break;
+      }
       // show one button from the sequence
-      const uint8_t button = simonSequence[simonIndex];
+      const uint8_t button = sequencer_song[simonIndex];
       if (hasLight) ledDisp->SetLedArray(lights[button]);
       if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
       ++simonIndex;
-    } else {
-      // sequence has finished, give command to player
-      ledDisp->SetLedArray(0);
-      simonShow = false;
-      simonIndex = 0;
+      break;
     }
-  } else {
-    // player needs to enter the sequence
-    if (simonIndex < simonLength) {
-      // check the pressed buttons
-      const uint8_t button = simonSequence[simonIndex];
-      for (int k = 0; k < numButtons; ++k) {
-        const bool pressed = buttons[k] == BUTTON_LATCHING_YELLOW
-          ? binaryInputs[buttons[k]].getValueChanged()
-          : binaryInputs[buttons[k]].getEdgeUp();
-        if (pressed) {
-          if (k == button) {
-            // correct button
-            if (hasSound) buzzer->programBuzzerRoll(sounds[button]);
-            ++simonIndex;
-          } else {
-            // player made mistake, start new game
-            if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
-            modeSimon(true);
-            return;
-          }
-        }
+    case simonUserRepeats: {
+      if (!buttonsChanged) {
+        break;
       }
-    } else {
-      // player has entered sequence correctly, add one more button to sequence
-      ++simonLength;
-      if (simonLength > simonBufSize) {
-        // reached maximum length
-        if (hasSound) buzzer->loadBuzzerTrack(song_attack);
-        modeSimon(true);
-        return;
+      const int expected = sequencer_song[simonIndex];
+      if (buttonsChanged != (1 << expected)) {
+        // player made mistake, start new game
+        if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
+        simonState = simonNewGame;
+        break;
       }
-      simonIndex = -1;
-      simonShow = true;
-      generalTimer.start();
+      // player pressed correct button
+      if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
+      ++simonIndex;
+      if (simonIndex >= simonLength) {
+        // sequence fully replaced, add one more note
+        simonState = simonNewLevel;
+        break;
+      }
+      break;
     }
   }
 }
