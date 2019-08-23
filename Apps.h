@@ -332,8 +332,8 @@ class Apps{
 
   // simon
   enum SimonState {
+      simonWaitForNewGame,
       simonNewGame,
-      simonWaitForStart,
       simonNewLevel,
       simonPlaySequence,
       simonUserRepeats,

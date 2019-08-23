@@ -1375,14 +1375,11 @@ void Apps::modeSimon(bool init)
   const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
 
   if (init) {
-    randomSeed(millis());
-    simonLength = 1;
-    simonIndex = -1;
+    simonState = simonWaitForNewGame;
   }
 
   if (init || potentio->getValueStableChangedEdge()) {
     generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
-    generalTimer.start();
   }
 
   uint8_t buttonsChanged = 0;
@@ -1396,37 +1393,40 @@ void Apps::modeSimon(bool init)
   }
 
   switch (simonState) {
-    case simonNewGame: {
-      // generate new sequence
-      for (int k = 0; k < sequencer_bufsize; ++k) {
-        sequencer_song[k] = k % numButtons;
-      }
-      shuffle(sequencer_song, sequencer_bufsize);
-      simonLength = 0;
+    case simonWaitForNewGame: {
       // all lights on
       byte allLights = 0;
       for (int k = 0; k < numButtons; ++k) {
         allLights |= lights[k];
       }
       ledDisp->SetLedArray(allLights);
-      simonState = simonWaitForStart;
-      break;
-    }
-    case simonWaitForStart: {
       if (!buttonsChanged) {
         break;
       }
+      simonState = simonNewGame;
+      break;
+    }
+
+    case simonNewGame: {
       ledDisp->SetLedArray(0);
+      // generate new sequence
+      randomSeed(millis());
+      for (int k = 0; k < sequencer_bufsize; ++k) {
+        sequencer_song[k] = k % numButtons;
+      }
+      shuffle(sequencer_song, sequencer_bufsize);
+      simonLength = 0;
       simonState = simonNewLevel;
       break;
     }
+
     case simonNewLevel: {
       ledDisp->showNumber(simonLength);
       ++simonLength;
       if (simonLength >= sequencer_bufsize) {
           // reached maximum length
           if (hasSound) buzzer->loadBuzzerTrack(song_attack);
-          simonState = simonNewGame;
+          simonState = simonWaitForNewGame;
           break;
       }
       simonIndex = -1; // negative index allows for lead-in time
@@ -1434,6 +1434,7 @@ void Apps::modeSimon(bool init)
       generalTimer.start();
       break;
     }
+
     case simonPlaySequence: {
       if (generalTimer.getTimeIsNegative()) {
         break;
@@ -1457,6 +1458,7 @@ void Apps::modeSimon(bool init)
       ++simonIndex;
       break;
     }
+
     case simonUserRepeats: {
       if (!buttonsChanged) {
         break;
@@ -1465,7 +1467,7 @@ void Apps::modeSimon(bool init)
       if (buttonsChanged != (1 << expected)) {
         // player made mistake, start new game
         if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
-        simonState = simonNewGame;
+        simonState = simonWaitForNewGame;
         break;
       }
       // player pressed correct button
