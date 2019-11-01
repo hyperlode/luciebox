@@ -8,8 +8,9 @@ class DataPlayer{
 
   public:
     DataPlayer();
-    uint16_t getStartIndexByDataSet(uint8_t data_set);
-	void loadAllData(const uint8_t* data);
+        void loadAllData(const uint8_t* data);
+	
+        uint16_t getStartIndexByDataSet(uint8_t data_set);
 	
 	void loadDataSet(uint8_t data_set);
 	void nextDataSet(bool stepForwardElseBackward);
