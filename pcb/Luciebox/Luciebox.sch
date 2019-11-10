@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:Luciebox-cache
-EELAYER 29 0
+EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -1352,7 +1352,6 @@ F 3 "~" H 6100 7100 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	5100 6500 4000 6500
-Connection ~ 4000 6550
 Wire Wire Line
 	4000 6500 4000 6550
 Wire Wire Line
@@ -1445,5 +1444,105 @@ Wire Wire Line
 	1500 6150 2200 6150
 Wire Wire Line
 	3300 6750 3750 6750
-Connection ~ 3750 6750
+$Comp
+L power:+12V #PWR0103
+U 1 1 5DC88B13
+P 5900 7400
+F 0 "#PWR0103" H 5900 7250 50  0001 C CNN
+F 1 "+12V" H 5915 7573 50  0000 C CNN
+F 2 "" H 5900 7400 50  0001 C CNN
+F 3 "" H 5900 7400 50  0001 C CNN
+	1    5900 7400
+	-1   0    0    1   
+$EndComp
+Text Notes 6200 7450 0    50   ~ 0
+12V
+$Comp
+L Mechanical:MountingHole H4
+U 1 1 5DC89D39
+P 5600 5450
+F 0 "H4" H 5700 5496 50  0000 L CNN
+F 1 "MountingHole" H 5700 5405 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 5600 5450 50  0001 C CNN
+F 3 "~" H 5600 5450 50  0001 C CNN
+	1    5600 5450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 5DC9D1FF
+P 5600 5650
+F 0 "H1" H 5700 5696 50  0000 L CNN
+F 1 "MountingHole" H 5700 5605 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 5600 5650 50  0001 C CNN
+F 3 "~" H 5600 5650 50  0001 C CNN
+	1    5600 5650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 5DC9D279
+P 5600 5800
+F 0 "H2" H 5700 5846 50  0000 L CNN
+F 1 "MountingHole" H 5700 5755 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 5600 5800 50  0001 C CNN
+F 3 "~" H 5600 5800 50  0001 C CNN
+	1    5600 5800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H3
+U 1 1 5DC9D2EF
+P 5650 6000
+F 0 "H3" H 5750 6046 50  0000 L CNN
+F 1 "MountingHole" H 5750 5955 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 5650 6000 50  0001 C CNN
+F 3 "~" H 5650 6000 50  0001 C CNN
+	1    5650 6000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H8
+U 1 1 5DC9D36B
+P 6250 6000
+F 0 "H8" H 6350 6046 50  0000 L CNN
+F 1 "MountingHole" H 6350 5955 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 6250 6000 50  0001 C CNN
+F 3 "~" H 6250 6000 50  0001 C CNN
+	1    6250 6000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H7
+U 1 1 5DC9D403
+P 6200 5800
+F 0 "H7" H 6300 5846 50  0000 L CNN
+F 1 "MountingHole" H 6300 5755 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 6200 5800 50  0001 C CNN
+F 3 "~" H 6200 5800 50  0001 C CNN
+	1    6200 5800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H6
+U 1 1 5DC9D485
+P 6200 5600
+F 0 "H6" H 6300 5646 50  0000 L CNN
+F 1 "MountingHole" H 6300 5555 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 6200 5600 50  0001 C CNN
+F 3 "~" H 6200 5600 50  0001 C CNN
+	1    6200 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H5
+U 1 1 5DC9D509
+P 6200 5400
+F 0 "H5" H 6300 5446 50  0000 L CNN
+F 1 "MountingHole" H 6300 5355 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4mm" H 6200 5400 50  0001 C CNN
+F 3 "~" H 6200 5400 50  0001 C CNN
+	1    6200 5400
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
