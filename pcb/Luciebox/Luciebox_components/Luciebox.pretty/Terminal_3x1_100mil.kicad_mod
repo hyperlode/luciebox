@@ -1,4 +1,4 @@
-(module Terminal_3x1_100mil (layer F.Cu) (tedit 5DC370B1)
+(module Terminal_3x1_100mil (layer F.Cu) (tedit 5DCA2CF7)
   (fp_text reference REF** (at 0 2.5) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
@@ -10,6 +10,7 @@
   (fp_line (start -3.39 -1.25) (end 3.81 -1.25) (layer F.CrtYd) (width 0.05))
   (fp_line (start 3.81 1.25) (end -3.39 1.25) (layer F.CrtYd) (width 0.05))
   (fp_line (start -3.39 1.25) (end -3.39 -1.25) (layer F.CrtYd) (width 0.05))
+  (fp_line (start 3.8236 1.25) (end 3.8236 -1.25) (layer F.CrtYd) (width 0.05))
   (pad 1 thru_hole rect (at -2.54 0) (size 1.2 2) (drill 0.8) (layers *.Cu *.Mask))
   (pad 2 thru_hole oval (at 0 0) (size 1.2 2) (drill 0.8) (layers *.Cu *.Mask))
   (pad 3 thru_hole oval (at 2.54 0) (size 1.2 2) (drill 0.8) (layers *.Cu *.Mask))

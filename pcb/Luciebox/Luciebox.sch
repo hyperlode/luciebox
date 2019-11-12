@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:Luciebox-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -1545,4 +1545,155 @@ F 3 "~" H 6200 5400 50  0001 C CNN
 	1    6200 5400
 	1    0    0    -1  
 $EndComp
+$Comp
+L Luciebox_components:8X8PADS U4
+U 1 1 5DD3C18A
+P 2850 200
+F 0 "U4" H 5212 1775 50  0000 C CNN
+F 1 "8X8PADS" H 5000 1600 50  0000 C CNN
+F 2 "Luciebox:64_PADS_100mil" H 2850 200 50  0001 C CNN
+F 3 "" H 2850 200 50  0001 C CNN
+	1    2850 200 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2550 -650 2550 -550
+Wire Wire Line
+	2550 -550 2550 -450
+Connection ~ 2550 -550
+Wire Wire Line
+	2550 -450 2550 -350
+Connection ~ 2550 -450
+Wire Wire Line
+	2550 -350 2550 -250
+Connection ~ 2550 -350
+Wire Wire Line
+	2550 -250 2550 -150
+Connection ~ 2550 -250
+Wire Wire Line
+	2550 -150 2550 -50 
+Connection ~ 2550 -150
+Wire Wire Line
+	2550 -50  2550 50  
+Connection ~ 2550 -50 
+Wire Wire Line
+	3600 50   3600 -50 
+Wire Wire Line
+	3600 -50  3650 -50 
+Wire Wire Line
+	3650 -50  3650 -150
+Wire Wire Line
+	3650 -150 3600 -150
+Connection ~ 3600 -50 
+Wire Wire Line
+	3600 -150 3600 -250
+Connection ~ 3600 -150
+Wire Wire Line
+	3600 -250 3600 -350
+Connection ~ 3600 -250
+Wire Wire Line
+	3600 -350 3600 -450
+Connection ~ 3600 -350
+Wire Wire Line
+	3600 -450 3600 -550
+Connection ~ 3600 -450
+Wire Wire Line
+	3600 -550 3600 -650
+Connection ~ 3600 -550
+Wire Wire Line
+	2700 -650 2700 -550
+Wire Wire Line
+	2700 -550 2700 -450
+Connection ~ 2700 -550
+Wire Wire Line
+	2700 -450 2700 -350
+Connection ~ 2700 -450
+Wire Wire Line
+	2850 -650 2850 -550
+Wire Wire Line
+	2850 -550 2850 -450
+Connection ~ 2850 -550
+Wire Wire Line
+	2850 -450 2850 -350
+Connection ~ 2850 -450
+Wire Wire Line
+	3000 -650 3000 -550
+Wire Wire Line
+	3000 -550 3000 -450
+Connection ~ 3000 -550
+Wire Wire Line
+	3000 -450 3000 -350
+Connection ~ 3000 -450
+Wire Wire Line
+	3150 -350 3150 -450
+Wire Wire Line
+	3150 -450 3150 -550
+Connection ~ 3150 -450
+Wire Wire Line
+	3150 -550 3150 -650
+Connection ~ 3150 -550
+Wire Wire Line
+	3300 -650 3300 -550
+Wire Wire Line
+	3300 -550 3300 -450
+Connection ~ 3300 -550
+Wire Wire Line
+	3300 -450 3300 -350
+Connection ~ 3300 -450
+Wire Wire Line
+	3450 -350 3450 -450
+Wire Wire Line
+	3450 -450 3450 -550
+Connection ~ 3450 -450
+Wire Wire Line
+	3450 -550 3450 -650
+Connection ~ 3450 -550
+Wire Wire Line
+	2700 -250 2700 -150
+Wire Wire Line
+	2700 -50  2700 50  
+Wire Wire Line
+	2850 50   2850 -50 
+Wire Wire Line
+	2850 -150 2850 -250
+Wire Wire Line
+	3000 -250 3000 -150
+Wire Wire Line
+	3000 -50  3000 50  
+Wire Wire Line
+	3150 50   3150 -50 
+Wire Wire Line
+	3150 -150 3150 -250
+Wire Wire Line
+	3300 -250 3300 -150
+Wire Wire Line
+	3300 -50  3300 50  
+Wire Wire Line
+	3450 50   3450 -50 
+Wire Wire Line
+	3450 -150 3450 -250
+$Comp
+L power:GND #PWR?
+U 1 1 5DCBF971
+P 3600 50
+F 0 "#PWR?" H 3600 -200 50  0001 C CNN
+F 1 "GND" H 3605 -123 50  0000 C CNN
+F 2 "" H 3600 50  50  0001 C CNN
+F 3 "" H 3600 50  50  0001 C CNN
+	1    3600 50  
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5DCC8327
+P 2550 -650
+F 0 "#PWR?" H 2550 -800 50  0001 C CNN
+F 1 "VCC" H 2567 -477 50  0000 C CNN
+F 2 "" H 2550 -650 50  0001 C CNN
+F 3 "" H 2550 -650 50  0001 C CNN
+	1    2550 -650
+	1    0    0    -1  
+$EndComp
+Connection ~ 2550 -650
+Connection ~ 3600 50  
 $EndSCHEMATC
