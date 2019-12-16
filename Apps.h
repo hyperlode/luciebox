@@ -183,7 +183,45 @@ const uint8_t song_happy_dryer [] PROGMEM = {
   rest_2,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1,rest_2,Cs7_1,rest_2,E7_2,rest_4,Cs7_2,rest_4,B6_2,rest_4,A6_1,rest_2,rest_2,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_attack [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE}; // aaanvallueeeeee!
-const uint8_t kindeke_douwen [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
+const uint8_t kindeke_douwen [] PROGMEM = {
+	
+	// Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 
+	B7_4,rest_4,rest_2, // wie
+	B7_1,  //zal
+	rest_2,A7_4,rest_4, //er
+	G6_4,rest_4,rest_2, //ons
+	B7_1, //kind-
+	B7_4,rest_4,A7_4,rest_4, //-de
+	G6_4,rest_4,rest_2, //-ke
+	A7_1, //dou
+	A7_4, rest_4,rest_2 ,
+	C7_4, rest_4,rest_2,
+    C7_1, //wen
+	rest_1,
+	C7_4,rest_4,rest_2, // dat 
+	B7_1, // schaars
+	B7_4,rest_4,B7_4, rest_4,
+	B7_4, rest_4, rest_2, 
+	
+	
+	E7_4,rest_4,rest_2, // 
+	E7_1,
+	E7_4,rest_4,E7_4, rest_4,
+	A7_4, rest_4, rest_2, 
+	
+	// E7_4,rest_4,rest_2, // dat schaars...
+	// E7_1,
+	// rest_2,E7_4, rest_4,
+	// A7_2,rest_2,
+	
+	// E7_4,rest_4,rest_2, // dat schaars...
+	// E7_1,
+	// rest_2,E7_4, rest_4,
+	// A7_2,rest_2,
+	
+	
+	
+	BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
 
 const uint8_t alphabeth_song [] PROGMEM = {
 	

@@ -251,45 +251,48 @@ void Apps::modeScroll(bool init){
 	generalTimer.setInitTimeMillis(-200);
 	generalTimer.start();
   }
-  
-  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-	  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-		counter++;
-		
-		// Serial.println(displaySequence[counter], BIN);
-	  }
-	  if(!generalTimer.getTimeIsNegative()){
-		  generalTimer.start();
-		  counter++;
-	  }
-	  if (counter>31){
-			counter = 0;
-			this->fadeInList(displaySequence, 32, 0);
-			counter2  = !counter2;
-		}
-		
-	  if (potentio->getValueStableChangedEdge()){
-		generalTimer.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-	  }
-	  
-	  screenPersistenceOfVision = displaySequence[counter];
-	  if (counter2){
-		  // negative ==> which makes it fade out.
-		  screenPersistenceOfVision = ~screenPersistenceOfVision;
-	  }
+  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+	   
+	   
+  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+			counter++;
+			
+			// Serial.println(displaySequence[counter], BIN);
+		  }
+		  if(!generalTimer.getTimeIsNegative()){
+			  generalTimer.start();
+			  counter++;
+		  }
+		  if (counter>31){
+				counter = 0;
+				this->fadeInList(displaySequence, 32, 0);
+				counter2  = !counter2;
+			}
+			
+		  if (potentio->getValueStableChangedEdge()){
+			generalTimer.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+		  }
 		  
-	  ledDisp->SetFourDigits(screenPersistenceOfVision);
+		  screenPersistenceOfVision = displaySequence[counter];
+		  if (counter2){
+			  // negative ==> which makes it fade out.
+			  screenPersistenceOfVision = ~screenPersistenceOfVision;
+		  }
+			  
+		  ledDisp->SetFourDigits(screenPersistenceOfVision);
 
-	 
-  }else{
-	  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-		ledDisp->doScroll();
-	  }
-
-	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-		ledDisp->setScrollSpeed((long)potentio->getValueStable());
+		 
 	  }else{
-		ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
+		  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+			ledDisp->doScroll();
+		  }
+
+		  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+			ledDisp->setScrollSpeed((long)potentio->getValueStable());
+		  }else{
+			ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
+		  }
 	  }
   }
 }

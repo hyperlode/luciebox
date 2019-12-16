@@ -57,22 +57,15 @@ void ButtonsDacR2r::refresh(){
   this->buttonsPreviousStableValue = this->buttonsCurrentStableValue;
   uint8_t buttonsValue = getButtonsValueRaw();
   
-  // //software debouncing: wait a number of cycles to make sure value is stable.
-  // if (buttonsValue == this->buttonsPreviousValue){
-    // // take care for overflows.
-    // this->cyclesValueIsStable++;
-  // }else{
-    // this->cyclesValueIsStable = 0;
-  // }
+  // software debouncing: wait some time to make sure value is stable.
+  // reset wait time when value changes.
   
   if ( buttonsValue != this->buttonsPreviousValue){
 	  this->buttonEdgeMillis = millis();
   }
   
   if (millis() - this->buttonEdgeMillis > (unsigned long) this->debounceMillis){
-  // if (this->cyclesValueIsStable >= this->debouncingCycles ){
     this->buttonsCurrentStableValue = buttonsValue ;
-    // this->cyclesValueIsStable = 0;
   }
   
   this->buttonsPreviousValue = buttonsValue;

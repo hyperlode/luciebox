@@ -7,12 +7,12 @@
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 
-#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 
 #ifdef ENABLE_SERIAL
-  //#define DEBUG_MERCURY
+  #define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
-  #define DEBUG_BUTTONS
+  // #define DEBUG_BUTTONS
   //#define DEBUG_SELECTOR_KNOB
   //#define DEBUG_MINIMULTITIMER
   //#define DEBUG_SEQUENCER
@@ -21,8 +21,8 @@
 // Lode Ameije 2019-05
 // Pretbak is a busy box for my newly born niece
 // The hardware is a box with:
-// input: buttons, momentary and switches, a potentiometer, a selector dial, some mercury switches.
-// output: lights on buttons, 7seg display (4 digits), buzzer
+// input: momentary buttons, latching buttons, a potentiometer, a selector dial, four mercury switches.
+// output: lights on buttons (one light per button), 7seg display (4 digits), buzzer
 
 //pretbak
 Apps pretbak_apps;
@@ -31,7 +31,7 @@ Apps pretbak_apps;
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
-ButtonsDacR2r buttons_2; // buttons with normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+ButtonsDacR2r buttons_2; // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 ButtonsDacR2r mercurySwitches;  // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K 
 Potentio potentio;
 
