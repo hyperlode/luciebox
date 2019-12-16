@@ -32,7 +32,8 @@ class DataPlayer{
     uint32_t getActive32bit();
   
   private:
-	PGM_P allData;
+	//PGM_P allData;
+  PROGMEM const uint8_t* allData;
 	
     bool auto_step_enabled;
 	SuperTimer auto_step_timer;

@@ -6,6 +6,7 @@
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
+#include <avr/eeprom.h>
 
 #define ENABLE_MULTITIMER
 #ifdef ENABLE_MULTITIMER
@@ -133,7 +134,7 @@ const uint8_t disp_4digits_animations [] PROGMEM = {
 };	
 
 #define ALL_DATA_SIZE 1
-PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
+//PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
 
 const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
   C7_4,rest_4,rest_2,

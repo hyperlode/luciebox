@@ -255,10 +255,7 @@ void Apps::modeScroll(bool init){
 	generalTimer.setInitTimeMillis(-200);
 	generalTimer.start();
   }
-  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-	   
-	   
-  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 		  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 			counter++;
 			
@@ -298,7 +295,7 @@ void Apps::modeScroll(bool init){
 			ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
 		  }
 	  }
-  }
+  
 }
 
 void Apps::modeSimpleButtonsAndLights(){
