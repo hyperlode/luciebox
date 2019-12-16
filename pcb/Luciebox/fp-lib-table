@@ -1,4 +1,5 @@
 (fp_lib_table
   (lib (name Socket_Arduino_Uno)(type KiCad)(uri "$(KIPRJMOD)/Socket_Arduino_Uno.pretty")(options "")(descr ""))
   (lib (name Luciebox)(type KiCad)(uri ${KIPRJMOD}/Luciebox_components/Luciebox.pretty)(options "")(descr ""))
+  (lib (name artwork)(type KiCad)(uri ${KIPRJMOD}/Luciebox_components/artwork.pretty)(options "")(descr ""))
 )

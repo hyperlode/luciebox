@@ -2,7 +2,7 @@
 SuperTimer::SuperTimer(){
 	setIsStarted(false);
 	setIsPaused(false);
-	this->callibrationConstant = 1; //default is 1 // DISABLED
+	*this->callibrationConstant = 1.0; //default is 1 // DISABLED
 	this-> initTimeMillis = 0;
 }
 

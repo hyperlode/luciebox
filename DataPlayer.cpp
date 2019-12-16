@@ -12,9 +12,7 @@ DataPlayer::DataPlayer() {
 	auto_step_timer.start();
 }
 
-void DataPlayer::loadAllData(const uint8_t* data){
-	this->allData = data;
-}
+
 
 void DataPlayer::nextDataSet(bool stepForwardElseBackward){
 	if (stepForwardElseBackward){
@@ -26,7 +24,9 @@ void DataPlayer::nextDataSet(bool stepForwardElseBackward){
 	}
 	this->loadDataSet(this->data_set);
 }
-
+void DataPlayer::loadAllData(const uint8_t* data){
+	this->allData = data;
+}
 uint16_t DataPlayer::getStartIndexByDataSet(uint8_t data_set){
 	//counter contains length of animation in bytes.
 	uint16_t startByte = 0;

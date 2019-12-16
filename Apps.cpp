@@ -1,5 +1,5 @@
 #include "Apps.h"
-#include "Arduino.h"
+//#include "Arduino.h"
 #include "PretbakSettings.h"
 
 Apps::Apps(){
@@ -83,6 +83,10 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
 			Serial.println(potentio.getValueMapped(0,1023));
 		  }
+
+      #else
+
+     this->modeSimon(init);
 
 		  #endif
 
@@ -1358,6 +1362,125 @@ void Apps::modeMetronome(bool init){
 //
 //  }
   
+}
+
+void Apps::modeSimon(bool init)
+{
+  const int numButtons = 4;
+  const int buttons[numButtons] = { BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
+  const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
+  const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
+
+  const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+  const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
+
+  if (init) {
+    simonState = simonWaitForNewGame;
+  }
+
+  if (init || potentio->getValueStableChangedEdge()) {
+    generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
+  }
+
+  uint8_t buttonsChanged = 0;
+  for (int k = 0; k < numButtons; ++k) {
+    const bool changed = (buttons[k] == BUTTON_LATCHING_YELLOW)
+      ? binaryInputs[buttons[k]].getValueChanged()
+      : binaryInputs[buttons[k]].getEdgeUp();
+    if (changed) {
+      buttonsChanged |= (1 << k);
+    }
+  }
+
+  switch (simonState) {
+    case simonWaitForNewGame: {
+      // all lights on
+      byte allLights = 0;
+      for (int k = 0; k < numButtons; ++k) {
+        allLights |= lights[k];
+      }
+      ledDisp->SetLedArray(allLights);
+      if (!buttonsChanged) {
+        break;
+      }
+      simonState = simonNewGame;
+      break;
+    }
+
+    case simonNewGame: {
+      ledDisp->SetLedArray(0);
+      // generate new sequence
+      randomSeed(millis());
+      for (int k = 0; k < sequencer_bufsize; ++k) {
+        sequencer_song[k] = k % numButtons;
+      }
+      shuffle(sequencer_song, sequencer_bufsize);
+      simonLength = 0;
+      simonState = simonNewLevel;
+      break;
+    }
+
+    case simonNewLevel: {
+      ledDisp->showNumber(simonLength);
+      ++simonLength;
+      if (simonLength >= sequencer_bufsize) {
+          // reached maximum length
+          if (hasSound) buzzer->loadBuzzerTrack(song_attack);
+          simonState = simonWaitForNewGame;
+          break;
+      }
+      simonIndex = -1; // negative index allows for lead-in time
+      simonState = simonPlaySequence;
+      generalTimer.start();
+      break;
+    }
+
+    case simonPlaySequence: {
+      if (generalTimer.getTimeIsNegative()) {
+        break;
+      }
+      generalTimer.start();
+      if (simonIndex < 0) {
+        ++simonIndex; // do-nothing lead in time
+        break;
+      }
+      if (simonIndex >= simonLength) {
+        // sequence finished, give control to user
+        ledDisp->SetLedArray(0);
+        simonIndex = 0;
+        simonState = simonUserRepeats;
+        break;
+      }
+      // show one button from the sequence
+      const uint8_t button = sequencer_song[simonIndex];
+      if (hasLight) ledDisp->SetLedArray(lights[button]);
+      if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
+      ++simonIndex;
+      break;
+    }
+
+    case simonUserRepeats: {
+      if (!buttonsChanged) {
+        break;
+      }
+      const int expected = sequencer_song[simonIndex];
+      if (buttonsChanged != (1 << expected)) {
+        // player made mistake, start new game
+        if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
+        simonState = simonWaitForNewGame;
+        break;
+      }
+      // player pressed correct button
+      if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
+      ++simonIndex;
+      if (simonIndex >= simonLength) {
+        // sequence fully replaced, add one more note
+        simonState = simonNewLevel;
+        break;
+      }
+      break;
+    }
+  }
 }
 
 int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue){

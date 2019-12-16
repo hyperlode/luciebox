@@ -314,6 +314,7 @@ class Apps{
   void modeGeiger(bool init);
   void modeSequencer(bool init);
   void modeMetronome(bool init);
+  void modeSimon(bool init);
   void gameButtonInteraction(bool init);
   void tiltSwitchTest(bool init);
   
@@ -335,7 +336,10 @@ class Apps{
   SuperTimer generalTimer2;
   
   //global app variables
-  uint8_t sequencer_song [32] ;
+  enum {
+    sequencer_bufsize = 32,
+  };
+  uint8_t sequencer_song[sequencer_bufsize];
   uint8_t* game_random;
   uint32_t screenPersistenceOfVision;
   //SuperTimer animation_speed;
@@ -361,6 +365,18 @@ class Apps{
   uint8_t dispState[4];
   
   uint32_t displaySequence[32];
+
+  // simon
+  enum SimonState {
+      simonWaitForNewGame,
+      simonNewGame,
+      simonNewLevel,
+      simonPlaySequence,
+      simonUserRepeats,
+  };
+  SimonState simonState;
+  uint8_t simonLength;
+  int8_t simonIndex;
 
   char*  textBuf;
   char*  scrollBuf;
