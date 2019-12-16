@@ -5,18 +5,17 @@
 
 //empty constructor
 ButtonsDacR2r::ButtonsDacR2r(){
-  this->debouncingCycles = CYCLES_BEFORE_CONSIDERED_STABLE;
+  this->debounceMillis = DEBOUNCE_MILLIS;
 }
 
-void ButtonsDacR2r::setDebouncingCycles(uint8_t value){
-  this->debouncingCycles = value;  
+void ButtonsDacR2r::setDebounceMillis(uint8_t value){
+  this->debounceMillis = (unsigned long)value;  
 }
 
 void ButtonsDacR2r::setPin(byte pin, byte buttonsCount){
   this->analogPin = pin;
   this->buttonsCount = buttonsCount;
 }
-
 
 //int ButtonsDacR2r::getButtonsValueAnalog(){
 //  return analogRead(this->analogPin);
@@ -58,17 +57,15 @@ void ButtonsDacR2r::refresh(){
   this->buttonsPreviousStableValue = this->buttonsCurrentStableValue;
   uint8_t buttonsValue = getButtonsValueRaw();
   
-  //software debouncing: wait a number of cycles to make sure value is stable.
-  if (buttonsValue == this->buttonsPreviousValue){
-    // take care for overflows.
-    this->cyclesValueIsStable++;
-  }else{
-    this->cyclesValueIsStable = 0;
+  // software debouncing: wait some time to make sure value is stable.
+  // reset wait time when value changes.
+  
+  if ( buttonsValue != this->buttonsPreviousValue){
+	  this->buttonEdgeMillis = millis();
   }
   
-  if (this->cyclesValueIsStable >= this->debouncingCycles ){
+  if (millis() - this->buttonEdgeMillis > (unsigned long) this->debounceMillis){
     this->buttonsCurrentStableValue = buttonsValue ;
-    this->cyclesValueIsStable = 0;
   }
   
   this->buttonsPreviousValue = buttonsValue;

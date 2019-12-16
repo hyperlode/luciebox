@@ -1,13 +1,24 @@
 #define DISPLAY_IS_COMMON_ANODE true  //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
 
-#define PIN_DUMMY 66
  
-#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
-#define PIN_DISPLAY_DIGIT_1 5
-#define PIN_DISPLAY_DIGIT_2 9
-#define PIN_DISPLAY_DIGIT_3 10
-#define PIN_DISPLAY_DIGIT_4 11
-#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
+
+#ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
+	#define PIN_DUMMY 66
+	#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
+	#define PIN_DISPLAY_DIGIT_1 5
+	#define PIN_DISPLAY_DIGIT_2 9
+	#define PIN_DISPLAY_DIGIT_3 10
+	#define PIN_DISPLAY_DIGIT_4 11
+	#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
+#else
+	#define PIN_DUMMY 66
+	#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
+	#define PIN_DISPLAY_DIGIT_1 11
+	#define PIN_DISPLAY_DIGIT_2 10
+	#define PIN_DISPLAY_DIGIT_3 9
+	#define PIN_DISPLAY_DIGIT_4 5
+	#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
+#endif
 
 #define PIN_DISPLAY_SEGMENT_A 7
 #define PIN_DISPLAY_SEGMENT_B 2
@@ -16,7 +27,7 @@
 #define PIN_DISPLAY_SEGMENT_E 12
 #define PIN_DISPLAY_SEGMENT_F 13
 #define PIN_DISPLAY_SEGMENT_G 3
-#define PIN_DISPLAY_SEGMENT_DP 0 //A4
+#define PIN_DISPLAY_SEGMENT_DP 0 
 
 #define PIN_BUZZER A5
   
@@ -35,7 +46,7 @@
 #define PIN_POTENTIO A3
 
 
-#define BINARY_INPUTS_COUNT 11 //8
+#define BINARY_INPUTS_COUNT 11 
 
 #define BUTTONS_1_COUNT 4
 #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3

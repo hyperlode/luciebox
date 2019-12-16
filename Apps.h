@@ -14,7 +14,7 @@
 
 #include "DataPlayer.h"
 
-#include "SevSeg5Digits.h" sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
+#include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 #include "Potentio.h"
@@ -51,19 +51,17 @@ const uint8_t app_splash_screens [] PROGMEM = {
 	
 	// 0x38, 0x3F, 0x5E, 0x79, // LODE minimultitimer
 	// 0x5E, 0x5E, 0x01, 0x5F, // music notes. duh!  (doesn't show nicely)
-	0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
-	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol of tank
 	// 0x00, 0x7C, 0x5E, 0x6F, // BdG
-	0x39, 0x09, 0x09, 0x0F, // abstractbig circle
-	0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
 	// 0x6F, 0x79, 0x06, 0x6F, // GEIG geiger
 	// 0x70, 0x06, 0x38, 0x70, // TILT
-	// 0x9B, 0x2D, 0x9B, 0x2D, // abstract.  "river" --> looks too much like 2 and 5's
+	0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
+	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol of tank
+	0x39, 0x09, 0x09, 0x0F, // abstractbig circle
+	0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
 	0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
 	0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
 	0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
 	0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
-	// 0xB7, 0xB7, 0xB7, 0x37, // abstract snake   boring!
 	0x08, 0xCE, 0x78, 0x08, // abstract piramid
 	0x40, 0x4F, 0x79, 0x40, // abstract art deco 
 	0x36, 0x36, 0x36, 0x36, // abstract vertical lines
@@ -185,7 +183,45 @@ const uint8_t song_happy_dryer [] PROGMEM = {
   rest_2,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1,rest_2,Cs7_1,rest_2,E7_2,rest_4,Cs7_2,rest_4,B6_2,rest_4,A6_1,rest_2,rest_2,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t song_attack [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE}; // aaanvallueeeeee!
-const uint8_t kindeke_douwen [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 ,BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
+const uint8_t kindeke_douwen [] PROGMEM = {
+	
+	// Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1 
+	B7_4,rest_4,rest_2, // wie
+	B7_1,  //zal
+	rest_2,A7_4,rest_4, //er
+	G6_4,rest_4,rest_2, //ons
+	B7_1, //kind-
+	B7_4,rest_4,A7_4,rest_4, //-de
+	G6_4,rest_4,rest_2, //-ke
+	A7_1, //dou
+	A7_4, rest_4,rest_2 ,
+	C7_4, rest_4,rest_2,
+    C7_1, //wen
+	rest_1,
+	C7_4,rest_4,rest_2, // dat 
+	B7_1, // schaars
+	B7_4,rest_4,B7_4, rest_4,
+	B7_4, rest_4, rest_2, 
+	
+	
+	E7_4,rest_4,rest_2, // 
+	E7_1,
+	E7_4,rest_4,E7_4, rest_4,
+	A7_4, rest_4, rest_2, 
+	
+	// E7_4,rest_4,rest_2, // dat schaars...
+	// E7_1,
+	// rest_2,E7_4, rest_4,
+	// A7_2,rest_2,
+	
+	// E7_4,rest_4,rest_2, // dat schaars...
+	// E7_1,
+	// rest_2,E7_4, rest_4,
+	// A7_2,rest_2,
+	
+	
+	
+	BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
 
 const uint8_t alphabeth_song [] PROGMEM = {
 	
