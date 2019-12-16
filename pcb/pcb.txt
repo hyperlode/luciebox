@@ -1,0 +1,11 @@
+ordered 10x 24CAD all in.  jlcpcb.com W201911141423989
+
+pcb errors encountered to be corrected after delivery:
+-5V arduino to pcb NOT connected
+-resistor footprints too big for small SMD components
+-add resistor to the 5V used for the NC of the switches, to save for short circuits when switching and NO and NC briefly connected (make before break)
+-digits were swapped (changed in software)
+-tilt switches: provide dedicated space on board for sensor installation
+-usb micro.
+-add diodes to protect power supplies. 
+-label better: power connector / programming connector.
