@@ -1,16 +1,25 @@
 #include "PotentioSelector.h"
 #include "Arduino.h"
 
+
+//for selector switch where 
+
 //empty constructor
 PotentioSelector::PotentioSelector(){
+          
 }
-void PotentioSelector::setPin(byte pin){
+
+void PotentioSelector::initialize(byte pin, uint8_t selector_positions_count){
 	this->analogPin = pin;
+        this->analog_range_per_value =  (float)1024 / selector_positions_count;
 }
 
 uint8_t PotentioSelector::getSelectorValueRaw(){
 	
-	return (uint8_t)(((analogRead(this->analogPin) + VALUE_MARGIN_FOR_SELECTOR) * (NUMBER_OF_KNOB_POSITIONS-1)) / 1024);
+	//return (uint8_t)(((analogRead(this->analogPin) + VALUE_MARGIN_FOR_SELECTOR) * (NUMBER_OF_KNOB_POSITIONS-1)) / 1024);
+//        return (uint8_t)((( analogRead(this->analogPin) - VALUE_MARGIN_FOR_SELECTOR/2 ) / (1024 / NUMBER_OF_KNOB_POSITIONS+1))-1);
+        return (uint8_t)(   (float)(analogRead(this->analogPin) + this->analog_range_per_value/2 ) /  this->analog_range_per_value); //this->analog_range_per_value/2 = get value in middle of the range.
+        
 }
 
 uint8_t PotentioSelector::getSelectorValue(){

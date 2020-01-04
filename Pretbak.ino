@@ -8,13 +8,14 @@
 #include "PretbakSettings.h"
 #include <EEPROM.h>
 
-//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 
 #ifdef ENABLE_SERIAL
-  #define DEBUG_MERCURY
+  //#define DEBUG_ANALOG_IN 
+  // #define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
   // #define DEBUG_BUTTONS
-  //#define DEBUG_SELECTOR_KNOB
+  #define DEBUG_SELECTOR_KNOB
   //#define DEBUG_MINIMULTITIMER
   //#define DEBUG_SEQUENCER
 #endif 
@@ -83,6 +84,7 @@ void refresh(){
     #ifdef DEBUG_SELECTOR_KNOB
     Serial.println("selector:");
     Serial.println(selectorDial.getSelectorValue());
+    Serial.println(analogRead(PIN_SELECTOR_DIAL));
     #endif
     
   }
@@ -145,8 +147,11 @@ void mode_refresh(){
 
   //check if first iteration at new selector value.
   bool init = selectorDial.getValueChangedEdge();
+#ifdef PROTOTYPE
   pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
-  
+#else
+  pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1);  // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
+#endif  
 }
 
 void setup() {
@@ -157,10 +162,16 @@ void setup() {
   
   // put your setup code here, to run once
   
-  selectorDial.setPin(PIN_SELECTOR_DIAL);
-  buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT);
-  buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT);
-  mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT);
+  selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS); 
+  
+  uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
+  buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT, setValues_1);
+  
+  uint16_t setValues_2 [BUTTONS_2_COUNT] = BUTTONS_2_VALUES;
+  buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT, setValues_2);
+  
+  uint16_t setValues_mercury [MERCURY_SWITCHES_COUNT] = MERCURY_SWITCHES_VALUES;
+  mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
   mercurySwitches.setDebounceMillis(30);
 
   buzzer.setPin(PIN_BUZZER);

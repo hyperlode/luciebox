@@ -84,9 +84,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 			Serial.println(potentio.getValueMapped(0,1023));
 		  }
 
-      #else
-
-     this->modeSimon(init);
+                  #else
+            
+                  this->modeSimon(init);
 
 		  #endif
 
@@ -512,15 +512,15 @@ void Apps::modeSoundSong(bool init){
     if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_unhappy_dryer);
-		Serial.println("unhappy");
+		//Serial.println("unhappy");
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
         buzzer->loadBuzzerTrack(kindeke_douwen);
-		Serial.println("dow");
+		//Serial.println("dow");
       }
       if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_retreat );
-		Serial.println("rettr");
+		//Serial.println("rettr");
       }
     }else{
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
