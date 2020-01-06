@@ -14,12 +14,12 @@
   //#define DEBUG_ANALOG_IN 
   // #define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
-  #define DEBUG_BUTTONS
+  //#define DEBUG_BUTTONS
   //#define DEBUG_SELECTOR_KNOB
   //#define DEBUG_MINIMULTITIMER
   //#define DEBUG_SEQUENCER
   
-  #define SUPERDEBUG
+  //#define SUPERDEBUG
   
 #endif 
 
@@ -28,6 +28,10 @@
 // The hardware is a box with:
 // input: momentary buttons, latching buttons, a potentiometer, a selector dial, four mercury switches.
 // output: lights on buttons (one light per button), 7seg display (4 digits), buzzer
+
+uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
+uint16_t setValues_2 [BUTTONS_2_COUNT] = BUTTONS_2_VALUES;
+uint16_t setValues_mercury [MERCURY_SWITCHES_COUNT] = MERCURY_SWITCHES_VALUES;
 
 //pretbak
 Apps pretbak_apps;
@@ -53,54 +57,44 @@ void refresh(){
   input_process();
   
   #ifdef SUPERDEBUG
+  uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
+  
+  uint16_t* tmp  = setValues_1;
+  
   if (  potentio.getValueStableChangedEdge()){
-    Serial.println(analogRead(PIN_BUTTONS_1));
+    Serial.println("rawval:");
+    Serial.println(analogRead(PIN_BUTTONS_2));
   }
   #endif
   
   #ifdef DEBUG_BUTTONS
-  
-
-    if (buttons_1.getValueChangedEdge()){
-      Serial.println("yoooeeuey");
-      if (buttons_1.getButtonsValueRaw()){
-        Serial.println("yes");
-      }else{
-        Serial.println("noonon");
-        
-      }
-      
-    }
-    
-    
     for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
-      
-     
       
       if (binaryInputs[i].getEdgeUp()){
         
         Serial.println("{{{-------PRESS:-------:");
         Serial.println(i);
-        Serial.println( (analogRead(PIN_BUTTONS_1)));
-        Serial.println( (analogRead(PIN_BUTTONS_2)));
-        Serial.println(buttons_1.getButtonsValueRaw(),BIN);
-        Serial.println(buttons_2.getButtonsValueRaw(),BIN);
+     //   Serial.println( (analogRead(PIN_BUTTONS_1)));
+      //  Serial.println( (analogRead(PIN_BUTTONS_2)));
+       // Serial.println(buttons_1.getButtonsValueRaw(),BIN);
+    //    Serial.println(buttons_2.getButtonsValueRaw(),BIN);
   
-        Serial.println("-------PRESS:-------}}}");  
+      //  Serial.println("-------PRESS:-------}}}");  
       }
       if (binaryInputs[i].getEdgeDown()){
         Serial.println("-----RELEASE:");
-        Serial.println(i);
+       // Serial.println(i);
         //Serial.println( (analogRead(PIN_BUTTONS_1)));
        
-        Serial.println(buttons_1.getButtonsValueRaw(),BIN);
+        //Serial.println(buttons_1.getButtonsValueRaw(),BIN);
         //Serial.println("-----------");
   //      Serial.println("Button released");
   //      Serial.println("analog in mercury switches edge down:");
         
       }
       
-  }
+    }
+      
   
   #endif
   
@@ -112,15 +106,15 @@ void refresh(){
   if (selectorDial.getValueChangedEdge()) {
     //default mode (go to default state at each change)
     
-    #ifndef SUPERDEBUG
+#ifndef SUPERDEBUG
     pretbak_apps.setDefaultMode();
-    #endif
+#endif
     
-    #ifdef DEBUG_SELECTOR_KNOB
+#ifdef DEBUG_SELECTOR_KNOB
     Serial.println("selector:");
     Serial.println(selectorDial.getSelectorValue());
     Serial.println(analogRead(PIN_SELECTOR_DIAL));
-    #endif
+#endif
     
   }
   #ifndef SUPERDEBUG
@@ -158,27 +152,28 @@ void input_process(){
     //Serial.println(buttons_1.getButtonsValue());
     for (uint8_t i=0; i< BUTTONS_1_COUNT; i++){
       binaryInputs[BUTTONS_1_TO_BINARY_INPUT_OFFSET + i].setValue(buttons_1.getButtonValueByIndex(i));
+      
     }
   }
 
-   if (mercurySwitches.getValueChangedEdge()) {
-      #ifdef DEBUG_MERCURY
+  if (mercurySwitches.getValueChangedEdge()) {
+#ifdef DEBUG_MERCURY
       Serial.println("analog in mercury switches:");
       Serial.println(analogRead(A4));
       Serial.println(mercurySwitches.getButtonsValueRaw(), BIN);
       Serial.println(mercurySwitches.getButtonsValue());
-      #endif
+#endif
+
     for (uint8_t i=0; i< MERCURY_SWITCHES_COUNT; i++){
-       #ifdef DEBUG_MERCURY
+#ifdef DEBUG_MERCURY
       Serial.println(MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET );
       Serial.println(i);
-      #endif
+#endif
       binaryInputs[MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET + i].setValue(mercurySwitches.getButtonValueByIndex(i));
     }
+
   }
 }
-
-
 
 void mode_refresh(){
   
@@ -203,13 +198,10 @@ void setup() {
   
   selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS); 
   
-  uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
   buttons_1.setPin(PIN_BUTTONS_1,BUTTONS_1_COUNT, setValues_1);
   
-  uint16_t setValues_2 [BUTTONS_2_COUNT] = BUTTONS_2_VALUES;
   buttons_2.setPin(PIN_BUTTONS_2,BUTTONS_2_COUNT, setValues_2);
   
-  uint16_t setValues_mercury [MERCURY_SWITCHES_COUNT] = MERCURY_SWITCHES_VALUES;
   mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
   mercurySwitches.setDebounceMillis(30);
 

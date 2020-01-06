@@ -62,7 +62,8 @@
 #ifdef PROTOTYPE
   #define BUTTONS_1_VALUES {512,256,128,64}
 #else
-  #define BUTTONS_1_VALUES {446,223,109,53}
+  //#define BUTTONS_1_VALUES {446,223,109,53}
+  #define BUTTONS_1_VALUES {520,260,129,63}
 #endif
 
 #define BUTTONS_2_COUNT 3
@@ -70,7 +71,7 @@
 #ifdef PROTOTYPE
   #define BUTTONS_2_VALUES {512,256,128}
 #else
-  #define BUTTONS_2_VALUES {443,215,117}
+  #define BUTTONS_2_VALUES {525,263,117}
 #endif
 
 #define MERCURY_SWITCHES_COUNT 4
