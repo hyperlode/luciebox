@@ -14,10 +14,13 @@
   //#define DEBUG_ANALOG_IN 
   // #define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
-  // #define DEBUG_BUTTONS
-  #define DEBUG_SELECTOR_KNOB
+  #define DEBUG_BUTTONS
+  //#define DEBUG_SELECTOR_KNOB
   //#define DEBUG_MINIMULTITIMER
   //#define DEBUG_SEQUENCER
+  
+  #define SUPERDEBUG
+  
 #endif 
 
 // Lode Ameije 2019-05
@@ -49,25 +52,54 @@ void refresh(){
   //input process  
   input_process();
   
+  #ifdef SUPERDEBUG
+  if (  potentio.getValueStableChangedEdge()){
+    Serial.println(analogRead(PIN_BUTTONS_1));
+  }
+  #endif
+  
   #ifdef DEBUG_BUTTONS
   
-  for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
-    if (binaryInputs[i].getEdgeUp()){
+
+    if (buttons_1.getValueChangedEdge()){
+      Serial.println("yoooeeuey");
+      if (buttons_1.getButtonsValueRaw()){
+        Serial.println("yes");
+      }else{
+        Serial.println("noonon");
+        
+      }
       
-      Serial.println("PRESS:");
-      Serial.println(i);
-       Serial.println( (analogRead(PIN_BUTTONS_1)));
-       Serial.println( (analogRead(PIN_BUTTONS_2)));
+    }
+    
+    
+    for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
+      
+     
+      
+      if (binaryInputs[i].getEdgeUp()){
+        
+        Serial.println("{{{-------PRESS:-------:");
+        Serial.println(i);
+        Serial.println( (analogRead(PIN_BUTTONS_1)));
+        Serial.println( (analogRead(PIN_BUTTONS_2)));
+        Serial.println(buttons_1.getButtonsValueRaw(),BIN);
+        Serial.println(buttons_2.getButtonsValueRaw(),BIN);
   
-    }
-    if (binaryInputs[i].getEdgeDown()){
-      Serial.println("RELEASE:");
-      Serial.println(i);
-//      Serial.println("Button released");
-//      Serial.println("analog in mercury switches edge down:");
-//      Serial.println(mercurySwitches.getButtonsValueRaw());
+        Serial.println("-------PRESS:-------}}}");  
+      }
+      if (binaryInputs[i].getEdgeDown()){
+        Serial.println("-----RELEASE:");
+        Serial.println(i);
+        //Serial.println( (analogRead(PIN_BUTTONS_1)));
+       
+        Serial.println(buttons_1.getButtonsValueRaw(),BIN);
+        //Serial.println("-----------");
+  //      Serial.println("Button released");
+  //      Serial.println("analog in mercury switches edge down:");
+        
+      }
       
-    }
   }
   
   #endif
@@ -75,11 +107,14 @@ void refresh(){
   //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
   //modes functionality
-  
+    
   //mode change
   if (selectorDial.getValueChangedEdge()) {
     //default mode (go to default state at each change)
+    
+    #ifndef SUPERDEBUG
     pretbak_apps.setDefaultMode();
+    #endif
     
     #ifdef DEBUG_SELECTOR_KNOB
     Serial.println("selector:");
@@ -88,13 +123,17 @@ void refresh(){
     #endif
     
   }
-
+  #ifndef SUPERDEBUG
+  
   mode_refresh();
+  #endif
 
   //output process
   ledDisp.refresh();
+  #ifndef SUPERDEBUG
   buzzer.doBuzzerRoll();
-    
+  #endif
+  
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
     binaryInputs[i].refresh();
   }

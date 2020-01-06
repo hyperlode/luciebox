@@ -6,7 +6,7 @@
 
 //empty constructor
 PotentioSelector::PotentioSelector(){
-          
+          this->debounceMillis = DEBOUNCE_MILLIS;
 }
 
 void PotentioSelector::initialize(byte pin, uint8_t selector_positions_count){
@@ -35,6 +35,24 @@ bool PotentioSelector::getValueChangedEdge(){
 void PotentioSelector::refresh(){
 	//call this to update the value of the analog input. call multiple times to check for stable value.
 	
+        this->selectorPreviousStableValue = this->selectorCurrentStableValue;
+        
+        if ( getSelectorValueRaw() != this->selectorPreviousValue){
+      	  this->buttonEdgeMillis = millis();
+          this->debounceMillis = DEBOUNCE_MILLIS;
+        }
+                
+        if (millis() - this->buttonEdgeMillis > this->debounceMillis){
+
+          this->selectorCurrentStableValue = getSelectorValueRaw();
+          this->debounceMillis = 1000000; // set high, so does not trigger all the time once stable. (for debugging)
+          //Serial.println("delete me raw value stable: ");
+          //Serial.println(analogRead(this->analogPin));
+        }
+        
+        this->selectorPreviousValue = getSelectorValueRaw();
+        
+/*
 	this->selectorPreviousStableValue = this->selectorCurrentStableValue;
 	if (getSelectorValueRaw() == this->selectorPreviousValue){
 		if (this->cyclesValueIsStable < CYCLES_BEFORE_CONSIDERED_STABLE){
@@ -46,6 +64,8 @@ void PotentioSelector::refresh(){
 	}
 	if (this->cyclesValueIsStable >=CYCLES_BEFORE_CONSIDERED_STABLE ){
 		this->selectorCurrentStableValue = getSelectorValueRaw();
+                Serial.println(analogRead(this->analogPin));
 	}
 	this->selectorPreviousValue = getSelectorValueRaw();
+*/
 }

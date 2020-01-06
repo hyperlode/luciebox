@@ -8,7 +8,7 @@ class ButtonsDacR2r{
   
     #define VALUE_MARGIN_FOR_SELECTOR 15 //8    //fixed value margin for adc TODO should be a relative margin (depending on button  i.e. 1 for 64 , 2 for 128, 4 for 256,...)
     #define ADC_POWERS_OF_TWO 10  //1024 = 2^10 (adc resolution in bits)
-    #define DEBOUNCE_MILLIS 30
+    #define DEBOUNCE_MILLIS 30  //30 is realistic
     ButtonsDacR2r();
     void setPin( byte pin, byte buttonsCount, uint16_t* thresholds);
     uint8_t getButtonsValue();
@@ -21,7 +21,7 @@ class ButtonsDacR2r{
     void setDebounceMillis(uint8_t value);
   private:  
 
-    uint8_t debounceMillis;
+    unsigned long debounceMillis;
     byte buttonsCount;
     byte analogPin;
     unsigned long buttonEdgeMillis;

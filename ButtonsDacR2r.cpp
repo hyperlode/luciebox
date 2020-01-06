@@ -23,11 +23,23 @@ void ButtonsDacR2r::setPin(byte pin, byte buttonsCount, uint16_t* thresholds){
 //}
 
 uint8_t ButtonsDacR2r::getButtonsValueRaw(){
-  int raw = (analogRead(this->analogPin));
+  int16_t raww = (int16_t)(analogRead(this->analogPin));
   uint8_t allButtonsState = 0b00000000; //every bit is a button.
   
+   //uint16_t checkValue = this->thresholds[0];  
+//    if (raw - (VALUE_MARGIN_FOR_SELECTOR/2) > checkValue ){
+    //if (raw - (VALUE_MARGIN_FOR_SELECTOR/2) > 448 ){
+   //   if (raw - (VALUE_MARGIN_FOR_SELECTOR/2)  > 446 ){
+    // allButtonsState |= 0b00000001 <<  3; 
+   // }
+   //- (uint16_t)(VALUE_MARGIN_FOR_SELECTOR/2) )
+   //Serial.println("uuee");
+   //
+   if ((raww -(VALUE_MARGIN_FOR_SELECTOR/2)) > 446){
+    allButtonsState |= 0b00000001 <<  3; 
+   }
   
-  
+  /*
   for(uint8_t i=0; i<this->buttonsCount; i++){
     //uint16_t checkValue = ( 0x0001 << ADC_POWERS_OF_TWO -1 - i); 
     uint16_t checkValue = this->thresholds[i];
@@ -38,7 +50,8 @@ uint8_t ButtonsDacR2r::getButtonsValueRaw(){
         raw=0;
       }
     }
-    
+  }
+    */
     
     //uint16_t checkValue = ( 0x0001 << ADC_POWERS_OF_TWO -1 - i); 
     //if (raw > (checkValue - VALUE_MARGIN_FOR_SELECTOR )){   //for 10bit (max1024) adc, first check for higher than 512-margin, then 256-margin,...
@@ -48,7 +61,7 @@ uint8_t ButtonsDacR2r::getButtonsValueRaw(){
     //    raw=0;
     //  }
     //}
-  }
+  
   return allButtonsState;
 }
 
@@ -64,6 +77,7 @@ uint8_t ButtonsDacR2r::getButtonsValue(){
 bool ButtonsDacR2r::getValueChangedEdge(){
   //will only trigger if a change in STABLE value is detected.
   return this->buttonsPreviousStableValue != this->buttonsCurrentStableValue ;
+  
 }
 
 void ButtonsDacR2r::refresh(){
@@ -76,10 +90,13 @@ void ButtonsDacR2r::refresh(){
   
   if ( buttonsValue != this->buttonsPreviousValue){
 	  this->buttonEdgeMillis = millis();
+        this->debounceMillis = DEBOUNCE_MILLIS;
   }
   
-  if (millis() - this->buttonEdgeMillis > (unsigned long) this->debounceMillis){
+  if (millis() - this->buttonEdgeMillis >  this->debounceMillis){
+    this->debounceMillis = 1000000;
     this->buttonsCurrentStableValue = buttonsValue ;
+
   }
   
   this->buttonsPreviousValue = buttonsValue;
