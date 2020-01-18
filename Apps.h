@@ -8,6 +8,8 @@
 #include "BinaryInput.h"
 #include <avr/eeprom.h>
 
+
+
 #define ENABLE_MULTITIMER
 #ifdef ENABLE_MULTITIMER
 #include "MiniMultiTimer.h"
@@ -318,7 +320,7 @@ class Apps{
   void modeSimon(bool init);
   void gameButtonInteraction(bool init);
   void tiltSwitchTest(bool init);
-  
+  void modeButtonDebug(bool init);
   void miniMultiTimer(bool init);
   
   

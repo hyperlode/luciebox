@@ -844,4 +844,9 @@ K darlington transistor array
 F http://www.ti.com/lit/ds/symlink/uln2003a.pdf
 $ENDCMP
 #
+$CMP VCC_minimalCurrent
+D Power flag, VCC
+K power-flag
+$ENDCMP
+#
 #End Doc Library

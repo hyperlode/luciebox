@@ -559,21 +559,6 @@ X Pin_7 7 200 -300 150 L 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
-# Luciebox_components_Switch_tilt
-#
-DEF Luciebox_components_Switch_tilt SW 0 40 Y Y 1 F N
-F0 "SW" 0 300 50 H V C CNN
-F1 "Luciebox_components_Switch_tilt" 0 200 50 H V C CNN
-F2 "" -150 100 50 H I C CNN
-F3 "" -150 100 50 H I C CNN
-DRAW
-P 2 0 1 0 100 -50 50 -50 N
-P 5 0 1 0 0 150 0 0 -50 50 50 50 0 0 N
-X ~ 1 -150 -50 100 R 50 50 1 1 P
-X ~ 2 200 -50 100 L 50 50 1 1 P
-ENDDRAW
-ENDDEF
-#
 # Luciebox_components_VCC_minimalCurrent
 #
 DEF Luciebox_components_VCC_minimalCurrent #PWR 0 0 Y Y 1 F P

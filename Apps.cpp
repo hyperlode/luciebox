@@ -31,15 +31,13 @@ void Apps::test(){
   if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
     buzzer->programBuzzerRoll(45);
     
-    #ifdef DEBUG_POTENTIO
-    //Serial.println(potentio->getValue());
-    #endif
-    
   }
 }
 
 void Apps::appSelector(bool init, uint8_t selector){
-	
+#ifdef DEBUG_BUTTONS
+  this->modeButtonDebug(init); 
+#else
 	if (init){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
@@ -132,6 +130,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		}
 	}
+
+#endif
+
 }
 
 
@@ -207,6 +208,59 @@ bool Apps::init_app(bool init, uint8_t selector){
 		  
 	  
 	  return false;
+}
+
+void Apps::modeButtonDebug(bool init){
+  if (init){
+    generalTimer.setInitTimeMillis((long)-5000); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+    generalTimer.start();
+    counter = 0;
+  }
+  
+  if(!generalTimer.getTimeIsNegative()){
+   
+    counter++;
+    
+    if (counter > 5){
+       counter = 0; 
+    }
+    switch (counter){
+      case 0:{
+         ledDisp->showNumber( (int16_t) 1);
+         generalTimer.setInitTimeMillis((long)-500);
+       break; 
+      }
+      case 1:{
+         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1));
+         generalTimer.setInitTimeMillis((long)-2000);
+       break; 
+      }
+      case 2:{
+         ledDisp->showNumber( (int16_t) 2);
+         generalTimer.setInitTimeMillis((long)-500);
+       break; 
+      }
+      case 3:{
+         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
+         generalTimer.setInitTimeMillis((long)-2000);
+       break; 
+      }
+      case 4:{
+         ledDisp->showNumber( (int16_t) 111);
+         generalTimer.setInitTimeMillis((long)-500);
+       break; 
+      }
+      case 5:{
+         ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));
+         generalTimer.setInitTimeMillis((long)-2000);
+       break; 
+      }
+    }
+    
+    generalTimer.start();
+  }
+  
+  
 }
 
 void Apps::modeScroll(bool init){

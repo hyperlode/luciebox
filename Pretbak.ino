@@ -7,19 +7,19 @@
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 #include <EEPROM.h>
-
-#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define DEBUG_BUTTONS
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 
 #ifdef ENABLE_SERIAL
   //#define DEBUG_ANALOG_IN 
   // #define DEBUG_MERCURY
   //#define DEBUG_POTENTIO
-  #define DEBUG_BUTTONS
-  //#define DEBUG_SELECTOR_KNOB
+  //#define DEBUG_BUTTONS
+  #define DEBUG_SELECTOR_KNOB
   //#define DEBUG_MINIMULTITIMER
   //#define DEBUG_SEQUENCER
   
-  #define SUPERDEBUG
+  //#define SUPERDEBUG
   
 #endif 
 
@@ -74,16 +74,17 @@ void refresh(){
         
         Serial.println("{{{-------PRESS:-------:");
         Serial.println(i);
-     //   Serial.println( (analogRead(PIN_BUTTONS_1)));
-      //  Serial.println( (analogRead(PIN_BUTTONS_2)));
+        Serial.println( (analogRead(PIN_BUTTONS_1)));
+        Serial.println( (analogRead(PIN_BUTTONS_2)));
        // Serial.println(buttons_1.getButtonsValueRaw(),BIN);
     //    Serial.println(buttons_2.getButtonsValueRaw(),BIN);
   
       //  Serial.println("-------PRESS:-------}}}");  
       }
       if (binaryInputs[i].getEdgeDown()){
+        
         Serial.println("-----RELEASE:");
-       // Serial.println(i);
+        Serial.println(i);
         //Serial.println( (analogRead(PIN_BUTTONS_1)));
        
         //Serial.println(buttons_1.getButtonsValueRaw(),BIN);
@@ -111,6 +112,7 @@ void refresh(){
 #endif
     
 #ifdef DEBUG_SELECTOR_KNOB
+    //Serial.println(SELECTOR_DIAL_POSITIONS);
     Serial.println("selector:");
     Serial.println(selectorDial.getSelectorValue());
     Serial.println(analogRead(PIN_SELECTOR_DIAL));
@@ -186,6 +188,8 @@ void mode_refresh(){
 #else
   pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1);  // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 #endif  
+
+
 }
 
 void setup() {

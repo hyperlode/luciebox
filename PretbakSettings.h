@@ -3,6 +3,8 @@
 #define PIN_DUMMY 66
 #define PIN_DUMMY_2 67
 
+
+
 #ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
 	
 	#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
@@ -21,7 +23,7 @@
 	#define PIN_DISPLAY_DIGIT_3 9
 	#define PIN_DISPLAY_DIGIT_4 5
 	#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
-        #define SELECTOR_DIAL_POSITIONS 13  //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
+        #define SELECTOR_DIAL_POSITIONS 12  //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 
 #endif
 
