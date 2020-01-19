@@ -52,20 +52,21 @@ Buzzer buzzer;
 char  textBuf [6];
 char  scrollBuf [40];
 
+//debug mode
+bool debugMode;
+
 void refresh(){
   //input process  
   input_process();
   
-  #ifdef SUPERDEBUG
-  uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
-  
-  uint16_t* tmp  = setValues_1;
-  
-  if (  potentio.getValueStableChangedEdge()){
-    Serial.println("rawval:");
-    Serial.println(analogRead(PIN_BUTTONS_2));
-  }
-  #endif
+//  if (debugMode){
+//    uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
+//    uint16_t* tmp  = setValues_1;
+//    if (  potentio.getValueStableChangedEdge()){
+//      Serial.println("rawval:");
+//      Serial.println(analogRead(PIN_BUTTONS_2));
+//    }
+//  }
   
   #ifdef DEBUG_BUTTONS
     for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
@@ -76,60 +77,59 @@ void refresh(){
         Serial.println(i);
         Serial.println( (analogRead(PIN_BUTTONS_1)));
         Serial.println( (analogRead(PIN_BUTTONS_2)));
-       // Serial.println(buttons_1.getButtonsValueRaw(),BIN);
-    //    Serial.println(buttons_2.getButtonsValueRaw(),BIN);
-  
-      //  Serial.println("-------PRESS:-------}}}");  
+        //Serial.println(buttons_1.getButtonsValueRaw(),BIN);
+        //Serial.println(buttons_2.getButtonsValueRaw(),BIN);
+        //Serial.println("-------PRESS:-------}}}");  
       }
+
       if (binaryInputs[i].getEdgeDown()){
-        
         Serial.println("-----RELEASE:");
         Serial.println(i);
         //Serial.println( (analogRead(PIN_BUTTONS_1)));
-       
         //Serial.println(buttons_1.getButtonsValueRaw(),BIN);
         //Serial.println("-----------");
-  //      Serial.println("Button released");
-  //      Serial.println("analog in mercury switches edge down:");
-        
       }
-      
     }
       
-  
   #endif
   
   //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
-  //modes functionality
+  //modes functionality (apps)
+  if (!debugMode){
+     //mode change
+    if (selectorDial.getValueChangedEdge()) {
+      //default mode (go to default state at each change)
+      pretbak_apps.setDefaultMode();
+      
+      #ifdef DEBUG_SELECTOR_KNOB
+      //Serial.println(SELECTOR_DIAL_POSITIONS);
+      Serial.println("selector:");
+      Serial.println(selectorDial.getSelectorValue());
+      Serial.println(analogRead(PIN_SELECTOR_DIAL));
+      #endif
+      
+    }
+     
+     //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
     
-  //mode change
-  if (selectorDial.getValueChangedEdge()) {
-    //default mode (go to default state at each change)
-    
-#ifndef SUPERDEBUG
-    pretbak_apps.setDefaultMode();
-#endif
-    
-#ifdef DEBUG_SELECTOR_KNOB
-    //Serial.println(SELECTOR_DIAL_POSITIONS);
-    Serial.println("selector:");
-    Serial.println(selectorDial.getSelectorValue());
-    Serial.println(analogRead(PIN_SELECTOR_DIAL));
-#endif
-    
+    //check if first iteration at new selector value.
+    bool init = selectorDial.getValueChangedEdge();
+    #ifdef PROTOTYPE
+      pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
+    #else
+      pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1);  // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
+    #endif  
+     
+    buzzer.doBuzzerRoll();
+     
+  }else{
+    pretbak_apps.appSelector(false, 12);  //debug mode
   }
-  #ifndef SUPERDEBUG
   
-  mode_refresh();
-  #endif
-
   //output process
   ledDisp.refresh();
-  #ifndef SUPERDEBUG
-  buzzer.doBuzzerRoll();
-  #endif
-  
+ 
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
     binaryInputs[i].refresh();
   }
@@ -177,21 +177,6 @@ void input_process(){
   }
 }
 
-void mode_refresh(){
-  
-  //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
-
-  //check if first iteration at new selector value.
-  bool init = selectorDial.getValueChangedEdge();
-#ifdef PROTOTYPE
-  pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
-#else
-  pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1);  // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
-#endif  
-
-
-}
-
 void setup() {
   
   #ifdef ENABLE_SERIAL
@@ -220,6 +205,16 @@ void setup() {
   pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
   pretbak_apps.setBuffers(scrollBuf, textBuf);
   pretbak_apps.setDefaultMode();
+  
+  
+  // if one of the push buttons is pressed at startup, activate debugmode.
+  debugMode = false;
+  if (analogRead(PIN_BUTTONS_1) > 10 && analogRead(PIN_BUTTONS_1) < 500){
+    debugMode = true;
+    pretbak_apps.appSelector(true, 12);
+  }
+  
+  
 }
 
 void loop() {

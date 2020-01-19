@@ -2,8 +2,6 @@
 //#include "Arduino.h"
 #include "PretbakSettings.h"
 
-
-//#define SUPERDEBUG
 Apps::Apps(){
 	//initialize sequencer note only at apps startup.  
 	for (uint8_t i=0;i<32;i++){
@@ -32,34 +30,28 @@ void Apps::test(){
 //  if (*this->binaryInputs)[BUTTON_MOMENTARY_RED].getValue()){
   if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
     buzzer->programBuzzerRoll(45);
-    
   }
 }
 
 void Apps::appSelector(bool init, uint8_t selector){
-#ifdef SUPERDEBUG
-  this->modeButtonDebug(init); 
-#else
+
 	if (init){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
 		
 		// this->TIMER_INIT_APP.setInitTimeMillis(-2000);
 		// this->TIMER_INIT_APP.start();
-		ledDisp->SetFourDigits(0x0ff00f0f); 
-		
-		
+		ledDisp->SetFourDigits(0x0ff00f0f); 	
 	}
 	
 	if (this->app_init_mode){
-		// if (this->TIMER_INIT_APP.getTimeIsNegative()){
-			// 
-		// }
+		
 		if (this->init_app(init, selector)){ 
 			// do init routine, if finished,end of init.
 			this->app_init_mode = false;
 			init = true;
 		}
+
 	}
 	
 	// not as else statement, to have the init properly transferred after app beginning screen.
@@ -127,14 +119,16 @@ void Apps::appSelector(bool init, uint8_t selector){
 		case 11:
 		  this->miniMultiTimer(init);
 		  break;
-		
+
+		case 12:
+                  //this is the debug mode
+                  this->modeButtonDebug(init);
+                  break;
+                  
 		default:
 		  break;
 		}
 	}
-
-#endif
-
 }
 
 
@@ -183,9 +177,8 @@ bool Apps::init_app(bool init, uint8_t selector){
 		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
 
 	}else if (counter < 50){
-		// this->TIMER_INIT_APP.setInitTimeMillis(-20); 
-		ledDisp->SetFourDigits(this->screenPersistenceOfVision);
-		// ledDisp->showNumber(selector);
+		//ledDisp->SetFourDigits(this->screenPersistenceOfVision);
+		ledDisp->showNumber(selector);
 		
 	}else if (counter == 50){
 		this->fadeInList(displaySequence, 32, ~this->screenPersistenceOfVision);
@@ -196,25 +189,13 @@ bool Apps::init_app(bool init, uint8_t selector){
 	}else {
 		this->setDefaultMode();
 		return true;
-	}
-	
-	  // if (potentio->getValueStableChangedEdge()){
-		// this->TIMER_INIT_APP.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-	  // }
-	  
-	  
-	  // if (counter2){
-		  // // negative ==> which makes it fade out.
-		  // screenPersistenceOfVision = ~screenPersistenceOfVision;
-	  // }
-		  
-	  
-	  return false;
+	}	  
+	return false;
 }
 
 void Apps::modeButtonDebug(bool init){
   if (init){
-    generalTimer.setInitTimeMillis((long)-5000); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+    generalTimer.setInitTimeMillis((long)-5000);
     generalTimer.start();
     counter = 0;
   }
@@ -223,38 +204,59 @@ void Apps::modeButtonDebug(bool init){
    
     counter++;
     
-    if (counter > 5){
+    if (counter > 9){
        counter = 0; 
     }
+    
     switch (counter){
       case 0:{
-         ledDisp->showNumber( (int16_t) 1);
+         ledDisp->showNumber( (int16_t) 0); // analog A0
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
       case 1:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1));
-         generalTimer.setInitTimeMillis((long)-2000);
+         ledDisp->showNumber( (int16_t) analogRead(PIN_SELECTOR_DIAL));
+         generalTimer.setInitTimeMillis((long)-1000);
        break; 
       }
       case 2:{
-         ledDisp->showNumber( (int16_t) 2);
+         ledDisp->showNumber( (int16_t) 1); // analog A1
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
       case 3:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
-         generalTimer.setInitTimeMillis((long)-2000);
+         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1));
+         generalTimer.setInitTimeMillis((long)-1000);
        break; 
       }
       case 4:{
-         ledDisp->showNumber( (int16_t) 111);
+         ledDisp->showNumber( (int16_t) 2); // analog A2
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
       case 5:{
+         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
+         generalTimer.setInitTimeMillis((long)-1000);
+       break; 
+      }
+      case 6:{
+         ledDisp->showNumber( (int16_t) 3);// analog A3
+         generalTimer.setInitTimeMillis((long)-500);
+       break; 
+      }
+      case 7:{
+         ledDisp->showNumber( (int16_t) analogRead(PIN_POTENTIO));
+         generalTimer.setInitTimeMillis((long)-1000);
+       break; 
+      }
+      case 8:{
+         ledDisp->showNumber( (int16_t) 4);// analog A4
+         generalTimer.setInitTimeMillis((long)-500);
+       break; 
+      }
+      case 9:{
          ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));
-         generalTimer.setInitTimeMillis((long)-2000);
+         generalTimer.setInitTimeMillis((long)-1000);
        break; 
       }
     }

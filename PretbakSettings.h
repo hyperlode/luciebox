@@ -54,8 +54,9 @@
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
 #define PIN_BUTTONS_2 A2
-#define PIN_MERCURY_SWITCHES A4
 #define PIN_POTENTIO A3
+#define PIN_MERCURY_SWITCHES A4
+
 
 #define BINARY_INPUTS_COUNT 11 
 
@@ -99,3 +100,5 @@
 #define SWITCH_TILT_RIGHT 9
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
+
+
