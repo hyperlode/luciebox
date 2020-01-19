@@ -2,6 +2,8 @@
 //#include "Arduino.h"
 #include "PretbakSettings.h"
 
+
+//#define SUPERDEBUG
 Apps::Apps(){
 	//initialize sequencer note only at apps startup.  
 	for (uint8_t i=0;i<32;i++){
@@ -35,7 +37,7 @@ void Apps::test(){
 }
 
 void Apps::appSelector(bool init, uint8_t selector){
-#ifdef DEBUG_BUTTONS
+#ifdef SUPERDEBUG
   this->modeButtonDebug(init); 
 #else
 	if (init){
