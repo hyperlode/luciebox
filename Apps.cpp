@@ -194,8 +194,9 @@ bool Apps::init_app(bool init, uint8_t selector){
 }
 
 void Apps::modeButtonDebug(bool init){
+  // integrated debug mode (intended to be able to be activated in the final product in order to debug).
   if (init){
-    generalTimer.setInitTimeMillis((long)-5000);
+    generalTimer.setInitTimeMillis((long)0);
     generalTimer.start();
     counter = 0;
   }
@@ -208,9 +209,16 @@ void Apps::modeButtonDebug(bool init){
        counter = 0; 
     }
     
+    textBuf[1]=' ';
+    textBuf[2]=' ';
+    textBuf[3]='A'; 
+   
+    
+    
     switch (counter){
       case 0:{
-         ledDisp->showNumber( (int16_t) 0); // analog A0
+         textBuf[4]='0'; // analog A0
+         ledDisp->displayHandler(textBuf);
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
@@ -220,7 +228,8 @@ void Apps::modeButtonDebug(bool init){
        break; 
       }
       case 2:{
-         ledDisp->showNumber( (int16_t) 1); // analog A1
+         textBuf[4]='1'; // analog A1
+         ledDisp->displayHandler(textBuf);
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
@@ -230,7 +239,8 @@ void Apps::modeButtonDebug(bool init){
        break; 
       }
       case 4:{
-         ledDisp->showNumber( (int16_t) 2); // analog A2
+         textBuf[4]='2'; // analog A2
+         ledDisp->displayHandler(textBuf);
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
@@ -240,7 +250,8 @@ void Apps::modeButtonDebug(bool init){
        break; 
       }
       case 6:{
-         ledDisp->showNumber( (int16_t) 3);// analog A3
+         textBuf[4]='3';// analog A3
+         ledDisp->displayHandler(textBuf);
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
@@ -250,7 +261,8 @@ void Apps::modeButtonDebug(bool init){
        break; 
       }
       case 8:{
-         ledDisp->showNumber( (int16_t) 4);// analog A4
+         textBuf[4]='4';// analog A4
+         ledDisp->displayHandler(textBuf);
          generalTimer.setInitTimeMillis((long)-500);
        break; 
       }
@@ -262,9 +274,7 @@ void Apps::modeButtonDebug(bool init){
     }
     
     generalTimer.start();
-  }
-  
-  
+  }  
 }
 
 void Apps::modeScroll(bool init){
