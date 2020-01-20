@@ -85,7 +85,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		  
 		case 3:
-		  this->modeScroll(init);
+		  //this->modeScroll(init);
+                  this->modeDiceRoll(init);
+
 		  break;
 		  
 		case 4:
@@ -137,7 +139,10 @@ void Apps:: setDefaultMode(){
   ledDisp->SetLedArray(0b00000000);  // no lights
 
   //display
-  ledDisp->SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
+  //ledDisp->SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
+  //ledDisp->SetFourDigits(0x80808080); //default dispaly 4x minus
+  ledDisp->setBlankDisplay();
+  //ledDisp->SetFourDigits(0xC0C0C0C0); 
   ledDisp->setBrightness(0,false);
 
   //buzzer
@@ -195,6 +200,7 @@ bool Apps::init_app(bool init, uint8_t selector){
 
 void Apps::modeButtonDebug(bool init){
   // integrated debug mode (intended to be able to be activated in the final product in order to debug).
+  // will show in sequence all analog input values.
   if (init){
     generalTimer.setInitTimeMillis((long)0);
     generalTimer.start();
@@ -213,8 +219,6 @@ void Apps::modeButtonDebug(bool init){
     textBuf[2]=' ';
     textBuf[3]='A'; 
    
-    
-    
     switch (counter){
       case 0:{
          textBuf[4]='0'; // analog A0
@@ -277,94 +281,125 @@ void Apps::modeButtonDebug(bool init){
   }  
 }
 
-void Apps::modeScroll(bool init){
-  
-  // display scroll mode
-  
+void Apps::modeDiceRoll(bool init){
   if (init){
-    // display scroll mode
-//    scrollBuf[0]='L';
-//    scrollBuf[1]='U';
-//    scrollBuf[2]='C';
-//    scrollBuf[3]='I';
-//    scrollBuf[4]='E';
-//    scrollBuf[5]=' ';
-//    scrollBuf[6]='B';
-//    scrollBuf[7]='A';
-//    scrollBuf[8]='B';
-//    scrollBuf[9]='Y';
-//
-
-    this->scrollBuf[0]='H';
-    scrollBuf[1]='A';
-    scrollBuf[2]='P';
-    scrollBuf[3]='P';
-    scrollBuf[4]='Y';
-    scrollBuf[5]=' ';
-    scrollBuf[6]='B';
-    scrollBuf[7]='D';
-    scrollBuf[8]='A';
-    scrollBuf[9]='Y';
-    scrollBuf[10]=' ';
-    scrollBuf[11]='B';
-    scrollBuf[12]='R';
-    scrollBuf[13]='A';
-    scrollBuf[14]='M';
-    scrollBuf[15]='Z';
-    scrollBuf[16]='Y';
-    //scrollBuf[10]='/0';
-    ledDisp->dispHandlerWithScroll(scrollBuf, true, false);
-      
-	  
-	this->fadeInList(displaySequence, 32, 0);
-	counter = 0;
-	counter2= false;
-	
-	generalTimer.setInitTimeMillis(-200);
-	generalTimer.start();
+  
+    counter = 1;
+    counter2 = 0;
+    
+    textBuf[1]=' ';
+    textBuf[2]=' ';
+    textBuf[3]=' '; 
   }
-  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-			counter++;
-			
-			// Serial.println(displaySequence[counter], BIN);
-		  }
-		  if(!generalTimer.getTimeIsNegative()){
-			  generalTimer.start();
-			  counter++;
-		  }
-		  if (counter>31){
-				counter = 0;
-				this->fadeInList(displaySequence, 32, 0);
-				counter2  = !counter2;
-			}
-			
-		  if (potentio->getValueStableChangedEdge()){
-			generalTimer.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-		  }
-		  
-		  screenPersistenceOfVision = displaySequence[counter];
-		  if (counter2){
-			  // negative ==> which makes it fade out.
-			  screenPersistenceOfVision = ~screenPersistenceOfVision;
-		  }
-			  
-		  ledDisp->SetFourDigits(screenPersistenceOfVision);
-
-		 
-	  }else{
-		  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-			ledDisp->doScroll();
-		  }
-
-		  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-			ledDisp->setScrollSpeed((long)potentio->getValueStable());
-		  }else{
-			ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
-		  }
-	  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+    counter += 1;
+    if (counter > 6){  // about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out!
+      counter = 1;
+    }
+    textBuf[4]= 48 + counter;
+    counter2 ++;
+    ledDisp->showNumber(counter2);
+  }else{
+    //counter2 = 0;
+//    ledDisp->displayHandler(textBuf);
+    ledDisp->showNumber(counter2);
+  }  
+  
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+    counter2 = 0;
+  }
   
 }
+
+// void Apps::modeScroll(bool init){
+  
+//   // display scroll mode
+  
+//   if (init){
+//     // display scroll mode
+// //    scrollBuf[0]='L';
+// //    scrollBuf[1]='U';
+// //    scrollBuf[2]='C';
+// //    scrollBuf[3]='I';
+// //    scrollBuf[4]='E';
+// //    scrollBuf[5]=' ';
+// //    scrollBuf[6]='B';
+// //    scrollBuf[7]='A';
+// //    scrollBuf[8]='B';
+// //    scrollBuf[9]='Y';
+// //
+
+//     this->scrollBuf[0]='H';
+//     scrollBuf[1]='A';
+//     scrollBuf[2]='P';
+//     scrollBuf[3]='P';
+//     scrollBuf[4]='Y';
+//     scrollBuf[5]=' ';
+//     scrollBuf[6]='B';
+//     scrollBuf[7]='D';
+//     scrollBuf[8]='A';
+//     scrollBuf[9]='Y';
+//     scrollBuf[10]=' ';
+//     scrollBuf[11]='B';
+//     scrollBuf[12]='R';
+//     scrollBuf[13]='A';
+//     scrollBuf[14]='M';
+//     scrollBuf[15]='Z';
+//     scrollBuf[16]='Y';
+//     //scrollBuf[10]='/0';
+//     ledDisp->dispHandlerWithScroll(scrollBuf, true, false);
+      
+	  
+// 	this->fadeInList(displaySequence, 32, 0);
+// 	counter = 0;
+// 	counter2= false;
+	
+// 	generalTimer.setInitTimeMillis(-200);
+// 	generalTimer.start();
+//   }
+//   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+// 		  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+// 			counter++;
+			
+// 			// Serial.println(displaySequence[counter], BIN);
+// 		  }
+// 		  if(!generalTimer.getTimeIsNegative()){
+// 			  generalTimer.start();
+// 			  counter++;
+// 		  }
+// 		  if (counter>31){
+// 				counter = 0;
+// 				this->fadeInList(displaySequence, 32, 0);
+// 				counter2  = !counter2;
+// 			}
+			
+// 		  if (potentio->getValueStableChangedEdge()){
+// 			generalTimer.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+// 		  }
+		  
+// 		  screenPersistenceOfVision = displaySequence[counter];
+// 		  if (counter2){
+// 			  // negative ==> which makes it fade out.
+// 			  screenPersistenceOfVision = ~screenPersistenceOfVision;
+// 		  }
+			  
+// 		  ledDisp->SetFourDigits(screenPersistenceOfVision);
+
+		 
+// 	  }else{
+// 		  if (!binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+// 			ledDisp->doScroll();
+// 		  }
+
+// 		  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+// 			ledDisp->setScrollSpeed((long)potentio->getValueStable());
+// 		  }else{
+// 			ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
+// 		  }
+// 	  }
+  
+// }
 
 void Apps::modeSimpleButtonsAndLights(){
   
@@ -976,6 +1011,8 @@ void Apps::miniMultiTimer(bool init){
 	 
 	  this->multiTimer.setBuzzer(this->buzzer);
 	  this->multiTimer.init();
+    
+  
   }  
   
   // TIMER BUTTONS
@@ -1025,8 +1062,8 @@ void Apps::miniMultiTimer(bool init){
 	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
       
       // pass through to multitimer app, it has to decide about validity.
-	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
-      this->multiTimer.setFischerTimer(seconds);
+    this->multiTimer.setAllInitCountDownTimeSecs(seconds);
+    this->multiTimer.setFischerTimer(seconds);
   }
   
   // UPDATE CYCLIC
@@ -1041,9 +1078,9 @@ void Apps::miniMultiTimer(bool init){
   uint8_t lights=0b00000000;
   // timer buttons lights to real lights
   for(uint8_t i=0;i<4;i++){
-	if (1<<i & buttonLights){
-			lights |= 1<<lights_indexed[i+1];    
-	}
+    if (1<<i & buttonLights){
+        lights |= 1<<lights_indexed[i+1];    
+    }
   }
   
   // settings light to real lights
@@ -1051,9 +1088,11 @@ void Apps::miniMultiTimer(bool init){
   (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LED_3:false;
   (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LED_2:false;
   (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LED_1:false;
-  
-  ledDisp->SetLedArray(lights); 
+
   ledDisp->displayHandler(textBuf);
+  ledDisp->SetLedArray(lights); 
+  ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights ,2);
+    
 #endif
 }
 
@@ -1431,121 +1470,121 @@ void Apps::modeMetronome(bool init){
 
 void Apps::modeSimon(bool init)
 {
-  const int numButtons = 4;
-  const int buttons[numButtons] = { BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
-  const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
-  const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
+  // const int numButtons = 4;
+  // const int buttons[numButtons] = { BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
+  // const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
+  // const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
 
-  const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
-  const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
+  // const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+  // const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
 
-  if (init) {
-    simonState = simonWaitForNewGame;
-  }
+  // if (init) {
+  //   simonState = simonWaitForNewGame;
+  // }
 
-  if (init || potentio->getValueStableChangedEdge()) {
-    generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
-  }
+  // if (init || potentio->getValueStableChangedEdge()) {
+  //   generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
+  // }
 
-  uint8_t buttonsChanged = 0;
-  for (int k = 0; k < numButtons; ++k) {
-    const bool changed = (buttons[k] == BUTTON_LATCHING_YELLOW)
-      ? binaryInputs[buttons[k]].getValueChanged()
-      : binaryInputs[buttons[k]].getEdgeUp();
-    if (changed) {
-      buttonsChanged |= (1 << k);
-    }
-  }
+  // uint8_t buttonsChanged = 0;
+  // for (int k = 0; k < numButtons; ++k) {
+  //   const bool changed = (buttons[k] == BUTTON_LATCHING_YELLOW)
+  //     ? binaryInputs[buttons[k]].getValueChanged()
+  //     : binaryInputs[buttons[k]].getEdgeUp();
+  //   if (changed) {
+  //     buttonsChanged |= (1 << k);
+  //   }
+  // }
 
-  switch (simonState) {
-    case simonWaitForNewGame: {
-      // all lights on
-      byte allLights = 0;
-      for (int k = 0; k < numButtons; ++k) {
-        allLights |= lights[k];
-      }
-      ledDisp->SetLedArray(allLights);
-      if (!buttonsChanged) {
-        break;
-      }
-      simonState = simonNewGame;
-      break;
-    }
+  // switch (simonState) {
+  //   case simonWaitForNewGame: {
+  //     // all lights on
+  //     byte allLights = 0;
+  //     for (int k = 0; k < numButtons; ++k) {
+  //       allLights |= lights[k];
+  //     }
+  //     ledDisp->SetLedArray(allLights);
+  //     if (!buttonsChanged) {
+  //       break;
+  //     }
+  //     simonState = simonNewGame;
+  //     break;
+  //   }
 
-    case simonNewGame: {
-      ledDisp->SetLedArray(0);
-      // generate new sequence
-      randomSeed(millis());
-      for (int k = 0; k < sequencer_bufsize; ++k) {
-        sequencer_song[k] = k % numButtons;
-      }
-      shuffle(sequencer_song, sequencer_bufsize);
-      simonLength = 0;
-      simonState = simonNewLevel;
-      break;
-    }
+  //   case simonNewGame: {
+  //     ledDisp->SetLedArray(0);
+  //     // generate new sequence
+  //     randomSeed(millis());
+  //     for (int k = 0; k < sequencer_bufsize; ++k) {
+  //       sequencer_song[k] = k % numButtons;
+  //     }
+  //     shuffle(sequencer_song, sequencer_bufsize);
+  //     simonLength = 0;
+  //     simonState = simonNewLevel;
+  //     break;
+  //   }
 
-    case simonNewLevel: {
-      ledDisp->showNumber(simonLength);
-      ++simonLength;
-      if (simonLength >= sequencer_bufsize) {
-          // reached maximum length
-          if (hasSound) buzzer->loadBuzzerTrack(song_attack);
-          simonState = simonWaitForNewGame;
-          break;
-      }
-      simonIndex = -1; // negative index allows for lead-in time
-      simonState = simonPlaySequence;
-      generalTimer.start();
-      break;
-    }
+  //   case simonNewLevel: {
+  //     ledDisp->showNumber(simonLength);
+  //     ++simonLength;
+  //     if (simonLength >= sequencer_bufsize) {
+  //         // reached maximum length
+  //         if (hasSound) buzzer->loadBuzzerTrack(song_attack);
+  //         simonState = simonWaitForNewGame;
+  //         break;
+  //     }
+  //     simonIndex = -1; // negative index allows for lead-in time
+  //     simonState = simonPlaySequence;
+  //     generalTimer.start();
+  //     break;
+  //   }
 
-    case simonPlaySequence: {
-      if (generalTimer.getTimeIsNegative()) {
-        break;
-      }
-      generalTimer.start();
-      if (simonIndex < 0) {
-        ++simonIndex; // do-nothing lead in time
-        break;
-      }
-      if (simonIndex >= simonLength) {
-        // sequence finished, give control to user
-        ledDisp->SetLedArray(0);
-        simonIndex = 0;
-        simonState = simonUserRepeats;
-        break;
-      }
-      // show one button from the sequence
-      const uint8_t button = sequencer_song[simonIndex];
-      if (hasLight) ledDisp->SetLedArray(lights[button]);
-      if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
-      ++simonIndex;
-      break;
-    }
+  //   case simonPlaySequence: {
+  //     if (generalTimer.getTimeIsNegative()) {
+  //       break;
+  //     }
+  //     generalTimer.start();
+  //     if (simonIndex < 0) {
+  //       ++simonIndex; // do-nothing lead in time
+  //       break;
+  //     }
+  //     if (simonIndex >= simonLength) {
+  //       // sequence finished, give control to user
+  //       ledDisp->SetLedArray(0);
+  //       simonIndex = 0;
+  //       simonState = simonUserRepeats;
+  //       break;
+  //     }
+  //     // show one button from the sequence
+  //     const uint8_t button = sequencer_song[simonIndex];
+  //     if (hasLight) ledDisp->SetLedArray(lights[button]);
+  //     if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
+  //     ++simonIndex;
+  //     break;
+  //   }
 
-    case simonUserRepeats: {
-      if (!buttonsChanged) {
-        break;
-      }
-      const int expected = sequencer_song[simonIndex];
-      if (buttonsChanged != (1 << expected)) {
-        // player made mistake, start new game
-        if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
-        simonState = simonWaitForNewGame;
-        break;
-      }
-      // player pressed correct button
-      if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
-      ++simonIndex;
-      if (simonIndex >= simonLength) {
-        // sequence fully replaced, add one more note
-        simonState = simonNewLevel;
-        break;
-      }
-      break;
-    }
-  }
+  //   case simonUserRepeats: {
+  //     if (!buttonsChanged) {
+  //       break;
+  //     }
+  //     const int expected = sequencer_song[simonIndex];
+  //     if (buttonsChanged != (1 << expected)) {
+  //       // player made mistake, start new game
+  //       if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
+  //       simonState = simonWaitForNewGame;
+  //       break;
+  //     }
+  //     // player pressed correct button
+  //     if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
+  //     ++simonIndex;
+  //     if (simonIndex >= simonLength) {
+  //       // sequence fully replaced, add one more note
+  //       simonState = simonNewLevel;
+  //       break;
+  //     }
+  //     break;
+  //   }
+  // }
 }
 
 int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue){

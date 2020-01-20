@@ -186,7 +186,7 @@ void MiniMultiTimer::refresh(){
 	}
 }
 
-void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 settingsLights){
+void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* settingsLights){
 	//what should be showing on the display right now?
 	*playerLights = 0b00000000; //lsb is timer 0, 2nd bit is timer 1, ....
 	*settingsLights = 0b00000000; //settings lights are other lights then timer button lights.
@@ -196,6 +196,8 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
     disp[3] = ' ';	
     disp[4] = ' ';
     
+	
+	
 	if ( this-> state == initialized){
 		this->timers[this->activeTimer].getTimeString(disp+1);	
 		
@@ -218,6 +220,8 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 				*settingsLights |= LIGHT_PAUSE; //pause light on.
 			}
 		}	
+		*settingsLights |= LIGHT_SECONDS_BLINKER;	
+
 	}else if (this->state == playing ){
         
         // displayed timer is not always the active timer (i.e. non active player wants to check his time).
@@ -230,30 +234,45 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
                 // active timer seconds blink
                 if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
                     *playerLights |= 1 << i;
+
+					// blinking behaviour of decimal point
+					*settingsLights |= LIGHT_SECONDS_BLINKER;	
                 }
             }else if (i == timerDisplayed){
                 // displayed timer is not always the active timer (i.e. non active player wants to check his time).
                 if (millis()%250 > 125){
                     *playerLights |= 1 << i;
                 }
+
+				// solid seconds blinker when displaying other timer
+				*settingsLights |= LIGHT_SECONDS_BLINKER;	
+
             }else if (i != this->activeTimer && !this->getTimerFinished(i) ) {
                 //other lights solid on if still alive.
 				*playerLights |= 1 << i;
 			} 
 		}
 		
-		 *settingsLights |= LIGHT_PLAYING; //when in timers running mode, solid on.
+		// //decimal point blinker
+		
+		// if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
+			
+		// } 
+
+		*settingsLights |= LIGHT_PLAYING; //when in timers running mode, solid on.
 		
 	}else if (this->state == finished){
-		disp[1] = 32;	
-		disp[2] = 69;	
-		disp[3] = 78;	
-		disp[4] = 68;	
+		disp[1] = 32; //' '
+		disp[2] = 69; //'E'
+		disp[3] = 78; //'N'	
+		disp[4] = 68; //'D'	
 		
 		//fast blink last surviving timer light.
 		if (millis()%250 > 125){
 			*playerLights |= 1 << this->activeTimer;
 		}
+
+		*settingsLights |= LIGHT_SECONDS_BLINKER;	
 		
 	}else if (this->state == paused){
 		if(millis()%1000 > 500 || this->timerDisplayed != this->activeTimer){
@@ -289,6 +308,8 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
         }
 		// playing light on.
 		*settingsLights |= LIGHT_PLAYING; //when in timers running mode, solid on.
+
+		*settingsLights |= LIGHT_SECONDS_BLINKER;	
 		
 	}else if (this->state == setFischer){
         if (millis()%1000 > 650){
@@ -328,6 +349,9 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t*	 set
 		// fischer light always solid on when not zero seconds added. (except during setting, then blinking).
 		*settingsLights |= LIGHT_FISCHER; 
 	}
+
+	//hour:seconds divider
+	
 }
 
 bool MiniMultiTimer::getTimerFinished(uint8_t timerIndex){

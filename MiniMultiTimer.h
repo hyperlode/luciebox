@@ -34,6 +34,7 @@ class MiniMultiTimer{
 	#define LIGHT_PLAYING 0x02
 	#define LIGHT_FISCHER 0x04
 	#define LIGHT_SET_TIMERS_COUNT 0x08
+	#define LIGHT_SECONDS_BLINKER 0b00010000
 	
 	enum state{
 		initialized=0,

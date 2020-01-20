@@ -51,12 +51,7 @@
 
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
-	
-	// 0x38, 0x3F, 0x5E, 0x79, // LODE minimultitimer
-	// 0x5E, 0x5E, 0x01, 0x5F, // music notes. duh!  (doesn't show nicely)
-	// 0x00, 0x7C, 0x5E, 0x6F, // BdG
-	// 0x6F, 0x79, 0x06, 0x6F, // GEIG geiger
-	// 0x70, 0x06, 0x38, 0x70, // TILT
+
 	0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
 	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol of tank
 	0x39, 0x09, 0x09, 0x0F, // abstractbig circle
@@ -69,7 +64,7 @@ const uint8_t app_splash_screens [] PROGMEM = {
 	0x40, 0x4F, 0x79, 0x40, // abstract art deco 
 	0x36, 0x36, 0x36, 0x36, // abstract vertical lines
 	0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
-        0x5F, 0x79, 0x1C, 0x3D  // DBUG
+  0x5F, 0x79, 0x1C, 0x3D  // DBUG
 		
 };
 
@@ -83,10 +78,10 @@ const uint8_t disp_4digits_animations [] PROGMEM = {
     0x00,0x00,0x06,0x00,
     0x00,0x00,0x49,0x00,
     0x00,0x00,0x30,0x00,
-	0x00,0x06,0x00,0x00,
+	  0x00,0x06,0x00,0x00,
     0x00,0x49,0x00,0x00,
     0x00,0x30,0x00,0x00,
-	0x06,0x00,0x00,0x00,
+	  0x06,0x00,0x00,0x00,
     0x49,0x00,0x00,0x00,
     0x30,0x00,0x00,0x00, //last byte is byte 52.
 	0x19,  //length of next animation (25 including the length)  byte53
@@ -145,36 +140,36 @@ const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
   C7_4,rest_4,rest_2,
   G6_2,G6_4,rest_2, 
 
-  E7_4,rest_4,rest_2,
-  E7_4,rest_2, E7_8,rest_8,
-  E7_4,rest_4,rest_2,
-  C7_2,C7_4,rest_2, 
+  // E7_4,rest_4,rest_2,
+  // E7_4,rest_2, E7_8,rest_8,
+  // E7_4,rest_4,rest_2,
+  // C7_2,C7_4,rest_2, 
 
-  G7_4,rest_4,rest_2,
-  G7_4,rest_2, G7_8,rest_8,
+  // G7_4,rest_4,rest_2,
+  // G7_4,rest_2, G7_8,rest_8,
   
-  A7_8,rest_8,rest_4,
-  G7_8,rest_8,rest_4,
+  // A7_8,rest_8,rest_4,
+  // G7_8,rest_8,rest_4,
   
-  F7_8,rest_8,rest_4,
-  E7_8,rest_8,rest_4,
+  // F7_8,rest_8,rest_4,
+  // E7_8,rest_8,rest_4,
   
-  D7_2,D7_4,rest_4,
-  D7_2,D7_4,rest_4,
-  D7_2,D7_4,rest_4,
-  rest_4,
-  G7_8,rest_8,rest_4,
-  F7_8,rest_8,rest_4,
+  // D7_2,D7_4,rest_4,
+  // D7_2,D7_4,rest_4,
+  // D7_2,D7_4,rest_4,
+  // rest_4,
+  // G7_8,rest_8,rest_4,
+  // F7_8,rest_8,rest_4,
 
-  E7_1,E7_2,rest_2,
-  F7_1,F7_2,rest_2,
+  // E7_1,E7_2,rest_2,
+  // F7_1,F7_2,rest_2,
 
-  G7_1,G7_2,rest_2,
-  A7_2,A7_4,rest_4,
-  F7_2,F7_4,rest_4,
+  // G7_1,G7_2,rest_2,
+  // A7_2,A7_4,rest_4,
+  // F7_2,F7_4,rest_4,
 
-  E7_1,E7_2,rest_2,
-  D7_1,D7_2,rest_2,
+  // E7_1,E7_2,rest_2,
+  // D7_1,D7_2,rest_2,
   C7_1,C7_1,BUZZER_ROLL_SONG_STOPVALUE
   };
 const uint8_t song_happy_dryer [] PROGMEM = {
@@ -306,7 +301,7 @@ class Apps{
   void setDefaultMode();
   void appSelector(bool init, uint8_t selector);
   bool init_app(bool init, uint8_t selector);
-  void modeScroll(bool init);
+  //void modeScroll(bool init);
   void modeSimpleButtonsAndLights();
   void modeCountingLettersAndChars(bool init);
   void modeSoundSong(bool init);
@@ -323,6 +318,7 @@ class Apps{
   void tiltSwitchTest(bool init);
   void modeButtonDebug(bool init);
   void miniMultiTimer(bool init);
+  void modeDiceRoll(bool init);
   
   
   void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen);

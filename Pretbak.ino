@@ -128,6 +128,8 @@ void refresh(){
   }
   
   //output process
+  //ledDisp->setDecimalPoint(true,2);
+  //ledDisp.setDecimalPoint(true,2);
   ledDisp.refresh();
  
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
