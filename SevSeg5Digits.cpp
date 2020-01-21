@@ -261,14 +261,6 @@ void SevSeg5Digits::CreateArray() {
   	case '9' :
   		lights[digit] = B01101111;
   		break;
-  		/*
-  	case 20:
-  		lights[digit][0]=0;lights[digit][1]=0;lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-  		break;
-  	case 21:
-  		lights[digit][0]=0;lights[digit][1]=0;lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=1;
-  		break;
-  	/**/
   	case 'A':
   		lights[digit] = B01110111;
   		break;
@@ -298,18 +290,18 @@ void SevSeg5Digits::CreateArray() {
   	//	break;
   	case 'H':
   		//lights[digit] = B01110110;
-      lights[digit] = B01110100;
+        lights[digit] = B01110100;
   		break;
   	case 'I':
   //		lights[digit] = B00000110;
-      lights[digit] = B00000100;
+        lights[digit] = B00000100;
   		break;
   //	case 'i':
   //		lights[digit] = B00000100;
   //		break;
   	case 'J':
   //		lights[digit] = B00001110;
-      lights[digit] = B00001100;
+        lights[digit] = B00001100;
   		break;
   	case 'K':
       lights[digit] = B01110101;
@@ -382,9 +374,12 @@ void SevSeg5Digits::CreateArray() {
   	case ' ':
   		lights[digit] = B00000000;
   		break;
-  //	case '~': //only upper (seg A)
-  //		lights[digit][0]=1; lights[digit][1]=0; lights[digit][2]=0;lights[digit][3]=0;lights[digit][4]=0;lights[digit][5]=0;lights[digit][6]=0;
-  //		break;
+	case '=': //only top and bottom
+  		lights[digit] = B00001001;
+  		break;
+    case '^': //only top (seg A)
+  		lights[digit] = B00000001;
+  		break;
   	case '-': //only middle (seg G)
   		lights[digit] = B01000000;
   		break;

@@ -69,24 +69,13 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  
 		case 2:
 		  //sound fun with frequencies.
-		  
-		  #ifdef DEBUG_BUTTONS
-		  
-		  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-			Serial.println(potentio.getValueMapped(0,1023));
-		  }
-
-                  #else
-            
-                  this->modeSimon(init);
-
-		  #endif
+		  this->modeSimon(init);
 
 		  break;
 		  
 		case 3:
 		  //this->modeScroll(init);
-                  this->modeDiceRoll(init);
+      this->modeDiceRoll(init);
 
 		  break;
 		  
@@ -285,31 +274,83 @@ void Apps::modeDiceRoll(bool init){
   if (init){
   
     counter = 1;
-    counter2 = 0;
-    
-    textBuf[1]=' ';
-    textBuf[2]=' ';
-    textBuf[3]=' '; 
+    generalTimer.setInitTimeMillis(-100);
+  	generalTimer.start();
   }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-    counter += 1;
+
+   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+
+     generalTimer.setInitTimeMillis((long)(1* potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+		 //generalTimer.start();
+     //ledDisp->showNumber(counter);	
+   }
+
+
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue() || binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+
+    counter ++;
     if (counter > 6){  // about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out!
       counter = 1;
     }
-    textBuf[4]= 48 + counter;
-    counter2 ++;
-    ledDisp->showNumber(counter2);
-  }else{
-    //counter2 = 0;
-//    ledDisp->displayHandler(textBuf);
-    ledDisp->showNumber(counter2);
-  }  
+
+    //textBuf[4]= 48 + counter;
+   
+    if (!generalTimer.getTimeIsNegative()){
+      buzzer->cleanBuzzerRoll();
+      buzzer->programBuzzerRoll(14);
+      ledDisp->displayHandler(textBuf);
+      generalTimer.start();
+    }
+
+
+    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+
+        //ledDisp->showNumber(counter2);
+        textBuf[1]='?';
+        textBuf[2]='?';
+        textBuf[3]='?'; 
+        textBuf[4]='?'; 
+
+    }else{
+      
+      textBuf[4] = ' '; 
+      for (uint8_t i=1;i<4;i++){
+        // build up dice eyes over three digits 
+
+        //set default for digit 1 2 and 3. Because most used (seg A and D) 
+        textBuf[i] = '=';  
+
+        //first and third digit
+        if (counter == 1 ){
+          textBuf[i] = ' '; // 
+        }else if(counter <4){
+          textBuf[i] = '^'; // assume first digit seg A
+          if( i == 3){
+            textBuf[i] = '_'; // seg D
+          }
+        }
+
+        //second digit
+        if (i == 2 && counter < 6){
+          textBuf[i] = '-'; // assume odd
+          if (counter%2 == 0 ){ // if even
+            textBuf[i] = ' '; 
+          }
+        }
+      }
+    }
+  } 
   
+
+  //  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+  //     ledDisp->showNumber(counter);
+
+  //   }
+
+
   if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
-    counter2 = 0;
+    //counter2 = 0;
   }
-  
 }
 
 // void Apps::modeScroll(bool init){

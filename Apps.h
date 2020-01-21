@@ -68,6 +68,12 @@ const uint8_t app_splash_screens [] PROGMEM = {
 		
 };
 
+// const uint8_t disp_dice [] PROGMEM = {
+//   0x00,0x00,0x00,0x00,
+
+
+// }
+
 const uint8_t disp_4digits_animations [] PROGMEM = {
 	0x35,  // first byte = length of animation in bytes  (here 53, including the length byte)
 // const uint32_t disp_4digits_swoosh [] PROGMEM = {
