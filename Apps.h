@@ -45,20 +45,29 @@
 #define TIMER_INIT_APP generalTimer
 
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer2
+
+#define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
 #define GEIGER_TONE_FREQUENY_LOWEST counter
+#define DRAW_ACTIVE_SEGMENT counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
-#define GAME_X_POS counter2
+#define DRAW_X_POS counter2
 
-#define GAME_Y_POS counter3
+#define DRAW_Y_POS counter3
 #define COUNTER_GEIGER counter3
 #define GEIGER_INCREASE_CHANCE counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 
+#define DRAW_DISP_STATE array_4_bytes
+#define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
+
 #define GEIGER_TONE_LENGTH counter4
+#define REACTION_GAME_TARGET counter4
+
+#define REACTION_GAME_YELLOW_BUTTON_INCLUDED general_boolean  
 
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
@@ -361,28 +370,30 @@ class Apps{
 
     uint8_t sequencer_song[sequencer_bufsize]; // also used for simon game
     uint8_t* game_random;
-    uint32_t screenPersistenceOfVision;
 
-    uint8_t allNotesIndex;
+    uint32_t displayAllSegments;
 
+    
+    bool general_boolean;
     int16_t counter;
     int16_t counter2;
     long counter3;
     uint16_t counter4;
-
-    bool numberElseAlphabethMode;
+    
+    uint8_t array_4_bytes [4];
 
     uint8_t reactionGameTarget;
     
-    
-    
-    bool reactionGameYellowButtonIsIncluded;
-
-    uint8_t selectedSounds[4];
-    
-    uint8_t dispState[4];
-    
     uint32_t displaySequence[32];
+
+
+    // // reaction
+    // enum ReactionGameState {
+    //     reactionWaitForStart,
+    //     reactionPlaying,
+    //     reactionFinished,
+        
+    // };
 
     // simon
     enum SimonState {

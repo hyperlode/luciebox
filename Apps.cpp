@@ -145,12 +145,12 @@ bool Apps::init_app(bool init, uint8_t selector){
 	
 	if(init){
 		// init of the init_app...
-		this->screenPersistenceOfVision = 0;
-		  for (uint8_t i=0;i<4;i++){
-			this->screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
-		  }
+		this->displayAllSegments = 0;
+    for (uint8_t i=0;i<4;i++){
+      this->displayAllSegments |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+    }
 		
-		this->fadeInList(displaySequence, 32, this->screenPersistenceOfVision);
+		this->fadeInList(displaySequence, 32, this->displayAllSegments);
 		// counter = 0;
 		// this->TIMER_INIT_APP.setInitTimeMillis(-5); 
 
@@ -171,11 +171,11 @@ bool Apps::init_app(bool init, uint8_t selector){
 		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
 
 	}else if (counter < 50){
-		//ledDisp->SetFourDigits(this->screenPersistenceOfVision);
+		//ledDisp->SetFourDigits(this->displayAllSegments);
 		ledDisp->showNumber(selector);
 		
 	}else if (counter == 50){
-		this->fadeInList(displaySequence, 32, ~this->screenPersistenceOfVision);
+		this->fadeInList(displaySequence, 32, ~this->displayAllSegments);
 		
 	}else if (counter < 82 ){
 		ledDisp->SetFourDigits(~displaySequence[counter-51]);
@@ -191,15 +191,14 @@ void Apps::modeButtonDebug(bool init){
   // integrated debug mode (intended to be able to be activated in the final product in order to debug).
   // will show in sequence all analog input values.
   if (init){
-    generalTimer.setInitTimeMillis((long)0);
+    generalTimer.setInitTimeMillis(0);
     generalTimer.start();
     counter = 0;
   }
   
   if(!generalTimer.getTimeIsNegative()){
-   
+
     counter++;
-    
     if (counter > 9){
        counter = 0; 
     }
@@ -420,13 +419,13 @@ void Apps::modeDiceRoll(bool init){
 // 			generalTimer.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
 // 		  }
 		  
-// 		  screenPersistenceOfVision = displaySequence[counter];
+// 		  displayAllSegments = displaySequence[counter];
 // 		  if (counter2){
 // 			  // negative ==> which makes it fade out.
-// 			  screenPersistenceOfVision = ~screenPersistenceOfVision;
+// 			  displayAllSegments = ~displayAllSegments;
 // 		  }
 			  
-// 		  ledDisp->SetFourDigits(screenPersistenceOfVision);
+// 		  ledDisp->SetFourDigits(displayAllSegments);
 
 		 
 // 	  }else{
@@ -520,7 +519,7 @@ void Apps::modeCountingLettersAndChars(bool init){
 	     	generalTimer.setInitTimeMillis(-1000);
       }
       
-      numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+      const bool numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
 	  
   
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
@@ -689,9 +688,9 @@ void Apps::modeSoundNotes(){
       // if (potentio->getValueStableChangedEdge()){
       
       // buzzer->buzzerOff();
-        // allNotesIndex = potentio->getValueMapped(0,255);
-      // ledDisp->showNumber(allNotesIndex);
-      // buzzer->programBuzzerRoll(allNotesIndex);
+        // SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);
+      // ledDisp->showNumber(SOUND_FUN_NOTE_INDEX);
+      // buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
       // }
     // }else  
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
@@ -710,29 +709,30 @@ void Apps::modeSoundNotes(){
         ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));
       }  
     }else{ 
+
       // simple mode.
       if (potentio->getValueStableChangedEdge()){
         //buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
-        allNotesIndex = potentio->getValueMapped(0,255);
+        SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);
         if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
           buzzer->buzzerOff();
       } 
-        buzzer->programBuzzerRoll(allNotesIndex);
+        buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
       }
         
       if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-        buzzer->programBuzzerRoll(allNotesIndex);
-        allNotesIndex--;
+        buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+        SOUND_FUN_NOTE_INDEX--;
       }
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-        buzzer->programBuzzerRoll(allNotesIndex);
+        buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
       }
       
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-        buzzer->programBuzzerRoll(allNotesIndex);
-        allNotesIndex++;
+        buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+        SOUND_FUN_NOTE_INDEX++;
       }
-      ledDisp->showNumber(allNotesIndex);
+      ledDisp->showNumber(SOUND_FUN_NOTE_INDEX);
     }
   }
 }
@@ -825,16 +825,16 @@ void Apps::movieAnimationMode(bool init){
 	}
 	
 	// get the display data.
-	screenPersistenceOfVision = this->dataPlayer.getActive32bit();
+	displayAllSegments = this->dataPlayer.getActive32bit();
 	
 	//invert all data in picture 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 	  // negative .
-	  screenPersistenceOfVision = ~screenPersistenceOfVision ;
+	  displayAllSegments = ~displayAllSegments ;
 	}
 	
 	// set to display 
-	ledDisp->SetFourDigits(screenPersistenceOfVision);
+	ledDisp->SetFourDigits(displayAllSegments);
 }
 
 void Apps::modeSingleSegmentManipulation(bool init){
@@ -845,15 +845,15 @@ void Apps::modeSingleSegmentManipulation(bool init){
     // animation_step = 0;
 	
     //bottom left is origin
-    GAME_X_POS = 0;
-    GAME_Y_POS = 0;
-    counter = 0; // segment active
-    
+    DRAW_X_POS = 0;
+    DRAW_Y_POS = 0;
+    DRAW_ACTIVE_SEGMENT = 0; // segment active
     
     //reset saved led disp state.
-    for (uint8_t i=0;i<4;i++){
-      this->dispState[i]=0;
-    }
+    DRAW_DISP_STATE[0]=0;
+    DRAW_DISP_STATE[1]=0;
+    DRAW_DISP_STATE[2]=0;
+    DRAW_DISP_STATE[3]=0;
     
     //generalTimer.setInitTimeMillis(3000);
     //generalTimer.start();
@@ -863,10 +863,10 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		  uint16_t val;
 		  val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments. 
 		  val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
-		  counter = val/12; // get digit
+		  DRAW_ACTIVE_SEGMENT = val/12; // get digit
 		  val = val%12; 
-		  GAME_X_POS = val/4; // get xpos
-		  GAME_Y_POS = val%4; // get ypos
+		  DRAW_X_POS = val/4; // get xpos
+		  DRAW_Y_POS = val%4; // get ypos
   }
   
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
@@ -897,13 +897,13 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	
 	case MOVE_RIGHT:{
 	  //move right
-	  GAME_X_POS++;
-	  if (GAME_X_POS > 2){
-		  counter++; // next digit
-		  if (counter> 3){ 
-			  counter = 0;
+	  DRAW_X_POS++;
+	  if (DRAW_X_POS > 2){
+		  DRAW_ACTIVE_SEGMENT++; // next digit
+		  if (DRAW_ACTIVE_SEGMENT> 3){ 
+			  DRAW_ACTIVE_SEGMENT = 0;
 		  }
-		  GAME_X_POS = 0;
+		  DRAW_X_POS = 0;
 	  }
 	}
 	break;
@@ -911,18 +911,18 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	case MOVE_DOWN:
 	{
 	  //move down
-	  switch (GAME_Y_POS){
+	  switch (DRAW_Y_POS){
 		case 0:
-			GAME_Y_POS = 3;
+			DRAW_Y_POS = 3;
 			break;
 		case 1:
-			GAME_Y_POS = 0;
+			DRAW_Y_POS = 0;
 			break;
 		case 2:
-			GAME_Y_POS = 0;
+			DRAW_Y_POS = 0;
 			break;
 		case 3:
-			GAME_Y_POS = (GAME_X_POS == 1)?2:0;
+			DRAW_Y_POS = (DRAW_X_POS == 1)?2:0;
 			break;
 	  }	
 	}
@@ -931,18 +931,18 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	case MOVE_UP:
 	{	
 	  //move up
-	   switch (GAME_Y_POS){
+	   switch (DRAW_Y_POS){
 		case 0:
-			GAME_Y_POS = (GAME_X_POS == 1)?1:3;
+			DRAW_Y_POS = (DRAW_X_POS == 1)?1:3;
 			break;
 		case 1:
-			GAME_Y_POS = 3;
+			DRAW_Y_POS = 3;
 			break;
 		case 2:
-			GAME_Y_POS = 3;
+			DRAW_Y_POS = 3;
 			break;
 		case 3:
-			GAME_Y_POS = 0;
+			DRAW_Y_POS = 0;
 			break;
 	  }
     }
@@ -951,11 +951,11 @@ void Apps::modeSingleSegmentManipulation(bool init){
     case MOVE_LEFT:
     { 
 	  //move left
-	  if (GAME_X_POS == 0){
-		counter = (counter == 0)?3:(counter-1); // previous digit
-		GAME_X_POS = 2;
+	  if (DRAW_X_POS == 0){
+		DRAW_ACTIVE_SEGMENT = (DRAW_ACTIVE_SEGMENT == 0)?3:(DRAW_ACTIVE_SEGMENT-1); // previous digit
+		DRAW_X_POS = 2;
 	  }else{
-		GAME_X_POS--;
+		DRAW_X_POS--;
 	  }
     }
 	break;
@@ -965,7 +965,8 @@ void Apps::modeSingleSegmentManipulation(bool init){
   }
 
   uint8_t seg;
-  switch (10*GAME_Y_POS + GAME_X_POS){
+
+  switch (10*DRAW_Y_POS + DRAW_X_POS){
 	  case 0:
 	  case 10:
 		seg = 0b00010000;  //E
@@ -1002,32 +1003,32 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	    // toggle segment with xor old^toggleval=new  
 		//	toggleval==0: 0^0=0, 1^0=1 , 
 		//  toggleval==1: 1^1=0, 0^1=1
-		this->dispState[counter]  ^= seg; 
+		DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT]  ^= seg; 
   }
   
   //invert all data in picture 
   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValueChanged()){
-      //i can typ whatever i want mlem mlem mlem
+    //i can typ whatever i want mlem mlem mlem
 	  // negative .
 	  for (uint8_t i=0;i<4;i++){
-		  this->dispState[i] = ~this->dispState[i] ;
+		  DRAW_DISP_STATE[i] = ~DRAW_DISP_STATE[i] ;
 	  }  
   }
   
   
   // set display
   for (uint8_t i=0;i<4;i++){
-	  ledDisp->SetSingleDigit(this->dispState[i],i+1);  
+	  ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
   }
 
   //show active segment on display
   // if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
   if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-	ledDisp->SetSingleDigit(seg^this->dispState[counter],counter+1); // XOR the seg with the segment saved value, so it shows negatively.  
+	ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1); // XOR the seg with the segment saved value, so it shows negatively.  
   }
   // else{
 	  // //only show the saved state, no blinking of active segment. 
-	  // ledDisp->SetSingleDigit(this->dispState[counter],counter+1);
+	  // ledDisp->SetSingleDigit(DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1);
   // }
   
 // ledDisp->displayHandler(textBuf);  
@@ -1661,27 +1662,27 @@ void Apps::modeReactionGame(bool init){
     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
     
     REACTION_GAME_SCORE = 0;
-    screenPersistenceOfVision = 0;
-    reactionGameYellowButtonIsIncluded = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+    displayAllSegments = 0;
+    REACTION_GAME_YELLOW_BUTTON_INCLUDED = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
     
     for (uint8_t i=0;i<4;i++){
-      selectedSounds[i] = (uint8_t)random(100, 114);
+      REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
     }
   }
 
   // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
   if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
      //always show unless in soundmode->competition
-    ledDisp->setDecimalPoint(true, reactionGameTarget+1);
+    ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
   }
 
   // animation next step
   if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
     // game timing animation update.
     for (uint8_t i=0;i<4;i++){
-      screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_SCORE*4 + (i)) << (8*i); 
+      displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_SCORE*4 + (i)) << (8*i); 
     }
-    ledDisp->SetFourDigits(screenPersistenceOfVision);
+    ledDisp->SetFourDigits(displayAllSegments);
      
     REACTION_GAME_SCORE = this->nextStepRotate(REACTION_GAME_SCORE, true, 0, 12);
     
@@ -1690,7 +1691,7 @@ void Apps::modeReactionGame(bool init){
 	// check game status 'dead'
     if (REACTION_GAME_SCORE == 12){
       REACTION_GAME_SCORE = 0;
-      screenPersistenceOfVision=0;    
+      displayAllSegments=0;    
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
         // timed out.
         isDead = true;
@@ -1717,18 +1718,19 @@ void Apps::modeReactionGame(bool init){
      }else{
         ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
      }
-  }else if (binaryInputs[buttons_indexed[reactionGameTarget]].getEdgeUp() ||
-      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameTarget == 0))
+
+  }else if (binaryInputs[buttons_indexed[REACTION_GAME_TARGET]].getEdgeUp() ||
+      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& REACTION_GAME_TARGET == 0))
   {
-      //right button
-      REACTION_GAME_SCORE++;
-      getNewNumber = true;
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-         //play by sounds
-        //buzzer->programBuzzerRoll(C7_8);
-		buzzer->programBuzzerRoll(rest_1);
-		//buzzer->programBuzzerRoll(rest_1);
-      }
+    //right button
+    REACTION_GAME_SCORE++;
+    getNewNumber = true;
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+      //play by sounds
+      //buzzer->programBuzzerRoll(C7_8);
+      buzzer->programBuzzerRoll(rest_1);
+      //buzzer->programBuzzerRoll(rest_1);
+    }
       
   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
       binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
@@ -1744,8 +1746,8 @@ void Apps::modeReactionGame(bool init){
       TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
       TIMER_REACTION_GAME_RESTART_DELAY.start();
       //play by sounds
-      for (uint8_t i=reactionGameYellowButtonIsIncluded?0:1;i<4;i++){
-        buzzer->programBuzzerRoll(selectedSounds[i]+128);
+      for (uint8_t i=REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1;i<4;i++){
+        buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]+128);
         buzzer->programBuzzerRoll(rest_1);
       }
        
@@ -1763,16 +1765,16 @@ void Apps::modeReactionGame(bool init){
     ledDisp->setBlankDisplay();
     lights = 0b00000000; //reset before switch enquiry
     
-    reactionGameTarget = (uint8_t)random(reactionGameYellowButtonIsIncluded?0:1, 4);
+    REACTION_GAME_TARGET = random(REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1, 4);
     
-    screenPersistenceOfVision = 0; //reset animation graphics screen
+    displayAllSegments = 0; //reset animation graphics screen
     REACTION_GAME_SCORE= 0; //reset animation step
 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
        //play by sounds
-       buzzer->programBuzzerRoll(selectedSounds[reactionGameTarget]);
+       buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
     }else{
-      lights |= 1<<lights_indexed[reactionGameTarget];     
+      lights |= 1<<lights_indexed[REACTION_GAME_TARGET];     
     }
     ledDisp->SetLedArray(lights); 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
@@ -1790,7 +1792,8 @@ void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
 }
 
 void Apps::fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen){
-	uint8_t sequence[32];
+	
+  uint8_t sequence[32];
 	for (uint8_t i = 0; i < 32; i++) {
 		sequence[i] = i;
 	}
@@ -1801,11 +1804,10 @@ void Apps::fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen){
 	// fade in effect, enable random segments.
 	// uint32_t fullScreen = 0x00000000;
 	uint32_t fullScreen = startScreen;
-	 // ppp ;
+	
 	for (uint8_t i=0; i<32;i++){
 		fullScreen |= 1UL <<sequence[i];// 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
 		movie[i] = fullScreen;
-		// Serial.println(movie[i], BIN);
 	}
 }
 
