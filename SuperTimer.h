@@ -73,6 +73,7 @@ class SuperTimer{
 		//bool previousCheckInFirstPartOfSecond;
 		
 		uint8_t boolContainer;
+		
 		#define BITLOCATION_ISSTARTED 0
 		#define BITLOCATION_ISPAUSED 1
 		#define BITLOCATION_INFIRSTPARTOFSECOND_EGDE 2

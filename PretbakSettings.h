@@ -13,7 +13,7 @@
     #define PIN_DISPLAY_DIGIT_3 10
     #define PIN_DISPLAY_DIGIT_4 11
     #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
-        #define SELECTOR_DIAL_POSITIONS 12  
+    #define SELECTOR_DIAL_POSITIONS 12  
 
 #else
     
@@ -23,7 +23,7 @@
     #define PIN_DISPLAY_DIGIT_3 9
     #define PIN_DISPLAY_DIGIT_4 5
     #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
-        #define SELECTOR_DIAL_POSITIONS 12  //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
+    #define SELECTOR_DIAL_POSITIONS 12  //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 
 #endif
 
@@ -58,15 +58,19 @@
 #define PIN_MERCURY_SWITCHES A4
 
 
-#define BINARY_INPUTS_COUNT 11 
 
-#define BUTTONS_1_COUNT 4
+
+
 #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
 #ifdef PROTOTYPE
+    #define BINARY_INPUTS_COUNT 11 
+    #define BUTTONS_1_COUNT 4
   #define BUTTONS_1_VALUES {512,256,128,64}
 #else
+    #define BINARY_INPUTS_COUNT 12 
+    #define BUTTONS_1_COUNT 5
   //#define BUTTONS_1_VALUES {446,223,109,53}
-  #define BUTTONS_1_VALUES {509,253,129,63}
+  #define BUTTONS_1_VALUES {509,253,129,63,32}
 #endif
 
 #define BUTTONS_2_COUNT 3
@@ -86,6 +90,7 @@
   #define MERCURY_SWITCHES_VALUES {512, 256, 128, 64}
 #endif
 
+// binary input indeces per button
 #define BUTTON_LATCHING_BIG_RED 2
 #define BUTTON_LATCHING_SMALL_RED_LEFT 1
 #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
@@ -93,6 +98,8 @@
 #define BUTTON_MOMENTARY_RED 5
 #define BUTTON_MOMENTARY_GREEN 4
 #define BUTTON_MOMENTARY_BLUE 3
+
+#define BUTTON_MOMENTARY_EXTRA_YELLOW 11
 
 #define SWITCH_TILT_FORWARD 10
 #define SWITCH_TILT_BACKWARD 8

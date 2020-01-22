@@ -50,7 +50,7 @@ Buzzer buzzer;
 
 //output
 char  textBuf [6];
-char  scrollBuf [6]; //was 40, but, it does not get used anyways!!
+char  scrollBuf [1]; //was 40, but, it does not get used anyways!!
 
 //debug mode
 bool debugMode;
