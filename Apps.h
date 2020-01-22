@@ -50,10 +50,12 @@
 #define REACTION_GAME_SCORE counter
 #define GEIGER_TONE_FREQUENY_LOWEST counter
 #define DRAW_ACTIVE_SEGMENT counter
+#define SIMON_LENGTH counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
 #define DRAW_X_POS counter2
+#define SIMON_INDEX counter2
 
 #define DRAW_Y_POS counter3
 #define COUNTER_GEIGER counter3
@@ -369,7 +371,7 @@ class Apps{
     };
 
     uint8_t sequencer_song[sequencer_bufsize]; // also used for simon game
-    uint8_t* game_random;
+    //uint8_t* game_random;
 
     uint32_t displayAllSegments;
 
@@ -382,19 +384,19 @@ class Apps{
     
     uint8_t array_4_bytes [4];
 
-    uint8_t reactionGameTarget;
+    //uint8_t reactionGameTarget;
     
     uint32_t displaySequence[32];
 
 
-    // reaction
-    enum ReactionGameState:uint8_t {
-        reactionWaitForStart,
-        reactionPlaying,
-        reactionFinished,
+    // // reaction
+    // enum ReactionGameState:uint8_t {
+    //     reactionWaitForStart,
+    //     reactionPlaying,
+    //     reactionFinished,
         
-    };
-    ReactionGameState reactionGameState;
+    // };
+    // ReactionGameState reactionGameState;
 
     // simon
     enum SimonState:uint8_t {
@@ -405,8 +407,8 @@ class Apps{
         simonUserRepeats,
     };
     SimonState simonState;
-    uint8_t simonLength;
-    int8_t simonIndex;
+    //uint8_t simonLength;
+    //int8_t simonIndex;
 
     char*  textBuf;
     char*  scrollBuf;
