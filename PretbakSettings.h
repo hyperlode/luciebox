@@ -6,23 +6,23 @@
 
 
 #ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
-	
-	#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
-	#define PIN_DISPLAY_DIGIT_1 5
-	#define PIN_DISPLAY_DIGIT_2 9
-	#define PIN_DISPLAY_DIGIT_3 10
-	#define PIN_DISPLAY_DIGIT_4 11
-	#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
+    
+    #define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
+    #define PIN_DISPLAY_DIGIT_1 5
+    #define PIN_DISPLAY_DIGIT_2 9
+    #define PIN_DISPLAY_DIGIT_3 10
+    #define PIN_DISPLAY_DIGIT_4 11
+    #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
         #define SELECTOR_DIAL_POSITIONS 12  
 
 #else
-	
-	#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
-	#define PIN_DISPLAY_DIGIT_1 11
-	#define PIN_DISPLAY_DIGIT_2 10
-	#define PIN_DISPLAY_DIGIT_3 9
-	#define PIN_DISPLAY_DIGIT_4 5
-	#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
+    
+    #define PIN_DISPLAY_DIGIT_0 PIN_DUMMY  //invalid
+    #define PIN_DISPLAY_DIGIT_1 11
+    #define PIN_DISPLAY_DIGIT_2 10
+    #define PIN_DISPLAY_DIGIT_3 9
+    #define PIN_DISPLAY_DIGIT_4 5
+    #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
         #define SELECTOR_DIAL_POSITIONS 12  //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 
 #endif
@@ -43,13 +43,13 @@
 
 #define PIN_BUZZER A5
   
-#define LIGHT_RED 1
-#define LIGHT_GREEN 6
-#define LIGHT_BLUE 2
-#define LIGHT_YELLOW 0
-#define LIGHT_LED_1 3
-#define LIGHT_LED_2 4
-#define LIGHT_LED_3 5
+#define LIGHT_RED 	    1
+#define LIGHT_GREEN     6
+#define LIGHT_BLUE 	    2
+#define LIGHT_YELLOW    0
+#define LIGHT_LED_1     3
+#define LIGHT_LED_2     4
+#define LIGHT_LED_3     5
 
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
@@ -66,7 +66,7 @@
   #define BUTTONS_1_VALUES {512,256,128,64}
 #else
   //#define BUTTONS_1_VALUES {446,223,109,53}
-  #define BUTTONS_1_VALUES {520,260,129,63}
+  #define BUTTONS_1_VALUES {509,253,129,63}
 #endif
 
 #define BUTTONS_2_COUNT 3

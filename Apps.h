@@ -42,16 +42,23 @@
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_REACTION_GAME_SPEED generalTimer
-#define TIMER_REACTION_GAME_RESTART_DELAY generalTimer2
-
-#define GAME_X_POS counter2
-#define GAME_Y_POS counter3
-
-#define COUNTER_GEIGER counter3
-#define GEIGER_INCREASE_CHANCE counter_long
-
 #define TIMER_INIT_APP generalTimer
 
+#define TIMER_REACTION_GAME_RESTART_DELAY generalTimer2
+#define REACTION_GAME_SCORE counter
+#define GEIGER_TONE_FREQUENY_LOWEST counter
+
+#define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
+#define REACTION_GAME_TIMER_STEP counter2
+#define GAME_X_POS counter2
+
+#define GAME_Y_POS counter3
+#define COUNTER_GEIGER counter3
+#define GEIGER_INCREASE_CHANCE counter3
+#define REACTION_GAME_STEP_TIME_MILLIS counter3
+#define GEIGER_PROBABILITY_THRESHOLD counter3
+
+#define GEIGER_TONE_LENGTH counter4
 
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
@@ -324,7 +331,7 @@ class Apps{
     void modeSequencer(bool init);
     void modeMetronome(bool init);
     void modeSimon(bool init);
-    void gameButtonInteraction(bool init);
+    void modeReactionGame(bool init);
     void tiltSwitchTest(bool init);
     void modeButtonDebug(bool init);
     void miniMultiTimer(bool init);
@@ -351,7 +358,8 @@ class Apps{
     enum {
       sequencer_bufsize = 32,
     };
-    uint8_t sequencer_song[sequencer_bufsize];
+
+    uint8_t sequencer_song[sequencer_bufsize]; // also used for simon game
     uint8_t* game_random;
     uint32_t screenPersistenceOfVision;
 
@@ -359,23 +367,19 @@ class Apps{
 
     int16_t counter;
     int16_t counter2;
-    int16_t counter3;
-    long counter_long;
+    long counter3;
+    uint16_t counter4;
 
     bool numberElseAlphabethMode;
 
-    //uint8_t game_x_pos;
-    //uint8_t game_y_pos;
     uint8_t reactionGameTarget;
     
-    long frequency_lower;
-    long frequency_upper;
-    long tone_length_millis;
-    long geiger_trigger_chance;
     
-    long initTime;
+    
     bool reactionGameYellowButtonIsIncluded;
+
     uint8_t selectedSounds[4];
+    
     uint8_t dispState[4];
     
     uint32_t displaySequence[32];

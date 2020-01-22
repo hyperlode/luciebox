@@ -100,7 +100,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		  
 		case 9:
-		  this->gameButtonInteraction(init);
+		  this->modeReactionGame(init);
 		  break;
 		  
 		case 10:
@@ -1242,11 +1242,11 @@ void Apps::tiltSwitchTest(bool init){
 void Apps::modeGeiger(bool init){
 
   if (init){
-      textBuf[4]=' ';
-      this->COUNTER_GEIGER = 0;
-	  this->frequency_lower = 2000;
-	  this->frequency_upper = 4000;
-	  this->tone_length_millis = 10;
+    //textBuf[4]=' ';
+    COUNTER_GEIGER = 0;
+	  GEIGER_TONE_FREQUENY_LOWEST = 2000;
+	  GEIGER_TONE_FREQUENCY_HEIGHEST = 4000;
+	  GEIGER_TONE_LENGTH = 10;
   }
     
   //play tick. 
@@ -1256,45 +1256,46 @@ void Apps::modeGeiger(bool init){
   //long r = random(0, 1024);
   //r = r*r;
 
-  
-  
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 
-	if (potentio->getValueStableChangedEdge()){
-		//Serial.println(potentio->getValueStable());
-		if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
-			//lower
-			this->frequency_lower = potentio->getValueMapped(0,5000);
-			if (this->frequency_lower >= this->frequency_upper){
-				this->frequency_lower = this->frequency_upper;
-			}
-		}else if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
-			//upper
-			
-			this->frequency_upper = potentio->getValueMapped(0,5000);
-			if (this->frequency_upper <= this->frequency_lower){
-				this->frequency_upper = this->frequency_lower;
-			} 
-		}else if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
-			//length
-		    this->tone_length_millis = potentio->getValueMapped(0,500);
-		}else{
-			this->geiger_trigger_chance = potentio->getValueMapped(0,1048576);
-		}		
-	}
+    if (potentio->getValueStableChangedEdge()){
+      //Serial.println(potentio->getValueStable());
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getValue()){
+        //lower
+        GEIGER_TONE_FREQUENY_LOWEST = potentio->getValueMapped(0,5000);
+        if (GEIGER_TONE_FREQUENY_LOWEST >= GEIGER_TONE_FREQUENCY_HEIGHEST){
+          GEIGER_TONE_FREQUENY_LOWEST = GEIGER_TONE_FREQUENCY_HEIGHEST;
+        }
 
-    if (r > this->geiger_trigger_chance){ // 1024*1024
-		
-	  if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
-		 // when tone playing, play it until next tone
-		 tone(PIN_BUZZER, random(this->frequency_lower,this->frequency_upper));
-	  }else{
-		// limited time length tone
-		tone(PIN_BUZZER, random(this->frequency_lower,this->frequency_upper), this->tone_length_millis);
-	  }
-    
-      this->COUNTER_GEIGER++;
-	  ledDisp->showNumber(this->COUNTER_GEIGER);
+      }else if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
+        //upper
+        GEIGER_TONE_FREQUENCY_HEIGHEST = potentio->getValueMapped(0,5000);
+        if (GEIGER_TONE_FREQUENCY_HEIGHEST <= GEIGER_TONE_FREQUENY_LOWEST){
+          GEIGER_TONE_FREQUENCY_HEIGHEST = GEIGER_TONE_FREQUENY_LOWEST;
+        }
+
+      }else if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
+        //length
+        GEIGER_TONE_LENGTH = potentio->getValueMapped(0,500);
+
+      }else{
+        GEIGER_PROBABILITY_THRESHOLD = potentio->getValueMapped(0,1048576);
+
+      }		
+    }
+
+    if (r > GEIGER_PROBABILITY_THRESHOLD){ // 1024*1024
+      
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+        // when tone playing, play it until next tone
+        tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST));
+      }else{
+        // limited time length tone
+        tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST), GEIGER_TONE_LENGTH);
+      }
+      
+      COUNTER_GEIGER++;
+      ledDisp->showNumber(COUNTER_GEIGER);
       
     }
     
@@ -1314,7 +1315,7 @@ void Apps::modeGeiger(bool init){
 	}
 	r+=GEIGER_INCREASE_CHANCE;
 	
-    if (r > potentio->getValueMapped(0,1048576)){
+  if (r > potentio->getValueMapped(0,1048576)){
   //    buzzer->programBuzzerRoll(1); //not beep but "puck"
  	  tone(PIN_BUZZER, (unsigned int)50, 10);
     
@@ -1641,7 +1642,7 @@ int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minV
      return counter;
 }
 
-void Apps::gameButtonInteraction(bool init){
+void Apps::modeReactionGame(bool init){
   //yellow button active at start: yellow button is also a guess button
   // big red active: timed game
   // small red right active: time progressively shorter as game advances
@@ -1651,15 +1652,15 @@ void Apps::gameButtonInteraction(bool init){
   bool isDead = false;
   
   if (init){
-    counter = 0; // holds score
+    REACTION_GAME_SCORE = 0; // holds score
     randomSeed(millis());
     getNewNumber = true;
     TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
 
-    initTime = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(initTime);
+    REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
     
-    counter2 = 0;
+    REACTION_GAME_SCORE = 0;
     screenPersistenceOfVision = 0;
     reactionGameYellowButtonIsIncluded = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
     
@@ -1678,17 +1679,17 @@ void Apps::gameButtonInteraction(bool init){
   if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
     // game timing animation update.
     for (uint8_t i=0;i<4;i++){
-      screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
+      screenPersistenceOfVision |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_SCORE*4 + (i)) << (8*i); 
     }
     ledDisp->SetFourDigits(screenPersistenceOfVision);
      
-    counter2 = this->nextStepRotate(counter2, true, 0, 12);
+    REACTION_GAME_SCORE = this->nextStepRotate(REACTION_GAME_SCORE, true, 0, 12);
     
     TIMER_REACTION_GAME_SPEED.reset();
 	
 	// check game status 'dead'
-    if (counter2 == 12){
-      counter2 = 0;
+    if (REACTION_GAME_SCORE == 12){
+      REACTION_GAME_SCORE = 0;
       screenPersistenceOfVision=0;    
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
         // timed out.
@@ -1704,23 +1705,23 @@ void Apps::gameButtonInteraction(bool init){
   
   if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative()){
     //end of display high score, next number
-    counter = 0;
+    REACTION_GAME_SCORE = 0;
     getNewNumber = true;
     TIMER_REACTION_GAME_RESTART_DELAY.reset();
-    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(initTime);
+    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
        
   }else if(TIMER_REACTION_GAME_RESTART_DELAY.getIsStarted()){
      //do nothing.  wait for display high score is finished.
      if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
         ledDisp->setBlankDisplay(); //make high score blink
      }else{
-        ledDisp->showNumber(counter ); //score display. Leave at beginning, to display high score blinking.
+        ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
      }
   }else if (binaryInputs[buttons_indexed[reactionGameTarget]].getEdgeUp() ||
       (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& reactionGameTarget == 0))
   {
       //right button
-      counter++;
+      REACTION_GAME_SCORE++;
       getNewNumber = true;
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
          //play by sounds
@@ -1738,15 +1739,12 @@ void Apps::gameButtonInteraction(bool init){
       isDead = true;
   }
   
-  // ledDisp->SetSingleDigit(&counter,3);
-  // ledDisp->SetSingleDigit(*(&game_random+counter),3);
   if (isDead){
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
       TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
       TIMER_REACTION_GAME_RESTART_DELAY.start();
       //play by sounds
       for (uint8_t i=reactionGameYellowButtonIsIncluded?0:1;i<4;i++){
-        // buzzer->programBuzzerRoll(selectedSounds[i]+128);
         buzzer->programBuzzerRoll(selectedSounds[i]+128);
         buzzer->programBuzzerRoll(rest_1);
       }
@@ -1768,7 +1766,7 @@ void Apps::gameButtonInteraction(bool init){
     reactionGameTarget = (uint8_t)random(reactionGameYellowButtonIsIncluded?0:1, 4);
     
     screenPersistenceOfVision = 0; //reset animation graphics screen
-    counter2= 0; //reset animation step
+    REACTION_GAME_SCORE= 0; //reset animation step
 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
        //play by sounds

@@ -169,7 +169,6 @@ void MiniMultiTimer::refresh(){
 			this->state = finished;
 		}else{
 			//check timers
-			//uint8_t previousActiveTimer = this->activeTimer;
 			if (getTimerFinished(this->activeTimer)){
 				this->next();
 			}
