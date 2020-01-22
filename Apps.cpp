@@ -1661,7 +1661,7 @@ void Apps::modeReactionGame(bool init){
     REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
     
-    REACTION_GAME_SCORE = 0;
+    REACTION_GAME_TIMER_STEP = 0;
     displayAllSegments = 0;
     REACTION_GAME_YELLOW_BUTTON_INCLUDED = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
     
@@ -1680,17 +1680,17 @@ void Apps::modeReactionGame(bool init){
   if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
     // game timing animation update.
     for (uint8_t i=0;i<4;i++){
-      displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_SCORE*4 + (i)) << (8*i); 
+      displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
     }
     ledDisp->SetFourDigits(displayAllSegments);
      
-    REACTION_GAME_SCORE = this->nextStepRotate(REACTION_GAME_SCORE, true, 0, 12);
+    REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
     
     TIMER_REACTION_GAME_SPEED.reset();
 	
 	// check game status 'dead'
-    if (REACTION_GAME_SCORE == 12){
-      REACTION_GAME_SCORE = 0;
+    if (REACTION_GAME_TIMER_STEP == 12){
+      REACTION_GAME_TIMER_STEP = 0;
       displayAllSegments=0;    
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
         // timed out.
@@ -1768,7 +1768,7 @@ void Apps::modeReactionGame(bool init){
     REACTION_GAME_TARGET = random(REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1, 4);
     
     displayAllSegments = 0; //reset animation graphics screen
-    REACTION_GAME_SCORE= 0; //reset animation step
+    REACTION_GAME_TIMER_STEP= 0; //reset animation step
 
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
        //play by sounds
