@@ -387,16 +387,17 @@ class Apps{
     uint32_t displaySequence[32];
 
 
-    // // reaction
-    // enum ReactionGameState {
-    //     reactionWaitForStart,
-    //     reactionPlaying,
-    //     reactionFinished,
+    // reaction
+    enum ReactionGameState:uint8_t {
+        reactionWaitForStart,
+        reactionPlaying,
+        reactionFinished,
         
-    // };
+    };
+    ReactionGameState reactionGameState;
 
     // simon
-    enum SimonState {
+    enum SimonState:uint8_t {
         simonWaitForNewGame,
         simonNewGame,
         simonNewLevel,
