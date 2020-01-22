@@ -112,9 +112,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 
 		case 12:
-                  //this is the debug mode
-                  this->modeButtonDebug(init);
-                  break;
+      //this is the debug mode
+      this->modeButtonDebug(init);
+      break;
                   
 		default:
 		  break;
@@ -210,59 +210,59 @@ void Apps::modeButtonDebug(bool init){
    
     switch (counter){
       case 0:{
-         textBuf[4]='0'; // analog A0
-         ledDisp->displayHandler(textBuf);
-         generalTimer.setInitTimeMillis((long)-500);
-       break; 
+        textBuf[4]='0'; // analog A0
+        ledDisp->displayHandler(textBuf);
+        generalTimer.setInitTimeMillis((long)-500);
+        break; 
       }
       case 1:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_SELECTOR_DIAL));
-         generalTimer.setInitTimeMillis((long)-1000);
-       break; 
+        ledDisp->showNumber( (int16_t) analogRead(PIN_SELECTOR_DIAL));
+        generalTimer.setInitTimeMillis((long)-1000);
+        break; 
       }
       case 2:{
-         textBuf[4]='1'; // analog A1
-         ledDisp->displayHandler(textBuf);
-         generalTimer.setInitTimeMillis((long)-500);
-       break; 
+        textBuf[4]='1'; // analog A1
+        ledDisp->displayHandler(textBuf);
+        generalTimer.setInitTimeMillis((long)-500);
+        break; 
       }
       case 3:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1));
-         generalTimer.setInitTimeMillis((long)-1000);
-       break; 
+        ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1));
+        generalTimer.setInitTimeMillis((long)-1000);
+        break; 
       }
       case 4:{
-         textBuf[4]='2'; // analog A2
-         ledDisp->displayHandler(textBuf);
-         generalTimer.setInitTimeMillis((long)-500);
-       break; 
+        textBuf[4]='2'; // analog A2
+        ledDisp->displayHandler(textBuf);
+        generalTimer.setInitTimeMillis((long)-500);
+        break; 
       }
       case 5:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
-         generalTimer.setInitTimeMillis((long)-1000);
-       break; 
+        ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
+        generalTimer.setInitTimeMillis((long)-1000);
+        break; 
       }
       case 6:{
-         textBuf[4]='3';// analog A3
-         ledDisp->displayHandler(textBuf);
-         generalTimer.setInitTimeMillis((long)-500);
-       break; 
+        textBuf[4]='3';// analog A3
+        ledDisp->displayHandler(textBuf);
+        generalTimer.setInitTimeMillis((long)-500);
+        break; 
       }
       case 7:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_POTENTIO));
-         generalTimer.setInitTimeMillis((long)-1000);
-       break; 
+        ledDisp->showNumber( (int16_t) analogRead(PIN_POTENTIO));
+        generalTimer.setInitTimeMillis((long)-1000);
+        break; 
       }
       case 8:{
-         textBuf[4]='4';// analog A4
-         ledDisp->displayHandler(textBuf);
-         generalTimer.setInitTimeMillis((long)-500);
-       break; 
+        textBuf[4]='4';// analog A4
+        ledDisp->displayHandler(textBuf);
+        generalTimer.setInitTimeMillis((long)-500);
+        break; 
       }
       case 9:{
-         ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));
-         generalTimer.setInitTimeMillis((long)-1000);
-       break; 
+        ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));
+        generalTimer.setInitTimeMillis((long)-1000);
+        break; 
       }
     }
     
@@ -287,7 +287,6 @@ void Apps::modeDiceRoll(bool init){
 
   }
 
-
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue() || binaryInputs[BUTTON_MOMENTARY_RED].getValue()|| binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){
     
     counter ++;
@@ -295,28 +294,21 @@ void Apps::modeDiceRoll(bool init){
       counter = 1;
     }
 
-    //textBuf[4]= 48 + counter;
-   
     if (!generalTimer.getTimeIsNegative()){
 
       if (binaryInputs[BUTTON_MOMENTARY_GREEN].getValue()){   
         
         for (uint8_t  i=1;i<4;i++){
           textBuf[i]=textBuf[i+1];
-
         }
-
         textBuf[4] = 48 + counter; // convert digit to number char.
-
       }
 
       buzzer->cleanBuzzerRoll();
       buzzer->programBuzzerRoll(14);
       ledDisp->displayHandler(textBuf);
       generalTimer.start();
-
     }
-
 
     if (binaryInputs[BUTTON_MOMENTARY_BLUE].getValue()){
       // show random nonsense coolness. 
@@ -525,7 +517,7 @@ void Apps::modeCountingLettersAndChars(bool init){
 
       if (init){
         updateScreen = true;
-		generalTimer.setInitTimeMillis(-1000);
+	     	generalTimer.setInitTimeMillis(-1000);
       }
       
       numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
@@ -533,13 +525,13 @@ void Apps::modeCountingLettersAndChars(bool init){
   
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()){
         updateScreen = true;
-		if (!numberElseAlphabethMode){
-			buzzer->buzzerOff();
-			buzzer->setSpeedRatio(4);
-			buzzer->loadBuzzerTrack(alphabeth_song);
-		}else{
-			buzzer->buzzerOff();
-		}
+        if (!numberElseAlphabethMode){
+          buzzer->buzzerOff();
+          buzzer->setSpeedRatio(4);
+          buzzer->loadBuzzerTrack(alphabeth_song);
+        }else{
+          buzzer->buzzerOff();
+        }
       }
     
       if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
@@ -613,12 +605,12 @@ void Apps::modeCountingLettersAndChars(bool init){
       }
 
       if (updateScreen){
-			// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
-			if (numberElseAlphabethMode){
-			  ledDisp->showNumber(counter);
-			}else{
-			  ledDisp->showNumberAsChars(counter);
-			}
+        // when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
+        if (numberElseAlphabethMode){
+          ledDisp->showNumber(counter);
+        }else{
+          ledDisp->showNumberAsChars(counter);
+        }
       }
 }
 
@@ -626,15 +618,14 @@ void Apps::modeSoundSong(bool init){
   if (init){
     buzzer->loadBuzzerTrack(song_happy_dryer);
     buzzer->setSpeedRatio((float)2);
-	
-  }
+	}
 
   if (potentio->getValueStableChangedEdge()){
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12,12)));
-	}else{
-		buzzer->setSpeedRatio((float)(potentio->getValue()) / 256 );
-	}
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+      buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12,12)));
+    }else{
+      buzzer->setSpeedRatio((float)(potentio->getValue()) / 256 );
+    }
   }
   
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
@@ -692,58 +683,58 @@ void Apps::modeSoundSong(bool init){
 void Apps::modeSoundNotes(){
   //buzzer with buzzer roll (notes).
       
-      if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-		  
-		// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
-		  // if (potentio->getValueStableChangedEdge()){
-			 
-			 // buzzer->buzzerOff();
-		     // allNotesIndex = potentio->getValueMapped(0,255);
-			 // ledDisp->showNumber(allNotesIndex);
-			 // buzzer->programBuzzerRoll(allNotesIndex);
-		  // }
-		// }else  
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-			
-			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-			  buzzer->buzzerOff();
-			  ledDisp->showNumber(buzzer->addRandomSoundToRoll(223, 235));
-			  //0 -> 63 short
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-			  buzzer->buzzerOff();
-			  ledDisp->showNumber(buzzer->addRandomSoundToRoll(160, 223));
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-			  buzzer->buzzerOff();
-			  ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));
-			}  
-		}else{ 
-			// simple mode.
-			if (potentio->getValueStableChangedEdge()){
-			  //buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
-			   allNotesIndex = potentio->getValueMapped(0,255);
-			  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
-			    buzzer->buzzerOff();
-			} 
-			  buzzer->programBuzzerRoll(allNotesIndex);
-			}
-			  
-			if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-			  buzzer->programBuzzerRoll(allNotesIndex);
-			  allNotesIndex--;
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-			  buzzer->programBuzzerRoll(allNotesIndex);
-			}
-			
-			if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
-			  buzzer->programBuzzerRoll(allNotesIndex);
-			  allNotesIndex++;
-			}
-			ledDisp->showNumber(allNotesIndex);
-		}
-	  }
+  if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+    
+    // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
+      // if (potentio->getValueStableChangedEdge()){
+      
+      // buzzer->buzzerOff();
+        // allNotesIndex = potentio->getValueMapped(0,255);
+      // ledDisp->showNumber(allNotesIndex);
+      // buzzer->programBuzzerRoll(allNotesIndex);
+      // }
+    // }else  
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+      
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer->buzzerOff();
+        ledDisp->showNumber(buzzer->addRandomSoundToRoll(223, 235));
+        //0 -> 63 short
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        buzzer->buzzerOff();
+        ledDisp->showNumber(buzzer->addRandomSoundToRoll(160, 223));
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer->buzzerOff();
+        ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));
+      }  
+    }else{ 
+      // simple mode.
+      if (potentio->getValueStableChangedEdge()){
+        //buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
+        allNotesIndex = potentio->getValueMapped(0,255);
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
+          buzzer->buzzerOff();
+      } 
+        buzzer->programBuzzerRoll(allNotesIndex);
+      }
+        
+      if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+        buzzer->programBuzzerRoll(allNotesIndex);
+        allNotesIndex--;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+        buzzer->programBuzzerRoll(allNotesIndex);
+      }
+      
+      if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+        buzzer->programBuzzerRoll(allNotesIndex);
+        allNotesIndex++;
+      }
+      ledDisp->showNumber(allNotesIndex);
+    }
+  }
 }
 
 void Apps::draw(bool init){
@@ -761,8 +752,9 @@ void Apps::draw(bool init){
 		this->modeSingleSegmentManipulation(init);
 	}
 }
+
 void Apps::movieAnimationMode(bool init){
-	bool nextStep = 0;
+	//bool nextStep = 0;
 	 //reset saved led disp state.
 	if (init){
 		counter = 4; // display is four characters. Four bytes.So, it should advance four bytes every step (default). But, it could give fun effects to change that number and see what happens... 
@@ -852,19 +844,19 @@ void Apps::modeSingleSegmentManipulation(bool init){
 
     // animation_step = 0;
 	
-	//bottom left is origin
-	game_x_pos = 0;
-    game_y_pos = 0;
-	counter = 0; // segment active
-	// counter2 = 0; 
-	
-	//reset saved led disp state.
-	for (uint8_t i=0;i<4;i++){
-		this->dispState[i]=0;
-	}
-	
-	//generalTimer.setInitTimeMillis(3000);
-	//generalTimer.start();
+    //bottom left is origin
+    GAME_X_POS = 0;
+    GAME_Y_POS = 0;
+    counter = 0; // segment active
+    
+    
+    //reset saved led disp state.
+    for (uint8_t i=0;i<4;i++){
+      this->dispState[i]=0;
+    }
+    
+    //generalTimer.setInitTimeMillis(3000);
+    //generalTimer.start();
   }
   
   if (potentio->getValueStableChangedEdge()){
@@ -873,8 +865,8 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		  val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
 		  counter = val/12; // get digit
 		  val = val%12; 
-		  game_x_pos = val/4; // get xpos
-		  game_y_pos = val%4; // get ypos
+		  GAME_X_POS = val/4; // get xpos
+		  GAME_Y_POS = val%4; // get ypos
   }
   
   if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
@@ -905,13 +897,13 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	
 	case MOVE_RIGHT:{
 	  //move right
-	  game_x_pos++;
-	  if (game_x_pos > 2){
+	  GAME_X_POS++;
+	  if (GAME_X_POS > 2){
 		  counter++; // next digit
 		  if (counter> 3){ 
 			  counter = 0;
 		  }
-		  game_x_pos = 0;
+		  GAME_X_POS = 0;
 	  }
 	}
 	break;
@@ -919,18 +911,18 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	case MOVE_DOWN:
 	{
 	  //move down
-	  switch (game_y_pos){
+	  switch (GAME_Y_POS){
 		case 0:
-			game_y_pos = 3;
+			GAME_Y_POS = 3;
 			break;
 		case 1:
-			game_y_pos = 0;
+			GAME_Y_POS = 0;
 			break;
 		case 2:
-			game_y_pos = 0;
+			GAME_Y_POS = 0;
 			break;
 		case 3:
-			game_y_pos = (game_x_pos == 1)?2:0;
+			GAME_Y_POS = (GAME_X_POS == 1)?2:0;
 			break;
 	  }	
 	}
@@ -939,18 +931,18 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	case MOVE_UP:
 	{	
 	  //move up
-	   switch (game_y_pos){
+	   switch (GAME_Y_POS){
 		case 0:
-			game_y_pos = (game_x_pos == 1)?1:3;
+			GAME_Y_POS = (GAME_X_POS == 1)?1:3;
 			break;
 		case 1:
-			game_y_pos = 3;
+			GAME_Y_POS = 3;
 			break;
 		case 2:
-			game_y_pos = 3;
+			GAME_Y_POS = 3;
 			break;
 		case 3:
-			game_y_pos = 0;
+			GAME_Y_POS = 0;
 			break;
 	  }
     }
@@ -959,11 +951,11 @@ void Apps::modeSingleSegmentManipulation(bool init){
     case MOVE_LEFT:
     { 
 	  //move left
-	  if (game_x_pos == 0){
+	  if (GAME_X_POS == 0){
 		counter = (counter == 0)?3:(counter-1); // previous digit
-		game_x_pos = 2;
+		GAME_X_POS = 2;
 	  }else{
-		game_x_pos--;
+		GAME_X_POS--;
 	  }
     }
 	break;
@@ -973,7 +965,7 @@ void Apps::modeSingleSegmentManipulation(bool init){
   }
 
   uint8_t seg;
-  switch (10*game_y_pos + game_x_pos){
+  switch (10*GAME_Y_POS + GAME_X_POS){
 	  case 0:
 	  case 10:
 		seg = 0b00010000;  //E
@@ -1438,16 +1430,11 @@ void Apps::modeMetronome(bool init){
   if (init){
     counter = 0;
     counter2 = 0;
-    game_x_pos = 0;
-    game_y_pos = 0;
     TIMER_METRONOME.setInitTimeMillis((long)potentio->getValueStable() * -1);
     TIMER_METRONOME.start();
     nextStep = true;
   }
-  
 
-  
-  
   bool direction1 = true;
   if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
     direction1 = false;
@@ -1458,54 +1445,54 @@ void Apps::modeMetronome(bool init){
     direction2 = false;
   }
   
- // if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
-    if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
+// if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue()){
 
-      if (potentio->getValueStableChangedEdge()){
-        TIMER_METRONOME.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+    if (potentio->getValueStableChangedEdge()){
+      TIMER_METRONOME.setInitTimeMillis(potentio->getValueMapped(-1024,0));
 //        TIMER_METRONOME.start(); //during turning it pauses because of the continuous restarting.
-      }
-      
-      if (!TIMER_METRONOME.getTimeIsNegative()){
-        nextStep = true;
-        TIMER_METRONOME.start();
-      }
     }
     
-    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+    if (!TIMER_METRONOME.getTimeIsNegative()){
       nextStep = true;
+      TIMER_METRONOME.start();
     }
-    
-    if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
-      counter = this->nextStepRotate(counter, !direction1, 0, 11);
-      counter2 = counter;
-      nextStep = true;
-    }
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
+    nextStep = true;
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
+    counter = this->nextStepRotate(counter, !direction1, 0, 11);
+    counter2 = counter;
+    nextStep = true;
+  }
 
-    if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
-      counter2 = this->nextStepRotate(counter2, !direction2, 0, 11);
-      nextStep = true;
+  if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()){
+    counter2 = this->nextStepRotate(counter2, !direction2, 0, 11);
+    nextStep = true;
+  }
+  
+  if (nextStep){
+    uint32_t screen = 0;
+    for (uint8_t i=0;i<4;i++){
+      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
     }
+    ledDisp->SetFourDigits(screen);
     
-    if (nextStep){
-      uint32_t screen = 0;
-      for (uint8_t i=0;i<4;i++){
-        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
-        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + counter2*4 + (i)) << (8*i); 
-      }
-      ledDisp->SetFourDigits(screen);
-      
-      counter = this->nextStepRotate(counter, direction1, 0, 11);
-      counter2 = this->nextStepRotate(counter2, direction2, 0, 11);
-	  
-	  if (counter == 0){
-		  buzzer->programBuzzerRoll(C7_8);
-	  }
-	  if (counter2 == 0){
-		  buzzer->programBuzzerRoll(C6_4);
-	  }
+    counter = this->nextStepRotate(counter, direction1, 0, 11);
+    counter2 = this->nextStepRotate(counter2, direction2, 0, 11);
+  
+    if (counter == 0){
+      buzzer->programBuzzerRoll(C7_8);
     }
-    
+    if (counter2 == 0){
+      buzzer->programBuzzerRoll(C6_4);
+    }
+  }
+  
 //  }else{
 //    //interactive mode
 //    // game: x,y 0,0 = bottom left 
@@ -1520,121 +1507,121 @@ void Apps::modeMetronome(bool init){
 
 void Apps::modeSimon(bool init)
 {
-  // const int numButtons = 4;
-  // const int buttons[numButtons] = { BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
-  // const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
-  // const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
+  const int numButtons = 4;
+  const int buttons[numButtons] = { BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE };
+  const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
+  const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
 
-  // const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
-  // const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
+  const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+  const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
 
-  // if (init) {
-  //   simonState = simonWaitForNewGame;
-  // }
+  if (init) {
+    simonState = simonWaitForNewGame;
+  }
 
-  // if (init || potentio->getValueStableChangedEdge()) {
-  //   generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
-  // }
+  if (init || potentio->getValueStableChangedEdge()) {
+    generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
+  }
 
-  // uint8_t buttonsChanged = 0;
-  // for (int k = 0; k < numButtons; ++k) {
-  //   const bool changed = (buttons[k] == BUTTON_LATCHING_YELLOW)
-  //     ? binaryInputs[buttons[k]].getValueChanged()
-  //     : binaryInputs[buttons[k]].getEdgeUp();
-  //   if (changed) {
-  //     buttonsChanged |= (1 << k);
-  //   }
-  // }
+  uint8_t buttonsChanged = 0;
+  for (int k = 0; k < numButtons; ++k) {
+    const bool changed = (buttons[k] == BUTTON_LATCHING_YELLOW)
+      ? binaryInputs[buttons[k]].getValueChanged()
+      : binaryInputs[buttons[k]].getEdgeUp();
+    if (changed) {
+      buttonsChanged |= (1 << k);
+    }
+  }
 
-  // switch (simonState) {
-  //   case simonWaitForNewGame: {
-  //     // all lights on
-  //     byte allLights = 0;
-  //     for (int k = 0; k < numButtons; ++k) {
-  //       allLights |= lights[k];
-  //     }
-  //     ledDisp->SetLedArray(allLights);
-  //     if (!buttonsChanged) {
-  //       break;
-  //     }
-  //     simonState = simonNewGame;
-  //     break;
-  //   }
+  switch (simonState) {
+    case simonWaitForNewGame: {
+      // all lights on
+      byte allLights = 0;
+      for (int k = 0; k < numButtons; ++k) {
+        allLights |= lights[k];
+      }
+      ledDisp->SetLedArray(allLights);
+      if (!buttonsChanged) {
+        break;
+      }
+      simonState = simonNewGame;
+      break;
+    }
 
-  //   case simonNewGame: {
-  //     ledDisp->SetLedArray(0);
-  //     // generate new sequence
-  //     randomSeed(millis());
-  //     for (int k = 0; k < sequencer_bufsize; ++k) {
-  //       sequencer_song[k] = k % numButtons;
-  //     }
-  //     shuffle(sequencer_song, sequencer_bufsize);
-  //     simonLength = 0;
-  //     simonState = simonNewLevel;
-  //     break;
-  //   }
+    case simonNewGame: {
+      ledDisp->SetLedArray(0);
+      // generate new sequence
+      randomSeed(millis());
+      for (int k = 0; k < sequencer_bufsize; ++k) {
+        sequencer_song[k] = k % numButtons;
+      }
+      shuffle(sequencer_song, sequencer_bufsize);
+      simonLength = 0;
+      simonState = simonNewLevel;
+      break;
+    }
 
-  //   case simonNewLevel: {
-  //     ledDisp->showNumber(simonLength);
-  //     ++simonLength;
-  //     if (simonLength >= sequencer_bufsize) {
-  //         // reached maximum length
-  //         if (hasSound) buzzer->loadBuzzerTrack(song_attack);
-  //         simonState = simonWaitForNewGame;
-  //         break;
-  //     }
-  //     simonIndex = -1; // negative index allows for lead-in time
-  //     simonState = simonPlaySequence;
-  //     generalTimer.start();
-  //     break;
-  //   }
+    case simonNewLevel: {
+      ledDisp->showNumber(simonLength);
+      ++simonLength;
+      if (simonLength >= sequencer_bufsize) {
+          // reached maximum length
+          if (hasSound) buzzer->loadBuzzerTrack(song_attack);
+          simonState = simonWaitForNewGame;
+          break;
+      }
+      simonIndex = -1; // negative index allows for lead-in time
+      simonState = simonPlaySequence;
+      generalTimer.start();
+      break;
+    }
 
-  //   case simonPlaySequence: {
-  //     if (generalTimer.getTimeIsNegative()) {
-  //       break;
-  //     }
-  //     generalTimer.start();
-  //     if (simonIndex < 0) {
-  //       ++simonIndex; // do-nothing lead in time
-  //       break;
-  //     }
-  //     if (simonIndex >= simonLength) {
-  //       // sequence finished, give control to user
-  //       ledDisp->SetLedArray(0);
-  //       simonIndex = 0;
-  //       simonState = simonUserRepeats;
-  //       break;
-  //     }
-  //     // show one button from the sequence
-  //     const uint8_t button = sequencer_song[simonIndex];
-  //     if (hasLight) ledDisp->SetLedArray(lights[button]);
-  //     if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
-  //     ++simonIndex;
-  //     break;
-  //   }
+    case simonPlaySequence: {
+      if (generalTimer.getTimeIsNegative()) {
+        break;
+      }
+      generalTimer.start();
+      if (simonIndex < 0) {
+        ++simonIndex; // do-nothing lead in time
+        break;
+      }
+      if (simonIndex >= simonLength) {
+        // sequence finished, give control to user
+        ledDisp->SetLedArray(0);
+        simonIndex = 0;
+        simonState = simonUserRepeats;
+        break;
+      }
+      // show one button from the sequence
+      const uint8_t button = sequencer_song[simonIndex];
+      if (hasLight) ledDisp->SetLedArray(lights[button]);
+      if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
+      ++simonIndex;
+      break;
+    }
 
-  //   case simonUserRepeats: {
-  //     if (!buttonsChanged) {
-  //       break;
-  //     }
-  //     const int expected = sequencer_song[simonIndex];
-  //     if (buttonsChanged != (1 << expected)) {
-  //       // player made mistake, start new game
-  //       if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
-  //       simonState = simonWaitForNewGame;
-  //       break;
-  //     }
-  //     // player pressed correct button
-  //     if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
-  //     ++simonIndex;
-  //     if (simonIndex >= simonLength) {
-  //       // sequence fully replaced, add one more note
-  //       simonState = simonNewLevel;
-  //       break;
-  //     }
-  //     break;
-  //   }
-  // }
+    case simonUserRepeats: {
+      if (!buttonsChanged) {
+        break;
+      }
+      const int expected = sequencer_song[simonIndex];
+      if (buttonsChanged != (1 << expected)) {
+        // player made mistake, start new game
+        if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
+        simonState = simonWaitForNewGame;
+        break;
+      }
+      // player pressed correct button
+      if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
+      ++simonIndex;
+      if (simonIndex >= simonLength) {
+        // sequence fully replaced, add one more note
+        simonState = simonNewLevel;
+        break;
+      }
+      break;
+    }
+  }
 }
 
 int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue){

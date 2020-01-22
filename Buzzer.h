@@ -317,7 +317,7 @@ class Buzzer{
     uint8_t getNextBuzzerRollSlot ( bool getNextEmptySlot);
     uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty(); 
-	void setTranspose(int8_t offset);
+	  void setTranspose(int8_t offset);
     void cleanBuzzerRoll();
     void buzzerOn(uint16_t freq);
     void buzzerOff();
@@ -330,7 +330,7 @@ class Buzzer{
     uint8_t buzzerRoll[BUZZER_ROLL_LENGTH];
     uint8_t playSlotCounter;
     uint8_t programSlotCounter;
-    long soundFinishedTimeMillis;
+    unsigned long soundFinishedTimeMillis;
 };
 #endif
 

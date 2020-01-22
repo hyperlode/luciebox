@@ -5,7 +5,7 @@
 
 //empty constructor
 ButtonsDacR2r::ButtonsDacR2r(){
-  this->debounceMillis = DEBOUNCE_MILLIS;
+  this->debounceMillis = DEBOUNCE_BUTTON_MILLIS;
 }
 
 void ButtonsDacR2r::setDebounceMillis(uint8_t value){
@@ -43,7 +43,7 @@ uint8_t ButtonsDacR2r::getButtonsValueRaw(){
        //Serial.println(checkValue);
        //Serial.println((raw -(VALUE_MARGIN_FOR_SELECTOR/2)));
        //Serial.println("-----efe-");
-       allButtonsState |= 0b00000001 <<  this->buttonsCount - 1 - i; 
+       allButtonsState |= 0b00000001 <<  (this->buttonsCount - 1 - i); 
      
        raw -= checkValue;  
        if (raw<0){
@@ -79,7 +79,7 @@ void ButtonsDacR2r::refresh(){
   
   if ( buttonsValue != this->buttonsPreviousValue){
 	  this->buttonEdgeMillis = millis();
-        this->debounceMillis = DEBOUNCE_MILLIS;
+        this->debounceMillis = DEBOUNCE_BUTTON_MILLIS;
   }
   
   if (millis() - this->buttonEdgeMillis >  this->debounceMillis){

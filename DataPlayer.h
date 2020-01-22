@@ -33,7 +33,8 @@ class DataPlayer{
   
   private:
 	//PGM_P allData;
-  PROGMEM const uint8_t* allData;
+    // PROGMEM const uint8_t* allData; 
+	const uint8_t* allData;
 	
     bool auto_step_enabled;
 	SuperTimer auto_step_timer;

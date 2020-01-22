@@ -163,7 +163,7 @@ void DisplayManagement::doScroll(){ //char * intext
 void DisplayManagement::get5DigitsFromString(char* in, char* out, int startPos){ //, int spacesBetweenRepeat
 	//startPos can be a negative number (for scrolling in at the start), all negative numbers are "spaces". i.e. -2  => [' ', ' ', pos0char, pos1char]
 	bool endOfString = false;
-	int spacesAtEnd = 0;
+	//int spacesAtEnd = 0;
 	
 	//check for end of string befor startpos in  incoming text. If so, then all spaces...
 	for (int i = 0; i<startPos-1;i++){

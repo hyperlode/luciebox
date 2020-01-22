@@ -11,8 +11,9 @@
 
 
 #define ENABLE_MULTITIMER
+
 #ifdef ENABLE_MULTITIMER
-#include "MiniMultiTimer.h"
+  #include "MiniMultiTimer.h"
 #endif
 
 #include "DataPlayer.h"
@@ -42,6 +43,9 @@
 #define TIMER_METRONOME generalTimer
 #define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer2
+
+#define GAME_X_POS counter2
+#define GAME_Y_POS counter3
 
 #define COUNTER_GEIGER counter3
 #define GEIGER_INCREASE_CHANCE counter_long
@@ -146,36 +150,36 @@ const uint8_t song_lang_zal_ze_leven [] PROGMEM = {
   C7_4,rest_4,rest_2,
   G6_2,G6_4,rest_2, 
 
-  // E7_4,rest_4,rest_2,
-  // E7_4,rest_2, E7_8,rest_8,
-  // E7_4,rest_4,rest_2,
-  // C7_2,C7_4,rest_2, 
+  E7_4,rest_4,rest_2,
+  E7_4,rest_2, E7_8,rest_8,
+  E7_4,rest_4,rest_2,
+  C7_2,C7_4,rest_2, 
 
-  // G7_4,rest_4,rest_2,
-  // G7_4,rest_2, G7_8,rest_8,
+  G7_4,rest_4,rest_2,
+  G7_4,rest_2, G7_8,rest_8,
   
-  // A7_8,rest_8,rest_4,
-  // G7_8,rest_8,rest_4,
+  A7_8,rest_8,rest_4,
+  G7_8,rest_8,rest_4,
   
-  // F7_8,rest_8,rest_4,
-  // E7_8,rest_8,rest_4,
+  F7_8,rest_8,rest_4,
+  E7_8,rest_8,rest_4,
   
-  // D7_2,D7_4,rest_4,
-  // D7_2,D7_4,rest_4,
-  // D7_2,D7_4,rest_4,
-  // rest_4,
-  // G7_8,rest_8,rest_4,
-  // F7_8,rest_8,rest_4,
+  D7_2,D7_4,rest_4,
+  D7_2,D7_4,rest_4,
+  D7_2,D7_4,rest_4,
+  rest_4,
+  G7_8,rest_8,rest_4,
+  F7_8,rest_8,rest_4,
 
-  // E7_1,E7_2,rest_2,
-  // F7_1,F7_2,rest_2,
+  E7_1,E7_2,rest_2,
+  F7_1,F7_2,rest_2,
 
-  // G7_1,G7_2,rest_2,
-  // A7_2,A7_4,rest_4,
-  // F7_2,F7_4,rest_4,
+  G7_1,G7_2,rest_2,
+  A7_2,A7_4,rest_4,
+  F7_2,F7_4,rest_4,
 
-  // E7_1,E7_2,rest_2,
-  // D7_1,D7_2,rest_2,
+  E7_1,E7_2,rest_2,
+  D7_1,D7_2,rest_2,
   C7_1,C7_1,BUZZER_ROLL_SONG_STOPVALUE
   };
 const uint8_t song_happy_dryer [] PROGMEM = {
@@ -292,103 +296,107 @@ class Apps{
 
   public:
 
-  Apps();
+    Apps();
 
-  BinaryInput* binaryInputs;
-  DisplayManagement* ledDisp;
-  Buzzer* buzzer;
-  Potentio* potentio;
-  
-  
-  void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer);
-  void setBuffers(char* textBuf, char*  scrollBuf);
-  void test();
-  
-  void setDefaultMode();
-  void appSelector(bool init, uint8_t selector);
-  bool init_app(bool init, uint8_t selector);
-  //void modeScroll(bool init);
-  void modeSimpleButtonsAndLights();
-  void modeCountingLettersAndChars(bool init);
-  void modeSoundSong(bool init);
-  void modeSoundNotes();
-  void draw(bool init);
-  void movieAnimationMode(bool init);
-  uint16_t _animationGetStartByte(uint8_t number);
-  void modeSingleSegmentManipulation(bool init);
-  void modeGeiger(bool init);
-  void modeSequencer(bool init);
-  void modeMetronome(bool init);
-  void modeSimon(bool init);
-  void gameButtonInteraction(bool init);
-  void tiltSwitchTest(bool init);
-  void modeButtonDebug(bool init);
-  void miniMultiTimer(bool init);
-  void modeDiceRoll(bool init);
-  
-  
-  void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen);
-  void shuffle(uint8_t* list, uint8_t length);
-  
+    BinaryInput* binaryInputs;
+    DisplayManagement* ledDisp;
+    Buzzer* buzzer;
+    Potentio* potentio;
+    
+    
+    void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer);
+    void setBuffers(char* textBuf, char*  scrollBuf);
+    void test();
+    
+    void setDefaultMode();
+    void appSelector(bool init, uint8_t selector);
+    bool init_app(bool init, uint8_t selector);
+    //void modeScroll(bool init);
+    void modeSimpleButtonsAndLights();
+    void modeCountingLettersAndChars(bool init);
+    void modeSoundSong(bool init);
+    void modeSoundNotes();
+    void draw(bool init);
+    void movieAnimationMode(bool init);
+    uint16_t _animationGetStartByte(uint8_t number);
+    void modeSingleSegmentManipulation(bool init);
+    void modeGeiger(bool init);
+    void modeSequencer(bool init);
+    void modeMetronome(bool init);
+    void modeSimon(bool init);
+    void gameButtonInteraction(bool init);
+    void tiltSwitchTest(bool init);
+    void modeButtonDebug(bool init);
+    void miniMultiTimer(bool init);
+    void modeDiceRoll(bool init);
+    
+    
+    void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen);
+    void shuffle(uint8_t* list, uint8_t length);
+    
   private:
-  DataPlayer dataPlayer;
-  #ifdef ENABLE_MULTITIMER
-  MiniMultiTimer multiTimer;
-  #endif
-  int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-  void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
-  
-  SuperTimer generalTimer;
-  SuperTimer generalTimer2;
-  
-  //global app variables
-  enum {
-    sequencer_bufsize = 32,
-  };
-  uint8_t sequencer_song[sequencer_bufsize];
-  uint8_t* game_random;
-  uint32_t screenPersistenceOfVision;
-  //SuperTimer animation_speed;
-  uint8_t allNotesIndex;
-  int16_t counter;
-  int16_t counter2;
-  int16_t counter3;
-  long counter_long;
-  bool numberElseAlphabethMode;
-  // int16_t animation_step;
-  uint8_t game_x_pos;
-  uint8_t game_y_pos;
-  uint8_t reactionGameTarget;
-  
-  long frequency_lower;
-  long frequency_upper;
-  long tone_length_millis;
-  long geiger_trigger_chance;
-  
-  long initTime;
-  bool reactionGameYellowButtonIsIncluded;
-  uint8_t selectedSounds[4];
-  uint8_t dispState[4];
-  
-  uint32_t displaySequence[32];
+    DataPlayer dataPlayer;
+    
+    #ifdef ENABLE_MULTITIMER
+    MiniMultiTimer multiTimer;
+    #endif
 
-  // simon
-  enum SimonState {
-      simonWaitForNewGame,
-      simonNewGame,
-      simonNewLevel,
-      simonPlaySequence,
-      simonUserRepeats,
-  };
-  SimonState simonState;
-  uint8_t simonLength;
-  int8_t simonIndex;
+    int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
+    
+    SuperTimer generalTimer;
+    SuperTimer generalTimer2;
+    
+    //global app variables
+    enum {
+      sequencer_bufsize = 32,
+    };
+    uint8_t sequencer_song[sequencer_bufsize];
+    uint8_t* game_random;
+    uint32_t screenPersistenceOfVision;
 
-  char*  textBuf;
-  char*  scrollBuf;
-  uint8_t lights;
-  
-  bool app_init_mode;
+    uint8_t allNotesIndex;
+
+    int16_t counter;
+    int16_t counter2;
+    int16_t counter3;
+    long counter_long;
+
+    bool numberElseAlphabethMode;
+
+    //uint8_t game_x_pos;
+    //uint8_t game_y_pos;
+    uint8_t reactionGameTarget;
+    
+    long frequency_lower;
+    long frequency_upper;
+    long tone_length_millis;
+    long geiger_trigger_chance;
+    
+    long initTime;
+    bool reactionGameYellowButtonIsIncluded;
+    uint8_t selectedSounds[4];
+    uint8_t dispState[4];
+    
+    uint32_t displaySequence[32];
+
+    // simon
+    enum SimonState {
+        simonWaitForNewGame,
+        simonNewGame,
+        simonNewLevel,
+        simonPlaySequence,
+        simonUserRepeats,
+    };
+    SimonState simonState;
+    uint8_t simonLength;
+    int8_t simonIndex;
+
+    char*  textBuf;
+    char*  scrollBuf;
+    uint8_t lights;
+    
+    bool app_init_mode;
   
 };
 
