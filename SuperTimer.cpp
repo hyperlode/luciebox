@@ -1,4 +1,5 @@
 #include "SuperTimer.h"
+
 SuperTimer::SuperTimer(){
 	setIsStarted(false);
 	setIsPaused(false);
@@ -6,29 +7,11 @@ SuperTimer::SuperTimer(){
 	this-> initTimeMillis = 0;
 }
 
-
 //INIT TIME 
 
 void SuperTimer::setInitTimeMillis(long milliSeconds){
-//	//if not yet started it is easy, if already started, we don't affect the original time, only the runtime. so, when timer resets, we see again the original time.
-//	if (getIsStarted()){
-//		//if started, we don't touch the initial init time. only the ingame time!
-//		if (getIsPaused()){
-//			//this->startedMillis = this->pauseStartedMillis + milliSeconds;
-//			//this->pauseStartedMillis = this->pauseStartedMillis - milliSeconds; //to test debug
-////			this->startedMillis = this->startedMillis - milliSeconds; //to test debug
-//			this->startedMillis =  this->pauseStartedMillis - milliSeconds;
-//		}else{
-//			this->startedMillis =  (long)getMillisCallibrated() - milliSeconds; // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
-//		}
-//		
-//	}else{
-//		this-> initTimeMillis = milliSeconds;	
-//	}	
-
   this-> initTimeMillis = milliSeconds;  
 }
-
 
 void SuperTimer::setOffsetInitTimeMillis(long offsetMillis){
 	//make distinction between change during runtime and not, if during runtime: the original set time will not be affected.
@@ -43,10 +26,6 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis){
 		this-> initTimeMillis += offsetMillis;	
 	}
 }
-
-// void SuperTimer::setInitTimeSecs(int seconds){
-	// setInitTimeMillis((long)(seconds) * 1000); //FIRST convert seconds to long, THEN *1000!!!
-// }
 
 void SuperTimer::setInitCountDownTimeSecs(uint16_t countDownSeconds){
 	this->setInitCountDownTimeMillis(((long)countDownSeconds) * 1000);
@@ -139,21 +118,15 @@ void SuperTimer::paused(bool pause){
 }
 
 bool SuperTimer::getIsPaused(){
-	//return this->isPaused ;
 	return getBit(&this->boolContainer, BITLOCATION_ISPAUSED);
-	
 }
 
 void SuperTimer::setIsPaused(bool paused){
-	
 	setBit(&this->boolContainer, paused, BITLOCATION_ISPAUSED);
-
 }
 
-
-
-
 //RESET
+
 void SuperTimer::reset(){
 	// TODO not happy with this. It does not even set the time back to its init time. CHange it!
 	
@@ -182,19 +155,14 @@ long SuperTimer::getTimeMillis(){
 	}
 }
 
-// bool SuperTimer::getInitTimeElapsed(){
 bool SuperTimer::getTimeIsNegative(){
-	//if time is negative: counting down.
+	// as long as time is negative, timer is counting down. Else, counting up.
 	return getTimeMillis() <= 0; 
 }
 
 long SuperTimer::getTimeSeconds(){
-	//if (getTimeIsNegative()){
-	//	return -1 * getTimeSecondsAbsolute();
-	//}else{
-	//	return getTimeSecondsAbsolute();
-	//}
-        return (long)getTimeSecondsAbsolute() * (1 -2*getTimeIsNegative()); //-1 if negative  
+
+	return (long)getTimeSecondsAbsolute() * (1 -2*getTimeIsNegative()); //-1 if negative  
 }
 
 unsigned int SuperTimer::getTimeSecondsAbsolute(){
@@ -222,20 +190,13 @@ long SuperTimer::getTimeMillisCountDownTimer(){
 	}
 }
 
-
 void SuperTimer::getTimeString(char * textBuf){
 	//will always return a string with a positive time value ...
 	timeMillisToClockString(textBuf, getTimeMillis());
 }
 
 
-
-
-
 //ADMINISTRATION 
-// unsigned long SuperTimer::getMillisAtLastCheck(){
-	// return this->millisAtLastCheck;
-// }
 
 //callibration. should be done at a higher level. every clock should have the same speed.... , so the millis() function should be modified, 
 void SuperTimer::setCallibrationMillis(float* callibrationRatio){
@@ -248,17 +209,21 @@ float SuperTimer::getCallibrationMillis(){
 }
 
 unsigned long SuperTimer::getMillisCallibrated(){
+  
   return millis(); // bridge callibration  todo
-  return (unsigned long)millis(); // bridge callibration  todo
-	return (unsigned long)(millis() *
-#if defined DISABLE_CALIBRATION && defined ARDUINO_SIMULATION
-		1
-#else
-		*this->callibrationConstant
-#endif
 
-	);
+//   return (unsigned long)millis(); // bridge callibration  todo
+// 	return (unsigned long)(millis() *
+// #if defined DISABLE_CALIBRATION && defined ARDUINO_SIMULATION
+// 		1
+// #else
+// 		*this->callibrationConstant
+// #endif
+
+// 	);
 }
+
+
 //original countdowntimer
 
 
@@ -269,10 +234,7 @@ bool SuperTimer::getInFirstGivenHundredsPartOfSecond(int hundreds){
 		//chrono
 		return abs(getTimeMillis()%1000) <= (hundreds);
 	}else{
-		//for chrono,
 		//countdown
-		
-		//return getExceededMillis()%1000<=hundreds;
 		return abs(getTimeMillis())%1000>=(1000-hundreds);
 	}
 }
@@ -295,68 +257,6 @@ bool SuperTimer::getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(int hundreds
 		return false;
 	}
 }
-
-
-// bool SuperTimer::getIsPaused(){
-	// //return this->isPaused ;
-	// return getBit(&this->boolContainer, BITLOCATION_ISPAUSED);
-	
-// }
-
-// void SuperTimer::setIsPaused(bool paused){
-	
-	// setBit(&this->boolContainer, paused, BITLOCATION_ISPAUSED);
-
-// }
-
-
-// bool SuperTimer::secondsChangedSinceLastCheck(){
-	// //did the second digit changed since the last check?
-	
-	// //this is the new version, but millis should be "getTimeMillisAtLastCheck."
-	// // if (getTimeMillisAtLastCheck()/3600 == getMillis / 3600){
-		// // return false;
-	// // }else{
-		// // return true;
-	// // };
-	
-	
-	// int timeSecs = getTimeSeconds();
-	// int secondsLastCheckWorking = this->secondsLastCheck;
-	// this-> secondsLastCheck = timeSecs;
-	// if (timeSecs == secondsLastCheckWorking){
-		// return false;
-	// }else{
-		// return true;
-	// };
-	
-	// // bool newSecondEdge = false;
-	// // //check if it is the same with previous
-	// // if ( getBit(&this->boolContainer, BITLOCATION_NEWSECOND_EGDEDETECTION) == 
-	
-	// // //store previous
-	
-	
-	
-	// // int timeSecs = getTimeSeconds();
-	// // int secondsLastCheckWorking = this->secondsLastCheck;
-	// // this-> secondsLastCheck = timeSecs;
-	
-	// // if (timeSecs == secondsLastCheckWorking){
-		// // return false;
-	// // }else{
-		// // return true;
-	// // };
-	
-// }
-
-
-
-
-
-
-
-
 
 
 

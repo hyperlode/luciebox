@@ -31,13 +31,10 @@ class SuperTimer{
 		void paused(bool pause);
 		bool getIsPaused();
 		
-
 		void reset();
 
-		// void offsetRunningTimeMillis(long offsetMillis);
 		void setOffsetInitTimeMillis(long offsetMillis);
-		//void setNewTimeAtRunTime (long timeSetMillis);
-
+		
 		long getTimeMillis();
 		bool getTimeIsNegative();
 		long getTimeSeconds();
@@ -46,38 +43,27 @@ class SuperTimer{
 		long getTimeMillisCountDownTimer();
 		void getTimeString(char * textBuf);
 
-		//unsigned long getMillisAtLastCheck();
 		void setCallibrationMillis(float* callibrationRatio);
 		float getCallibrationMillis();
 		unsigned long getMillisCallibrated();
 
 		bool getInFirstGivenHundredsPartOfSecond(int hundreds);
 		bool getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(int hundreds, bool positiveEdge, bool negativeEdge);
-	//	bool secondsChangedSinceLastCheck();
 		
 	private: //not accessible in subclasses (work with getters and setter to access then) 
-	//protected: 
 		void setIsPaused(bool paused); //only for internal use, to set the variable...
-		//bool isStarted;
-	//	bool isPaused;
-		
-		//int secondsLastCheck; //get rid of this one! 
-		//unsigned long millisAtLastCheck; //check if this one is needed (stores the millis(), It could be usefull if we stored the time!)
-		
+	
 		float* callibrationConstant;
 
 		long startedMillis;
 		long pauseStartedMillis;
 		long initTimeMillis;
 
-		//bool previousCheckInFirstPartOfSecond;
-		
 		uint8_t boolContainer;
-		
+
 		#define BITLOCATION_ISSTARTED 0
 		#define BITLOCATION_ISPAUSED 1
 		#define BITLOCATION_INFIRSTPARTOFSECOND_EGDE 2
-	//	#define BITLOCATION_NEWSECOND_EGDEDETECTION 3
 		
 }; 
 #endif

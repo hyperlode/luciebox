@@ -51,6 +51,10 @@
 #define LIGHT_LED_2     4
 #define LIGHT_LED_3     5
 
+#ifndef PROTOTYPE
+#define LIGHT_YELLOW_EXTRA 7
+#endif 
+
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
 #define PIN_BUTTONS_2 A2

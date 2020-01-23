@@ -469,6 +469,12 @@ void Apps::modeSimpleButtonsAndLights(){
         updateScreen = true;
       }
       
+      #ifndef PROTOTYPE
+      if (binaryInputs[BUTTON_MOMENTARY_EXTRA_YELLOW].getValue()){
+        lights|= 1<<LIGHT_YELLOW_EXTRA;
+        updateScreen = true;
+      }
+      #endif
 
       if (updateScreen){
         textBuf[1]='8';
@@ -482,6 +488,7 @@ void Apps::modeSimpleButtonsAndLights(){
         textBuf[3]='-';
         textBuf[4]='-';
       }
+
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
         lights|= 1<<LIGHT_LED_1;
       }else{
@@ -505,6 +512,8 @@ void Apps::modeSimpleButtonsAndLights(){
         textBuf[4]=' ';
       }
       
+     
+
       ledDisp->displayHandler(textBuf);
       
       ledDisp->SetLedArray(lights);
@@ -1052,11 +1061,8 @@ void Apps::miniMultiTimer(bool init){
   // game: pause, player alive? ,fischertimer active?/time, random starter
 
   if (init){
-	 
 	  this->multiTimer.setBuzzer(this->buzzer);
 	  this->multiTimer.init();
-    
-  
   }  
   
   // TIMER BUTTONS
@@ -1068,7 +1074,6 @@ void Apps::miniMultiTimer(bool init){
   
   if (binaryInputs[BUTTON_MOMENTARY_EXTRA_YELLOW].getEdgeDown()){
 	  this->multiTimer.playerButtonPressEdgeDown(3);
-   
   }
   
   #endif
