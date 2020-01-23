@@ -21,37 +21,36 @@ void ButtonsDacR2r::setPin(byte pin, byte buttonsCount, uint16_t* thresholds){
 uint8_t ButtonsDacR2r::getButtonsValueRaw(){
   int16_t raw = (int16_t)(analogRead(this->analogPin));
   uint8_t allButtonsState = 0b00000000; //every bit is a button.
-   for(uint8_t i=0; i<this->buttonsCount; i++){
-     int16_t checkValue = (int16_t)this->thresholds[i];  
-     //Serial.println(checkValue -(VALUE_MARGIN_FOR_SELECTOR/2));
-     //Serial.println(i);
-     //Serial.println("====");
-     
-     // value margin is always the binary value one level below the lowest button value
-     int16_t value_margin = (int16_t)0b00000001 << (ADC_POWERS_OF_TWO - this->buttonsCount - 2 ) ; ; //((ADC_POWERS_OF_TWO) - this->buttonsCount - 1(forgoing one level below least buttonvalue) - 1(for dividing into two, so we end up in the middle of the margin) ;
-     /*
-//     example:
-     00000000001 //start
-     10000000000 //1024 = 2^10
-     01000000000 // /2 because 512 would be the next lowest value
-     00000010000 //  /2 because we take only half of the margin to end up in the middle
-     */
-     
-     //Serial.println(value_margin);
-     if (raw > (checkValue - value_margin ) ){
-       //Serial.println(raw);
-       //Serial.println(checkValue);
-       //Serial.println((raw -(VALUE_MARGIN_FOR_SELECTOR/2)));
-       //Serial.println("-----efe-");
-       allButtonsState |= 0b00000001 <<  (this->buttonsCount - 1 - i); 
-     
-       raw -= checkValue;  
-       if (raw<0){
-         raw=0;
-       }
-     }
-   }
-  
+  for(uint8_t i=0; i<this->buttonsCount; i++){
+    int16_t checkValue = (int16_t)this->thresholds[i];  
+    //Serial.println(checkValue -(VALUE_MARGIN_FOR_SELECTOR/2));
+    //Serial.println(i);
+    //Serial.println("====");
+    
+    // value margin is always the binary value one level below the lowest button value
+    /*
+    value margin example:
+    00000000001 //start
+    10000000000 //1024 = 2^10
+    01000000000 // /2 because 512 would be the next lowest value
+    00000010000 //  /2 because we take only half of the margin to end up in the middle
+    */
+    int16_t value_margin = (int16_t)0b00000001 << (ADC_POWERS_OF_TWO - this->buttonsCount - 2 ); //((ADC_POWERS_OF_TWO) - this->buttonsCount - 1(forgoing one level below least buttonvalue) - 1(for dividing into two, so we end up in the middle of the margin) ;
+    
+    if (raw > (checkValue - value_margin ) ){
+      //Serial.println(raw);
+      //Serial.println(checkValue);
+      //Serial.println((raw -(VALUE_MARGIN_FOR_SELECTOR/2)));
+
+      allButtonsState |= 0b00000001 <<  (this->buttonsCount - 1 - i); 
+    
+      raw -= checkValue;  
+      if (raw<0){
+        raw=0;
+      }
+    }
+  }
+
   return allButtonsState;
 }
 

@@ -469,7 +469,7 @@ void Apps::modeSimpleButtonsAndLights(){
         updateScreen = true;
       }
       
-      #ifndef PROTOTYPE
+      #if MOMENTARY_BUTTONS_COUNT == 4
       if (binaryInputs[BUTTON_MOMENTARY_EXTRA_YELLOW].getValue()){
         lights|= 1<<LIGHT_YELLOW_EXTRA;
         updateScreen = true;
@@ -511,8 +511,6 @@ void Apps::modeSimpleButtonsAndLights(){
       }else{
         textBuf[4]=' ';
       }
-      
-     
 
       ledDisp->displayHandler(textBuf);
       
@@ -1066,7 +1064,7 @@ void Apps::miniMultiTimer(bool init){
   }  
   
   // TIMER BUTTONS
-  #ifndef PROTOTYPE
+  #if MOMENTARY_BUTTONS_COUNT == 4
   
   if (binaryInputs[BUTTON_MOMENTARY_EXTRA_YELLOW].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(3);
@@ -1745,7 +1743,7 @@ void Apps::modeReactionGame(bool init){
         ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
      }
 
-  }else if (binaryInputs[buttons_indexed[REACTION_GAME_TARGET]].getEdgeUp() ||
+  }else if (binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ||
       (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& REACTION_GAME_TARGET == 0))
   {
     //right button

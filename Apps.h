@@ -266,8 +266,13 @@ const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,re
 
 
 const uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE, LIGHT_LED_1, LIGHT_LED_2, LIGHT_LED_3};
-const uint8_t buttons_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
-  
+
+#if MOMENTARY_BUTTONS_COUNT == 3
+const uint8_t buttons_momentary_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
+#else
+const uint8_t buttons_momentary_indexed [] = {BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE, BUTTON_MOMENTARY_EXTRA_YELLOW};
+
+#endif
 
 const uint32_t tilt_forward [] PROGMEM = {
 	0x08,0x08,0x08,0x08
@@ -301,14 +306,6 @@ const uint32_t disp_4digits_animate_circle [] PROGMEM = {
     0x10,0x00,0x00,0x00,    
     0x20,0x00,0x00,0x00    
     };
-	
-	
-
-	
-
-//INPUT
-
-
 
 class Apps{
 
@@ -373,18 +370,18 @@ class Apps{
     uint8_t sequencer_song[sequencer_bufsize]; // also used for simon game
     
     uint32_t displayAllSegments;
+    uint32_t displaySequence[32];
 
-    
+
+    //reused variables per app
     bool general_boolean;
     int16_t counter;
     int16_t counter2;
     long counter3;
     uint16_t counter4;
-    
     uint8_t array_4_bytes [4];
 
-    uint32_t displaySequence[32];
-
+    
 
     // // reaction
     // enum ReactionGameState:uint8_t {
