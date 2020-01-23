@@ -211,7 +211,7 @@ void setup() {
   
   // if one of the push buttons is pressed at startup, activate debugmode.
   debugMode = false;
-  if (analogRead(PIN_BUTTONS_1) > 10 && analogRead(PIN_BUTTONS_1) < 500){
+  if (analogRead(PIN_BUTTONS_1) > 10 && analogRead(PIN_BUTTONS_1) < 200){
     debugMode = true;
     pretbak_apps.appSelector(true, 12);
   }

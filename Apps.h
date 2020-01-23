@@ -44,7 +44,7 @@
 #define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_INIT_APP generalTimer
 
-#define TIMER_REACTION_GAME_RESTART_DELAY generalTimer2
+#define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
@@ -268,9 +268,9 @@ const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,re
 const uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE, LIGHT_LED_1, LIGHT_LED_2, LIGHT_LED_3};
 
 #if MOMENTARY_BUTTONS_COUNT == 3
-const uint8_t buttons_momentary_indexed [] = {BUTTON_LATCHING_YELLOW, BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
+  const uint8_t buttons_momentary_indexed [] = { BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
 #else
-const uint8_t buttons_momentary_indexed [] = {BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE, BUTTON_MOMENTARY_EXTRA_YELLOW};
+  const uint8_t buttons_momentary_indexed [] = {BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE, BUTTON_MOMENTARY_EXTRA_YELLOW};
 
 #endif
 
@@ -360,7 +360,7 @@ class Apps{
     void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
     
     SuperTimer generalTimer;
-    SuperTimer generalTimer2;
+   // SuperTimer generalTimer2;
     
     //global app variables
     enum {
@@ -383,14 +383,17 @@ class Apps{
 
     
 
-    // // reaction
-    // enum ReactionGameState:uint8_t {
-    //     reactionWaitForStart,
-    //     reactionPlaying,
-    //     reactionFinished,
+    // reaction
+    enum ReactionGameState:uint8_t {
+        reactionWaitForStart,
+        reactionNewGame,
+        reactionNewTurn,
+        reactionPlaying,
+        reactionJustDied,
+        reactionFinished,
         
-    // };
-    // ReactionGameState reactionGameState;
+    };
+    ReactionGameState reactionGameState;
 
     // simon
     enum SimonState:uint8_t {

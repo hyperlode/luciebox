@@ -1666,147 +1666,335 @@ int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minV
      }
      return counter;
 }
-
 void Apps::modeReactionGame(bool init){
   //yellow button active at start: yellow button is also a guess button
   // big red active: timed game
   // small red right active: time progressively shorter as game advances
   // small red left active: play by sound.
   
-  bool getNewNumber = false;
-  bool isDead = false;
-  
   if (init){
-    REACTION_GAME_SCORE = 0; // holds score
     randomSeed(millis());
-    getNewNumber = true;
-    TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
 
-    REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
-    
+    //TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
+
     REACTION_GAME_TIMER_STEP = 0;
     displayAllSegments = 0;
-    REACTION_GAME_YELLOW_BUTTON_INCLUDED = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
-    
-    for (uint8_t i=0;i<4;i++){
-      REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
-    }
+    reactionGameState = reactionWaitForStart;
   }
 
+  // at any time, leave game when depressing play button.
+  if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeDown() ){
+    reactionGameState = reactionWaitForStart;
+  }
+
+
+  switch (reactionGameState) {
+    case reactionWaitForStart: {
+      if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp() ){
+        reactionGameState = reactionNewGame;
+  
+        //play by sound
+        for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+          REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
+        }
+
+        if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue() ){
+          reactionGameState = reactionNewGame;
+          REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+        }
+      }
+      break;
+    }
+
+    case reactionNewGame: {
+        
+      reactionGameState = reactionNewTurn;
+      
+      TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
+      REACTION_GAME_SCORE = 0;
+  
+     break;
+    }
+
+    case reactionNewTurn:{
+     
+        ledDisp->setBlankDisplay();
+        lights = 0b00000000; //reset before switch enquiry
+        
+        REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
+        
+        displayAllSegments = 0; //reset animation graphics screen
+        REACTION_GAME_TIMER_STEP= 0; //reset animation step
+
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+          //play by sounds
+          buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
+        }else{
+          lights |= 1<<lights_indexed[REACTION_GAME_TARGET];     
+        }
+
+        ledDisp->SetLedArray(lights); 
+
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+          TIMER_REACTION_GAME_SPEED.setInitTimeMillis(TIMER_REACTION_GAME_SPEED.getInitTimeMillis()*0.99);
+        }        
+
+        TIMER_REACTION_GAME_SPEED.start();    
+      
+        reactionGameState = reactionPlaying;
+      break;
+    }
+    case reactionPlaying: {
+      // animation next step
+      if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
+        // game timing animation update.
+        for (uint8_t i=0;i<4;i++){
+          displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
+        }
+        ledDisp->SetFourDigits(displayAllSegments);
+        
+        REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
+        
+        TIMER_REACTION_GAME_SPEED.reset();
+      
+        // check game status 'dead'
+        if (REACTION_GAME_TIMER_STEP == 12){
+          REACTION_GAME_TIMER_STEP = 0;
+          displayAllSegments=0;    
+          if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
+            // timed out.
+            reactionGameState = reactionJustDied;
+          }else{
+            // time out not enabled.
+            TIMER_REACTION_GAME_SPEED.start();
+          }
+        }else{
+          TIMER_REACTION_GAME_SPEED.start();
+        }   
+      }
+
+      // check player input
+      if ( binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ) {
+          //right button
+          REACTION_GAME_SCORE++;
+          reactionGameState = reactionNewTurn;
+          if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+            //play by sounds
+            //buzzer->programBuzzerRoll(C7_8);
+            buzzer->programBuzzerRoll(rest_1);
+            //buzzer->programBuzzerRoll(rest_1);
+          }
+            
+        }else{
+          
+          for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+            if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
+              //wrong button
+               reactionGameState = reactionJustDied;
+            }
+          }
+        }
+
+     break;
+    }
+    case reactionJustDied:{
+        
+        //start high score end timer
+        TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
+        TIMER_REACTION_GAME_RESTART_DELAY.start();
+
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+          
+          //play by sounds, let them all play.
+          for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+            buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]+128);
+            buzzer->programBuzzerRoll(rest_1);
+          }
+          
+        }else{
+          
+          // play death song
+          buzzer->programBuzzerRoll(F4_1);  
+          buzzer->programBuzzerRoll(F4_1);  
+          buzzer->programBuzzerRoll(F4_1);  
+          buzzer->programBuzzerRoll(F4_1);  
+        }
+
+        reactionGameState = reactionFinished;
+
+      break;
+    }
+    case reactionFinished: {
+      if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative()){
+        //end of display high score, next number
+        //TIMER_REACTION_GAME_RESTART_DELAY.reset();
+        reactionGameState = reactionNewGame;
+          
+      }else {
+
+        //do nothing.  wait for display high score is finished.
+        if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
+            ledDisp->setBlankDisplay(); //make high score blink
+        }else{
+            ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
+        }
+
+      }
+     
+      
+      break;
+    }
+
+  }
+    
   // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
   if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
      //always show unless in soundmode->competition
     ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
   }
 
-  // animation next step
-  if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
-    // game timing animation update.
-    for (uint8_t i=0;i<4;i++){
-      displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
-    }
-    ledDisp->SetFourDigits(displayAllSegments);
-     
-    REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
-    
-    TIMER_REACTION_GAME_SPEED.reset();
-	
-	// check game status 'dead'
-    if (REACTION_GAME_TIMER_STEP == 12){
-      REACTION_GAME_TIMER_STEP = 0;
-      displayAllSegments=0;    
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
-        // timed out.
-        isDead = true;
-      }else{
-        // time out not enabled.
-        TIMER_REACTION_GAME_SPEED.start();
-      }
-    }else{
-      TIMER_REACTION_GAME_SPEED.start();
-    }   
-  }
-  
-  if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative()){
-    //end of display high score, next number
-    REACTION_GAME_SCORE = 0;
-    getNewNumber = true;
-    TIMER_REACTION_GAME_RESTART_DELAY.reset();
-    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
-       
-  }else if(TIMER_REACTION_GAME_RESTART_DELAY.getIsStarted()){
-     //do nothing.  wait for display high score is finished.
-     if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
-        ledDisp->setBlankDisplay(); //make high score blink
-     }else{
-        ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
-     }
 
-  }else if (binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ||
-      (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& REACTION_GAME_TARGET == 0))
-  {
-    //right button
-    REACTION_GAME_SCORE++;
-    getNewNumber = true;
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-      //play by sounds
-      //buzzer->programBuzzerRoll(C7_8);
-      buzzer->programBuzzerRoll(rest_1);
-      //buzzer->programBuzzerRoll(rest_1);
-    }
-      
-  }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
-      binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
-      binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() ||
-      binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged())
-  {
-    //wrong button
-      isDead = true;
-  }
-  
-  if (isDead){
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-      TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-      TIMER_REACTION_GAME_RESTART_DELAY.start();
-      //play by sounds
-      for (uint8_t i=REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1;i<4;i++){
-        buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]+128);
-        buzzer->programBuzzerRoll(rest_1);
-      }
-       
-    }else{
-      TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-      TIMER_REACTION_GAME_RESTART_DELAY.start();
-      buzzer->programBuzzerRoll(F4_1);  
-      buzzer->programBuzzerRoll(F4_1);  
-      buzzer->programBuzzerRoll(F4_1);  
-      buzzer->programBuzzerRoll(F4_1);  
-    }
-  }
-  
-  if (getNewNumber){
-    ledDisp->setBlankDisplay();
-    lights = 0b00000000; //reset before switch enquiry
-    
-    REACTION_GAME_TARGET = random(REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1, 4);
-    
-    displayAllSegments = 0; //reset animation graphics screen
-    REACTION_GAME_TIMER_STEP= 0; //reset animation step
-
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-       //play by sounds
-       buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
-    }else{
-      lights |= 1<<lights_indexed[REACTION_GAME_TARGET];     
-    }
-    ledDisp->SetLedArray(lights); 
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-      TIMER_REACTION_GAME_SPEED.setInitTimeMillis(TIMER_REACTION_GAME_SPEED.getInitTimeMillis()*0.99);
-    }        
-    TIMER_REACTION_GAME_SPEED.start();    
-  }
 }
+// void Apps::modeReactionGame(bool init){
+//   //yellow button active at start: yellow button is also a guess button
+//   // big red active: timed game
+//   // small red right active: time progressively shorter as game advances
+//   // small red left active: play by sound.
+  
+//   bool getNewNumber = false;
+//   bool isDead = false;
+  
+//   if (init){
+//     REACTION_GAME_SCORE = 0; // holds score
+//     randomSeed(millis());
+//     getNewNumber = true;
+//     TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
+
+//     REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+//     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
+    
+//     REACTION_GAME_TIMER_STEP = 0;
+//     displayAllSegments = 0;
+//     REACTION_GAME_YELLOW_BUTTON_INCLUDED = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
+    
+//     for (uint8_t i=0;i<4;i++){
+//       REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
+//     }
+//   }
+
+//   // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
+//   if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
+//      //always show unless in soundmode->competition
+//     ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
+//   }
+
+//   // animation next step
+//   if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
+//     // game timing animation update.
+//     for (uint8_t i=0;i<4;i++){
+//       displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
+//     }
+//     ledDisp->SetFourDigits(displayAllSegments);
+     
+//     REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
+    
+//     TIMER_REACTION_GAME_SPEED.reset();
+	
+// 	// check game status 'dead'
+//     if (REACTION_GAME_TIMER_STEP == 12){
+//       REACTION_GAME_TIMER_STEP = 0;
+//       displayAllSegments=0;    
+//       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
+//         // timed out.
+//         isDead = true;
+//       }else{
+//         // time out not enabled.
+//         TIMER_REACTION_GAME_SPEED.start();
+//       }
+//     }else{
+//       TIMER_REACTION_GAME_SPEED.start();
+//     }   
+//   }
+  
+//   if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative()){
+//     //end of display high score, next number
+//     REACTION_GAME_SCORE = 0;
+//     getNewNumber = true;
+//     TIMER_REACTION_GAME_RESTART_DELAY.reset();
+//     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
+       
+//   }else if(TIMER_REACTION_GAME_RESTART_DELAY.getIsStarted()){
+//      //do nothing.  wait for display high score is finished.
+//      if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
+//         ledDisp->setBlankDisplay(); //make high score blink
+//      }else{
+//         ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
+//      }
+
+//   }else if (binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ||
+//       (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& REACTION_GAME_TARGET == 0))
+//   {
+//     //right button
+//     REACTION_GAME_SCORE++;
+//     getNewNumber = true;
+//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+//       //play by sounds
+//       //buzzer->programBuzzerRoll(C7_8);
+//       buzzer->programBuzzerRoll(rest_1);
+//       //buzzer->programBuzzerRoll(rest_1);
+//     }
+      
+//   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
+//       binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
+//       binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() ||
+//       binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged())
+//   {
+//     //wrong button
+//       isDead = true;
+//   }
+  
+//   if (isDead){
+//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+//       TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
+//       TIMER_REACTION_GAME_RESTART_DELAY.start();
+//       //play by sounds
+//       for (uint8_t i=REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1;i<4;i++){
+//         buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]+128);
+//         buzzer->programBuzzerRoll(rest_1);
+//       }
+       
+//     }else{
+//       TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
+//       TIMER_REACTION_GAME_RESTART_DELAY.start();
+//       buzzer->programBuzzerRoll(F4_1);  
+//       buzzer->programBuzzerRoll(F4_1);  
+//       buzzer->programBuzzerRoll(F4_1);  
+//       buzzer->programBuzzerRoll(F4_1);  
+//     }
+//   }
+  
+//   if (getNewNumber){
+//     ledDisp->setBlankDisplay();
+//     lights = 0b00000000; //reset before switch enquiry
+    
+//     REACTION_GAME_TARGET = random(REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1, 4);
+    
+//     displayAllSegments = 0; //reset animation graphics screen
+//     REACTION_GAME_TIMER_STEP= 0; //reset animation step
+
+//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+//        //play by sounds
+//        buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
+//     }else{
+//       lights |= 1<<lights_indexed[REACTION_GAME_TARGET];     
+//     }
+//     ledDisp->SetLedArray(lights); 
+//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+//       TIMER_REACTION_GAME_SPEED.setInitTimeMillis(TIMER_REACTION_GAME_SPEED.getInitTimeMillis()*0.99);
+//     }        
+//     TIMER_REACTION_GAME_SPEED.start();    
+//   }
+// }
 
 void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
 	//as the number of write operations to eeprom is limited, only write when different value.
