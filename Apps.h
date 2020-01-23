@@ -371,8 +371,7 @@ class Apps{
     };
 
     uint8_t sequencer_song[sequencer_bufsize]; // also used for simon game
-    //uint8_t* game_random;
-
+    
     uint32_t displayAllSegments;
 
     
@@ -384,8 +383,6 @@ class Apps{
     
     uint8_t array_4_bytes [4];
 
-    //uint8_t reactionGameTarget;
-    
     uint32_t displaySequence[32];
 
 

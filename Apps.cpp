@@ -138,6 +138,7 @@ void Apps:: setDefaultMode(){
   buzzer->setSpeedRatio(1);
   buzzer->buzzerOff();
   buzzer->setTranspose(0);
+
 }
 
 bool Apps::init_app(bool init, uint8_t selector){
@@ -1059,6 +1060,19 @@ void Apps::miniMultiTimer(bool init){
   }  
   
   // TIMER BUTTONS
+  #ifndef PROTOTYPE
+  
+  if (binaryInputs[BUTTON_MOMENTARY_EXTRA_YELLOW].getEdgeUp()){
+	  this->multiTimer.playerButtonPressEdgeUp(3);
+  }
+  
+  if (binaryInputs[BUTTON_MOMENTARY_EXTRA_YELLOW].getEdgeDown()){
+	  this->multiTimer.playerButtonPressEdgeDown(3);
+   
+  }
+  
+  #endif
+
   if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(2);
   }
@@ -1067,9 +1081,10 @@ void Apps::miniMultiTimer(bool init){
   }
   if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()){
 	  this->multiTimer.playerButtonPressEdgeUp(0);
+    //Serial.println("eijejfjeetttt");
   }
   
-  if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeDown()){
+    if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeDown()){
 	  this->multiTimer.playerButtonPressEdgeDown(2);
   }
   if (binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeDown()){
@@ -1078,6 +1093,8 @@ void Apps::miniMultiTimer(bool init){
   if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeDown()){
 	  this->multiTimer.playerButtonPressEdgeDown(0);
   }
+
+
 
   // START STOP Button
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
@@ -1099,8 +1116,12 @@ void Apps::miniMultiTimer(bool init){
   // THE DIAL
   if (potentio->getValueStableChangedEdge()){
 	  // number of timers
-	  this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
 
+    #ifdef PROTOTYPE
+    this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,3));
+    #else
+	  this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1,MAX_TIMERS_COUNT));
+    #endif
 	  // convert value to predefined amount of seconds.
 	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
       

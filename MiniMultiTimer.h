@@ -25,7 +25,7 @@ const uint16_t timeDialDiscreteSeconds [] = {
 
 class MiniMultiTimer{
 	
-	#define MAX_TIMERS_COUNT 3
+	#define MAX_TIMERS_COUNT 4
 	#define DEFAULT_INIT_TIME_SECS 600  //600
 	#define DEFAULT_FISCHER_TIMER_SECS 0
 	#define DEFAULT_TIMERS_COUNT 2
