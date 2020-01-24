@@ -10,8 +10,8 @@
 
 
 
-//#define ENABLE_MULTITIMER
-//#define SIMON_APP
+#define ENABLE_MULTITIMER
+#define SIMON_APP
 #ifdef ENABLE_MULTITIMER
   #include "MiniMultiTimer.h"
 #endif
