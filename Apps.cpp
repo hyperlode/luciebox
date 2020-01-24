@@ -69,8 +69,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  
 		case 2:
 		  //sound fun with frequencies.
+      #ifdef SIMON_APP
 		  this->modeSimon(init);
-
+      #endif
 		  break;
 		  
 		case 3:
@@ -1531,6 +1532,8 @@ void Apps::modeMetronome(bool init){
   
 }
 
+#ifdef SIMON_APP
+
 void Apps::modeSimon(bool init)
 {
   const int numButtons = 4;
@@ -1649,6 +1652,7 @@ void Apps::modeSimon(bool init)
     }
   }
 }
+#endif 
 
 int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue){
 
@@ -1676,7 +1680,7 @@ void Apps::modeReactionGame(bool init){
   if (init){
     randomSeed(millis());
     reactionGameState = reactionWaitForStart;
-    displayAllSegments = 0;
+    displayAllSegments = 0x0;
   }
 
   // at any time, leave game when depressing play button.
@@ -1685,30 +1689,42 @@ void Apps::modeReactionGame(bool init){
   }
  
   switch (reactionGameState) {
+
     case reactionWaitForStart: {
+
+      ledDisp->SetFourDigits(displayAllSegments);
+
       if (binaryInputs[BUTTON_LATCHING_YELLOW].getEdgeUp() ){
         reactionGameState = reactionNewGame;
-  
+
         //play by sound
         for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
           REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
         }
 
-        if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue() ){
-          reactionGameState = reactionNewGame;
-          REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-        }
-      }
+        //if (binaryInputs[BUTTON_LATCHING_YELLOW].getValue() ){
+        REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+        //}
+      } 
+
       break;
     }
 
     case reactionNewGame: {
-        
-      reactionGameState = reactionNewTurn;
+      
       TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
       REACTION_GAME_SCORE = 0;
-  
+
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+
+        reactionGameState = reactionMultiNewTurn;
+        displayAllSegments = 0;
+        
+      }else{
+        reactionGameState = reactionNewTurn;
+      }
      break;
+
     }
 
     case reactionMultiNewTurn: {
@@ -1717,76 +1733,98 @@ void Apps::modeReactionGame(bool init){
       // three rows of four horizontal segments in 4 digits 7 segment display. 
       // choose top row random. any combination of 4 (including zero) ==> 16 combinations.
 
-
+      ledDisp->setBlankDisplay(); 
+      lights = 0b00000000;
+     
       //lights = 0;
-
       uint8_t segment;
+      uint8_t new_segment;
+      uint32_t tmp_segments;
+      tmp_segments = 0;
+      new_segment = 0;
+
+      //displayAllSegments = 0; // UNDO THIS
       // treat every segment separatly
       for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+      
+        //segment = 0; // UNDO THIS
         
-        // get relevant segment
+        // // get relevant segment
         segment = displayAllSegments >> (8*i); 
 
-        //mid seg to bottom seg
-        segment |= (segment & 0b01000000) >> 3// G segment, move to D segment  0G00D000
+        // //mid seg to bottom seg
+        new_segment |= (segment & 0b01000000) >> 3;// G segment, move to D segment  0G00D000
         
-        //mid seg to DP seg
-        segment |= (segment & 0b01000000) << 1// G segment, move to DP segment  DP.G.0.0.0.0.0.0
+        // //mid seg to DP seg
+        new_segment |= (segment & 0b01000000) << 1;// G segment, move to DP segment  DP.G.0.0.0.0.0.0
 
         //top seg to mid seg
-        segment |= (segment & 0b00000001)  << 6// A segment, ON or OFF?, move to G segment
+        new_segment |= (segment & 0b00000001)  << 6;// A segment, ON or OFF?, move to G segment
 
         // random top
-        segment |= random(0, 2);  // 0 or 1  // move to segment A
+        // if (random(0, 2)){  // 0 or 1  // move to segment A)
+        //   new_segment |= 1;
+        // }else{
+        //   new_segment &= ~(0b00000001);
+        // }
+        // new_segment |= random(0, 2);
+        if (random(0, 100) > 70){
+          new_segment |= 0b00000001;
+        }
 
-        displayAllSegments |= segment<< (8*i)
+        tmp_segments |= ((uint32_t)new_segment) << (8*i);
+        
+        
       }
-
+      displayAllSegments = tmp_segments;
       //ledDisp->SetLedArray(lights); 
       ledDisp->SetFourDigits(displayAllSegments);
       TIMER_REACTION_GAME_SPEED.start();
-      break;   
+
+      reactionGameState = reactionMultiPlaying;
+      break; 
     }
 
     case reactionMultiPlaying: {
-      if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
-        // if not all needed buttons pressed, player is dead.
-        // check dps!
 
-        if ((displayAllSegments & 0x80808080) != 0 ){
+      for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+
+        if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
+          //if DP of this button was on, switch it off. else, die!
+          //check if DP of digit "i" is set
+          
+          if (displayAllSegments & (0x80UL << 8*i)){
+            // DP is on, set to zero.
+            displayAllSegments &= ~(0x80UL << 8*i);
+          }else{
+             //DP is off --> button should not have been pressed.
+            reactionGameState = reactionJustDied;
+          }
+        }
+      }
+
+      if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
+      //   // if not all needed buttons pressed, player is dead.
+      //   // check dps!
+        
+        if ((displayAllSegments & 0x80808080UL) != 0 ){
           // no success... (not all DP's cleared.)
-          reactionGameState = reactionFinished;
+          reactionGameState = reactionJustDied;
+          //TIMER_REACTION_GAME_SPEED.reset();
+          //Serial.println("dead");
         }else{
           // success!
           reactionGameState = reactionMultiNewTurn;
           REACTION_GAME_SCORE++;
         }
       }
-
-      for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-        if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
-          //if DP of this button was on, switch it off. else, die!
-          //check if DP of digit "i" is set
-          if (displayAllSegments & (0x80 <<i)){
-            // DP is on, set to zero.
-            displayAllSegments &= (0x80 <<i);
-          }else{
-             //DP is off --> button should not have been pressed.
-             reactionGameState = reactionFinished;
-          }
-
-        }
-      }
-
+      ledDisp->SetFourDigits(displayAllSegments);
       break;
     }
 
-     
-
-    
     case reactionNewTurn:{
      
-      //ledDisp->setBlankDisplay();
+      ledDisp->setBlankDisplay(); // yes, this is needed.
       lights = 0b00000000; //reset before switch enquiry
       
       REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
@@ -1814,6 +1852,9 @@ void Apps::modeReactionGame(bool init){
     }
     
     case reactionPlaying: {
+
+
+      
       // animation next step
       if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
         // game timing animation update.
@@ -1830,17 +1871,20 @@ void Apps::modeReactionGame(bool init){
         if (REACTION_GAME_TIMER_STEP == 12){
           REACTION_GAME_TIMER_STEP = 0;
           displayAllSegments=0;    
-          if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
-            // timed out.
-            reactionGameState = reactionJustDied;
-          }else{
-            // time out not enabled.
-            TIMER_REACTION_GAME_SPEED.start();
-          }
+          
+          reactionGameState = reactionJustDied;
+         
         }else{
           TIMER_REACTION_GAME_SPEED.start();
         }   
       }
+
+      // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
+      //if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_YELLOW].getValue() )){
+        //always show unless in soundmode->competition
+        ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
+      //}
+        
 
       // check player input
       if ( binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ) {
@@ -1916,154 +1960,10 @@ void Apps::modeReactionGame(bool init){
 
   }
     
-  // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
-  if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
-     //always show unless in soundmode->competition
-    ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
-  }
+
 
 
 }
-// void Apps::modeReactionGame(bool init){
-//   //yellow button active at start: yellow button is also a guess button
-//   // big red active: timed game
-//   // small red right active: time progressively shorter as game advances
-//   // small red left active: play by sound.
-  
-//   bool getNewNumber = false;
-//   bool isDead = false;
-  
-//   if (init){
-//     REACTION_GAME_SCORE = 0; // holds score
-//     randomSeed(millis());
-//     getNewNumber = true;
-//     TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
-
-//     REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-//     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
-    
-//     REACTION_GAME_TIMER_STEP = 0;
-//     displayAllSegments = 0;
-//     REACTION_GAME_YELLOW_BUTTON_INCLUDED = binaryInputs[BUTTON_LATCHING_YELLOW].getValue();
-    
-//     for (uint8_t i=0;i<4;i++){
-//       REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
-//     }
-//   }
-
-//   // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
-//   if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() )){
-//      //always show unless in soundmode->competition
-//     ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
-//   }
-
-//   // animation next step
-//   if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
-//     // game timing animation update.
-//     for (uint8_t i=0;i<4;i++){
-//       displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
-//     }
-//     ledDisp->SetFourDigits(displayAllSegments);
-     
-//     REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
-    
-//     TIMER_REACTION_GAME_SPEED.reset();
-	
-// 	// check game status 'dead'
-//     if (REACTION_GAME_TIMER_STEP == 12){
-//       REACTION_GAME_TIMER_STEP = 0;
-//       displayAllSegments=0;    
-//       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() ){
-//         // timed out.
-//         isDead = true;
-//       }else{
-//         // time out not enabled.
-//         TIMER_REACTION_GAME_SPEED.start();
-//       }
-//     }else{
-//       TIMER_REACTION_GAME_SPEED.start();
-//     }   
-//   }
-  
-//   if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative()){
-//     //end of display high score, next number
-//     REACTION_GAME_SCORE = 0;
-//     getNewNumber = true;
-//     TIMER_REACTION_GAME_RESTART_DELAY.reset();
-//     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
-       
-//   }else if(TIMER_REACTION_GAME_RESTART_DELAY.getIsStarted()){
-//      //do nothing.  wait for display high score is finished.
-//      if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
-//         ledDisp->setBlankDisplay(); //make high score blink
-//      }else{
-//         ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
-//      }
-
-//   }else if (binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ||
-//       (binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged()&& REACTION_GAME_TARGET == 0))
-//   {
-//     //right button
-//     REACTION_GAME_SCORE++;
-//     getNewNumber = true;
-//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-//       //play by sounds
-//       //buzzer->programBuzzerRoll(C7_8);
-//       buzzer->programBuzzerRoll(rest_1);
-//       //buzzer->programBuzzerRoll(rest_1);
-//     }
-      
-//   }else if (binaryInputs[BUTTON_MOMENTARY_RED].getEdgeUp()  ||
-//       binaryInputs[BUTTON_MOMENTARY_GREEN].getEdgeUp()  ||
-//       binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp() ||
-//       binaryInputs[BUTTON_LATCHING_YELLOW].getValueChanged())
-//   {
-//     //wrong button
-//       isDead = true;
-//   }
-  
-//   if (isDead){
-//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-//       TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-//       TIMER_REACTION_GAME_RESTART_DELAY.start();
-//       //play by sounds
-//       for (uint8_t i=REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1;i<4;i++){
-//         buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]+128);
-//         buzzer->programBuzzerRoll(rest_1);
-//       }
-       
-//     }else{
-//       TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-//       TIMER_REACTION_GAME_RESTART_DELAY.start();
-//       buzzer->programBuzzerRoll(F4_1);  
-//       buzzer->programBuzzerRoll(F4_1);  
-//       buzzer->programBuzzerRoll(F4_1);  
-//       buzzer->programBuzzerRoll(F4_1);  
-//     }
-//   }
-  
-//   if (getNewNumber){
-//     ledDisp->setBlankDisplay();
-//     lights = 0b00000000; //reset before switch enquiry
-    
-//     REACTION_GAME_TARGET = random(REACTION_GAME_YELLOW_BUTTON_INCLUDED?0:1, 4);
-    
-//     displayAllSegments = 0; //reset animation graphics screen
-//     REACTION_GAME_TIMER_STEP= 0; //reset animation step
-
-//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-//        //play by sounds
-//        buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
-//     }else{
-//       lights |= 1<<lights_indexed[REACTION_GAME_TARGET];     
-//     }
-//     ledDisp->SetLedArray(lights); 
-//     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-//       TIMER_REACTION_GAME_SPEED.setInitTimeMillis(TIMER_REACTION_GAME_SPEED.getInitTimeMillis()*0.99);
-//     }        
-//     TIMER_REACTION_GAME_SPEED.start();    
-//   }
-// }
 
 void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
 	//as the number of write operations to eeprom is limited, only write when different value.

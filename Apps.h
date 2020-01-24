@@ -10,8 +10,8 @@
 
 
 
-#define ENABLE_MULTITIMER
-
+//#define ENABLE_MULTITIMER
+//#define SIMON_APP
 #ifdef ENABLE_MULTITIMER
   #include "MiniMultiTimer.h"
 #endif
@@ -391,10 +391,13 @@ class Apps{
         reactionPlaying,
         reactionJustDied,
         reactionFinished,
+        reactionMultiNewTurn,
+        reactionMultiPlaying,
         
     };
     ReactionGameState reactionGameState;
 
+    #ifdef SIMON_APP
     // simon
     enum SimonState:uint8_t {
         simonWaitForNewGame,
@@ -406,6 +409,7 @@ class Apps{
     SimonState simonState;
     //uint8_t simonLength;
     //int8_t simonIndex;
+    #endif
 
     char*  textBuf;
     char*  scrollBuf;

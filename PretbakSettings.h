@@ -2,7 +2,7 @@
 
 #define PIN_DUMMY 66
 #define PIN_DUMMY_2 67
-
+#define PIN_DUMMY_3 68
 
 
 #ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
@@ -42,7 +42,9 @@
 #endif 
 
 #define PIN_BUZZER A5
-  
+// #define PIN_BUZZER PIN_DUMMY_3
+
+
 #define LIGHT_RED 	    1
 #define LIGHT_GREEN     6
 #define LIGHT_BLUE 	    2
