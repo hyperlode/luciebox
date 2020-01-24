@@ -1741,21 +1741,18 @@ void Apps::modeReactionGame(bool init){
       uint8_t new_segment;
       uint32_t tmp_segments;
       tmp_segments = 0;
-      new_segment = 0;
-
+      
       //displayAllSegments = 0; // UNDO THIS
       // treat every segment separatly
       for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-      
-        //segment = 0; // UNDO THIS
-        
-        // // get relevant segment
+        new_segment = 0;
+        // get relevant segment
         segment = displayAllSegments >> (8*i); 
 
-        // //mid seg to bottom seg
+        //mid seg to bottom seg
         new_segment |= (segment & 0b01000000) >> 3;// G segment, move to D segment  0G00D000
         
-        // //mid seg to DP seg
+        //mid seg to DP seg
         new_segment |= (segment & 0b01000000) << 1;// G segment, move to DP segment  DP.G.0.0.0.0.0.0
 
         //top seg to mid seg
@@ -1768,15 +1765,17 @@ void Apps::modeReactionGame(bool init){
         //   new_segment &= ~(0b00000001);
         // }
         // new_segment |= random(0, 2);
-        if (random(0, 100) > 70){
+        
+        if (random(0, 100) > 50){
           new_segment |= 0b00000001;
         }
 
         tmp_segments |= ((uint32_t)new_segment) << (8*i);
         
-        
       }
+
       displayAllSegments = tmp_segments;
+
       //ledDisp->SetLedArray(lights); 
       ledDisp->SetFourDigits(displayAllSegments);
       TIMER_REACTION_GAME_SPEED.start();
@@ -1796,6 +1795,7 @@ void Apps::modeReactionGame(bool init){
           if (displayAllSegments & (0x80UL << 8*i)){
             // DP is on, set to zero.
             displayAllSegments &= ~(0x80UL << 8*i);
+            REACTION_GAME_SCORE++; 
           }else{
              //DP is off --> button should not have been pressed.
             reactionGameState = reactionJustDied;
@@ -1810,12 +1810,11 @@ void Apps::modeReactionGame(bool init){
         if ((displayAllSegments & 0x80808080UL) != 0 ){
           // no success... (not all DP's cleared.)
           reactionGameState = reactionJustDied;
-          //TIMER_REACTION_GAME_SPEED.reset();
-          //Serial.println("dead");
+          
         }else{
           // success!
           reactionGameState = reactionMultiNewTurn;
-          REACTION_GAME_SCORE++;
+          //REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
         }
       }
       ledDisp->SetFourDigits(displayAllSegments);
@@ -1852,8 +1851,6 @@ void Apps::modeReactionGame(bool init){
     }
     
     case reactionPlaying: {
-
-
       
       // animation next step
       if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
@@ -1880,11 +1877,11 @@ void Apps::modeReactionGame(bool init){
       }
 
       // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
-      //if (!(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && binaryInputs[BUTTON_LATCHING_YELLOW].getValue() )){
+      if ( !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() ){
+
         //always show unless in soundmode->competition
         ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
-      //}
-        
+      }
 
       // check player input
       if ( binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ) {
@@ -1957,12 +1954,7 @@ void Apps::modeReactionGame(bool init){
       }
       break;
     }
-
   }
-    
-
-
-
 }
 
 void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
