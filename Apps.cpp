@@ -1736,27 +1736,25 @@ void Apps::modeReactionGame(bool init){
       ledDisp->setBlankDisplay(); 
       lights = 0b00000000;
      
-      //lights = 0;
-      uint8_t segment;
       uint8_t new_segment;
       uint32_t tmp_segments;
+      
       tmp_segments = 0;
       
-      //displayAllSegments = 0; // UNDO THIS
       // treat every segment separatly
       for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
         new_segment = 0;
         // get relevant segment
-        segment = displayAllSegments >> (8*i); 
+        
 
         //mid seg to bottom seg
-        new_segment |= (segment & 0b01000000) >> 3;// G segment, move to D segment  0G00D000
+        new_segment |= ((displayAllSegments >> (8*i)) & 0b01000000) >> 3;// G segment, move to D segment  0G00D000
         
         //mid seg to DP seg
-        new_segment |= (segment & 0b01000000) << 1;// G segment, move to DP segment  DP.G.0.0.0.0.0.0
+        new_segment |= ((displayAllSegments >> (8*i)) & 0b01000000) << 1;// G segment, move to DP segment  DP.G.0.0.0.0.0.0
 
         //top seg to mid seg
-        new_segment |= (segment & 0b00000001)  << 6;// A segment, ON or OFF?, move to G segment
+        new_segment |= ((displayAllSegments >> (8*i)) & 0b00000001)  << 6;// A segment, ON or OFF?, move to G segment
 
         // random top
         // if (random(0, 2)){  // 0 or 1  // move to segment A)
