@@ -51,17 +51,20 @@
 #define GEIGER_TONE_FREQUENY_LOWEST counter
 #define DRAW_ACTIVE_SEGMENT counter
 #define SIMON_LENGTH counter
+#define METRONOME_TICKER_1_POSITION counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
 #define DRAW_X_POS counter2
 #define SIMON_INDEX counter2
+#define METRONOME_TICKER_2_POSITION counter2
 
 #define DRAW_Y_POS counter3
 #define COUNTER_GEIGER counter3
 #define GEIGER_INCREASE_CHANCE counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
+#define METRONOME_TICKER_3_POSITION counter3
 
 #define DRAW_DISP_STATE array_4_bytes
 #define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
@@ -272,9 +275,9 @@ const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,re
 const uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE, LIGHT_LED_1, LIGHT_LED_2, LIGHT_LED_3};
 
 #if MOMENTARY_BUTTONS_COUNT == 3
-  const uint8_t buttons_momentary_indexed [] = { BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE};
+  const uint8_t buttons_momentary_indexed [] = { BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
 #else
-  const uint8_t buttons_momentary_indexed [] = {BUTTON_MOMENTARY_RED, BUTTON_MOMENTARY_GREEN, BUTTON_MOMENTARY_BLUE, BUTTON_MOMENTARY_EXTRA_YELLOW};
+  const uint8_t buttons_momentary_indexed [] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3};
 
 #endif
 
