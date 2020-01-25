@@ -71,6 +71,10 @@
 
 #define REACTION_GAME_YELLOW_BUTTON_INCLUDED general_boolean  
 
+#define SIMON_LIST bytes_list
+#define SEQUENCER_SONG bytes_list
+#define FADE_IN_RANDOM_LIST bytes_list
+
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
 
@@ -345,9 +349,11 @@ class Apps{
     void miniMultiTimer(bool init);
     void modeDiceRoll(bool init);
     
-    
-    void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen);
+    uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence);    
+    // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
     void shuffle(uint8_t* list, uint8_t length);
+
+
     
   private:
     DataPlayer dataPlayer;
@@ -360,18 +366,20 @@ class Apps{
     void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
     
     SuperTimer generalTimer;
-   // SuperTimer generalTimer2;
-    
+ 
     //global app variables
     enum {
-      sequencer_bufsize = 32,
+      bytes_list_bufsize = 32,
     };
 
-    uint8_t sequencer_song[sequencer_bufsize]; // also used for simon game
-    
-    uint32_t displayAllSegments;
-    uint32_t displaySequence[32];
+    //sequencer_bufsize
 
+    uint8_t bytes_list[bytes_list_bufsize]; // also used for simon game
+    //sequencer_song
+
+
+    uint32_t displayAllSegments;
+    //uint32_t displaySequence[32];
 
     //reused variables per app
     bool general_boolean;
@@ -407,8 +415,7 @@ class Apps{
         simonUserRepeats,
     };
     SimonState simonState;
-    //uint8_t simonLength;
-    //int8_t simonIndex;
+
     #endif
 
     char*  textBuf;

@@ -3,11 +3,7 @@
 #include "PretbakSettings.h"
 
 Apps::Apps(){
-	//initialize sequencer note only at apps startup.  
-	for (uint8_t i=0;i<32;i++){
-		this->sequencer_song[i] = C7_8;
-	}
-	// dataPlayer
+
 };
 
 void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer){
@@ -152,7 +148,15 @@ bool Apps::init_app(bool init, uint8_t selector){
       this->displayAllSegments |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
     }
 		
-		this->fadeInList(displaySequence, 32, this->displayAllSegments);
+    // initialize list
+    for (uint8_t i = 0; i < bytes_list_bufsize; i++) {
+     	this->FADE_IN_RANDOM_LIST[i] = i;
+    }
+
+    // // shuffle in place
+    this->shuffle(this->FADE_IN_RANDOM_LIST, bytes_list_bufsize);
+
+		//this->fadeInList(step, bytes_list_bufsize, this->displayAllSegments, this->FADE_IN_RANDOM_LIST);
 		// counter = 0;
 		// this->TIMER_INIT_APP.setInitTimeMillis(-5); 
 
@@ -177,10 +181,11 @@ bool Apps::init_app(bool init, uint8_t selector){
 		ledDisp->showNumber(selector);
 		
 	}else if (counter == 50){
-		this->fadeInList(displaySequence, 32, ~this->displayAllSegments);
+		//this->fadeInList(displaySequence, 32, ~this->displayAllSegments);
 		
 	}else if (counter < 82 ){
-		ledDisp->SetFourDigits(~displaySequence[counter-51]);
+		//ledDisp->SetFourDigits(~displaySequence[counter-51]);
+    ledDisp->SetFourDigits(~ this->fadeInList(counter-51, bytes_list_bufsize, this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); 
 		
 	}else {
 		this->setDefaultMode();
@@ -1370,9 +1375,10 @@ void Apps::modeSequencer(bool init){
 			generalTimer.start();
 			nextStep = true;
 			
-			// for (uint8_t i=0;i<32;i++){
-				// this->sequencer_song[i] = C7_8;
-			// }
+      //resets song.
+			for (uint8_t i=0;i<32;i++){
+			  this->SEQUENCER_SONG[i] = C7_8;
+			}
 		}
 		
 		if (binaryInputs[BUTTON_MOMENTARY_BLUE].getEdgeUp()){
@@ -1401,10 +1407,10 @@ void Apps::modeSequencer(bool init){
 			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
 				//copy to all measures
 				for (uint8_t i=0;i<4;i++){
-					this->sequencer_song[(counter%8) + 8*i] = note;
+					this->SEQUENCER_SONG[(counter%8) + 8*i] = note;
 				}
 			}else{
-				this->sequencer_song[counter] = note;
+				this->SEQUENCER_SONG[counter] = note;
 			}
 		}
 		
@@ -1425,7 +1431,7 @@ void Apps::modeSequencer(bool init){
 			if (counter > 31){
 				counter = 0;
 			}
-			buzzer->programBuzzerRoll(this->sequencer_song[counter]);
+			buzzer->programBuzzerRoll(this->SEQUENCER_SONG[counter]);
 			
 			// sequencer shows every step in 32 notes bar. 8steps (circle) times 4 measures (bar on bottom)
 			uint32_t screen = 0;
@@ -1581,10 +1587,10 @@ void Apps::modeSimon(bool init)
       ledDisp->SetLedArray(0);
       // generate new sequence
       randomSeed(millis());
-      for (int k = 0; k < sequencer_bufsize; ++k) {
-        sequencer_song[k] = k % numButtons;
+      for (int k = 0; k < bytes_list_bufsize; ++k) {
+        SIMON_LIST[k] = k % numButtons;
       }
-      shuffle(sequencer_song, sequencer_bufsize);
+      shuffle(SIMON_LIST, bytes_list_bufsize);
       SIMON_LENGTH = 0;
       simonState = simonNewLevel;
       break;
@@ -1593,7 +1599,7 @@ void Apps::modeSimon(bool init)
     case simonNewLevel: {
       ledDisp->showNumber(SIMON_LENGTH);
       ++SIMON_LENGTH;
-      if (SIMON_LENGTH >= sequencer_bufsize) {
+      if (SIMON_LENGTH >= bytes_list_bufsize) {
           // reached maximum length
           if (hasSound) buzzer->loadBuzzerTrack(song_attack);
           simonState = simonWaitForNewGame;
@@ -1622,7 +1628,7 @@ void Apps::modeSimon(bool init)
         break;
       }
       // show one button from the sequence
-      const uint8_t button = sequencer_song[SIMON_INDEX];
+      const uint8_t button = SIMON_LIST[SIMON_INDEX];
       if (hasLight) ledDisp->SetLedArray(lights[button]);
       if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
       ++SIMON_INDEX;
@@ -1633,7 +1639,7 @@ void Apps::modeSimon(bool init)
       if (!buttonsChanged) {
         break;
       }
-      const int expected = sequencer_song[SIMON_INDEX];
+      const int expected = SIMON_LIST[SIMON_INDEX];
       if (buttonsChanged != (1 << expected)) {
         // player made mistake, start new game
         if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
@@ -1962,25 +1968,48 @@ void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
 	}
 }
 
-void Apps::fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen){
+uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence ){
 	
-  uint8_t sequence[32];
-	for (uint8_t i = 0; i < 32; i++) {
-		sequence[i] = i;
-	}
+
+  // uint8_t sequence[32];
+	// for (uint8_t i = 0; i < 32; i++) {
+	// 	sequence[i] = i;
+	// }
 	
-	// shuffle in place
-	this->shuffle(sequence, 32);
+	// // shuffle in place
+	// this->shuffle(sequence, 32);
 	
 	// fade in effect, enable random segments.
 	// uint32_t fullScreen = 0x00000000;
 	uint32_t fullScreen = startScreen;
 	
-	for (uint8_t i=0; i<32;i++){
-		fullScreen |= 1UL <<sequence[i];// 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
-		movie[i] = fullScreen;
+	for (uint8_t i=0; i<step;i++){
+		fullScreen |= 1UL <<shuffledSequence[i];// 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
+		
 	}
+  return fullScreen;
 }
+
+// void Apps::fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen, ){
+	
+//   uint8_t sequence[32];
+// 	for (uint8_t i = 0; i < 32; i++) {
+// 		sequence[i] = i;
+// 	}
+	
+// 	// shuffle in place
+// 	this->shuffle(sequence, 32);
+	
+// 	// fade in effect, enable random segments.
+// 	// uint32_t fullScreen = 0x00000000;
+// 	uint32_t fullScreen = startScreen;
+	
+// 	for (uint8_t i=0; i<32;i++){
+// 		fullScreen |= 1UL <<sequence[i];// 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
+// 		movie[i] = fullScreen;
+// 	}
+// }
+
 
 void Apps::shuffle(uint8_t* listToShuffle, uint8_t length) {
 	//shuffle the array:
