@@ -54,6 +54,7 @@ char  scrollBuf [1]; //was 40, but, it does not get used anyways!!
 
 //debug mode
 bool debugMode;
+bool silentMode;
 
 void refresh(){
   //input process  
@@ -196,15 +197,26 @@ void setup() {
   mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
   mercurySwitches.setDebounceMillis(30);
 
-  buzzer.setPin(PIN_BUZZER);
-
   potentio.setPin(PIN_POTENTIO);
   
   ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
   //ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
 
+  // if no latching buttons pressed at startup, disable sound 
+  //(a "Lode listens to the parents"-initiative)
+  silentMode = false;
+  if (analogRead(PIN_BUTTONS_2) == 0){
+    silentMode = true;
+  }
+  
+  if (silentMode){
+    buzzer.setPin(PIN_BUZZER_FAKE);
+  }else{
+    buzzer.setPin(PIN_BUZZER);
+  }
+  
 
-  pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
+  pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer, silentMode);
   pretbak_apps.setBuffers(scrollBuf, textBuf);
   pretbak_apps.setDefaultMode();
   

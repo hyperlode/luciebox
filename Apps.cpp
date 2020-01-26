@@ -3,14 +3,14 @@
 #include "PretbakSettings.h"
 
 Apps::Apps(){
-
 };
 
-void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer){
+void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer, bool silentMode){
   this->buzzer = buzzer;
   this->binaryInputs = binaryInputs;
   this->potentio = potentio;
   this->ledDisp = ledDisp;
+  this->silentMode = silentMode;
 }
 
 void Apps::setBuffers(  char*  textBuf, char*  scrollBuf){
@@ -1317,38 +1317,45 @@ void Apps::modeGeiger(bool init){
 
     if (r > GEIGER_PROBABILITY_THRESHOLD){ // 1024*1024
       
-      if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-        // when tone playing, play it until next tone
-        tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST));
-      }else{
-        // limited time length tone
-        tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST), GEIGER_TONE_LENGTH);
+
+      if (!this->silentMode){
+        if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+          // when tone playing, play it until next tone
+          //tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST));
+        }else{
+          // limited time length tone
+          //tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST), GEIGER_TONE_LENGTH);
+        }
       }
-      
+
       COUNTER_GEIGER++;
       ledDisp->showNumber(COUNTER_GEIGER);
       
     }
     
   }else{
-	// simple Geiger mode
-	// todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
+    // simple Geiger mode
+    // todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
+    
+    // If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
+    if ( binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+      // binaryInputs[SWITCH_TILT_FORWARD].getValue() ||
+      // r *= 2; //
+      GEIGER_INCREASE_CHANCE+=1000;
+    }else{
+      if (GEIGER_INCREASE_CHANCE > 0){
+        GEIGER_INCREASE_CHANCE-=1500;
+      }
+    }
+
+    r+=GEIGER_INCREASE_CHANCE;
 	
-	// If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
-	if ( binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-		// binaryInputs[SWITCH_TILT_FORWARD].getValue() ||
-		// r *= 2; //
-		GEIGER_INCREASE_CHANCE+=1000;
-	}else{
-		if (GEIGER_INCREASE_CHANCE > 0){
-			GEIGER_INCREASE_CHANCE-=1500;
-		}
-	}
-	r+=GEIGER_INCREASE_CHANCE;
-	
-  if (r > potentio->getValueMapped(0,1048576)){
-  //    buzzer->programBuzzerRoll(1); //not beep but "puck"
- 	  tone(PIN_BUZZER, (unsigned int)50, 10);
+    if (r > potentio->getValueMapped(0,1048576)){
+    //    buzzer->programBuzzerRoll(1); //not beep but "puck"
+
+      if (this->silentMode){
+        tone(PIN_BUZZER, (unsigned int)50, 10);
+      }
     
       textBuf[1]='?';
       textBuf[2]='?';
@@ -1474,10 +1481,10 @@ void Apps::modeSequencer(bool init){
 }
 
 void Apps::modeMetronome(bool init){
-  
+  // todo: with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen)!
   bool update = 0;
-  bool direction1 = true;
-  bool direction2 = true;
+  // bool direction1 = true;
+  // bool direction2 = true;
   bool nextStep = false;
 
   
@@ -1549,8 +1556,6 @@ void Apps::modeMetronome(bool init){
     nextStep = true;
   }
 
-
-
   if (update){
     uint32_t screen = 0;
     for (uint8_t i=0;i<4;i++){
@@ -1594,7 +1599,6 @@ void Apps::modeMetronome(bool init){
       ){
       buzzer->programBuzzerRoll(C5_4);
     }
-
   }  
 }
 

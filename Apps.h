@@ -326,7 +326,7 @@ class Apps{
     Potentio* potentio;
     
     
-    void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer);
+    void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer, bool silentMode);
     void setBuffers(char* textBuf, char*  scrollBuf);
     void test();
     
@@ -426,7 +426,7 @@ class Apps{
     uint8_t lights;
     
     bool app_init_mode;
-  
+    bool silentMode;
 };
 
 #endif 
