@@ -119,7 +119,6 @@ void Apps::appSelector(bool init, uint8_t selector){
 	}
 }
 
-
 void Apps:: setDefaultMode(){
   //button lights
   ledDisp->SetLedArray(0b00000000);  // no lights
@@ -177,15 +176,15 @@ bool Apps::init_app(bool init, uint8_t selector){
 		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
 
 	}else if (counter < 50){
-		//ledDisp->SetFourDigits(this->displayAllSegments);
-		ledDisp->showNumber(selector);
+		ledDisp->SetFourDigits(this->displayAllSegments);
+		//ledDisp->showNumber(selector);
 		
 	}else if (counter == 50){
 		//this->fadeInList(displaySequence, 32, ~this->displayAllSegments);
 		
 	}else if (counter < 82 ){
 		//ledDisp->SetFourDigits(~displaySequence[counter-51]);
-    ledDisp->SetFourDigits(~ this->fadeInList(counter-51, bytes_list_bufsize, this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); 
+    ledDisp->SetFourDigits(~ this->fadeInList(counter-51, bytes_list_bufsize, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); 
 		
 	}else {
 		this->setDefaultMode();

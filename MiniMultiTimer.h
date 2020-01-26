@@ -64,6 +64,7 @@ class MiniMultiTimer{
 		void setStateFischerTimer(bool set);
 		void setStatePause(bool set);
 		void refresh();
+		void buzzerRefresh(bool alarm);
 		void next();
 		//state getState();
 		

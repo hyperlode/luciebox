@@ -160,15 +160,46 @@ void MiniMultiTimer::continu(){
 	this->timers[this->activeTimer].continu();
 }
 
+void MiniMultiTimer::buzzerRefresh(bool alarm){
+	if ( this->timers[this->activeTimer].getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(100, true, false)){
+		if (alarm){
+
+			uint8_t tmp = random(20,50);
+			for (uint8_t i =0;i<5;i++){
+				(*this->buzzer).programBuzzerRoll(tmp );
+
+				(*this->buzzer).programBuzzerRoll(rest_4);
+			}
+			//(*this->buzzer).addRandomSoundToRoll(20,80 );
+			
+		}
+
+		if (this->timers[this->activeTimer].getTimeSecondsAbsolute() < 11 && this->timers[this->activeTimer].getTimeIsNegative()){ 
+			// check for last ten seconds of countdown timer
+			(*this->buzzer).programBuzzerRoll(34 + this->timers[this->activeTimer].getTimeSecondsAbsolute() );
+			// (*this->buzzer).programBuzzerRoll(63);
+		}
+
+		if (this->timers[this->activeTimer].getTimeSecondsAbsolute() % 60 == 0){
+			(*this->buzzer).programBuzzerRoll(44 );
+			// (*this->buzzer).programBuzzerRoll(63);
+		}
+	}
+}
+
 void MiniMultiTimer::refresh(){
 	
 	if (this->state == playing){
 		
 		//check all timers elapsed
 		if (this->checkAllTimersFinished()){
+			
 			this->state = finished;
 		}else{
-			//check timers
+			
+			buzzerRefresh(false);
+			
+			//check active timer time elapsed
 			if (getTimerFinished(this->activeTimer)){
 				this->next();
 			}
@@ -179,7 +210,7 @@ void MiniMultiTimer::refresh(){
 	}else if (this->state == paused){
 		
 	}else if (this->state == finished){
-		
+		buzzerRefresh(this->timers_count == 1); // alarm will sound if it was only one player.
 	}else if (this->state == setTimers){
         
 	}
@@ -194,8 +225,6 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
     disp[2] = ' ';	
     disp[3] = ' ';	
     disp[4] = ' ';
-    
-	
 	
 	if ( this-> state == initialized){
 		this->timers[this->activeTimer].getTimeString(disp+1);	
@@ -226,7 +255,7 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
         // displayed timer is not always the active timer (i.e. non active player wants to check his time).
 		this->timers[this->timerDisplayed].getTimeString(disp+1);	
 		
-		// other alive timers solid on.
+		// run through all timers to set lights 
 		for (uint8_t i=0;i<this->timers_count;i++){
 			
             if (i == activeTimer){
@@ -237,6 +266,7 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
 					// blinking behaviour of decimal point
 					*settingsLights |= LIGHT_SECONDS_BLINKER;	
                 }
+
             }else if (i == timerDisplayed){
                 // displayed timer is not always the active timer (i.e. non active player wants to check his time).
                 if (millis()%250 > 125){
@@ -252,6 +282,7 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
 			} 
 		}
 		
+		
 		// //decimal point blinker
 		
 		// if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
@@ -261,17 +292,25 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
 		*settingsLights |= LIGHT_PLAYING; //when in timers running mode, solid on.
 		
 	}else if (this->state == finished){
-		disp[1] = 32; //' '
-		disp[2] = 69; //'E'
-		disp[3] = 78; //'N'	
-		disp[4] = 68; //'D'	
-		
+
+		// last surviving timer is now a chrono for displaying time since end.
+
+		if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
+			this->timers[this->activeTimer].getTimeString(disp+1);	
+			*settingsLights |= LIGHT_SECONDS_BLINKER;	
+		}else{
+
+			disp[1] = 32; //' '
+			disp[2] = 69; //'E'
+			disp[3] = 78; //'N'	
+			disp[4] = 68; //'D'	
+		}
 		//fast blink last surviving timer light.
 		if (millis()%250 > 125){
 			*playerLights |= 1 << this->activeTimer;
 		}
 
-		*settingsLights |= LIGHT_SECONDS_BLINKER;	
+		
 		
 	}else if (this->state == paused){
 		if(millis()%1000 > 500 || this->timerDisplayed != this->activeTimer){
@@ -362,14 +401,12 @@ bool MiniMultiTimer::checkAllTimersFinished(){
 	for (uint8_t i=0;i<this->timers_count;i++){
 		this->getTimerFinished(i) ? count++ : count+=0;
 	}
+
 	return count == this->timers_count;
 }
 
 void MiniMultiTimer::next(){
-	// don't check for everybody dead here. If only one timer not finished, will return same activeTimer.
-	if (this->checkAllTimersFinished()){
-		return ;
-	};
+	// don't check for everybody dead here, check at refresh where next is called.
 	
 	if (this->state == playing){
 		this->timers[this->activeTimer].pause();
@@ -381,6 +418,8 @@ void MiniMultiTimer::next(){
 			this->activeTimer >=(this->timers_count-1) ? this->activeTimer=0 : this->activeTimer++;
 		}while(this->getTimerFinished(this->activeTimer)  //if finished go to next timer.
 		);	
+
 		this->timers[this->activeTimer].continu();
+		this->timerDisplayed = this->activeTimer;
 	}
 }
