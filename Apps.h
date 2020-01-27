@@ -333,7 +333,7 @@ class Apps{
     
     void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer, bool silentMode);
     void setBuffers(char* textBuf, char*  scrollBuf);
-    void test();
+    // void test();
     
     void setDefaultMode();
     void appSelector(bool init, uint8_t selector);

@@ -19,6 +19,7 @@ class DisplayManagement {
         ~DisplayManagement();
         void startUp(bool dispHasCommonAnode , byte D0,byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8);
         void startUp(bool dispHasCommonAnode , byte D0,byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8);
+        
         void showNumberAsChars(int16_t number);
         void showNumber(int16_t number);
         void setBlankDisplay();
@@ -26,11 +27,13 @@ class DisplayManagement {
         void SetSingleDigit(uint8_t value, int digit);
         void SetFourDigits(uint32_t value);
         void SetLedArray(byte ledsAsBits);
+
         void displayHandler(char* inText);
         void displayHandlerSequence(char* movie);
         void doSequence();
         void dispHandlerWithScroll(char* intext, bool comeScrollIn, bool scrollOnceElseInfinit);
         void doScroll();
+        
         void get5DigitsFromString(char* in, char* out, int startPos);
         void writeStringToDisplay(char* shortText);
 
@@ -39,6 +42,7 @@ class DisplayManagement {
 
         //set scrollstatus 
         void setIsScrolling(bool enableScroll);
+        
         void setBrightness(byte value, bool exponential);
         void setScrollSpeed(long value);
         void refresh();

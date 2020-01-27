@@ -19,15 +19,15 @@ void Apps::setBuffers(  char*  textBuf, char*  scrollBuf){
    this->lights = lights;  
 }
 
-void Apps::test(){
+// void Apps::test(){
   
-  //(*this->buzzer).programBuzzerRoll(45);
-  (*this->ledDisp).showNumber(666);
-//  if (*this->binaryInputs)[BUTTON_MOMENTARY_0].getValue()){
-  if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-    buzzer->programBuzzerRoll(45);
-  }
-}
+//   //(*this->buzzer).programBuzzerRoll(45);
+//   (*this->ledDisp).showNumber(666);
+// //  if (*this->binaryInputs)[BUTTON_MOMENTARY_0].getValue()){
+//   if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+//     buzzer->programBuzzerRoll(45);
+//   }
+// }
 
 void Apps::appSelector(bool init, uint8_t selector){
 
@@ -1772,15 +1772,11 @@ void Apps::modeReactionGame(bool init){
 
     case reactionWaitForStart: {
 
-      // ledDisp->SetFourDigits(displayAllSegments);
-
-      // REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-      // ledDisp->showNumber( (int16_t) REACTION_GAME_STEP_TIME_MILLIS);
-
-
       REACTION_GAME_LEVEL = (potentio->getValueMapped(1,5)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-      ledDisp->showNumber( (int16_t) REACTION_GAME_LEVEL);
+      intToDigitsString(textBuf+1, REACTION_GAME_LEVEL, false);  // utilities lode
+      textBuf[1] = 'L';
 
+      ledDisp->displayHandler(textBuf);
 
       if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() ){
         reactionGameState = reactionNewGame;
@@ -1805,12 +1801,12 @@ void Apps::modeReactionGame(bool init){
         reactionGameState = reactionMultiNewTurn;
         displayAllSegments = 0;
 
-        REACTION_GAME_STEP_TIME_MILLIS *= 4;
-        REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -140;
+        //REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -140;
+        REACTION_GAME_STEP_TIME_MILLIS = (6-REACTION_GAME_LEVEL) * -200;
         
       }else{
         reactionGameState = reactionNewTurn;
-        REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -35;
+        REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6-REACTION_GAME_LEVEL)) * -35;
       }
 
     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
@@ -2043,9 +2039,10 @@ void Apps::modeReactionGame(bool init){
             ledDisp->setBlankDisplay(); //make high score blink
             
         }else{
-            ledDisp->showNumber(REACTION_GAME_SCORE ); //score display. Leave at beginning, to display high score blinking.
+            ledDisp->showNumber(REACTION_GAME_SCORE); //score display. Leave at beginning, to display high score blinking.
+            // intToDigitsString(textBuf+1, REACTION_GAME_SCORE, false);  // utilities lode
+            // ledDisp->displayHandler(textBuf);
         }
-        
       }
       break;
     }
