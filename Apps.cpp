@@ -34,9 +34,6 @@ void Apps::appSelector(bool init, uint8_t selector){
 	if (init){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
-		
-		// this->TIMER_INIT_APP.setInitTimeMillis(-2000);
-		// this->TIMER_INIT_APP.start();
 		ledDisp->SetFourDigits(0x0ff00f0f); 	
 	}
 	
@@ -130,8 +127,12 @@ void Apps:: setDefaultMode(){
   //ledDisp->SetFourDigits(0xC0C0C0C0); 
   ledDisp->setBrightness(0,false);
 
+  // as tone is used in Geiger, at change of app, would sometimes play continuously...
+  noTone(PIN_BUZZER);
+  
   //buzzer
   buzzer->setSpeedRatio(1);
+
   buzzer->buzzerOff();
   buzzer->setTranspose(0);
 
@@ -294,10 +295,11 @@ void Apps::modeDiceRoll(bool init){
 
   if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || binaryInputs[BUTTON_MOMENTARY_0].getValue()|| binaryInputs[BUTTON_MOMENTARY_1].getValue()){
     
-    counter ++;
-    if (counter > 6){  // about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out!
-      counter = 1;
-    }
+    // DICEROLL_RANDOM_NUMBER ++;
+    // if (DICEROLL_RANDOM_NUMBER > 6){  // NO THIS IS TERRIBLE! about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out!
+    //   DICEROLL_RANDOM_NUMBER = 1;
+    // }
+    DICEROLL_RANDOM_NUMBER = random (1,7);
 
     if (!generalTimer.getTimeIsNegative()){
 
@@ -306,7 +308,7 @@ void Apps::modeDiceRoll(bool init){
         for (uint8_t  i=1;i<4;i++){
           textBuf[i]=textBuf[i+1];
         }
-        textBuf[4] = 48 + counter; // convert digit to number char.
+        textBuf[4] = 48 + DICEROLL_RANDOM_NUMBER; // convert digit to number char.
       }
 
       buzzer->cleanBuzzerRoll();
@@ -337,9 +339,9 @@ void Apps::modeDiceRoll(bool init){
         textBuf[i] = '=';  
 
         //first and third digit
-        if (counter == 1 ){
+        if (DICEROLL_RANDOM_NUMBER == 1){
           textBuf[i] = ' '; // 
-        }else if(counter <4){
+        }else if(DICEROLL_RANDOM_NUMBER < 4){
           textBuf[i] = '^'; // assume first digit seg A
           if( i == 3){
             textBuf[i] = '_'; // seg D
@@ -347,9 +349,9 @@ void Apps::modeDiceRoll(bool init){
         }
 
         //second digit
-        if (i == 2 && counter < 6){
+        if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){
           textBuf[i] = '-'; // assume odd
-          if (counter%2 == 0 ){ // if even
+          if (DICEROLL_RANDOM_NUMBER%2 == 0 ){ // if even
             textBuf[i] = ' '; 
           }
         }
@@ -643,51 +645,60 @@ void Apps::modeSoundSong(bool init){
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
     // advanced mode scales
     if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-      if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-        buzzer->loadBuzzerTrack(scale_major);
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-        //buzzer->loadBuzzerTrack(song_unhappy_dryer);
-      }
       if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
         //buzzer->loadBuzzerTrack(song_attack );
       }
-    }else{
+      if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+        //buzzer->loadBuzzerTrack(song_unhappy_dryer);
+      }
       if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-        buzzer->loadBuzzerTrack(scale_major_reversed);
+        buzzer->loadBuzzerTrack(scale_major);
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+        buzzer->loadBuzzerTrack(scale_pentatonic);
+      }
+
+    }else{
+      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+        //buzzer->loadBuzzerTrack(song_retreat );
       }
       if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
         //buzzer->loadBuzzerTrack(song_unhappy_dryer);
       }
-      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-        //buzzer->loadBuzzerTrack(song_retreat );
+      if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+        buzzer->loadBuzzerTrack(scale_major_reversed);
       }
+      if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+        // buzzer->loadBuzzerTrack(scale_pentatonic_reversed);
+      }
+      
     }
   }else{
     // simple mode: songs!
     if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-      if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_unhappy_dryer);
-		//Serial.println("unhappy");
+      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_retreat );
+		//Serial.println("rettr");
       }
       if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
         buzzer->loadBuzzerTrack(kindeke_douwen);
 		//Serial.println("dow");
       }
-      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_retreat );
-		//Serial.println("rettr");
+      if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_unhappy_dryer);
+		//Serial.println("unhappy");
       }
     }else{
-      if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_happy_dryer);
+      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_attack );
       }
       if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_lang_zal_ze_leven);
       }
-      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-        buzzer->loadBuzzerTrack(song_attack );
+      if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+        buzzer->loadBuzzerTrack(song_happy_dryer);
       }
+      
     }
   }
 }
@@ -1320,10 +1331,10 @@ void Apps::modeGeiger(bool init){
       if (!this->silentMode){
         if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
           // when tone playing, play it until next tone
-          //tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST));
+          tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST));
         }else{
           // limited time length tone
-          //tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST), GEIGER_TONE_LENGTH);
+          tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST), GEIGER_TONE_LENGTH);
         }
       }
 
@@ -1761,7 +1772,15 @@ void Apps::modeReactionGame(bool init){
 
     case reactionWaitForStart: {
 
-      ledDisp->SetFourDigits(displayAllSegments);
+      // ledDisp->SetFourDigits(displayAllSegments);
+
+      // REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+      // ledDisp->showNumber( (int16_t) REACTION_GAME_STEP_TIME_MILLIS);
+
+
+      REACTION_GAME_LEVEL = (potentio->getValueMapped(1,5)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+      ledDisp->showNumber( (int16_t) REACTION_GAME_LEVEL);
+
 
       if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() ){
         reactionGameState = reactionNewGame;
@@ -1770,10 +1789,8 @@ void Apps::modeReactionGame(bool init){
         for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
           REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
         }
+        //REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -35;
 
-        //if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue() ){
-        REACTION_GAME_STEP_TIME_MILLIS = (potentio->getValueMapped(-1024,0)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-        //}
       } 
 
       break;
@@ -1781,17 +1798,23 @@ void Apps::modeReactionGame(bool init){
 
     case reactionNewGame: {
       
-      TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
       REACTION_GAME_SCORE = 0;
 
       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 
         reactionGameState = reactionMultiNewTurn;
         displayAllSegments = 0;
+
+        REACTION_GAME_STEP_TIME_MILLIS *= 4;
+        REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -140;
         
       }else{
         reactionGameState = reactionNewTurn;
+        REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -35;
       }
+
+    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
+      
      break;
 
     }
@@ -1936,8 +1959,6 @@ void Apps::modeReactionGame(bool init){
         
         REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
         
-        TIMER_REACTION_GAME_SPEED.reset();
-      
         // check game status 'dead'
         if (REACTION_GAME_TIMER_STEP == 12){
           REACTION_GAME_TIMER_STEP = 0;

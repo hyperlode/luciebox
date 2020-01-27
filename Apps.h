@@ -52,6 +52,7 @@
 #define DRAW_ACTIVE_SEGMENT counter
 #define SIMON_LENGTH counter
 #define METRONOME_TICKER_1_POSITION counter
+#define DICEROLL_RANDOM_NUMBER counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -72,6 +73,8 @@
 #define GEIGER_TONE_LENGTH counter4
 #define REACTION_GAME_TARGET counter4
 
+#define REACTION_GAME_LEVEL counter5
+
 #define REACTION_GAME_YELLOW_BUTTON_INCLUDED general_boolean  
 
 #define SIMON_LIST bytes_list
@@ -87,7 +90,7 @@ const uint8_t app_splash_screens [] PROGMEM = {
 	0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
 	0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
 	//0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
-  0x32, 0x26, 0x34, 0x16,
+  0x32, 0x26, 0x34, 0x16,  // vertical lines short and long 
 	0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
 	0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
 	0x08, 0xCE, 0x78, 0x08, // abstract piramid
@@ -272,6 +275,7 @@ const uint8_t song_retreat [] PROGMEM = {Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4,
 const uint8_t scale_major [] PROGMEM = {C7_2,rest_4,D7_2,rest_4,E7_2,rest_4,F7_2,rest_4,G7_2,rest_4,A7_2,rest_4,B7_2,rest_4,C8_2,rest_4,BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t scale_major_reversed [] PROGMEM = {C8_2,rest_4,B7_2,rest_4,A7_2,rest_4,G7_2,rest_4,F7_2,rest_4,E7_2,rest_4,D7_2,rest_4,C7_2,rest_4,BUZZER_ROLL_SONG_STOPVALUE};
 
+const uint8_t scale_pentatonic [] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2,BUZZER_ROLL_SONG_STOPVALUE};
 
 const uint8_t lights_indexed [] = {LIGHT_YELLOW, LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE, LIGHT_LED_1, LIGHT_LED_2, LIGHT_LED_3};
 
@@ -391,6 +395,7 @@ class Apps{
     int16_t counter2;
     long counter3;
     uint16_t counter4;
+    uint8_t counter5;
     uint8_t array_4_bytes [4];
 
     

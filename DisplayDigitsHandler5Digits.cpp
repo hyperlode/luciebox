@@ -39,9 +39,9 @@ void DisplayManagement::showNumberAsChars(int16_t number){
 }
 
 void DisplayManagement::showNumber(int16_t number){
-  //negative numbers not yet working.
+  // negative numbers made absolute!
   int16_t c;
-  c = number;
+  c = abs(number);
   for (int i=0;i<4;i++){
     text[4-i] = 48 + c%10; //ascii 48 = 0
     c/=10;
