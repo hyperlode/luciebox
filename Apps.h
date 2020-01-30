@@ -1,17 +1,22 @@
 #ifndef APPS_H 
 #define APPS_H 
+
+
+// #define ENABLE_EEPROM
+#define ENABLE_MULTITIMER
+// #define SIMON_APP
+
 #include "Arduino.h"
 #include "SuperTimer.h"
 #include "Buzzer.h"
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
-#include <avr/eeprom.h>
+#ifdef ENABLE_EEPROM
+   #include <avr/eeprom.h>
+  // #include <EEPROM.h>
+#endif
 
-
-
-#define ENABLE_MULTITIMER
-#define SIMON_APP
 #ifdef ENABLE_MULTITIMER
   #include "MiniMultiTimer.h"
 #endif
@@ -380,14 +385,9 @@ class Apps{
       bytes_list_bufsize = 32,
     };
 
-    //sequencer_bufsize
-
     uint8_t bytes_list[bytes_list_bufsize]; // also used for simon game
-    //sequencer_song
-
 
     uint32_t displayAllSegments;
-    //uint32_t displaySequence[32];
 
     //reused variables per app
     bool general_boolean;
@@ -397,8 +397,6 @@ class Apps{
     uint16_t counter4;
     uint8_t counter5;
     uint8_t array_4_bytes [4];
-
-    
 
     // reaction
     enum ReactionGameState:uint8_t {

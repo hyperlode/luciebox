@@ -6,7 +6,6 @@
 #include "Potentio.h"
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
-#include <EEPROM.h>
 
 //#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 

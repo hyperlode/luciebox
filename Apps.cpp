@@ -1761,6 +1761,10 @@ void Apps::modeReactionGame(bool init){
     randomSeed(millis());
     reactionGameState = reactionWaitForStart;
     displayAllSegments = 0x0;
+    TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
+        
+    TIMER_REACTION_GAME_RESTART_DELAY.start();
+
   }
 
   // at any time, leave game when depressing play button.
@@ -1773,10 +1777,38 @@ void Apps::modeReactionGame(bool init){
     case reactionWaitForStart: {
 
       REACTION_GAME_LEVEL = (potentio->getValueMapped(1,5)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+      
+      if (potentio->getValueStableChangedEdge()){
+        TIMER_REACTION_GAME_RESTART_DELAY.start();
+      }
+#ifdef ENABLE_EEPROM
+        //do nothing.  wait for display high score is finished.
+      if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
+        intToDigitsString(textBuf+1, REACTION_GAME_LEVEL, false);  // utilities lode
+        textBuf[1] = 'L';
+        ledDisp->displayHandler(textBuf);
+      }else{
+        //ledDisp->setBlankDisplay(); //make high score blink
+        // scores for guitar hero and single dot reaction game depending on big latching button position. (no more variable to save on stack ram)
+        ledDisp->showNumber(
+          // EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) << 8 | 
+          // EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + 1 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) 
+          eeprom_read_word(
+              (uint16_t*)
+              (EEPROM_REACTION_GAME_START_ADDRESS +
+               REACTION_GAME_LEVEL * 2 +
+               EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+              )
+            )
+          );
+      }            
+#else
       intToDigitsString(textBuf+1, REACTION_GAME_LEVEL, false);  // utilities lode
       textBuf[1] = 'L';
-
       ledDisp->displayHandler(textBuf);
+#endif
+
+          
 
       if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() ){
         reactionGameState = reactionNewGame;
@@ -1807,6 +1839,7 @@ void Apps::modeReactionGame(bool init){
       }else{
         reactionGameState = reactionNewTurn;
         REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6-REACTION_GAME_LEVEL)) * -35;
+
       }
 
     TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
@@ -2001,7 +2034,38 @@ void Apps::modeReactionGame(bool init){
     
     case reactionJustDied:{
         
+#ifdef ENABLE_EEPROM
+
         //start high score end timer
+        if (REACTION_GAME_SCORE > 
+              eeprom_read_word(
+                    (uint16_t*)
+                    (EEPROM_REACTION_GAME_START_ADDRESS +
+                    REACTION_GAME_LEVEL*2 +
+                    EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+                    )
+              )
+            // (EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) << 8 | 
+            // EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + 1 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) 
+                // )
+        )    
+        {
+              
+          // EEPROM.write(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue(), REACTION_GAME_SCORE>>8); 
+          // EEPROM.write(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + 1 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue(), REACTION_GAME_SCORE & 0x00FF); 
+          eeprom_update_word(
+            (uint16_t*)
+            (EEPROM_REACTION_GAME_START_ADDRESS +
+            REACTION_GAME_LEVEL*2 +
+            EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+            ),
+            REACTION_GAME_SCORE
+
+          );
+          buzzer->loadBuzzerTrack(song_attack );
+        }
+#endif
+
         TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
         TIMER_REACTION_GAME_RESTART_DELAY.start();
 
@@ -2016,7 +2080,6 @@ void Apps::modeReactionGame(bool init){
         }else{
           
           // play death song
-          buzzer->programBuzzerRoll(F4_1);  
           buzzer->programBuzzerRoll(F4_1);  
           buzzer->programBuzzerRoll(F4_1);  
           buzzer->programBuzzerRoll(F4_1);  
@@ -2049,13 +2112,6 @@ void Apps::modeReactionGame(bool init){
   }
 }
 
-void Apps::_eepromWriteByteIfChanged(uint8_t* address , uint8_t value) {
-	//as the number of write operations to eeprom is limited, only write when different value.
-	if (eeprom_read_byte(address) != value) {
-		eeprom_write_byte(address, value);
-	}
-}
-
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence ){
 	
 
@@ -2077,27 +2133,6 @@ uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, ui
 	}
   return fullScreen;
 }
-
-// void Apps::fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen, ){
-	
-//   uint8_t sequence[32];
-// 	for (uint8_t i = 0; i < 32; i++) {
-// 		sequence[i] = i;
-// 	}
-	
-// 	// shuffle in place
-// 	this->shuffle(sequence, 32);
-	
-// 	// fade in effect, enable random segments.
-// 	// uint32_t fullScreen = 0x00000000;
-// 	uint32_t fullScreen = startScreen;
-	
-// 	for (uint8_t i=0; i<32;i++){
-// 		fullScreen |= 1UL <<sequence[i];// 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
-// 		movie[i] = fullScreen;
-// 	}
-// }
-
 
 void Apps::shuffle(uint8_t* listToShuffle, uint8_t length) {
 	//shuffle the array:

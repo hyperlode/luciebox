@@ -230,7 +230,7 @@ unsigned long SuperTimer::getMillisCallibrated(){
 bool SuperTimer::getInFirstGivenHundredsPartOfSecond(int hundreds){
 	//calc like this: if timeleft is 9600 millis ==> first 400 millis of seconds is passed...
 	// bool inFirstPartOfSecond = getTimeLeftMillis()%1000 <= 1000 - hundreds
-	if (getTimeMillis() > 0 ){
+	if (getTimeMillis() >= 0 ){
 		//chrono
 		return abs(getTimeMillis()%1000) <= (hundreds);
 	}else{

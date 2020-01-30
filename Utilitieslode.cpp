@@ -15,6 +15,8 @@ void timeSecondsToClockString(char * textBuf, unsigned int seconds){
 	}
 }
 
+
+
 unsigned int timeMillisToSeconds(long milliSeconds){  //, bool countDownTimer
 	// //argument countDownTimer= true:,  59500 millis = 1:00   else:(counting up) 59500 millis = 0:59
 	// unsigned int counterSeconds;
