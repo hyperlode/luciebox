@@ -3,8 +3,12 @@
 SuperTimer::SuperTimer(){
 	setIsStarted(false);
 	setIsPaused(false);
-	*this->callibrationConstant = 1.0; //default is 1 // DISABLED
 	this-> initTimeMillis = 0;
+
+#ifdef ENABLE_CALLIBRATION
+	*this->callibrationConstant = 1.0; //default is 1 // DISABLED
+#endif
+
 }
 
 //INIT TIME 
@@ -60,7 +64,12 @@ void SuperTimer::start(){
 }
 
 void SuperTimer::startPaused(bool paused){
+	#ifdef ENABLE_CALLIBRATION
 	startComplete(paused, getMillisCallibrated());
+	#else
+	startComplete(paused, millis());
+	
+	#endif
 }
 
 void SuperTimer::startComplete(bool startInPauseMode, unsigned long startedMillisPassing){
@@ -74,7 +83,11 @@ void SuperTimer::startComplete(bool startInPauseMode, unsigned long startedMilli
 		//make sure if we start in pause mode, that the exact time of start is the start of the pause.
 		if (startInPauseMode){
 			setIsPaused(true);
+			#ifdef ENABLE_CALLIBRATION
 			this->pauseStartedMillis = (long)getMillisCallibrated();
+			#else
+			this->pauseStartedMillis = millis();		
+			#endif
 		}else{
 			setIsPaused(false);
 		}
@@ -105,11 +118,20 @@ void SuperTimer::pause(){
 void SuperTimer::paused(bool pause){
 	if (pause){
 		if (!getIsPaused()){ //only do this when not yet paused!
+			#ifdef ENABLE_CALLIBRATION
 			this->pauseStartedMillis =  (long)getMillisCallibrated();
+			#else
+			this->pauseStartedMillis =  millis();
+			#endif
 		}
 	}else{
 		if (getIsPaused()){
+			#ifdef ENABLE_CALLIBRATION
 			this->startedMillis =  (long)getMillisCallibrated() - (this-> pauseStartedMillis - this-> startedMillis); // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
+			#else
+			this->startedMillis =  millis() - (this-> pauseStartedMillis - this-> startedMillis); // we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
+
+			#endif
 		}
 
 	}
@@ -147,7 +169,11 @@ long SuperTimer::getTimeMillis(){
 		if (getIsPaused()){
 			return this->pauseStartedMillis - this->startedMillis;
 		}else{
+			#ifdef ENABLE_CALLIBRATION
 			return (long)getMillisCallibrated() - this->startedMillis;
+			#else
+			return millis()- this->startedMillis;
+			#endif
       
 		}
 	}else{
@@ -197,6 +223,7 @@ void SuperTimer::getTimeString(char * textBuf){
 
 
 //ADMINISTRATION 
+#ifdef ENABLE_CALLIBRATION
 
 //callibration. should be done at a higher level. every clock should have the same speed.... , so the millis() function should be modified, 
 void SuperTimer::setCallibrationMillis(float* callibrationRatio){
@@ -222,6 +249,7 @@ unsigned long SuperTimer::getMillisCallibrated(){
 
 // 	);
 }
+#endif
 
 
 //original countdowntimer

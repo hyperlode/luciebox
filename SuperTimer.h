@@ -1,6 +1,9 @@
 //Written by Lode Ameije 2013 
 #ifndef SuperTimer_h 
 #define SuperTimer_h 
+
+// #define ENABLE_CALLIBRATION
+
 #if defined(ARDUINO) && ARDUINO >= 100 
 #include "Arduino.h"
 #else 
@@ -43,17 +46,21 @@ class SuperTimer{
 		long getTimeMillisCountDownTimer();
 		void getTimeString(char * textBuf);
 
+#ifdef ENABLE_CALLIBRATION
 		void setCallibrationMillis(float* callibrationRatio);
 		float getCallibrationMillis();
 		unsigned long getMillisCallibrated();
 
+#endif
 		bool getInFirstGivenHundredsPartOfSecond(int hundreds);
 		bool getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(int hundreds, bool positiveEdge, bool negativeEdge);
 		
 	private: //not accessible in subclasses (work with getters and setter to access then) 
 		void setIsPaused(bool paused); //only for internal use, to set the variable...
-	
+
+#ifdef ENABLE_CALLIBRATION
 		float* callibrationConstant;
+#endif
 
 		long startedMillis;
 		long pauseStartedMillis;
