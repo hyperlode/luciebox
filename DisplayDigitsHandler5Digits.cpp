@@ -4,31 +4,38 @@
 
 DisplayManagement::DisplayManagement (){
 	this->text[5] = '\0';
-	// brightness = (LED_DISP_BRIGHTNESS - 888)/1000;
 	brightness = (8888 - LED_DISP_BRIGHTNESS )/1000;
+
+#ifdef ENABLE_SCROLL
 	this->setScrollSpeed(SCROLL_SPEED_DELAY_MILLIS);
-	//scrollNextMove.setInitTimeMillis();
-  
+#endif
+
 };
 
 DisplayManagement::~DisplayManagement(){
+#ifdef ENABLE_SCROLL
 	delete [] scrollTextAddress;
+#endif
 };
 
 void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8){
 	//for extra led array.
 	sevseg.Begin(dispHasCommonAnode, D0,  D1,  D2,  D3, D4,LedArrayDigit,  S1,  S2,  S3,  S4,  S5,  S6,  S7,  S8); 
+	
+#ifdef ENABLE_SCROLL 
 	textStartPos = 0;
+#endif
+
 }
 
 void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8){
 	sevseg.Begin(dispHasCommonAnode, D0,  D1,  D2,  D3, D4,  S1,  S2,  S3,  S4,  S5,  S6,  S7,  S8); 
+	
+#ifdef ENABLE_SCROLL 
 	textStartPos = 0;
-}
+#endif
 
-//void DisplayManagement::showSecondsBlinker(bool secondsBlink, bool menuItemValueQuickView){
-//	sevseg.SetDecPoints(0, 0,  secondsBlink,  0, menuItemValueQuickView );
-//}
+}
 
 void DisplayManagement::showNumberAsChars(int16_t number){
   // chars as in the alphabet: A=1, B=2,...
@@ -93,6 +100,59 @@ void DisplayManagement::displayHandler(char* inText){
 	inText[5] = '\0';
 	writeStringToDisplay(inText);
 }
+
+
+void DisplayManagement::get5DigitsFromString(char* in, char* out, int startPos){ //, int spacesBetweenRepeat
+	//startPos can be a negative number (for scrolling in at the start), all negative numbers are "spaces". i.e. -2  => [' ', ' ', pos0char, pos1char]
+	bool endOfString = false;
+	//int spacesAtEnd = 0;
+	
+	//check for end of string befor startpos in  incoming text. If so, then all spaces...
+	for (int i = 0; i<startPos-1;i++){
+		if (i > 0 && in[i] == '\0'){  
+			endOfString = true;
+		}
+	}
+
+	for (int i = 0; i<5; i++){
+		if (startPos + i<0){
+			out[i] = ' ';
+		}else if (in[startPos + i] != '\0'){
+			out[i] = in[startPos + i];
+		}else{
+			endOfString = true;
+		}
+		if (endOfString){
+			out[i] = ' ';
+		}
+	}
+}
+
+void DisplayManagement::writeStringToDisplay(char* shortText){
+  sevseg.NewText(shortText);  
+}
+
+void DisplayManagement::setBrightness(byte value, bool exponential){ //smaller number is brighter
+	if (exponential){
+	  this->brightness = value*value;
+	}else{
+    this->brightness = value;
+	}
+}
+
+void DisplayManagement::getActiveSegmentAddress(byte** carrier){
+	*carrier = this->activeSegment;
+}
+
+void DisplayManagement::refresh(){
+	
+	this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
+
+}
+
+
+#ifdef ENABLE_SCROLL
+
 
 void DisplayManagement::displayHandlerSequence(char* movie){
 	//take each time the 4 next chars and displays them at once (time in between = scrollNextMove timer)
@@ -176,35 +236,6 @@ void DisplayManagement::doScroll(){ //char * intext
 	}
 }
 
-void DisplayManagement::get5DigitsFromString(char* in, char* out, int startPos){ //, int spacesBetweenRepeat
-	//startPos can be a negative number (for scrolling in at the start), all negative numbers are "spaces". i.e. -2  => [' ', ' ', pos0char, pos1char]
-	bool endOfString = false;
-	//int spacesAtEnd = 0;
-	
-	//check for end of string befor startpos in  incoming text. If so, then all spaces...
-	for (int i = 0; i<startPos-1;i++){
-		if (i > 0 && in[i] == '\0'){  
-			endOfString = true;
-		}
-	}
-
-	for (int i = 0; i<5; i++){
-		if (startPos + i<0){
-			out[i] = ' ';
-		}else if (in[startPos + i] != '\0'){
-			out[i] = in[startPos + i];
-		}else{
-			endOfString = true;
-		}
-		if (endOfString){
-			out[i] = ' ';
-		}
-	}
-}
-
-void DisplayManagement::writeStringToDisplay(char* shortText){
-  sevseg.NewText(shortText);  
-}
 
 //check scroll status
 bool DisplayManagement::getIsScrolling(){
@@ -216,28 +247,12 @@ void DisplayManagement::setIsScrolling(bool enableScroll){
 	this->isScrolling = enableScroll;
 }
 
-void DisplayManagement::setBrightness(byte value, bool exponential){ //smaller number is brighter
-	if (exponential){
-	  this->brightness = value*value;
-	}else{
-    this->brightness = value;
-	}
-}
-
 void DisplayManagement::setScrollSpeed(long value){
 	scrollNextMove.setInitTimeMillis(value * -1);
   //scrollNextMove.start();
 }
 
-void DisplayManagement::getActiveSegmentAddress(byte** carrier){
-	*carrier = this->activeSegment;
-}
-
-void DisplayManagement::refresh(){
-	
-	this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
-
-}
+#endif 
 
 
 

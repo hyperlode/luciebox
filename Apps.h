@@ -2,9 +2,9 @@
 #define APPS_H 
 
 
-// #define ENABLE_EEPROM
+#define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
-// #define SIMON_APP
+#define SIMON_APP
 
 #include "Arduino.h"
 #include "SuperTimer.h"
