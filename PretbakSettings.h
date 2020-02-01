@@ -95,7 +95,7 @@
   #define BUTTONS_2_VALUES {512,256,128}
 #else
 //  #define BUTTONS_2_VALUES {452,219,107}
-  #define BUTTONS_2_VALUES {525,263,117}
+  #define BUTTONS_2_VALUES {510,256,106}
 #endif
 
 #define MERCURY_SWITCHES_COUNT 4

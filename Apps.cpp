@@ -86,7 +86,8 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		  
 		case 7:
-		  this->modeSimpleButtonsAndLights();    
+		  
+      this->modeSimpleButtonsAndLights(init);    
 		  break;
 		  
 		case 8:
@@ -450,8 +451,21 @@ void Apps::modeDiceRoll(bool init){
   
 // }
 
-void Apps::modeSimpleButtonsAndLights(){
+void Apps::modeSimpleButtonsAndLights(bool init){
   
+  if (init){
+
+    if(  analogRead(PIN_BUTTONS_1) == 0 &&
+          analogRead(PIN_BUTTONS_2) == 0 &&
+          analogRead(PIN_POTENTIO) == 0){
+        this->counter = 666;
+    }  
+  }
+
+  if (this->counter == 666){
+    this->modeButtonDebug(init);
+  }
+
       // simple repetitive, predictive mode.
       // each button triggers its corresponding light. 
       // potentio sets display brightness
@@ -1813,9 +1827,20 @@ void Apps::modeReactionGame(bool init){
       if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() ){
         reactionGameState = reactionNewGame;
 
-        //play by sound
-        for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-          REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(100, 114);
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+          //play by sound
+          for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+            
+            REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(228, 242);
+            
+            for (uint8_t j=0;j<i;j++){
+              if (REACTION_GAME_SELECTED_SOUNDS[j] == REACTION_GAME_SELECTED_SOUNDS[i]){
+                i--;
+              }
+            }
+          }
+            
+          
         }
         //REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -35;
 
@@ -1837,6 +1862,18 @@ void Apps::modeReactionGame(bool init){
         REACTION_GAME_STEP_TIME_MILLIS = (6-REACTION_GAME_LEVEL) * -200;
         
       }else{
+        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+          // let them all play so the player gets a feel for them.
+          for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+            buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
+            buzzer->programBuzzerRoll(rest_1);
+          }
+
+          buzzer->programBuzzerRoll(rest_1);
+          buzzer->programBuzzerRoll(rest_1);
+        }  
+
+
         reactionGameState = reactionNewTurn;
         REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6-REACTION_GAME_LEVEL)) * -35;
 
@@ -1920,7 +1957,7 @@ void Apps::modeReactionGame(bool init){
             displayAllSegments &= ~(0x80UL << 8*i);
             REACTION_GAME_SCORE++; 
             //buzzer->programBuzzerRoll(rest_1);
-            buzzer->programBuzzerRoll(C5_1);
+            //buzzer->programBuzzerRoll(C5_1);
             
           }else{
              //DP is off --> button should not have been pressed --> die!
@@ -2007,85 +2044,71 @@ void Apps::modeReactionGame(bool init){
         ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
       }
 
-      // check player input
-      if ( binaryInputs[buttons_momentary_indexed[REACTION_GAME_TARGET]].getEdgeUp() ) {
-          //right button
-          REACTION_GAME_SCORE++;
-          reactionGameState = reactionNewTurn;
+      // check player pressed a button. 
+      for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+
+        // button press
+        if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
+         
           if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-            //play by sounds
-            //buzzer->programBuzzerRoll(C7_8);
+            //play by sounds, play sound of pushed button
+            buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
             buzzer->programBuzzerRoll(rest_1);
-            //buzzer->programBuzzerRoll(rest_1);
+            buzzer->programBuzzerRoll(rest_1);
           }
+
+          if (i==REACTION_GAME_TARGET){
+            //right button
+            REACTION_GAME_SCORE++;
+            reactionGameState = reactionNewTurn;
             
-        }else{
-          
-          for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-            if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
-              //wrong button
-               reactionGameState = reactionJustDied;
-            }
+          }else{
+            //wrong button
+            reactionGameState = reactionJustDied;
           }
         }
+      }
 
      break;
     }
     
     case reactionJustDied:{
+      
+      #ifdef ENABLE_EEPROM
+
+      //start high score end timer
+      if (REACTION_GAME_SCORE > 
+            eeprom_read_word(
+                  (uint16_t*)
+                  (EEPROM_REACTION_GAME_START_ADDRESS +
+                  REACTION_GAME_LEVEL*2 +
+                  EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+                  )
+            )
+      )    
+      {
+        eeprom_update_word(
+          (uint16_t*)
+          (EEPROM_REACTION_GAME_START_ADDRESS +
+          REACTION_GAME_LEVEL*2 +
+          EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+          ),
+          REACTION_GAME_SCORE
+
+        );
+        buzzer->loadBuzzerTrack(song_attack );
+      }
+      #endif
+
+      TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
+      TIMER_REACTION_GAME_RESTART_DELAY.start();
         
-#ifdef ENABLE_EEPROM
+      // play death song
+      buzzer->programBuzzerRoll(F4_1);  
+      buzzer->programBuzzerRoll(F4_1);  
+      buzzer->programBuzzerRoll(F4_1);  
 
-        //start high score end timer
-        if (REACTION_GAME_SCORE > 
-              eeprom_read_word(
-                    (uint16_t*)
-                    (EEPROM_REACTION_GAME_START_ADDRESS +
-                    REACTION_GAME_LEVEL*2 +
-                    EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
-                    )
-              )
-            // (EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) << 8 | 
-            // EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + 1 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) 
-                // )
-        )    
-        {
-              
-          // EEPROM.write(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue(), REACTION_GAME_SCORE>>8); 
-          // EEPROM.write(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + 1 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue(), REACTION_GAME_SCORE & 0x00FF); 
-          eeprom_update_word(
-            (uint16_t*)
-            (EEPROM_REACTION_GAME_START_ADDRESS +
-            REACTION_GAME_LEVEL*2 +
-            EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
-            ),
-            REACTION_GAME_SCORE
-
-          );
-          buzzer->loadBuzzerTrack(song_attack );
-        }
-#endif
-
-        TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-        TIMER_REACTION_GAME_RESTART_DELAY.start();
-
-        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-          
-          //play by sounds, let them all play.
-          for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-            buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]+128);
-            buzzer->programBuzzerRoll(rest_1);
-          }
-          
-        }else{
-          
-          // play death song
-          buzzer->programBuzzerRoll(F4_1);  
-          buzzer->programBuzzerRoll(F4_1);  
-          buzzer->programBuzzerRoll(F4_1);  
-        }
-
-        reactionGameState = reactionFinished;
+      reactionGameState = reactionFinished;
 
       break;
     }

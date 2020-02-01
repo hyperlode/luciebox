@@ -344,7 +344,7 @@ class Apps{
     void appSelector(bool init, uint8_t selector);
     bool init_app(bool init, uint8_t selector);
     //void modeScroll(bool init);
-    void modeSimpleButtonsAndLights();
+    void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
     void modeSoundNotes();
