@@ -84,8 +84,7 @@ void Buzzer::doBuzzerRoll() {
       //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
       float freq = 1;
 
-
-{
+      {
         // convert note to freq
         for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64) + this->transpose; i++) {
         //for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64); i++) {
@@ -94,13 +93,11 @@ void Buzzer::doBuzzerRoll() {
           freq *= 1.059463;
         }
       }
-
 	  
       if (buzzerRoll[this->playSlotCounter] % 64 != 0) {
         //no sound, stop. (rust)
         freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
       } 
-	  
 	  
       tone(this->pin, (unsigned int)freq ,
            (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS *
@@ -157,6 +154,7 @@ uint8_t Buzzer::getBuzzerRollFull() {
   //check if there are free slots.
   return (getNextBuzzerRollSlot(true) == this->playSlotCounter);
 }
+
 uint8_t Buzzer::getBuzzerRollEmpty() {
   int sum = 0;
   for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH ; i++) {

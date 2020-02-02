@@ -129,7 +129,7 @@ void Apps:: setDefaultMode(){
   ledDisp->setBrightness(0,false);
 
   // as tone is used in Geiger, at change of app, would sometimes play continuously...
-  noTone(PIN_BUZZER);
+  //noTone(PIN_BUZZER);
   
   //buzzer
   buzzer->setSpeedRatio(1);
@@ -1377,7 +1377,7 @@ void Apps::modeGeiger(bool init){
     if (r > potentio->getValueMapped(0,1048576)){
     //    buzzer->programBuzzerRoll(1); //not beep but "puck"
 
-      if (this->silentMode){
+      if (!this->silentMode){
         tone(PIN_BUZZER, (unsigned int)50, 10);
       }
     
@@ -1831,7 +1831,8 @@ void Apps::modeReactionGame(bool init){
           //play by sound
           for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
             
-            REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(228, 242);
+            // REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(228, 242);
+            REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(234, 245);
             
             for (uint8_t j=0;j<i;j++){
               if (REACTION_GAME_SELECTED_SOUNDS[j] == REACTION_GAME_SELECTED_SOUNDS[i]){
@@ -1912,7 +1913,7 @@ void Apps::modeReactionGame(bool init){
         new_segment |= ((displayAllSegments >> (8*i)) & 0b01000000) << 1;// G segment, move to DP segment  DP.G.0.0.0.0.0.0
 
         //top seg to mid seg
-        new_segment |= ((displayAllSegments >> (8*i)) & 0b00000001)  << 6;// A segment, ON or OFF?, move to G segment
+        new_segment |= ((displayAllSegments >> (8*i)) & 0b00000001) << 6;// A segment, ON or OFF?, move to G segment
 
         // random top
         // if (random(0, 2)){  // 0 or 1  // move to segment A)
@@ -1950,9 +1951,6 @@ void Apps::modeReactionGame(bool init){
           
           if (displayAllSegments & (0x80UL << 8*i)){
             // DP is on, set to zero.
-            
-
-            //buzzer->programBuzzerRoll(rest_1);
             buzzer->addRandomSoundToRoll(190,198);
             displayAllSegments &= ~(0x80UL << 8*i);
             REACTION_GAME_SCORE++; 
@@ -1995,8 +1993,14 @@ void Apps::modeReactionGame(bool init){
       REACTION_GAME_TIMER_STEP= 0; //reset animation step
 
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        
         //play by sounds
+        for (uint8_t j=0; j<4;j++){
+          buzzer->programBuzzerRoll(rest_1);
+
+        }
         buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
+
       }else{
         lights |= 1<<lights_indexed[REACTION_GAME_TARGET];     
       }
@@ -2038,9 +2042,9 @@ void Apps::modeReactionGame(bool init){
       }
 
       // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
-      if ( !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() ){
 
-        //always show unless in soundmode->competition
+      if ( !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() ){
+        //always show unless in soundmode
         ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);
       }
 
@@ -2050,18 +2054,24 @@ void Apps::modeReactionGame(bool init){
         // button press
         if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
          
-          if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-            //play by sounds, play sound of pushed button
-            buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
-            buzzer->programBuzzerRoll(rest_1);
-            buzzer->programBuzzerRoll(rest_1);
-          }
-
+          
           if (i==REACTION_GAME_TARGET){
             //right button
             REACTION_GAME_SCORE++;
             reactionGameState = reactionNewTurn;
-            
+
+            // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+            //   //play by sounds, play sound of pushed button
+            //   //buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
+            //   // buzzer->programBuzzerRoll(rest_1);
+            //   // buzzer->programBuzzerRoll(rest_1);
+            //   for (uint8_t j=0; j<6;j++){
+            //     buzzer->programBuzzerRoll(rest_1);
+
+            //   }
+            // }
+
+
           }else{
             //wrong button
             reactionGameState = reactionJustDied;
@@ -2069,7 +2079,7 @@ void Apps::modeReactionGame(bool init){
         }
       }
 
-     break;
+      break;
     }
     
     case reactionJustDied:{
