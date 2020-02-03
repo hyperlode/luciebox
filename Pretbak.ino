@@ -1,3 +1,4 @@
+
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
@@ -7,7 +8,8 @@
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 
-#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_ANALOG_PIN_DEBUG
 
 #ifdef ENABLE_SERIAL
   //#define DEBUG_ANALOG_IN 
@@ -51,9 +53,10 @@ Buzzer buzzer;
 //char  textBuf [6];
 //char  scrollBuf [1]; //was 40, but, it does not get used anyways!!
 
+#ifdef ENABLE_ANALOG_PIN_DEBUG
 //debug mode
 bool debugMode;
-bool silentMode;
+#endif
 
 void refresh(){
   //input process  
@@ -96,7 +99,11 @@ void refresh(){
   //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
   //modes functionality (apps)
+
+  #ifdef ENABLE_ANALOG_PIN_DEBUG
   if (!debugMode){
+  #endif
+  
      //mode change
     if (selectorDial.getValueChangedEdge()) {
       //default mode (go to default state at each change)
@@ -122,11 +129,13 @@ void refresh(){
     #endif  
      
     buzzer.doBuzzerRoll();
-     
+
+  #ifdef ENABLE_ANALOG_PIN_DEBUG   
   }else{
     pretbak_apps.appSelector(false, 12);  //debug mode
   }
-  
+  #endif
+
   //output process
   //ledDisp->setDecimalPoint(true,2);
   //ledDisp.setDecimalPoint(true,2);
@@ -203,30 +212,26 @@ void setup() {
 
   // if no latching buttons pressed at startup, disable sound 
   //(a "Lode listens to the parents"-initiative)
-  silentMode = false;
   if (analogRead(PIN_BUTTONS_2) == 0){
-    silentMode = true;
-  }
-  
-  if (silentMode){
     buzzer.setPin(PIN_BUZZER_FAKE);
   }else{
     buzzer.setPin(PIN_BUZZER);
   }
+  
   
 
   pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
   //pretbak_apps.setBuffers( textBuf);
   pretbak_apps.setDefaultMode();
   
-  
+  #ifdef ENABLE_ANALOG_PIN_DEBUG
   // if one of the push buttons is pressed at startup, activate debugmode.
   debugMode = false;
   if (analogRead(PIN_BUTTONS_1) > 10 && analogRead(PIN_BUTTONS_1) < 200){
     debugMode = true;
     pretbak_apps.appSelector(true, 12);
   }
-  
+  #endif
   
 }
 

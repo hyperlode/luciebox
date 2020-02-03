@@ -106,12 +106,14 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  this->miniMultiTimer(init);
 		  break;
 
+    #ifdef ENABLE_ANALOG_PIN_DEBUG
 		case 12:
       //this is the debug mode
       this->modeButtonDebug(init);
       break;
-                  
-		default:
+    #endif
+		
+    default:
 		  break;
 		}
 	}
@@ -207,68 +209,79 @@ void Apps::modeButtonDebug(bool init){
     if (counter > 9){
        counter = 0; 
     }
+    
     // Serial.println(counter);
     textBuf[1]=' ';
     textBuf[2]=' ';
     textBuf[3]='A'; 
    
     switch (counter){
-      case 0:{
-        textBuf[4]='0'; // analog A0
-        ledDisp->displayHandler(textBuf);
-        generalTimer.setInitTimeMillis((long)-500);
-        break; 
-      }
+      // case 0:{
+      //   // textBuf[4]='0'; // analog A0
+      //   // ledDisp->displayHandler(textBuf);
+      //   // generalTimer.setInitTimeMillis((long)-500);
+      //   break; 
+      // }
       case 1:{
         ledDisp->showNumber( (int16_t) analogRead(PIN_SELECTOR_DIAL));
-        generalTimer.setInitTimeMillis((long)-1000);
+        // generalTimer.setInitTimeMillis((long)-1000);
         break; 
       }
-      case 2:{
-        textBuf[4]='1'; // analog A1
-        ledDisp->displayHandler(textBuf);
-        generalTimer.setInitTimeMillis((long)-500);
-        break; 
-      }
+      // case 2:{
+      //   // textBuf[4]='1'; // analog A1
+      //   // ledDisp->displayHandler(textBuf);
+      //   // generalTimer.setInitTimeMillis((long)-500);
+      //   break; 
+      // }
       case 3:{
         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1));
-        generalTimer.setInitTimeMillis((long)-1000);
+        // generalTimer.setInitTimeMillis((long)-1000);
         break; 
       }
-      case 4:{
-        textBuf[4]='2'; // analog A2
-        ledDisp->displayHandler(textBuf);
-        generalTimer.setInitTimeMillis((long)-500);
-        break; 
-      }
+      // case 4:{
+      //   // textBuf[4]='2'; // analog A2
+      //   // ledDisp->displayHandler(textBuf);
+      //   // generalTimer.setInitTimeMillis((long)-500);
+      //   break; 
+      // }
       case 5:{
         ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
-        generalTimer.setInitTimeMillis((long)-1000);
+        // generalTimer.setInitTimeMillis((long)-1000);
         break; 
       }
-      case 6:{
-        textBuf[4]='3';// analog A3
-        ledDisp->displayHandler(textBuf);
-        generalTimer.setInitTimeMillis((long)-500);
-        break; 
-      }
+      // case 6:{
+      //   textBuf[4]='3';// analog A3
+      //   ledDisp->displayHandler(textBuf);
+      //   // generalTimer.setInitTimeMillis((long)-500);
+      //   break; 
+      // }
       case 7:{
         ledDisp->showNumber( (int16_t) analogRead(PIN_POTENTIO));
-        generalTimer.setInitTimeMillis((long)-1000);
+        // generalTimer.setInitTimeMillis((long)-1000);
         break; 
       }
-      case 8:{
-        textBuf[4]='4';// analog A4
-        ledDisp->displayHandler(textBuf);
-        generalTimer.setInitTimeMillis((long)-500);
-        break; 
-      }
+      // case 8:{
+      //   textBuf[4]='4';// analog A4
+      //   ledDisp->displayHandler(textBuf);
+      //   // generalTimer.setInitTimeMillis((long)-500);
+      //   break; 
+      // }
       case 9:{
         ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));
-        generalTimer.setInitTimeMillis((long)-1000);
+        // generalTimer.setInitTimeMillis((long)-1000);
         break; 
       }
     }
+
+    // show menu title (compressed)
+    if (counter%2 == 0){
+      // show analog pin
+      textBuf[4] = counter/2 + 48; // char 0 + analog pin . 
+      ledDisp->displayHandler(textBuf);
+    }
+
+    // show values one seconds, menu items half a second
+    generalTimer.setInitTimeMillis((long) (-500 - (counter%2)*500)); 
     
     generalTimer.start();
   }  
