@@ -5,19 +5,19 @@
 Apps::Apps(){
 };
 
-void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer, bool silentMode){
+void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer){
   this->buzzer = buzzer;
   this->binaryInputs = binaryInputs;
   this->potentio = potentio;
   this->ledDisp = ledDisp;
-  this->silentMode = silentMode;
+  // this->silentMode = silentMode;
 }
 
-void Apps::setBuffers(  char*  textBuf, char*  scrollBuf){
-   this->textBuf = textBuf;
-   this->scrollBuf = scrollBuf;
-   this->lights = lights;  
-}
+// void Apps::setBuffers(  char*  textBuf){
+//    this->textBuf = textBuf;
+//    //this->scrollBuf = scrollBuf;
+//    this->lights = lights;  
+// }
 
 // void Apps::test(){
   
@@ -127,14 +127,10 @@ void Apps:: setDefaultMode(){
   ledDisp->setBlankDisplay();
   //ledDisp->SetFourDigits(0xC0C0C0C0); 
   ledDisp->setBrightness(0,false);
-
-  // as tone is used in Geiger, at change of app, would sometimes play continuously...
-  //noTone(PIN_BUZZER);
   
   //buzzer
   buzzer->setSpeedRatio(1);
-
-  buzzer->buzzerOff();
+  buzzer->buzzerOff(); // stop all sounds that were playing in an app. 
   buzzer->setTranspose(0);
 
 }
@@ -201,16 +197,17 @@ void Apps::modeButtonDebug(bool init){
   if (init){
     generalTimer.setInitTimeMillis(0);
     generalTimer.start();
-    counter = 0;
+    counter = -1;
+    // Serial.println("dbug init");
   }
   
   if(!generalTimer.getTimeIsNegative()){
-
+    // Serial.println("dbug displ");
     counter++;
     if (counter > 9){
        counter = 0; 
     }
-    
+    // Serial.println(counter);
     textBuf[1]=' ';
     textBuf[2]=' ';
     textBuf[3]='A'; 
@@ -458,85 +455,88 @@ void Apps::modeSimpleButtonsAndLights(bool init){
     if(  analogRead(PIN_BUTTONS_1) == 0 &&
           analogRead(PIN_BUTTONS_2) == 0 &&
           analogRead(PIN_POTENTIO) == 0){
-        this->counter = 666;
+          DEBUGMODE_ACTIVATED = 666;
     }  
   }
 
-  if (this->counter == 666){
+  if (DEBUGMODE_ACTIVATED == 666){
+    // Serial.println("aaahaa");
     this->modeButtonDebug(init);
+
+  }else{
+
+    // simple repetitive, predictive mode.
+    // each button triggers its corresponding light. 
+    // potentio sets display brightness
+    // no buzzer
+    // display lights up a segment for each button.
+    bool updateScreen = false;
+
+    //delete all content from screen.
+    ledDisp->setBlankDisplay();      
+    
+    lights = 0b00000000; //reset before switch enquiry
+    if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+      lights|= 1<<LIGHT_RED;
+      updateScreen = true;
+    }
+    if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
+      lights|= 1<<LIGHT_BLUE;
+      updateScreen = true;
+    }
+    if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+      lights|= 1<<LIGHT_GREEN;
+      updateScreen = true;
+    }
+    
+    #if MOMENTARY_BUTTONS_COUNT == 4
+    if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+      lights|= 1<<LIGHT_YELLOW_EXTRA;
+      updateScreen = true;
+    }
+    #endif
+
+    if (updateScreen){
+      textBuf[1]='8';
+      textBuf[2]='8';
+      textBuf[3]='8';
+      textBuf[4]='8';        
+    }else{
+      //display
+      textBuf[1]='-';
+      textBuf[2]='-';
+      textBuf[3]='-';
+      textBuf[4]='-';
+    }
+
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+      lights|= 1<<LIGHT_LED_1;
+    }else{
+      textBuf[1]=' ';
+    }
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+      lights|= 1<<LIGHT_LED_2;
+    }else{
+      textBuf[2]=' ';
+    }
+    if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+      lights|= 1<<LIGHT_LED_3;
+      updateScreen = true;
+    }else{
+      textBuf[3]=' ';
+    }
+    if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+      lights|= 1<<LIGHT_YELLOW;
+      updateScreen = true;
+    }else{
+      textBuf[4]=' ';
+    }
+
+    ledDisp->displayHandler(textBuf);
+    
+    ledDisp->SetLedArray(lights);
+    ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
   }
-
-      // simple repetitive, predictive mode.
-      // each button triggers its corresponding light. 
-      // potentio sets display brightness
-      // no buzzer
-      // display lights up a segment for each button.
-      bool updateScreen = false;
-
-      //delete all content from screen.
-      ledDisp->setBlankDisplay();      
-      
-      lights = 0b00000000; //reset before switch enquiry
-      if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-        lights|= 1<<LIGHT_RED;
-        updateScreen = true;
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-        lights|= 1<<LIGHT_BLUE;
-        updateScreen = true;
-      }
-      if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-        lights|= 1<<LIGHT_GREEN;
-        updateScreen = true;
-      }
-      
-      #if MOMENTARY_BUTTONS_COUNT == 4
-      if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
-        lights|= 1<<LIGHT_YELLOW_EXTRA;
-        updateScreen = true;
-      }
-      #endif
-
-      if (updateScreen){
-        textBuf[1]='8';
-        textBuf[2]='8';
-        textBuf[3]='8';
-        textBuf[4]='8';        
-      }else{
-        //display
-        textBuf[1]='-';
-        textBuf[2]='-';
-        textBuf[3]='-';
-        textBuf[4]='-';
-      }
-
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-        lights|= 1<<LIGHT_LED_1;
-      }else{
-        textBuf[1]=' ';
-      }
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-        lights|= 1<<LIGHT_LED_2;
-      }else{
-        textBuf[2]=' ';
-      }
-      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-        lights|= 1<<LIGHT_LED_3;
-        updateScreen = true;
-      }else{
-        textBuf[3]=' ';
-      }
-      if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-        lights|= 1<<LIGHT_YELLOW;
-        updateScreen = true;
-      }else{
-        textBuf[4]=' ';
-      }
-
-      ledDisp->displayHandler(textBuf);
-      
-      ledDisp->SetLedArray(lights);
-      ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
 }
 
 void Apps::modeCountingLettersAndChars(bool init){
@@ -1313,48 +1313,53 @@ void Apps::modeGeiger(bool init){
 
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 
-    if (potentio->getValueStableChangedEdge()){
-      //Serial.println(potentio->getValueStable());
-      if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-        //lower
+    if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+      //lower
+      if (potentio->getValueStableChangedEdge()){
         GEIGER_TONE_FREQUENY_LOWEST = potentio->getValueMapped(0,5000);
-        if (GEIGER_TONE_FREQUENY_LOWEST >= GEIGER_TONE_FREQUENCY_HEIGHEST){
-          GEIGER_TONE_FREQUENY_LOWEST = GEIGER_TONE_FREQUENCY_HEIGHEST;
-        }
+      }
+      ledDisp->showNumber(GEIGER_TONE_FREQUENY_LOWEST);
 
-      }else if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-        //upper
+    }else if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+      //upper
+      if (potentio->getValueStableChangedEdge()){
         GEIGER_TONE_FREQUENCY_HEIGHEST = potentio->getValueMapped(0,5000);
-        if (GEIGER_TONE_FREQUENCY_HEIGHEST <= GEIGER_TONE_FREQUENY_LOWEST){
-          GEIGER_TONE_FREQUENCY_HEIGHEST = GEIGER_TONE_FREQUENY_LOWEST;
-        }
+      }
+      ledDisp->showNumber(GEIGER_TONE_FREQUENCY_HEIGHEST);
 
-      }else if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-        //length
+    }else if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
+      //length
+      if (potentio->getValueStableChangedEdge()){
         GEIGER_TONE_LENGTH = potentio->getValueMapped(0,500);
+      }
+      ledDisp->showNumber(GEIGER_TONE_LENGTH);
 
-      }else{
-        GEIGER_PROBABILITY_THRESHOLD = potentio->getValueMapped(0,1048576);
-
-      }		
-    }
-
-    if (r > GEIGER_PROBABILITY_THRESHOLD){ // 1024*1024
-      
-
-      if (!this->silentMode){
-        if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-          // when tone playing, play it until next tone
-          tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST));
-        }else{
-          // limited time length tone
-          tone(PIN_BUZZER, random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST), GEIGER_TONE_LENGTH);
-        }
+    } else if(binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+      if (potentio->getValueStableChangedEdge()){
+        buzzer->playTone(
+            potentio->getValueMapped(0,500), 
+            binaryInputs[BUTTON_LATCHING_EXTRA].getValue()?0:GEIGER_TONE_LENGTH
+          );
       }
 
-      COUNTER_GEIGER++;
-      ledDisp->showNumber(COUNTER_GEIGER);
+    }else{
+
+      if (r > GEIGER_PROBABILITY_THRESHOLD){ // 1024*1024
+        long tmp  =  random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST+1);
+        buzzer->playTone(
+          tmp , 
+          binaryInputs[BUTTON_LATCHING_EXTRA].getValue()?0:GEIGER_TONE_LENGTH
+          );
+
+        ledDisp->showNumber(tmp);
+        COUNTER_GEIGER++;
+      }
+
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        ledDisp->showNumber(COUNTER_GEIGER);
+      }
       
+      GEIGER_PROBABILITY_THRESHOLD = potentio->getValueMapped(0,1048576);
     }
     
   }else{
@@ -1373,25 +1378,20 @@ void Apps::modeGeiger(bool init){
     }
 
     r+=GEIGER_INCREASE_CHANCE;
-	
-    if (r > potentio->getValueMapped(0,1048576)){
-    //    buzzer->programBuzzerRoll(1); //not beep but "puck"
 
-      if (!this->silentMode){
-        tone(PIN_BUZZER, (unsigned int)50, 10);
-      }
-    
+	  textBuf[1]=' '; 
+    if (r > potentio->getValueMapped(0,1048576)){
+      //    buzzer->programBuzzerRoll(1); //not beep but "puck"
+      buzzer->playTone((unsigned int)50, 10);
       textBuf[1]='?';
-      textBuf[2]='?';
-      textBuf[3]='?';
-      textBuf[4]='?';
-      
-    }else{
-      textBuf[1]=' ';
-      textBuf[2]=' ';
-      textBuf[3]=' ';
-      textBuf[4]=' ';
+    
     }
+
+    //all digits same value
+    for(uint8_t i=2;i<5;i++){
+      textBuf[i]=textBuf[1];
+    }
+    
     ledDisp->displayHandler(textBuf);  
   }
 }

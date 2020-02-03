@@ -319,7 +319,8 @@ class Buzzer{
     uint8_t getBuzzerRollEmpty(); 
 	  void setTranspose(int8_t offset);
     void cleanBuzzerRoll();
-    void buzzerOn(uint16_t freq);
+    // void buzzerOn(uint16_t freq);
+    void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerOff();
     void setSpeedRatio(float speedMultiplier);
 

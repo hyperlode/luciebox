@@ -7,7 +7,7 @@
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 
-//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 
 #ifdef ENABLE_SERIAL
   //#define DEBUG_ANALOG_IN 
@@ -48,8 +48,8 @@ DisplayManagement ledDisp;
 Buzzer buzzer;
 
 //output
-char  textBuf [6];
-char  scrollBuf [1]; //was 40, but, it does not get used anyways!!
+//char  textBuf [6];
+//char  scrollBuf [1]; //was 40, but, it does not get used anyways!!
 
 //debug mode
 bool debugMode;
@@ -215,8 +215,8 @@ void setup() {
   }
   
 
-  pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer, silentMode);
-  pretbak_apps.setBuffers(scrollBuf, textBuf);
+  pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
+  //pretbak_apps.setBuffers( textBuf);
   pretbak_apps.setDefaultMode();
   
   

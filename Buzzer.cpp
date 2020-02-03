@@ -146,8 +146,19 @@ void Buzzer::buzzerOff() {
   noTone(this->pin);
 }
 
-void Buzzer::buzzerOn(uint16_t freq) {
-  tone(this->pin, freq);
+// void Buzzer::buzzerOn(uint16_t freq) {
+//   tone(this->pin, freq);
+// }
+
+void Buzzer::playTone(unsigned int freq, unsigned long duration_millis){
+  // set 0 to duration_millis for indefinate length (will sound until notone or another tone command is given. )
+  
+  this->buzzerOff();
+  if (duration_millis == 0){
+    tone(this->pin, freq);
+  }else{
+    tone(this->pin, freq, duration_millis);
+  }
 }
 
 uint8_t Buzzer::getBuzzerRollFull() {

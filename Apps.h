@@ -3,8 +3,8 @@
 
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
-#define SIMON_APP
+//#define ENABLE_MULTITIMER
+//#define SIMON_APP
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -64,21 +64,19 @@
 #define DRAW_X_POS counter2
 #define SIMON_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
+#define DEBUGMODE_ACTIVATED counter2
 
 #define DRAW_Y_POS counter3
-#define COUNTER_GEIGER counter3
 #define GEIGER_INCREASE_CHANCE counter3
-#define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
+#define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define METRONOME_TICKER_3_POSITION counter3
 
-#define DRAW_DISP_STATE array_4_bytes
-#define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
-
-#define GEIGER_TONE_LENGTH counter4
 #define REACTION_GAME_TARGET counter4
+#define COUNTER_GEIGER counter4
 
 #define REACTION_GAME_LEVEL counter5
+#define GEIGER_TONE_LENGTH counter5
 
 #define REACTION_GAME_YELLOW_BUTTON_INCLUDED general_boolean  
 
@@ -86,11 +84,14 @@
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
 
+#define DRAW_DISP_STATE array_4_bytes
+#define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
+
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
 
 	0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
-	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol of tank
+	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol or tank
 	0x39, 0x09, 0x09, 0x0F, // abstractbig circle
 	0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
 	0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
@@ -335,9 +336,9 @@ class Apps{
     Buzzer* buzzer;
     Potentio* potentio;
     
-    
-    void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer, bool silentMode);
-    void setBuffers(char* textBuf, char*  scrollBuf);
+    void setPeripherals( BinaryInput* binaryInput, Potentio* potentio, DisplayManagement* ledDisp, Buzzer* buzzer);
+    // void setBuffers(char* textBuf, char*  scrollBuf);
+    //void setBuffers(char* textBuf);
     // void test();
     
     void setDefaultMode();
@@ -366,8 +367,6 @@ class Apps{
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
     void shuffle(uint8_t* list, uint8_t length);
 
-
-    
   private:
     DataPlayer dataPlayer;
     
@@ -395,7 +394,8 @@ class Apps{
     int16_t counter2;
     long counter3;
     uint16_t counter4;
-    uint8_t counter5;
+    uint16_t counter5;
+
     uint8_t array_4_bytes [4];
 
     // reaction
@@ -425,12 +425,12 @@ class Apps{
 
     #endif
 
-    char*  textBuf;
-    char*  scrollBuf;
+    char  textBuf[6];
+    // char*  scrollBuf;
     uint8_t lights;
     
     bool app_init_mode;
-    bool silentMode;
+    //bool silentMode;
 };
 
 #endif 
