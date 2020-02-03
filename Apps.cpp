@@ -35,6 +35,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
 		ledDisp->SetFourDigits(0x0ff00f0f); 	
+    Serial.println("initappsel");
 	}
 	
 	if (this->app_init_mode){
