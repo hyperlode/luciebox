@@ -115,7 +115,7 @@ void DataPlayer::setSetIndexDirection(uint8_t dir){
 	// 2: toggle
 	
 	if (dir == 2){
-		//Serial.println("toggle");
+		// Serial.println("toggle");
 		this->set_move_forward_else_backward = !this->set_move_forward_else_backward; 
 	}else{
 		this->set_move_forward_else_backward = (bool)dir;

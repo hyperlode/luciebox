@@ -1343,7 +1343,7 @@ void Apps::modeGeiger(bool init){
     }else if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
       //length
       if (potentio->getValueStableChangedEdge()){
-        GEIGER_TONE_LENGTH = potentio->getValueMapped(0,500);
+        GEIGER_TONE_LENGTH = potentio->getValueMapped(0,256);
       }
       ledDisp->showNumber(GEIGER_TONE_LENGTH);
 
@@ -2100,7 +2100,7 @@ void Apps::modeReactionGame(bool init){
       #ifdef ENABLE_EEPROM
 
       //start high score end timer
-      if (REACTION_GAME_SCORE > 
+      if (REACTION_GAME_SCORE > (int16_t)
             eeprom_read_word(
                   (uint16_t*)
                   (EEPROM_REACTION_GAME_START_ADDRESS +

@@ -2,9 +2,9 @@
 #define APPS_H 
 
 
-//#define ENABLE_EEPROM
-//#define ENABLE_MULTITIMER
-//#define SIMON_APP
+#define ENABLE_EEPROM
+#define ENABLE_MULTITIMER
+#define SIMON_APP
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -387,7 +387,7 @@ class Apps{
     int16_t counter2;
     long counter3;
     uint16_t counter4;
-    uint16_t counter5;
+    uint8_t counter5;
 
     enum {
       bytes_list_bufsize = 32,

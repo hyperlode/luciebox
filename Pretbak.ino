@@ -9,7 +9,7 @@
 #include "PretbakSettings.h"
 
 //#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
-//#define ENABLE_ANALOG_PIN_DEBUG
+//#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 
 #ifdef ENABLE_SERIAL
   //#define DEBUG_ANALOG_IN 
@@ -59,17 +59,9 @@ bool debugMode;
 #endif
 
 void refresh(){
-  //input process  
+
+  //update inputs
   input_process();
-  
-//  if (debugMode){
-//    uint16_t setValues_1 [BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
-//    uint16_t* tmp  = setValues_1;
-//    if (  potentio.getValueStableChangedEdge()){
-//      Serial.println("rawval:");
-//      Serial.println(analogRead(PIN_BUTTONS_2));
-//    }
-//  }
   
   #ifdef DEBUG_BUTTONS
     for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
@@ -98,12 +90,12 @@ void refresh(){
   
   //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
-  //modes functionality (apps)
 
   #ifdef ENABLE_ANALOG_PIN_DEBUG
   if (!debugMode){
   #endif
   
+  //modes functionality (apps)
      //mode change
     if (selectorDial.getValueChangedEdge()) {
       //default mode (go to default state at each change)
@@ -137,8 +129,6 @@ void refresh(){
   #endif
 
   //output process
-  //ledDisp->setDecimalPoint(true,2);
-  //ledDisp.setDecimalPoint(true,2);
   ledDisp.refresh();
  
   for(uint8_t i=0;i<BINARY_INPUTS_COUNT;i++){
@@ -160,12 +150,8 @@ void input_process(){
   }
 
   if (buttons_1.getValueChangedEdge()) {
-    //Serial.println("analog in buttons:");
-    //Serial.println(buttons_1.getButtonsValueRaw());
-    //Serial.println(buttons_1.getButtonsValue());
     for (uint8_t i=0; i< BUTTONS_1_COUNT; i++){
       binaryInputs[BUTTONS_1_TO_BINARY_INPUT_OFFSET + i].setValue(buttons_1.getButtonValueByIndex(i));
-      
     }
   }
 
