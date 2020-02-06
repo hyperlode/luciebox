@@ -363,6 +363,7 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
         }
 		
 	}else if (this->state == setTimers){
+		// Serial.println("setStateTimersCount");
         if (millis()%1000 > 650){
 			disp[1] = 'Q';	
             disp[2] = 'T';	

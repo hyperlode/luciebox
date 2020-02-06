@@ -10,32 +10,14 @@ void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, Displ
   this->binaryInputs = binaryInputs;
   this->potentio = potentio;
   this->ledDisp = ledDisp;
-  // this->silentMode = silentMode;
 }
-
-// void Apps::setBuffers(  char*  textBuf){
-//    this->textBuf = textBuf;
-//    //this->scrollBuf = scrollBuf;
-//    this->lights = lights;  
-// }
-
-// void Apps::test(){
-  
-//   //(*this->buzzer).programBuzzerRoll(45);
-//   (*this->ledDisp).showNumber(666);
-// //  if (*this->binaryInputs)[BUTTON_MOMENTARY_0].getValue()){
-//   if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-//     buzzer->programBuzzerRoll(45);
-//   }
-// }
 
 void Apps::appSelector(bool init, uint8_t selector){
 
 	if (init){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
-		ledDisp->SetFourDigits(0x0ff00f0f); 	
-    Serial.println("initappsel");
+    Serial.println("initapps");
 	}
 	
 	if (this->app_init_mode){
@@ -45,7 +27,6 @@ void Apps::appSelector(bool init, uint8_t selector){
 			this->app_init_mode = false;
 			init = true;
 		}
-
 	}
 	
 	// not as else statement, to have the init properly transferred after app beginning screen.
@@ -71,7 +52,6 @@ void Apps::appSelector(bool init, uint8_t selector){
 		case 3:
 		  //this->modeScroll(init);
       this->modeDiceRoll(init);
-
 		  break;
 		  
 		case 4:
@@ -87,7 +67,6 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		  
 		case 7:
-		  
       this->modeSimpleButtonsAndLights(init);    
 		  break;
 		  
@@ -96,7 +75,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		  
 		case 9:
+      #ifdef ENABLE_REACTION_APP
 		  this->modeReactionGame(init);
+      #endif
 		  break;
 		  
 		case 10:
@@ -104,7 +85,9 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		  
 		case 11:
+      #ifdef ENABLE_MULTITIMER
 		  this->miniMultiTimer(init);
+      #endif
 		  break;
 
     #ifdef ENABLE_ANALOG_PIN_DEBUG
@@ -175,10 +158,12 @@ bool Apps::init_app(bool init, uint8_t selector){
 	if (counter < 32){
 		// ledDisp->SetFourDigits(displaySequence[31-counter]); // use fade in as fade out to set text.
 		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
+    ledDisp->showNumber(freeMemory());
 
 	}else if (counter < 50){
 		ledDisp->SetFourDigits(this->displayAllSegments);
 		//ledDisp->showNumber(selector);
+    ledDisp->showNumber(freeMemory());
 		
 	}else if (counter == 50){
 		//this->fadeInList(displaySequence, 32, ~this->displayAllSegments);
@@ -1096,9 +1081,8 @@ void Apps::modeSingleSegmentManipulation(bool init){
   // }
 }
 
-
-void Apps::miniMultiTimer(bool init){
 #ifdef ENABLE_MULTITIMER
+void Apps::miniMultiTimer(bool init){
   // every player: init time, time left, alive? 
   // game: pause, player alive? ,fischertimer active?/time, random starter
 
@@ -1131,7 +1115,7 @@ void Apps::miniMultiTimer(bool init){
     //Serial.println("eijejfjeetttt");
   }
   
-    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
+  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
 	  this->multiTimer.playerButtonPressEdgeDown(2);
   }
   if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
@@ -1140,8 +1124,6 @@ void Apps::miniMultiTimer(bool init){
   if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
 	  this->multiTimer.playerButtonPressEdgeDown(0);
   }
-
-
 
   // START STOP Button
   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
@@ -1172,7 +1154,7 @@ void Apps::miniMultiTimer(bool init){
 	  // convert value to predefined amount of seconds.
 	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
       
-      // pass through to multitimer app, it has to decide about validity.
+    // pass through to multitimer app, it has to decide about validity.
     this->multiTimer.setAllInitCountDownTimeSecs(seconds);
     this->multiTimer.setFischerTimer(seconds);
   }
@@ -1204,8 +1186,8 @@ void Apps::miniMultiTimer(bool init){
   ledDisp->SetLedArray(lights); 
   ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights ,2);
     
-#endif
 }
+#endif
 
 void Apps::tiltSwitchTest(bool init){
   // four tilt switches are positioned as such that they are "ON" in rest position. 
@@ -1249,6 +1231,7 @@ void Apps::tiltSwitchTest(bool init){
 	 screen = this->dataPlayer.getActive32bit();
 
 	 ledDisp->SetFourDigits(screen);  
+
   }else{
 		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){
 			buzzer->programBuzzerRoll(1); //not beep but "puck"
@@ -1779,7 +1762,9 @@ int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minV
      return counter;
 }
 
+
 void Apps::modeReactionGame(bool init){
+  #ifdef ENABLE_REACTION_APP
   //yellow button active at start: yellow button is also a guess button
   // big red active: timed game
   // small red right active: time progressively shorter as game advances
@@ -2157,6 +2142,7 @@ void Apps::modeReactionGame(bool init){
       break;
     }
   }
+  #endif
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence ){

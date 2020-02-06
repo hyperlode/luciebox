@@ -5,10 +5,11 @@
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
 #define SIMON_APP
+#define ENABLE_REACTION_APP
 
 #include "Arduino.h"
 #include "SuperTimer.h"
-#include "Buzzer.h"
+#include "Buzzer.h" 
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
@@ -379,7 +380,7 @@ class Apps{
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
     
     SuperTimer generalTimer;
-     uint32_t displayAllSegments;
+    uint32_t displayAllSegments;
 
     //reused variables per app
     bool general_boolean;
@@ -396,8 +397,10 @@ class Apps{
     
     uint8_t array_4_bytes [4];
 
+    #ifdef ENABLE_REACTION_APP
     // reaction
-    enum ReactionGameState:uint8_t {
+    // enum ReactionGameState:uint8_t {
+    enum ReactionGameState{
         reactionWaitForStart,
         reactionNewGame,
         reactionNewTurn,
@@ -409,10 +412,12 @@ class Apps{
         
     };
     ReactionGameState reactionGameState;
+    #endif
 
     #ifdef SIMON_APP
     // simon
-    enum SimonState:uint8_t {
+    // enum SimonState:uint8_t {
+    enum SimonState{
         simonWaitForNewGame,
         simonNewGame,
         simonNewLevel,
