@@ -158,12 +158,10 @@ bool Apps::init_app(bool init, uint8_t selector){
 	if (counter < 32){
 		// ledDisp->SetFourDigits(displaySequence[31-counter]); // use fade in as fade out to set text.
 		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.
-    ledDisp->showNumber(freeMemory());
 
 	}else if (counter < 50){
 		ledDisp->SetFourDigits(this->displayAllSegments);
-		//ledDisp->showNumber(selector);
-    ledDisp->showNumber(freeMemory());
+		// ledDisp->showNumber(selector);
 		
 	}else if (counter == 50){
 		//this->fadeInList(displaySequence, 32, ~this->displayAllSegments);
