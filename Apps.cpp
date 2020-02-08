@@ -689,15 +689,12 @@ void Apps::modeSoundSong(bool init){
     if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
       if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_retreat );
-		//Serial.println("rettr");
       }
       if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
         buzzer->loadBuzzerTrack(kindeke_douwen);
-		//Serial.println("dow");
       }
       if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
         buzzer->loadBuzzerTrack(song_unhappy_dryer);
-		//Serial.println("unhappy");
       }
     }else{
       if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
@@ -1165,7 +1162,6 @@ void Apps::miniMultiTimer(bool init){
   uint8_t settingsLights;
   this->multiTimer.getDisplay(textBuf, &buttonLights, &settingsLights);
   
-  
   uint8_t lights=0b00000000;
   // timer buttons lights to real lights
   for(uint8_t i=0;i<4;i++){
@@ -1268,25 +1264,23 @@ void Apps::tiltSwitchTest(bool init){
 				screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword
 			  }
 		  }	
-		
+      ledDisp->SetFourDigits(screen);  
   
-		ledDisp->SetFourDigits(screen);  
-	}else{
-		ledDisp->displayHandler(textBuf);
-	}
+    }else{
+      ledDisp->displayHandler(textBuf);
+    }
   }
   
   // keep track of progress
   if (counter2 == 0x0F){ //if a digit is complete
-	counter++;
-	//Serial.println(counter);
-	if (counter == 4){
-		buzzer->loadBuzzerTrack(song_happy_dryer);
-		counter = 0;
-	}
-	counter2 = 0;
+    counter++;
+    //Serial.println(counter);
+    if (counter == 4){
+      buzzer->loadBuzzerTrack(song_happy_dryer);
+      counter = 0;
+    }
+    counter2 = 0;
   }
-  
 }
 
 void Apps::modeGeiger(bool init){
@@ -1401,7 +1395,6 @@ void Apps::modeSequencer(bool init){
 			generalTimer.setInitTimeMillis((long)potentio->getValueStable() * -1);
 			generalTimer.start();
 			
-			
       //resets song.
 			for (uint8_t i=0;i<32;i++){
 			  this->SEQUENCER_SONG[i] = C7_8;
@@ -1460,7 +1453,6 @@ void Apps::modeSequencer(bool init){
 			}
 		}
 
-
 		if (step != 0){
 			counter+=step;
 
@@ -1492,7 +1484,6 @@ void Apps::modeSequencer(bool init){
 			ledDisp->SetFourDigits(screen);
 		}
 		
-		
 	 }else{
 		 this->modeMetronome(init);
 	 }
@@ -1501,11 +1492,8 @@ void Apps::modeSequencer(bool init){
 
 void Apps::modeMetronome(bool init){
   // todo: with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen)!
-  bool update = 0;
-  // bool direction1 = true;
-  // bool direction2 = true;
+  bool update = false;
   bool nextStep = false;
-
   
   if (init){
     METRONOME_TICKER_1_POSITION = 0;
@@ -1516,16 +1504,6 @@ void Apps::modeMetronome(bool init){
     update = true;
   }
   
-  //ticker one direction inverse
-  // if(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-  //   direction1 = false;
-  // }  
-  
-  // if(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-  //   direction2 = false;
-  // }
-  
-
   if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 
     if (potentio->getValueStableChangedEdge()){
@@ -1541,7 +1519,7 @@ void Apps::modeMetronome(bool init){
   }
   
   if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-    //ticker 1,2 and 3 back together
+    //ticker 1,2 and 3 back together (at position of ticker 1)
     METRONOME_TICKER_2_POSITION = METRONOME_TICKER_1_POSITION;
     METRONOME_TICKER_3_POSITION = METRONOME_TICKER_1_POSITION;
     update = true;
@@ -1552,8 +1530,8 @@ void Apps::modeMetronome(bool init){
     //set ticker 2 one step extra forward .
     METRONOME_TICKER_2_POSITION = this->nextStepRotate(
       METRONOME_TICKER_2_POSITION, 
-      //binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(), 
-      true,
+      !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(), 
+      // true,
       0, 
       11);
     update = true;
@@ -1564,7 +1542,8 @@ void Apps::modeMetronome(bool init){
     //set ticker 3 one step extra forward .
     METRONOME_TICKER_3_POSITION = this->nextStepRotate(
       METRONOME_TICKER_3_POSITION, 
-      true,
+      !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(), 
+      // true,
       0, 
       11);
     update = true;
@@ -1576,31 +1555,25 @@ void Apps::modeMetronome(bool init){
   }
 
   if (update){
-    uint32_t screen = 0;
-    for (uint8_t i=0;i<4;i++){
-      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_1_POSITION*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
-      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_2_POSITION*4 + (i)) << (8*i); 
-      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_3_POSITION*4 + (i)) << (8*i); 
-    }
-    ledDisp->SetFourDigits(screen);
+    
 
     if (nextStep){
       METRONOME_TICKER_1_POSITION = this->nextStepRotate(
         METRONOME_TICKER_1_POSITION, 
-        binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(), 
-        //true,
+        true,
         0, 
         11);
 
       METRONOME_TICKER_2_POSITION = this->nextStepRotate(
         METRONOME_TICKER_2_POSITION, 
-        binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(), 
+        !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(), 
         // true,
         0, 
         11);
       METRONOME_TICKER_3_POSITION = this->nextStepRotate(
         METRONOME_TICKER_3_POSITION, 
-        true, 
+        !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(), 
+        // true, 
         0, 
         11);
     }  
@@ -1618,6 +1591,15 @@ void Apps::modeMetronome(bool init){
       ){
       buzzer->programBuzzerRoll(C5_4);
     }
+
+    uint32_t screen = 0;
+    for (uint8_t i=0;i<4;i++){
+      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_1_POSITION*4 + (i)) << (8*i); //* 4 --> 4 bytes per dword
+      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_2_POSITION*4 + (i)) << (8*i); 
+      screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_3_POSITION*4 + (i)) << (8*i); 
+    }
+    ledDisp->SetFourDigits(screen);
+
   }  
 }
 
