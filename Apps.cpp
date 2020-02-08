@@ -17,7 +17,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 	if (init){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
-    Serial.println("initapps");
+    //Serial.println("initapps");
 	}
 	
 	if (this->app_init_mode){
