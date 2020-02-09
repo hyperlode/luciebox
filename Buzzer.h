@@ -276,7 +276,7 @@
 #define BUZZER_ROLLVALUE_STARTGAME
 #define BUZZER_ROLLVALUE_ENDGAME
 
-#define BUZZER_ROLL_LENGTH 80
+#define BUZZER_ROLL_LENGTH 100 // accomodate for "the longest songs..." or find another way to split songs in half.
 #define BUZZER_ROLL_EMPTY_SLOT 255
 // #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 63
 #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 15

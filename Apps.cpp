@@ -1769,40 +1769,51 @@ void Apps::modeReactionGame(bool init){
 
     case reactionWaitForStart: {
 
+      // change level
       REACTION_GAME_LEVEL = (potentio->getValueMapped(1,5)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-      
       if (potentio->getValueStableChangedEdge()){
         TIMER_REACTION_GAME_RESTART_DELAY.start();
       }
-#ifdef ENABLE_EEPROM
-        //do nothing.  wait for display high score is finished.
+
+      // special mode for the reaction game: limited total time during which as many points should be collected. 
+      REACTION_COUNTDOWN_MODE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();
+      REACTION_GUITAR_HERO_MODE = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
+
+      // guitar hero and countdown mode should never occure at the same time!
+      if (REACTION_GUITAR_HERO_MODE && REACTION_COUNTDOWN_MODE){
+        // error!!!
+        REACTION_COUNTDOWN_MODE = false; // no reaction count downmode for guitar hero.
+      }
+
+      // display level and high score
+      #ifdef ENABLE_EEPROM
       if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
         intToDigitsString(textBuf+1, REACTION_GAME_LEVEL, false);  // utilities lode
         textBuf[1] = 'L';
         ledDisp->displayHandler(textBuf);
       }else{
         //ledDisp->setBlankDisplay(); //make high score blink
-        // scores for guitar hero and single dot reaction game depending on big latching button position. (no more variable to save on stack ram)
+        
+
         ledDisp->showNumber(
-          // EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) << 8 | 
-          // EEPROM.read(EEPROM_REACTION_GAME_START_ADDRESS + REACTION_GAME_LEVEL*2 + 1 + EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()) 
           eeprom_read_word(
               (uint16_t*)
               (EEPROM_REACTION_GAME_START_ADDRESS +
                REACTION_GAME_LEVEL * 2 +
-               EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+               EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+               EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE
               )
             )
           );
       }            
-#else
+      #else
       intToDigitsString(textBuf+1, REACTION_GAME_LEVEL, false);  // utilities lode
       textBuf[1] = 'L';
       ledDisp->displayHandler(textBuf);
-#endif
+      #endif
 
-          
-
+        
+      // play game button pressed
       if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() ){
         reactionGameState = reactionNewGame;
 
@@ -1810,20 +1821,17 @@ void Apps::modeReactionGame(bool init){
           //play by sound
           for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
             
-            // REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(228, 242);
             REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(234, 245);
             
+            
             for (uint8_t j=0;j<i;j++){
+              // never twice the same sound
               if (REACTION_GAME_SELECTED_SOUNDS[j] == REACTION_GAME_SELECTED_SOUNDS[i]){
                 i--;
               }
             }
           }
-            
-          
         }
-        //REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -35;
-
       } 
 
       break;
@@ -1838,7 +1846,6 @@ void Apps::modeReactionGame(bool init){
         reactionGameState = reactionMultiNewTurn;
         displayAllSegments = 0;
 
-        //REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5-REACTION_GAME_LEVEL)) * -140;
         REACTION_GAME_STEP_TIME_MILLIS = (6-REACTION_GAME_LEVEL) * -200;
         
       }else{
@@ -1853,15 +1860,21 @@ void Apps::modeReactionGame(bool init){
           buzzer->programBuzzerRoll(rest_1);
         }  
 
-
         reactionGameState = reactionNewTurn;
-        REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6-REACTION_GAME_LEVEL)) * -35;
+
+        if (REACTION_COUNTDOWN_MODE){
+          // if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
+          REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL )) * -4000; // step speed depending on level
+
+        }else{
+          REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+        }
 
       }
 
-    TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
-      
-     break;
+      TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
+      TIMER_REACTION_GAME_SPEED.start(); 
+      break;
 
     }
 
@@ -1920,6 +1933,8 @@ void Apps::modeReactionGame(bool init){
       break; 
     }
 
+
+
     case reactionMultiPlaying: {
 
       for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
@@ -1963,13 +1978,20 @@ void Apps::modeReactionGame(bool init){
 
     case reactionNewTurn:{
      
+      if (!REACTION_COUNTDOWN_MODE){
+       
+        REACTION_GAME_TIMER_STEP= 0; //reset animation step
+        TIMER_REACTION_GAME_SPEED.start(); // only restart if 12 steps time per turn
+      }
       ledDisp->setBlankDisplay(); // yes, this is needed.
+      displayAllSegments = 0; //reset animation graphics screen
+      
       lights = 0b00000000; //reset before switch enquiry
       
       REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
       
-      displayAllSegments = 0; //reset animation graphics screen
-      REACTION_GAME_TIMER_STEP= 0; //reset animation step
+      
+      
 
       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
         
@@ -1986,38 +2008,58 @@ void Apps::modeReactionGame(bool init){
 
       ledDisp->SetLedArray(lights); 
 
-      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-        TIMER_REACTION_GAME_SPEED.setInitTimeMillis(TIMER_REACTION_GAME_SPEED.getInitTimeMillis()*0.99);
-      }        
+           
 
-      TIMER_REACTION_GAME_SPEED.start();    
+          
     
       reactionGameState = reactionPlaying;
       break;
     }
-    
+
+
+
+
     case reactionPlaying: {
       
-      // animation next step
-      if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
-        // game timing animation update.
-        for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-          displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
+      
+      if (REACTION_COUNTDOWN_MODE){
+        // if timer out, always dead.
+        if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
+           reactionGameState = reactionJustDied;
+        }
+        // show number of segments:
+        REACTION_GAME_TIMER_STEP = 10 - (uint16_t) ((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
+        // REACTION_GAME_TIMER_STEP = 11;
+        for (uint8_t step=0;step<=REACTION_GAME_TIMER_STEP ;step++){
+         for (uint8_t i=0;i<4;i++){
+            displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + step*4 + (i)) << (8*i); 
+          }
         }
         ledDisp->SetFourDigits(displayAllSegments);
-        
-        REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
-        
-        // check game status 'dead'
-        if (REACTION_GAME_TIMER_STEP == 12){
-          REACTION_GAME_TIMER_STEP = 0;
-          displayAllSegments=0;    
+
+      }else{
+        // animation next step
+      
+        if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){
+          // game timing animation update.
+          for (uint8_t i=0;i<4;i++){
+            displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); 
+          }
+          ledDisp->SetFourDigits(displayAllSegments);
           
-          reactionGameState = reactionJustDied;
-         
-        }else{
-          TIMER_REACTION_GAME_SPEED.start();
-        }   
+          REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
+          
+          // check game status 'dead'
+          if (REACTION_GAME_TIMER_STEP == 12){
+            REACTION_GAME_TIMER_STEP = 0;
+            displayAllSegments=0;    
+            
+            reactionGameState = reactionJustDied;
+          
+          }else{
+            TIMER_REACTION_GAME_SPEED.start();
+          }   
+        }
       }
 
       // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
@@ -2032,24 +2074,11 @@ void Apps::modeReactionGame(bool init){
 
         // button press
         if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
-         
           
           if (i==REACTION_GAME_TARGET){
             //right button
             REACTION_GAME_SCORE++;
             reactionGameState = reactionNewTurn;
-
-            // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-            //   //play by sounds, play sound of pushed button
-            //   //buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
-            //   // buzzer->programBuzzerRoll(rest_1);
-            //   // buzzer->programBuzzerRoll(rest_1);
-            //   for (uint8_t j=0; j<6;j++){
-            //     buzzer->programBuzzerRoll(rest_1);
-
-            //   }
-            // }
-
 
           }else{
             //wrong button
@@ -2071,7 +2100,8 @@ void Apps::modeReactionGame(bool init){
                   (uint16_t*)
                   (EEPROM_REACTION_GAME_START_ADDRESS +
                   REACTION_GAME_LEVEL*2 +
-                  EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+                  EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+                  EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE
                   )
             )
       )    
@@ -2080,11 +2110,12 @@ void Apps::modeReactionGame(bool init){
           (uint16_t*)
           (EEPROM_REACTION_GAME_START_ADDRESS +
           REACTION_GAME_LEVEL*2 +
-          EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()
+          EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+          EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE
           ),
           REACTION_GAME_SCORE
-
         );
+
         buzzer->loadBuzzerTrack(song_attack );
       }
       #endif

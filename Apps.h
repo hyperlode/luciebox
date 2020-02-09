@@ -47,10 +47,13 @@
 #define ANIMATION_STOP_CODE 0x00
 
 #define TIMER_METRONOME generalTimer
-#define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_INIT_APP generalTimer
-
+#define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
+
+
+
+
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
@@ -80,7 +83,13 @@
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
 
-#define REACTION_GAME_YELLOW_BUTTON_INCLUDED general_boolean  
+// #define REACTION_GAME_COUNTDOWN counter6
+
+#define REACTION_COUNTDOWN_MODE general_boolean  
+
+#define REACTION_GUITAR_HERO_MODE general_boolean2
+
+
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
@@ -380,10 +389,12 @@ class Apps{
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
     
     SuperTimer generalTimer;
+    SuperTimer generalTimer2;
     uint32_t displayAllSegments;
 
     //reused variables per app
     bool general_boolean;
+    bool general_boolean2;
     int16_t counter;
     int16_t counter2;
     long counter3;
@@ -399,8 +410,8 @@ class Apps{
 
     #ifdef ENABLE_REACTION_APP
     // reaction
-    // enum ReactionGameState:uint8_t {
-    enum ReactionGameState{
+    enum ReactionGameState:uint8_t {
+    // enum ReactionGameState{
         reactionWaitForStart,
         reactionNewGame,
         reactionNewTurn,
@@ -409,6 +420,7 @@ class Apps{
         reactionFinished,
         reactionMultiNewTurn,
         reactionMultiPlaying,
+
         
     };
     ReactionGameState reactionGameState;
@@ -416,8 +428,8 @@ class Apps{
 
     #ifdef SIMON_APP
     // simon
-    // enum SimonState:uint8_t {
-    enum SimonState{
+    enum SimonState:uint8_t {
+    // enum SimonState{
         simonWaitForNewGame,
         simonNewGame,
         simonNewLevel,

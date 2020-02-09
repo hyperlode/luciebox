@@ -36,8 +36,8 @@ class MiniMultiTimer{
 	#define LIGHT_SET_TIMERS_COUNT 0x08
 	#define LIGHT_SECONDS_BLINKER 0b00010000
 	
-	// enum state:uint8_t{
-	enum state{
+	enum state:uint8_t{
+	// enum state{
 		initialized=0,
 		playing,
 		finished,
