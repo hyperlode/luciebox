@@ -51,7 +51,7 @@
 #define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 
-
+#define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 
 
 
@@ -75,6 +75,7 @@
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define METRONOME_TICKER_3_POSITION counter3
+#define SETTINGS_MODE_SELECTOR counter3
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
@@ -100,7 +101,7 @@
 
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
-
+  
 	0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
 	0xD8, 0xE9, 0xCB, 0xC4, // abstract drol or tank
 	0x39, 0x09, 0x09, 0x0F, // abstractbig circle
@@ -108,8 +109,9 @@ const uint8_t app_splash_screens [] PROGMEM = {
 	0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
 	//0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
   0x32, 0x26, 0x34, 0x16,  // vertical lines short and long 
-	0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
+	//0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
 	0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
+  0x0F, 0x40, 0x40, 0x39, //wrench
 	0x08, 0xCE, 0x78, 0x08, // abstract piramid
 	0x40, 0x4F, 0x79, 0x40, // abstract art deco 
 	0x36, 0x36, 0x36, 0x36, // abstract vertical lines
@@ -426,6 +428,13 @@ class Apps{
     ReactionGameState reactionGameState;
     #endif
 
+
+    enum SettingsState:uint8_t{
+      settingNormal,
+      settingSound,
+      settingButtons,
+      settingEepromReset
+    };
     #ifdef SIMON_APP
     // simon
     enum SimonState:uint8_t {

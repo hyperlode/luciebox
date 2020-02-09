@@ -184,7 +184,6 @@ void Apps::modeButtonDebug(bool init){
     generalTimer.setInitTimeMillis(0);
     generalTimer.start();
     counter = -1;
-    // Serial.println("dbug init");
   }
   
   if(!generalTimer.getTimeIsNegative()){
@@ -448,92 +447,236 @@ void Apps::modeDiceRoll(bool init){
 void Apps::modeSimpleButtonsAndLights(bool init){
   
   if (init){
+    SETTINGS_MODE_SELECTOR = 0;
 
     if(  analogRead(PIN_BUTTONS_1) == 0 &&
           analogRead(PIN_BUTTONS_2) == 0 &&
           analogRead(PIN_POTENTIO) == 0){
           DEBUGMODE_ACTIVATED = 666;
+          // SETTINGS_MODE_DISPLAY_VALUES_BLINK.setInitCountDownTimeSecs(1);
+          SETTINGS_MODE_DISPLAY_VALUES_BLINK.setInitCountDownTimeMillis(-1000);
+          SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
     }  
   }
 
-  if (DEBUGMODE_ACTIVATED == 666){
-    // Serial.println("aaahaa");
-    this->modeButtonDebug(init);
-
-  }else{
-
-    // simple repetitive, predictive mode.
-    // each button triggers its corresponding light. 
-    // potentio sets display brightness
-    // no buzzer
-    // display lights up a segment for each button.
-    bool updateScreen = false;
-
-    //delete all content from screen.
-    ledDisp->setBlankDisplay();      
-    
-    lights = 0b00000000; //reset before switch enquiry
-    if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-      lights|= 1<<LIGHT_RED;
-      updateScreen = true;
-    }
-    if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-      lights|= 1<<LIGHT_BLUE;
-      updateScreen = true;
-    }
-    if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-      lights|= 1<<LIGHT_GREEN;
-      updateScreen = true;
-    }
-    
-    #if MOMENTARY_BUTTONS_COUNT == 4
-    if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
-      lights|= 1<<LIGHT_YELLOW_EXTRA;
-      updateScreen = true;
-    }
-    #endif
-
-    if (updateScreen){
-      textBuf[1]='8';
-      textBuf[2]='8';
-      textBuf[3]='8';
-      textBuf[4]='8';        
-    }else{
-      //display
-      textBuf[1]='-';
-      textBuf[2]='-';
-      textBuf[3]='-';
-      textBuf[4]='-';
-    }
-
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-      lights|= 1<<LIGHT_LED_1;
-    }else{
-      textBuf[1]=' ';
-    }
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-      lights|= 1<<LIGHT_LED_2;
-    }else{
-      textBuf[2]=' ';
-    }
-    if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-      lights|= 1<<LIGHT_LED_3;
-      updateScreen = true;
-    }else{
-      textBuf[3]=' ';
-    }
-    if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-      lights|= 1<<LIGHT_YELLOW;
-      updateScreen = true;
-    }else{
-      textBuf[4]=' ';
-    }
-
-    ledDisp->displayHandler(textBuf);
-    
-    ledDisp->SetLedArray(lights);
-    ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
+  // back and forth motion required of the potentio to count up modes
+  if (potentio->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 ==0){
+    SETTINGS_MODE_SELECTOR++;
+  }else if (potentio->getValue() >1000 && SETTINGS_MODE_SELECTOR % 2 !=0){
+    SETTINGS_MODE_SELECTOR++;
   }
+
+    textBuf[1]=' ';
+    textBuf[2]=' ';
+    textBuf[3]=' '; 
+    textBuf[4]=' '; 
+   
+  if (SETTINGS_MODE_SELECTOR < 6){
+    
+      //normal mode
+
+      // simple repetitive, predictive mode.
+      // each button triggers its corresponding light. 
+      // potentio sets display brightness
+      // no buzzer
+      // display lights up a segment for each button.
+
+      bool updateScreen = false;
+
+      //delete all content from screen.
+      ledDisp->setBlankDisplay();      
+      
+      lights = 0b00000000; //reset before switch enquiry
+      if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+        lights|= 1<<LIGHT_RED;
+        updateScreen = true;
+        SETTINGS_MODE_SELECTOR = 0;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
+        lights|= 1<<LIGHT_BLUE;
+        updateScreen = true;
+        SETTINGS_MODE_SELECTOR = 0;
+      }
+      if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+        lights|= 1<<LIGHT_GREEN;
+        updateScreen = true;
+        SETTINGS_MODE_SELECTOR = 0;
+      }
+      
+      #if MOMENTARY_BUTTONS_COUNT == 4
+      if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+        lights|= 1<<LIGHT_YELLOW_EXTRA;
+        updateScreen = true;
+        SETTINGS_MODE_SELECTOR = 0;
+      }
+      #endif
+
+      if (updateScreen){
+        textBuf[1]='8';
+        textBuf[2]='8';
+        textBuf[3]='8';
+        textBuf[4]='8';        
+      }else{
+        //display
+        textBuf[1]='-';
+        textBuf[2]='-';
+        textBuf[3]='-';
+        textBuf[4]='-';
+      }
+
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+        lights|= 1<<LIGHT_LED_1;
+      }else{
+        textBuf[1]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+        lights|= 1<<LIGHT_LED_2;
+      }else{
+        textBuf[2]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+        lights|= 1<<LIGHT_LED_3;
+        updateScreen = true;
+      }else{
+        textBuf[3]=' ';
+      }
+      if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+        lights|= 1<<LIGHT_YELLOW;
+        updateScreen = true;
+      }else{
+        textBuf[4]=' ';
+      }
+
+      ledDisp->displayHandler(textBuf);
+      
+      ledDisp->SetLedArray(lights);
+      ledDisp->setBrightness((byte)(50 - potentio->getValueMapped(0,50)),false);
+
+    }else if (SETTINGS_MODE_SELECTOR < 8){
+      if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500)){
+        textBuf[1]='B'; 
+        textBuf[2]='E'; 
+        textBuf[3]='E'; 
+        textBuf[4]='P'; 
+
+      }else{
+        textBuf[2]='O'; // On Off o char
+        if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+          //ON 
+          //textBuf[1]=' '; 
+          textBuf[3]='N'; 
+          // textBuf[4]=' ';
+        }else{
+          // OFF
+
+          // textBuf[1]=' '; 
+          // textBuf[2]='O'; 
+          textBuf[3]='F'; 
+          textBuf[4]='F';
+        } 
+        ledDisp->displayHandler(textBuf);
+      }
+      
+    }else if (SETTINGS_MODE_SELECTOR < 10){
+      textBuf[3]='A'; 
+      textBuf[4]='0'; 
+      ledDisp->showNumber( (int16_t) analogRead(PIN_SELECTOR_DIAL)); 
+    
+    }else if (SETTINGS_MODE_SELECTOR < 12){
+      textBuf[3]='A'; 
+      textBuf[4]='1'; 
+      ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1)); 
+    
+    }else if (SETTINGS_MODE_SELECTOR < 14){
+      textBuf[3]='A'; 
+      textBuf[4]='2'; 
+      ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));
+    
+    }else if (SETTINGS_MODE_SELECTOR < 16){
+      textBuf[3]='A'; 
+      textBuf[4]='3'; 
+      ledDisp->showNumber( (int16_t) analogRead(PIN_POTENTIO));
+
+    }else if (SETTINGS_MODE_SELECTOR < 18){
+      textBuf[3]='A'; 
+      textBuf[4]='4'; 
+      ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));
+    
+    }else if (SETTINGS_MODE_SELECTOR < 20){
+      if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(300)){
+        textBuf[1]='E'; 
+        textBuf[2]='E'; 
+        textBuf[3]='P'; 
+        textBuf[4]='R'; 
+
+      }else{
+        textBuf[1]='R'; 
+        textBuf[2]='S'; 
+        textBuf[3]='E'; 
+        textBuf[4]='T'; 
+        ledDisp->displayHandler(textBuf);
+      }
+    }else if (SETTINGS_MODE_SELECTOR < 22){
+     if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+        
+        #ifdef ENABLE_EEPROM
+        for(uint16_t i = 0;i<100;i+2){
+          eeprom_update_word(
+            (uint16_t*)i,
+            //i,
+            0
+          );
+        }
+        #endif
+        textBuf[1]='D'; 
+        textBuf[2]='O'; 
+        textBuf[3]='N'; 
+        textBuf[4]='E'; 
+
+
+      }else{
+        textBuf[1]='D'; 
+        textBuf[2]='O'; 
+        textBuf[3]='I'; 
+        textBuf[4]='T'; 
+        ledDisp->displayHandler(textBuf);
+
+      }
+    }else if (SETTINGS_MODE_SELECTOR < 24){
+    
+      ledDisp->showNumber(SETTINGS_MODE_SELECTOR);
+
+
+
+    }else{
+      ledDisp->showNumber(SETTINGS_MODE_SELECTOR);
+    }
+
+
+    if (SETTINGS_MODE_SELECTOR >= 6){
+      // in real settings mode
+
+      // show menu title (compressed)
+      // if (counter%2 == 0){
+      //   // show analog pin
+      //   textBuf[4] = counter/2 + 48; // char 0 + analog pin . 
+      //   ledDisp->displayHandler(textBuf);
+      // }
+      if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getTimeIsNegative()){
+        SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
+      }
+      
+      if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500)){
+          ledDisp->displayHandler(textBuf);
+      }
+
+      // show values one seconds, menu items half a second
+      //generalTimer.setInitTimeMillis((long) (-500 - (counter%2)*500)); 
+     
+
+    }
+
+  // }
 }
 
 void Apps::modeCountingLettersAndChars(bool init){
