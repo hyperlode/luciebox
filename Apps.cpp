@@ -445,7 +445,8 @@ void Apps::modeDiceRoll(bool init){
 // }
 
 void Apps::modeSimpleButtonsAndLights(bool init){
-  
+  lights = 0b00000000; //reset before switch enquiry
+
   if (init){
     SETTINGS_MODE_SELECTOR = 0;
 
@@ -486,7 +487,7 @@ void Apps::modeSimpleButtonsAndLights(bool init){
       //delete all content from screen.
       ledDisp->setBlankDisplay();      
       
-      lights = 0b00000000; //reset before switch enquiry
+      
       if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
         lights|= 1<<LIGHT_RED;
         updateScreen = true;
@@ -549,10 +550,28 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 
       ledDisp->displayHandler(textBuf);
       
-      ledDisp->SetLedArray(lights);
+     
       ledDisp->setBrightness((byte)(50 - potentio->getValueMapped(0,50)),false);
 
     }else if (SETTINGS_MODE_SELECTOR < 8){
+      lights|= 1<<LIGHT_RED;
+      if(binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+       #ifdef ENABLE_EEPROM
+        
+        eeprom_update_byte(
+          (uint8_t*)SOUND_OFF_BY_DEFAULT,
+          //i,
+          !eeprom_read_byte((uint8_t*)SOUND_OFF_BY_DEFAULT)
+        );
+        #endif
+      
+        if (buzzer->getPin() == PIN_BUZZER){
+          buzzer->setPin(PIN_BUZZER_FAKE);
+        }else{
+          buzzer->setPin(PIN_BUZZER);
+        }
+      }
+
       if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500)){
         textBuf[1]='B'; 
         textBuf[2]='E'; 
@@ -561,7 +580,8 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 
       }else{
         textBuf[2]='O'; // On Off o char
-        if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+        
+        if (buzzer->getPin() == PIN_BUZZER){
           //ON 
           //textBuf[1]=' '; 
           textBuf[3]='N'; 
@@ -617,10 +637,11 @@ void Apps::modeSimpleButtonsAndLights(bool init){
         ledDisp->displayHandler(textBuf);
       }
     }else if (SETTINGS_MODE_SELECTOR < 22){
+      lights|= 1<<LIGHT_RED;
      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
         
         #ifdef ENABLE_EEPROM
-        for(uint16_t i = 0;i<100;i+2){
+        for(uint16_t i = 0;i<100;i=i+2){
           eeprom_update_word(
             (uint16_t*)i,
             //i,
@@ -662,6 +683,8 @@ void Apps::modeSimpleButtonsAndLights(bool init){
       //   textBuf[4] = counter/2 + 48; // char 0 + analog pin . 
       //   ledDisp->displayHandler(textBuf);
       // }
+
+      
       if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getTimeIsNegative()){
         SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
       }
@@ -675,8 +698,7 @@ void Apps::modeSimpleButtonsAndLights(bool init){
      
 
     }
-
-  // }
+    ledDisp->SetLedArray(lights);
 }
 
 void Apps::modeCountingLettersAndChars(bool init){

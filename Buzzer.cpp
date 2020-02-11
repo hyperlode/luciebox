@@ -28,6 +28,10 @@ void Buzzer::setPin(uint8_t pin) {
   pinMode(this->pin, OUTPUT);
 }
 
+uint8_t Buzzer::getPin(){
+  return this->pin;
+}
+
 void Buzzer::loadBuzzerTrack(const uint8_t* seq) {
   //load a whole track in the buzzer roll
   //load all bytes from sequence in buffer.

@@ -198,12 +198,20 @@ void setup() {
 
   // if no latching buttons pressed at startup, disable sound 
   //(a "Lode listens to the parents"-initiative)
-  if (analogRead(PIN_BUTTONS_2) == 0){
+  // if (analogRead(PIN_BUTTONS_2) == 0){
+  //   buzzer.setPin(PIN_BUZZER_FAKE);
+  // }else{
+  //   buzzer.setPin(PIN_BUZZER);
+  // }
+  #ifdef ENABLE_EEPROM
+  if (eeprom_read_byte((uint8_t*)SOUND_OFF_BY_DEFAULT)){
     buzzer.setPin(PIN_BUZZER_FAKE);
   }else{
     buzzer.setPin(PIN_BUZZER);
   }
-  
+  #else
+  buzzer.setPin(PIN_BUZZER);
+  #endif
   
 
   pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);

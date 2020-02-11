@@ -142,4 +142,6 @@
   #define EEPROM_REACTION_GAME_START_ADDRESS        EEPROM_OFFSET + 0
   #define EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET 12  // level 0 does not exist. but let's pretend it does. so: 6 levels, each 2 bytes.
   #define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET 24 // special limited time mode of reaction game (does not exist for guitar hero)
+  #define EEPROM_SETTINGS_OFFSET    EEPROM_OFFSET + 100
+  #define SOUND_OFF_BY_DEFAULT     EEPROM_SETTINGS_OFFSET 
 #endif
