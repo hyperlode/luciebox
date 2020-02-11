@@ -62,6 +62,7 @@
 #define SIMON_LENGTH counter
 #define METRONOME_TICKER_1_POSITION counter
 #define DICEROLL_RANDOM_NUMBER counter
+#define SEQUENCER_STEP_COUNTER counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -79,10 +80,12 @@
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
+#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 
 
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
+#define SEQUENCER_TEMP_NOTE counter5
 
 // #define REACTION_GAME_COUNTDOWN counter6
 
