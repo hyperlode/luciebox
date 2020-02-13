@@ -559,9 +559,9 @@ void Apps::modeSimpleButtonsAndLights(bool init){
        #ifdef ENABLE_EEPROM
         
         eeprom_update_byte(
-          (uint8_t*)SOUND_OFF_BY_DEFAULT,
+          (uint8_t*)EEPROM_SOUND_OFF_BY_DEFAULT,
           //i,
-          !eeprom_read_byte((uint8_t*)SOUND_OFF_BY_DEFAULT)
+          !eeprom_read_byte((uint8_t*)EEPROM_SOUND_OFF_BY_DEFAULT)
         );
         #endif
       
@@ -1554,6 +1554,7 @@ void Apps::modeSequencer(bool init){
 	int8_t step = 0;
 
   if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
+    // metrone function is the "easy mode here"
     this->modeMetronome(init);
     return;
   }
@@ -1563,6 +1564,9 @@ void Apps::modeSequencer(bool init){
     SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
     generalTimer.setInitTimeMillis((long)potentio->getValueStable() * -1);
     generalTimer.start();
+
+    SEQUENCER_EEPROM_MODE_BLINK.setInitTimeMillis(-1000);
+    SEQUENCER_EEPROM_MODE_BLINK.start();
     
     //resets song.
     for (uint8_t i=0;i<32;i++){
@@ -1570,130 +1574,186 @@ void Apps::modeSequencer(bool init){
     }
   }
   
-  // visualize programmed note
-
-  SEQUENCER_TEMP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
-
-  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-    buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-    ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown()){
+    init = true; // make sure we display the sequencer when returning from save/load mode
   }
 
-  if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-    // if button continuously pressed, show notes.
-    ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
+    // load/save songs to the sequencer
+    //blink alternatively song number and "load" or "save"
+    uint8_t song_number  = potentio->getValueMapped(1,9);
+    if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
+      ledDisp->showNumber(song_number);
 
-    // bonus effect: TRANSPOSE!
-    if (potentio->getValueStableChangedEdge()){
-      SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
-    }
-  } 
-  
-  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
-    ledDisp->SetFourDigits(displayAllSegments);
-    
-  }
-
-  // just listen to the potentio note
- 
-  SEQUENCER_TEMP_NOTE = potentio->getValueMapped(0,255);  
-
-  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-    buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-    ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
-  }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-    // if button continuously pressed, rotate potentio to hear notes.
-    if (potentio->getValueStableChangedEdge()){
+    }else{
       
+      if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+        textBuf[1] = 'S';
+        textBuf[2] = 'A';
+        textBuf[3] = 'V';
+        textBuf[4] = 'E';
+      
+      }else{
+        textBuf[1] = 'L';
+        textBuf[2] = 'O';
+        textBuf[3] = 'A';
+        textBuf[4] = 'D';
+
+      }
+
+      ledDisp->displayHandler(textBuf);
+    }
+
+    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+      for (uint8_t i=0;i<32;i++){
+        uint8_t eeprom_address = (uint8_t*)
+              (EEPROM_SEQUENCER_SONGS_START_ADDRESS +
+               (song_number - 1) * EEPROM_SEQUENCER_SONG_LENGTH +
+               i               
+              );
+
+        if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+          //save
+          eeprom_write_byte(eeprom_address, this->SEQUENCER_SONG[i]);
+
+        }else{
+          //load
+          this->SEQUENCER_SONG[i] = eeprom_read_byte(eeprom_address);
+        }
+      }
+    }
+
+    if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+      TIMER_REACTION_GAME_RESTART_DELAY.start();
+    }
+    
+
+  }else{
+    // manipulate the sequencer
+
+
+    // visualize programmed note
+
+    SEQUENCER_TEMP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
+
+    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
       buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
       ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
     }
-  } 
-  
-  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
-    ledDisp->SetFourDigits(displayAllSegments);
-  }
 
-  // program note to song
-  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-    
-    uint8_t note = potentio->getValueMapped(0,255);
-    
-    buzzer->programBuzzerRoll(note);
+    if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+      // if button continuously pressed, show notes.
+      ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
 
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
-      //copy to all measures
-      for (uint8_t i=0;i<4;i++){
-        this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER%8) + 8*i] = note;
+      // bonus effect: TRANSPOSE!
+      if (potentio->getValueStableChangedEdge()){
+        SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
       }
-    }else{
-      this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = note;
-    }
-  }
-  
-  // song progression
-  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-    step = 1;
-  }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
-    if (potentio->getValueStableChangedEdge()){
-      step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
-    }
-  }
-
-  // autoplay
-  if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-    // change speed is default behaviour of potentio.
-      if (!binaryInputs[BUTTON_MOMENTARY_0].getValue() && 
-          !binaryInputs[BUTTON_MOMENTARY_1].getValue() &&
-          !binaryInputs[BUTTON_MOMENTARY_2].getValue() &&
-          !binaryInputs[BUTTON_MOMENTARY_3].getValue() &&
-          potentio->getValueStableChangedEdge()){
-
-            //  generalTimer.setInitTimeMillis(potentio->getValueMapped(-1024,0));
-            int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
-            generalTimer.setInitTimeMillis(generalTimer.getInitTimeMillis() + tmp * 10) ; //step +1 or -1
+    } 
+    
+    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
+      ledDisp->SetFourDigits(displayAllSegments);
     }
 
-    if (!generalTimer.getTimeIsNegative()){
+    // just listen to the potentio note
+    SEQUENCER_TEMP_NOTE = potentio->getValueMapped(0,255);  
+
+    if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+      buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
+      ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+    }
+    
+    if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+      // if button continuously pressed, rotate potentio to hear notes.
+      if (potentio->getValueStableChangedEdge()){
+        
+        buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
+        ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+      }
+    } 
+    
+    if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
+      ledDisp->SetFourDigits(displayAllSegments);
+    }
+
+    // program note to song
+    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+      
+      uint8_t note = potentio->getValueMapped(0,255);
+      
+      buzzer->programBuzzerRoll(note);
+
+      if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){ 
+        //copy to all measures
+        for (uint8_t i=0;i<4;i++){
+          this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER%8) + 8*i] = note;
+        }
+      }else{
+        this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = note;
+      }
+    }
+    
+    // song progression
+    if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
       step = 1;
-      generalTimer.start();
+    }
+    
+    if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+      if (potentio->getValueStableChangedEdge()){
+        step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
+      }
+    }
+
+    // autoplay
+    if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+      // change speed is default behaviour of potentio.
+        if (!binaryInputs[BUTTON_MOMENTARY_0].getValue() && 
+            !binaryInputs[BUTTON_MOMENTARY_1].getValue() &&
+            !binaryInputs[BUTTON_MOMENTARY_2].getValue() &&
+            !binaryInputs[BUTTON_MOMENTARY_3].getValue() &&
+            potentio->getValueStableChangedEdge()){
+
+              //  generalTimer.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+              int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
+              generalTimer.setInitTimeMillis(generalTimer.getInitTimeMillis() + tmp * 10) ; //step +1 or -1
+      }
+
+      if (!generalTimer.getTimeIsNegative()){
+        step = 1;
+        generalTimer.start();
+      }
+    }
+    
+    // handle step change
+    if (step != 0 || init){
+      SEQUENCER_STEP_COUNTER+=step;
+
+      if (SEQUENCER_STEP_COUNTER < 0){
+        SEQUENCER_STEP_COUNTER = 31;
+      }
+
+      if (SEQUENCER_STEP_COUNTER > 31){
+        SEQUENCER_STEP_COUNTER = 0;
+      }
+      
+      buzzer->programBuzzerRoll(
+        this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] + 
+        SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * binaryInputs[BUTTON_MOMENTARY_0].getValue()
+        );
+      
+      // sequencer shows every step in 32 notes bar. 8steps (circle) times 4 measures (bar on bottom)
+      displayAllSegments = 0;
+      if (SEQUENCER_STEP_COUNTER % 8 < 4){
+        displayAllSegments |=  (uint32_t)0x1 << (8* (SEQUENCER_STEP_COUNTER % 8)) ; 
+      }else{
+        displayAllSegments |=  (uint32_t)0x1 << ((8*( 3 - ( SEQUENCER_STEP_COUNTER % 8 -4 ))) + 6); 
+      }
+      
+      displayAllSegments |=  (uint32_t)0x1 << ((8*(SEQUENCER_STEP_COUNTER / 8))+3) ;  // bar at bottom.
+      ledDisp->SetFourDigits(displayAllSegments);
+
     }
   }
-  
-  // handle step change
-  if (step != 0 || init){
-    SEQUENCER_STEP_COUNTER+=step;
-
-    if (SEQUENCER_STEP_COUNTER < 0){
-      SEQUENCER_STEP_COUNTER = 31;
-    }
-
-    if (SEQUENCER_STEP_COUNTER > 31){
-      SEQUENCER_STEP_COUNTER = 0;
-    }
-    
-    buzzer->programBuzzerRoll(
-      this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] + 
-      SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * binaryInputs[BUTTON_MOMENTARY_0].getValue()
-      );
-    
-    // sequencer shows every step in 32 notes bar. 8steps (circle) times 4 measures (bar on bottom)
-    displayAllSegments = 0;
-    if (SEQUENCER_STEP_COUNTER % 8 < 4){
-      displayAllSegments |=  (uint32_t)0x1 << (8* (SEQUENCER_STEP_COUNTER % 8)) ; 
-    }else{
-      displayAllSegments |=  (uint32_t)0x1 << ((8*( 3 - ( SEQUENCER_STEP_COUNTER % 8 -4 ))) + 6); 
-    }
-    
-    displayAllSegments |=  (uint32_t)0x1 << ((8*(SEQUENCER_STEP_COUNTER / 8))+3) ;  // bar at bottom.
-    ledDisp->SetFourDigits(displayAllSegments);
-
-  }
-    
 }
 
 void Apps::modeMetronome(bool init){

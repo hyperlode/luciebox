@@ -204,7 +204,7 @@ void setup() {
   //   buzzer.setPin(PIN_BUZZER);
   // }
   #ifdef ENABLE_EEPROM
-  if (eeprom_read_byte((uint8_t*)SOUND_OFF_BY_DEFAULT)){
+  if (eeprom_read_byte((uint8_t*)EEPROM_SOUND_OFF_BY_DEFAULT)){
     buzzer.setPin(PIN_BUZZER_FAKE);
   }else{
     buzzer.setPin(PIN_BUZZER);

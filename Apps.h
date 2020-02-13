@@ -53,7 +53,7 @@
 
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 
-
+#define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
