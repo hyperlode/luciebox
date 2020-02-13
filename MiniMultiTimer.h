@@ -53,7 +53,7 @@ class MiniMultiTimer{
 		void setBuzzer(Buzzer* buzzer);
 		uint16_t getIndexedTime(uint8_t index);
 		void setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
-		
+		void setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);		
 		void getDisplay(char* disp, uint8_t* playerLights, uint8_t* settingsLights);
 		bool getTimerFinished(uint8_t timerIndex);
 		bool checkAllTimersFinished();

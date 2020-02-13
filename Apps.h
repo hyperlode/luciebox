@@ -456,6 +456,7 @@ class Apps{
     uint8_t lights;
     
     bool app_init_mode;
+   
 };
 
 #endif 

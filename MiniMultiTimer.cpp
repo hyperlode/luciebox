@@ -70,15 +70,21 @@ void MiniMultiTimer::setAllInitCountDownTimeSecs(uint16_t initTimeSecs){
 	if (this->state == initialized){
 		this->initTimeSecs = initTimeSecs;
 		for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
-			this->timers[i].setInitCountDownTimeSecs(this->initTimeSecs );
+			this->setTimerInitCountTimeSecs(i, this->initTimeSecs);
 		}
+	}
+}
+
+void MiniMultiTimer::setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs){
+	if (this->state == initialized){
+		this->timers[timer].setInitCountDownTimeSecs(initTimeSecs );
 	}
 }
 
 void MiniMultiTimer::init(){
 	for(uint8_t i=0;i<MAX_TIMERS_COUNT;i++){
 		this->timers[i].reset();
-		this->timers[i].setInitCountDownTimeSecs(this->initTimeSecs);
+		//this->timers[i].setInitCountDownTimeSecs(this->initTimeSecs);
 		//this->timers[i].startPaused(true);
 	}
 	this->state = initialized;

@@ -1252,37 +1252,14 @@ void Apps::miniMultiTimer(bool init){
   }  
   
   // TIMER BUTTONS
-  #if MOMENTARY_BUTTONS_COUNT == 4
   
-  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-	  this->multiTimer.playerButtonPressEdgeUp(3);
-  }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeDown()){
-	  this->multiTimer.playerButtonPressEdgeDown(3);
-  }
-  
-  #endif
-
-  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-	  this->multiTimer.playerButtonPressEdgeUp(2);
-  }
-  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-	  this->multiTimer.playerButtonPressEdgeUp(1);
-  }
-  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-	  this->multiTimer.playerButtonPressEdgeUp(0);
-    //Serial.println("eijejfjeetttt");
-  }
-  
-  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
-	  this->multiTimer.playerButtonPressEdgeDown(2);
-  }
-  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
-	  this->multiTimer.playerButtonPressEdgeDown(1);
-  }
-  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
-	  this->multiTimer.playerButtonPressEdgeDown(0);
+  for (uint8_t i = 0; i<MAX_TIMERS_COUNT; i++){
+    if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
+      this->multiTimer.playerButtonPressEdgeUp(i);
+    }
+    if (binaryInputs[buttons_momentary_indexed[i]].getEdgeDown()){
+      this->multiTimer.playerButtonPressEdgeDown(i);
+    }
   }
 
   // START STOP Button
@@ -1315,7 +1292,17 @@ void Apps::miniMultiTimer(bool init){
 	  uint16_t seconds =  this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91)); // 0 seconds to an hour
       
     // pass through to multitimer app, it has to decide about validity.
-    this->multiTimer.setAllInitCountDownTimeSecs(seconds);
+    bool individualTimerSet = false;
+    for (uint8_t i = 0; i<MAX_TIMERS_COUNT; i++){
+      if (binaryInputs[buttons_momentary_indexed[i]].getValue()){
+        this->multiTimer.setTimerInitCountTimeSecs(i, seconds);
+        individualTimerSet = true;
+      }
+    }
+    if (!individualTimerSet){
+      this->multiTimer.setAllInitCountDownTimeSecs(seconds);
+    }
+
     this->multiTimer.setFischerTimer(seconds);
   }
   
@@ -1713,9 +1700,9 @@ void Apps::modeSequencer(bool init){
             !binaryInputs[BUTTON_MOMENTARY_3].getValue() &&
             potentio->getValueStableChangedEdge()){
 
-              //  generalTimer.setInitTimeMillis(potentio->getValueMapped(-1024,0));
-              int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
-              generalTimer.setInitTimeMillis(generalTimer.getInitTimeMillis() + tmp * 10) ; //step +1 or -1
+            //  generalTimer.setInitTimeMillis(potentio->getValueMapped(-1024,0));
+            int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
+            generalTimer.setInitTimeMillis(generalTimer.getInitTimeMillis() + tmp * 10) ; //step +1 or -1
       }
 
       if (!generalTimer.getTimeIsNegative()){
