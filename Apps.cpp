@@ -307,7 +307,7 @@ void Apps::modeDiceRoll(bool init){
 
 				if (!DICEROLL_ROLL_SPEED.getTimeIsNegative()){
 					buzzer->programBuzzerRoll( C7_8);
-					randomModeDisplay();
+					randomModeDisplay(false);
 
 					DICEROLL_ROLL_SPEED.start();
 				}
@@ -334,7 +334,7 @@ void Apps::modeDiceRoll(bool init){
 			
 			if (!DICEROLL_ROLL_SPEED.getTimeIsNegative()){
 				buzzer->programBuzzerRoll( C7_8);
-				randomModeDisplay();
+				randomModeDisplay(false);
 
 				// roll slower and slower until threshold reached.
 				DICEROLL_ROLL_SPEED.setInitTimeMillis(DICEROLL_ROLL_SPEED.getInitTimeMillis() * 1.4); //1.5 //1.4
@@ -348,7 +348,7 @@ void Apps::modeDiceRoll(bool init){
 		break;
 			
 		case dicerollShowResult:{
-			randomModeDisplay();
+			randomModeDisplay(true);
 			diceRollState = dicerollIdle;
 				
 		}
@@ -392,19 +392,12 @@ void Apps::modeDiceRoll(bool init){
 	// }
 
 	// }
-	
-	
-
-
-
-	
-
-	
 
 
 } 
    
-void Apps::randomModeDisplay(){
+void Apps::randomModeDisplay(bool forReal){
+	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
 	textBuf[1] = ' ';
 	textBuf[2] = ' ';
 	textBuf[3] = ' ';
@@ -452,29 +445,35 @@ void Apps::randomModeDisplay(){
 		}
 		break;
 
-		case DICEROLL_TAKERANDOMCARD: {
-			// random card
-			DICEROLL_RANDOM_NUMBER = random (0, 52); // 52 cards
+		case DICEROLL_TAKERANDOMCARDFROMDECK: {
+
+			if (!forReal){
+				// don't draw a card if it's not for real. We will not even display a card, as that would be confusing. Just show blanks.
+				break;
+			}
+			// take card off deck
+			if (DICEROLL_CARD_FROM_DECK_INDEX == 0){
+				// pick card from stack. --> reshuffle if all gone.
+				//shuffle(SIMON_LIST, bytes_list_bufsize);
+				for (int i = 0; i < 52; i++) {
+					CARDS_DECK[i] = i;
+				}
+				shuffle(CARDS_DECK, 52);
+			}
+			DICEROLL_RANDOM_NUMBER = CARDS_DECK[DICEROLL_CARD_FROM_DECK_INDEX];
+			DICEROLL_CARD_FROM_DECK_INDEX++;
+			if (DICEROLL_CARD_FROM_DECK_INDEX == 52){
+				DICEROLL_CARD_FROM_DECK_INDEX = 0;
+			}
+		
 		}
 		// NO BREAK, fallthrough to show card!!!!
 		
-		case DICEROLL_TAKERANDOMCARDFROMDECK: {
+		case DICEROLL_TAKERANDOMCARD: {
 
-			if (DICEROLL_RANDOM_TYPE != DICEROLL_TAKERANDOMCARD){ // fall through from random card.
-				// take card off deck
-				if (DICEROLL_CARD_FROM_DECK_INDEX == 0){
-					// pick card from stack. --> reshuffle if all gone.
-					//shuffle(SIMON_LIST, bytes_list_bufsize);
-					for (int i = 0; i < 52; i++) {
-						CARDS_DECK[i] = i;
-					}
-					shuffle(CARDS_DECK, 52);
-				}
-				DICEROLL_RANDOM_NUMBER = CARDS_DECK[DICEROLL_CARD_FROM_DECK_INDEX];
-				DICEROLL_CARD_FROM_DECK_INDEX++;
-				if (DICEROLL_CARD_FROM_DECK_INDEX == 52){
-					DICEROLL_CARD_FROM_DECK_INDEX = 0;
-				}
+			if (DICEROLL_RANDOM_TYPE != DICEROLL_TAKERANDOMCARDFROMDECK){ // fall through from random card.
+				// random card
+				DICEROLL_RANDOM_NUMBER = random (0, 52); // 52 cards
 			}
 
 			//show playing card
@@ -502,7 +501,9 @@ void Apps::randomModeDisplay(){
 			}
 
 		}
+		
 		break;
+
 		case DICEROLL_RANDOMNUMBER: {
 			// random number
 		

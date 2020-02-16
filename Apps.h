@@ -424,7 +424,7 @@ class Apps{
     #endif
 
     int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    void randomModeDisplay();
+    void randomModeDisplay(bool forReal);
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
     
     SuperTimer generalTimer;
