@@ -413,13 +413,21 @@ void Apps::modeDiceRoll(bool init){
 	
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
 		if (DICEROLL_SECONDARY_OPTION){
-			// show random nonsense coolness. 
-			textBuf[1]='?';
-			textBuf[2]='?';
-			textBuf[3]='?'; 
-			textBuf[4]='?'; 
-			ledDisp->displayHandler(textBuf);
+			// // show random nonsense coolness. 
+			// textBuf[1]='?';
+			// textBuf[2]='?';
+			// textBuf[3]='?'; 
+			// textBuf[4]='?'; 
+			// ledDisp->displayHandler(textBuf);
 			
+			// show letter alphabeth, plus its position.
+			DICEROLL_RANDOM_NUMBER = random(0,26);
+			if (DICEROLL_RANDOM_NUMBER > 8){
+				textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) / 10 + 48;
+			}
+			textBuf[2] = (DICEROLL_RANDOM_NUMBER +1) % 10 + 48;
+			textBuf[4] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
+			ledDisp->displayHandler(textBuf);
 		}else{
 			// random number
 			ledDisp->showNumber( random(0,10000));
