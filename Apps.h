@@ -3,7 +3,7 @@
 
 
 #define ENABLE_EEPROM
-//#define ENABLE_MULTITIMER
+#define ENABLE_MULTITIMER
 #define SIMON_APP
 #define ENABLE_REACTION_APP
 
@@ -74,10 +74,11 @@
 #define TIMER_INIT_APP generalTimer
 #define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
-
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
+#define DICEROLL_ROLL_SPEED generalTimer
 
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
+#define DICEROLL_AUTODRAW_TIMER generalTimer2
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
@@ -103,7 +104,7 @@
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define METRONOME_TICKER_3_POSITION counter3
 #define SETTINGS_MODE_SELECTOR counter3
-#define DICEROLL_RANDOM_TYPE counter3
+
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
@@ -113,6 +114,7 @@
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
 #define SEQUENCER_TEMP_NOTE counter5
+#define DICEROLL_RANDOM_TYPE counter5
 
 // #define REACTION_GAME_COUNTDOWN counter6
 
@@ -422,6 +424,7 @@ class Apps{
     #endif
 
     int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    void randomModeDisplay();
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
     
     SuperTimer generalTimer;
@@ -466,6 +469,7 @@ class Apps{
       dicerollIdle,
       dicerollShowResult,
       dicerollRolling,
+      dicerollRollingEnd,
     };
     DiceRollState diceRollState;
 
