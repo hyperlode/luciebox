@@ -3,7 +3,7 @@
 
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
+//#define ENABLE_MULTITIMER
 #define SIMON_APP
 #define ENABLE_REACTION_APP
 
@@ -70,6 +70,8 @@
 #define SIMON_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
 #define DEBUGMODE_ACTIVATED counter2
+#define DICEROLL_CARD_FROM_DECK_INDEX counter2
+
 
 #define DRAW_Y_POS counter3
 #define GEIGER_INCREASE_CHANCE counter3
@@ -90,6 +92,7 @@
 // #define REACTION_GAME_COUNTDOWN counter6
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
+#define DICEROLL_SECONDARY_OPTION general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 
@@ -98,6 +101,7 @@
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
+#define CARDS_DECK bytes_list
 
 #define DRAW_DISP_STATE array_4_bytes
 #define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
@@ -407,7 +411,7 @@ class Apps{
     uint8_t counter5;
 
     enum {
-      bytes_list_bufsize = 32,
+      bytes_list_bufsize = 52,
     };
     uint8_t bytes_list[bytes_list_bufsize];
     

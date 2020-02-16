@@ -132,16 +132,12 @@ bool Apps::init_app(bool init, uint8_t selector){
 	}
 		 
 	// initialize list
-	for (uint8_t i = 0; i < bytes_list_bufsize; i++) {
+	for (uint8_t i = 0; i < 32; i++) {
 		this->FADE_IN_RANDOM_LIST[i] = i;
 	}
  
 	// // shuffle in place
-	this->shuffle(this->FADE_IN_RANDOM_LIST, bytes_list_bufsize);
- 
-		//this->fadeInList(step, bytes_list_bufsize, this->displayAllSegments, this->FADE_IN_RANDOM_LIST);
-		// counter = 0;
-		// this->TIMER_INIT_APP.setInitTimeMillis(-5); 
+	this->shuffle(this->FADE_IN_RANDOM_LIST, 32);
  
 		counter = 27;
 		this->TIMER_INIT_APP.setInitTimeMillis(-20); 
@@ -168,7 +164,7 @@ bool Apps::init_app(bool init, uint8_t selector){
 		 
 	}else if (counter < 82 ){
 		//ledDisp->SetFourDigits(~displaySequence[counter-51]);
-	ledDisp->SetFourDigits(~ this->fadeInList(counter-51, bytes_list_bufsize, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); 
+	ledDisp->SetFourDigits(~ this->fadeInList(counter-51, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); 
 		 
 	}else {
 		this->setDefaultMode();
@@ -271,89 +267,196 @@ void Apps::modeButtonDebug(bool init){
 }
  
 void Apps::modeDiceRoll(bool init){
-  if (init){
-   
-	counter = 1;
-	generalTimer.setInitTimeMillis(-1000);
-	generalTimer.start();
-  }
- 
-  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
- 
-	generalTimer.setInitTimeMillis((long)(1* potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-   
-  }else{
-	generalTimer.setInitTimeMillis(-1000);
- 
-  }
- 
-  if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || binaryInputs[BUTTON_MOMENTARY_0].getValue()|| binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-	 
+	if (init){
+		// generalTimer.setInitTimeMillis(-1000);
+		// generalTimer.start();
+		DICEROLL_CARD_FROM_DECK_INDEX = 0;
+	}
+
+	DICEROLL_SECONDARY_OPTION = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+	//   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+
+	// 	generalTimer.setInitTimeMillis((long)(1* potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+
+	//   }else{
+	// 	generalTimer.setInitTimeMillis(-1000);
+
+	//   }
+
+	// if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || binaryInputs[BUTTON_MOMENTARY_0].getValue()|| binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+		
 	// DICEROLL_RANDOM_NUMBER ++;
 	// if (DICEROLL_RANDOM_NUMBER > 6){  // NO THIS IS TERRIBLE! about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out!
 	//   DICEROLL_RANDOM_NUMBER = 1;
 	// }
-	DICEROLL_RANDOM_NUMBER = random (1,7);
- 
-	if (!generalTimer.getTimeIsNegative()){
- 
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){   
-		 
-		for (uint8_t  i=1;i<4;i++){
-		  textBuf[i]=textBuf[i+1];
+	
+	// if (!generalTimer.getTimeIsNegative()){
+
+	//   if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){   
+			
+	// 	for (uint8_t  i=1;i<4;i++){
+	// 	  textBuf[i]=textBuf[i+1];
+	// 	}
+	// 	textBuf[4] = 48 + DICEROLL_RANDOM_NUMBER; // convert digit to number char.
+	//   }
+
+	//   buzzer->cleanBuzzerRoll();
+	//   buzzer->programBuzzerRoll(14);
+	//   ledDisp->displayHandler(textBuf);
+	//   generalTimer.start();
+	// }
+
+	// }
+	
+	textBuf[1] = ' ';
+	textBuf[2] = ' ';
+	textBuf[3] = ' ';
+	textBuf[4] = ' ';
+
+	for (uint8_t i=0;i<4;i++){
+		
+		if (binaryInputs[buttons_momentary_indexed[i]].getValue()){
+			ledDisp->showNumber(8888);
 		}
-		textBuf[4] = 48 + DICEROLL_RANDOM_NUMBER; // convert digit to number char.
-	  }
- 
-	  buzzer->cleanBuzzerRoll();
-	  buzzer->programBuzzerRoll(14);
-	  ledDisp->displayHandler(textBuf);
-	  generalTimer.start();
 	}
- 
-	if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-	  // show random nonsense coolness. 
-	   
-	  textBuf[1]='?';
-	  textBuf[2]='?';
-	  textBuf[3]='?'; 
-	  textBuf[4]='?'; 
- 
-	} else if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-	  // sequence of numbers
-	   
-	}else{
-	  // show dice eyes
-	   
-	  textBuf[4] = ' '; 
-	  for (uint8_t i=1;i<4;i++){
-		// build up dice eyes over three digits 
- 
-		//set default for digit 1 2 and 3. Because most used (seg A and D) 
-		textBuf[i] = '=';  
- 
-		//first and third digit
-		if (DICEROLL_RANDOM_NUMBER == 1){
-		  textBuf[i] = ' '; // 
-		}else if(DICEROLL_RANDOM_NUMBER < 4){
-		  textBuf[i] = '^'; // assume first digit seg A
-		  if( i == 3){
-			textBuf[i] = '_'; // seg D
-		  }
+
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
+		// dice 
+
+		if (DICEROLL_SECONDARY_OPTION){
+			// throw four dice
+			DICEROLL_RANDOM_NUMBER = random (1, 7);
+			for (uint8_t  i=1;i<5;i++){
+				textBuf[i] = random (49, 55);  // char 1 to 6
+			}
+
+		}else{
+			DICEROLL_RANDOM_NUMBER = random (1, 7);
+			// show dice eyes
+			textBuf[4] = ' '; 
+			for (uint8_t i=1;i<4;i++){
+				// build up dice eyes over three digits 
+
+				//set default for digit 1 2 and 3. Because most used (seg A and D) 
+				textBuf[i] = '=';  
+
+				//first and third digit
+				if (DICEROLL_RANDOM_NUMBER == 1){
+					textBuf[i] = ' '; // 
+				}else if(DICEROLL_RANDOM_NUMBER < 4){
+					textBuf[i] = '^'; // assume first digit seg A
+					if( i == 3){
+					textBuf[i] = '_'; // seg D
+					}
+				}
+
+				//second digit
+				if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){
+					textBuf[i] = '-'; // assume odd
+					if (DICEROLL_RANDOM_NUMBER%2 == 0 ){ // if even
+					textBuf[i] = ' '; 
+					}
+				}
+			}
 		}
- 
-		//second digit
-		if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){
-		  textBuf[i] = '-'; // assume odd
-		  if (DICEROLL_RANDOM_NUMBER%2 == 0 ){ // if even
-			textBuf[i] = ' '; 
-		  }
-		}
-	  }
+		ledDisp->displayHandler(textBuf);
 	}
-  } 
+	
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
+		// cards 
+
+		if (DICEROLL_SECONDARY_OPTION){
+			// take card off deck
+			if (DICEROLL_CARD_FROM_DECK_INDEX == 0){
+				// pick card from stack. --> reshuffle if all gone.
+				//shuffle(SIMON_LIST, bytes_list_bufsize);
+				for (int i = 0; i < 52; i++) {
+					CARDS_DECK[i] = i;
+				}
+				shuffle(CARDS_DECK, 52);
+			}
+			DICEROLL_RANDOM_NUMBER = CARDS_DECK[DICEROLL_CARD_FROM_DECK_INDEX];
+			DICEROLL_CARD_FROM_DECK_INDEX++;
+			if (DICEROLL_CARD_FROM_DECK_INDEX == 52){
+				DICEROLL_CARD_FROM_DECK_INDEX = 0;
+			}
+		}else{
+			// random card
+			DICEROLL_RANDOM_NUMBER = random (0, 52); // 52 cards
+		}
+		
+		//show playing card
+		if (DICEROLL_RANDOM_NUMBER%13 < 9){
+			textBuf[2] = DICEROLL_RANDOM_NUMBER%13 + 49;
+		}else{
+			textBuf[1] = 49;  // 1
+			textBuf[2] = (3 - (((DICEROLL_RANDOM_NUMBER)%13) + 1 )%10) + 48;  // 9,10,11,13 to char 0 1 2 3
+			// Serial.println(DICEROLL_RANDOM_NUMBER);
+		}
+
+		switch (DICEROLL_RANDOM_NUMBER/13){
+		case 0:
+		textBuf[4]='H';
+		break;
+		case 1:
+		textBuf[4]='D';
+		break;
+		case 2:
+		textBuf[4]='S';
+		break;
+		case 3:
+		textBuf[4]='C';
+		break;
+		}
+		ledDisp->displayHandler(textBuf);
+	}
+	
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
+		if (DICEROLL_SECONDARY_OPTION){
+			// show random nonsense coolness. 
+			textBuf[1]='?';
+			textBuf[2]='?';
+			textBuf[3]='?'; 
+			textBuf[4]='?'; 
+			ledDisp->displayHandler(textBuf);
+			
+		}else{
+			// random number
+			ledDisp->showNumber( random(0,10000));
+		}
+	}
+	
+	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeDown()){
+		if (DICEROLL_SECONDARY_OPTION){
+			if (random(0,2)){
+				textBuf[2]='Y';
+				textBuf[3]='E'; 
+				textBuf[4]='S'; 
+			}else{
+				textBuf[2]='N';
+				textBuf[3]='O'; 
+			}
+		}else{
+			if (random(0,2)){
+				textBuf[1]='H';
+				textBuf[2]='E';
+				textBuf[3]='A'; 
+				textBuf[4]='D'; 
+			}else{
+				textBuf[1]='T';
+				textBuf[2]='A';
+				textBuf[3]='I'; 
+				textBuf[4]='L'; 
+			}
+		}
+		ledDisp->displayHandler(textBuf);
+		
+	}
+
+
+} 
    
-}
+
  
 // void Apps::modeScroll(bool init){
    
@@ -1597,7 +1700,7 @@ void Apps::modeSequencer(bool init){
  
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 	  for (uint8_t i=0;i<32;i++){
-		uint8_t eeprom_address = (uint8_t*)
+		uint8_t* eeprom_address = (uint8_t*)
 			  (EEPROM_SEQUENCER_SONGS_START_ADDRESS +
 			   (song_number - 1) * EEPROM_SEQUENCER_SONG_LENGTH +
 			   i			   
