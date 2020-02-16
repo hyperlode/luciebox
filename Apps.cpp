@@ -271,9 +271,194 @@ void Apps::modeDiceRoll(bool init){
 		// generalTimer.setInitTimeMillis(-1000);
 		// generalTimer.start();
 		DICEROLL_CARD_FROM_DECK_INDEX = 0;
+		diceRollState = dicerollIdle;
 	}
 
-	DICEROLL_SECONDARY_OPTION = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+	switch(diceRollState){
+		case dicerollIdle:{
+			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+				if ( binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){
+
+					DICEROLL_RANDOM_TYPE = i + 10 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+					diceRollState = dicerollRolling;
+				}
+			}
+		}
+		break;
+			
+		case dicerollRolling:{
+			// during roll all lights on
+			ledDisp->showNumber(8888);
+
+			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+				
+				if (binaryInputs[buttons_momentary_indexed[i]].getEdgeDown()){
+					diceRollState = dicerollShowResult;
+				}
+			}
+
+		}
+		break;
+			
+		case dicerollShowResult:{
+			textBuf[1] = ' ';
+			textBuf[2] = ' ';
+			textBuf[3] = ' ';
+			textBuf[4] = ' ';
+
+			switch (DICEROLL_RANDOM_TYPE){
+
+				case DICEROLL_ROLLONEDICE: {
+					DICEROLL_RANDOM_NUMBER = random (1, 7);
+					// show dice eyes
+					//textBuf[4] = ' '; 
+					for (uint8_t i=1;i<4;i++){
+						// build up dice eyes over three digits 
+
+						//set default for digit 1 2 and 3. Because most used (seg A and D) 
+						textBuf[i] = '=';  
+
+						//first and third digit
+						if (DICEROLL_RANDOM_NUMBER == 1){
+							textBuf[i] = ' '; // 
+						}else if(DICEROLL_RANDOM_NUMBER < 4){
+							textBuf[i] = '^'; // assume first digit seg A
+							if( i == 3){
+							textBuf[i] = '_'; // seg D
+							}
+						}
+
+						//second digit
+						if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){
+							textBuf[i] = '-'; // assume odd
+							if (DICEROLL_RANDOM_NUMBER%2 == 0 ){ // if even
+							textBuf[i] = ' '; 
+							}
+						}
+					}
+				
+				}
+				break;
+
+				case DICEROLL_ROLLFOURDICE: {
+					// throw four dice
+					DICEROLL_RANDOM_NUMBER = random (1, 7);
+					for (uint8_t  i=1;i<5;i++){
+						textBuf[i] = random (49, 55);  // char 1 to 6
+					}
+				}
+				break;
+
+				case DICEROLL_TAKERANDOMCARD: {
+					// random card
+					DICEROLL_RANDOM_NUMBER = random (0, 52); // 52 cards
+				}
+				// NO BREAK, fallthrough to show card!!!!
+				
+				case DICEROLL_TAKERANDOMCARDFROMDECK: {
+
+					if (DICEROLL_RANDOM_TYPE != DICEROLL_TAKERANDOMCARD){ // fall through from random card.
+						// take card off deck
+						if (DICEROLL_CARD_FROM_DECK_INDEX == 0){
+							// pick card from stack. --> reshuffle if all gone.
+							//shuffle(SIMON_LIST, bytes_list_bufsize);
+							for (int i = 0; i < 52; i++) {
+								CARDS_DECK[i] = i;
+							}
+							shuffle(CARDS_DECK, 52);
+						}
+						DICEROLL_RANDOM_NUMBER = CARDS_DECK[DICEROLL_CARD_FROM_DECK_INDEX];
+						DICEROLL_CARD_FROM_DECK_INDEX++;
+						if (DICEROLL_CARD_FROM_DECK_INDEX == 52){
+							DICEROLL_CARD_FROM_DECK_INDEX = 0;
+						}
+					}
+
+					//show playing card
+					if (DICEROLL_RANDOM_NUMBER%13 < 9){
+						textBuf[2] = DICEROLL_RANDOM_NUMBER%13 + 49;
+					}else{
+						textBuf[1] = 49;  // 1
+						textBuf[2] = (3 - (((DICEROLL_RANDOM_NUMBER)%13) + 1 )%10) + 48;  // 9,10,11,13 to char 0 1 2 3
+						// Serial.println(DICEROLL_RANDOM_NUMBER);
+					}
+
+					switch (DICEROLL_RANDOM_NUMBER/13){
+						case 0:
+						textBuf[4]='H';
+						break;
+						case 1:
+						textBuf[4]='D';
+						break;
+						case 2:
+						textBuf[4]='S';
+						break;
+						case 3:
+						textBuf[4]='C';
+						break;
+					}
+
+				}
+				break;
+				case DICEROLL_RANDOMNUMBER: {
+					// random number
+				
+					ledDisp->numberToBuf(textBuf, random(0,10000));
+				}
+				break;
+				case DICEROLL_RANDOMLETTER: {
+					// show letter alphabeth, plus its position.
+					DICEROLL_RANDOM_NUMBER = random(0,26);
+					if (DICEROLL_RANDOM_NUMBER > 8){
+						textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) / 10 + 48;
+					}
+					textBuf[2] = (DICEROLL_RANDOM_NUMBER +1) % 10 + 48;
+					textBuf[4] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
+					ledDisp->displayHandler(textBuf);
+				}
+				break;
+				case DICEROLL_HEADSORTAILS: {
+					if (random(0,2)){
+						textBuf[1]='H';
+						textBuf[2]='E';
+						textBuf[3]='A'; 
+						textBuf[4]='D'; 
+					}else{
+						textBuf[1]='T';
+						textBuf[2]='A';
+						textBuf[3]='I'; 
+						textBuf[4]='L'; 
+					}
+				}
+				break;
+				case DICEROLL_YESORNO: {
+					if (random(0,2)){
+						textBuf[2]='Y';
+						textBuf[3]='E'; 
+						textBuf[4]='S'; 
+					}else{
+						textBuf[2]='N';
+						textBuf[3]='O'; 
+					}
+				}
+				break;
+				default:{
+					textBuf[2]='-';
+				}
+			}
+
+			ledDisp->displayHandler(textBuf);
+			diceRollState = dicerollIdle;
+				
+		}
+		break;
+	
+			
+
+
+	}
+
+	//DICEROLL_SECONDARY_OPTION = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
 	//   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 
 	// 	generalTimer.setInitTimeMillis((long)(1* potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
@@ -308,163 +493,66 @@ void Apps::modeDiceRoll(bool init){
 
 	// }
 	
-	textBuf[1] = ' ';
-	textBuf[2] = ' ';
-	textBuf[3] = ' ';
-	textBuf[4] = ' ';
-
-	for (uint8_t i=0;i<4;i++){
-		
-		if (binaryInputs[buttons_momentary_indexed[i]].getValue()){
-			ledDisp->showNumber(8888);
-		}
-	}
-
-	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
-		// dice 
-
-		if (DICEROLL_SECONDARY_OPTION){
-			// throw four dice
-			DICEROLL_RANDOM_NUMBER = random (1, 7);
-			for (uint8_t  i=1;i<5;i++){
-				textBuf[i] = random (49, 55);  // char 1 to 6
-			}
-
-		}else{
-			DICEROLL_RANDOM_NUMBER = random (1, 7);
-			// show dice eyes
-			textBuf[4] = ' '; 
-			for (uint8_t i=1;i<4;i++){
-				// build up dice eyes over three digits 
-
-				//set default for digit 1 2 and 3. Because most used (seg A and D) 
-				textBuf[i] = '=';  
-
-				//first and third digit
-				if (DICEROLL_RANDOM_NUMBER == 1){
-					textBuf[i] = ' '; // 
-				}else if(DICEROLL_RANDOM_NUMBER < 4){
-					textBuf[i] = '^'; // assume first digit seg A
-					if( i == 3){
-					textBuf[i] = '_'; // seg D
-					}
-				}
-
-				//second digit
-				if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){
-					textBuf[i] = '-'; // assume odd
-					if (DICEROLL_RANDOM_NUMBER%2 == 0 ){ // if even
-					textBuf[i] = ' '; 
-					}
-				}
-			}
-		}
-		ledDisp->displayHandler(textBuf);
-	}
 	
-	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
-		// cards 
 
-		if (DICEROLL_SECONDARY_OPTION){
-			// take card off deck
-			if (DICEROLL_CARD_FROM_DECK_INDEX == 0){
-				// pick card from stack. --> reshuffle if all gone.
-				//shuffle(SIMON_LIST, bytes_list_bufsize);
-				for (int i = 0; i < 52; i++) {
-					CARDS_DECK[i] = i;
-				}
-				shuffle(CARDS_DECK, 52);
-			}
-			DICEROLL_RANDOM_NUMBER = CARDS_DECK[DICEROLL_CARD_FROM_DECK_INDEX];
-			DICEROLL_CARD_FROM_DECK_INDEX++;
-			if (DICEROLL_CARD_FROM_DECK_INDEX == 52){
-				DICEROLL_CARD_FROM_DECK_INDEX = 0;
-			}
-		}else{
-			// random card
-			DICEROLL_RANDOM_NUMBER = random (0, 52); // 52 cards
-		}
-		
-		//show playing card
-		if (DICEROLL_RANDOM_NUMBER%13 < 9){
-			textBuf[2] = DICEROLL_RANDOM_NUMBER%13 + 49;
-		}else{
-			textBuf[1] = 49;  // 1
-			textBuf[2] = (3 - (((DICEROLL_RANDOM_NUMBER)%13) + 1 )%10) + 48;  // 9,10,11,13 to char 0 1 2 3
-			// Serial.println(DICEROLL_RANDOM_NUMBER);
-		}
 
-		switch (DICEROLL_RANDOM_NUMBER/13){
-		case 0:
-		textBuf[4]='H';
-		break;
-		case 1:
-		textBuf[4]='D';
-		break;
-		case 2:
-		textBuf[4]='S';
-		break;
-		case 3:
-		textBuf[4]='C';
-		break;
-		}
-		ledDisp->displayHandler(textBuf);
-	}
+
 	
-	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
-		if (DICEROLL_SECONDARY_OPTION){
-			// // show random nonsense coolness. 
-			// textBuf[1]='?';
-			// textBuf[2]='?';
-			// textBuf[3]='?'; 
-			// textBuf[4]='?'; 
-			// ledDisp->displayHandler(textBuf);
-			
-			// show letter alphabeth, plus its position.
-			DICEROLL_RANDOM_NUMBER = random(0,26);
-			if (DICEROLL_RANDOM_NUMBER > 8){
-				textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) / 10 + 48;
-			}
-			textBuf[2] = (DICEROLL_RANDOM_NUMBER +1) % 10 + 48;
-			textBuf[4] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
-			ledDisp->displayHandler(textBuf);
-		}else{
-			// random number
-			ledDisp->showNumber( random(0,10000));
-		}
-	}
+
 	
-	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeDown()){
-		if (DICEROLL_SECONDARY_OPTION){
-			if (random(0,2)){
-				textBuf[2]='Y';
-				textBuf[3]='E'; 
-				textBuf[4]='S'; 
-			}else{
-				textBuf[2]='N';
-				textBuf[3]='O'; 
-			}
-		}else{
-			if (random(0,2)){
-				textBuf[1]='H';
-				textBuf[2]='E';
-				textBuf[3]='A'; 
-				textBuf[4]='D'; 
-			}else{
-				textBuf[1]='T';
-				textBuf[2]='A';
-				textBuf[3]='I'; 
-				textBuf[4]='L'; 
-			}
-		}
-		ledDisp->displayHandler(textBuf);
-		
-	}
 
 
 } 
    
 
+// if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
+// 		// dice 
+
+// 		if (DICEROLL_SECONDARY_OPTION){
+		
+// 		}else{
+		
+// 		ledDisp->displayHandler(textBuf);
+// 	}
+	
+// 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
+// 		// cards 
+
+// 		if (DICEROLL_SECONDARY_OPTION){
+			
+// 		}else{
+		
+// 		}
+		
+	
+// 		ledDisp->displayHandler(textBuf);
+// 	}
+	
+// 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
+// 		if (DICEROLL_SECONDARY_OPTION){
+// 			// // show random nonsense coolness. 
+// 			// textBuf[1]='?';
+// 			// textBuf[2]='?';
+// 			// textBuf[3]='?'; 
+// 			// textBuf[4]='?'; 
+// 			// ledDisp->displayHandler(textBuf);
+			
+			
+// 		}else{
+			
+// 		}
+// 	}
+	
+// 	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeDown()){
+// 		if (DICEROLL_SECONDARY_OPTION){
+
+// 		}else{
+
+// 		}
+// 		ledDisp->displayHandler(textBuf);
+		
+// 	}
+// }
  
 // void Apps::modeScroll(bool init){
    

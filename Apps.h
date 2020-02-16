@@ -45,6 +45,30 @@
 #define MOVE_DOWN		4
 #define MOVE_UP	  	    5
 #define ANIMATION_STOP_CODE 0x00
+    // enum DiceRollMode:uint8_t{
+    //   rollOneDice,
+    //   rollFourDice,
+    //   takeRandomCard,
+    //   takeRandomCardFromDeck,
+    //   randomNumber,
+    //   randomLetter,
+    //   headsOrTails,
+    //   yesOrNo,
+    // };
+    // DiceRollMode diceRollMode;
+
+
+ #define DICEROLL_ROLLONEDICE 0
+ #define DICEROLL_ROLLFOURDICE 10
+ #define DICEROLL_TAKERANDOMCARD 1
+ #define DICEROLL_TAKERANDOMCARDFROMDECK 11
+ #define DICEROLL_RANDOMNUMBER 2
+ #define DICEROLL_RANDOMLETTER 12
+ #define DICEROLL_HEADSORTAILS 3
+ #define DICEROLL_YESORNO 13
+
+
+// VARIABLE REUSE
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_INIT_APP generalTimer
@@ -79,6 +103,7 @@
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define METRONOME_TICKER_3_POSITION counter3
 #define SETTINGS_MODE_SELECTOR counter3
+#define DICEROLL_RANDOM_TYPE counter3
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
@@ -105,6 +130,8 @@
 
 #define DRAW_DISP_STATE array_4_bytes
 #define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
+
+
 
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
@@ -435,13 +462,21 @@ class Apps{
     ReactionGameState reactionGameState;
     #endif
 
-
-    enum SettingsState:uint8_t{
-      settingNormal,
-      settingSound,
-      settingButtons,
-      settingEepromReset
+    enum DiceRollState:uint8_t {
+      dicerollIdle,
+      dicerollShowResult,
+      dicerollRolling,
     };
+    DiceRollState diceRollState;
+
+
+
+    // enum SettingsState:uint8_t{
+    //   settingNormal,
+    //   settingSound,
+    //   settingButtons,
+    //   settingEepromReset
+    // };
     #ifdef SIMON_APP
     // simon
     enum SimonState:uint8_t {
@@ -456,7 +491,7 @@ class Apps{
 
     #endif
 
-    char  textBuf[6];
+    char textBuf[6];
     uint8_t lights;
     
     bool app_init_mode;

@@ -47,29 +47,35 @@ void DisplayManagement::showNumberAsChars(int16_t number){
 
 // void DisplayManagement::showNumber(int16_t number, bool noLeadingZeros){
 void DisplayManagement::showNumber(int16_t number){
-  // negative numbers made absolute!
-  int16_t c;
-  number = abs(number);
-  c = number;
-  uint8_t lastDigitNonZero = 4;
-  for (uint8_t i=0;i<4;i++){
+	numberToBuf(text, number);
+    this->displayHandler(text);
+}
 
-	text[4-i] = 48 + c%10; //ascii 48 = 0
+void DisplayManagement::numberToBuf(char* textBuf, int16_t number){
+	// negative numbers made absolute!
+	// textbuf five positions.
 
-    // memory for saving leading zero's indicator.	
-	if (text[4-i] != 48){
-		lastDigitNonZero = 4-i;
+	int16_t c;
+	number = abs(number);
+	c = number;
+	uint8_t lastDigitNonZero = 4;
+
+	for (uint8_t i=0;i<4;i++){
+
+		textBuf[4-i] = 48 + c%10; //ascii 48 = 0
+
+		// memory for saving leading zero's indicator.	
+		if (textBuf[4-i] != 48){
+			lastDigitNonZero = 4-i;
+		}
+
+		c/=10;
 	}
 
-    c/=10;
-  }
+	for (uint8_t i=1;i< lastDigitNonZero;i++){
+		textBuf[i] = ' ';
+	}
 
-//   if(!noLeadingZeros){
-    for (uint8_t i=1;i< lastDigitNonZero;i++){
-  		text[i] = ' ';
-    }
-//   }
-  this->displayHandler(text);
 }
 
 void DisplayManagement::setDecimalPoint(boolean isOn, int digit){
