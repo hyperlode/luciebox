@@ -272,15 +272,28 @@ void Apps::modeDiceRoll(bool init){
 
 		DICEROLL_CARD_FROM_DECK_INDEX = 0;
 		diceRollState = dicerollIdle;
+		DICEROLL_RANDOM_TYPE = 0;
+		randomModeDisplay(false);
+		// DICEROLL_ANIMATION_DELAY = 14;
 	}
 
 	if (potentio->getValueStableChangedEdge()){
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 			// set auto draw time
 
-		}else{
+			int16_t delaySeconds =  potentio->getValueMapped(0, 10);
+			ledDisp->showNumber(delaySeconds);
+			DICEROLL_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delaySeconds);
+
+		}else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 			//set animation speed time
-			//DICEROLL_ROLL_SPEED.setInitTimeMillis((long)(potentio->getValueMapped(-500, 0))); 
+			// DICEROLL_ANIMATION_DELAY =  potentio->getValueMapped(0, 50);
+			// ledDisp->showNumber(DICEROLL_ANIMATION_DELAY);
+			
+		}else{
+			// display random
+			randomModeDisplay(false);
+			buzzer->programBuzzerRoll( C7_8);
 		}
 	}
 
@@ -316,15 +329,27 @@ void Apps::modeDiceRoll(bool init){
 				ledDisp->showNumber(8888);
 			}
 
-			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-				
-				if (binaryInputs[buttons_momentary_indexed[i]].getEdgeDown()){
-					if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-						diceRollState = dicerollRollingEnd; 
-						
-					}else{
-						diceRollState = dicerollShowResult;
+			bool roll_end = false;
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+				// autoroll no need for button
+				roll_end = true;
+
+			}else{
+				// wait for button release
+				for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+					
+					if (binaryInputs[buttons_momentary_indexed[i]].getEdgeDown()){
+						roll_end = true;
 					}
+				}
+			}
+
+			if (roll_end){
+				if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+					diceRollState = dicerollRollingEnd; 
+				}else{
+					diceRollState = dicerollShowResult;
+					buzzer->programBuzzerRoll( D4_8);
 				}
 			}
 		}
@@ -337,8 +362,10 @@ void Apps::modeDiceRoll(bool init){
 				randomModeDisplay(false);
 
 				// roll slower and slower until threshold reached.
-				DICEROLL_ROLL_SPEED.setInitTimeMillis(DICEROLL_ROLL_SPEED.getInitTimeMillis() * 1.4); //1.5 //1.4
+				// DICEROLL_ROLL_SPEED.setInitTimeMillis(DICEROLL_ROLL_SPEED.getInitTimeMillis() * ((float)DICEROLL_ANIMATION_DELAY)/10 ); //1.5 //1.4
+				DICEROLL_ROLL_SPEED.setInitTimeMillis(DICEROLL_ROLL_SPEED.getInitTimeMillis() * 1.4 ); //1.5 //1.4
 				if (DICEROLL_ROLL_SPEED.getInitTimeMillis() < -600){  //-800 //-600
+				// if (DICEROLL_ROLL_SPEED.getInitTimeMillis() < -100*DICEROLL_ANIMATION_DELAY){  //-800 //-600
 					diceRollState = dicerollShowResult;
 				}
 			
@@ -348,52 +375,35 @@ void Apps::modeDiceRoll(bool init){
 		break;
 			
 		case dicerollShowResult:{
+			
 			randomModeDisplay(true);
-			diceRollState = dicerollIdle;
-				
-		}
-		// case dicerollAutoRollPause:{
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+				// auto roll delay.
+				DICEROLL_AUTODRAW_DELAY.start();	
+				diceRollState = dicerollAutoRollDelay;
 
-		// }
+			}else{
+				diceRollState = dicerollIdle;
+			}
+			
+		}
+		break;
+
+		case dicerollAutoRollDelay:{
+			if (!DICEROLL_AUTODRAW_DELAY.getTimeIsNegative()){
+				// set up animation
+				DICEROLL_ROLL_SPEED.setInitTimeMillis(-30);
+				DICEROLL_ROLL_SPEED.start();
+				
+				diceRollState = dicerollRolling;
+			}
+			if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+				diceRollState = dicerollIdle;
+			}
+		}
+
 		break;
 	}
-
-	//DICEROLL_SECONDARY_OPTION = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
-	//   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-
-	// 	generalTimer.setInitTimeMillis((long)(1* potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-
-	//   }else{
-	// 	generalTimer.setInitTimeMillis(-1000);
-
-	//   }
-
-	// if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || binaryInputs[BUTTON_MOMENTARY_0].getValue()|| binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-		
-	// DICEROLL_RANDOM_NUMBER ++;
-	// if (DICEROLL_RANDOM_NUMBER > 6){  // NO THIS IS TERRIBLE! about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out!
-	//   DICEROLL_RANDOM_NUMBER = 1;
-	// }
-	
-	// if (!generalTimer.getTimeIsNegative()){
-
-	//   if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){   
-			
-	// 	for (uint8_t  i=1;i<4;i++){
-	// 	  textBuf[i]=textBuf[i+1];
-	// 	}
-	// 	textBuf[4] = 48 + DICEROLL_RANDOM_NUMBER; // convert digit to number char.
-	//   }
-
-	//   buzzer->cleanBuzzerRoll();
-	//   buzzer->programBuzzerRoll(14);
-	//   ledDisp->displayHandler(textBuf);
-	//   generalTimer.start();
-	// }
-
-	// }
-
-
 } 
    
 void Apps::randomModeDisplay(bool forReal){
@@ -557,54 +567,7 @@ void Apps::randomModeDisplay(bool forReal){
 
 
 }
-// if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){
-// 		// dice 
 
-// 		if (DICEROLL_SECONDARY_OPTION){
-		
-// 		}else{
-		
-// 		ledDisp->displayHandler(textBuf);
-// 	}
-	
-// 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){
-// 		// cards 
-
-// 		if (DICEROLL_SECONDARY_OPTION){
-			
-// 		}else{
-		
-// 		}
-		
-	
-// 		ledDisp->displayHandler(textBuf);
-// 	}
-	
-// 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeDown()){
-// 		if (DICEROLL_SECONDARY_OPTION){
-// 			// // show random nonsense coolness. 
-// 			// textBuf[1]='?';
-// 			// textBuf[2]='?';
-// 			// textBuf[3]='?'; 
-// 			// textBuf[4]='?'; 
-// 			// ledDisp->displayHandler(textBuf);
-			
-			
-// 		}else{
-			
-// 		}
-// 	}
-	
-// 	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeDown()){
-// 		if (DICEROLL_SECONDARY_OPTION){
-
-// 		}else{
-
-// 		}
-// 		ledDisp->displayHandler(textBuf);
-		
-// 	}
-// }
  
 // void Apps::modeScroll(bool init){
    

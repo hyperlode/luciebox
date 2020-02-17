@@ -78,7 +78,7 @@
 #define DICEROLL_ROLL_SPEED generalTimer
 
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
-#define DICEROLL_AUTODRAW_TIMER generalTimer2
+#define DICEROLL_AUTODRAW_DELAY generalTimer2
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
@@ -104,6 +104,7 @@
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define METRONOME_TICKER_3_POSITION counter3
 #define SETTINGS_MODE_SELECTOR counter3
+#define DICEROLL_ANIMATION_DELAY counter3
 
 
 #define REACTION_GAME_TARGET counter4
@@ -119,7 +120,6 @@
 // #define REACTION_GAME_COUNTDOWN counter6
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
-#define DICEROLL_SECONDARY_OPTION general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 
@@ -470,6 +470,7 @@ class Apps{
       dicerollShowResult,
       dicerollRolling,
       dicerollRollingEnd,
+      dicerollAutoRollDelay,
     };
     DiceRollState diceRollState;
 
