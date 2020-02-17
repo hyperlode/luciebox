@@ -322,6 +322,8 @@ class Buzzer{
     void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerOff();
     void setSpeedRatio(float speedMultiplier);
+    void lastPlayedNoteToDisplay(char* textBuf, uint8_t* decimalPoints);
+    void noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note);
 
   private:
     int8_t transpose; 

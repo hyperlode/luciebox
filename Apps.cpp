@@ -39,14 +39,14 @@ void Apps::appSelector(bool init, uint8_t selector){
 		   
 		case 1:
 		  //sound fun with notes
-		  this->modeSoundNotes();
+		  this->modeSoundNotes(init);
 		  break;
 		   
 		case 2:
 		  //sound fun with frequencies.
-	  #ifdef SIMON_APP
+	  	  #ifdef SIMON_APP
 		  this->modeSimon(init);
-	  #endif
+	      #endif
 		  break;
 		   
 		case 3:
@@ -1093,8 +1093,13 @@ void Apps::modeSoundSong(bool init){
   }
 }
  
-void Apps::modeSoundNotes(){
+void Apps::modeSoundNotes(bool init){
   //buzzer with buzzer roll (notes).
+  
+  if (init){
+	decimalPoints = 0xFF;
+  }
+
 	   
   if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
 	 
@@ -1129,8 +1134,8 @@ void Apps::modeSoundNotes(){
 		//buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
 		SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
-		  buzzer->buzzerOff();
-	  } 
+			buzzer->buzzerOff();
+		} 
 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
 	  }
 		 
@@ -1146,7 +1151,8 @@ void Apps::modeSoundNotes(){
 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
 		SOUND_FUN_NOTE_INDEX++;
 	  }
-	  ledDisp->showNumber(SOUND_FUN_NOTE_INDEX);
+	  buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
+	  ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
 	}
   }
 }

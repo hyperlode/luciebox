@@ -397,7 +397,7 @@ class Apps{
     void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
-    void modeSoundNotes();
+    void modeSoundNotes(bool init);
     void draw(bool init);
     void movieAnimationMode(bool init);
     uint16_t _animationGetStartByte(uint8_t number);
@@ -497,6 +497,7 @@ class Apps{
     #endif
 
     char textBuf[6];
+    uint8_t decimalPoints;  // segment 4 = bit 3, ....   00043210 (segment number)
     uint8_t lights;
     
     bool app_init_mode;

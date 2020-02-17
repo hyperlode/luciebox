@@ -107,6 +107,13 @@ void DisplayManagement::displayHandler(char* inText){
 	writeStringToDisplay(inText);
 }
 
+void DisplayManagement::displaySetTextAndDecimalPoints(char* inText, uint8_t* decimalPoints){
+	displayHandler(inText);
+	// always think of 5 digits.
+	for (uint8_t i=0;i<5;i++){
+		setDecimalPoint( *decimalPoints & (0x01 << i) ,i);
+	}
+}
 
 void DisplayManagement::get5DigitsFromString(char* in, char* out, int startPos){ //, int spacesBetweenRepeat
 	//startPos can be a negative number (for scrolling in at the start), all negative numbers are "spaces". i.e. -2  => [' ', ' ', pos0char, pos1char]

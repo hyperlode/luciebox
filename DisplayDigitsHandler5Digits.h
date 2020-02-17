@@ -32,6 +32,7 @@ class DisplayManagement {
         void SetLedArray(byte ledsAsBits);
 
         void displayHandler(char* inText);
+        void displaySetTextAndDecimalPoints(char* inText, uint8_t* decimalPoints);
         void get5DigitsFromString(char* in, char* out, int startPos);
         void writeStringToDisplay(char* shortText);
         

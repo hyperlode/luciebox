@@ -178,6 +178,78 @@ uint8_t Buzzer::getBuzzerRollEmpty() {
   return sum == BUZZER_ROLL_LENGTH * BUZZER_ROLL_EMPTY_SLOT;
 }
 
+void Buzzer::lastPlayedNoteToDisplay(char* textBuf, uint8_t* decimalPoints){
+  noteToDisplay(textBuf, decimalPoints, this->buzzerRoll[this->playSlotCounter]);
+}
+
+void Buzzer::noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note){
+
+  if (note%64 == 0){
+    // rest
+    textBuf[1] = '-';
+    textBuf[2] = '-';
+  }else{
+
+    // note 
+    uint8_t noteVal;
+    bool notSharp=false;
+    switch((note-1)%12){
+      case 0:
+        notSharp=true;
+      case 1:
+        noteVal = 1;
+        break;
+      case 2:
+        notSharp=true;
+        noteVal = 2;
+        break;
+      case 3:
+        notSharp=true;
+      case 4:
+        noteVal = 3;
+        break;
+      case 5:
+        notSharp=true;
+      case 6:
+        noteVal = 4;
+        break;
+      case 7:
+        notSharp=true;
+        noteVal = 5;
+        break;
+      case 8:
+        notSharp=true;
+      case 9:
+        noteVal = 6;
+        break;
+      case 10:
+        notSharp=true;
+      case 11:
+        noteVal = 7;
+        break;
+    }
+    textBuf[1]= noteVal + 64;
+
+    if (notSharp){
+      *decimalPoints = 0x00;
+    }else{
+      *decimalPoints = 0x02;
+    }
+    // octave
+    if (note  <4){ 
+      // exceptions, because we don't want negative numbers when doing -4 in our formula
+      textBuf[2]= 48+3;
+    }else{
+      textBuf[2] = ((note%64) - 4)/12 + 4 + 48;
+    }
+  }
+  textBuf[3] = ' ';
+  
+  // note length
+  textBuf[4] =  (0x01 << ( 3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
+}
+
+
 /// ---------------------------
 /// ---------------------------
 /// ---------------------------
