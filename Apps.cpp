@@ -111,8 +111,11 @@ void Apps:: setDefaultMode(){
   //ledDisp->SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
   //ledDisp->SetFourDigits(0x80808080); //default dispaly 4x minus
   ledDisp->setBlankDisplay();
+  decimalPoints = 0;  // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
   //ledDisp->SetFourDigits(0xC0C0C0C0); 
   ledDisp->setBrightness(0,false);
+  
+
    
   //buzzer
   buzzer->setSpeedRatio(1);
@@ -189,7 +192,6 @@ void Apps::modeButtonDebug(bool init){
 	   counter = 0; 
 	}
 	 
-	// Serial.println(counter);
 	textBuf[1]=' ';
 	textBuf[2]=' ';
 	textBuf[3]='A'; 
@@ -281,9 +283,10 @@ void Apps::modeDiceRoll(bool init){
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 			// set auto draw time
 
-			int16_t delaySeconds =  potentio->getValueMapped(0, 10);
-			ledDisp->showNumber(delaySeconds);
-			DICEROLL_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delaySeconds);
+			int16_t delayMillisExp =  potentio->getValueMapped(3, 100);
+			delayMillisExp *= delayMillisExp;
+			ledDisp->showNumber(delayMillisExp);
+			DICEROLL_AUTODRAW_DELAY.setInitTimeMillis(-1 * delayMillisExp );
 
 		}else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 			//set animation speed time
@@ -1762,8 +1765,9 @@ void Apps::modeGeiger(bool init){
 }
  
 void Apps::modeSequencer(bool init){
-	int8_t step = 0;
- 
+  int8_t step = 0;
+  bool showNote = false;
+
   if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
 	// metrone function is the "easy mode here"
 	this->modeMetronome(init);
@@ -1849,12 +1853,14 @@ void Apps::modeSequencer(bool init){
  
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 	  buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-	  ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+	  buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
+	  showNote = true;
 	}
  
 	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
 	  // if button continuously pressed, show notes.
-	  ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+      buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);	
+	  showNote = true;
  
 	  // bonus effect: TRANSPOSE!
 	  if (potentio->getValueStableChangedEdge()){
@@ -1871,7 +1877,9 @@ void Apps::modeSequencer(bool init){
  
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 	  buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-	  ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+	//   ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+		buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
+		showNote = true;
 	}
 	 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
@@ -1879,7 +1887,9 @@ void Apps::modeSequencer(bool init){
 	  if (potentio->getValueStableChangedEdge()){
 		 
 		buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-		ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+		// ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
+		buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
+		showNote = true;
 	  }
 	} 
 	 
@@ -1916,10 +1926,15 @@ void Apps::modeSequencer(bool init){
 	  }
 	}
 #endif
- 
+	
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown()){
+		// reset transpose when stop autoplay.
+		SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
+	}
+
 	// autoplay
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-	  // change speed is default behaviour of potentio.
+	  // change speed if default behaviour of potentio.
 		if (!binaryInputs[BUTTON_MOMENTARY_0].getValue() && 
 			!binaryInputs[BUTTON_MOMENTARY_1].getValue() &&
 			!binaryInputs[BUTTON_MOMENTARY_2].getValue() &&
@@ -1938,7 +1953,12 @@ void Apps::modeSequencer(bool init){
 		generalTimer.start();
 	  }
 	}
-	 
+	
+	// if music note needs to be shown
+	if (showNote){
+	  ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+	}
+
 	// handle step change
 	if (step != 0 || init){
 	  SEQUENCER_STEP_COUNTER+=step;
