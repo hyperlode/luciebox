@@ -258,7 +258,8 @@
 #define Gs8_1 252
 #define A8_1 253
 #define As8_1 254
-#define B8_1 255
+// #define rest_top_up_to_1 254 // adds silence to previous note until full note length; i.e. if 1/4 note, will add 3/4 silence.
+// #define B8_1 255  = BUZZER_ROLL_SONG_STOPVALUE
 
 #define BUZZER_MINUTE_BEEP_FREQUENCY 4000 //beep at each minute with this frequency
 #define BUZZER_MINUTEBEEP_DURATION_MILLIS 20

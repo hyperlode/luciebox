@@ -17,7 +17,6 @@ void Apps::appSelector(bool init, uint8_t selector){
 	if (init){
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
-	//Serial.println("initapps");
 	}
 	 
 	if (this->app_init_mode){
@@ -1094,70 +1093,221 @@ void Apps::modeSoundSong(bool init){
 	   
 	}
   }
+
+  buzzer->lastPlayedNoteToDisplay(textBuf, &decimalPoints);
+	 
+  ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
 }
+
+void Apps::modeComposeSong(bool init){
+
+	bool defaultDisplay = true;
+	int8_t step = 0;
+
+	if (init){
+    	for (uint8_t i=0;i<bytes_list_bufsize;i++){
+			COMPOSER_SONG[i] = BUZZER_ROLL_SONG_STOPVALUE;
+		}
+		COMPOSER_SONG_LENGTH = 1;
+		COMPOSER_SONG[0] = rest_1; //default note
+		COMPOSER_STEP = 0;
+		COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
+	}
+
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
+	hhhh
  
+	}else{
+
+
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+			// display song by index (enable insert delete position)
+			
+			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+				//delete current position
+				// move all notes one position down.
+				for (uint8_t i=COMPOSER_STEP;i<bytes_list_bufsize-1;i++){
+					COMPOSER_SONG[i] = COMPOSER_SONG[i+1]; 
+				}
+				COMPOSER_SONG_LENGTH--;
+			}
+
+			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+				//insert after current index (and move to it)
+
+				for (uint8_t i=bytes_list_bufsize-2;i>COMPOSER_STEP;i--){
+					COMPOSER_SONG[i+1] = COMPOSER_SONG[i]; 
+				}
+				COMPOSER_SONG[COMPOSER_STEP+1] = rest_1;
+				COMPOSER_SONG_LENGTH++;
+				step = 1; // move to new position
+			}
+
+			ledDisp->showNumber(COMPOSER_STEP);
+
+		}else{
+
+			// display song by note (enable programming and listening to notes)
+			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+				// just listen to note on index in song
+				buzzer->buzzerOff();
+				buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+			}
+
+			if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+				// just play notes selected with potentio
+				if (potentio->getValueStableChangedEdge()){			
+					buzzer->buzzerOff();
+					buzzer->programBuzzerRoll(potentio->getValueMapped(0,254));
+					
+					buzzer->noteToDisplay(textBuf, &decimalPoints,potentio->getValueMapped(0,254));
+					ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+				}
+				defaultDisplay = false;
+			}
+
+			// program note in song
+			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+				
+				COMPOSER_SONG[COMPOSER_STEP] = potentio->getValueMapped(0,254);
+				buzzer->buzzerOff();
+				buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+			
+				// if note added to end, expand song length and add default note 
+				if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1  ){
+					COMPOSER_SONG_LENGTH++;
+					COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = rest_1;  //default note
+				}
+			}
+
+			if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+				if(potentio->getValueStableChangedEdge()){
+					COMPOSER_SONG[COMPOSER_STEP] = potentio->getValueMapped(0,255);
+					buzzer->buzzerOff();
+					buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+				}
+			}
+		}
+	#ifdef BUTTON_MOMENTARY_3
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+			step = -1;
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+			step = 1;
+		}
+	#else
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+			step = 1;
+		}
+	#endif
+
+		// autoplay
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			
+
+			if (!COMPOSER_STEP_TIMER.getTimeIsNegative()){
+				step = 1;
+				COMPOSER_STEP_TIMER.start();
+			}
+		}
+
+		//default potentio behaviour
+		if (!binaryInputs[BUTTON_MOMENTARY_0].getValue() && 
+			!binaryInputs[BUTTON_MOMENTARY_1].getValue() &&
+			!binaryInputs[BUTTON_MOMENTARY_2].getValue() &&
+	#ifdef BUTTON_MOMENTARY_3
+			!binaryInputs[BUTTON_MOMENTARY_3].getValue() &&
+	#endif
+			potentio->getValueStableChangedEdge()){
+			int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+				// change speed if default behaviour of potentio.
+				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + tmp * 10) ; //step +1 or -1
+			}else{
+				step = tmp;
+			}
+		}
+
+		if (step != 0){
+			COMPOSER_STEP = nextStepRotate(COMPOSER_STEP, (step + 1)/2, 0, COMPOSER_SONG_LENGTH-1 );
+			buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+		}
+
+		//sometimes overrule screen if potentio looking for a note.
+		if (defaultDisplay){
+			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+				ledDisp->showNumber(COMPOSER_STEP);
+			}else{
+				buzzer->noteToDisplay(textBuf, &decimalPoints, COMPOSER_SONG[COMPOSER_STEP]);
+				ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+			}
+		}
+	}
+}
+
 void Apps::modeSoundNotes(bool init){
   //buzzer with buzzer roll (notes).
-  
-  if (init){
-	decimalPoints = 0xFF;
-  }
+	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+		this->modeComposeSong(init);
+		return;
+	}
 
-	   
-  if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-	 
+	if (init){
+		decimalPoints = 0xFF;
+	}
+		
 	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
-	  // if (potentio->getValueStableChangedEdge()){
-	   
-	  // buzzer->buzzerOff();
+		// if (potentio->getValueStableChangedEdge()){
+		
+		// buzzer->buzzerOff();
 		// SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);
-	  // ledDisp->showNumber(SOUND_FUN_NOTE_INDEX);
-	  // buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	  // }
+		// ledDisp->showNumber(SOUND_FUN_NOTE_INDEX);
+		// buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+		// }
 	// }else  
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-	   
-	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+		
+		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 		buzzer->buzzerOff();
 		ledDisp->showNumber(buzzer->addRandomSoundToRoll(223, 235));
 		//0 -> 63 short
-	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 		buzzer->buzzerOff();
 		ledDisp->showNumber(buzzer->addRandomSoundToRoll(160, 223));
-	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		buzzer->buzzerOff();
 		ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));
-	  }  
+		}  
 	}else{ 
- 
-	  // simple mode.
-	  if (potentio->getValueStableChangedEdge()){
+
+		// simple mode.
+		if (potentio->getValueStableChangedEdge()){
 		//buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
 		SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  
 			buzzer->buzzerOff();
 		} 
 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	  }
-		 
-	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+		}
+			
+		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
 		SOUND_FUN_NOTE_INDEX--;
-	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	  }
-	   
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
 		SOUND_FUN_NOTE_INDEX++;
-	  }
-	  buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
-	  ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+		}
+		buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
+		ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
 	}
-  }
+	
 }
  
 void Apps::draw(bool init){
@@ -1797,7 +1947,7 @@ void Apps::modeSequencer(bool init){
 	// load/save songs to the sequencer
 	//blink alternatively song number and "load" or "save"
 	uint8_t song_number  = potentio->getValueMapped(1,9);
-	if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){
+	if (SEQUENCER_EEPROM_MODE_BLINK.getInFirstGivenHundredsPartOfSecond(500)){
 	  ledDisp->showNumber(song_number);
  
 	}else{
@@ -1839,7 +1989,7 @@ void Apps::modeSequencer(bool init){
 	}
  
 	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-	  TIMER_REACTION_GAME_RESTART_DELAY.start();
+	  SEQUENCER_EEPROM_MODE_BLINK.start();
 	}
 	 
  
@@ -2692,4 +2842,66 @@ void Apps::shuffle(uint8_t* listToShuffle, uint8_t length) {
 		listToShuffle[i] = listToShuffle[randomIndex];
 		listToShuffle[randomIndex] = tmp;
 	}
+}
+
+void Apps::saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLength, uint8_t eepromStartAddress){
+	// we will need to make this a separate function, it's almost identical to sequencer load save.
+	//-number of save slots
+	//-length of data to save.  (=eeprom data length)
+	// eeprom start length
+	// pointer to the data
+
+	//kind of an init
+	if (!SAVE_LOAD_MENU_BLINK_TIMER.getIsStarted()){
+		SAVE_LOAD_MENU_BLINK_TIMER.setInitTimeMillis(-1000);
+		SAVE_LOAD_MENU_BLINK_TIMER.start();
+	}
+
+	// load/save songs 
+	//blink alternatively song number and "load" or "save"
+	uint8_t slot_number  = potentio->getValueMapped(1,slotCount);
+	if (SAVE_LOAD_MENU_BLINK_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
+		ledDisp->showNumber(slot_number);
+
+	}else{
+		
+		if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			textBuf[1] = 'S';
+			textBuf[2] = 'A';
+			textBuf[3] = 'V';
+			textBuf[4] = 'E';
+		
+		}else{
+			textBuf[1] = 'L';
+			textBuf[2] = 'O';
+			textBuf[3] = 'A';
+			textBuf[4] = 'D';
+	
+		}
+	
+		ledDisp->displayHandler(textBuf);
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+		for (uint8_t i=0;i<eepromSlotLength;i++){
+			uint8_t* eeprom_address = (uint8_t*)
+				(eepromStartAddress +
+				(slot_number - 1) * eepromSlotLength + i  
+				);
+	
+			if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+				//save
+				eeprom_write_byte(eeprom_address, this->SEQUENCER_SONG[i]);
+	
+			}else{
+				//load
+				data[i] = eeprom_read_byte(eeprom_address);
+			}
+		}
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+		SAVE_LOAD_MENU_BLINK_TIMER.start();
+	}
+	
 }

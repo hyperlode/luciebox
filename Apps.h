@@ -76,7 +76,9 @@
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define DICEROLL_ROLL_SPEED generalTimer
+#define COMPOSER_STEP_TIMER generalTimer
 
+#define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define DICEROLL_AUTODRAW_DELAY generalTimer2
 
@@ -88,6 +90,7 @@
 #define METRONOME_TICKER_1_POSITION counter
 #define DICEROLL_RANDOM_NUMBER counter
 #define SEQUENCER_STEP_COUNTER counter
+#define COMPOSER_STEP counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -107,6 +110,7 @@
 #define DICEROLL_ANIMATION_DELAY counter3
 
 
+
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
@@ -116,6 +120,7 @@
 #define GEIGER_TONE_LENGTH counter5
 #define SEQUENCER_TEMP_NOTE counter5
 #define DICEROLL_RANDOM_TYPE counter5
+#define COMPOSER_SONG_LENGTH counter5
 
 // #define REACTION_GAME_COUNTDOWN counter6
 
@@ -129,6 +134,8 @@
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
 #define CARDS_DECK bytes_list
+#define COMPOSER_SONG bytes_list
+
 
 #define DRAW_DISP_STATE array_4_bytes
 #define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
@@ -397,6 +404,7 @@ class Apps{
     void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
+    void modeComposeSong(bool init);
     void modeSoundNotes(bool init);
     void draw(bool init);
     void movieAnimationMode(bool init);
@@ -415,6 +423,7 @@ class Apps{
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence);    
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
     void shuffle(uint8_t* list, uint8_t length);
+    void saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLength, uint8_t eepromStartAddress);
 
   private:
     DataPlayer dataPlayer;
@@ -441,7 +450,7 @@ class Apps{
     uint8_t counter5;
 
     enum {
-      bytes_list_bufsize = 52,
+      bytes_list_bufsize = 100,
     };
     uint8_t bytes_list[bytes_list_bufsize];
     
