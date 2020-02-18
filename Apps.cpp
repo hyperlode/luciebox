@@ -1115,32 +1115,55 @@ void Apps::modeComposeSong(bool init){
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
-	hhhh
- 
+		bool loaded;
+		loaded = saveLoadMenu(COMPOSER_SONG, 4, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS);
+		
+		if (loaded){
+			COMPOSER_STEP = 0;
+			// search for the last note in the composed song. 
+			// assume last note of longest possible song is always BUZZER_ROLL_SONG_STOPVALUE
+			for(uint8_t i=bytes_list_bufsize-2; i>0; i--){
+				COMPOSER_SONG_LENGTH = i+1;
+				if (COMPOSER_SONG[i] != BUZZER_ROLL_SONG_STOPVALUE){
+					
+					break;
+				} 
+			}
+		}
 	}else{
-
 
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 			// display song by index (enable insert delete position)
 			
 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 				//delete current position
+
 				// move all notes one position down.
-				for (uint8_t i=COMPOSER_STEP;i<bytes_list_bufsize-1;i++){
+				for (uint8_t i=COMPOSER_STEP; i<bytes_list_bufsize-1; i++){
 					COMPOSER_SONG[i] = COMPOSER_SONG[i+1]; 
 				}
+				// deleted space should be a song stop note.
+				COMPOSER_SONG[COMPOSER_SONG_LENGTH-1] = BUZZER_ROLL_SONG_STOPVALUE;
+				
+				//adjust length
 				COMPOSER_SONG_LENGTH--;
 			}
 
 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 				//insert after current index (and move to it)
-
-				for (uint8_t i=bytes_list_bufsize-2;i>COMPOSER_STEP;i--){
-					COMPOSER_SONG[i+1] = COMPOSER_SONG[i]; 
+				if (COMPOSER_SONG_LENGTH  >= bytes_list_bufsize-2){
+					//max length reached 
+					
+				}else{
+					
+					// remember, last note of longest song possible MUST be BUZZER_ROLL_SONG_STOPVALUE, don't copy a note to it.
+					for (uint8_t i=bytes_list_bufsize-3; i>COMPOSER_STEP; i--){
+						COMPOSER_SONG[i+1] = COMPOSER_SONG[i]; 
+					}
+					COMPOSER_SONG[COMPOSER_STEP+1] = rest_1;
+					COMPOSER_SONG_LENGTH++;
+					step = 1; // move to new position
 				}
-				COMPOSER_SONG[COMPOSER_STEP+1] = rest_1;
-				COMPOSER_SONG_LENGTH++;
-				step = 1; // move to new position
 			}
 
 			ledDisp->showNumber(COMPOSER_STEP);
@@ -1944,55 +1967,8 @@ void Apps::modeSequencer(bool init){
   }
  
   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ 
-	// load/save songs to the sequencer
-	//blink alternatively song number and "load" or "save"
-	uint8_t song_number  = potentio->getValueMapped(1,9);
-	if (SEQUENCER_EEPROM_MODE_BLINK.getInFirstGivenHundredsPartOfSecond(500)){
-	  ledDisp->showNumber(song_number);
- 
-	}else{
-	   
-	  if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-		textBuf[1] = 'S';
-		textBuf[2] = 'A';
-		textBuf[3] = 'V';
-		textBuf[4] = 'E';
-	   
-	  }else{
-		textBuf[1] = 'L';
-		textBuf[2] = 'O';
-		textBuf[3] = 'A';
-		textBuf[4] = 'D';
- 
-	  }
- 
-	  ledDisp->displayHandler(textBuf);
-	}
- 
-	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-	  for (uint8_t i=0;i<32;i++){
-		uint8_t* eeprom_address = (uint8_t*)
-			  (EEPROM_SEQUENCER_SONGS_START_ADDRESS +
-			   (song_number - 1) * EEPROM_SEQUENCER_SONG_LENGTH +
-			   i			   
-			  );
- 
-		if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-		  //save
-		  eeprom_write_byte(eeprom_address, this->SEQUENCER_SONG[i]);
- 
-		}else{
-		  //load
-		  this->SEQUENCER_SONG[i] = eeprom_read_byte(eeprom_address);
-		}
-	  }
-	}
- 
-	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-	  SEQUENCER_EEPROM_MODE_BLINK.start();
-	}
-	 
- 
+	  this->saveLoadMenu(this->SEQUENCER_SONG, 9, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS);
+
   }else{
 	// manipulate the sequencer
  
@@ -2844,7 +2820,7 @@ void Apps::shuffle(uint8_t* listToShuffle, uint8_t length) {
 	}
 }
 
-void Apps::saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLength, uint8_t eepromStartAddress){
+bool Apps::saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress){
 	// we will need to make this a separate function, it's almost identical to sequencer load save.
 	//-number of save slots
 	//-length of data to save.  (=eeprom data length)
@@ -2883,6 +2859,7 @@ void Apps::saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLeng
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+		bool loaded = false;
 		for (uint8_t i=0;i<eepromSlotLength;i++){
 			uint8_t* eeprom_address = (uint8_t*)
 				(eepromStartAddress +
@@ -2891,17 +2868,22 @@ void Apps::saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLeng
 	
 			if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 				//save
-				eeprom_write_byte(eeprom_address, this->SEQUENCER_SONG[i]);
+				eeprom_write_byte(eeprom_address, data[i]);
 	
 			}else{
 				//load
 				data[i] = eeprom_read_byte(eeprom_address);
+				loaded = true;
 			}
 		}
+
+		return loaded;
+
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
 		SAVE_LOAD_MENU_BLINK_TIMER.start();
 	}
+	return false;
 	
 }
