@@ -923,11 +923,15 @@ void Apps::modeCountingLettersAndChars(bool init){
  
 	  if (init){
 		updateScreen = true;
-			generalTimer.setInitTimeMillis(-1000);
+		generalTimer.setInitTimeMillis(-1000);
+		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN= true;
 	  }
 	   
-	  const bool numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();
-	   
+	  const bool numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+
+	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+	   	 NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = !NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN; 
+	   }
    
 	  if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged()){
 		updateScreen = true;
@@ -940,16 +944,16 @@ void Apps::modeCountingLettersAndChars(bool init){
 		}
 	  }
 	 
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
 		counter++;
 		updateScreen = true;
 	  }
 		
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		counter--;
 		updateScreen = true;
 	  } 
-	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 		if (numberElseAlphabethMode){
 		  counter = 0;
 		}else{
@@ -959,34 +963,38 @@ void Apps::modeCountingLettersAndChars(bool init){
 	  }
 	   
 	  // auto count
-	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
+	  if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
 		generalTimer.start();
 	  }  
 	   
-	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
+	  if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown()){
 		generalTimer.pause();		
 	  }  
 	   
-	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() && !generalTimer.getTimeIsNegative()){
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		  counter++;  
-		}else{
-		  counter--;
+	  
+	  if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+		// auto mode
+
+		if (!generalTimer.getTimeIsNegative()){
+			if (NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN){
+			counter++;  
+			}else{
+			counter--;
+			}
+			generalTimer.start();
+			updateScreen = true;
 		}
-		generalTimer.start();
-		updateScreen = true;
-	  }
-	   
-	  //potentio behaviour
-	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+
+		//potentio behaviour
 		if (potentio->getValueStableChangedEdge()){
 			 
 			generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-			generalTimer.start();
+			//generalTimer.start();
 			ledDisp->showNumber( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));
 			 
 		}
 	  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+		// show number right away depending on potention value
 		if (numberElseAlphabethMode){
 		  counter = (int16_t)(potentio->getValueMapped(0,100));
 		}else{
@@ -1006,7 +1014,7 @@ void Apps::modeCountingLettersAndChars(bool init){
 	  }else{  
 		//no negative numbers yet for little lucie
 		if (counter < 0){
-		  counter = 0;
+		  counter = 100;
 		}
 	  }
  

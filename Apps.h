@@ -125,6 +125,7 @@
 // #define REACTION_GAME_COUNTDOWN counter6
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
+#define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 
