@@ -705,24 +705,24 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 	   
 	   
 	  if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-		lights|= 1<<LIGHT_RED;
+		lights|= 1<<LIGHT_MOMENTARY_0;
 		updateScreen = true;
 		SETTINGS_MODE_SELECTOR = 0;
 	  }
 	  if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-		lights|= 1<<LIGHT_BLUE;
+		lights|= 1<<LIGHT_MOMENTARY_2;
 		updateScreen = true;
 		SETTINGS_MODE_SELECTOR = 0;
 	  }
 	  if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-		lights|= 1<<LIGHT_GREEN;
+		lights|= 1<<LIGHT_MOMENTARY_1;
 		updateScreen = true;
 		SETTINGS_MODE_SELECTOR = 0;
 	  }
 	   
 	  #if MOMENTARY_BUTTONS_COUNT == 4
 	  if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
-		lights|= 1<<LIGHT_YELLOW_EXTRA;
+		lights|= 1<<LIGHT_MOMENTARY_3;
 		updateScreen = true;
 		SETTINGS_MODE_SELECTOR = 0;
 	  }
@@ -742,23 +742,23 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 	  }
  
 	  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		lights|= 1<<LIGHT_LED_1;
+		lights|= 1<<LIGHT_LATCHING_SMALL_LEFT;
 	  }else{
 		textBuf[1]=' ';
 	  }
 	  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-		lights|= 1<<LIGHT_LED_2;
+		lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT;
 	  }else{
 		textBuf[2]=' ';
 	  }
 	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-		lights|= 1<<LIGHT_LED_3;
+		lights|= 1<<LIGHT_LATCHING_BIG;
 		updateScreen = true;
 	  }else{
 		textBuf[3]=' ';
 	  }
 	  if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-		lights|= 1<<LIGHT_YELLOW;
+		lights|= 1<<LIGHT_LATCHING_EXTRA;
 		updateScreen = true;
 	  }else{
 		textBuf[4]=' ';
@@ -770,7 +770,7 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 	  ledDisp->setBrightness((byte)(50 - potentio->getValueMapped(0,50)),false);
  
 	}else if (SETTINGS_MODE_SELECTOR < 8){
-	  lights|= 1<<LIGHT_RED;
+	  lights|= 1<<LIGHT_MOMENTARY_0;
 	  if(binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 	   #ifdef ENABLE_EEPROM
 		 
@@ -853,7 +853,7 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 		ledDisp->displayHandler(textBuf);
 	  }
 	}else if (SETTINGS_MODE_SELECTOR < 22){
-	  lights|= 1<<LIGHT_RED;
+	  lights|= 1<<LIGHT_MOMENTARY_0;
 	 if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 		 
 		#ifdef ENABLE_EEPROM
@@ -1717,15 +1717,15 @@ void Apps::miniMultiTimer(bool init){
   // timer buttons lights to real lights
   for(uint8_t i=0;i<4;i++){
 	if (1<<i & buttonLights){
-		lights |= 1<<lights_indexed[i+1];	
+		lights |= 1<<lights_indexed[i];	
 	}
   }
    
   // settings light to real lights
-  (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_YELLOW:false;
-  (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LED_3:false;
-  (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LED_2:false;
-  (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LED_1:false;
+  (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_LATCHING_EXTRA:false;
+  (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LATCHING_BIG:false;
+  (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT:false;
+  (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_LEFT:false;
  
   ledDisp->displayHandler(textBuf);
   ledDisp->SetLedArray(lights); 
@@ -2238,7 +2238,7 @@ void Apps::modeSimon(bool init)
 {
   const int numButtons = 4;
   const int buttons[numButtons] = { BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2 };
-  const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };
+  const byte lights[numButtons] = { 1 << LIGHT_LATCHING_EXTRA, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2 };
   const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};
  
   const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();

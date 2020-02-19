@@ -46,17 +46,24 @@
 #define PIN_BUZZER_FAKE 68
 
 
-#define LIGHT_RED 	    1
-#define LIGHT_GREEN     6
-#define LIGHT_BLUE 	    2
-#define LIGHT_YELLOW    0
-#define LIGHT_LED_1     3
-#define LIGHT_LED_2     4
-#define LIGHT_LED_3     5
-
-#ifndef PROTOTYPE
-#define LIGHT_YELLOW_EXTRA 7
-#endif 
+#ifdef PROTOTYPE
+  #define LIGHT_MOMENTARY_0 	    1  // RED
+  #define LIGHT_MOMENTARY_1     6  // GREEN
+  #define LIGHT_MOMENTARY_2 	    2  // BLUE
+  #define LIGHT_LATCHING_EXTRA    0  // LATCHING YELLOW
+  #define LIGHT_LATCHING_SMALL_LEFT     3  // small latch left
+  #define LIGHT_LATCHING_SMALL_RIGHT     4  // small latch right
+  #define LIGHT_LATCHING_BIG     5  // big latch
+#else
+  #define LIGHT_MOMENTARY_0 	    1  // momentary 0
+  #define LIGHT_MOMENTARY_1     6  // momentary 1
+  #define LIGHT_MOMENTARY_2 	    2  // momentary 2
+  #define LIGHT_MOMENTARY_3 5  // momentary 3
+  #define LIGHT_LATCHING_EXTRA    0  // extra latch
+  #define LIGHT_LATCHING_SMALL_LEFT     3  // small latch left
+  #define LIGHT_LATCHING_SMALL_RIGHT     4  // small latch right
+  #define LIGHT_LATCHING_BIG     7  // big latch
+#endif
 
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1

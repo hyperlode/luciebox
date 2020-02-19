@@ -636,7 +636,7 @@
 [32m+[m[41m       [m
 [32m+[m[41m       [m
        if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){[m
-         lights|= 1<<LIGHT_RED;[m
+         lights|= 1<<LIGHT_MOMENTARY_0;[m
          updateScreen = true;[m
 [36m@@ -503,7 +503,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
          updateScreen = true;[m
@@ -646,7 +646,7 @@
 [32m+[m[41m       [m
        #if MOMENTARY_BUTTONS_COUNT == 4[m
        if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){[m
-         lights|= 1<<LIGHT_YELLOW_EXTRA;[m
+         lights|= 1<<LIGHT_MOMENTARY_3;[m
 [36m@@ -511,7 +511,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
          SETTINGS_MODE_SELECTOR = 0;[m
        }[m
@@ -663,7 +663,7 @@
 [31m-[m
 [32m+[m[41m [m
        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
-         lights|= 1<<LIGHT_LED_1;[m
+         lights|= 1<<LIGHT_LATCHING_SMALL_LEFT;[m
        }else{[m
 [36m@@ -547,40 +547,40 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
        }else{[m
@@ -679,7 +679,7 @@
 [31m-[m
 [32m+[m[41m [m
      }else if (SETTINGS_MODE_SELECTOR < 8){[m
-       lights|= 1<<LIGHT_RED;[m
+       lights|= 1<<LIGHT_MOMENTARY_0;[m
        if(binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){[m
         #ifdef ENABLE_EEPROM[m
 [31m-        [m
@@ -772,7 +772,7 @@
          textBuf[2]='S'; [m
 [36m@@ -639,7 +639,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
      }else if (SETTINGS_MODE_SELECTOR < 22){[m
-       lights|= 1<<LIGHT_RED;[m
+       lights|= 1<<LIGHT_MOMENTARY_0;[m
       if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){[m
 [31m-        [m
 [32m+[m[41m         [m
@@ -1721,10 +1721,10 @@
 [31m-  [m
 [32m+[m[41m   [m
    // settings light to real lights[m
-   (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_YELLOW:false;[m
-   (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LED_3:false;[m
-   (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LED_2:false;[m
-   (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LED_1:false;[m
+   (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_LATCHING_EXTRA:false;[m
+   (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LATCHING_BIG:false;[m
+   (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT:false;[m
+   (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_LEFT:false;[m
 [31m-[m
 [32m+[m[41m [m
    ledDisp->displayHandler(textBuf);[m
@@ -2419,7 +2419,7 @@
  {[m
    const int numButtons = 4;[m
    const int buttons[numButtons] = { BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2 };[m
-   const byte lights[numButtons] = { 1 << LIGHT_YELLOW, 1 << LIGHT_RED, 1 << LIGHT_GREEN, 1 << LIGHT_BLUE };[m
+   const byte lights[numButtons] = { 1 << LIGHT_LATCHING_EXTRA, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2 };[m
    const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};[m
 [31m-[m
 [32m+[m[41m [m
