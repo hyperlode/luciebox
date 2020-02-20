@@ -2373,15 +2373,23 @@ void Apps::modeSimon(bool init)
   //const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
   uint8_t lights = 0b00000000;
 
+
   if (init) {
 	SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LED_BLINK_TIME);
 	SIMON_STEP_TIMER.setInitTimeMillis(-500);
 	SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;	
+	SIMON_PLAYERS_COUNT = 1;
+	SIMON_LEVEL = 1;
   }
  
   if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue() || init){
 	// at any time, if play button off: no more playing!
 	simonState = simonWaitForNewGame;
+  }
+
+  if (SIMON_PLAYERS_COUNT > 1){
+	  // if more than one player, light always on.
+	  lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
   }
 
 //   if (init || potentio->getValueStableChangedEdge()) {
@@ -2395,25 +2403,25 @@ void Apps::modeSimon(bool init)
 	  buttonsChanged |= (1 << k);
 	}
   }
+
  
   switch (simonState) {
 	case simonWaitForNewGame: {
 		
-	  // all lights on
-	//   byte allLights = 0;
-	//   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
-	// 	allLights |= 1<<lights_indexed[k];
-	//   }
-	//   ledDisp->SetLedArray(allLights);
-	//   if (!buttonsChanged) {
-	// 	break;
-	//   }
+		textBuf[1]=' ';
+		textBuf[2]=' ';
+		textBuf[3]=' '; 
+		textBuf[4]=' '; 
 
+		SIMON_PLAYERS_ALIVE = 0;
+		for (uint8_t i = 0; i<SIMON_PLAYERS_COUNT;i++){
+			//set all players alive.
+			SIMON_PLAYERS_ALIVE |= 1<<i;
+		}
+		
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 			simonState = simonNewGame;
 		}
-
-		
 
 		// play button light blinking invitingly.
 		if (millis()%250 > 125){
@@ -2421,10 +2429,41 @@ void Apps::modeSimon(bool init)
 			lights|= 1<<LIGHT_LATCHING_EXTRA;
 			
 		}
+
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+			if (millis()%250 > 125){
+				lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT;
+			}
+			
+			if (millis()%1000 > 650){
+				textBuf[1] = 'Q';	
+				textBuf[2] = 'T';	
+				textBuf[3] = 'Y';	
+				textBuf[4] = ' ';
+			}else{
+				//intToDigitsString(disp+1, (unsigned int) this->timers_count, false);  // utilities lode
+				ledDisp->numberToBuf(textBuf, SIMON_PLAYERS_COUNT);
+			}
+
+			if( potentio->getValueStableChangedEdge()) {
+				SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,9);
+			}
+		}else{
+			
+			//if (millis()%1000 > 650){
+			intToDigitsString(textBuf+1, SIMON_LEVEL, false);  // utilities lode
+			textBuf[1] = 'L';
+			
+			if( potentio->getValueStableChangedEdge()) {
+				SIMON_LEVEL = potentio->getValueMapped(1,5);
+				SIMON_STEP_TIMER.setInitTimeMillis(SIMON_LEVEL * -200);
+				SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LEVEL* -100);
+			}
+		}
 		
-
-
-
+		// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		// 	lights |= 1<<LIGHT_LATCHING_SMALL_LEFT;
+		// }
 	  break;
 	}
  
@@ -2442,8 +2481,10 @@ void Apps::modeSimon(bool init)
 	}
  
 	case simonNewLevel: {
-	  ledDisp->showNumber(SIMON_LENGTH);
 	  ++SIMON_LENGTH;
+
+	  ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
+
 	  if (SIMON_LENGTH >= bytes_list_bufsize) {
 		  // reached maximum length
 		  buzzer->loadBuzzerTrack(song_attack);
@@ -2457,15 +2498,30 @@ void Apps::modeSimon(bool init)
 	}
  
 	case simonPlaySequence: {
+	  textBuf[2] = 'S';	
 	  
 	  if (SIMON_BUTTON_MEMORY != SIMON_NO_BUTTON_PRESS_IN_MEMORY){
 	  	lights |= 1<<lights_indexed[SIMON_BUTTON_MEMORY];
 		if(!SIMON_BLINK_TIMER.getTimeIsNegative()){
 			SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;
+			
+			// if (SIMON_INDEX >= SIMON_LENGTH-1){
+			// 	// after last step display, immediatley shut down.
+			// 	simonState = simonUserRepeats;
+			// 	break;
+			// }
 		}
 	  }
+
+ 	  if (SIMON_INDEX >= SIMON_LENGTH && !SIMON_BLINK_TIMER.getTimeIsNegative()) {
+		// after last step display, immediatley shut down.
+		simonState = simonUserRepeats;
+		SIMON_INDEX = 0;
+		break;
+	  }
 	  
-	  if (SIMON_STEP_TIMER.getTimeIsNegative()) {
+	  if (SIMON_STEP_TIMER.getTimeIsNegative()){
+		// still in step. 
 		break;
 	  }
 	  
@@ -2474,9 +2530,9 @@ void Apps::modeSimon(bool init)
 		++SIMON_INDEX; // do-nothing lead in time
 		break;
 	  }
+
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
 		// sequence finished, give control to user
-		//ledDisp->SetLedArray(0);
 		SIMON_INDEX = 0;
 		simonState = simonUserRepeats;
 		break;
@@ -2493,6 +2549,7 @@ void Apps::modeSimon(bool init)
 	}
  
 	case simonUserRepeats: {
+      textBuf[2] = 'P';
 	  if (!buttonsChanged) {
 		break;
 	  }
@@ -2521,10 +2578,23 @@ void Apps::modeSimon(bool init)
 	  }
 	  break;
 	}
+	
+	case simonNextPlayer:{
+
+
+	}
+	break;
+
+	case simonPlayerDead:{
+
+	}
+	break;
+
   }
 
 
   ledDisp->SetLedArray(lights);
+  ledDisp->displayHandler(textBuf);
 }
 #endif 
 #endif

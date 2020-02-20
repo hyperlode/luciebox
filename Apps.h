@@ -113,13 +113,14 @@
 #define METRONOME_TICKER_3_POSITION counter3
 #define SETTINGS_MODE_SELECTOR counter3
 #define DICEROLL_ANIMATION_DELAY counter3
-#define SIMON_BUTTON_MEMORY counter3
-
+#define SIMON_LEVEL counter3
 
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
+#define SIMON_BUTTON_MEMORY counter4
+
 
 
 #define REACTION_GAME_LEVEL counter5
@@ -127,6 +128,9 @@
 #define SEQUENCER_TEMP_NOTE counter5
 #define DICEROLL_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
+#define SIMON_PLAYERS_ALIVE counter5
+
+#define SIMON_PLAYERS_COUNT counter6
 
 // #define REACTION_GAME_COUNTDOWN counter6
 
@@ -456,6 +460,7 @@ class Apps{
     long counter3;
     uint16_t counter4;
     uint8_t counter5;
+    uint8_t counter6;
 
     enum {
       bytes_list_bufsize = 100,
@@ -508,6 +513,8 @@ class Apps{
         simonNewLevel,
         simonPlaySequence,
         simonUserRepeats,
+        simonNextPlayer,
+        simonPlayerDead,
     };
     SimonState simonState;
 
