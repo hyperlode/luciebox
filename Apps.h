@@ -67,6 +67,8 @@
  #define DICEROLL_HEADSORTAILS 3
  #define DICEROLL_YESORNO 13
 
+ #define SIMON_LED_BLINK_TIME -200
+ #define SIMON_NO_BUTTON_PRESS_IN_MEMORY 666
 
 // VARIABLE REUSE
 
@@ -77,10 +79,12 @@
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define DICEROLL_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer
+#define SIMON_STEP_TIMER generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define DICEROLL_AUTODRAW_DELAY generalTimer2
+#define SIMON_BLINK_TIMER generalTimer2
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
@@ -101,6 +105,7 @@
 #define DICEROLL_CARD_FROM_DECK_INDEX counter2
 
 
+
 #define DRAW_Y_POS counter3
 #define GEIGER_INCREASE_CHANCE counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
@@ -108,6 +113,7 @@
 #define METRONOME_TICKER_3_POSITION counter3
 #define SETTINGS_MODE_SELECTOR counter3
 #define DICEROLL_ANIMATION_DELAY counter3
+#define SIMON_BUTTON_MEMORY counter3
 
 
 

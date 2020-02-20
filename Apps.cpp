@@ -2368,18 +2368,25 @@ void Apps::modeSimon(bool init)
   //const int numButtons = MOMENTARY_BUTTONS_COUNT;
   //const int buttons[numButtons] = { BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2 };
   //const byte lights[MOMENTARY_BUTTONS_COUNT] = { 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2, 1 << LIGHT_MOMENTARY_3 };
-  const uint8_t sounds[MOMENTARY_BUTTONS_COUNT] = { C4_1, F4_1, A4_1, C5_1};
- 
-  const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
-  const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
- 
+//   const uint8_t sounds[MOMENTARY_BUTTONS_COUNT] = { C4_1, F4_1, A4_1, C5_1};
+  //const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+  //const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
+  uint8_t lights = 0b00000000;
+
   if (init) {
+	SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LED_BLINK_TIME);
+	SIMON_STEP_TIMER.setInitTimeMillis(-500);
+	SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;	
+  }
+ 
+  if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue() || init){
+	// at any time, if play button off: no more playing!
 	simonState = simonWaitForNewGame;
   }
- 
-  if (init || potentio->getValueStableChangedEdge()) {
-	generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
-  }
+
+//   if (init || potentio->getValueStableChangedEdge()) {
+// 	SIMON_STEP_TIMER.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
+//   }
  
   uint8_t buttonsChanged = 0;
   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
@@ -2391,21 +2398,38 @@ void Apps::modeSimon(bool init)
  
   switch (simonState) {
 	case simonWaitForNewGame: {
+		
 	  // all lights on
-	  byte allLights = 0;
-	  for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
-		allLights |= 1<<lights_indexed[k];
-	  }
-	  ledDisp->SetLedArray(allLights);
-	  if (!buttonsChanged) {
-		break;
-	  }
-	  simonState = simonNewGame;
+	//   byte allLights = 0;
+	//   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
+	// 	allLights |= 1<<lights_indexed[k];
+	//   }
+	//   ledDisp->SetLedArray(allLights);
+	//   if (!buttonsChanged) {
+	// 	break;
+	//   }
+
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			simonState = simonNewGame;
+		}
+
+		
+
+		// play button light blinking invitingly.
+		if (millis()%250 > 125){
+			//*settingsLights |= LIGHT_PAUSE; //pause light on.
+			lights|= 1<<LIGHT_LATCHING_EXTRA;
+			
+		}
+		
+
+
+
 	  break;
 	}
  
 	case simonNewGame: {
-	  ledDisp->SetLedArray(0);
+	 
 	  // generate new sequence
 	  randomSeed(millis());
 	  for (int k = 0; k < bytes_list_bufsize; ++k) {
@@ -2422,36 +2446,48 @@ void Apps::modeSimon(bool init)
 	  ++SIMON_LENGTH;
 	  if (SIMON_LENGTH >= bytes_list_bufsize) {
 		  // reached maximum length
-		  if (hasSound) buzzer->loadBuzzerTrack(song_attack);
+		  buzzer->loadBuzzerTrack(song_attack);
 		  simonState = simonWaitForNewGame;
 		  break;
 	  }
 	  SIMON_INDEX = -1; // negative index allows for lead-in time
 	  simonState = simonPlaySequence;
-	  generalTimer.start();
+	  SIMON_STEP_TIMER.start();
 	  break;
 	}
  
 	case simonPlaySequence: {
-	  if (generalTimer.getTimeIsNegative()) {
+	  
+	  if (SIMON_BUTTON_MEMORY != SIMON_NO_BUTTON_PRESS_IN_MEMORY){
+	  	lights |= 1<<lights_indexed[SIMON_BUTTON_MEMORY];
+		if(!SIMON_BLINK_TIMER.getTimeIsNegative()){
+			SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;
+		}
+	  }
+	  
+	  if (SIMON_STEP_TIMER.getTimeIsNegative()) {
 		break;
 	  }
-	  generalTimer.start();
+	  
+	  SIMON_STEP_TIMER.start();
 	  if (SIMON_INDEX < 0) {
 		++SIMON_INDEX; // do-nothing lead in time
 		break;
 	  }
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
 		// sequence finished, give control to user
-		ledDisp->SetLedArray(0);
+		//ledDisp->SetLedArray(0);
 		SIMON_INDEX = 0;
 		simonState = simonUserRepeats;
 		break;
 	  }
 	  // show one button from the sequence
-	  const uint8_t button = SIMON_LIST[SIMON_INDEX];
-	  if (hasLight) ledDisp->SetLedArray(1<<lights_indexed[button]);
-	  if (hasSound) buzzer->programBuzzerRoll(sounds[button]); 
+	  SIMON_BUTTON_MEMORY = SIMON_LIST[SIMON_INDEX];
+	 
+	  SIMON_BLINK_TIMER.start();
+	 
+	  buzzer->programBuzzerRoll(A3_8);
+	  //buzzer->programBuzzerRoll(sounds[button]); 
 	  ++SIMON_INDEX;
 	  break;
 	}
@@ -2463,21 +2499,32 @@ void Apps::modeSimon(bool init)
 	  const int expected = SIMON_LIST[SIMON_INDEX];
 	  if (buttonsChanged != (1 << expected)) {
 		// player made mistake, start new game
-		if (hasSound) buzzer->loadBuzzerTrack(scale_major_reversed);
+		// buzzer->loadBuzzerTrack(scale_major_reversed);
+		buzzer->programBuzzerRoll(C4_1); 
+		buzzer->programBuzzerRoll(C4_1); 
+		buzzer->programBuzzerRoll(C4_1); 
+		buzzer->programBuzzerRoll(C4_1); 
 		simonState = simonWaitForNewGame;
 		break;
 	  }
 	  // player pressed correct button
-	  if (hasSound) buzzer->programBuzzerRoll(sounds[expected]);
+	  //buzzer->programBuzzerRoll(sounds[expected]);
+	  buzzer->programBuzzerRoll(A3_8);
 	  ++SIMON_INDEX;
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
 		// sequence fully replaced, add one more note
+		buzzer->programBuzzerRoll(E5_4); 
+		buzzer->programBuzzerRoll(rest_1); 
+		buzzer->programBuzzerRoll(B6_1); 
 		simonState = simonNewLevel;
 		break;
 	  }
 	  break;
 	}
   }
+
+
+  ledDisp->SetLedArray(lights);
 }
 #endif 
 #endif
