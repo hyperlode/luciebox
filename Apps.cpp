@@ -2380,6 +2380,7 @@ void Apps::modeSimon(bool init)
 	SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;	
 	SIMON_PLAYERS_COUNT = 1;
 	SIMON_LEVEL = 1;
+	SIMON_PLAYER_PLAYING = 0; // player indeces 0 -> 7 (8 players max) 
   }
  
   if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue() || init){
@@ -2446,7 +2447,7 @@ void Apps::modeSimon(bool init)
 			}
 
 			if( potentio->getValueStableChangedEdge()) {
-				SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,9);
+				SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,8);
 			}
 		}else{
 			
@@ -2468,7 +2469,13 @@ void Apps::modeSimon(bool init)
 	}
  
 	case simonNewGame: {
-	 
+	  // reset all players
+	  SIMON_PLAYER_PLAYING = 0;
+	  for (uint8_t i = 0; i<SIMON_PLAYERS_COUNT;i++){
+		//set all players alive.
+		SIMON_PLAYERS_ALIVE |= 1<<i;
+	  }
+
 	  // generate new sequence
 	  randomSeed(millis());
 	  for (int k = 0; k < bytes_list_bufsize; ++k) {
@@ -2504,12 +2511,6 @@ void Apps::modeSimon(bool init)
 	  	lights |= 1<<lights_indexed[SIMON_BUTTON_MEMORY];
 		if(!SIMON_BLINK_TIMER.getTimeIsNegative()){
 			SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;
-			
-			// if (SIMON_INDEX >= SIMON_LENGTH-1){
-			// 	// after last step display, immediatley shut down.
-			// 	simonState = simonUserRepeats;
-			// 	break;
-			// }
 		}
 	  }
 
@@ -2543,29 +2544,28 @@ void Apps::modeSimon(bool init)
 	  SIMON_BLINK_TIMER.start();
 	 
 	  buzzer->programBuzzerRoll(A3_8);
-	  //buzzer->programBuzzerRoll(sounds[button]); 
 	  ++SIMON_INDEX;
 	  break;
 	}
  
 	case simonUserRepeats: {
+
+      textBuf[1] = SIMON_PLAYER_PLAYING + 49;
       textBuf[2] = 'P';
 	  if (!buttonsChanged) {
 		break;
 	  }
 	  const int expected = SIMON_LIST[SIMON_INDEX];
 	  if (buttonsChanged != (1 << expected)) {
-		// player made mistake, start new game
-		// buzzer->loadBuzzerTrack(scale_major_reversed);
+		// player made mistake, player dies
 		buzzer->programBuzzerRoll(C4_1); 
 		buzzer->programBuzzerRoll(C4_1); 
 		buzzer->programBuzzerRoll(C4_1); 
 		buzzer->programBuzzerRoll(C4_1); 
-		simonState = simonWaitForNewGame;
+		simonState = simonPlayerDead;
 		break;
 	  }
 	  // player pressed correct button
-	  //buzzer->programBuzzerRoll(sounds[expected]);
 	  buzzer->programBuzzerRoll(A3_8);
 	  ++SIMON_INDEX;
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
@@ -2573,20 +2573,37 @@ void Apps::modeSimon(bool init)
 		buzzer->programBuzzerRoll(E5_4); 
 		buzzer->programBuzzerRoll(rest_1); 
 		buzzer->programBuzzerRoll(B6_1); 
-		simonState = simonNewLevel;
+		simonState = simonNextPlayer;
 		break;
 	  }
 	  break;
 	}
-	
-	case simonNextPlayer:{
 
+	case simonNextPlayer:{
+	  
+	  // check next alive player (assume there is always a player alive.)
+	  do {
+		SIMON_PLAYER_PLAYING++;
+		if (SIMON_PLAYER_PLAYING >= SIMON_PLAYERS_COUNT ){
+			simonState = simonNewLevel;
+			break;
+		}
+	  }while(! (SIMON_PLAYERS_ALIVE & (1<<SIMON_PLAYER_PLAYING)));
+
+	  SIMON_INDEX = 0;
+	  simonState = simonUserRepeats;
 
 	}
 	break;
 
 	case simonPlayerDead:{
-
+		SIMON_PLAYERS_ALIVE = ~( 1<<SIMON_PLAYER_PLAYING);
+		if (!SIMON_PLAYERS_ALIVE){
+			//everybody dead
+			simonState = simonWaitForNewGame;
+		}else{
+			simonState = simonNextPlayer;
+		}
 	}
 	break;
 
