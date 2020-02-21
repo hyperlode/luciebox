@@ -2364,11 +2364,12 @@ void Apps::modeSimon(bool init)
   uint8_t lights = 0b00000000;
 
   if (init) {
-	SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LED_BLINK_TIME);
+	SIMON_BLINK_TIMER.setInitTimeMillis(-250);
 	SIMON_STEP_TIMER.setInitTimeMillis(-500);
+
 	SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;	
 	SIMON_PLAYERS_COUNT = 1;
-	SIMON_LEVEL = 1;
+	// SIMON_LEVEL = 1; // levels don't look that appealing. I choose one speed and you'll have to stick with it.
   }
  
   if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue() || init){
@@ -2376,8 +2377,11 @@ void Apps::modeSimon(bool init)
 	simonState = simonWaitForNewGame;
   }
 
-  if (SIMON_PLAYERS_COUNT > 1){
-	  // if more than one player, light always on.
+//   if (SIMON_PLAYERS_COUNT > 1){
+// 	  // if more than one player, light always on.
+// 	  lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
+//   }
+  if (SIMON_RANDOM_PLAYER_SEQUENCE){
 	  lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
   }
   
@@ -2413,38 +2417,22 @@ void Apps::modeSimon(bool init)
 		if (millis()%250 > 125){
 			lights|= 1<<LIGHT_LATCHING_EXTRA;
 		}
-
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-			if (millis() % 250 > 125){
-				lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT;
-			}
-			
-			if (millis()%1000 > 650){
-				textBuf[1] = 'Q';	
-				textBuf[2] = 'T';	
-				textBuf[3] = 'Y';	
-				textBuf[4] = ' ';
-			}else{
-				//intToDigitsString(disp+1, (unsigned int) this->timers_count, false);  // utilities lode
-				ledDisp->numberToBuf(textBuf, SIMON_PLAYERS_COUNT);
-			}
-
-			if( potentio->getValueStableChangedEdge()) {
-				SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,SIMON_MAX_PLAYERS);
-			}
-		}else{
-			
-			//if (millis()%1000 > 650){
-			intToDigitsString(textBuf+1, SIMON_LEVEL, false);  // utilities lode
-			textBuf[1] = 'L';
-			
-			if( potentio->getValueStableChangedEdge()) {
-				SIMON_LEVEL = potentio->getValueMapped(1,5);
-				SIMON_STEP_TIMER.setInitTimeMillis(SIMON_LEVEL * -200);
-				SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LEVEL* -100);
-			}
+		
+		// number of players.
+		if( potentio->getValueStableChangedEdge()) {
+			SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,SIMON_MAX_PLAYERS);
 		}
+		ledDisp->numberToBuf(textBuf, SIMON_PLAYERS_COUNT);
+		textBuf[1] = ' ';	
+		textBuf[2] = 'P';	
+		textBuf[3] = ' ';	
+		
+
+		// Instead of computer, user choses the next light in simon sequence.
 		SIMON_CUSTOM_BUILD_UP = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+
+		// random player sequence during game if multiplayer
+		SIMON_RANDOM_PLAYER_SEQUENCE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();
 		
 	  break;
 	}
@@ -2476,12 +2464,15 @@ void Apps::modeSimon(bool init)
 	  ++SIMON_LENGTH;
 
 	  // shuffle alive players.
-	  shuffle(SIMON_PLAYERS, SIMON_PLAYERS_ALIVE_COUNT);
+	  if (SIMON_RANDOM_PLAYER_SEQUENCE){
+	  	shuffle(SIMON_PLAYERS, SIMON_PLAYERS_ALIVE_COUNT);
+	  }
 
 	  // set first player
 	  SIMON_PLAYER_PLAYING_INDEX = 0;  // this is just the index.
 
 	  ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
+	  //intToDigitsString(textBuf+1, SIMON_LENGTH, false);
 
 	// let maximum length breach be a happy crash. I can't afford the bytes!
 	//   if (SIMON_LENGTH >= bytes_list_bufsize) {
