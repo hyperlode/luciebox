@@ -2377,10 +2377,10 @@ void Apps::modeSimon(bool init)
   if (init) {
 	SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LED_BLINK_TIME);
 	SIMON_STEP_TIMER.setInitTimeMillis(-500);
-	SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;	
+	SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;	
 	SIMON_PLAYERS_COUNT = 1;
 	SIMON_LEVEL = 1;
-	SIMON_PLAYER_PLAYING = 0; // player indeces 0 -> 7 (8 players max) 
+	//SIMON_PLAYER_PLAYING = SIMON_NOBODY_PLAYING_YET; // player indeces 0 -> 7 (8 players max) 
   }
  
   if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue() || init){
@@ -2409,6 +2409,7 @@ void Apps::modeSimon(bool init)
   switch (simonState) {
 	case simonWaitForNewGame: {
 		
+
 		textBuf[1]=' ';
 		textBuf[2]=' ';
 		textBuf[3]=' '; 
@@ -2469,8 +2470,8 @@ void Apps::modeSimon(bool init)
 	}
  
 	case simonNewGame: {
+	  SIMON_END_OF_GAME = false;
 	  // reset all players
-	  SIMON_PLAYER_PLAYING = 0;
 	  for (uint8_t i = 0; i<SIMON_PLAYERS_COUNT;i++){
 		//set all players alive.
 		SIMON_PLAYERS_ALIVE |= 1<<i;
@@ -2492,7 +2493,7 @@ void Apps::modeSimon(bool init)
 
 	  // get first alive player.
 	  for (uint8_t i=0;i<8;i++){
-	  	SIMON_PLAYER_PLAYING = i;
+		SIMON_PLAYER_PLAYING = i;
 
 		// check if player alive.
 		if (SIMON_PLAYERS_ALIVE & 1<<i){
@@ -2508,26 +2509,38 @@ void Apps::modeSimon(bool init)
 		  simonState = simonWaitForNewGame;
 		  break;
 	  }
-	  SIMON_INDEX = -1; // negative index allows for lead-in time
-	  simonState = simonPlaySequence;
-	  SIMON_STEP_TIMER.start();
+	 
+	  simonState = simonStartPlaySequence;
 	  break;
 	}
  
+    case simonStartPlaySequence:{
+		SIMON_INDEX = -1; // negative index allows for lead-in time
+		SIMON_STEP_TIMER.start();
+	    simonState = simonPlaySequence;
+	}
+
 	case simonPlaySequence: {
-	  textBuf[2] = 'S';	
+	  if (SIMON_END_OF_GAME){
+		textBuf[2] = 'E';
+
+	  }else{
+	  	textBuf[2] = 'S';		
+	  }
 	  
-	  if (SIMON_BUTTON_MEMORY != SIMON_NO_BUTTON_PRESS_IN_MEMORY){
-	  	lights |= 1<<lights_indexed[SIMON_BUTTON_MEMORY];
+	  if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT){
+	  	lights |= 1<<lights_indexed[SIMON_ACTIVE_LIGHT];
 		if(!SIMON_BLINK_TIMER.getTimeIsNegative()){
-			SIMON_BUTTON_MEMORY = SIMON_NO_BUTTON_PRESS_IN_MEMORY;
+			SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
 		}
 	  }
 
  	  if (SIMON_INDEX >= SIMON_LENGTH && !SIMON_BLINK_TIMER.getTimeIsNegative()) {
 		// after last step display, immediatley shut down.
 		simonState = simonStartUserRepeats;
-		
+		if (SIMON_END_OF_GAME){
+	 		simonState = simonWaitForNewGame;
+	 	}	
 		break;
 	  }
 	  
@@ -2542,13 +2555,8 @@ void Apps::modeSimon(bool init)
 		break;
 	  }
 
-	  if (SIMON_INDEX >= SIMON_LENGTH) {
-		// sequence finished, give control to user
-		simonState = simonStartUserRepeats;
-		break;
-	  }
-	  // show one button from the sequence
-	  SIMON_BUTTON_MEMORY = SIMON_LIST[SIMON_INDEX];
+	  // show one light from the sequence
+	  SIMON_ACTIVE_LIGHT = SIMON_LIST[SIMON_INDEX];
 	 
 	  SIMON_BLINK_TIMER.start();
 	 
@@ -2559,6 +2567,8 @@ void Apps::modeSimon(bool init)
 	
 	case simonStartUserRepeats:{
 		SIMON_INDEX = 0;
+		
+		
 		simonState = simonUserRepeats;
 	}
 	break;
@@ -2615,7 +2625,7 @@ void Apps::modeSimon(bool init)
 	 		nextLevel = true;
 	 		break;
 	 	}
-		 
+
 		// check if player alive.
 		if (SIMON_PLAYERS_ALIVE & 1<<next_player){
 			break;
@@ -2637,7 +2647,8 @@ void Apps::modeSimon(bool init)
 		SIMON_PLAYERS_ALIVE &= ~( 1<<SIMON_PLAYER_PLAYING);
 		if (!SIMON_PLAYERS_ALIVE){
 			//everybody dead
-			simonState = simonWaitForNewGame;
+			simonState = simonStartPlaySequence;
+			SIMON_END_OF_GAME = true;
 		}else{
 			simonState = simonNextPlayer;
 		}

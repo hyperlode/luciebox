@@ -3,7 +3,7 @@
 
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
+//#define ENABLE_MULTITIMER
 #define SIMON_APP
 #define ENABLE_REACTION_APP
 
@@ -68,7 +68,7 @@
  #define DICEROLL_YESORNO 13
 
  #define SIMON_LED_BLINK_TIME -200
- #define SIMON_NO_BUTTON_PRESS_IN_MEMORY 666
+ #define SIMON_NO_ACTIVE_LIGHT 666
 
 // VARIABLE REUSE
 
@@ -119,7 +119,7 @@
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
-#define SIMON_BUTTON_MEMORY counter4
+#define SIMON_ACTIVE_LIGHT counter4
 
 
 
@@ -142,7 +142,7 @@
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
-
+#define SIMON_END_OF_GAME general_boolean2
 
 
 #define SIMON_LIST bytes_list
@@ -517,6 +517,7 @@ class Apps{
         simonWaitForNewGame,
         simonNewGame,
         simonNewLevel,
+        simonStartPlaySequence,
         simonPlaySequence,
         simonStartUserRepeats,
         simonUserRepeats,
