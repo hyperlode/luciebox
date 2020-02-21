@@ -2396,12 +2396,6 @@ void Apps::modeSimon(bool init)
 		textBuf[2]=' ';
 		textBuf[3]=' '; 
 		textBuf[4]=' '; 
-
-		SIMON_PLAYERS_ALIVE = 0;
-		for (uint8_t i = 0; i<SIMON_PLAYERS_COUNT;i++){
-			//set all players alive.
-			SIMON_PLAYERS_ALIVE |= 1<<i;
-		}
 		
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 			simonState = simonNewGame;
@@ -2428,7 +2422,7 @@ void Apps::modeSimon(bool init)
 			}
 
 			if( potentio->getValueStableChangedEdge()) {
-				SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,8);
+				SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,SIMON_MAX_PLAYERS);
 			}
 		}else{
 			
@@ -2451,13 +2445,14 @@ void Apps::modeSimon(bool init)
  
 	case simonNewGame: {
 	  SIMON_END_OF_GAME = false;
-	  // reset all players
-	  for (uint8_t i = 0; i<SIMON_PLAYERS_COUNT;i++){
-		//set all players alive.
-		SIMON_PLAYERS_ALIVE |= 1<<i;
+	  SIMON_PLAYERS_ALIVE_COUNT = SIMON_PLAYERS_COUNT;
+	  
+	  // set all players in array. don't bother about real player count.
+	  for (uint8_t i=0;i<SIMON_MAX_PLAYERS;i++){
+		SIMON_PLAYERS[i]=i;
 	  }
 
-	  // generate new sequence
+	  // generate new light sequence
 	  randomSeed(millis());
 	  for (int k = 0; k < bytes_list_bufsize; ++k) {
 		SIMON_LIST[k] = k %  MOMENTARY_BUTTONS_COUNT;
@@ -2471,21 +2466,15 @@ void Apps::modeSimon(bool init)
 	case simonNewLevel: {
 	  ++SIMON_LENGTH;
 
-	  // get random alive player
+	  // shuffle alive players.
+	  shuffle(SIMON_PLAYERS, SIMON_PLAYERS_ALIVE_COUNT);
 
-	  
-	  for (uint8_t i=0;i<8;i++){
-		SIMON_PLAYER_PLAYING = i;
-
-		// check if player alive.
-		if (SIMON_PLAYERS_ALIVE & 1<<i){
-			break;
-		}
-	  }
+	  // set first player
+	  SIMON_PLAYER_PLAYING_INDEX = 0;  // this is just the index.
 
 	  ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
 
-	// let maximum length be a happy crash. I can't afford the bytes!
+	// let maximum length breach be a happy crash. I can't afford the bytes!
 	//   if (SIMON_LENGTH >= bytes_list_bufsize) {
 	// 	  // reached maximum length
 	// 	  buzzer->loadBuzzerTrack(song_attack);
@@ -2505,8 +2494,17 @@ void Apps::modeSimon(bool init)
 
 	case simonPlaySequence: {
 	  if (SIMON_END_OF_GAME){
-		textBuf[2] = 'E';
 
+		if (millis()%1000 > 650){
+			ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
+			textBuf[1] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
+			textBuf[2] = 'P';
+		}else{
+			textBuf[1] = ' ';
+			textBuf[2] = 'E';
+			textBuf[3] = 'N';
+			textBuf[4] = 'D';
+		}
 	  }else{
 	  	textBuf[2] = 'S';		
 	  }
@@ -2561,7 +2559,7 @@ void Apps::modeSimon(bool init)
 
 	case simonUserRepeats: {
 
-      textBuf[1] = SIMON_PLAYER_PLAYING + 49;
+      textBuf[1] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
       textBuf[2] = 'P';
 	  if (!buttonsChanged) {
 		break;
@@ -2593,56 +2591,43 @@ void Apps::modeSimon(bool init)
 	}
 
 	case simonNextPlayer:{
-	  bool nextLevel = false;
 	  // check next alive player (assume there is always a player alive.)
-	  // ASSERT:SIMON_PLAYERS_ALIVE not zero. 
-	//   do {
-	// 	SIMON_PLAYER_PLAYING++;
-	// 	if (SIMON_PLAYER_PLAYING >= SIMON_PLAYERS_COUNT ){
-	// 		nextLevel = true;
-	// 		break;
-	// 	}
-	//   }while(! (SIMON_PLAYERS_ALIVE & (1<<SIMON_PLAYER_PLAYING)));
-	  
-	  for (uint8_t next_player=SIMON_PLAYER_PLAYING+1;next_player<9;next_player++){
-	  	SIMON_PLAYER_PLAYING = next_player;
-		// presume players nicely in sequence.
-		if (next_player >= SIMON_PLAYERS_COUNT ){
-	 		nextLevel = true;
-	 		break;
-	 	}
-
-		// check if player alive.
-		if (SIMON_PLAYERS_ALIVE & 1<<next_player){
-			break;
-		}
-	  }
-
-	  if (nextLevel){
-		// completely new level
-	  	simonState = simonNewLevel;
-	  }else{
-		// repeat existing level for next player
-		simonState = simonStartUserRepeats;
-	  }
+	
+	   SIMON_PLAYER_PLAYING_INDEX++;
+	   if (SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT){
+		 // completely new level
+		 simonState = simonNewLevel;
+	   }else{
+		 // repeat existing level for next player
+		 simonState = simonStartUserRepeats;
+	   }
 
 	}
 	break;
 
 	case simonPlayerDead:{
-		SIMON_PLAYERS_ALIVE &= ~( 1<<SIMON_PLAYER_PLAYING);
-		if (!SIMON_PLAYERS_ALIVE){
+		SIMON_PLAYERS_ALIVE_COUNT--;
+		if (SIMON_PLAYERS_ALIVE_COUNT == 0){
 			//everybody dead
 			simonState = simonStartPlaySequence;
 			SIMON_END_OF_GAME = true;
-		}else{
-			simonState = simonNextPlayer;
+			break;
 		}
+
+		if (SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT){
+			// if last player in the sequence was playing. not much needs to be done.
+			simonState = simonNewLevel;
+			break;
+		}
+
+		// replace the current (dead) player by the last player in the list that needs to play.
+		// remember: we already decrease alive_count by 1
+		// no need to go to next player, as the new current player didnt play yet
+		SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] = SIMON_PLAYERS[SIMON_PLAYERS_ALIVE_COUNT ];
+		simonState = simonStartUserRepeats;
 	}
 	break;
-
   }
-
 
   ledDisp->SetLedArray(lights);
   ledDisp->displayHandler(textBuf);

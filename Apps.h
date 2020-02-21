@@ -69,6 +69,8 @@
 
  #define SIMON_LED_BLINK_TIME -200
  #define SIMON_NO_ACTIVE_LIGHT 666
+ #define SIMON_DEAD_PLAYER 666
+ #define SIMON_MAX_PLAYERS 8
 
 // VARIABLE REUSE
 
@@ -128,13 +130,13 @@
 #define SEQUENCER_TEMP_NOTE counter5
 #define DICEROLL_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
-#define SIMON_PLAYERS_ALIVE counter5
+#define SIMON_PLAYERS_ALIVE_COUNT counter5
 
 #define SIMON_PLAYERS_COUNT counter6
 
-#define SIMON_PLAYER_PLAYING counter7
+#define SIMON_PLAYER_PLAYING_INDEX counter7
 
-#define SIMON_PLAYER_PLAYED_LEVEL counter8
+//#define SIMON_PLAYER_PLAYED_LEVEL counter8
 
 // #define REACTION_GAME_COUNTDOWN counter6
 
@@ -464,7 +466,7 @@ class Apps{
     uint8_t counter5;
     uint8_t counter6;
     uint8_t counter7;
-    uint8_t counter8;
+    // uint8_t counter8;
 
     enum {
       bytes_list_bufsize = 100,
