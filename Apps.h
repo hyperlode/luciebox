@@ -134,6 +134,8 @@
 
 #define SIMON_PLAYER_PLAYING counter7
 
+#define SIMON_PLAYER_PLAYED_LEVEL counter8
+
 // #define REACTION_GAME_COUNTDOWN counter6
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
@@ -464,6 +466,7 @@ class Apps{
     uint8_t counter5;
     uint8_t counter6;
     uint8_t counter7;
+    uint8_t counter8;
 
     enum {
       bytes_list_bufsize = 100,
@@ -515,6 +518,7 @@ class Apps{
         simonNewGame,
         simonNewLevel,
         simonPlaySequence,
+        simonStartUserRepeats,
         simonUserRepeats,
         simonNextPlayer,
         simonPlayerDead,

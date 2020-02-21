@@ -2490,6 +2490,16 @@ void Apps::modeSimon(bool init)
 	case simonNewLevel: {
 	  ++SIMON_LENGTH;
 
+	  // get first alive player.
+	  for (uint8_t i=0;i<8;i++){
+	  	SIMON_PLAYER_PLAYING = i;
+
+		// check if player alive.
+		if (SIMON_PLAYERS_ALIVE & 1<<i){
+			break;
+		}
+	  }
+
 	  ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
 
 	  if (SIMON_LENGTH >= bytes_list_bufsize) {
@@ -2516,8 +2526,8 @@ void Apps::modeSimon(bool init)
 
  	  if (SIMON_INDEX >= SIMON_LENGTH && !SIMON_BLINK_TIMER.getTimeIsNegative()) {
 		// after last step display, immediatley shut down.
-		simonState = simonUserRepeats;
-		SIMON_INDEX = 0;
+		simonState = simonStartUserRepeats;
+		
 		break;
 	  }
 	  
@@ -2534,8 +2544,7 @@ void Apps::modeSimon(bool init)
 
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
 		// sequence finished, give control to user
-		SIMON_INDEX = 0;
-		simonState = simonUserRepeats;
+		simonState = simonStartUserRepeats;
 		break;
 	  }
 	  // show one button from the sequence
@@ -2547,7 +2556,13 @@ void Apps::modeSimon(bool init)
 	  ++SIMON_INDEX;
 	  break;
 	}
- 
+	
+	case simonStartUserRepeats:{
+		SIMON_INDEX = 0;
+		simonState = simonUserRepeats;
+	}
+	break;
+
 	case simonUserRepeats: {
 
       textBuf[1] = SIMON_PLAYER_PLAYING + 49;
@@ -2556,6 +2571,7 @@ void Apps::modeSimon(bool init)
 		break;
 	  }
 	  const int expected = SIMON_LIST[SIMON_INDEX];
+
 	  if (buttonsChanged != (1 << expected)) {
 		// player made mistake, player dies
 		buzzer->programBuzzerRoll(C4_1); 
@@ -2568,6 +2584,7 @@ void Apps::modeSimon(bool init)
 	  // player pressed correct button
 	  buzzer->programBuzzerRoll(A3_8);
 	  ++SIMON_INDEX;
+
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
 		// sequence fully replaced, add one more note
 		buzzer->programBuzzerRoll(E5_4); 
@@ -2580,24 +2597,44 @@ void Apps::modeSimon(bool init)
 	}
 
 	case simonNextPlayer:{
-	  
+	  bool nextLevel = false;
 	  // check next alive player (assume there is always a player alive.)
-	  do {
-		SIMON_PLAYER_PLAYING++;
-		if (SIMON_PLAYER_PLAYING >= SIMON_PLAYERS_COUNT ){
-			simonState = simonNewLevel;
+	  // ASSERT:SIMON_PLAYERS_ALIVE not zero. 
+	//   do {
+	// 	SIMON_PLAYER_PLAYING++;
+	// 	if (SIMON_PLAYER_PLAYING >= SIMON_PLAYERS_COUNT ){
+	// 		nextLevel = true;
+	// 		break;
+	// 	}
+	//   }while(! (SIMON_PLAYERS_ALIVE & (1<<SIMON_PLAYER_PLAYING)));
+	  
+	  for (uint8_t next_player=SIMON_PLAYER_PLAYING+1;next_player<9;next_player++){
+	  	SIMON_PLAYER_PLAYING = next_player;
+		// presume players nicely in sequence.
+		if (next_player >= SIMON_PLAYERS_COUNT ){
+	 		nextLevel = true;
+	 		break;
+	 	}
+		 
+		// check if player alive.
+		if (SIMON_PLAYERS_ALIVE & 1<<next_player){
 			break;
 		}
-	  }while(! (SIMON_PLAYERS_ALIVE & (1<<SIMON_PLAYER_PLAYING)));
+	  }
 
-	  SIMON_INDEX = 0;
-	  simonState = simonUserRepeats;
+	  if (nextLevel){
+		// completely new level
+	  	simonState = simonNewLevel;
+	  }else{
+		// repeat existing level for next player
+		simonState = simonStartUserRepeats;
+	  }
 
 	}
 	break;
 
 	case simonPlayerDead:{
-		SIMON_PLAYERS_ALIVE = ~( 1<<SIMON_PLAYER_PLAYING);
+		SIMON_PLAYERS_ALIVE &= ~( 1<<SIMON_PLAYER_PLAYING);
 		if (!SIMON_PLAYERS_ALIVE){
 			//everybody dead
 			simonState = simonWaitForNewGame;
