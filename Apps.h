@@ -71,6 +71,7 @@
  #define SIMON_NO_ACTIVE_LIGHT 666
  #define SIMON_DEAD_PLAYER 666
  #define SIMON_MAX_PLAYERS 8
+ #define SIMON_NO_BUTTON_PRESSED 111
 
 // VARIABLE REUSE
 
@@ -142,6 +143,7 @@
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
+#define SIMON_CUSTOM_BUILD_UP general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2

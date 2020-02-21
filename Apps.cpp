@@ -2381,15 +2381,23 @@ void Apps::modeSimon(bool init)
 	  lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
   }
   
-  // check if a momentary button was pressed.
-  uint8_t buttonsChanged = 0;
+  if (SIMON_CUSTOM_BUILD_UP){
+	// if custom sequence, light always on.	
+ 	lights |= 1<<LIGHT_LATCHING_SMALL_LEFT;
+  } 
+  
+//   // check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
+//   uint8_t buttonsChanged = 0;
+//   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
+// 	buttonsChanged |= (binaryInputs[buttons_momentary_indexed[k]].getEdgeUp() << k);
+//   }
+  uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
-	const bool changed = binaryInputs[buttons_momentary_indexed[k]].getEdgeUp();
-	if (changed) {
-	  buttonsChanged |= (1 << k);
+	if (binaryInputs[buttons_momentary_indexed[k]].getEdgeUp()){
+		pressed_momentary_button = k;		
 	}
   }
-
+  	
   switch (simonState) {
 	case simonWaitForNewGame: {
 		textBuf[1]=' ';
@@ -2436,10 +2444,8 @@ void Apps::modeSimon(bool init)
 				SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LEVEL* -100);
 			}
 		}
+		SIMON_CUSTOM_BUILD_UP = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
 		
-		// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-		// 	lights |= 1<<LIGHT_LATCHING_SMALL_LEFT;
-		// }
 	  break;
 	}
  
@@ -2458,7 +2464,10 @@ void Apps::modeSimon(bool init)
 		SIMON_LIST[k] = k %  MOMENTARY_BUTTONS_COUNT;
 	  }
 	  shuffle(SIMON_LIST, bytes_list_bufsize);
+
+	  // set starting parameters
 	  SIMON_LENGTH = 0;
+
 	  simonState = simonNewLevel;
 	  break;
 	}
@@ -2482,7 +2491,12 @@ void Apps::modeSimon(bool init)
 	// 	  break;
 	//   }
 	 
-	  simonState = simonStartPlaySequence;
+      if (SIMON_CUSTOM_BUILD_UP){
+		// for custom sequence games, there is nothing to be replayed.
+		simonState = simonStartUserRepeats;
+	  }else{
+	  	simonState = simonStartPlaySequence;
+	  }
 	  break;
 	}
  
@@ -2551,22 +2565,35 @@ void Apps::modeSimon(bool init)
 	
 	case simonStartUserRepeats:{
 		SIMON_INDEX = 0;
-		
-		
 		simonState = simonUserRepeats;
 	}
 	break;
 
 	case simonUserRepeats: {
 
+	  for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
+	
+			lights |= binaryInputs[buttons_momentary_indexed[k]].getValue()<<lights_indexed[k];
+		
+	  
+	  }
+
       textBuf[1] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
       textBuf[2] = 'P';
-	  if (!buttonsChanged) {
+	  if (pressed_momentary_button == SIMON_NO_BUTTON_PRESSED) {
 		break;
 	  }
+
+	  if (SIMON_CUSTOM_BUILD_UP && (SIMON_INDEX + 1) == SIMON_LENGTH){
+		// last light of sequence is not yet defined.
+		// user can choose any button.
+		SIMON_LIST[SIMON_INDEX] = pressed_momentary_button;
+		
+	  }
+	  
 	  const int expected = SIMON_LIST[SIMON_INDEX];
 
-	  if (buttonsChanged != (1 << expected)) {
+	  if (pressed_momentary_button != expected) {
 		// player made mistake, player dies
 		buzzer->programBuzzerRoll(C4_1); 
 		buzzer->programBuzzerRoll(C4_1); 
@@ -2577,10 +2604,11 @@ void Apps::modeSimon(bool init)
 	  }
 	  // player pressed correct button
 	  buzzer->programBuzzerRoll(A3_8);
+	  
 	  ++SIMON_INDEX;
 
 	  if (SIMON_INDEX >= SIMON_LENGTH) {
-		// sequence fully replaced, add one more note
+		// sequence done!
 		buzzer->programBuzzerRoll(E5_4); 
 		buzzer->programBuzzerRoll(rest_1); 
 		buzzer->programBuzzerRoll(B6_1); 
@@ -2601,7 +2629,6 @@ void Apps::modeSimon(bool init)
 		 // repeat existing level for next player
 		 simonState = simonStartUserRepeats;
 	   }
-
 	}
 	break;
 
@@ -2912,18 +2939,12 @@ void Apps::modeReactionGame(bool init){
 	  }
  
 	  ledDisp->SetLedArray(lights); 
- 
-			
- 
-		   
 	 
 	  reactionGameState = reactionPlaying;
 	  break;
 	}
  
- 
- 
- 
+
 	case reactionPlaying: {
 	   
 	   
