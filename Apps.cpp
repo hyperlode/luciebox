@@ -185,7 +185,6 @@ void Apps::modeButtonDebug(bool init){
   }
    
   if(!generalTimer.getTimeIsNegative()){
-	// Serial.println("dbug displ");
 	counter++;
 	if (counter > 9){
 	   counter = 0; 
@@ -494,7 +493,6 @@ void Apps::randomModeDisplay(bool forReal){
 			}else{
 				textBuf[1] = 49;  // 1
 				textBuf[2] = (3 - (((DICEROLL_RANDOM_NUMBER)%13) + 1 )%10) + 48;  // 9,10,11,13 to char 0 1 2 3
-				// Serial.println(DICEROLL_RANDOM_NUMBER);
 			}
 
 			switch (DICEROLL_RANDOM_NUMBER/13){
@@ -621,7 +619,6 @@ void Apps::randomModeDisplay(bool forReal){
 //		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 //		  counter++;
 			 
-//		  // Serial.println(displaySequence[counter], BIN);
 //		}
 //		if(!generalTimer.getTimeIsNegative()){
 //			generalTimer.start();
@@ -1833,7 +1830,6 @@ void Apps::tiltSwitchTest(bool init){
   // keep track of progress
   if (counter2 == 0x0F){ //if a digit is complete
 	counter++;
-	//Serial.println(counter);
 	if (counter == 4){
 	  buzzer->loadBuzzerTrack(song_happy_dryer);
 	  counter = 0;
@@ -2365,14 +2361,7 @@ void Apps::modeSimon(bool init)
 
 void Apps::modeSimon(bool init)
 {
-  //const int numButtons = MOMENTARY_BUTTONS_COUNT;
-  //const int buttons[numButtons] = { BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2 };
-  //const byte lights[MOMENTARY_BUTTONS_COUNT] = { 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2, 1 << LIGHT_MOMENTARY_3 };
-//   const uint8_t sounds[MOMENTARY_BUTTONS_COUNT] = { C4_1, F4_1, A4_1, C5_1};
-  //const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
-  //const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;
   uint8_t lights = 0b00000000;
-
 
   if (init) {
 	SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_LED_BLINK_TIME);
@@ -2380,7 +2369,6 @@ void Apps::modeSimon(bool init)
 	SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;	
 	SIMON_PLAYERS_COUNT = 1;
 	SIMON_LEVEL = 1;
-	//SIMON_PLAYER_PLAYING = SIMON_NOBODY_PLAYING_YET; // player indeces 0 -> 7 (8 players max) 
   }
  
   if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue() || init){
@@ -2392,11 +2380,8 @@ void Apps::modeSimon(bool init)
 	  // if more than one player, light always on.
 	  lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
   }
-
-//   if (init || potentio->getValueStableChangedEdge()) {
-// 	SIMON_STEP_TIMER.setInitTimeMillis(potentio->getValueMapped(-1000,-100));
-//   }
- 
+  
+  // check if a momentary button was pressed.
   uint8_t buttonsChanged = 0;
   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
 	const bool changed = binaryInputs[buttons_momentary_indexed[k]].getEdgeUp();
@@ -2405,11 +2390,8 @@ void Apps::modeSimon(bool init)
 	}
   }
 
- 
   switch (simonState) {
 	case simonWaitForNewGame: {
-		
-
 		textBuf[1]=' ';
 		textBuf[2]=' ';
 		textBuf[3]=' '; 
@@ -2427,13 +2409,11 @@ void Apps::modeSimon(bool init)
 
 		// play button light blinking invitingly.
 		if (millis()%250 > 125){
-			//*settingsLights |= LIGHT_PAUSE; //pause light on.
 			lights|= 1<<LIGHT_LATCHING_EXTRA;
-			
 		}
 
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-			if (millis()%250 > 125){
+			if (millis() % 250 > 125){
 				lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT;
 			}
 			
@@ -2491,7 +2471,9 @@ void Apps::modeSimon(bool init)
 	case simonNewLevel: {
 	  ++SIMON_LENGTH;
 
-	  // get first alive player.
+	  // get random alive player
+
+	  
 	  for (uint8_t i=0;i<8;i++){
 		SIMON_PLAYER_PLAYING = i;
 
@@ -2503,12 +2485,13 @@ void Apps::modeSimon(bool init)
 
 	  ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
 
-	  if (SIMON_LENGTH >= bytes_list_bufsize) {
-		  // reached maximum length
-		  buzzer->loadBuzzerTrack(song_attack);
-		  simonState = simonWaitForNewGame;
-		  break;
-	  }
+	// let maximum length be a happy crash. I can't afford the bytes!
+	//   if (SIMON_LENGTH >= bytes_list_bufsize) {
+	// 	  // reached maximum length
+	// 	  buzzer->loadBuzzerTrack(song_attack);
+	// 	  simonState = simonWaitForNewGame;
+	// 	  break;
+	//   }
 	 
 	  simonState = simonStartPlaySequence;
 	  break;
@@ -2536,11 +2519,14 @@ void Apps::modeSimon(bool init)
 	  }
 
  	  if (SIMON_INDEX >= SIMON_LENGTH && !SIMON_BLINK_TIMER.getTimeIsNegative()) {
-		// after last step display, immediatley shut down.
-		simonState = simonStartUserRepeats;
+		// after last step display, immediatly continue
 		if (SIMON_END_OF_GAME){
+
 	 		simonState = simonWaitForNewGame;
-	 	}	
+	 	}else{
+		  // time for the user to prove himself.
+			simonState = simonStartUserRepeats;
+        }	
 		break;
 	  }
 	  
@@ -2859,7 +2845,6 @@ void Apps::modeReactionGame(bool init){
 		}
  
 		tmp_segments |= ((uint32_t)new_segment) << (8*i);
-		 
 	  }
  
 	  displayAllSegments = tmp_segments;
@@ -2871,8 +2856,6 @@ void Apps::modeReactionGame(bool init){
 	  reactionGameState = reactionMultiPlaying;
 	  break; 
 	}
- 
- 
  
 	case reactionMultiPlaying: {
  
@@ -2887,8 +2870,6 @@ void Apps::modeReactionGame(bool init){
 			buzzer->addRandomSoundToRoll(190,198);
 			displayAllSegments &= ~(0x80UL << 8*i);
 			REACTION_GAME_SCORE++; 
-			//buzzer->programBuzzerRoll(rest_1);
-			//buzzer->programBuzzerRoll(C5_1);
 			 
 		  }else{
 			 //DP is off --> button should not have been pressed --> die!

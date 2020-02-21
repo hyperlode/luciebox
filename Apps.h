@@ -3,7 +3,7 @@
 
 
 #define ENABLE_EEPROM
-//#define ENABLE_MULTITIMER
+#define ENABLE_MULTITIMER
 #define SIMON_APP
 #define ENABLE_REACTION_APP
 
@@ -151,11 +151,9 @@
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
 
-
-#define DRAW_DISP_STATE array_4_bytes
-#define REACTION_GAME_SELECTED_SOUNDS array_4_bytes
-
-
+#define DRAW_DISP_STATE array_8_bytes
+#define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
+#define SIMON_PLAYERS array_8_bytes
 
 const uint8_t app_splash_screens [] PROGMEM = {
 	//sorted by selector number
@@ -473,7 +471,7 @@ class Apps{
     };
     uint8_t bytes_list[bytes_list_bufsize];
     
-    uint8_t array_4_bytes [4];
+    uint8_t array_8_bytes [8];
 
     #ifdef ENABLE_REACTION_APP
     // reaction
