@@ -57,7 +57,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		   
 		case 2:
-		  
+		  stopwatch(init);
 		  break;
 
 		case 3:
@@ -189,9 +189,78 @@ bool Apps::init_app(bool init, uint8_t selector){
 	return false;
 }
 
-// void Apps::chronoMeter(bool init){
+void Apps::stopwatch(bool init){
+	// classic stopwatch
 
-// } 
+	if (init){
+		STOPWATCH_CHRONO.setInitTimeMillis(0);
+		STOPWATCH_CHRONO.reset();
+		
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			STOPWATCH_CHRONO.start();
+		}
+	}
+
+	long time_millis = 0;
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown()){
+		STOPWATCH_CHRONO.pause();
+	}
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
+		STOPWATCH_CHRONO.startPaused(false);
+	}
+
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+			STOPWATCH_CHRONO.paused(!STOPWATCH_CHRONO.getIsPaused());
+			// STOPWATCH_CHRONO.pause();
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+			STOPWATCH_CHRONO.startPaused(false);
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+			STOPWATCH_LAP_MEMORY =  STOPWATCH_CHRONO.getTimeMillis(); 
+		}
+	}
+
+	time_millis = STOPWATCH_CHRONO.getTimeMillis();
+	if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || 
+		binaryInputs[BUTTON_MOMENTARY_1].getValue() ){
+		// one button only displays memory
+		time_millis = STOPWATCH_LAP_MEMORY;
+	}
+
+	uint8_t timeDisplayShift = 0;
+	
+	if (time_millis < 10000){
+		timeDisplayShift = 1;
+	}else if (time_millis < 100000){
+		time_millis/=10;
+		timeDisplayShift = 2;
+	}else if (time_millis < 1000000){
+		time_millis/=100;
+		timeDisplayShift = 3;
+	}else{
+		time_millis/=1000;
+		timeDisplayShift = 4;
+	}
+
+	textBuf[1] = ' ';
+	textBuf[2] = ' ';
+
+	intToDigitsString(textBuf+1, time_millis, true);
+	decimalPoints = 0x1<<timeDisplayShift;
+
+	//ledDisp->showNumber(STOPWATCH_CHRONO.getTimeMillis());
+
+	if(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+		timeSecondsToClockString(textBuf, (unsigned int)(time_millis/1000));
+	}else{
+		//
+		ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+	}
+	
+	
+} 
 void Apps::modeButtonDebug(bool init){
   // integrated debug mode (intended to be able to be activated in the final product in order to debug).
   // will show in sequence all analog input values.

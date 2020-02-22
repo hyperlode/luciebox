@@ -82,6 +82,7 @@
 #define DICEROLL_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer
 #define SIMON_STEP_TIMER generalTimer
+#define STOPWATCH_CHRONO generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
@@ -116,7 +117,7 @@
 #define SETTINGS_MODE_SELECTOR counter3
 #define DICEROLL_ANIMATION_DELAY counter3
 #define SIMON_RANDOM_PLAYER_SEQUENCE counter3
-
+#define STOPWATCH_LAP_MEMORY counter3
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
@@ -427,7 +428,7 @@ class Apps{
     void movieAnimationMode(bool init);
     uint16_t _animationGetStartByte(uint8_t number);
     
-    //void chronoMeter(bool init);
+    void stopwatch(bool init);
     void modeSingleSegmentManipulation(bool init);
     void modeGeiger(bool init);
     void modeSequencer(bool init);
