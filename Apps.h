@@ -426,6 +426,8 @@ class Apps{
     void draw(bool init);
     void movieAnimationMode(bool init);
     uint16_t _animationGetStartByte(uint8_t number);
+    
+    //void chronoMeter(bool init);
     void modeSingleSegmentManipulation(bool init);
     void modeGeiger(bool init);
     void modeSequencer(bool init);

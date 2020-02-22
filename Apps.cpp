@@ -31,23 +31,35 @@ void Apps::appSelector(bool init, uint8_t selector){
 	// not as else statement, to have the init properly transferred after app beginning screen.
 	if (!this->app_init_mode){
 		 
+		bool advancedMode = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
+
 		switch (selector) {
-		case 0:
-		  this->modeCountingLettersAndChars(init);
+		case 0:{
+			if (advancedMode){
+				#ifdef SIMON_APP
+				this->modeSimon(init);
+				#endif
+
+			}else{
+				this->modeCountingLettersAndChars(init);
+			}
+		  }
 		  break;
 		   
-		case 1:
+		case 1:{
 		  //sound fun with notes
-		  this->modeSoundNotes(init);
+		  	if (advancedMode){
+				this->modeComposeSong(init);
+			}else{
+		  		this->modeSoundNotes(init);
+			}
+		  }
 		  break;
 		   
 		case 2:
-		  //sound fun with frequencies.
-	  	  #ifdef SIMON_APP
-		  this->modeSimon(init);
-	      #endif
+		  
 		  break;
-		   
+
 		case 3:
 		  //this->modeScroll(init);
 	      this->modeDiceRoll(init);
@@ -70,13 +82,18 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		   
 		case 8:
-		  this->modeSequencer(init);
+		  if (advancedMode){
+		  	this->modeSequencer(init);
+
+		  }else{
+			this->modeMetronome(init);
+		  }
 		  break;
 		   
 		case 9:
-	  #ifdef ENABLE_REACTION_APP
+		  #ifdef ENABLE_REACTION_APP
 		  this->modeReactionGame(init);
-	  #endif
+	 	  #endif
 		  break;
 		   
 		case 10:
@@ -114,13 +131,10 @@ void Apps:: setDefaultMode(){
   //ledDisp->SetFourDigits(0xC0C0C0C0); 
   ledDisp->setBrightness(0,false);
   
-
-   
   //buzzer
   buzzer->setSpeedRatio(1);
   buzzer->buzzerOff(); // stop all sounds that were playing in an app. 
   buzzer->setTranspose(0);
- 
 }
  
 bool Apps::init_app(bool init, uint8_t selector){
@@ -174,7 +188,10 @@ bool Apps::init_app(bool init, uint8_t selector){
 	}	 
 	return false;
 }
- 
+
+// void Apps::chronoMeter(bool init){
+
+// } 
 void Apps::modeButtonDebug(bool init){
   // integrated debug mode (intended to be able to be activated in the final product in order to debug).
   // will show in sequence all analog input values.
@@ -1275,10 +1292,7 @@ void Apps::modeComposeSong(bool init){
 
 void Apps::modeSoundNotes(bool init){
   //buzzer with buzzer roll (notes).
-	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-		this->modeComposeSong(init);
-		return;
-	}
+	
 
 	if (init){
 		decimalPoints = 0xFF;
@@ -1944,12 +1958,6 @@ void Apps::modeGeiger(bool init){
 void Apps::modeSequencer(bool init){
   int8_t step = 0;
   bool showNote = false;
-
-  if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ 
-	// metrone function is the "easy mode here"
-	this->modeMetronome(init);
-	return;
-  }
 	 
   if (init){
 	SEQUENCER_STEP_COUNTER = 0; 
