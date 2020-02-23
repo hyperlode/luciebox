@@ -195,41 +195,68 @@ bool Apps::init_app(bool init, uint8_t selector){
 }
 
 void Apps::pomodoroTimer(bool init){
+
+	uint8_t display_mode = POMODORO_DISPLAY_TIMER;
+
 	if (init){
-		POMODORO_INIT_MILLIS = (long)-1000 * POMODORO_INIT_SECS;
-		POMODORO_PAUSE_MILLIS = (long)-1000 * POMODORO_PAUSE_SECS;
-		POMODORO_TIMER.setInitTimeMillis(POMODORO_INIT_MILLIS);
+		POMODORO_INIT_TIME_SECONDS = POMODORO_INIT_DEFAULT_SECS;
+		POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
+		
+		POMODORO_PAUSE_TIME_SECONDS = POMODORO_PAUSE_DEFAULT_SECS;
 
 		POMODORO_TIMER.reset();
+
+		POMODORO_IN_BREAK = false;
+		POMODORO_MAIN_MENU = true;
 		
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	}
+
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+		if (POMODORO_MAIN_MENU){
 			POMODORO_TIMER.start();
 		}
 
-		POMODORO_IN_BREAK = false;
-		
-	}
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown()){
-		POMODORO_TIMER.pause();
-	}
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
-		POMODORO_TIMER.startPaused(false);
-	}
+		if (!POMODORO_TIMER.getTimeIsNegative()){
+			POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
+			if (POMODORO_IN_BREAK){
+				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
+				buzzer->loadBuzzerTrack(song_happy_dryer);
 
-	if (!POMODORO_TIMER.getTimeIsNegative()){
-		POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
-		if (POMODORO_IN_BREAK){
-			POMODORO_TIMER.setInitTimeMillis(POMODORO_PAUSE_MILLIS);
-			buzzer->loadBuzzerTrack(song_happy_dryer);
+			}else{
+				buzzer->loadBuzzerTrack(song_attack);
+				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
+			}
+			POMODORO_TIMER.start();
 
-		}else{
-			buzzer->loadBuzzerTrack(song_attack);
-			POMODORO_TIMER.setInitTimeMillis(POMODORO_INIT_MILLIS);
 		}
-		POMODORO_TIMER.start();
+		
 
+	}else{
+		if (!POMODORO_MAIN_MENU){
+			POMODORO_TIMER.reset();
+			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
+			POMODORO_IN_BREAK = false;
+		}
+
+		uint16_t tmpSeconds = 60*(uint16_t)potentio->getValueMapped(0,180);
+		if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+			
+			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
+			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
+		}
+
+		if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+			POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
+			
+			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
+		}
 	}
-	POMODORO_TIMER.getTimeString(textBuf+1);
+
+	// POMODORO_MAIN_MENU is our edge detector
+	POMODORO_MAIN_MENU = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();
+
+
+
 
 	// ticking sound
 	long tick_duration = potentio->getValueMapped(0,40);
@@ -248,13 +275,44 @@ void Apps::pomodoroTimer(bool init){
 			}
 		}
 	}
+	// display
+	switch(display_mode){
+		case POMODORO_DISPLAY_TIMER:
+			POMODORO_TIMER.getTimeString(textBuf+1);
+			break;
+		case POMODORO_DISPLAY_PAUSE_INIT_SECS:{
+			timeSecondsToClockString(textBuf+1, POMODORO_PAUSE_TIME_SECONDS);
+			if (millis()%1000 > 600  ){
+				textBuf[1]='P';
+				textBuf[2]='A';
+				textBuf[3]='U';
+				textBuf[4]='S';
+			}
+		}
+		break;
+		default:
+			break;
+	}
+	
+	
 
 	decimalPoints = 1 << 2;
-	
- 	if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
-		decimalPoints =0;
-	}
+	if (POMODORO_MAIN_MENU){
+		
+	}else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
+		//decimalPoints = 1 << 2;
 
+	}else if  (POMODORO_IN_BREAK){
+		textBuf[1]='P';
+		textBuf[2]='A';
+		textBuf[3]='U';
+		textBuf[4]='S';
+		decimalPoints = 0;
+	}else{
+
+		decimalPoints = 0;
+	}
+	
 	ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
 }
 

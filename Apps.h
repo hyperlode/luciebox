@@ -71,10 +71,12 @@
  #define SIMON_DEAD_PLAYER 666
  #define SIMON_MAX_PLAYERS 8
  #define SIMON_NO_BUTTON_PRESSED 111
- #define POMODORO_INIT_SECS 1500
- #define POMODORO_PAUSE_SECS 600
-//  #define POMODORO_INIT_SECS 5
-//  #define POMODORO_PAUSE_SECS 2
+//  #define POMODORO_INIT_DEFAULT_SECS 1500
+//  #define POMODORO_PAUSE_DEFAULT_SECS 600
+ #define POMODORO_INIT_DEFAULT_SECS 5
+ #define POMODORO_PAUSE_DEFAULT_SECS 2
+ #define POMODORO_DISPLAY_TIMER 0
+ #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
 
 // VARIABLE REUSE
 
@@ -111,7 +113,7 @@
 #define METRONOME_TICKER_2_POSITION counter2
 #define DEBUGMODE_ACTIVATED counter2
 #define DICEROLL_CARD_FROM_DECK_INDEX counter2
-
+#define POMODORO_INIT_TIME_SECONDS counter2
 
 #define DRAW_Y_POS counter3
 #define GEIGER_INCREASE_CHANCE counter3
@@ -122,16 +124,17 @@
 #define DICEROLL_ANIMATION_DELAY counter3
 #define SIMON_RANDOM_PLAYER_SEQUENCE counter3
 #define STOPWATCH_LAP_MEMORY counter3
-#define POMODORO_INIT_MILLIS counter3
+
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 #define SIMON_ACTIVE_LIGHT counter4
+#define POMODORO_PAUSE_TIME_SECONDS counter4
 
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
-#define SEQUENCER_TEMP_NOTE counter5
+#define SEQUENCER_TEMP_NOTE counter5 
 #define DICEROLL_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
@@ -140,7 +143,6 @@
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 
-#define POMODORO_PAUSE_MILLIS counter8
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -149,7 +151,7 @@
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
-#define POMODORO_MAIN_MENU boolean2
+#define POMODORO_MAIN_MENU general_boolean2
 
 
 #define SIMON_LIST bytes_list
@@ -473,8 +475,6 @@ class Apps{
     uint8_t counter5;
     uint8_t counter6;
     uint8_t counter7;
-    long counter8;
-   
 
     enum {
       bytes_list_bufsize = 100,

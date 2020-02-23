@@ -32,7 +32,7 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis){
 }
 
 void SuperTimer::setInitCountDownTimeSecs(uint16_t countDownSeconds){
-	this->setInitCountDownTimeMillis(((long)countDownSeconds) * 1000);
+	this->setInitCountDownTimeMillis(((long)countDownSeconds) * 1000); // not -1000 because we call another COUNTDOWN
 }
 
 void SuperTimer::setInitCountDownTimeMillis(long countDownMillis){
