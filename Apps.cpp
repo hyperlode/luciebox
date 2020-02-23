@@ -200,15 +200,13 @@ void Apps::pomodoroTimer(bool init){
 
 	if (init){
 		POMODORO_INIT_TIME_SECONDS = POMODORO_INIT_DEFAULT_SECS;
-		POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
-		
 		POMODORO_PAUSE_TIME_SECONDS = POMODORO_PAUSE_DEFAULT_SECS;
 
+		POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 		POMODORO_TIMER.reset();
 
 		POMODORO_IN_BREAK = false;
 		POMODORO_MAIN_MENU = true;
-		
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
@@ -227,10 +225,7 @@ void Apps::pomodoroTimer(bool init){
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 			}
 			POMODORO_TIMER.start();
-
 		}
-		
-
 	}else{
 		if (!POMODORO_MAIN_MENU){
 			POMODORO_TIMER.reset();
@@ -238,7 +233,7 @@ void Apps::pomodoroTimer(bool init){
 			POMODORO_IN_BREAK = false;
 		}
 
-		uint16_t tmpSeconds = 60*(uint16_t)potentio->getValueMapped(0,180);
+		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91));
 		if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
 			
 			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
@@ -280,6 +275,7 @@ void Apps::pomodoroTimer(bool init){
 		case POMODORO_DISPLAY_TIMER:
 			POMODORO_TIMER.getTimeString(textBuf+1);
 			break;
+			
 		case POMODORO_DISPLAY_PAUSE_INIT_SECS:{
 			timeSecondsToClockString(textBuf+1, POMODORO_PAUSE_TIME_SECONDS);
 			if (millis()%1000 > 600  ){
@@ -293,8 +289,6 @@ void Apps::pomodoroTimer(bool init){
 		default:
 			break;
 	}
-	
-	
 
 	decimalPoints = 1 << 2;
 	if (POMODORO_MAIN_MENU){
