@@ -10,6 +10,8 @@ void Apps::setPeripherals( BinaryInput binaryInputs[], Potentio* potentio, Displ
   this->binaryInputs = binaryInputs;
   this->potentio = potentio;
   this->ledDisp = ledDisp;
+
+  //
 }
  
 void Apps::appSelector(bool init, uint8_t selector){
@@ -25,13 +27,13 @@ void Apps::appSelector(bool init, uint8_t selector){
 			// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
 			this->app_init_mode = false;
 			init = true;
-		}
+		}	
 	}
 
 	// not as else statement, to have the init properly transferred after app beginning screen.
 	if (!this->app_init_mode){
 
-		uint8_t appSelector = selector * 10 + binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
+		uint8_t appSelector = selector * 2 + binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
 		
 		bool advancedInit = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 		
@@ -39,6 +41,65 @@ void Apps::appSelector(bool init, uint8_t selector){
 		// it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
 			this->setDefaultMode();
 		}
+#ifdef FUNCTION_POINTER_APP_SELECTION
+		// problem: takes more memory than switch-case. AND init and advancedinit not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
+
+		//https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_74/rzarg/cplr034.htm
+		///////function pointer: working, but with weird audio beeps intermixed. What's going on there?!
+		////// this->appPointer = &Apps::modeSimon;
+		////// (this->*appPointer)(advancedInit);
+
+		// modeCountingLettersAndChars(advancedInit);
+
+		// fptr allAppsIndexed [24] = {
+		// 	&Apps::modeCountingLettersAndChars, 
+		// 	&Apps::modeSimon,
+		// 	&Apps::modeSoundNotes,
+		// 	&Apps::modeComposeSong,
+		// 	&Apps::stopwatch,
+		// 	&Apps::pomodoroTimer,
+		// 	&Apps::modeDiceRoll,
+		// 	&Apps::modeDiceRoll,
+		// 	&Apps::modeGeiger,
+		// 	&Apps::modeGeiger,
+		// 	&Apps::modeSoundSong,
+		// 	&Apps::draw,
+		// 	&Apps::modeSimpleButtonsAndLights,	
+		// 	&Apps::modeSimpleButtonsAndLights,	
+		// 	&Apps::modeMetronome,
+		// 	&Apps::modeSequencer,
+		// 	&Apps::modeReactionGame,
+		// 	&Apps::modeReactionGame,
+		// 	&Apps::tiltSwitchTest,
+		// 	&Apps::tiltSwitchTest,
+		// 	&Apps::miniMultiTimer, 
+		// 	&Apps::miniMultiTimer 
+		// 	};
+
+		// (this->*(allAppsIndexed[appSelector]))(advancedInit);
+
+
+		// this->modeComposeSong(advancedInit);
+		// stopwatch(advancedInit);
+		// pomodoroTimer(advancedInit);
+		// this->modeDiceRoll(advancedInit);
+		//    this->modeDiceRoll(advancedInit);
+		// this->modeGeiger(advancedInit);
+		// this->modeGeiger(advancedInit);
+		// this->modeSoundSong(advancedInit);
+		// this->draw(advancedInit);
+		//     this->modeSimpleButtonsAndLights(init);	
+		//     this->modeSimpleButtonsAndLights(init);	
+		// this->modeMetronome(advancedInit);
+		// this->modeSequencer(advancedInit);
+		// this->modeReactionGame(advancedInit);
+		// this->modeReactionGame(advancedInit);
+		// this->tiltSwitchTest(advancedInit);
+		// this->tiltSwitchTest(advancedInit);
+		// this->miniMultiTimer(init); 
+		// this->miniMultiTimer(init); 
+#else
+
 
 		switch (appSelector) {
 
@@ -133,6 +194,8 @@ void Apps::appSelector(bool init, uint8_t selector){
 			break;
 			
 		}
+
+#endif
 	}
 }
  

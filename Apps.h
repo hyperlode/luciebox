@@ -38,28 +38,32 @@
 
 #define APP_SELECTOR_LETTERS_AND_CHARS  0
 #define APP_SELECTOR_SIMON 1
-#define APP_SELECTOR_SOUND_NOTES 10
-#define APP_SELECTOR_SOUND_COMPOSER 11
-#define APP_SELECTOR_STOPWATCH 20
-#define APP_SELECTOR_POMODORO 21
-#define APP_SELECTOR_DICEROLL 30
-#define APP_SELECTOR_SLOTS 31
-#define APP_SELECTOR_GEIGER 40
+#define APP_SELECTOR_SOUND_NOTES 2
+#define APP_SELECTOR_SOUND_COMPOSER 3
+#define APP_SELECTOR_STOPWATCH 4
+#define APP_SELECTOR_POMODORO 5
+#define APP_SELECTOR_DICEROLL 6
+#define APP_SELECTOR_SLOTS 7
+#define APP_SELECTOR_GEIGER 8
+#define APP_SELECTOR_GEIGER_NOTES 9
+
  
-#define APP_SELECTOR_SOUND_SONG 50
+#define APP_SELECTOR_SOUND_SONG 10
+#define APP_SELECTOR_SOUND_SONG_TOO 11
 
-#define APP_SELECTOR_DRAW 60
+#define APP_SELECTOR_DRAW 12
+#define APP_SELECTOR_DRAW_TOO 13
 
-#define APP_SELECTOR_SETTING 70
-#define APP_SELECTOR_SETTING_TOO 71
-#define APP_SELECTOR_SOUND_METRONOME 80
-#define APP_SELECTOR_SOUND_SEQUENCER 81
-#define APP_SELECTOR_REACTION_GAME 90
-#define APP_SELECTOR_GUITAR_HERO 91
-#define APP_SELECTOR_TILT 100
-#define APP_SELECTOR_TILT_ADVANCED 101
-#define APP_SELECTOR_MULTITIMER_SETTING 110
-#define APP_SELECTOR_MULTITIMER_PLAYING 111
+#define APP_SELECTOR_SETTING 14
+#define APP_SELECTOR_SETTING_TOO 15
+#define APP_SELECTOR_SOUND_METRONOME 16
+#define APP_SELECTOR_SOUND_SEQUENCER 17
+#define APP_SELECTOR_REACTION_GAME 18
+#define APP_SELECTOR_GUITAR_HERO 19
+#define APP_SELECTOR_TILT 20
+#define APP_SELECTOR_TILT_ADVANCED 21
+#define APP_SELECTOR_MULTITIMER_SETTING 22
+#define APP_SELECTOR_MULTITIMER_PLAYING 23
 
 // #define TILT_FORWARD 	0x00000001
 // #define TILT_BACKWARD 	0x00000010
@@ -462,6 +466,7 @@ class Apps{
     void appSelector(bool init, uint8_t selector);
     bool init_app(bool init, uint8_t selector);
     //void modeScroll(bool init);
+
     void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
@@ -469,7 +474,6 @@ class Apps{
     void modeSoundNotes(bool init);
     void draw(bool init);
     void movieAnimationMode(bool init);
-    uint16_t _animationGetStartByte(uint8_t number);
     void pomodoroTimer(bool init);
     void stopwatch(bool init);
     void modeSingleSegmentManipulation(bool init);
@@ -483,12 +487,20 @@ class Apps{
     void miniMultiTimer(bool init);
     void modeDiceRoll(bool init);
     
+    uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence);    
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
     void shuffle(uint8_t* list, uint8_t length);
     bool saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
 
+
   private:
+    
+    #ifdef FUNCTION_POINTER_APP_SELECTION
+    typedef void (Apps::*fptr)(bool init);
+    fptr appPointer;
+    #endif
+    
     DataPlayer dataPlayer;
     
     #ifdef ENABLE_MULTITIMER
