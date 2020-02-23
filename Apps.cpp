@@ -253,27 +253,24 @@ void Apps::pomodoroTimer(bool init){
 			}
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 			POMODORO_STATS_WORKING_BAD ++;
 		}
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
 			POMODORO_STATS_WORKING_GOOD ++;
-		}
-
-		if (binaryInputs[BUTTON_MOMENTARY_1].getValue() ||
-			binaryInputs[BUTTON_MOMENTARY_3].getValue()
-			){
-			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
 
 		if (binaryInputs[BUTTON_MOMENTARY_0].getValue() ||
 			binaryInputs[BUTTON_MOMENTARY_2].getValue()
 			){
-			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
 
-		
-
+		if (binaryInputs[BUTTON_MOMENTARY_1].getValue() ||
+			binaryInputs[BUTTON_MOMENTARY_3].getValue()
+			){
+			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+		}
 
 	}else{
 		// in main menu
@@ -299,16 +296,13 @@ void Apps::pomodoroTimer(bool init){
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
+		if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
 			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
 		}
 		
-		if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+		if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
 			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
-		
-		
-
 	}
 	
 	POMODORO_AUTO_RESTART_ENABLED = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();
@@ -451,6 +445,8 @@ void Apps::pomodoroTimer(bool init){
 	}
 	if (!showMenu){
 		lights|= 1<<LIGHT_LATCHING_EXTRA;
+		lights|= 1<<LIGHT_MOMENTARY_2;
+		lights|= 1<<LIGHT_MOMENTARY_3;
 	}
 	
 	ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
