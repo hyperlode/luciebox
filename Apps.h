@@ -77,6 +77,7 @@
  #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
  #define POMODORO_DISPLAY_SHOW_GOOD 2
  #define POMODORO_DISPLAY_SHOW_BAD 3
+ #define POMODORO_DISPLAY_BEEP_PROBABILITY 4
 
 // VARIABLE REUSE
 
@@ -142,9 +143,12 @@
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
 
 #define SIMON_PLAYERS_COUNT counter6
+#define POMODORO_AUTO_RESTART_ENABLED counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
+#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
 
+#define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
 
 #define REACTION_COUNTDOWN_MODE general_boolean  
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -153,7 +157,7 @@
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
-#define POMODORO_MAIN_MENU general_boolean2
+#define POMODORO_SHOW_MENU_EDGE general_boolean2
 
 
 #define SIMON_LIST bytes_list
@@ -477,6 +481,8 @@ class Apps{
     uint8_t counter5;
     uint8_t counter6;
     uint8_t counter7;
+
+    uint16_t counter8;
 
     enum {
       bytes_list_bufsize = 100,

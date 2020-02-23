@@ -199,24 +199,38 @@ bool Apps::init_app(bool init, uint8_t selector){
 void Apps::pomodoroTimer(bool init){
 
 	uint8_t display_mode = POMODORO_DISPLAY_TIMER;
+	lights = 0;
 
 	if (init){
 		POMODORO_INIT_TIME_SECONDS = POMODORO_INIT_DEFAULT_SECS;
 		POMODORO_PAUSE_TIME_SECONDS = POMODORO_PAUSE_DEFAULT_SECS;
 
-		POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
-		POMODORO_TIMER.reset();
-
-		POMODORO_IN_BREAK = false;
-		POMODORO_MAIN_MENU = true;
+		// most variables set at main menu init.
+		POMODORO_SHOW_MENU_EDGE = false; // at init make sure to run through main menu once to set all varialbes that are always set at main menu entering.
 
 		POMODORO_STATS_WORKING_GOOD = 0;
 		POMODORO_STATS_WORKING_BAD = 0;
+		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
+
+	}
+	boolean showMenu = true;
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue() && 
+		!init && 
+		(POMODORO_AUTO_RESTART_ENABLED || (!POMODORO_IN_BREAK) ) // if not auto restart, we don't even do a break
+	   )
+	{
+		showMenu = false;
 	}
 
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
+		POMODORO_IN_BREAK = false;
+	} 
+
+	// in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
+	if (!showMenu){
 		// pomodoro timer running
-		if (POMODORO_MAIN_MENU){
+
+		if (POMODORO_SHOW_MENU_EDGE){
 			POMODORO_TIMER.start();
 		}
 
@@ -225,12 +239,18 @@ void Apps::pomodoroTimer(bool init){
 			if (POMODORO_IN_BREAK){
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
 				buzzer->loadBuzzerTrack(song_happy_dryer);
-
+				POMODORO_TIMER.start();
+				
 			}else{
+				// coming out of break. Not executed at starting Pomodoro by switch.
 				buzzer->loadBuzzerTrack(song_attack);
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
+				if (POMODORO_AUTO_RESTART_ENABLED){
+					POMODORO_TIMER.start();
+				}else{
+					POMODORO_SHOW_MENU_EDGE = true;
+				}
 			}
-			POMODORO_TIMER.start();
 		}
 
 		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
@@ -252,13 +272,15 @@ void Apps::pomodoroTimer(bool init){
 			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
 		}
 
+		
+
 
 	}else{
 		// in main menu
-		if (!POMODORO_MAIN_MENU){
+
+		if (!POMODORO_SHOW_MENU_EDGE){
 			POMODORO_TIMER.reset();
 			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
-			POMODORO_IN_BREAK = false;
 		}
 
 		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91));
@@ -272,6 +294,11 @@ void Apps::pomodoroTimer(bool init){
 			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
 		}
 
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = tmpSeconds;
+			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
+		}
+
 		if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
 			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
 		}
@@ -279,14 +306,32 @@ void Apps::pomodoroTimer(bool init){
 		if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
 			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
+		
+		
+
 	}
+	
+	POMODORO_AUTO_RESTART_ENABLED = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();
 
-	// POMODORO_MAIN_MENU is our edge detector
-	POMODORO_MAIN_MENU = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();
-
+	// POMODORO_SHOW_MENU_EDGE is our edge detector
+	POMODORO_SHOW_MENU_EDGE = showMenu;
+	
 	// ticking sound
 	long tick_duration = potentio->getValueMapped(0,40);
-	if(POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500,true,tick_duration>20)){	
+	bool tick_twice_a_second = tick_duration>20;
+	if(POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second)){	
+		
+		if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0){
+	
+			// on average every two minutes play beep
+			// if ( random(0,21) > 19 + (tick_twice_a_second) ){
+			if ( random(0,POMODORO_PROBABILITY_BEEP_EVERY_SECONDS*2) <= 1 - (tick_twice_a_second) ){
+				// random has 0 included. as we have to take into account the double ticking, 
+				// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
+
+				buzzer->programBuzzerRoll(C5_1);
+			};
+		}
 
 		if (tick_duration > 0){
 			// no sound when zero
@@ -317,7 +362,17 @@ void Apps::pomodoroTimer(bool init){
 			}
 		}
 		break;
-
+		case POMODORO_DISPLAY_BEEP_PROBABILITY:{
+			timeSecondsToClockString(textBuf+1, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS);
+			if (millis()%1000 > 650  ){
+				// rnd beep time....
+				textBuf[1]='R';
+				textBuf[2]='N';
+				textBuf[3]='D';
+				textBuf[4]='B';
+			}
+		}
+		break;
 		case POMODORO_DISPLAY_SHOW_GOOD:{
 			if (millis()%1000 > 650  ){
 				textBuf[1]=' ';
@@ -346,23 +401,60 @@ void Apps::pomodoroTimer(bool init){
 			break;
 	}
 
-	decimalPoints = 1 << 2;
-	if (POMODORO_MAIN_MENU){
-		
-	}else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
-		//decimalPoints = 1 << 2;
+	decimalPoints = 0;
+	if (showMenu){
+		decimalPoints = 1 << 2;
 
-	}else if  (POMODORO_IN_BREAK){
+		if (millis()%500 < 250){
+			lights|= 1<<LIGHT_LATCHING_EXTRA;
+		}
+
+	}else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
+		decimalPoints = 1 << 2;
+		lights|= 1<<LIGHT_LATCHING_EXTRA;
+
+	}else if (POMODORO_IN_BREAK){
 		textBuf[1]='P';
 		textBuf[2]='A';
 		textBuf[3]='U';
 		textBuf[4]='S';
-		decimalPoints = 0;
-	}else{
-		decimalPoints = 0;
+		
+	}
+
+
+// decimalPoints = 1 << 2;
+// 	//lights|= 1<<LIGHT_LATCHING_EXTRA;
+// 	if (showMenu){
+		
+// 	}else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
+// 		//decimalPoints = 1 << 2;
+
+// 	}else if  (POMODORO_IN_BREAK){
+// 		textBuf[1]='P';
+// 		textBuf[2]='A';
+// 		textBuf[3]='U';
+// 		textBuf[4]='S';
+// 		decimalPoints = 0;
+// 	}else{
+// 		decimalPoints = 0;
+// 	}
+
+
+
+	// leds
+	
+	if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0){
+		lights|= 1<<LIGHT_LATCHING_SMALL_LEFT;
+	}
+	if (POMODORO_AUTO_RESTART_ENABLED){
+		lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT;
+	}
+	if (!showMenu){
+		lights|= 1<<LIGHT_LATCHING_EXTRA;
 	}
 	
 	ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+	ledDisp->SetLedArray(lights);
 }
 
 void Apps::stopwatch(bool init){
