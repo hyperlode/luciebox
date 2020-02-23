@@ -209,9 +209,13 @@ void Apps::pomodoroTimer(bool init){
 
 		POMODORO_IN_BREAK = false;
 		POMODORO_MAIN_MENU = true;
+
+		POMODORO_STATS_WORKING_GOOD = 0;
+		POMODORO_STATS_WORKING_BAD = 0;
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+		// pomodoro timer running
 		if (POMODORO_MAIN_MENU){
 			POMODORO_TIMER.start();
 		}
@@ -228,7 +232,29 @@ void Apps::pomodoroTimer(bool init){
 			}
 			POMODORO_TIMER.start();
 		}
+
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+			POMODORO_STATS_WORKING_BAD ++;
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+			POMODORO_STATS_WORKING_GOOD ++;
+		}
+
+		if (binaryInputs[BUTTON_MOMENTARY_1].getValue() ||
+			binaryInputs[BUTTON_MOMENTARY_3].getValue()
+			){
+			display_mode = POMODORO_DISPLAY_SHOW_BAD;
+		}
+
+		if (binaryInputs[BUTTON_MOMENTARY_0].getValue() ||
+			binaryInputs[BUTTON_MOMENTARY_2].getValue()
+			){
+			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+		}
+
+
 	}else{
+		// in main menu
 		if (!POMODORO_MAIN_MENU){
 			POMODORO_TIMER.reset();
 			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
@@ -237,23 +263,26 @@ void Apps::pomodoroTimer(bool init){
 
 		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91));
 		if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
-			
 			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
 			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
 		}
 
 		if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
 			POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
-			
 			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
+		}
+
+		if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
+			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
 	}
 
 	// POMODORO_MAIN_MENU is our edge detector
 	POMODORO_MAIN_MENU = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();
-
-
-
 
 	// ticking sound
 	long tick_duration = potentio->getValueMapped(0,40);
@@ -280,7 +309,7 @@ void Apps::pomodoroTimer(bool init){
 			
 		case POMODORO_DISPLAY_PAUSE_INIT_SECS:{
 			timeSecondsToClockString(textBuf+1, POMODORO_PAUSE_TIME_SECONDS);
-			if (millis()%1000 > 600  ){
+			if (millis()%1000 > 650  ){
 				textBuf[1]='P';
 				textBuf[2]='A';
 				textBuf[3]='U';
@@ -288,6 +317,31 @@ void Apps::pomodoroTimer(bool init){
 			}
 		}
 		break;
+
+		case POMODORO_DISPLAY_SHOW_GOOD:{
+			if (millis()%1000 > 650  ){
+				textBuf[1]=' ';
+				textBuf[2]='Y';
+				textBuf[3]='E';
+				textBuf[4]='S';
+			}else{
+				ledDisp->numberToBuf(textBuf, POMODORO_STATS_WORKING_GOOD);
+			}
+		}
+		break;
+
+		case POMODORO_DISPLAY_SHOW_BAD:{
+			if (millis()%1000 > 650 ){
+				textBuf[1]=' ';
+				textBuf[2]='N';
+				textBuf[3]='O';
+				textBuf[4]=' ';
+			}else{
+				ledDisp->numberToBuf(textBuf, POMODORO_STATS_WORKING_BAD);
+			}
+		}
+		break;
+
 		default:
 			break;
 	}
@@ -305,7 +359,6 @@ void Apps::pomodoroTimer(bool init){
 		textBuf[4]='S';
 		decimalPoints = 0;
 	}else{
-
 		decimalPoints = 0;
 	}
 	
