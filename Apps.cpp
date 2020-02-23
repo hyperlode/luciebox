@@ -28,107 +28,110 @@ void Apps::appSelector(bool init, uint8_t selector){
 		}
 	}
 
-	
-	 
 	// not as else statement, to have the init properly transferred after app beginning screen.
 	if (!this->app_init_mode){
-		 
-		bool advancedMode = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
+
+		uint8_t appSelector = selector * 10 + binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
 		
 		bool advancedInit = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 		
-		if (init || (advancedInit && (selector!=SELECTOR_MULTITIMER))){
-		// it's a bit messy, but for now, the multitimer app is the only only without a double app per selector position
+		if (init || (advancedInit && (appSelector!=APP_SELECTOR_MULTITIMER_PLAYING))){
+		// it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
 			this->setDefaultMode();
 		}
 
-		switch (selector) {
-		case 0:{
-			if (advancedMode){
-				#ifdef SIMON_APP
-				this->modeSimon(advancedInit);
-				#endif
+		switch (appSelector) {
 
-			}else{
-				this->modeCountingLettersAndChars(advancedInit);
-			}
-		  }
-		  break;
-		   
-		case 1:{
-		  //sound fun with notes
-		  	if (advancedMode){
-				this->modeComposeSong(advancedInit);
-			}else{
-		  		this->modeSoundNotes(advancedInit);
-			}
-		  }
-		  break;
-		   
-		case 2:
-		  if (advancedMode){
-			pomodoroTimer(advancedInit);
-		  }else{
+		case APP_SELECTOR_LETTERS_AND_CHARS:
+			this->modeCountingLettersAndChars(advancedInit);
+			break;
+		
+		case APP_SELECTOR_SIMON:
+			
+			#ifdef SIMON_APP
+			this->modeSimon(advancedInit);
+			#endif
+			break;
+
+		case APP_SELECTOR_SOUND_NOTES:
+			this->modeSoundNotes(advancedInit);
+			break;
+
+		case APP_SELECTOR_SOUND_COMPOSER:
+		    //sound fun with notes
+			this->modeComposeSong(advancedInit);
+		    break;
+
+		case APP_SELECTOR_STOPWATCH:   
 		  	stopwatch(advancedInit);
-		  }
+			break;
 
-		  break;
+		case APP_SELECTOR_POMODORO:
+			pomodoroTimer(advancedInit);
+ 			break;
 
-		case 3:
-		  //this->modeScroll(init);
-	      this->modeDiceRoll(advancedInit);
-		  break;
-		   
-		case 4:
-		  this->modeGeiger(advancedInit);
-		  break;
-		   
-		case 5:
-		  this->modeSoundSong(advancedInit);
-		  break;
-		   
-		case 6:
-		  this->draw(advancedInit);
-		  break;
-		   
-		case 7:
-	 	  this->modeSimpleButtonsAndLights(advancedInit);	
-		  break;
-		   
-		case 8:
-		  if (advancedMode){
-		  	this->modeSequencer(advancedInit);
+		case APP_SELECTOR_DICEROLL:
+		    //this->modeScroll(init);
+	        this->modeDiceRoll(advancedInit);
+			break;
 
-		  }else{
+		case APP_SELECTOR_SLOTS:
+		    break;
+		   
+		case APP_SELECTOR_GEIGER:
+		    this->modeGeiger(advancedInit);
+		    break;
+		   
+		case APP_SELECTOR_SOUND_SONG:
+		    this->modeSoundSong(advancedInit);
+		    break;
+		   
+		case APP_SELECTOR_DRAW:
+		    this->draw(advancedInit);
+		    break;
+		   
+		case APP_SELECTOR_SETTING:
+		case APP_SELECTOR_SETTING_TOO:
+	 	    this->modeSimpleButtonsAndLights(init);	
+		    break;
+		   
+		case APP_SELECTOR_SOUND_METRONOME:
 			this->modeMetronome(advancedInit);
-		  }
-		  break;
-		   
-		case 9:
-		  #ifdef ENABLE_REACTION_APP
-		  this->modeReactionGame(advancedInit);
-	 	  #endif
-		  break;
-		   
-		case 10:
-		  this->tiltSwitchTest(advancedInit);
-		  break;
-		   
-		case SELECTOR_MULTITIMER:
-	  #ifdef ENABLE_MULTITIMER
-		  this->miniMultiTimer(init); 
-	  #endif
-		  break;
+			break;
+
+		case APP_SELECTOR_SOUND_SEQUENCER:
+		  	this->modeSequencer(advancedInit);
+			break;
+	
+		case APP_SELECTOR_REACTION_GAME:
+		case APP_SELECTOR_GUITAR_HERO:
+			#ifdef ENABLE_REACTION_APP
+			this->modeReactionGame(advancedInit);
+			#endif
+			break;
+		
+		case APP_SELECTOR_TILT:
+		case APP_SELECTOR_TILT_ADVANCED:
+			this->tiltSwitchTest(advancedInit);
+			break;
+
+		case APP_SELECTOR_MULTITIMER_SETTING:
+		case APP_SELECTOR_MULTITIMER_PLAYING:
+			#ifdef ENABLE_MULTITIMER
+			this->miniMultiTimer(init); 
+			#endif
+			break;
  
-	#ifdef ENABLE_ANALOG_PIN_DEBUG
-		case 12:
-	  //this is the debug mode
-	  this->modeButtonDebug(init);
-	  break;
-	#endif
+	// #ifdef ENABLE_ANALOG_PIN_DEBUG
+	// 	case 12:
+	//   //this is the debug mode
+	//   this->modeButtonDebug(init);
+	//   break;
+	// #endif
 		 
-	default:
-		  break;
+		default:
+			break;
+			
 		}
 	}
 }
