@@ -151,7 +151,7 @@ void SuperTimer::setIsPaused(bool paused){
 
 void SuperTimer::reset(){
 	// TODO not happy with this. It does not even set the time back to its init time. CHange it!
-	
+	// UPDATE: doesn't seem to bad after all. 
 	setIsPaused(false);
 	setIsStarted(false);
 }

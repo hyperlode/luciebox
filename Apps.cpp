@@ -22,7 +22,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 	if (this->app_init_mode){
 		 
 		if (this->init_app(init, selector)){ 
-			// do init routine, if finished,end of init.
+			// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
 			this->app_init_mode = false;
 			init = true;
 		}
@@ -32,16 +32,18 @@ void Apps::appSelector(bool init, uint8_t selector){
 	if (!this->app_init_mode){
 		 
 		bool advancedMode = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
+		bool advancedInit = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
+		
 
 		switch (selector) {
 		case 0:{
 			if (advancedMode){
 				#ifdef SIMON_APP
-				this->modeSimon(init);
+				this->modeSimon(advancedInit);
 				#endif
 
 			}else{
-				this->modeCountingLettersAndChars(init);
+				this->modeCountingLettersAndChars(advancedInit);
 			}
 		  }
 		  break;
@@ -49,65 +51,65 @@ void Apps::appSelector(bool init, uint8_t selector){
 		case 1:{
 		  //sound fun with notes
 		  	if (advancedMode){
-				this->modeComposeSong(init);
+				this->modeComposeSong(advancedInit);
 			}else{
-		  		this->modeSoundNotes(init);
+		  		this->modeSoundNotes(advancedInit);
 			}
 		  }
 		  break;
 		   
 		case 2:
 		  if (advancedMode){
-			pomodoroTimer(init);
+			pomodoroTimer(advancedInit);
 		  }else{
-		  	stopwatch(init);
+		  	stopwatch(advancedInit);
 		  }
 
 		  break;
 
 		case 3:
 		  //this->modeScroll(init);
-	      this->modeDiceRoll(init);
+	      this->modeDiceRoll(advancedInit);
 		  break;
 		   
 		case 4:
-		  this->modeGeiger(init);
+		  this->modeGeiger(advancedInit);
 		  break;
 		   
 		case 5:
-		  this->modeSoundSong(init);
+		  this->modeSoundSong(advancedInit);
 		  break;
 		   
 		case 6:
-		  this->draw(init);
+		  this->draw(advancedInit);
 		  break;
 		   
 		case 7:
-	 	  this->modeSimpleButtonsAndLights(init);	
+	 	  this->modeSimpleButtonsAndLights(advancedInit);	
 		  break;
 		   
 		case 8:
 		  if (advancedMode){
-		  	this->modeSequencer(init);
+		  	this->modeSequencer(advancedInit);
 
 		  }else{
-			this->modeMetronome(init);
+			this->modeMetronome(advancedInit);
 		  }
 		  break;
 		   
 		case 9:
 		  #ifdef ENABLE_REACTION_APP
-		  this->modeReactionGame(init);
+		  this->modeReactionGame(advancedInit);
 	 	  #endif
 		  break;
 		   
 		case 10:
-		  this->tiltSwitchTest(init);
+		  this->tiltSwitchTest(advancedInit);
 		  break;
 		   
 		case 11:
 	  #ifdef ENABLE_MULTITIMER
-		  this->miniMultiTimer(init);
+		  this->miniMultiTimer(init); 
 	  #endif
 		  break;
  
@@ -315,9 +317,9 @@ void Apps::stopwatch(bool init){
 
 	if (init){
 		STOPWATCH_LAP_MEMORY= 0;
+		
 		STOPWATCH_CHRONO.setInitTimeMillis(0);
-		STOPWATCH_CHRONO.startPaused(true);
-
+		STOPWATCH_CHRONO.reset();
 	}
 
 	long time_millis = 0;
@@ -336,6 +338,7 @@ void Apps::stopwatch(bool init){
 
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		// reset
+		// STOPWATCH_CHRONO.reset();
 		STOPWATCH_CHRONO.startPaused(STOPWATCH_CHRONO.getIsPaused());
 	}
 
