@@ -27,13 +27,20 @@ void Apps::appSelector(bool init, uint8_t selector){
 			init = true;
 		}
 	}
+
+	
 	 
 	// not as else statement, to have the init properly transferred after app beginning screen.
 	if (!this->app_init_mode){
 		 
 		bool advancedMode = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
+		
 		bool advancedInit = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 		
+		if (init || (advancedInit && (selector!=SELECTOR_MULTITIMER))){
+		// it's a bit messy, but for now, the multitimer app is the only only without a double app per selector position
+			this->setDefaultMode();
+		}
 
 		switch (selector) {
 		case 0:{
@@ -107,7 +114,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  this->tiltSwitchTest(advancedInit);
 		  break;
 		   
-		case 11:
+		case SELECTOR_MULTITIMER:
 	  #ifdef ENABLE_MULTITIMER
 		  this->miniMultiTimer(init); 
 	  #endif
@@ -190,7 +197,7 @@ bool Apps::init_app(bool init, uint8_t selector){
 	ledDisp->SetFourDigits(~ this->fadeInList(counter-51, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); 
 		 
 	}else {
-		this->setDefaultMode();
+		
 		return true;
 	}	 
 	return false;
@@ -3026,7 +3033,6 @@ void Apps::modeReactionGame(bool init){
 	TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
 		 
 	TIMER_REACTION_GAME_RESTART_DELAY.start();
- 
   }
  
   // at any time, leave game when depressing play button.

@@ -29,6 +29,7 @@
 #include "PretbakSettings.h"
 #include "Potentio.h"
 
+#define SELECTOR_MULTITIMER 11
 // #define TILT_FORWARD 	0x00000001
 // #define TILT_BACKWARD 	0x00000010
 // #define TILT_LEFT 		0x00000100
