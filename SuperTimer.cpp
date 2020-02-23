@@ -272,10 +272,20 @@ bool SuperTimer::getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(int hundreds
 	// if onlyPositiveEdge = false : edge on start and end (positive and negative edge) of first given part of hundreds
 	// if onlyPositiveEdge = true :  edge on start  (positive edge) of first given part of hundreds
 	bool inFirstGivenHundredsPartOfSecond = getInFirstGivenHundredsPartOfSecond(hundreds);
-
 	
-	// if ( inFirstGivenHundredsPartOfSecond != getBit(&this->boolContainer,BITLOCATION_INFIRSTPARTOFSECOND_EGDE) && (!positiveEdge || inFirstGivenHundredsPartOfSecond  )){
-	if ( inFirstGivenHundredsPartOfSecond != getBit(&this->boolContainer,BITLOCATION_INFIRSTPARTOFSECOND_EGDE) && ( (positiveEdge && negativeEdge) || (positiveEdge && inFirstGivenHundredsPartOfSecond) || (negativeEdge && !inFirstGivenHundredsPartOfSecond  ))){
+	// // if ( inFirstGivenHundredsPartOfSecond != getBit(&this->boolContainer,BITLOCATION_INFIRSTPARTOFSECOND_EGDE) && (!positiveEdge || inFirstGivenHundredsPartOfSecond  )){
+	// if ( inFirstGivenHundredsPartOfSecond != getBit(&this->boolContainer,BITLOCATION_INFIRSTPARTOFSECOND_EGDE) &&
+	// 	 ( 
+	// 		 (positiveEdge && negativeEdge) || 
+	// 		 (positiveEdge && inFirstGivenHundredsPartOfSecond) || 
+	// 		 (negativeEdge && !inFirstGivenHundredsPartOfSecond  ))
+	// 	 ){
+	if ( (positiveEdge && inFirstGivenHundredsPartOfSecond && !getBit(&this->boolContainer,BITLOCATION_INFIRSTPARTOFSECOND_EGDE)) ||
+		(negativeEdge && !inFirstGivenHundredsPartOfSecond && getBit(&this->boolContainer,BITLOCATION_INFIRSTPARTOFSECOND_EGDE))
+		){
+	
+		
+
 		//previousCheckInFirstPartOfSecond = inFirstGivenHundredsPartOfSecond;
 		setBit(&this->boolContainer,inFirstGivenHundredsPartOfSecond,BITLOCATION_INFIRSTPARTOFSECOND_EGDE);
 		return true;

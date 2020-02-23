@@ -57,7 +57,12 @@ void Apps::appSelector(bool init, uint8_t selector){
 		  break;
 		   
 		case 2:
-		  stopwatch(init);
+		  if (advancedMode){
+			pomodoroTimer(init);
+		  }else{
+		  	stopwatch(init);
+		  }
+
 		  break;
 
 		case 3:
@@ -132,7 +137,7 @@ void Apps:: setDefaultMode(){
   ledDisp->setBrightness(0,false);
   
   //buzzer
-  buzzer->setSpeedRatio(1);
+  buzzer->setSpeedRatio(2);
   buzzer->buzzerOff(); // stop all sounds that were playing in an app. 
   buzzer->setTranspose(0);
 }
@@ -189,43 +194,108 @@ bool Apps::init_app(bool init, uint8_t selector){
 	return false;
 }
 
+void Apps::pomodoroTimer(bool init){
+	if (init){
+		POMODORO_INIT_MILLIS = (long)-1000 * POMODORO_INIT_SECS;
+		POMODORO_PAUSE_MILLIS = (long)-1000 * POMODORO_PAUSE_SECS;
+		POMODORO_TIMER.setInitTimeMillis(POMODORO_INIT_MILLIS);
+
+		POMODORO_TIMER.reset();
+		
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			POMODORO_TIMER.start();
+		}
+
+		POMODORO_IN_BREAK = false;
+		
+	}
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown()){
+		POMODORO_TIMER.pause();
+	}
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
+		POMODORO_TIMER.startPaused(false);
+	}
+
+	if (!POMODORO_TIMER.getTimeIsNegative()){
+		POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
+		if (POMODORO_IN_BREAK){
+			POMODORO_TIMER.setInitTimeMillis(POMODORO_PAUSE_MILLIS);
+			buzzer->loadBuzzerTrack(song_happy_dryer);
+
+		}else{
+			buzzer->loadBuzzerTrack(song_attack);
+			POMODORO_TIMER.setInitTimeMillis(POMODORO_INIT_MILLIS);
+		}
+		POMODORO_TIMER.start();
+
+	}
+	POMODORO_TIMER.getTimeString(textBuf+1);
+
+	// ticking sound
+	long tick_duration = potentio->getValueMapped(0,40);
+	if(POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500,true,tick_duration>20)){	
+
+		if (tick_duration > 0){
+			// no sound when zero
+
+			// twenty settings, for each mode (two ticks or one tick per second)
+			if (tick_duration > 20){
+				tick_duration -= 20;
+			}
+			if (buzzer->getBuzzerRollEmpty()){ 
+				// if alarm sounds, no ticking!
+				buzzer->playTone(8000,tick_duration); // works well
+			}
+		}
+	}
+
+	decimalPoints = 1 << 2;
+	
+ 	if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
+		decimalPoints =0;
+	}
+
+	ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+}
+
 void Apps::stopwatch(bool init){
 	// classic stopwatch
 
 	if (init){
+		STOPWATCH_LAP_MEMORY= 0;
 		STOPWATCH_CHRONO.setInitTimeMillis(0);
-		STOPWATCH_CHRONO.reset();
-		
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-			STOPWATCH_CHRONO.start();
-		}
+		STOPWATCH_CHRONO.startPaused(true);
+
 	}
 
 	long time_millis = 0;
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown()){
 		STOPWATCH_CHRONO.pause();
 	}
+
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
 		STOPWATCH_CHRONO.startPaused(false);
 	}
 
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-			STOPWATCH_CHRONO.paused(!STOPWATCH_CHRONO.getIsPaused());
-			// STOPWATCH_CHRONO.pause();
-		}
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-			STOPWATCH_CHRONO.startPaused(false);
-		}
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-			STOPWATCH_LAP_MEMORY =  STOPWATCH_CHRONO.getTimeMillis(); 
-		}
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		// save and show laptime at press
+		STOPWATCH_LAP_MEMORY =  STOPWATCH_CHRONO.getTimeMillis(); 
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		// reset
+		STOPWATCH_CHRONO.startPaused(STOPWATCH_CHRONO.getIsPaused());
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+		STOPWATCH_CHRONO.paused(!STOPWATCH_CHRONO.getIsPaused());
 	}
 
 	time_millis = STOPWATCH_CHRONO.getTimeMillis();
-	if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || 
+
+	if (binaryInputs[BUTTON_MOMENTARY_0].getValue() || 
 		binaryInputs[BUTTON_MOMENTARY_1].getValue() ){
-		// one button only displays memory
+		// show saved laptime at press
 		time_millis = STOPWATCH_LAP_MEMORY;
 	}
 
@@ -250,10 +320,9 @@ void Apps::stopwatch(bool init){
 	intToDigitsString(textBuf+1, time_millis, true);
 	decimalPoints = 0x1<<timeDisplayShift;
 
-	//ledDisp->showNumber(STOPWATCH_CHRONO.getTimeMillis());
-
 	if(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-		timeSecondsToClockString(textBuf, (unsigned int)(time_millis/1000));
+		//timeSecondsToClockString(textBuf, (unsigned int)(time_millis/1000));
+		STOPWATCH_CHRONO.getTimeString(textBuf+1);
 	}else{
 		//
 		ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
@@ -360,17 +429,16 @@ void Apps::modeDiceRoll(bool init){
 		diceRollState = dicerollIdle;
 		DICEROLL_RANDOM_TYPE = 0;
 		randomModeDisplay(false);
+		decimalPoints = 0;
 		// DICEROLL_ANIMATION_DELAY = 14;
 	}
 
 	if (potentio->getValueStableChangedEdge()){
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-			// set auto draw time
-
-			int16_t delayMillisExp =  potentio->getValueMapped(3, 100);
-			delayMillisExp *= delayMillisExp;
-			ledDisp->showNumber(delayMillisExp);
-			DICEROLL_AUTODRAW_DELAY.setInitTimeMillis(-1 * delayMillisExp );
+			// set auto draw time seconds
+			int16_t delay_seconds =  potentio->getValueMapped(1, 300);
+			ledDisp->showNumber(delay_seconds);
+			DICEROLL_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delay_seconds );
 
 		}else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 			//set animation speed time

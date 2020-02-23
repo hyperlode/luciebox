@@ -306,10 +306,10 @@ void MiniMultiTimer::getDisplay(char* disp, uint8_t* playerLights, uint8_t* sett
 			*settingsLights |= LIGHT_SECONDS_BLINKER;	
 		}else{
 
-			disp[1] = 32; //' '
-			disp[2] = 69; //'E'
-			disp[3] = 78; //'N'	
-			disp[4] = 68; //'D'	
+			disp[1] = ' ';
+			disp[2] = 'E';
+			disp[3] = 'N';	
+			disp[4] = 'D';	
 		}
 		//fast blink last surviving timer light.
 		if (millis()%250 > 125){
