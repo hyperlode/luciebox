@@ -97,10 +97,7 @@ void refresh(){
   
   //modes functionality (apps)
      //mode change
-    if (selectorDial.getValueChangedEdge()) {
-      //default mode (go to default state at each change)
-      pretbak_apps.setDefaultMode();
-      
+    //if (selectorDial.getValueChangedEdge()) {
       #ifdef DEBUG_SELECTOR_KNOB
       //Serial.println(SELECTOR_DIAL_POSITIONS);
       Serial.println("selector:");
@@ -108,9 +105,9 @@ void refresh(){
       Serial.println(analogRead(PIN_SELECTOR_DIAL));
       #endif
       
-    }
+    //}
      
-     //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
+    //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states. 
     
     //check if first iteration at new selector value.
     bool init = selectorDial.getValueChangedEdge();

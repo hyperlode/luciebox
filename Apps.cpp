@@ -35,21 +35,21 @@ void Apps::appSelector(bool init, uint8_t selector){
 
 		uint8_t appSelector = selector * 2 + binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
 		
-		bool advancedInit = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
+		bool initOnBigLatchInitToo = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 		
-		if (init || (advancedInit && (appSelector!=APP_SELECTOR_MULTITIMER_PLAYING))){
+		if (init || (initOnBigLatchInitToo && (appSelector!=APP_SELECTOR_MULTITIMER_PLAYING))){
 		// it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
 			this->setDefaultMode();
 		}
 #ifdef FUNCTION_POINTER_APP_SELECTION
-		// problem: takes more memory than switch-case. AND init and advancedinit not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
+		// problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
 
 		//https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_74/rzarg/cplr034.htm
 		///////function pointer: working, but with weird audio beeps intermixed. What's going on there?!
 		////// this->appPointer = &Apps::modeSimon;
-		////// (this->*appPointer)(advancedInit);
+		////// (this->*appPointer)(initOnBigLatchInitToo);
 
-		// modeCountingLettersAndChars(advancedInit);
+		// modeCountingLettersAndChars(initOnBigLatchInitToo);
 
 		// fptr allAppsIndexed [24] = {
 		// 	&Apps::modeCountingLettersAndChars, 
@@ -76,26 +76,26 @@ void Apps::appSelector(bool init, uint8_t selector){
 		// 	&Apps::miniMultiTimer 
 		// 	};
 
-		// (this->*(allAppsIndexed[appSelector]))(advancedInit);
+		// (this->*(allAppsIndexed[appSelector]))(initOnBigLatchInitToo);
 
 
-		// this->modeComposeSong(advancedInit);
-		// stopwatch(advancedInit);
-		// pomodoroTimer(advancedInit);
-		// this->modeDiceRoll(advancedInit);
-		//    this->modeDiceRoll(advancedInit);
-		// this->modeGeiger(advancedInit);
-		// this->modeGeiger(advancedInit);
-		// this->modeSoundSong(advancedInit);
-		// this->draw(advancedInit);
+		// this->modeComposeSong(initOnBigLatchInitToo);
+		// stopwatch(initOnBigLatchInitToo);
+		// pomodoroTimer(initOnBigLatchInitToo);
+		// this->modeDiceRoll(initOnBigLatchInitToo);
+		//    this->modeDiceRoll(initOnBigLatchInitToo);
+		// this->modeGeiger(initOnBigLatchInitToo);
+		// this->modeGeiger(initOnBigLatchInitToo);
+		// this->modeSoundSong(initOnBigLatchInitToo);
+		// this->draw(initOnBigLatchInitToo);
 		//     this->modeSimpleButtonsAndLights(init);	
 		//     this->modeSimpleButtonsAndLights(init);	
-		// this->modeMetronome(advancedInit);
-		// this->modeSequencer(advancedInit);
-		// this->modeReactionGame(advancedInit);
-		// this->modeReactionGame(advancedInit);
-		// this->tiltSwitchTest(advancedInit);
-		// this->tiltSwitchTest(advancedInit);
+		// this->modeMetronome(initOnBigLatchInitToo);
+		// this->modeSequencer(initOnBigLatchInitToo);
+		// this->modeReactionGame(initOnBigLatchInitToo);
+		// this->modeReactionGame(initOnBigLatchInitToo);
+		// this->tiltSwitchTest(initOnBigLatchInitToo);
+		// this->tiltSwitchTest(initOnBigLatchInitToo);
 		// this->miniMultiTimer(init); 
 		// this->miniMultiTimer(init); 
 #else
@@ -104,51 +104,55 @@ void Apps::appSelector(bool init, uint8_t selector){
 		switch (appSelector) {
 
 		case APP_SELECTOR_LETTERS_AND_CHARS:
-			this->modeCountingLettersAndChars(advancedInit);
+			this->modeCountingLettersAndChars(initOnBigLatchInitToo);
 			break;
 		
 		case APP_SELECTOR_SIMON:
 			
 			#ifdef SIMON_APP
-			this->modeSimon(advancedInit);
+			this->modeSimon(initOnBigLatchInitToo);
 			#endif
 			break;
 
 		case APP_SELECTOR_SOUND_NOTES:
-			this->modeSoundNotes(advancedInit);
+			this->modeSoundNotes(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_SOUND_COMPOSER:
 		    //sound fun with notes
-			this->modeComposeSong(advancedInit);
+			this->modeComposeSong(initOnBigLatchInitToo);
 		    break;
 
 		case APP_SELECTOR_STOPWATCH:   
-		  	stopwatch(advancedInit);
+		  	stopwatch(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_POMODORO:
-			pomodoroTimer(advancedInit);
+			pomodoroTimer(initOnBigLatchInitToo);
  			break;
 
 		case APP_SELECTOR_DICEROLL:
 		    //this->modeScroll(init);
-	        this->modeDiceRoll(advancedInit);
+	        this->modeDiceRoll(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_SLOTS:
 		    break;
 		   
 		case APP_SELECTOR_GEIGER:
-		    this->modeGeiger(advancedInit);
+		    this->modeGeiger(initOnBigLatchInitToo);
 		    break;
 		   
 		case APP_SELECTOR_SOUND_SONG:
-		    this->modeSoundSong(advancedInit);
+		    this->modeSoundSong(initOnBigLatchInitToo);
 		    break;
 		   
 		case APP_SELECTOR_DRAW:
-		    this->draw(advancedInit);
+		    this->modeSingleSegmentManipulation(initOnBigLatchInitToo);
+			break;
+
+		case APP_SELECTOR_MOVIE_MODE:
+			this->movieAnimationMode(initOnBigLatchInitToo);
 		    break;
 		   
 		case APP_SELECTOR_SETTING:
@@ -157,23 +161,23 @@ void Apps::appSelector(bool init, uint8_t selector){
 		    break;
 		   
 		case APP_SELECTOR_SOUND_METRONOME:
-			this->modeMetronome(advancedInit);
+			this->modeMetronome(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_SOUND_SEQUENCER:
-		  	this->modeSequencer(advancedInit);
+		  	this->modeSequencer(initOnBigLatchInitToo);
 			break;
 	
 		case APP_SELECTOR_REACTION_GAME:
 		case APP_SELECTOR_GUITAR_HERO:
 			#ifdef ENABLE_REACTION_APP
-			this->modeReactionGame(advancedInit);
+			this->modeReactionGame(initOnBigLatchInitToo);
 			#endif
 			break;
 		
 		case APP_SELECTOR_TILT:
 		case APP_SELECTOR_TILT_ADVANCED:
-			this->tiltSwitchTest(advancedInit);
+			this->tiltSwitchTest(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_MULTITIMER_SETTING:
@@ -352,8 +356,11 @@ void Apps::pomodoroTimer(bool init){
 			POMODORO_TIMER.reset();
 			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
 		}
-
+#ifdef ENABLE_MULTITIMER
 		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0,91));
+#else
+		uint16_t tmpSeconds = potentio->getValueMapped(0,1024);
+#endif		
 		if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
 			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
 			POMODORO_TIMER.setInitCountDownTimeSecs( POMODORO_INIT_TIME_SECONDS);
@@ -1758,71 +1765,73 @@ void Apps::modeSoundNotes(bool init){
 	
 }
  
-void Apps::draw(bool init){
+// void Apps::draw(bool init){
 	 
-	if(binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
-		this->movieAnimationMode(true);
+// 	if(binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
+// 		this->movieAnimationMode(true);
 		 
-	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
-		this->modeSingleSegmentManipulation(false);
+// 	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
+// 		this->modeSingleSegmentManipulation(false);
 		 
-	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-		this->movieAnimationMode(init);
+// 	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
+// 		this->movieAnimationMode(init);
 		 
-	}else{
-		this->modeSingleSegmentManipulation(init);
-	}
-}
+// 	}else{
+// 		this->modeSingleSegmentManipulation(init);
+// 	}
+// }
  
 void Apps::movieAnimationMode(bool init){
 	//bool nextStep = 0;
 	 //reset saved led disp state.
 	if (init){
-		counter = 4; // display is four characters. Four bytes.So, it should advance four bytes every step (default). But, it could give fun effects to change that number and see what happens... 
+		counter = 4; // display is four characters. Four bytes.So, it should advance four bytes every frame (default). But, it could give fun effects to change that number and see what happens... 
 		this->dataPlayer.loadAllData(disp_4digits_animations);
 		this->dataPlayer.loadDataSet(1);
 		this->dataPlayer.setAutoSteps(4);
+		MOVIE_MODE_SHOW_NEGATIVE = false;
 	}
  
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
 		// manual mode
 		if (potentio->getValueStableChangedEdge()){
-			if (potentio->getLastStableValueChangedUp()){
-				this->dataPlayer.setSetIndexDirection(1);
-				this->dataPlayer.moveIndexSteps(counter);
-			}else{
-				this->dataPlayer.setSetIndexDirection(0);
-				this->dataPlayer.moveIndexSteps(counter);
-			}
+			this->dataPlayer.setSetIndexDirection(potentio->getLastStableValueChangedUp());
+			this->dataPlayer.moveIndexSteps(counter); // every frame is four bytes. advance four to move one frame.
 		}
-		 
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){  
+		
+		// one step forward
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){  
 			 this->dataPlayer.setSetIndexDirection(1);
 			 this->dataPlayer.moveIndexSteps(counter);
 		}
-		 
-		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){  
-			counter++;
-			if (counter>4){
-				counter = 1;
-			}
-			this->dataPlayer.setAutoSteps(counter);
+
+		// one step backward
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){  
+			 this->dataPlayer.setSetIndexDirection(0);
+			 this->dataPlayer.moveIndexSteps(counter);
 		}
 		 
-		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){  
-			this->dataPlayer.setSetIndexDirection(0);
-			 this->dataPlayer.moveIndexSteps(counter);
-		}   
+		// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){  
+		// 	counter++;
+		// 	if (counter>4){
+		// 		counter = 1;
+		// 	}
+		// 	this->dataPlayer.setAutoSteps(counter);
+		// }
 		 
 	}else{
 		// auto mode.
-		this->dataPlayer.update();
+		
 		if (potentio->getValueStableChangedEdge()){
 			dataPlayer.setAutoStepSpeed(potentio->getValueMapped(-1024,0));
 		}
  
-		if(binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		if(binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 			this->dataPlayer.setSetIndexDirection(2);
+		}
+
+		if(!binaryInputs[BUTTON_MOMENTARY_3].getValue()){
+			this->dataPlayer.update(); // this to pause the movie while holding.
 		}
 		   
 		  // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
@@ -1833,23 +1842,23 @@ void Apps::movieAnimationMode(bool init){
 				 // animation_step = 0; // first step
 			// }
 		  // }
-		   
-		  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-		 
-			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-				this->dataPlayer.nextDataSet(false);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-				this->dataPlayer.nextDataSet(true);
-			}
-		}
+		
+	}
+
+	// next movie
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()) {
+			this->dataPlayer.nextDataSet(true);
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		MOVIE_MODE_SHOW_NEGATIVE = !MOVIE_MODE_SHOW_NEGATIVE;
 	}
 	 
 	// get the display data.
 	displayAllSegments = this->dataPlayer.getActive32bit();
 	 
 	//invert all data in picture 
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+	if (MOVIE_MODE_SHOW_NEGATIVE ){
 	  // negative .
 	  displayAllSegments = ~displayAllSegments ;
 	}
@@ -1861,56 +1870,81 @@ void Apps::movieAnimationMode(bool init){
 void Apps::modeSingleSegmentManipulation(bool init){
   uint8_t moveDir;
   moveDir = DO_NOTHING;
+
+//   uint8_t segmentMoveIndexed [8] = {0x01, 0x02, 0x80, 0x00, 0x40, 0x04, 0x20, 0x10};
+  uint8_t segmentMoveIndexed [8] = {0x20, 0x10, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80};
+
   if (init){
+	DRAW_CURSOR_INDEX = 0;
  
 	// animation_step = 0;
-	 
+	
+#ifdef X_Y_COORDS 
 	//bottom left is origin
 	DRAW_X_POS = 0;
 	DRAW_Y_POS = 0;
 	DRAW_ACTIVE_SEGMENT = 0; // segment active
-	 
+#endif
+
 	//reset saved led disp state.
 	DRAW_DISP_STATE[0]=0;
 	DRAW_DISP_STATE[1]=0;
 	DRAW_DISP_STATE[2]=0;
 	DRAW_DISP_STATE[3]=0;
-	 
+	
+	DRAW_SHOW_MODE = 0;
 	//generalTimer.setInitTimeMillis(3000);
 	//generalTimer.start();
+
+
   }
    
   if (potentio->getValueStableChangedEdge()){
-		  uint16_t val;
-		  val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments. 
-		  val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
-		  DRAW_ACTIVE_SEGMENT = val/12; // get digit
-		  val = val%12; 
-		  DRAW_X_POS = val/4; // get xpos
-		  DRAW_Y_POS = val%4; // get ypos
+
+	DRAW_CURSOR_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
+
+	#ifdef X_Y_COORDS
+		uint16_t val;
+		val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments. 
+		val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
+		DRAW_ACTIVE_SEGMENT = val/12; // get digit
+		val = val%12; 
+		DRAW_X_POS = val/4; // get xpos
+		DRAW_Y_POS = val%4; // get ypos
+	#endif
   }
    
   if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-		  moveDir = MOVE_RIGHT;
-	  }
 	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 		  moveDir = TOGGLE_SEGMENT;
+		  DRAW_SHOW_MODE = 0;
 	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){	
-		  moveDir = MOVE_UP;
+	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){	
+		//   moveDir = MOVE_UP;
+		DRAW_CURSOR_INDEX --;
+		// Serial.println(DRAW_CURSOR_INDEX);
+		//   Serial.println(segmentMoveIndexed[ DRAW_CURSOR_INDEX % 8]);
+  		// 	Serial.println( DRAW_CURSOR_INDEX / 8);
+		// 	  Serial.println("----");
 	  }
-  }else{
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-		  moveDir = MOVE_RIGHT;
-	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		  moveDir = MOVE_LEFT;
-	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){	
-		  moveDir = MOVE_UP;
+	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+		//   moveDir = MOVE_RIGHT;
+		DRAW_CURSOR_INDEX ++;
 	  }
   }
+//   else{
+// 	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+// 		  moveDir = MOVE_RIGHT;
+// 	  }
+// 	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+// 		  moveDir = MOVE_LEFT;
+// 	  }
+// 	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){	
+// 		  moveDir = MOVE_UP;
+// 	  }
+//   }
+
+#ifdef X_Y_COORDS
    
   // set x and y coords
   // 3 (x) * 4(y) matrix. (y is 4 positions to "remember" if low or high part when passing through segment G)
@@ -1929,25 +1963,25 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	}
 	break;
 	 
-	case MOVE_DOWN:
-	{
-	  //move down
-	  switch (DRAW_Y_POS){
-		case 0:
-			DRAW_Y_POS = 3;
-			break;
-		case 1:
-			DRAW_Y_POS = 0;
-			break;
-		case 2:
-			DRAW_Y_POS = 0;
-			break;
-		case 3:
-			DRAW_Y_POS = (DRAW_X_POS == 1)?2:0;
-			break;
-	  } 
-	}
-	break;
+	// case MOVE_DOWN:
+	// {
+	//   //move down
+	//   switch (DRAW_Y_POS){
+	// 	case 0:
+	// 		DRAW_Y_POS = 3;
+	// 		break;
+	// 	case 1:
+	// 		DRAW_Y_POS = 0;
+	// 		break;
+	// 	case 2:
+	// 		DRAW_Y_POS = 0;
+	// 		break;
+	// 	case 3:
+	// 		DRAW_Y_POS = (DRAW_X_POS == 1)?2:0;
+	// 		break;
+	//   } 
+	// }
+	// break;
  
 	case MOVE_UP:
 	{   
@@ -1969,17 +2003,17 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	}
 	break;
 	 
-	case MOVE_LEFT:
-	{ 
-	  //move left
-	  if (DRAW_X_POS == 0){
-		DRAW_ACTIVE_SEGMENT = (DRAW_ACTIVE_SEGMENT == 0)?3:(DRAW_ACTIVE_SEGMENT-1); // previous digit
-		DRAW_X_POS = 2;
-	  }else{
-		DRAW_X_POS--;
-	  }
-	}
-	break;
+	// case MOVE_LEFT:
+	// { 
+	//   //move left
+	//   if (DRAW_X_POS == 0){
+	// 	DRAW_ACTIVE_SEGMENT = (DRAW_ACTIVE_SEGMENT == 0)?3:(DRAW_ACTIVE_SEGMENT-1); // previous digit
+	// 	DRAW_X_POS = 2;
+	//   }else{
+	// 	DRAW_X_POS--;
+	//   }
+	// }
+	// break;
 	  
 	default:
 	  break;
@@ -2018,51 +2052,79 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		seg = 0b01010101;
 		break;
   }
-   
-  // toggle active segment.
+    // toggle active segment.
   if (moveDir == TOGGLE_SEGMENT){
 		// toggle segment with xor old^toggleval=new  
 		//  toggleval==0: 0^0=0, 1^0=1 , 
 		//  toggleval==1: 1^1=0, 0^1=1
 		DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT]  ^= seg; 
   }
-   
-  //invert all data in picture 
-  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValueChanged()){
-	//i can typ whatever i want mlem mlem mlem
-	  // negative .
-	  for (uint8_t i=0;i<4;i++){
-		  DRAW_DISP_STATE[i] = ~DRAW_DISP_STATE[i] ;
-	  }  
+  #else
+
+  // set limits on cursor position
+   if (DRAW_CURSOR_INDEX < 0){
+		DRAW_CURSOR_INDEX = 31;
+	}
+  if (DRAW_CURSOR_INDEX > 31){
+		DRAW_CURSOR_INDEX = 0;
   }
+  if (moveDir == TOGGLE_SEGMENT){
+     DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 8]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 8]; 
+  }
+  #endif
+
+
+
    
+   //invert all data in picture 
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+
+	  DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE =0: DRAW_SHOW_MODE++; 
+
+	  switch (DRAW_SHOW_MODE){
+		  case 0:
+		  	//invert
+			for (uint8_t i=0;i<4;i++){
+				DRAW_DISP_STATE[i] = ~DRAW_DISP_STATE[i] ;
+			}  
+		  break;
+		  case 1:
+		  	//blank
+		  	for (uint8_t i=0;i<4;i++){
+				DRAW_DISP_STATE[i+4] = DRAW_DISP_STATE[i] ;
+				DRAW_DISP_STATE[i] = 0;
+			}  
+		  break;
+		  case 2:
+		  	//full
+		  	for (uint8_t i=0;i<4;i++){
+				DRAW_DISP_STATE[i] = 0xFF;
+			}
+		  break;
+		  case 3:
+		  	//restore
+		  	for (uint8_t i=0;i<4;i++){
+				DRAW_DISP_STATE[i] = DRAW_DISP_STATE[i+4];
+			}
+	    }
+	}
    
   // set display
   for (uint8_t i=0;i<4;i++){
 	  ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
   }
- 
+
   //show active segment on display
-  // if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
   if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	#ifdef X_Y_COORDS
 	ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1); // XOR the seg with the segment saved value, so it shows negatively.  
+	#else
+	ledDisp->SetSingleDigit(  segmentMoveIndexed[ DRAW_CURSOR_INDEX % 8] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 8], 
+	(DRAW_CURSOR_INDEX / 8) + 1) ; 
+
+	#endif
   }
-  // else{
-	  // //only show the saved state, no blinking of active segment. 
-	  // ledDisp->SetSingleDigit(DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1);
-  // }
-   
-// ledDisp->displayHandler(textBuf);  
-// ledDisp->SetSingleDigit(B11111111, 1);  
-// ledDisp->SetSingleDigit((uint8_t) (potentio->getValueStable()/4), 3);  
-   
-  // if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-	// ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),1);  
-	// //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_double + animation_step),2);  
-	// //ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate_inverted + animation_step),3);  
-	// ledDisp->SetSingleDigit(pgm_read_byte_near(disp_digit_animate + animation_step),4);  
-	 // (animation_step>=5)?animation_step=0:animation_step++;
-  // }
+
 }
  
 #ifdef ENABLE_MULTITIMER
@@ -3523,10 +3585,10 @@ void Apps::shuffle(uint8_t* listToShuffle, uint8_t length) {
 
 bool Apps::saveLoadMenu(uint8_t* data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress){
 	// we will need to make this a separate function, it's almost identical to sequencer load save.
+	// pointer to the data
 	//-number of save slots
 	//-length of data to save.  (=eeprom data length)
-	// eeprom start length
-	// pointer to the data
+	// eeprom start address 
 
 	//kind of an init
 	if (!SAVE_LOAD_MENU_BLINK_TIMER.getIsStarted()){

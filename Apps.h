@@ -4,7 +4,7 @@
 
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
-#define SIMON_APP
+//#define SIMON_APP
 #define ENABLE_REACTION_APP
 
 #include "Arduino.h"
@@ -52,7 +52,7 @@
 #define APP_SELECTOR_SOUND_SONG_TOO 11
 
 #define APP_SELECTOR_DRAW 12
-#define APP_SELECTOR_DRAW_TOO 13
+#define APP_SELECTOR_MOVIE_MODE 13
 
 #define APP_SELECTOR_SETTING 14
 #define APP_SELECTOR_SETTING_TOO 15
@@ -144,16 +144,18 @@
 #define COMPOSER_STEP counter
 #define POMODORO_STATS_WORKING_GOOD counter
 
+
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
-#define DRAW_X_POS counter2
+//#define DRAW_X_POS counter2
 #define SIMON_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
 #define DEBUGMODE_ACTIVATED counter2
 #define DICEROLL_CARD_FROM_DECK_INDEX counter2
 #define POMODORO_INIT_TIME_SECONDS counter2
 
-#define DRAW_Y_POS counter3
+//#define DRAW_Y_POS counter3
+#define DRAW_CURSOR_INDEX counter3
 #define GEIGER_INCREASE_CHANCE counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
@@ -171,6 +173,7 @@
 #define SIMON_ACTIVE_LIGHT counter4
 #define POMODORO_PAUSE_TIME_SECONDS counter4
 
+
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
 #define SEQUENCER_TEMP_NOTE counter5 
@@ -180,6 +183,7 @@
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
+#define DRAW_SHOW_MODE counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
@@ -194,6 +198,7 @@
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
 #define POMODORO_SHOW_MENU_EDGE general_boolean2
+#define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 
 
 #define SIMON_LIST bytes_list
