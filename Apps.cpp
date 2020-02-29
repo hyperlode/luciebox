@@ -1871,21 +1871,11 @@ void Apps::modeSingleSegmentManipulation(bool init){
   uint8_t moveDir;
   moveDir = DO_NOTHING;
 
-//   uint8_t segmentMoveIndexed [8] = {0x01, 0x02, 0x80, 0x00, 0x40, 0x04, 0x20, 0x10};
-  uint8_t segmentMoveIndexed [8] = {0x20, 0x10, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80};
+  uint8_t segmentMoveIndexed [9] = { 0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
 
   if (init){
 	DRAW_CURSOR_INDEX = 0;
- 
-	// animation_step = 0;
 	
-#ifdef X_Y_COORDS 
-	//bottom left is origin
-	DRAW_X_POS = 0;
-	DRAW_Y_POS = 0;
-	DRAW_ACTIVE_SEGMENT = 0; // segment active
-#endif
-
 	//reset saved led disp state.
 	DRAW_DISP_STATE[0]=0;
 	DRAW_DISP_STATE[1]=0;
@@ -1893,9 +1883,6 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	DRAW_DISP_STATE[3]=0;
 	
 	DRAW_SHOW_MODE = 0;
-	//generalTimer.setInitTimeMillis(3000);
-	//generalTimer.start();
-
 
   }
    
@@ -1903,15 +1890,6 @@ void Apps::modeSingleSegmentManipulation(bool init){
 
 	DRAW_CURSOR_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
 
-	#ifdef X_Y_COORDS
-		uint16_t val;
-		val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments. 
-		val = val % 48;   // 48 positions for 3x4 matrix * 4 digits
-		DRAW_ACTIVE_SEGMENT = val/12; // get digit
-		val = val%12; 
-		DRAW_X_POS = val/4; // get xpos
-		DRAW_Y_POS = val%4; // get ypos
-	#endif
   }
    
   if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
@@ -1919,164 +1897,58 @@ void Apps::modeSingleSegmentManipulation(bool init){
 		  moveDir = TOGGLE_SEGMENT;
 		  DRAW_SHOW_MODE = 0;
 	  }
+
 	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){	
-		//   moveDir = MOVE_UP;
-		DRAW_CURSOR_INDEX --;
-		// Serial.println(DRAW_CURSOR_INDEX);
-		//   Serial.println(segmentMoveIndexed[ DRAW_CURSOR_INDEX % 8]);
-  		// 	Serial.println( DRAW_CURSOR_INDEX / 8);
-		// 	  Serial.println("----");
+		// move digit
+		DRAW_CURSOR_INDEX += 9;
+
 	  }
 	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-		//   moveDir = MOVE_RIGHT;
+		// //   move horizontal
+		// DRAW_CURSOR_INDEX +=3;
+
+		// move inside digit
 		DRAW_CURSOR_INDEX ++;
+		if ((DRAW_CURSOR_INDEX) % 9 == 0){
+			DRAW_CURSOR_INDEX -= 9;
+		}
+
+	  }
+  }else{
+	 
+	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		 	  //   move vertical
+		DRAW_CURSOR_INDEX ++;
+		if ((DRAW_CURSOR_INDEX) % 3 == 0){
+			DRAW_CURSOR_INDEX -= 3;
+		}
+	  }
+	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		 	  //   move vertical
+		DRAW_CURSOR_INDEX -= 3;
+		
+	  }
+	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+		  DRAW_CURSOR_INDEX += 3;
 	  }
   }
-//   else{
-// 	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-// 		  moveDir = MOVE_RIGHT;
-// 	  }
-// 	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-// 		  moveDir = MOVE_LEFT;
-// 	  }
-// 	  if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){	
-// 		  moveDir = MOVE_UP;
-// 	  }
-//   }
 
-#ifdef X_Y_COORDS
+
+
+	// set limits on cursor position
+	if (DRAW_CURSOR_INDEX < 0){
+			DRAW_CURSOR_INDEX = 31;
+	}
+	
+	if (DRAW_CURSOR_INDEX > 35){
+			DRAW_CURSOR_INDEX = 0;
+	}
+	
+	if (moveDir == TOGGLE_SEGMENT){
+		DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
+	}
    
-  // set x and y coords
-  // 3 (x) * 4(y) matrix. (y is 4 positions to "remember" if low or high part when passing through segment G)
-  switch(moveDir){
-	 
-	case MOVE_RIGHT:{
-	  //move right
-	  DRAW_X_POS++;
-	  if (DRAW_X_POS > 2){
-		  DRAW_ACTIVE_SEGMENT++; // next digit
-		  if (DRAW_ACTIVE_SEGMENT> 3){ 
-			  DRAW_ACTIVE_SEGMENT = 0;
-		  }
-		  DRAW_X_POS = 0;
-	  }
-	}
-	break;
-	 
-	// case MOVE_DOWN:
-	// {
-	//   //move down
-	//   switch (DRAW_Y_POS){
-	// 	case 0:
-	// 		DRAW_Y_POS = 3;
-	// 		break;
-	// 	case 1:
-	// 		DRAW_Y_POS = 0;
-	// 		break;
-	// 	case 2:
-	// 		DRAW_Y_POS = 0;
-	// 		break;
-	// 	case 3:
-	// 		DRAW_Y_POS = (DRAW_X_POS == 1)?2:0;
-	// 		break;
-	//   } 
-	// }
-	// break;
- 
-	case MOVE_UP:
-	{   
-	  //move up
-	   switch (DRAW_Y_POS){
-		case 0:
-			DRAW_Y_POS = (DRAW_X_POS == 1)?1:3;
-			break;
-		case 1:
-			DRAW_Y_POS = 3;
-			break;
-		case 2:
-			DRAW_Y_POS = 3;
-			break;
-		case 3:
-			DRAW_Y_POS = 0;
-			break;
-	  }
-	}
-	break;
-	 
-	// case MOVE_LEFT:
-	// { 
-	//   //move left
-	//   if (DRAW_X_POS == 0){
-	// 	DRAW_ACTIVE_SEGMENT = (DRAW_ACTIVE_SEGMENT == 0)?3:(DRAW_ACTIVE_SEGMENT-1); // previous digit
-	// 	DRAW_X_POS = 2;
-	//   }else{
-	// 	DRAW_X_POS--;
-	//   }
-	// }
-	// break;
-	  
-	default:
-	  break;
-  }
- 
-  uint8_t seg;
- 
-  switch (10*DRAW_Y_POS + DRAW_X_POS){
-	  case 0:
-	  case 10:
-		seg = 0b00010000;  //E
-		break;
-	  case 1:
-		seg = 0b00001000;  //D
-		break;
-	  case 32:
-	  case 22:
-		seg = 0b00000010;  //B
-		break;
-	  case 20:
-	  case 30:
-		seg = 0b00100000;  //F
-		break;
-	  case 12:
-	  case 2:
-		seg = 0b00000100;  //C
-		break;
-	  case 11:
-	  case 21:
-		seg = 0b01000000;  //G
-		break;
-	  case 31:
-		seg = 0b00000001;  //A
-		break;
-	  default:
-		seg = 0b01010101;
-		break;
-  }
-    // toggle active segment.
-  if (moveDir == TOGGLE_SEGMENT){
-		// toggle segment with xor old^toggleval=new  
-		//  toggleval==0: 0^0=0, 1^0=1 , 
-		//  toggleval==1: 1^1=0, 0^1=1
-		DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT]  ^= seg; 
-  }
-  #else
-
-  // set limits on cursor position
-   if (DRAW_CURSOR_INDEX < 0){
-		DRAW_CURSOR_INDEX = 31;
-	}
-  if (DRAW_CURSOR_INDEX > 31){
-		DRAW_CURSOR_INDEX = 0;
-  }
-  if (moveDir == TOGGLE_SEGMENT){
-     DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 8]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 8]; 
-  }
-  #endif
-
-
-
-   
-   //invert all data in picture 
+   // global picture operations
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 
 	  DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE =0: DRAW_SHOW_MODE++; 
@@ -2119,8 +1991,8 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	#ifdef X_Y_COORDS
 	ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1); // XOR the seg with the segment saved value, so it shows negatively.  
 	#else
-	ledDisp->SetSingleDigit(  segmentMoveIndexed[ DRAW_CURSOR_INDEX % 8] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 8], 
-	(DRAW_CURSOR_INDEX / 8) + 1) ; 
+	ledDisp->SetSingleDigit(  segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9], 
+	(DRAW_CURSOR_INDEX / 9) + 1) ; 
 
 	#endif
   }
