@@ -1883,57 +1883,81 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	DRAW_DISP_STATE[3]=0;
 	
 	DRAW_SHOW_MODE = 0;
+	DRAW_ACTIVE_DRAWING_INDEX = 0;
+	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 0;
 
   }
    
+  // depending on mode, scroll to segments, or through drawings. 
   if (potentio->getValueStableChangedEdge()){
 
-	DRAW_CURSOR_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
-
+	int8_t tmp;
+	tmp =  1 - (2 * potentio->getLastStableValueChangedUp());
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+		DRAW_CURSOR_INDEX += tmp;
+	}else{
+		DRAW_ACTIVE_DRAWING_INDEX+= tmp;
+	}  
   }
    
   if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	  // modify drawing on display
 	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 		  moveDir = TOGGLE_SEGMENT;
-		  DRAW_SHOW_MODE = 0;
+		  DRAW_SHOW_MODE = 0; // reset all special functions. Once change, this screen becomes the new normal
 	  }
 
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){	
-		// move digit
-		DRAW_CURSOR_INDEX += 9;
-
-	  }
-	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-		// //   move horizontal
-		// DRAW_CURSOR_INDEX +=3;
-
+	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		// move inside digit
 		DRAW_CURSOR_INDEX ++;
 		if ((DRAW_CURSOR_INDEX) % 9 == 0){
 			DRAW_CURSOR_INDEX -= 9;
 		}
+	  }
 
+	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){	
+		// move digit
+		DRAW_CURSOR_INDEX += 9;
 	  }
+
   }else{
+	  // scroll through drawings.
+
 	 
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		 	  //   move vertical
-		DRAW_CURSOR_INDEX ++;
-		if ((DRAW_CURSOR_INDEX) % 3 == 0){
-			DRAW_CURSOR_INDEX -= 3;
-		}
-	  }
 	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-		 	  //   move vertical
-		DRAW_CURSOR_INDEX -= 3;
-		
+		  DRAW_ACTIVE_DRAWING_INDEX --;
 	  }
+	
 	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-		  DRAW_CURSOR_INDEX += 3;
+		  DRAW_ACTIVE_DRAWING_INDEX ++;
 	  }
+
+	
+	//   if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+	// 	 	  //   move vertical
+	// 	DRAW_CURSOR_INDEX ++;
+	// 	if ((DRAW_CURSOR_INDEX) % 3 == 0){
+	// 		DRAW_CURSOR_INDEX -= 3;
+	// 	}
+	//   }
+	//   if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+	// 	 	  //   move vertical
+	// 	DRAW_CURSOR_INDEX -= 3;
+		
+	//   }
+	//   if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+	// 	  DRAW_CURSOR_INDEX += 3;
+	//   }
   }
 
 
+	// set limits on active drawing index (although without limits, it's fun to see the whole eeprom visualized. Wait wait! We put that in HACK mode!!!)
+	if (DRAW_ACTIVE_DRAWING_INDEX<0){
+		DRAW_ACTIVE_DRAWING_INDEX = 0;
+	}
+	if (DRAW_ACTIVE_DRAWING_INDEX > EEPROM_NUMBER_OF_DRAWINGS){
+		DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS - 1;
+	}
 
 	// set limits on cursor position
 	if (DRAW_CURSOR_INDEX < 0){
@@ -1946,9 +1970,19 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	
 	if (moveDir == TOGGLE_SEGMENT){
 		DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
+
 	}
+	
+	// load drawing from memory at request.
+	if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY){
+		// load drawing
+		for (uint8_t i=0;i<4;i++){
+			DRAW_DISP_STATE[i] = eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i));
+		}
+	}
+	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
    
-   // global picture operations
+    // global picture operations
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 
 	  DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE =0: DRAW_SHOW_MODE++; 
@@ -1981,21 +2015,27 @@ void Apps::modeSingleSegmentManipulation(bool init){
 	    }
 	}
    
-  // set display
-  for (uint8_t i=0;i<4;i++){
-	  ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
-  }
 
-  //show active segment on display
-  if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-	#ifdef X_Y_COORDS
-	ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1); // XOR the seg with the segment saved value, so it shows negatively.  
-	#else
-	ledDisp->SetSingleDigit(  segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9], 
-	(DRAW_CURSOR_INDEX / 9) + 1) ; 
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		// always show index of active drawing if activated.
+		ledDisp->showNumber(DRAW_ACTIVE_DRAWING_INDEX);
 
-	#endif
-  }
+	}else {
+		// set display
+		for (uint8_t i=0;i<4;i++){
+			ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
+		}
+	
+
+		//show active segment on display
+		if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			ledDisp->SetSingleDigit(  
+				segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9], 
+				(DRAW_CURSOR_INDEX / 9) + 1
+				) ; 
+
+		}
+    }
 
 }
  
