@@ -74,12 +74,12 @@
 #define TILT_LEFT 		2
 #define TILT_RIGHT 		3
 
-#define DO_NOTHING		0
-#define TOGGLE_SEGMENT	1
-#define MOVE_RIGHT		2
-#define MOVE_LEFT		3
-#define MOVE_DOWN		4
-#define MOVE_UP	  	    5
+// #define DO_NOTHING		0
+// #define TOGGLE_SEGMENT	1
+// #define MOVE_RIGHT		2
+// #define MOVE_LEFT		3
+// #define MOVE_DOWN		4
+// #define MOVE_UP	  	    5
 #define ANIMATION_STOP_CODE 0x00
     // enum DiceRollMode:uint8_t{
     //   rollOneDice,
@@ -136,7 +136,7 @@
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
 #define GEIGER_TONE_FREQUENY_LOWEST counter
-#define DRAW_ACTIVE_SEGMENT counter
+#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY counter
 #define SIMON_LENGTH counter
 #define METRONOME_TICKER_1_POSITION counter
 #define DICEROLL_RANDOM_NUMBER counter
@@ -172,8 +172,6 @@
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 #define SIMON_ACTIVE_LIGHT counter4
 #define POMODORO_PAUSE_TIME_SECONDS counter4
-#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY counter4
-
 
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
