@@ -1,11 +1,11 @@
 
+#include "DisplayDigitsHandler5Digits.h"
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
 #include "Buzzer.h"
 #include "Apps.h"
 #include "Potentio.h"
-#include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx

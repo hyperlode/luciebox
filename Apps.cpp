@@ -854,21 +854,22 @@ void Apps::randomModeDisplay(bool forReal){
 				// build up dice eyes over three digits 
 
 				//set default for digit 1 2 and 3. Because most used (seg A and D) 
-				textBuf[i] = '=';  
+				textBuf[i] = ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII;  
 
 				//first and third digit
 				if (DICEROLL_RANDOM_NUMBER == 1){
-					textBuf[i] = ' '; // 
+					textBuf[i] = ' '; 
+
 				}else if(DICEROLL_RANDOM_NUMBER < 4){
-					textBuf[i] = '^'; // assume first digit seg A
+					textBuf[i] = ONLY_TOP_SEGMENT_FAKE_ASCII; // assume first digit seg A
 					if( i == 3){
-					textBuf[i] = '_'; // seg D
+					textBuf[i] = ONLY_BOTTOM_SEGMENT_FAKE_ASCII; // seg D
 					}
 				}
 
 				//second digit
 				if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){
-					textBuf[i] = '-'; // assume odd
+					textBuf[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII; // assume odd
 					if (DICEROLL_RANDOM_NUMBER%2 == 0 ){ // if even
 					textBuf[i] = ' '; 
 					}
