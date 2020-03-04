@@ -148,7 +148,7 @@ void Apps::appSelector(bool init, uint8_t selector){
 		    break;
 		   
 		case APP_SELECTOR_DRAW:
-		    this->modeSingleSegmentManipulation(initOnBigLatchInitToo);
+		    this->draw(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_MOVIE_MODE:
@@ -1766,22 +1766,6 @@ void Apps::modeSoundNotes(bool init){
 	
 }
  
-// void Apps::draw(bool init){
-	 
-// 	if(binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
-// 		this->movieAnimationMode(true);
-		 
-// 	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){
-// 		this->modeSingleSegmentManipulation(false);
-		 
-// 	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-// 		this->movieAnimationMode(init);
-		 
-// 	}else{
-// 		this->modeSingleSegmentManipulation(init);
-// 	}
-// }
- 
 void Apps::movieAnimationMode(bool init){
 	//bool nextStep = 0;
 	 //reset saved led disp state.
@@ -1868,20 +1852,25 @@ void Apps::movieAnimationMode(bool init){
 	ledDisp->SetFourDigits(displayAllSegments);
 }
  
-void Apps::modeSingleSegmentManipulation(bool init){
+void Apps::modeSingleSegmentManipulation(char* display_buffer){
+
+}
+
+void Apps::draw(bool init){
   uint8_t segmentMoveIndexed [9] = { 0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
 
   if (init){
 	DRAW_CURSOR_INDEX = 0;
 	
 	//reset saved led disp state.
-	for(uint8_t i=0;i<8;i++){
-		DRAW_DISP_STATE[i]=0;
-	}
+	// no memory wasting with setting to zero, instead, we'll load the first picture right away
+	// for(uint8_t i=0;i<8;i++){
+	// 	DRAW_DISP_STATE[i]=0;
+	// }
 	
 	DRAW_SHOW_MODE = 0;
 	DRAW_ACTIVE_DRAWING_INDEX = 0;
-	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 0;
+	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 
   }
    
