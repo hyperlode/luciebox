@@ -490,7 +490,7 @@ class Apps{
     void miniMultiTimer(bool init);
     void modeDiceRoll(bool init);
     
-    void modeSingleSegmentManipulation(char* display_buffer);
+    uint32_t modeSingleSegmentManipulation(uint8_t* display_buffer);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence);    
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.

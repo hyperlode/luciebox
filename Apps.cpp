@@ -1163,10 +1163,10 @@ void Apps::modeSimpleButtonsAndLights(bool init){
 		textBuf[4]='8';		
 	  }else{
 		//display
-		textBuf[1]='-';
-		textBuf[2]='-';
-		textBuf[3]='-';
-		textBuf[4]='-';
+		textBuf[1]= 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
+		textBuf[2]= 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
+		textBuf[3]= 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
+		textBuf[4]= 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';'-';
 	  }
  
 	  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
@@ -1852,82 +1852,33 @@ void Apps::movieAnimationMode(bool init){
 	ledDisp->SetFourDigits(displayAllSegments);
 }
  
-void Apps::modeSingleSegmentManipulation(char* display_buffer){
-
-}
-
-void Apps::draw(bool init){
-  uint8_t segmentMoveIndexed [9] = { 0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
-
-  if (init){
-	DRAW_CURSOR_INDEX = 0;
+uint32_t Apps::modeSingleSegmentManipulation(uint8_t* display_buffer){
+	// return blinking segment. 
+	// no need to initialize DRAW_CURSOR_INDEX, it get's within boundaries in one cycle. And we don't care about starting position.
 	
-	//reset saved led disp state.
-	// no memory wasting with setting to zero, instead, we'll load the first picture right away
-	// for(uint8_t i=0;i<8;i++){
-	// 	DRAW_DISP_STATE[i]=0;
-	// }
-	
-	DRAW_SHOW_MODE = 0;
-	DRAW_ACTIVE_DRAWING_INDEX = 0;
-	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
+	uint8_t segmentMoveIndexed [9] = { 0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
+      
+	// scroll through segements
+	if (potentio->getValueStableChangedEdge()){
+		DRAW_CURSOR_INDEX+= 1 - (2 * potentio->getLastStableValueChangedUp());
+	}
 
-  }
-   
-  // depending on mode, scroll through segments, or through drawings. 
-  if (potentio->getValueStableChangedEdge()){
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		display_buffer[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
+		DRAW_SHOW_MODE = 0; // reset all special functions. Once change, this screen becomes the new normal
+	}
 
-	int8_t tmp;
-	tmp =  1 - (2 * potentio->getLastStableValueChangedUp());
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-		DRAW_CURSOR_INDEX += tmp;
-	}else{
-		DRAW_ACTIVE_DRAWING_INDEX+= tmp;
-	}  
-  }
-  
-  if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue() && !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-	  // modify drawing on display in draw mode.
-	  // if in save to eeprom mode, always only scroll through drawings.
-	  
-	  if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		  DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
-		  DRAW_SHOW_MODE = 0; // reset all special functions. Once change, this screen becomes the new normal
-	  }
-
-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		// move inside digit
 		DRAW_CURSOR_INDEX ++;
 		if ((DRAW_CURSOR_INDEX) % 9 == 0){
 			DRAW_CURSOR_INDEX -= 9;
 		}
-	  }
+	}
 
-	  if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){	
+	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){	
 		// move digit
 		DRAW_CURSOR_INDEX += 9;
-	  }
-
-  }else{
-
-	    if (!binaryInputs[BUTTON_MOMENTARY_0].getValue()){ // shift function for saving drawings to eeprom.
-			// scroll through drawings.
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-				DRAW_ACTIVE_DRAWING_INDEX --;
-			}
-			
-			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-				DRAW_ACTIVE_DRAWING_INDEX ++;
-			}
-	   }
-  }
-
-	// set limits on active drawing index (although without limits, it's fun to see the whole eeprom visualized. Wait wait! We put that in HACK mode!!!)
-	if (DRAW_ACTIVE_DRAWING_INDEX < 0){
-		DRAW_ACTIVE_DRAWING_INDEX = 0;
-	}
-	if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS){
-		DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS-1;
 	}
 
 	// set limits on cursor position
@@ -1938,72 +1889,8 @@ void Apps::draw(bool init){
 	if (DRAW_CURSOR_INDEX > 35){
 			DRAW_CURSOR_INDEX = 0;
 	}
-	
-	
-	if ( binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-	   	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
-	 		// special function in save image to eeprom mode.
-			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-				// insert
 
-
-				// //insert after current index (and move to it)
-				if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS-1){
-					// one picture before the last one is the last position where you can still insert a drawing.
-				
-					
-				}else{
-					
-					// work with eeprom addresses, not with picture indexes.
-					for (int16_t i= EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 1) ;
-						 i>=EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
-						 i--){
-							// Serial.println(i);
-					    // move all pictures one up.
-						uint8_t tmp = eeprom_read_byte((uint8_t*)(i));
-						// Serial.println(tmp);
-						eeprom_write_byte((uint8_t*)(i + 4), tmp);
-				
-					}
-					DRAW_ACTIVE_DRAWING_INDEX++; // move to "new picture."
-					// Serial.println("---");
-				}
-
-			}
-
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-				// delete slot. (and shift all drawings.)
-				for (int16_t i=EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
-					i<EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
-					i++){
-					uint8_t tmp = eeprom_read_byte((uint8_t*)(i+4));
-					// Serial.println(i);
-					// Serial.println(tmp);
-					eeprom_write_byte((uint8_t*)(i), tmp);
-				}
-				
-			}
-			  
-	    }else{
-
-			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-				// save active drawing on display to eeprom.
-				for (uint8_t i=0;i<4;i++){
-					eeprom_write_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i), DRAW_DISP_STATE[i]);
-				}
-			}
-	    }
-	} else if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY){
-		// load drawing from memory at request.
-		// load drawing
-		for (uint8_t i=0;i<4;i++){
-			DRAW_DISP_STATE[i] = eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i));
-		}
-	}
-
-	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
-   
-    // global picture operations
+	// global picture operations
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp() && ! binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 
 	    DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE =0: DRAW_SHOW_MODE++; 
@@ -2036,27 +1923,148 @@ void Apps::draw(bool init){
 	    }
 	}
 
+	//show active segment on display
+	// if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	if (millis()%250 > 125 && binaryInputs[BUTTON_LATCHING_EXTRA].getValue() ){
+		// ledDisp->SetSingleDigit(  
+		// 	segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9], 
+		// 	(DRAW_CURSOR_INDEX / 9) + 1
+		// 	) ; 
+
+		// return active segement
+		return (uint32_t)(segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9)*8;
+	}else{
+		return 0;
+	}
+}
+
+void Apps::draw(bool init){
+ 
+	//uint8_t* draw_buffer;
+
+	uint32_t cursorBlinker = 0;
+
+	if (init){
+		//reset saved led disp state.
+		// no memory wasting with setting to zero, instead, we'll load the first picture right away
+		// for(uint8_t i=0;i<8;i++){
+		// 	DRAW_DISP_STATE[i]=0;
+		// }
+
+		DRAW_SHOW_MODE = 0;
+		DRAW_ACTIVE_DRAWING_INDEX = 0;
+		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
+	}
+
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue() && !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+		//   // modify drawing on display in draw mode.
+		//   // if in save to eeprom mode, always only scroll through drawings.
+		cursorBlinker = this->modeSingleSegmentManipulation( DRAW_DISP_STATE);
+	}else{
+
+		// scroll through drawings  
+		if (potentio->getValueStableChangedEdge()){
+			DRAW_ACTIVE_DRAWING_INDEX+= 1 - (2 * potentio->getLastStableValueChangedUp());
+		}
+
+		if (!binaryInputs[BUTTON_MOMENTARY_0].getValue()){ // shift function for saving drawings to eeprom.
+			// scroll through drawings.
+			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+				DRAW_ACTIVE_DRAWING_INDEX --;
+			}
+			
+			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+				DRAW_ACTIVE_DRAWING_INDEX ++;
+			}
+		}
+	}
+
+	// set limits on active drawing index (although without limits, it's fun to see the whole eeprom visualized. Wait wait! We put that in HACK mode!!!)
+	if (DRAW_ACTIVE_DRAWING_INDEX < 0){
+		DRAW_ACTIVE_DRAWING_INDEX = 0;
+	}
+
+	if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS){
+		DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS-1;
+	}
+	
+	if ( binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+	   	if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){
+	 		// special function in save image to eeprom mode.
+			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+				// insert
+
+				// //insert after current index (and move to it)
+				if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS-1){
+					// one picture before the last one is the last position where you can still insert a drawing.
+					
+				}else{
+					
+					// work with eeprom addresses, not with picture indexes.
+					for (int16_t i= EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 1) ;
+						 i>=EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
+						 i--){
+					    // move all pictures one up.
+						uint8_t tmp = eeprom_read_byte((uint8_t*)(i));
+						eeprom_write_byte((uint8_t*)(i + 4), tmp);
+				
+					}
+					DRAW_ACTIVE_DRAWING_INDEX++; // move to "new picture."
+				}
+			}
+
+			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+				// delete slot. (and shift all drawings.)
+				for (int16_t i=EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
+					i<EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
+					i++){
+					uint8_t tmp = eeprom_read_byte((uint8_t*)(i+4));
+					// Serial.println(i);
+					// Serial.println(tmp);
+					eeprom_write_byte((uint8_t*)(i), tmp);
+				}
+			}
+			  
+	    }else{
+
+			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+				// save active drawing on display to eeprom.
+				for (uint8_t i=0;i<4;i++){
+					eeprom_write_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i), DRAW_DISP_STATE[i]);
+				}
+			}
+	    }
+	} else if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY){
+		// load drawing from memory at request.
+		// load drawing
+		for (uint8_t i=0;i<4;i++){
+			DRAW_DISP_STATE[i] = eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i));
+		}
+	}
+
+	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
+    
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 		// always show index of active drawing if activated.
 		ledDisp->showNumber(DRAW_ACTIVE_DRAWING_INDEX + 1); // in the real world, most of the people start counting from 1. Welcome to an eternal discussion Lucie!
 
 	}else {
-		// set display
+		// // set display
+		// displayAllSegments = 0xFFFFFFFF;
+		displayAllSegments = 0;
 		for (uint8_t i=0;i<4;i++){
-			ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
+			//displayAllSegments |= DRAW_DISP_STATE[i] << (3-i);  
+			displayAllSegments |= (uint32_t)DRAW_DISP_STATE[i] << (i*8);  
 		}
 
-		//show active segment on display
-		// if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-		if (millis()%250 > 125 && binaryInputs[BUTTON_LATCHING_EXTRA].getValue() ){
-			ledDisp->SetSingleDigit(  
-				segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9], 
-				(DRAW_CURSOR_INDEX / 9) + 1
-				) ; 
 
-		}
+		ledDisp->SetFourDigits(displayAllSegments ^ cursorBlinker);
+		
+		// for (uint8_t i=0;i<4;i++){
+		// 	ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
+		// }
+
     }
-
 }
  
 #ifdef ENABLE_MULTITIMER
@@ -2117,6 +2125,7 @@ void Apps::miniMultiTimer(bool init){
 		individualTimerSet = true;
 	  }
 	}
+
 	if (!individualTimerSet){
 	  this->multiTimer.setAllInitCountDownTimeSecs(seconds);
 	}
@@ -2149,7 +2158,6 @@ void Apps::miniMultiTimer(bool init){
   ledDisp->displayHandler(textBuf);
   ledDisp->SetLedArray(lights); 
   ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights ,2);
-	 
 }
 #endif
  

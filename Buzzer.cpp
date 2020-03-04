@@ -186,8 +186,8 @@ void Buzzer::noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note){
 
   if (note%64 == 0){
     // rest
-    textBuf[1] = '-';
-    textBuf[2] = '-';
+    textBuf[1] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
+    textBuf[2] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
   }else{
 
     // note 
