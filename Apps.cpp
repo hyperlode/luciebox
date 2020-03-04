@@ -1851,21 +1851,70 @@ void Apps::movieAnimationMode(bool init){
 	// set to display 
 	ledDisp->SetFourDigits(displayAllSegments);
 }
- 
-uint32_t Apps::modeSingleSegmentManipulation(uint8_t* display_buffer){
+
+
+void Apps::displayChangeGlobal(uint32_t* display_buffer, bool saveStateToBuffer){
+	// global picture operations
+	if (saveStateToBuffer){
+		//displayAllSegmentsBuffer = *display_buffer;
+		DRAW_SHOW_MODE = 3;
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+		
+		DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE =0: DRAW_SHOW_MODE++;
+
+	    switch (DRAW_SHOW_MODE){
+		  case 0:
+		  	//invert
+			// for (uint8_t i=0;i<4;i++){
+			// 	DRAW_DISP_STATE[i] = ~DRAW_DISP_STATE[i] ;
+			// }  
+			displayAllSegmentsBuffer = *display_buffer;
+			*display_buffer = ~*display_buffer;
+		  break;
+		  case 1:
+		  	//blank
+		  //	for (uint8_t i=0;i<4;i++){
+				
+				*display_buffer = 0;
+				// DRAW_DISP_STATE[i+4] = DRAW_DISP_STATE[i] ;
+				// DRAW_DISP_STATE[i] = 0;
+			//}  
+		  break;
+		  case 2:
+		  	//full
+		  	// for (uint8_t i=0;i<4;i++){
+			// 	DRAW_DISP_STATE[i] = 0xFF;
+			// }
+			*display_buffer = 0xFFFFFFFF;
+		  break;
+		  case 3:
+		  	//restore
+		  	// for (uint8_t i=0;i<4;i++){
+			// 	DRAW_DISP_STATE[i] = DRAW_DISP_STATE[i+4];
+			// }
+			*display_buffer = displayAllSegmentsBuffer;
+	    }
+	}
+}
+
+uint32_t Apps::modeSingleSegmentManipulation(uint32_t* display_buffer){
 	// return blinking segment. 
 	// no need to initialize DRAW_CURSOR_INDEX, it get's within boundaries in one cycle. And we don't care about starting position.
-	
+
 	uint8_t segmentMoveIndexed [9] = { 0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
       
-	// scroll through segements
+	// scroll through segments
 	if (potentio->getValueStableChangedEdge()){
 		DRAW_CURSOR_INDEX+= 1 - (2 * potentio->getLastStableValueChangedUp());
 	}
+	this->displayChangeGlobal(&displayAllSegments, false);
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		display_buffer[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
-		DRAW_SHOW_MODE = 0; // reset all special functions. Once change, this screen becomes the new normal
+		// display_buffer[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
+		*display_buffer ^= (uint32_t)(segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9)*8;
+		this->displayChangeGlobal(display_buffer, true);
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
@@ -1890,38 +1939,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint8_t* display_buffer){
 			DRAW_CURSOR_INDEX = 0;
 	}
 
-	// global picture operations
-	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp() && ! binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-
-	    DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE =0: DRAW_SHOW_MODE++; 
-
-	    switch (DRAW_SHOW_MODE){
-		  case 0:
-		  	//invert
-			for (uint8_t i=0;i<4;i++){
-				DRAW_DISP_STATE[i] = ~DRAW_DISP_STATE[i] ;
-			}  
-		  break;
-		  case 1:
-		  	//blank
-		  	for (uint8_t i=0;i<4;i++){
-				DRAW_DISP_STATE[i+4] = DRAW_DISP_STATE[i] ;
-				DRAW_DISP_STATE[i] = 0;
-			}  
-		  break;
-		  case 2:
-		  	//full
-		  	for (uint8_t i=0;i<4;i++){
-				DRAW_DISP_STATE[i] = 0xFF;
-			}
-		  break;
-		  case 3:
-		  	//restore
-		  	for (uint8_t i=0;i<4;i++){
-				DRAW_DISP_STATE[i] = DRAW_DISP_STATE[i+4];
-			}
-	    }
-	}
+	
 
 	//show active segment on display
 	// if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
@@ -1950,8 +1968,9 @@ void Apps::draw(bool init){
 		// for(uint8_t i=0;i<8;i++){
 		// 	DRAW_DISP_STATE[i]=0;
 		// }
+		
 
-		DRAW_SHOW_MODE = 0;
+		//DRAW_SHOW_MODE = 0;
 		DRAW_ACTIVE_DRAWING_INDEX = 0;
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 	}
@@ -1959,8 +1978,9 @@ void Apps::draw(bool init){
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue() && !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 		//   // modify drawing on display in draw mode.
 		//   // if in save to eeprom mode, always only scroll through drawings.
-		cursorBlinker = this->modeSingleSegmentManipulation( DRAW_DISP_STATE);
+		cursorBlinker = this->modeSingleSegmentManipulation( &displayAllSegments);
 	}else{
+		this->displayChangeGlobal(&displayAllSegments, false);
 
 		// scroll through drawings  
 		if (potentio->getValueStableChangedEdge()){
@@ -2037,9 +2057,13 @@ void Apps::draw(bool init){
 	} else if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY){
 		// load drawing from memory at request.
 		// load drawing
+		displayAllSegments = 0;
 		for (uint8_t i=0;i<4;i++){
-			DRAW_DISP_STATE[i] = eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i));
+			//DRAW_DISP_STATE[i] = eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i));
+			displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i))) << (i*8);
+
 		}
+		this->displayChangeGlobal(&displayAllSegments, true);
 	}
 
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
@@ -2049,21 +2073,13 @@ void Apps::draw(bool init){
 		ledDisp->showNumber(DRAW_ACTIVE_DRAWING_INDEX + 1); // in the real world, most of the people start counting from 1. Welcome to an eternal discussion Lucie!
 
 	}else {
-		// // set display
-		// displayAllSegments = 0xFFFFFFFF;
-		displayAllSegments = 0;
-		for (uint8_t i=0;i<4;i++){
-			//displayAllSegments |= DRAW_DISP_STATE[i] << (3-i);  
-			displayAllSegments |= (uint32_t)DRAW_DISP_STATE[i] << (i*8);  
-		}
-
-
-		ledDisp->SetFourDigits(displayAllSegments ^ cursorBlinker);
-		
+		// set display
+		// displayAllSegments = 0;
 		// for (uint8_t i=0;i<4;i++){
-		// 	ledDisp->SetSingleDigit(DRAW_DISP_STATE[i],i+1);  
+		// 	displayAllSegments |= (uint32_t)DRAW_DISP_STATE[i] << (i*8);  
 		// }
 
+		ledDisp->SetFourDigits(displayAllSegments ^ cursorBlinker);
     }
 }
  

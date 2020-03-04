@@ -490,7 +490,8 @@ class Apps{
     void miniMultiTimer(bool init);
     void modeDiceRoll(bool init);
     
-    uint32_t modeSingleSegmentManipulation(uint8_t* display_buffer);
+    uint32_t modeSingleSegmentManipulation(uint32_t* display_buffer);
+    void displayChangeGlobal(uint32_t* display_buffer, bool saveStateToBuffer);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t* shuffledSequence);    
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
@@ -518,6 +519,7 @@ class Apps{
     SuperTimer generalTimer;
     SuperTimer generalTimer2;
     uint32_t displayAllSegments;
+    uint32_t displayAllSegmentsBuffer;
 
     //reused variables per app
     bool general_boolean;
