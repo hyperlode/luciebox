@@ -1856,8 +1856,7 @@ void Apps::movieAnimationMode(bool init){
 void Apps::displayChangeGlobal(uint32_t* display_buffer, bool saveStateToBuffer){
 	// global picture operations
 	if (saveStateToBuffer){
-		//displayAllSegmentsBuffer = *display_buffer;
-		DRAW_SHOW_MODE = 3;
+		DRAW_SHOW_MODE = 3; // prepare for next button press to save buffer and show inversion.
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
@@ -1867,33 +1866,19 @@ void Apps::displayChangeGlobal(uint32_t* display_buffer, bool saveStateToBuffer)
 	    switch (DRAW_SHOW_MODE){
 		  case 0:
 		  	//invert
-			// for (uint8_t i=0;i<4;i++){
-			// 	DRAW_DISP_STATE[i] = ~DRAW_DISP_STATE[i] ;
-			// }  
 			displayAllSegmentsBuffer = *display_buffer;
 			*display_buffer = ~*display_buffer;
 		  break;
 		  case 1:
 		  	//blank
-		  //	for (uint8_t i=0;i<4;i++){
-				
-				*display_buffer = 0;
-				// DRAW_DISP_STATE[i+4] = DRAW_DISP_STATE[i] ;
-				// DRAW_DISP_STATE[i] = 0;
-			//}  
+			*display_buffer = 0;
 		  break;
 		  case 2:
 		  	//full
-		  	// for (uint8_t i=0;i<4;i++){
-			// 	DRAW_DISP_STATE[i] = 0xFF;
-			// }
 			*display_buffer = 0xFFFFFFFF;
 		  break;
 		  case 3:
 		  	//restore
-		  	// for (uint8_t i=0;i<4;i++){
-			// 	DRAW_DISP_STATE[i] = DRAW_DISP_STATE[i+4];
-			// }
 			*display_buffer = displayAllSegmentsBuffer;
 	    }
 	}
@@ -1912,7 +1897,6 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t* display_buffer){
 	this->displayChangeGlobal(&displayAllSegments, false);
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		// display_buffer[DRAW_CURSOR_INDEX / 9]  ^= segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]; 
 		*display_buffer ^= (uint32_t)(segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9)*8;
 		this->displayChangeGlobal(display_buffer, true);
 	}
@@ -1939,17 +1923,8 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t* display_buffer){
 			DRAW_CURSOR_INDEX = 0;
 	}
 
-	
-
-	//show active segment on display
-	// if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	//add blinking cursor. (depending on time, we set the active segment)
 	if (millis()%250 > 125 && binaryInputs[BUTTON_LATCHING_EXTRA].getValue() ){
-		// ledDisp->SetSingleDigit(  
-		// 	segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9] ^ DRAW_DISP_STATE[DRAW_CURSOR_INDEX / 9], 
-		// 	(DRAW_CURSOR_INDEX / 9) + 1
-		// 	) ; 
-
-		// return active segement
 		return (uint32_t)(segmentMoveIndexed[ DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9)*8;
 	}else{
 		return 0;
@@ -1958,19 +1933,12 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t* display_buffer){
 
 void Apps::draw(bool init){
  
-	//uint8_t* draw_buffer;
-
 	uint32_t cursorBlinker = 0;
 
 	if (init){
 		//reset saved led disp state.
 		// no memory wasting with setting to zero, instead, we'll load the first picture right away
-		// for(uint8_t i=0;i<8;i++){
-		// 	DRAW_DISP_STATE[i]=0;
-		// }
-		
 
-		//DRAW_SHOW_MODE = 0;
 		DRAW_ACTIVE_DRAWING_INDEX = 0;
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 	}
@@ -2039,8 +2007,6 @@ void Apps::draw(bool init){
 					i<EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
 					i++){
 					uint8_t tmp = eeprom_read_byte((uint8_t*)(i+4));
-					// Serial.println(i);
-					// Serial.println(tmp);
 					eeprom_write_byte((uint8_t*)(i), tmp);
 				}
 			}
@@ -2050,7 +2016,7 @@ void Apps::draw(bool init){
 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 				// save active drawing on display to eeprom.
 				for (uint8_t i=0;i<4;i++){
-					eeprom_write_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i), DRAW_DISP_STATE[i]);
+					eeprom_write_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i), (uint8_t) ((displayAllSegments >> (i*8)) & 0xFF) );
 				}
 			}
 	    }
@@ -2059,7 +2025,6 @@ void Apps::draw(bool init){
 		// load drawing
 		displayAllSegments = 0;
 		for (uint8_t i=0;i<4;i++){
-			//DRAW_DISP_STATE[i] = eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i));
 			displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t*)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i))) << (i*8);
 
 		}
@@ -2074,11 +2039,6 @@ void Apps::draw(bool init){
 
 	}else {
 		// set display
-		// displayAllSegments = 0;
-		// for (uint8_t i=0;i<4;i++){
-		// 	displayAllSegments |= (uint32_t)DRAW_DISP_STATE[i] << (i*8);  
-		// }
-
 		ledDisp->SetFourDigits(displayAllSegments ^ cursorBlinker);
     }
 }

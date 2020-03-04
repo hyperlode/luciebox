@@ -206,7 +206,7 @@
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
 
-#define DRAW_DISP_STATE array_8_bytes
+
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 
