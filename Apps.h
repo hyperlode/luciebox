@@ -49,10 +49,10 @@
 
  
 #define APP_SELECTOR_SOUND_SONG 10
-#define APP_SELECTOR_SOUND_SONG_TOO 11
+#define APP_SELECTOR_MOVIE_MODE 11
 
 #define APP_SELECTOR_DRAW 12
-#define APP_SELECTOR_MOVIE_MODE 13
+#define APP_DRAW_GAME 13
 
 #define APP_SELECTOR_SETTING 14
 #define APP_SELECTOR_SETTING_TOO 15
@@ -127,6 +127,7 @@
 #define SIMON_STEP_TIMER generalTimer
 #define STOPWATCH_CHRONO generalTimer
 #define POMODORO_TIMER generalTimer
+#define DRAW_GAME_DISPLAY_TIMER generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
@@ -193,6 +194,7 @@
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
+#define DRAW_POTENIO_SENSITIVITY general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
@@ -225,7 +227,7 @@ const uint8_t app_splash_screens [] PROGMEM = {
   0x0F, 0x40, 0x40, 0x39, //wrench
 	0x08, 0xCE, 0x78, 0x08, // abstract piramid
 	0x40, 0x4F, 0x79, 0x40, // abstract art deco 
-	0x36, 0x36, 0x36, 0x36, // abstract vertical lines
+	0x36, 0x36, 0x36, 0x36, // abstract vertical lines 
 	0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
   0x5F, 0x79, 0x1C, 0x3D  // DBUG
 		
@@ -477,6 +479,7 @@ class Apps{
     void modeComposeSong(bool init);
     void modeSoundNotes(bool init);
     void draw(bool init);
+    void drawGame(bool init);
     void movieAnimationMode(bool init);
     void pomodoroTimer(bool init);
     void stopwatch(bool init);
@@ -540,6 +543,15 @@ class Apps{
     uint8_t bytes_list[bytes_list_bufsize];
     
     uint8_t array_8_bytes [8];
+
+
+    enum DrawGameState:uint8_t{
+      drawGameWaitForStart,
+      drawGameShowPicture,
+      drawGameDraw,
+      drawGameEvaluate,
+    };
+    DrawGameState drawGameState;
 
     #ifdef ENABLE_REACTION_APP
     // reaction

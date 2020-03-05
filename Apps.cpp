@@ -151,6 +151,10 @@ void Apps::appSelector(bool init, uint8_t selector){
 		    this->draw(initOnBigLatchInitToo);
 			break;
 
+		case APP_DRAW_GAME:
+		    this->drawGame(initOnBigLatchInitToo);
+			break;
+
 		case APP_SELECTOR_MOVIE_MODE:
 			this->movieAnimationMode(initOnBigLatchInitToo);
 		    break;
@@ -1852,7 +1856,6 @@ void Apps::movieAnimationMode(bool init){
 	ledDisp->SetFourDigits(displayAllSegments);
 }
 
-
 void Apps::displayChangeGlobal(uint32_t* display_buffer, bool saveStateToBuffer){
 	// global picture operations
 	if (saveStateToBuffer){
@@ -1892,8 +1895,13 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t* display_buffer){
       
 	// scroll through segments
 	if (potentio->getValueStableChangedEdge()){
-		DRAW_CURSOR_INDEX+= 1 - (2 * potentio->getLastStableValueChangedUp());
+		DRAW_POTENIO_SENSITIVITY = !DRAW_POTENIO_SENSITIVITY;
+		if(DRAW_POTENIO_SENSITIVITY){
+			DRAW_CURSOR_INDEX+= 1 - (2 * potentio->getLastStableValueChangedUp());
+		}
 	}
+
+	// check for global display change
 	this->displayChangeGlobal(&displayAllSegments, false);
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
@@ -1931,6 +1939,81 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t* display_buffer){
 	}
 }
 
+void Apps::drawGame(bool init){
+
+	uint32_t cursorBlinker = 0;
+
+	if (init){
+
+	}
+
+	switch(drawGameState){
+
+	    case drawGameWaitForStart:{
+			drawGameState = drawGameShowPicture;
+			ledDisp->numberToBuf(textBuf, random(0,10000));
+			ledDisp->bufToScreenBits(textBuf+1, &displayAllSegments);
+		    break;
+		}
+
+		case drawGameShowPicture:{
+			// displayAllSegments = 0xFF00FF00;
+		
+
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged()){
+				drawGameState = drawGameDraw;
+				displayAllSegmentsBuffer = displayAllSegments;
+				displayAllSegments = 0;
+			}
+			break;
+		}
+
+		case drawGameDraw:{
+			cursorBlinker = modeSingleSegmentManipulation(&displayAllSegments);
+			displayChangeGlobal(&displayAllSegments, false);
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged()){
+				drawGameState = drawGameEvaluate;
+
+
+				DRAW_GAME_DISPLAY_TIMER.setInitTimeMillis(-3000);
+				DRAW_GAME_DISPLAY_TIMER.start();
+
+				if (displayAllSegments == displayAllSegmentsBuffer){
+					buzzer->loadBuzzerTrack(song_happy_dryer);
+				}else{
+					buzzer->loadBuzzerTrack(song_unhappy_dryer);
+				}
+
+			}
+			break;
+		}
+
+		case drawGameEvaluate:{
+			
+
+			// if (!DRAW_GAME_DISPLAY_TIMER.getTimeIsNegative()){
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged()){
+				drawGameState = drawGameWaitForStart;
+			}
+			
+			if (DRAW_GAME_DISPLAY_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500,true,true)){
+			//if (millis() % 500 > 250){
+				uint32_t displayAllSegments_swap_buffer;
+				displayAllSegments_swap_buffer = displayAllSegments;
+				displayAllSegments = displayAllSegmentsBuffer;
+				displayAllSegmentsBuffer = displayAllSegments_swap_buffer;
+			}
+
+			
+			break;
+		}
+
+		default:
+			break;
+	}
+	ledDisp->SetFourDigits(displayAllSegments ^ cursorBlinker);
+}
+
 void Apps::draw(bool init){
  
 	uint32_t cursorBlinker = 0;
@@ -1948,7 +2031,6 @@ void Apps::draw(bool init){
 		//   // if in save to eeprom mode, always only scroll through drawings.
 		cursorBlinker = this->modeSingleSegmentManipulation( &displayAllSegments);
 	}else{
-		this->displayChangeGlobal(&displayAllSegments, false);
 
 		// scroll through drawings  
 		if (potentio->getValueStableChangedEdge()){
@@ -1956,6 +2038,10 @@ void Apps::draw(bool init){
 		}
 
 		if (!binaryInputs[BUTTON_MOMENTARY_0].getValue()){ // shift function for saving drawings to eeprom.
+			
+			// check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
+			//this->displayChangeGlobal(&displayAllSegments, false);
+			
 			// scroll through drawings.
 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 				DRAW_ACTIVE_DRAWING_INDEX --;

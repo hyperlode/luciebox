@@ -51,6 +51,13 @@ void DisplayManagement::showNumber(int16_t number){
     this->displayHandler(text);
 }
 
+void DisplayManagement::bufToScreenBits(char* textBuf, uint32_t* screenBits){
+	*screenBits = 0;
+	for (uint8_t i=0;i<4;i++){
+		*screenBits |= (uint32_t)(textBuf[i]) << (8*i);
+	}
+}
+
 void DisplayManagement::numberToBuf(char* textBuf, int16_t number){
 	// negative numbers made absolute!
 	// textbuf five positions.
@@ -93,6 +100,7 @@ void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
 void DisplayManagement::setBlankDisplay(){
   this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
 }
+
 void DisplayManagement::SetFourDigits(uint32_t value){
   // value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
   sevseg.SetFourDigits(value);

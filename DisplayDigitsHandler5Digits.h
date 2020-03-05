@@ -25,6 +25,8 @@ class DisplayManagement {
         void showNumberAsChars(int16_t number);
         void showNumber(int16_t number);
         void numberToBuf(char* textBuf, int16_t number);
+        void bufToScreenBits(char* textBuf, uint32_t* screenBits);
+
         void setBlankDisplay();
         void setDecimalPoint(boolean isOn, int digit);
         void SetSingleDigit(uint8_t value, int digit);
