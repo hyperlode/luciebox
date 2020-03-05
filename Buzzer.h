@@ -1,7 +1,7 @@
 
 #ifndef Buzzer_h
 #define Buzzer_h
-#include "Arduino.h" 
+#include "Arduino.h"
 
 #define rest_8 0
 #define A3_8 1
@@ -271,7 +271,7 @@
 #define BUZZER_NEXTPLAYER_DURATION_MILLIS 20
 #define BUZZER_NEXTPLAYER_MULTIPLEBEEP_INTERVAL_MILLIS 100
 
-#define BUZZER_ROLLVALUE_BUTTONPRESS 
+#define BUZZER_ROLLVALUE_BUTTONPRESS
 #define BUZZER_ROLLVALUE_PAUSE
 #define BUZZER_ROLLVALUE_UNPAUSE
 #define BUZZER_ROLLVALUE_STARTGAME
@@ -302,32 +302,31 @@
 //const byte song_attack [] PROGMEM = {162,126,162,126,162,126, 167,189,189,162,126,  230,230,230 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
 //const byte song_gameStart_attack [] PROGMEM = {162,126,162,126,162,126,167,189,189,162,126,  230,230,230 ,BUZZER_ROLL_SONG_STOPVALUE};  //aaanvallueeeeee!
 
-
-
-class Buzzer{
-  public:
+class Buzzer
+{
+public:
     Buzzer();
 
     void setPin(uint8_t pin);
     uint8_t getPin();
-    void loadBuzzerTrack(const uint8_t* seq);
+    void loadBuzzerTrack(const uint8_t *seq);
     void programBuzzerRoll(uint8_t sound);
     uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);
     void doBuzzerRoll();
-    uint8_t getNextBuzzerRollSlot ( bool getNextEmptySlot);
+    uint8_t getNextBuzzerRollSlot(bool getNextEmptySlot);
     uint8_t getBuzzerRollFull();
-    uint8_t getBuzzerRollEmpty(); 
-	  void setTranspose(int8_t offset);
+    uint8_t getBuzzerRollEmpty();
+    void setTranspose(int8_t offset);
     void cleanBuzzerRoll();
     // void buzzerOn(uint16_t freq);
     void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerOff();
     void setSpeedRatio(float speedMultiplier);
-    void lastPlayedNoteToDisplay(char* textBuf, uint8_t* decimalPoints);
-    void noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note);
+    void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
+    void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
 
-  private:
-    int8_t transpose; 
+private:
+    int8_t transpose;
     float speedScale;
     uint8_t pin;
     uint8_t buzzerRoll[BUZZER_ROLL_LENGTH];
@@ -344,7 +343,7 @@ class Buzzer{
 //    //byte numberOfBeepsToBePlayed;
 //    //unsigned long beepsWatchMillis;
 //
-//    
+//
 //#endif
 //
 //#ifdef BUZZER_ENABLED

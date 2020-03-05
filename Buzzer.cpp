@@ -1,254 +1,293 @@
 #include "Buzzer.h"
 #include "Arduino.h"
 
-Buzzer::Buzzer() {
-  //constructor
-  //init buzzerRoll
+Buzzer::Buzzer()
+{
+    //constructor
+    //init buzzerRoll
 
-  for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++) {
-    this->buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
-  }
-  this->soundFinishedTimeMillis = 0;
-  this->speedScale = 1;
-  this->transpose = 0;
-}
-
-void Buzzer::setTranspose(int8_t offset) {
-  if (offset < -12) {
-    this->transpose = -12;
-  } else if (offset > 12) {
-    this->transpose = 12;
-  }else{
-	  this->transpose = offset;
-  }
-}
-
-void Buzzer::setPin(uint8_t pin) {
-  this->pin = pin;
-  pinMode(this->pin, OUTPUT);
-}
-
-uint8_t Buzzer::getPin(){
-  return this->pin;
-}
-
-void Buzzer::loadBuzzerTrack(const uint8_t* seq) {
-  //load a whole track in the buzzer roll
-  //load all bytes from sequence in buffer.
-  uint8_t i = 0;
-  while (pgm_read_byte_near(seq + i) != BUZZER_ROLL_SONG_STOPVALUE and i < BUZZER_ROLL_LENGTH) {
-    programBuzzerRoll(pgm_read_byte_near(seq + i)); //progmem = special command so arrays are read out of flash directly without being loaded in eeprom.
-    i++;
-  }
-}
-
-void Buzzer::programBuzzerRoll(uint8_t sound) {
-  //load one sound to next slot in roll
-
-  //sound:
-  //0 = empty slot
-  //+ 1-62 = note (1 = 110Hz A , and going up 1/12 of an octave each number
-  //+ 63, 126, 189, 252 = duration = 1/8, 1/4, 1/2, 1
-  //program in next available slot AFTER playSlotCounter
-
-  //A0sharp 1/2 = 191
-  //1/8 stop = 63
-
-  this->programSlotCounter = getNextBuzzerRollSlot( true);
-  this->buzzerRoll[this->programSlotCounter] = sound;
-
-  //http://members.efn.org/~qehn/global/building/cents.htm
-  //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
-}
-
-uint8_t Buzzer::addRandomSoundToRoll(uint8_t lowest, uint8_t highest) {
-  // if (getBuzzerRollEmpty()) {
-  uint8_t r = random(lowest, highest);
-  programBuzzerRoll(r);
-  return r;
-  // }
-  // return 0;
-}
-
-void Buzzer::doBuzzerRoll() {
-  //play all the sounds in the array.
-  //array of 16 bytes
-  //0 stands for free and programmable
-  //one playSlotCounter
-
-  if ( millis() > this->soundFinishedTimeMillis) {
-    //erase previous slot
-    this->buzzerRoll[this->playSlotCounter] = BUZZER_ROLL_EMPTY_SLOT;
-
-    //move active slot
-    this->playSlotCounter = getNextBuzzerRollSlot( false);
-
-    if ( this->buzzerRoll[this->playSlotCounter] != BUZZER_ROLL_EMPTY_SLOT) {
-      //uint8_t noteNumber = buzzerRoll[this->playSlotCounter]%63;
-      //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
-      float freq = 1;
-
-      {
-        // convert note to freq
-        for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64) + this->transpose; i++) {
-        //for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64); i++) {
-          //same result as: (but 2K less memory!!)
-          //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63);
-          freq *= 1.059463;
-        }
-      }
-	  
-      if (buzzerRoll[this->playSlotCounter] % 64 != 0) {
-        //no sound, stop. (rust)
-        freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
-      } 
-	  
-      tone(this->pin, (unsigned int)freq ,
-           (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS *
-                           (1 << buzzerRoll[this->playSlotCounter] / 63))
-          ); //duration, number is exponent of 2.
-
-      //tone(PIN_BUZZER, (unsigned int)freq , 50); //duration, number is exponent of 2.
-      //tone(PIN_BUZZER, 3000 , (unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63))); //duration, number is exponent of 2.
-
-      //Serial.println((unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63)));
-      //Serial.println((unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63)));
-
-      this->soundFinishedTimeMillis = millis() + (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (1 << buzzerRoll[this->playSlotCounter] / 63));
+    for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
+    {
+        this->buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
     }
-  }
+    this->soundFinishedTimeMillis = 0;
+    this->speedScale = 1;
+    this->transpose = 0;
 }
 
-void Buzzer::setSpeedRatio(float speedMultiplier) {
-  // argument is a long: 1 is normal speed, 0.5 is double, 2 is half, ....
-  this->speedScale = speedMultiplier;
+void Buzzer::setTranspose(int8_t offset)
+{
+    if (offset < -12)
+    {
+        this->transpose = -12;
+    }
+    else if (offset > 12)
+    {
+        this->transpose = 12;
+    }
+    else
+    {
+        this->transpose = offset;
+    }
 }
 
-uint8_t Buzzer::getNextBuzzerRollSlot ( bool getNextEmptySlot) {
-  //returns value of next slot
-  //if argument true, will search for next free slot. If no free slots, returns current slot.
-  uint8_t slot = this->playSlotCounter;
-  do {
-    slot >= BUZZER_ROLL_LENGTH - 1 ? slot = 0 : slot ++;
-  } while ( getNextEmptySlot
-            && buzzerRoll[slot] != BUZZER_ROLL_EMPTY_SLOT
-            && this->playSlotCounter != slot
-          );
-  return slot;
+void Buzzer::setPin(uint8_t pin)
+{
+    this->pin = pin;
+    pinMode(this->pin, OUTPUT);
 }
 
-void Buzzer::cleanBuzzerRoll() {
-  //all slots empty
-  for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++) {
-    buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
-  }
+uint8_t Buzzer::getPin()
+{
+    return this->pin;
 }
 
-void Buzzer::buzzerOff() {
-  //erase contents of buzzerRoll and switch off.
-  this->cleanBuzzerRoll();
-  noTone(this->pin);
+void Buzzer::loadBuzzerTrack(const uint8_t *seq)
+{
+    //load a whole track in the buzzer roll
+    //load all bytes from sequence in buffer.
+    uint8_t i = 0;
+    while (pgm_read_byte_near(seq + i) != BUZZER_ROLL_SONG_STOPVALUE and i < BUZZER_ROLL_LENGTH)
+    {
+        programBuzzerRoll(pgm_read_byte_near(seq + i)); //progmem = special command so arrays are read out of flash directly without being loaded in eeprom.
+        i++;
+    }
+}
+
+void Buzzer::programBuzzerRoll(uint8_t sound)
+{
+    //load one sound to next slot in roll
+
+    //sound:
+    //0 = empty slot
+    //+ 1-62 = note (1 = 110Hz A , and going up 1/12 of an octave each number
+    //+ 63, 126, 189, 252 = duration = 1/8, 1/4, 1/2, 1
+    //program in next available slot AFTER playSlotCounter
+
+    //A0sharp 1/2 = 191
+    //1/8 stop = 63
+
+    this->programSlotCounter = getNextBuzzerRollSlot(true);
+    this->buzzerRoll[this->programSlotCounter] = sound;
+
+    //http://members.efn.org/~qehn/global/building/cents.htm
+    //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
+}
+
+uint8_t Buzzer::addRandomSoundToRoll(uint8_t lowest, uint8_t highest)
+{
+    // if (getBuzzerRollEmpty()) {
+    uint8_t r = random(lowest, highest);
+    programBuzzerRoll(r);
+    return r;
+    // }
+    // return 0;
+}
+
+void Buzzer::doBuzzerRoll()
+{
+    //play all the sounds in the array.
+    //array of 16 bytes
+    //0 stands for free and programmable
+    //one playSlotCounter
+
+    if (millis() > this->soundFinishedTimeMillis)
+    {
+        //erase previous slot
+        this->buzzerRoll[this->playSlotCounter] = BUZZER_ROLL_EMPTY_SLOT;
+
+        //move active slot
+        this->playSlotCounter = getNextBuzzerRollSlot(false);
+
+        if (this->buzzerRoll[this->playSlotCounter] != BUZZER_ROLL_EMPTY_SLOT)
+        {
+            //uint8_t noteNumber = buzzerRoll[this->playSlotCounter]%63;
+            //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
+            float freq = 1;
+
+            {
+                // convert note to freq
+                for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64) + this->transpose; i++)
+                {
+                    //for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64); i++) {
+                    //same result as: (but 2K less memory!!)
+                    //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63);
+                    freq *= 1.059463;
+                }
+            }
+
+            if (buzzerRoll[this->playSlotCounter] % 64 != 0)
+            {
+                //no sound, stop. (rust)
+                freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
+            }
+
+            tone(this->pin, (unsigned int)freq,
+                 (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS *
+                                 (1 << buzzerRoll[this->playSlotCounter] / 63))); //duration, number is exponent of 2.
+
+            //tone(PIN_BUZZER, (unsigned int)freq , 50); //duration, number is exponent of 2.
+            //tone(PIN_BUZZER, 3000 , (unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63))); //duration, number is exponent of 2.
+
+            //Serial.println((unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63)));
+            //Serial.println((unsigned long)(BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (B00000001 << buzzerRoll[this->playSlotCounter]/63)));
+
+            this->soundFinishedTimeMillis = millis() + (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (1 << buzzerRoll[this->playSlotCounter] / 63));
+        }
+    }
+}
+
+void Buzzer::setSpeedRatio(float speedMultiplier)
+{
+    // argument is a long: 1 is normal speed, 0.5 is double, 2 is half, ....
+    this->speedScale = speedMultiplier;
+}
+
+uint8_t Buzzer::getNextBuzzerRollSlot(bool getNextEmptySlot)
+{
+    //returns value of next slot
+    //if argument true, will search for next free slot. If no free slots, returns current slot.
+    uint8_t slot = this->playSlotCounter;
+    do
+    {
+        slot >= BUZZER_ROLL_LENGTH - 1 ? slot = 0 : slot++;
+    } while (getNextEmptySlot && buzzerRoll[slot] != BUZZER_ROLL_EMPTY_SLOT && this->playSlotCounter != slot);
+    return slot;
+}
+
+void Buzzer::cleanBuzzerRoll()
+{
+    //all slots empty
+    for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
+    {
+        buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
+    }
+}
+
+void Buzzer::buzzerOff()
+{
+    //erase contents of buzzerRoll and switch off.
+    this->cleanBuzzerRoll();
+    noTone(this->pin);
 }
 
 // void Buzzer::buzzerOn(uint16_t freq) {
 //   tone(this->pin, freq);
 // }
 
-void Buzzer::playTone(unsigned int freq, unsigned long duration_millis){
-  // set 0 to duration_millis for indefinate length (will sound until notone or another tone command is given. )
-  
-  this->buzzerOff();
-  if (duration_millis == 0){
-    tone(this->pin, freq);
-  }else{
-    tone(this->pin, freq, duration_millis);
-  }
-}
+void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
+{
+    // set 0 to duration_millis for indefinate length (will sound until notone or another tone command is given. )
 
-uint8_t Buzzer::getBuzzerRollFull() {
-  //check if there are free slots.
-  return (getNextBuzzerRollSlot(true) == this->playSlotCounter);
-}
-
-uint8_t Buzzer::getBuzzerRollEmpty() {
-  int sum = 0;
-  for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH ; i++) {
-    sum += buzzerRoll[i];
-  }
-  return sum == BUZZER_ROLL_LENGTH * BUZZER_ROLL_EMPTY_SLOT;
-}
-
-void Buzzer::lastPlayedNoteToDisplay(char* textBuf, uint8_t* decimalPoints){
-  noteToDisplay(textBuf, decimalPoints, this->buzzerRoll[this->playSlotCounter]);
-}
-
-void Buzzer::noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note){
-
-  if (note%64 == 0){
-    // rest
-    textBuf[1] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
-    textBuf[2] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
-  }else{
-
-    // note 
-    uint8_t noteVal;
-    bool notSharp=false;
-    switch((note-1)%12){
-      case 0:
-        notSharp=true;
-      case 1:
-        noteVal = 1;
-        break;
-      case 2:
-        notSharp=true;
-        noteVal = 2;
-        break;
-      case 3:
-        notSharp=true;
-      case 4:
-        noteVal = 3;
-        break;
-      case 5:
-        notSharp=true;
-      case 6:
-        noteVal = 4;
-        break;
-      case 7:
-        notSharp=true;
-        noteVal = 5;
-        break;
-      case 8:
-        notSharp=true;
-      case 9:
-        noteVal = 6;
-        break;
-      case 10:
-        notSharp=true;
-      case 11:
-        noteVal = 7;
-        break;
+    this->buzzerOff();
+    if (duration_millis == 0)
+    {
+        tone(this->pin, freq);
     }
-    textBuf[1]= noteVal + 64;
-
-    if (notSharp){
-      *decimalPoints = 0x00;
-    }else{
-      *decimalPoints = 0x02;
+    else
+    {
+        tone(this->pin, freq, duration_millis);
     }
-    // octave
-    if (note  <4){ 
-      // exceptions, because we don't want negative numbers when doing -4 in our formula
-      textBuf[2]= 48+3;
-    }else{
-      textBuf[2] = ((note%64) - 4)/12 + 4 + 48;
-    }
-  }
-  textBuf[3] = ' ';
-  
-  // note length
-  textBuf[4] =  (0x01 << ( 3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
 }
 
+uint8_t Buzzer::getBuzzerRollFull()
+{
+    //check if there are free slots.
+    return (getNextBuzzerRollSlot(true) == this->playSlotCounter);
+}
+
+uint8_t Buzzer::getBuzzerRollEmpty()
+{
+    int sum = 0;
+    for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
+    {
+        sum += buzzerRoll[i];
+    }
+    return sum == BUZZER_ROLL_LENGTH * BUZZER_ROLL_EMPTY_SLOT;
+}
+
+void Buzzer::lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints)
+{
+    noteToDisplay(textBuf, decimalPoints, this->buzzerRoll[this->playSlotCounter]);
+}
+
+void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
+{
+
+    if (note % 64 == 0)
+    {
+        // rest
+        textBuf[1] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
+        textBuf[2] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
+    }
+    else
+    {
+
+        // note
+        uint8_t noteVal;
+        bool notSharp = false;
+        switch ((note - 1) % 12)
+        {
+        case 0:
+            notSharp = true;
+        case 1:
+            noteVal = 1;
+            break;
+        case 2:
+            notSharp = true;
+            noteVal = 2;
+            break;
+        case 3:
+            notSharp = true;
+        case 4:
+            noteVal = 3;
+            break;
+        case 5:
+            notSharp = true;
+        case 6:
+            noteVal = 4;
+            break;
+        case 7:
+            notSharp = true;
+            noteVal = 5;
+            break;
+        case 8:
+            notSharp = true;
+        case 9:
+            noteVal = 6;
+            break;
+        case 10:
+            notSharp = true;
+        case 11:
+            noteVal = 7;
+            break;
+        }
+        textBuf[1] = noteVal + 64;
+
+        if (notSharp)
+        {
+            *decimalPoints = 0x00;
+        }
+        else
+        {
+            *decimalPoints = 0x02;
+        }
+        // octave
+        if (note < 4)
+        {
+            // exceptions, because we don't want negative numbers when doing -4 in our formula
+            textBuf[2] = 48 + 3;
+        }
+        else
+        {
+            textBuf[2] = ((note % 64) - 4) / 12 + 4 + 48;
+        }
+    }
+    textBuf[3] = ' ';
+
+    // note length
+    textBuf[4] = (0x01 << (3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
+}
 
 /// ---------------------------
 /// ---------------------------
@@ -256,7 +295,6 @@ void Buzzer::noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note){
 /// ---------------------------
 /// ---------------------------
 /// ---------------------------
-
 
 //Buzzer::playSound(uint8_t frequncey, uint8_t
 //
@@ -395,5 +433,3 @@ void Buzzer::noteToDisplay(char* textBuf, uint8_t* decimalPoints, uint8_t note){
 //        }
 //#endif
 //
-
-

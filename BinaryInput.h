@@ -2,22 +2,20 @@
 #ifndef BinaryInput_h
 #define BinaryInput_h
 
-class BinaryInput{
+class BinaryInput
+{
 
-  public:
+public:
     void setValue(bool value);
     bool getValue();
     bool getEdgeDown();
     bool getEdgeUp();
     bool getValueChanged();
     void refresh();
-    
-  private:
+
+private:
     bool previousValue;
     bool value;
-  
 };
 
 #endif
-
-

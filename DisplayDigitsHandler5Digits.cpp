@@ -2,63 +2,70 @@
 
 //changed from 4 to 5 digits 20140123 Lode
 
-DisplayManagement::DisplayManagement (){
+DisplayManagement::DisplayManagement()
+{
 	this->text[5] = '\0';
-	brightness = (8888 - LED_DISP_BRIGHTNESS )/1000;
+	brightness = (8888 - LED_DISP_BRIGHTNESS) / 1000;
 
 #ifdef ENABLE_SCROLL
 	this->setScrollSpeed(SCROLL_SPEED_DELAY_MILLIS);
 #endif
-
 };
 
-DisplayManagement::~DisplayManagement(){
+DisplayManagement::~DisplayManagement()
+{
 #ifdef ENABLE_SCROLL
-	delete [] scrollTextAddress;
+	delete[] scrollTextAddress;
 #endif
 };
 
-void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8){
+void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+{
 	//for extra led array.
-	sevseg.Begin(dispHasCommonAnode, D0,  D1,  D2,  D3, D4,LedArrayDigit,  S1,  S2,  S3,  S4,  S5,  S6,  S7,  S8); 
-	
-#ifdef ENABLE_SCROLL 
+	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, LedArrayDigit, S1, S2, S3, S4, S5, S6, S7, S8);
+
+#ifdef ENABLE_SCROLL
 	textStartPos = 0;
 #endif
-
 }
 
-void DisplayManagement::startUp(bool dispHasCommonAnode ,byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8){
-	sevseg.Begin(dispHasCommonAnode, D0,  D1,  D2,  D3, D4,  S1,  S2,  S3,  S4,  S5,  S6,  S7,  S8); 
-	
-#ifdef ENABLE_SCROLL 
+void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+{
+	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
+
+#ifdef ENABLE_SCROLL
 	textStartPos = 0;
 #endif
-
 }
 
-void DisplayManagement::showNumberAsChars(int16_t number){
-  // chars as in the alphabet: A=1, B=2,...
-  for (int i=0;i<4;i++){
-      text[4-i] = 64 + number; //ascii 65 = a
-  }
-  this->displayHandler(text);
+void DisplayManagement::showNumberAsChars(int16_t number)
+{
+	// chars as in the alphabet: A=1, B=2,...
+	for (int i = 0; i < 4; i++)
+	{
+		text[4 - i] = 64 + number; //ascii 65 = a
+	}
+	this->displayHandler(text);
 }
 
 // void DisplayManagement::showNumber(int16_t number, bool noLeadingZeros){
-void DisplayManagement::showNumber(int16_t number){
+void DisplayManagement::showNumber(int16_t number)
+{
 	numberToBuf(text, number);
-    this->displayHandler(text);
+	this->displayHandler(text);
 }
 
-void DisplayManagement::bufToScreenBits(char* textBuf, uint32_t* screenBits){
+void DisplayManagement::bufToScreenBits(char *textBuf, uint32_t *screenBits)
+{
 	*screenBits = 0;
-	for (uint8_t i=0;i<4;i++){
-		*screenBits |= (uint32_t)(textBuf[i]) << (8*i);
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		*screenBits |= (uint32_t)(textBuf[i]) << (8 * i);
 	}
 }
 
-void DisplayManagement::numberToBuf(char* textBuf, int16_t number){
+void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
+{
 	// negative numbers made absolute!
 	// textbuf five positions.
 
@@ -67,26 +74,29 @@ void DisplayManagement::numberToBuf(char* textBuf, int16_t number){
 	c = number;
 	uint8_t lastDigitNonZero = 4;
 
-	for (uint8_t i=0;i<4;i++){
+	for (uint8_t i = 0; i < 4; i++)
+	{
 
-		textBuf[4-i] = 48 + c%10; //ascii 48 = 0
+		textBuf[4 - i] = 48 + c % 10; //ascii 48 = 0
 
-		// memory for saving leading zero's indicator.	
-		if (textBuf[4-i] != 48){
-			lastDigitNonZero = 4-i;
+		// memory for saving leading zero's indicator.
+		if (textBuf[4 - i] != 48)
+		{
+			lastDigitNonZero = 4 - i;
 		}
 
-		c/=10;
+		c /= 10;
 	}
 
-	for (uint8_t i=1;i< lastDigitNonZero;i++){
+	for (uint8_t i = 1; i < lastDigitNonZero; i++)
+	{
 		textBuf[i] = ' ';
 	}
-
 }
 
-void DisplayManagement::setDecimalPoint(boolean isOn, int digit){
-	sevseg.SetDecPointSingle(isOn,digit);
+void DisplayManagement::setDecimalPoint(boolean isOn, int digit)
+{
+	sevseg.SetDecPointSingle(isOn, digit);
 #ifdef ARDUINO_SIMULATION
 	mtc->setPoint(isOn, digit);
 #endif
@@ -97,87 +107,108 @@ void DisplayManagement::setDecimalPoint(boolean isOn, int digit){
 //   sevseg.SetSingleDigit(value, digit);
 // }
 
-void DisplayManagement::setBlankDisplay(){
-  this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
+void DisplayManagement::setBlankDisplay()
+{
+	this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
 }
 
-void DisplayManagement::SetFourDigits(uint32_t value){
-  // value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
-  sevseg.SetFourDigits(value);
+void DisplayManagement::SetFourDigits(uint32_t value)
+{
+	// value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
+	sevseg.SetFourDigits(value);
 }
 
-void DisplayManagement::SetLedArray(byte ledsAsBits){
+void DisplayManagement::SetLedArray(byte ledsAsBits)
+{
 	sevseg.SetLedArray(ledsAsBits);
 };
 
-void DisplayManagement::displayHandler(char* inText){
+void DisplayManagement::displayHandler(char *inText)
+{
 	inText[5] = '\0';
 	writeStringToDisplay(inText);
 }
 
-void DisplayManagement::displaySetTextAndDecimalPoints(char* inText, uint8_t* decimalPoints){
+void DisplayManagement::displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints)
+{
 	displayHandler(inText);
 	// always think of 5 digits.
-	for (uint8_t i=0;i<5;i++){
-		setDecimalPoint( *decimalPoints & (0x01 << i) ,i);
+	for (uint8_t i = 0; i < 5; i++)
+	{
+		setDecimalPoint(*decimalPoints & (0x01 << i), i);
 	}
 }
 
-void DisplayManagement::get5DigitsFromString(char* in, char* out, int startPos){ //, int spacesBetweenRepeat
+void DisplayManagement::get5DigitsFromString(char *in, char *out, int startPos)
+{ //, int spacesBetweenRepeat
 	//startPos can be a negative number (for scrolling in at the start), all negative numbers are "spaces". i.e. -2  => [' ', ' ', pos0char, pos1char]
 	bool endOfString = false;
 	//int spacesAtEnd = 0;
-	
+
 	//check for end of string befor startpos in  incoming text. If so, then all spaces...
-	for (int i = 0; i<startPos-1;i++){
-		if (i > 0 && in[i] == '\0'){  
+	for (int i = 0; i < startPos - 1; i++)
+	{
+		if (i > 0 && in[i] == '\0')
+		{
 			endOfString = true;
 		}
 	}
 
-	for (int i = 0; i<5; i++){
-		if (startPos + i<0){
+	for (int i = 0; i < 5; i++)
+	{
+		if (startPos + i < 0)
+		{
 			out[i] = ' ';
-		}else if (in[startPos + i] != '\0'){
+		}
+		else if (in[startPos + i] != '\0')
+		{
 			out[i] = in[startPos + i];
-		}else{
+		}
+		else
+		{
 			endOfString = true;
 		}
-		if (endOfString){
+		if (endOfString)
+		{
 			out[i] = ' ';
 		}
 	}
 }
 
-void DisplayManagement::writeStringToDisplay(char* shortText){
-  sevseg.NewText(shortText);  
+void DisplayManagement::writeStringToDisplay(char *shortText)
+{
+	sevseg.NewText(shortText);
 }
 
-void DisplayManagement::setBrightness(byte value, bool exponential){ //smaller number is brighter
-	if (exponential){
-	  this->brightness = value*value;
-	}else{
-    this->brightness = value;
+void DisplayManagement::setBrightness(byte value, bool exponential)
+{ //smaller number is brighter
+	if (exponential)
+	{
+		this->brightness = value * value;
+	}
+	else
+	{
+		this->brightness = value;
 	}
 }
 
-void DisplayManagement::getActiveSegmentAddress(byte** carrier){
+void DisplayManagement::getActiveSegmentAddress(byte **carrier)
+{
 	*carrier = this->activeSegment;
 }
 
-void DisplayManagement::refresh(){
-	
+void DisplayManagement::refresh()
+{
+
 	this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
-
 }
-
 
 #ifdef ENABLE_SCROLL
 
-
-void DisplayManagement::displayHandlerSequence(char* movie){
+void DisplayManagement::displayHandlerSequence(char *movie)
+{
 	//take each time the 4 next chars and displays them at once (time in between = scrollNextMove timer)
-	this->scrollTextAddress = movie ;
+	this->scrollTextAddress = movie;
 	scrollNextMove.start();
 	this->textStartPos = 0;
 	get5DigitsFromString(this->scrollTextAddress, text, this->textStartPos);
@@ -185,20 +216,25 @@ void DisplayManagement::displayHandlerSequence(char* movie){
 	this->isScrolling = true;
 }
 
-void DisplayManagement::doSequence(){
-	if (this->isScrolling && scrollNextMove.getTimeIsNegative()){
-    
+void DisplayManagement::doSequence()
+{
+	if (this->isScrolling && scrollNextMove.getTimeIsNegative())
+	{
+
 		this->textStartPos += 5;
-		
+
 		//check for end of string in "next sequence"
 		bool endOfString = false;
-		for (int i = this->textStartPos; i < this->textStartPos + 5 ;i++){
-			if (this->scrollTextAddress[i] == '\0'){  
-				 endOfString = true;
+		for (int i = this->textStartPos; i < this->textStartPos + 5; i++)
+		{
+			if (this->scrollTextAddress[i] == '\0')
+			{
+				endOfString = true;
 			}
 		}
 
-		if (endOfString){
+		if (endOfString)
+		{
 			this->textStartPos = 0;
 		}
 
@@ -208,42 +244,52 @@ void DisplayManagement::doSequence(){
 		//scrollNextMove.reset(); //start includes reset.
 		scrollNextMove.start();
 	}
-
 }
 
-void DisplayManagement::dispHandlerWithScroll(char* intext, bool comeScrollIn, bool scrollOnceElseInfinit){
-	
+void DisplayManagement::dispHandlerWithScroll(char *intext, bool comeScrollIn, bool scrollOnceElseInfinit)
+{
+
 	this->scrollTextAddress = intext;
 	this->scrollOnceElseInfinit = scrollOnceElseInfinit;
 	this->comeScrollIn = comeScrollIn;
-	
-	if (this->comeScrollIn){
+
+	if (this->comeScrollIn)
+	{
 		this->textStartPos = -5;
-	}else{
+	}
+	else
+	{
 		this->textStartPos = 0;
 	}
 
 	//scrollNextMove.reset();
 	scrollNextMove.start();
-	
+
 	get5DigitsFromString(intext, text, this->textStartPos);
 	writeStringToDisplay(text);
 	this->isScrolling = true;
 }
 
-void DisplayManagement::doScroll(){ //char * intext
+void DisplayManagement::doScroll()
+{ //char * intext
 	//activate next move
-  if (this->isScrolling && !scrollNextMove.getTimeIsNegative()){
+	if (this->isScrolling && !scrollNextMove.getTimeIsNegative())
+	{
 		this->textStartPos++;
 		//check for end of scrollstring
-		if (this->textStartPos>0 && this->scrollTextAddress[textStartPos-1] == '\0'){
-      if (this->scrollOnceElseInfinit){
+		if (this->textStartPos > 0 && this->scrollTextAddress[textStartPos - 1] == '\0')
+		{
+			if (this->scrollOnceElseInfinit)
+			{
 				this->isScrolling = false;
-      }
+			}
 
-			if (this->comeScrollIn){
+			if (this->comeScrollIn)
+			{
 				this->textStartPos = -5;
-			}else{
+			}
+			else
+			{
 				this->textStartPos = 0;
 			}
 		}
@@ -251,29 +297,28 @@ void DisplayManagement::doScroll(){ //char * intext
 		//dispUpdate
 		get5DigitsFromString(this->scrollTextAddress, text, this->textStartPos);
 		writeStringToDisplay(text);
-		
+
 		//scrollNextMove.reset();
 		scrollNextMove.start();
 	}
 }
 
-
 //check scroll status
-bool DisplayManagement::getIsScrolling(){
+bool DisplayManagement::getIsScrolling()
+{
 	return this->isScrolling;
 }
 
-//set scrollstatus 
-void DisplayManagement::setIsScrolling(bool enableScroll){
+//set scrollstatus
+void DisplayManagement::setIsScrolling(bool enableScroll)
+{
 	this->isScrolling = enableScroll;
 }
 
-void DisplayManagement::setScrollSpeed(long value){
+void DisplayManagement::setScrollSpeed(long value)
+{
 	scrollNextMove.setInitTimeMillis(value * -1);
-  //scrollNextMove.start();
+	//scrollNextMove.start();
 }
 
-#endif 
-
-
-
+#endif
