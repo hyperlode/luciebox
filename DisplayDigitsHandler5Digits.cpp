@@ -92,10 +92,10 @@ void DisplayManagement::setDecimalPoint(boolean isOn, int digit){
 #endif
 }
 
-void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
-  //arbitrary segments lights per digit. according to bits set in value (bit 0=A , bit6 is seg G, bit 7 = decimal point).
-  sevseg.SetSingleDigit(value, digit);
-}
+// void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
+//   //arbitrary segments lights per digit. according to bits set in value (bit 0=A , bit6 is seg G, bit 7 = decimal point).
+//   sevseg.SetSingleDigit(value, digit);
+// }
 
 void DisplayManagement::setBlankDisplay(){
   this->SetFourDigits(0x00000000); //reset display, includes the decimal points.

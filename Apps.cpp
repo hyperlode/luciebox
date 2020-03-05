@@ -1944,8 +1944,8 @@ void Apps::drawGame(bool init){
 	uint32_t cursorBlinker = 0;
 
 	if (init){
-
 	}
+
 
 	switch(drawGameState){
 
@@ -2900,10 +2900,11 @@ void Apps::modeSimon(bool init)
 		if( potentio->getValueStableChangedEdge()) {
 			SIMON_PLAYERS_COUNT = potentio->getValueMapped(1,SIMON_MAX_PLAYERS);
 		}
+
 		ledDisp->numberToBuf(textBuf, SIMON_PLAYERS_COUNT);
-		textBuf[1] = ' ';	
+		//textBuf[1] = ' ';	
 		textBuf[2] = 'P';	
-		textBuf[3] = ' ';	
+		//textBuf[3] = ' ';	
 		
 
 		// Instead of computer, user choses the next light in simon sequence.
@@ -3390,9 +3391,6 @@ void Apps::modeReactionGame(bool init){
 	   
 	  REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 	   
-	   
-	   
- 
 	  if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 		 
 		//play by sounds

@@ -116,16 +116,17 @@ void SevSeg5Digits::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2,
 		pinMode(SegmentPins[seg], OUTPUT);
 	}
 
-	//Turn Everything Off
-	//Set all digit pins off.	Low for common anode, high for common cathode
-	for (byte digit=0;digit<6;digit++) {
-		digitalWrite(DigitPins[digit], DIGITOFF);
-	}
+	// no init needed, works with quick cycles anyways. 
+	// //Turn Everything Off
+	// //Set all digit pins off.	Low for common anode, high for common cathode
+	// for (byte digit=0;digit<6;digit++) {
+	// 	digitalWrite(DigitPins[digit], DIGITOFF);
+	// }
 	
-	//Set all segment pins off.	High for common anode, low for common cathode
-	for (byte seg=0;seg<8;seg++) {
-		digitalWrite(SegmentPins[seg], SEGMENTOFF);
-	}
+	// //Set all segment pins off.	High for common anode, low for common cathode
+	// for (byte seg=0;seg<8;seg++) {
+	// 	digitalWrite(SegmentPins[seg], SEGMENTOFF);
+	// }
 }
 
 //Refresh Display	for 1 + 4 digit display with max brightness.
@@ -166,7 +167,6 @@ byte* SevSeg5Digits::PrintOutputSeg(byte brightness){
 			if (this->extraLedArray && digit == 5){
 				
 				//led array digit
-				// if (this->ledArrayValues & ( 1 << segActive ) != 0){ //check if segment bit is not zero.
 				if (this->ledArrayValues & ( 1 << segActive ) ){ //check if segment bit is not zero.
 					pinMode(DigitPins[digit], OUTPUT);
 					digitalWrite(DigitPins[digit],DIGITON);

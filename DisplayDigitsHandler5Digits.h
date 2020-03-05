@@ -29,7 +29,7 @@ class DisplayManagement {
 
         void setBlankDisplay();
         void setDecimalPoint(boolean isOn, int digit);
-        void SetSingleDigit(uint8_t value, int digit);
+       //void SetSingleDigit(uint8_t value, int digit);
         void SetFourDigits(uint32_t value);
         void SetLedArray(byte ledsAsBits);
 
