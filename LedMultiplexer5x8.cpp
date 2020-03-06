@@ -148,7 +148,7 @@ void LedMultiplexer5x8::refresh()
 		pinMode(SegmentPins[segActive], INPUT);
 
 		//turn digits off
-		for (byte digit = 0; digit < 6; digit++)
+		for (byte digit = 0; digit < 5; digit++)
 		{
 			digitalWrite(DigitPins[digit], DIGITOFF);
 			pinMode(DigitPins[digit], INPUT);

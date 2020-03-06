@@ -1367,7 +1367,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		ledDisp->displayHandler(textBuf);
 
-		ledDisp->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
+		allLights->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
@@ -1676,7 +1676,8 @@ void Apps::modeCountingLettersAndChars(bool init)
 		}
 		else
 		{
-			ledDisp->showNumberAsChars(counter);
+			ledDisp->setCharToDisplay(counter + 65, 3); // 0 is A
+			
 		}
 	}
 }
@@ -2283,7 +2284,9 @@ void Apps::drawGame(bool init)
 	{
 		drawGameState = drawGameShowPicture;
 		ledDisp->numberToBuf(textBuf, random(0, 10000));
-		ledDisp->bufToScreenBits(textBuf + 1, &displayAllSegments);
+		// ledDisp->bufToScreenBits(textBuf + 1, &displayAllSegments);
+		ledDisp->convert_4bytesArray_32bits(textBuf, &displayAllSegments,false);
+
 		break;
 	}
 

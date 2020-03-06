@@ -168,8 +168,8 @@
 #define EEPROM_COMPOSER_SONG_LENGTH 100 // let's make four songs available.
 #define EEPROM_PICTURES_START_ADDRESS EEPROM_COMPOSER_SONGS_START_ADDRESS + 400
 #define EEPROM_PICTURES_LENGTH 300
-#define EEPROM_NUMBER_OF_DRAWINGS 75 // 300/4                             \
-                                     // #define EEPROM_PICTURES_LENGTH 20 \
-                                     // #define EEPROM_NUMBER_OF_DRAWINGS 5 // 300/4
+#define EEPROM_NUMBER_OF_DRAWINGS 75 // 300/4                             
+// #define EEPROM_PICTURES_LENGTH 20 
+// #define EEPROM_NUMBER_OF_DRAWINGS 5 // 300/4
 
 #endif

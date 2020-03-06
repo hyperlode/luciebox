@@ -56,8 +56,12 @@ void DisplayManagement::displayHandler(char *inText) // updateDisplayChars
 	//inText[5] = '\0';
 	//writeStringToDisplay(inText);
 	for (uint8_t i=0;i<4;i++){
-		this->text[i] = inText[i];
+		setCharToDisplay(inText[i],i);
 	}
+}
+
+void DisplayManagement::setCharToDisplay(char character, uint8_t digit){
+	this->text[digit] = character;
 }
 
 void DisplayManagement::showNumber(int16_t number) //updateDisplayNumber
@@ -97,6 +101,21 @@ void DisplayManagement::SetLedArray(byte ledsAsBits) //  updateLights
 	this->lights = ledsAsBits;
 };
 
+void DisplayManagement::convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray){
+	
+	if (toArray){
+		for(uint8_t i=0;i<4;i++){
+			characters[i] = (uint8_t)((*displayAllSegments >> (i * 8)) & 0xFF) ;
+		}
+	}else{
+		*displayAllSegments = 0;
+
+		for(uint8_t i=0;i<4;i++){
+			*displayAllSegments |= (uint32_t)(characters[i]) << (8*i); 
+		}
+	}
+}
+
 void DisplayManagement::setBlankDisplay()
 {
 	//this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
@@ -121,28 +140,28 @@ void DisplayManagement::setBlankDisplay()
 void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 {
 	// negative numbers made absolute!
-	// textbuf five positions.
+	// textbuf four positions.
 
 	int16_t c;
 	number = abs(number);
 	c = number;
-	uint8_t lastDigitNonZero = 4;
+	uint8_t lastDigitNonZero = 3;
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
 
-		textBuf[4 - i] = 48 + c % 10; //ascii 48 = 0
+		textBuf[3 - i] = 48 + c % 10; //ascii 48 = 0
 
 		// memory for saving leading zero's indicator.
-		if (textBuf[4 - i] != 48)
+		if (textBuf[3 - i] != 48)
 		{
-			lastDigitNonZero = 4 - i;
+			lastDigitNonZero = 2 - i;
 		}
 
 		c /= 10;
 	}
 
-	for (uint8_t i = 1; i < lastDigitNonZero; i++)
+	for (uint8_t i = 0; i < lastDigitNonZero; i++)
 	{
 		textBuf[i] = ' ';
 	}

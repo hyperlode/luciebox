@@ -93,6 +93,7 @@ public:
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
     
     void displayHandler(char *inText); // updateDisplayChars
+    void setCharToDisplay(char character, uint8_t digit);
     void showNumber(int16_t number); //updateDisplayNumber
     void SetFourDigits(uint32_t value); //  updateDisplayAllBits
     void setDecimalPoints(byte decimalPoints);
@@ -105,6 +106,7 @@ public:
 
     void numberToBuf(char *textBuf, int16_t number);
 
+    void convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray);
 
     void charsToScreen (char* text, byte* digits);
     void charToScreen(char character, byte* digit);
