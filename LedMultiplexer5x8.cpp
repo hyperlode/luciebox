@@ -29,7 +29,7 @@ Written by Dean Reading, 2012
  Where the digit pins are 1-4 and the segment pins are a-g + dp
  
  Software:
- Call Multiplexer5x8.Begin in setup.  
+ Call LedMultiplexer5x8.Begin in setup.  
  The first argument (boolean) tells whether the display is common cathode (0) or common
  anode (1).
  The next four arguments (bytes) tell the library which arduino pins are connected to
@@ -49,16 +49,16 @@ Written by Dean Reading, 2012
  
  */
 
-#include "Multiplexer5x8.h"
+#include "LedMultiplexer5x8.h"
 
-Multiplexer5x8::Multiplexer5x8()
+LedMultiplexer5x8::LedMultiplexer5x8()
 {
 	//Initial values
 	this->segActive = 0;
 	this->extraLedArray = false;
 }
 
-bool Multiplexer5x8::getMode()
+bool LedMultiplexer5x8::getMode()
 {
 	return getBit(&this->boolContainer, MODEISCOMMONANODE);
 }
@@ -66,15 +66,15 @@ bool Multiplexer5x8::getMode()
 /*******************************************************************************************/
 //Set pin modes and turns all displays off
 
-// void Multiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+// void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
 // {
 // 	//for initialization with extra led array
 // 	DigitPins[5] = LedArrayDigit;
 // 	Begin(mode_isCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
 // 	this->extraLedArray = true;
 // }
-// void Multiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-void Multiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
+// void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+void LedMultiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
 {
 	
 	//Assign input values to variables
@@ -136,7 +136,7 @@ void Multiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2,
 /*******************************************************************************************/
 //Cycles through each segment and turns on the correct digits for each.
 //Leaves everything off
-byte* Multiplexer5x8::PrintOutputSeg()
+byte* LedMultiplexer5x8::PrintOutputSeg()
 {
 	//brightness: 0 = max, the higher, the more delay.
 	//brightness = 49;
@@ -217,13 +217,13 @@ uint8_t** getDigits(){
 //New Number
 /*******************************************************************************************/
 
-// void Multiplexer5x8::SetSingleDigit(int8_t value, int digit)
+// void LedMultiplexer5x8::SetSingleDigit(int8_t value, int digit)
 // {
 // 	//value =  bits. Segment bit0=segmentA, bit6=segmentG, bit7 = decimal point.
 // 	this->lights[digit] = value;
 // }
 
-// void Multiplexer5x8::SetFourDigits(uint32_t value)
+// void LedMultiplexer5x8::SetFourDigits(uint32_t value)
 // {
 // 	for (uint8_t i = 0; i < 4; i++)
 // 	{
@@ -231,12 +231,12 @@ uint8_t** getDigits(){
 // 	}
 // }
 
-// void Multiplexer5x8::SetDecPointSingle(boolean pointIsOn, int digit)
+// void LedMultiplexer5x8::SetDecPointSingle(boolean pointIsOn, int digit)
 // {
 // 	setBit(&this->lights[digit], pointIsOn, 7);
 // 	//CreateArray();
 // }
-// void Multiplexer5x8::SetLedArray(byte ledsAsBits)
+// void LedMultiplexer5x8::SetLedArray(byte ledsAsBits)
 // {
 // 	this->ledArrayValues = ledsAsBits;
 // }
@@ -254,7 +254,7 @@ uint8_t** getDigits(){
 
 
 
-// void Multiplexer5x8::NewText(char *text)
+// void LedMultiplexer5x8::NewText(char *text)
 // {
 // 	this->text = text;
 // 	CreateArray();
@@ -267,7 +267,7 @@ uint8_t** getDigits(){
 // //Create Array
 // /*******************************************************************************************/
 // //From the numbers found, says which LEDs need to be turned on
-// void Multiplexer5x8::CreateArray()
+// void LedMultiplexer5x8::CreateArray()
 // {
 
 // 	for (byte digit = 0; digit < 5; digit++)

@@ -1,5 +1,6 @@
 
 #include "DisplayDigitsHandler5Digits.h"
+#incldue "LedMultiplexer5x8"
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
@@ -46,7 +47,8 @@ ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the
 Potentio potentio;
 
 // OUTPUT
-DisplayManagement ledDisp;
+DisplayManagement visualsManager;
+LedMultiplexer5x8 allVisuals;
 Buzzer buzzer;
 
 //output
@@ -132,7 +134,7 @@ void refresh()
 #endif
 
     //output process
-    ledDisp.refresh();
+    visualsManager.refresh();
 
     for (uint8_t i = 0; i < BINARY_INPUTS_COUNT; i++)
     {
@@ -204,8 +206,7 @@ void setup()
 
     potentio.setPin(PIN_POTENTIO);
 
-    ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-//ledDisp.startUp(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+    allLights.begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_4, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
 
 // if no latching buttons pressed at startup, disable sound
 //(a "Lode listens to the parents"-initiative)
@@ -227,7 +228,7 @@ void setup()
     buzzer.setPin(PIN_BUZZER);
 #endif
 
-    pretbak_apps.setPeripherals(binaryInputs, &potentio, &ledDisp, &buzzer);
+    pretbak_apps.setPeripherals(binaryInputs, &potentio, &visualsManager, &buzzer);
     //pretbak_apps.setBuffers( textBuf);
     pretbak_apps.setDefaultMode();
 
