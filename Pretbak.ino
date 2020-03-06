@@ -260,16 +260,13 @@ void loop()
     byte *tmp = allVisuals.getDigits();
 
     if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-        visualsManager.setDecimalPoint(true,0);
-        visualsManager.setDecimalPoint(true,1);
-        // visualsManager.setDecimalPoint(true,3);
-        // visualsManager.setDecimalPoints(0x03);
+        visualsManager.SetLedArray(0xff);
     }
     
     if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
     {
-        //visualsManager.setBlankDisplay();
-        visualsManager.setDecimalPoint(false,0);
+        visualsManager.setBlankDisplay();
+        //visualsManager.setDecimalPoint(false,0);
         
     }
     
