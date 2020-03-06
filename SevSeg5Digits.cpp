@@ -176,7 +176,6 @@ byte *SevSeg5Digits::PrintOutputSeg(byte brightness)
 		{
 			if (this->extraLedArray && digit == 5)
 			{
-
 				//led array digit
 				if (this->ledArrayValues & (1 << segActive))
 				{ //check if segment bit is not zero.
@@ -219,10 +218,12 @@ void SevSeg5Digits::SetDecPointSingle(boolean pointIsOn, int digit)
 	setBit(&this->lights[digit], pointIsOn, 7);
 	//CreateArray();
 }
+
 void SevSeg5Digits::SetLedArray(byte ledsAsBits)
 {
 	this->ledArrayValues = ledsAsBits;
 }
+
 void SevSeg5Digits::NewText(char *text)
 {
 	this->text = text;
