@@ -4,65 +4,114 @@
 
 DisplayManagement::DisplayManagement()
 {
-	this->text[5] = '\0';
-	brightness = (8888 - LED_DISP_BRIGHTNESS) / 1000;
+	// this->text[5] = '\0';
+	// brightness = (8888 - LED_DISP_BRIGHTNESS) / 1000;
+	setBlankDisplay();
 
 #ifdef ENABLE_SCROLL
 	this->setScrollSpeed(SCROLL_SPEED_DELAY_MILLIS);
 #endif
 };
 
-DisplayManagement::~DisplayManagement()
-{
-#ifdef ENABLE_SCROLL
-	delete[] scrollTextAddress;
-#endif
-};
+// DisplayManagement::~DisplayManagement()
+// {
+// #ifdef ENABLE_SCROLL
+// 	delete[] scrollTextAddress;
+// #endif
+// };
 
-void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-{
-	//for extra led array.
-	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, LedArrayDigit, S1, S2, S3, S4, S5, S6, S7, S8);
+// void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+// {
+// 	//for extra led array.
+// 	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, LedArrayDigit, S1, S2, S3, S4, S5, S6, S7, S8);
 
-#ifdef ENABLE_SCROLL
-	textStartPos = 0;
-#endif
-}
+// #ifdef ENABLE_SCROLL
+// 	textStartPos = 0;
+// #endif
+// }
 
-void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-{
-	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
+// void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+// {
+// 	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
 
-#ifdef ENABLE_SCROLL
-	textStartPos = 0;
-#endif
-}
+// #ifdef ENABLE_SCROLL
+// 	textStartPos = 0;
+// #endif
+// }
 
-void DisplayManagement::showNumberAsChars(int16_t number)
-{
-	// chars as in the alphabet: A=1, B=2,...
-	for (int i = 0; i < 4; i++)
-	{
-		text[4 - i] = 64 + number; //ascii 65 = a
-	}
-	this->displayHandler(text);
-}
+// void DisplayManagement::showNumberAsChars(int16_t number)
+// {
+// 	// chars as in the alphabet: A=1, B=2,...
+// 	for (int i = 0; i < 4; i++)
+// 	{
+// 		text[4 - i] = 64 + number; //ascii 65 = a
+// 	}
+// 	this->displayHandler(text);
+// }
 
 // void DisplayManagement::showNumber(int16_t number, bool noLeadingZeros){
-void DisplayManagement::showNumber(int16_t number)
-{
-	numberToBuf(text, number);
-	this->displayHandler(text);
-}
 
-void DisplayManagement::bufToScreenBits(char *textBuf, uint32_t *screenBits)
+void DisplayManagement::displayHandler(char *inText) // updateDisplayChars
 {
-	*screenBits = 0;
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		*screenBits |= (uint32_t)(textBuf[i]) << (8 * i);
+	//inText[5] = '\0';
+	//writeStringToDisplay(inText);
+	for (uint8_t i=0;i<4;i++){
+		this->text[i] = inText[i];
 	}
 }
+
+void DisplayManagement::showNumber(int16_t number) //updateDisplayNumber
+{
+	numberToBuf(this->text, number);
+	// this->displayHandler(text);
+}
+
+void DisplayManagement::SetFourDigits(uint32_t value) //updateDisplayAllBits
+{
+	// value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
+	//sevseg.SetFourDigits(value);
+	this->displayBinary = value;
+}
+
+void DisplayManagement::setDecimalPoint(boolean isOn, uint8_t digit) // updateDisplayDecimalPoint
+{
+	//sevseg.SetDecPointSingle(isOn, digit);
+	if (isOn){
+		this->decimalPoints |= 1<<digit;
+	}else{
+		this->decimalPoints &= ~(1<<digit);
+	}
+
+#ifdef ARDUINO_SIMULATION
+	mtc->setPoint(isOn, digit);
+#endif
+}
+
+void DisplayManagement::SetLedArray(byte ledsAsBits) //  updateLights
+{
+	sevseg.SetLedArray(ledsAsBits);
+};
+
+void DisplayManagement::setBlankDisplay()
+{
+	//this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
+	this->displayBinary = 0;
+	this->text[0]=0;
+	this->text[1]=0;
+	this->text[2]=0;
+	this->text[3]=0;
+	this->decimalPoints = 0;
+	this->lights = 0;
+}
+
+// void DisplayManagement::bufToScreenBits(char *textBuf, uint32_t *screenBits)
+// {
+// 	*screenBits = 0;
+// 	for (uint8_t i = 0; i < 4; i++)
+// 	{
+// 		*screenBits |= (uint32_t)(textBuf[i]) << (8 * i);
+// 	}
+// }
 
 void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 {
@@ -94,51 +143,100 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 	}
 }
 
-void DisplayManagement::setDecimalPoint(boolean isOn, int digit)
-{
-	sevseg.SetDecPointSingle(isOn, digit);
-#ifdef ARDUINO_SIMULATION
-	mtc->setPoint(isOn, digit);
-#endif
-}
-
 // void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
 //   //arbitrary segments lights per digit. according to bits set in value (bit 0=A , bit6 is seg G, bit 7 = decimal point).
 //   sevseg.SetSingleDigit(value, digit);
 // }
 
-void DisplayManagement::setBlankDisplay()
-{
-	this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
-}
+// void DisplayManagement::displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints)
+// {
+// 	displayHandler(inText);
+// 	// always think of 5 digits.
+// 	for (uint8_t i = 0; i < 5; i++)
+// 	{
+// 		setDecimalPoint(*decimalPoints & (0x01 << i), i);
+// 	}
+// }
 
-void DisplayManagement::SetFourDigits(uint32_t value)
-{
-	// value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
-	sevseg.SetFourDigits(value);
-}
+//Create Array
+/*******************************************************************************************/
+//From the numbers found, says which LEDs need to be turned on
 
-void DisplayManagement::SetLedArray(byte ledsAsBits)
+void DisplayManagement::charsToScreen(char* text, byte** digits)
 {
-	sevseg.SetLedArray(ledsAsBits);
-};
-
-void DisplayManagement::displayHandler(char *inText)
-{
-	inText[5] = '\0';
-	writeStringToDisplay(inText);
-}
-
-void DisplayManagement::displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints)
-{
-	displayHandler(inText);
-	// always think of 5 digits.
-	for (uint8_t i = 0; i < 5; i++)
+	// expect 4 chars.
+	for (byte index = 0; index < 4; index++)
 	{
-		setDecimalPoint(*decimalPoints & (0x01 << i), i);
+		charToScreen(text[i], &digits[i]);
 	}
 }
 
+void DisplayManagement::charToScreen(char character, byte* digit)
+{
+
+	// for (byte digit = 0; digit < 5; digit++)
+	// {
+
+	//temporary save the decimal point of the segment.
+	//setBit(&this->boolContainer, getBit(&this->lights[digit], 7), TEMPDECPOINTMEMORY);
+
+	if (character == ' ')
+	{
+		character = SPACE_FAKE_ASCII;
+	}
+
+	if (character == '?')
+	{
+		byte i = random(0, 7);
+
+		// toggles one segment of the digit ?!
+		setBit(digit, !getBit(digit, i), i); //random on or off...
+	}
+	else if (character < 91)
+	{
+		*digit = pgm_read_byte_near(selected_ascii_to_7seg_digit + character - 48);
+	}
+	else
+	{
+		// illegal state
+
+		//lights[digit] = B01011100; // default error display.
+	}
+
+	//Set the decimal place lights
+	//setBit(&this->lights[digit], getBit(&this->boolContainer, TEMPDECPOINTMEMORY), 7);
+	// }
+}
+
+// void DisplayManagement::setBrightness(byte value, bool exponential)
+// { //smaller number is brighter
+// 	if (exponential)
+// 	{
+// 		this->brightness = value * value;
+// 	}
+// 	else
+// 	{
+// 		this->brightness = value;
+// 	}
+// }
+
+void DisplayManagement::getActiveSegmentAddress(byte **carrier)
+{
+	*carrier = this->activeSegment;
+}
+
+void DisplayManagement::refresh()
+{
+
+	// this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
+}
+
+#ifdef ENABLE_SCROLL
+
+void DisplayManagement::writeStringToDisplay(char *shortText)
+{
+	sevseg.NewText(shortText);
+}
 void DisplayManagement::get5DigitsFromString(char *in, char *out, int startPos)
 { //, int spacesBetweenRepeat
 	//startPos can be a negative number (for scrolling in at the start), all negative numbers are "spaces". i.e. -2  => [' ', ' ', pos0char, pos1char]
@@ -174,36 +272,6 @@ void DisplayManagement::get5DigitsFromString(char *in, char *out, int startPos)
 		}
 	}
 }
-
-void DisplayManagement::writeStringToDisplay(char *shortText)
-{
-	sevseg.NewText(shortText);
-}
-
-void DisplayManagement::setBrightness(byte value, bool exponential)
-{ //smaller number is brighter
-	if (exponential)
-	{
-		this->brightness = value * value;
-	}
-	else
-	{
-		this->brightness = value;
-	}
-}
-
-void DisplayManagement::getActiveSegmentAddress(byte **carrier)
-{
-	*carrier = this->activeSegment;
-}
-
-void DisplayManagement::refresh()
-{
-
-	this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
-}
-
-#ifdef ENABLE_SCROLL
 
 void DisplayManagement::displayHandlerSequence(char *movie)
 {
