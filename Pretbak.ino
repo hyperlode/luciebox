@@ -260,7 +260,7 @@ void loop()
     byte *tmp = allVisuals.getDigits();
 
     if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-        visualsManager.SetLedArray(0xff);
+        visualsManager.SetFourDigits(0x00FFFF03);
     }
     
     if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())

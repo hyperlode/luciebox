@@ -268,8 +268,8 @@ void DisplayManagement::refresh()
 			// led display digits
 			
 			//charToScreen(text[i], &multiplexerData[i]);
-			//multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
-			multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
+			multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
+			//multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
 			// Serial.println(multiplexerData[i], HEX);
 		}else{
 			multiplexerData[i] = lights;
