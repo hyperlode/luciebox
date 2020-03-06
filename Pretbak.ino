@@ -9,9 +9,9 @@
 #include "Potentio.h"
 #include "PretbakSettings.h"
 
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
-
+#define DBUG_REFACTOR_DISP
 #ifdef ENABLE_SERIAL
 //#define DEBUG_ANALOG_IN
 // #define DEBUG_MERCURY
@@ -246,6 +246,39 @@ void setup()
 
 void loop()
 {
+
+    #ifdef DBUG_REFACTOR_DISP
+
+    allVisuals.refresh();
+    input_process();    
+    byte* tmp = allVisuals.getDigits();
+    
+    
+    if(binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+     for (uint8_t i=0;i<5;i++){
+        tmp[i] = 0x07;
+      }
+
+    }
+    if(binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+     for (uint8_t i=0;i<5;i++){
+        tmp[i] = 0x00;
+      }
+
+    }
+    if(binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+      allVisuals.setBrightness((byte)potentio.getValueMapped(0,50), false);
+     // Serial.println(potentio.getValueMapped(0,50));
+      for (uint8_t i=0;i<5;i++){
+        tmp[i] = 0xff;
+      }
+
+    }
+    
+    #else
     // put your main code here, to run repeatedly:
     refresh();
+  #endif
+
+
 }

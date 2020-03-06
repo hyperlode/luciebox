@@ -76,7 +76,7 @@ bool LedMultiplexer5x8::getMode()
 // void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
 void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
 {
-	
+
 	//Assign input values to variables
 	//Mode sets what the digit pins must be set at for it to be turned on.	0 for common cathode, 1 for common anode
 	//this->mode_isCommonAnode=mode_isCommonAnode;
@@ -107,7 +107,7 @@ void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte
 	SegmentPins[5] = S5;
 	SegmentPins[6] = S6;
 	SegmentPins[7] = S7;
-	
+
 	//Set Pin Modes as outputs
 	for (byte digit = 0; digit < 5; digit++)
 	{
@@ -132,7 +132,7 @@ void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte
 	// }
 }
 
-//Refresh Display	for 1 + 4 digit display with max brightness.
+//Refresh Display
 /*******************************************************************************************/
 //Cycles through each segment and turns on the correct digits for each.
 //Leaves everything off
@@ -140,19 +140,19 @@ void LedMultiplexer5x8::refresh()
 {
 	//brightness: 0 = max, the higher, the more delay.
 	//brightness = 49;
-	//turn active segmentOff , as active segment can be more than there are available segments, check the number!
-	if (segActive <= 7)
-	{ //if we don't do this, after a certain amount of time, about more than 50, the device errors.
-		//turn segment line off
-		digitalWrite(SegmentPins[segActive], SEGMENTOFF);
-		pinMode(SegmentPins[segActive], INPUT);
 
-		//turn digits off
-		for (byte digit = 0; digit < 5; digit++)
-		{
-			digitalWrite(DigitPins[digit], DIGITOFF);
-			pinMode(DigitPins[digit], INPUT);
-		}
+	//turn segments off
+	for (byte segment = 0; segment < 8; segment++)
+	{
+		digitalWrite(SegmentPins[segment], SEGMENTOFF);
+		// pinMode(SegmentPins[segment], INPUT);
+	}
+
+	//turn digits off
+	for (byte digit = 0; digit < 5; digit++)
+	{
+		digitalWrite(DigitPins[digit], DIGITOFF);
+		// pinMode(DigitPins[digit], INPUT);
 	}
 
 	segActive++;
@@ -174,24 +174,11 @@ void LedMultiplexer5x8::refresh()
 		//For each digit, turn relevant digits on
 		for (byte digit = 0; digit < 5; digit++)
 		{
-			// if (this->extraLedArray && digit == 5)
-			// {
-
-			// 	//led array digit
-			// 	if (this->ledArrayValues & (1 << segActive))
-			// 	{ //check if segment bit is not zero.
-			// 		pinMode(DigitPins[digit], OUTPUT);
-			// 		digitalWrite(DigitPins[digit], DIGITON);
-			// 	}
-			// }
-			// else
-			// {
-				if (getBit(&digitValues[digit], segActive))
-				{
-					pinMode(DigitPins[digit], OUTPUT);
-					digitalWrite(DigitPins[digit], DIGITON);
-				}
-			// }
+			if (getBit(&digitValues[digit], segActive))
+			{
+				pinMode(DigitPins[digit], OUTPUT);
+				digitalWrite(DigitPins[digit], DIGITON);
+			}
 		}
 	}
 	//return &segActive; //return the address of the integer that contains the active Segment.
@@ -209,8 +196,9 @@ void LedMultiplexer5x8::setBrightness(byte value, bool exponential)
 	}
 }
 
-byte* LedMultiplexer5x8::getDigits(){
-	// get the handle to send the values of all the lights too. 
+byte *LedMultiplexer5x8::getDigits()
+{
+	// get the handle to send the values of all the lights too.
 	return digitValues;
 }
 
@@ -240,19 +228,6 @@ byte* LedMultiplexer5x8::getDigits(){
 // {
 // 	this->ledArrayValues = ledsAsBits;
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // void LedMultiplexer5x8::NewText(char *text)
 // {
