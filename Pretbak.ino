@@ -260,13 +260,18 @@ void loop()
     byte *tmp = allVisuals.getDigits();
 
     if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-        visualsManager.SetFourDigits(0x00FFFF03);
+        
+        visualsManager.setCharToDisplay('Y',3);
+        visualsManager.setCharToDisplay('C',2);
+        visualsManager.setCharToDisplay('U',1);
+        visualsManager.setCharToDisplay('L',0);
     }
     
     if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
     {
-        visualsManager.setBlankDisplay();
-        //visualsManager.setDecimalPoint(false,0);
+        visualsManager.SetFourDigits(0xFF000000);
+        visualsManager.SetLedArray(0x0F);
+        visualsManager.setDecimalPoint(false,2);
         
     }
     
@@ -276,6 +281,7 @@ void loop()
         allVisuals.setBrightness((byte)potentio.getValueMapped(0, 50), false);
         //Serial.println(potentio.getValueMapped(0,50));
        // visualsManager.setBlankDisplay();
+       visualsManager.setBlankDisplay();
     }
     visualsManager.refresh();
 

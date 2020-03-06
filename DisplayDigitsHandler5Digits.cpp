@@ -120,10 +120,10 @@ void DisplayManagement::setBlankDisplay()
 {
 	//this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
 	this->displayBinary = 0;
-	this->text[0]=0;
-	this->text[1]=0;
-	this->text[2]=0;
-	this->text[3]=0;
+	this->text[0]=SPACE_FAKE_ASCII;
+	this->text[1]=SPACE_FAKE_ASCII;
+	this->text[2]=SPACE_FAKE_ASCII;
+	this->text[3]=SPACE_FAKE_ASCII;
 	this->decimalPoints = 0;
 	this->lights = 0;
 }
@@ -267,9 +267,9 @@ void DisplayManagement::refresh()
 		if (i < 4){
 			// led display digits
 			
-			//charToScreen(text[i], &multiplexerData[i]);
+			charToScreen(text[i], &multiplexerData[i]);
 			multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
-			//multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
+			multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
 			// Serial.println(multiplexerData[i], HEX);
 		}else{
 			multiplexerData[i] = lights;
