@@ -54,8 +54,8 @@ Written by Dean Reading, 2012
 LedMultiplexer5x8::LedMultiplexer5x8()
 {
 	//Initial values
-	this->segActive = 0;
-	this->extraLedArray = false;
+	// this->segActive = 0;
+	// this->extraLedArray = false;
 }
 
 bool LedMultiplexer5x8::getMode()
@@ -74,7 +74,7 @@ bool LedMultiplexer5x8::getMode()
 // 	this->extraLedArray = true;
 // }
 // void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-void LedMultiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
+void LedMultiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
 {
 	
 	//Assign input values to variables
@@ -136,7 +136,7 @@ void LedMultiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte 
 /*******************************************************************************************/
 //Cycles through each segment and turns on the correct digits for each.
 //Leaves everything off
-byte* LedMultiplexer5x8::PrintOutputSeg()
+void LedMultiplexer5x8::refresh()
 {
 	//brightness: 0 = max, the higher, the more delay.
 	//brightness = 49;
@@ -194,10 +194,10 @@ byte* LedMultiplexer5x8::PrintOutputSeg()
 			// }
 		}
 	}
-	return &segActive; //return the address of the integer that contains the active Segment.
+	//return &segActive; //return the address of the integer that contains the active Segment.
 }
 
-void DisplayManagement::setBrightness(byte value, bool exponential)
+void LedMultiplexer5x8::setBrightness(byte value, bool exponential)
 { //smaller number is brighter
 	if (exponential)
 	{
@@ -209,9 +209,9 @@ void DisplayManagement::setBrightness(byte value, bool exponential)
 	}
 }
 
-uint8_t** getDigits(){
+byte* LedMultiplexer5x8::getDigits(){
 	// get the handle to send the values of all the lights too. 
-	return &digitValues;
+	return digitValues;
 }
 
 //New Number

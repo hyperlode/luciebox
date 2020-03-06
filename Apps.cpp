@@ -4,12 +4,15 @@
 
 Apps::Apps(){};
 
-void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, DisplayManagement *ledDisp, Buzzer *buzzer)
+void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer)
 {
 	this->buzzer = buzzer;
 	this->binaryInputs = binaryInputs;
 	this->potentio = potentio;
 	this->ledDisp = ledDisp;
+	this->allLights = allLights;
+
+	ledDisp->setMultiplexerData(allLights->getDigits());
 
 	//
 }
@@ -222,7 +225,7 @@ void Apps::setDefaultMode()
 	ledDisp->setBlankDisplay();
 	decimalPoints = 0; // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
 	//ledDisp->SetFourDigits(0xC0C0C0C0);
-	ledDisp->setBrightness(0, false);
+	allLights->setBrightness(0, false);
 
 	//buzzer
 	buzzer->setSpeedRatio(2);
@@ -532,10 +535,11 @@ void Apps::pomodoroTimer(bool init)
 		break;
 	}
 
-	decimalPoints = 0;
+	// decimalPoints = 0;
 	if (showMenu)
 	{
-		decimalPoints = 1 << 2;
+		// decimalPoints = 1 << 2;
+		ledDisp->setDecimalPoint(true, 2);
 
 		if (millis() % 500 < 250)
 		{
@@ -544,7 +548,7 @@ void Apps::pomodoroTimer(bool init)
 	}
 	else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500))
 	{
-		decimalPoints = 1 << 2;
+		ledDisp->setDecimalPoint(true, 2);
 		lights |= 1 << LIGHT_LATCHING_EXTRA;
 	}
 	else if (POMODORO_IN_BREAK)
@@ -589,7 +593,8 @@ void Apps::pomodoroTimer(bool init)
 		lights |= 1 << LIGHT_MOMENTARY_3;
 	}
 
-	ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+	//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+	ledDisp->displayHandler(textBuf);
 	ledDisp->SetLedArray(lights);
 }
 
@@ -679,7 +684,8 @@ void Apps::stopwatch(bool init)
 	else
 	{
 		//
-		ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+		ledDisp->displayHandler(textBuf);
+			ledDisp->setDecimalPoints(decimalPoints);
 	}
 }
 void Apps::modeButtonDebug(bool init)
@@ -1778,7 +1784,8 @@ void Apps::modeSoundSong(bool init)
 
 	buzzer->lastPlayedNoteToDisplay(textBuf, &decimalPoints);
 
-	ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+	ledDisp->displayHandler(textBuf);
+			ledDisp->setDecimalPoints(decimalPoints);
 }
 
 void Apps::modeComposeSong(bool init)
@@ -1886,7 +1893,8 @@ void Apps::modeComposeSong(bool init)
 					buzzer->programBuzzerRoll(potentio->getValueMapped(0, 254));
 
 					buzzer->noteToDisplay(textBuf, &decimalPoints, potentio->getValueMapped(0, 254));
-					ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+					ledDisp->displayHandler(textBuf);
+			ledDisp->setDecimalPoints(decimalPoints);
 				}
 				defaultDisplay = false;
 			}
@@ -1981,7 +1989,8 @@ void Apps::modeComposeSong(bool init)
 			else
 			{
 				buzzer->noteToDisplay(textBuf, &decimalPoints, COMPOSER_SONG[COMPOSER_STEP]);
-				ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+				ledDisp->displayHandler(textBuf);
+			ledDisp->setDecimalPoints(decimalPoints);
 			}
 		}
 	}
@@ -2056,7 +2065,8 @@ void Apps::modeSoundNotes(bool init)
 			SOUND_FUN_NOTE_INDEX++;
 		}
 		buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
-		ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+		ledDisp->displayHandler(textBuf);
+			ledDisp->setDecimalPoints(decimalPoints);
 	}
 }
 
@@ -2995,7 +3005,9 @@ void Apps::modeSequencer(bool init)
 		// if music note needs to be shown
 		if (showNote)
 		{
-			ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+			//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+			ledDisp->displayHandler(textBuf);
+			ledDisp->setDecimalPoints(decimalPoints);
 		}
 
 		// handle step change

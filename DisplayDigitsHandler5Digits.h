@@ -6,7 +6,7 @@
 #else
 #include "WProgram.h"
 #endif
-#include "SevSeg5Digits.h"
+//#include "SevSeg5Digits.h"
 //#include "Countdowntimer.h"
 #include "SuperTimer.h"
 
@@ -95,6 +95,7 @@ public:
     void displayHandler(char *inText); // updateDisplayChars
     void showNumber(int16_t number); //updateDisplayNumber
     void SetFourDigits(uint32_t value); //  updateDisplayAllBits
+    void setDecimalPoints(byte decimalPoints);
     void setDecimalPoint(boolean isOn, uint8_t digit); // updateDisplayDecimalPoint
     void SetLedArray(byte ledsAsBits);  //  updateLights
     
@@ -105,8 +106,10 @@ public:
     void numberToBuf(char *textBuf, int16_t number);
 
 
-    void charsToScreen (char* text, byte** digits);
+    void charsToScreen (char* text, byte* digits);
     void charToScreen(char character, byte* digit);
+
+    void setMultiplexerData(byte* multiplexerDigits);
 
     //void displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints);  //deprecated
 
@@ -141,6 +144,8 @@ private:
     byte lights;
     byte decimalPoints;
     uint32_t displayBinary;
+
+    byte* multiplexerData; // pointer to array containing the actual lights data.
 
     //byte *activeSegment;
 

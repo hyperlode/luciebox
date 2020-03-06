@@ -73,6 +73,10 @@ void DisplayManagement::SetFourDigits(uint32_t value) //updateDisplayAllBits
 	this->displayBinary = value;
 }
 
+void DisplayManagement::setDecimalPoints(byte decimalPoints){
+	this->decimalPoints = decimalPoints;
+}
+
 void DisplayManagement::setDecimalPoint(boolean isOn, uint8_t digit) // updateDisplayDecimalPoint
 {
 	//sevseg.SetDecPointSingle(isOn, digit);
@@ -89,7 +93,8 @@ void DisplayManagement::setDecimalPoint(boolean isOn, uint8_t digit) // updateDi
 
 void DisplayManagement::SetLedArray(byte ledsAsBits) //  updateLights
 {
-	sevseg.SetLedArray(ledsAsBits);
+	//sevseg.SetLedArray(ledsAsBits);
+	this->lights = ledsAsBits;
 };
 
 void DisplayManagement::setBlankDisplay()
@@ -162,12 +167,12 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 /*******************************************************************************************/
 //From the numbers found, says which LEDs need to be turned on
 
-void DisplayManagement::charsToScreen(char* text, byte** digits)
+void DisplayManagement::charsToScreen(char* text, byte* digits)
 {
 	// expect 4 chars.
 	for (byte index = 0; index < 4; index++)
 	{
-		charToScreen(text[i], &digits[i]);
+		charToScreen(text[index], &digits[index]);
 	}
 }
 
@@ -220,15 +225,36 @@ void DisplayManagement::charToScreen(char character, byte* digit)
 // 	}
 // }
 
-void DisplayManagement::getActiveSegmentAddress(byte **carrier)
-{
-	*carrier = this->activeSegment;
+// void DisplayManagement::getActiveSegmentAddress(byte **carrier)
+// {
+// 	*carrier = this->activeSegment;
+// }
+void DisplayManagement::setMultiplexerData(byte* multiplexerDigits){
+	this->multiplexerData = multiplexerDigits;
 }
 
 void DisplayManagement::refresh()
 {
 
 	// this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
+
+	// set it all up.
+
+	for (uint8_t i = 0;i<5;i++){
+
+		// start with a clean sheet.
+		multiplexerData[i] = 0;
+
+		if (i < 4){
+			// led display digits
+			
+			charToScreen(text[i], &multiplexerData[i]);
+			multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
+			multiplexerData[i] |=  1 << (getBit(&this->decimalPoints, i));
+		}else{
+			multiplexerData[i] = lights;
+		}
+	}
 }
 
 #ifdef ENABLE_SCROLL

@@ -15,11 +15,10 @@
 
 #else
 
-#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY //invalid
-#define PIN_DISPLAY_DIGIT_1 11
-#define PIN_DISPLAY_DIGIT_2 10
-#define PIN_DISPLAY_DIGIT_3 9
-#define PIN_DISPLAY_DIGIT_4 5
+#define PIN_DISPLAY_DIGIT_0 11 
+#define PIN_DISPLAY_DIGIT_1 10
+#define PIN_DISPLAY_DIGIT_2 9
+#define PIN_DISPLAY_DIGIT_3 5
 #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
 #define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 
