@@ -664,6 +664,12 @@ $CMP DAC_R-2R
 F https://www.bourns.com/docs/Product-Datasheets/R2R.pdf
 $ENDCMP
 #
+$CMP D_Schottky
+D Schottky diode
+K diode Schottky
+F ~
+$ENDCMP
+#
 $CMP FDMS8050
 D 55A Id, 30V Vds, N-Channel PowerTrench MOSFET, 0.65mOhm Ron, 285nC Qgmax, -55 to 150 °C, 5x6mm SON8
 K powertrench MOSFET fairchild

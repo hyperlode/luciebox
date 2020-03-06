@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:Luciebox-cache
-EELAYER 30 0
+EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -58,11 +58,11 @@ F 3 "https://www.bourns.com/docs/Product-Datasheets/R2R.pdf" H 2450 3700 50  000
 $EndComp
 $Comp
 L power:GND #PWR021
-U 1 1 5DACA23D
+U 1 1 5E6454E3
 P 3600 3550
-AR Path="/5D74964C/5DACA23D" Ref="#PWR021"  Part="1" 
-AR Path="/5D761BCA/5DACA23D" Ref="#PWR024"  Part="1" 
-AR Path="/5D9307E8/5DACA23D" Ref="#PWR027"  Part="1" 
+AR Path="/5D74964C/5E6454E3" Ref="#PWR021"  Part="1" 
+AR Path="/5D761BCA/5E6454E3" Ref="#PWR024"  Part="1" 
+AR Path="/5D9307E8/5E6454E3" Ref="#PWR027"  Part="1" 
 F 0 "#PWR027" H 3600 3300 50  0001 C CNN
 F 1 "GND" H 3605 3377 50  0000 C CNN
 F 2 "" H 3600 3550 50  0001 C CNN
@@ -76,11 +76,11 @@ Wire Wire Line
 	3350 3550 3350 3700
 $Comp
 L Luciebox_components:VCC_minimalCurrent #PWR025
-U 1 1 5DB05874
+U 1 1 5E6454E4
 P 5750 1500
-AR Path="/5D9307E8/5DB05874" Ref="#PWR025"  Part="1" 
-AR Path="/5D74964C/5DB05874" Ref="#PWR019"  Part="1" 
-AR Path="/5D761BCA/5DB05874" Ref="#PWR022"  Part="1" 
+AR Path="/5D9307E8/5E6454E4" Ref="#PWR025"  Part="1" 
+AR Path="/5D74964C/5E6454E4" Ref="#PWR019"  Part="1" 
+AR Path="/5D761BCA/5E6454E4" Ref="#PWR022"  Part="1" 
 F 0 "#PWR025" H 5750 1350 50  0001 C CNN
 F 1 "VCC_minimalCurrent" H 5767 1673 50  0000 C CNN
 F 2 "" H 5750 1500 50  0001 C CNN
@@ -187,11 +187,11 @@ Connection ~ 5750 2400
 Connection ~ 5750 1500
 $Comp
 L Device:R_Small R27
-U 1 1 5D7526CF
+U 1 1 5E6454DE
 P 3750 2850
-AR Path="/5D74964C/5D7526CF" Ref="R27"  Part="1" 
-AR Path="/5D761BCA/5D7526CF" Ref="R36"  Part="1" 
-AR Path="/5D9307E8/5D7526CF" Ref="R45"  Part="1" 
+AR Path="/5D74964C/5E6454DE" Ref="R27"  Part="1" 
+AR Path="/5D761BCA/5E6454DE" Ref="R36"  Part="1" 
+AR Path="/5D9307E8/5E6454DE" Ref="R45"  Part="1" 
 F 0 "R45" H 3809 2896 50  0000 L CNN
 F 1 "R_Small" H 3809 2805 50  0000 L CNN
 F 2 "Luciebox:1206" H 3750 2850 50  0001 C CNN
