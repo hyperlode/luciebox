@@ -29,7 +29,7 @@ Written by Dean Reading, 2012
  Where the digit pins are 1-4 and the segment pins are a-g + dp
  
  Software:
- Call SevSeg5Digits.Begin in setup.  
+ Call Multiplexer5x8.Begin in setup.  
  The first argument (boolean) tells whether the display is common cathode (0) or common
  anode (1).
  The next four arguments (bytes) tell the library which arduino pins are connected to
@@ -49,16 +49,16 @@ Written by Dean Reading, 2012
  
  */
 
-#include "SevSeg5Digits.h"
+#include "Multiplexer5x8.h"
 
-SevSeg5Digits::SevSeg5Digits()
+Multiplexer5x8::Multiplexer5x8()
 {
 	//Initial values
 	this->segActive = 0;
 	this->extraLedArray = false;
 }
 
-bool SevSeg5Digits::getMode()
+bool Multiplexer5x8::getMode()
 {
 	return getBit(&this->boolContainer, MODEISCOMMONANODE);
 }
@@ -66,17 +66,17 @@ bool SevSeg5Digits::getMode()
 /*******************************************************************************************/
 //Set pin modes and turns all displays off
 
-void SevSeg5Digits::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+// void Multiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+// {
+// 	//for initialization with extra led array
+// 	DigitPins[5] = LedArrayDigit;
+// 	Begin(mode_isCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
+// 	this->extraLedArray = true;
+// }
+// void Multiplexer5x8::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
+void Multiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
 {
-	//for initialization with extra led array
-	DigitPins[5] = LedArrayDigit;
-	Begin(mode_isCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
-	this->extraLedArray = true;
-}
-void SevSeg5Digits::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-{
-	//for pure 5 7seg digits.
-
+	
 	//Assign input values to variables
 	//Mode sets what the digit pins must be set at for it to be turned on.	0 for common cathode, 1 for common anode
 	//this->mode_isCommonAnode=mode_isCommonAnode;
@@ -99,17 +99,17 @@ void SevSeg5Digits::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2,
 	DigitPins[2] = D2;
 	DigitPins[3] = D3;
 	DigitPins[4] = D4;
-	SegmentPins[0] = S1;
-	SegmentPins[1] = S2;
-	SegmentPins[2] = S3;
-	SegmentPins[3] = S4;
-	SegmentPins[4] = S5;
-	SegmentPins[5] = S6;
-	SegmentPins[6] = S7;
-	SegmentPins[7] = S8;
-
+	SegmentPins[0] = S0;
+	SegmentPins[1] = S1;
+	SegmentPins[2] = S2;
+	SegmentPins[3] = S3;
+	SegmentPins[4] = S4;
+	SegmentPins[5] = S5;
+	SegmentPins[6] = S6;
+	SegmentPins[7] = S7;
+	
 	//Set Pin Modes as outputs
-	for (byte digit = 0; digit < 6; digit++)
+	for (byte digit = 0; digit < 5; digit++)
 	{
 		pinMode(DigitPins[digit], OUTPUT);
 	}
@@ -136,12 +136,12 @@ void SevSeg5Digits::Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2,
 /*******************************************************************************************/
 //Cycles through each segment and turns on the correct digits for each.
 //Leaves everything off
-byte *SevSeg5Digits::PrintOutputSeg(byte brightness)
+byte* Multiplexer5x8::PrintOutputSeg()
 {
 	//brightness: 0 = max, the higher, the more delay.
 	//brightness = 49;
 	//turn active segmentOff , as active segment can be more than there are available segments, check the number!
-	if (segActive < 8)
+	if (segActive <= 7)
 	{ //if we don't do this, after a certain amount of time, about more than 50, the device errors.
 		//turn segment line off
 		digitalWrite(SegmentPins[segActive], SEGMENTOFF);
@@ -159,114 +159,144 @@ byte *SevSeg5Digits::PrintOutputSeg(byte brightness)
 	if (segActive > 7)
 	{
 		//this is the brightness control, going into virtual segments, and doing nothing...
-		if (segActive > 7 + brightness)
+		if (segActive > 7 + this->brightness)
 		{
 			segActive = 0;
 		}
 	}
 
-	if (segActive < 8)
+	if (segActive <= 7)
 	{
 		//Turn the relevant segment on
 		pinMode(SegmentPins[segActive], OUTPUT);
 		digitalWrite(SegmentPins[segActive], SEGMENTON);
 
 		//For each digit, turn relevant digits on
-		for (byte digit = 0; digit < 6; digit++)
+		for (byte digit = 0; digit < 5; digit++)
 		{
-			if (this->extraLedArray && digit == 5)
-			{
-				//led array digit
-				if (this->ledArrayValues & (1 << segActive))
-				{ //check if segment bit is not zero.
-					pinMode(DigitPins[digit], OUTPUT);
-					digitalWrite(DigitPins[digit], DIGITON);
-				}
-			}
-			else
-			{
-				if (getBit(&lights[digit], segActive))
+			// if (this->extraLedArray && digit == 5)
+			// {
+
+			// 	//led array digit
+			// 	if (this->ledArrayValues & (1 << segActive))
+			// 	{ //check if segment bit is not zero.
+			// 		pinMode(DigitPins[digit], OUTPUT);
+			// 		digitalWrite(DigitPins[digit], DIGITON);
+			// 	}
+			// }
+			// else
+			// {
+				if (getBit(&digitValues[digit], segActive))
 				{
 					pinMode(DigitPins[digit], OUTPUT);
 					digitalWrite(DigitPins[digit], DIGITON);
 				}
-			}
+			// }
 		}
 	}
 	return &segActive; //return the address of the integer that contains the active Segment.
 }
 
+void DisplayManagement::setBrightness(byte value, bool exponential)
+{ //smaller number is brighter
+	if (exponential)
+	{
+		this->brightness = value * value;
+	}
+	else
+	{
+		this->brightness = value;
+	}
+}
+
+uint8_t** getDigits(){
+	// get the handle to send the values of all the lights too. 
+	return &digitValues;
+}
+
 //New Number
 /*******************************************************************************************/
 
-void SevSeg5Digits::SetSingleDigit(int8_t value, int digit)
-{
-	//value =  bits. Segment bit0=segmentA, bit6=segmentG, bit7 = decimal point.
-	this->lights[digit] = value;
-}
+// void Multiplexer5x8::SetSingleDigit(int8_t value, int digit)
+// {
+// 	//value =  bits. Segment bit0=segmentA, bit6=segmentG, bit7 = decimal point.
+// 	this->lights[digit] = value;
+// }
 
-void SevSeg5Digits::SetFourDigits(uint32_t value)
-{
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		this->SetSingleDigit(value >> (8 * i), i + 1);
-	}
-}
+// void Multiplexer5x8::SetFourDigits(uint32_t value)
+// {
+// 	for (uint8_t i = 0; i < 4; i++)
+// 	{
+// 		this->SetSingleDigit(value >> (8 * i), i + 1);
+// 	}
+// }
 
-void SevSeg5Digits::SetDecPointSingle(boolean pointIsOn, int digit)
-{
-	setBit(&this->lights[digit], pointIsOn, 7);
-	//CreateArray();
-}
+// void Multiplexer5x8::SetDecPointSingle(boolean pointIsOn, int digit)
+// {
+// 	setBit(&this->lights[digit], pointIsOn, 7);
+// 	//CreateArray();
+// }
+// void Multiplexer5x8::SetLedArray(byte ledsAsBits)
+// {
+// 	this->ledArrayValues = ledsAsBits;
+// }
 
-void SevSeg5Digits::SetLedArray(byte ledsAsBits)
-{
-	this->ledArrayValues = ledsAsBits;
-}
 
-void SevSeg5Digits::NewText(char *text)
-{
-	this->text = text;
-	CreateArray();
-#ifdef ARDUINO_SIMULATION
-	mtc->setText(text);
-	mtc->setLights(this->lights);
-#endif
-}
 
-//Create Array
-/*******************************************************************************************/
-//From the numbers found, says which LEDs need to be turned on
-void SevSeg5Digits::CreateArray()
-{
 
-	for (byte digit = 0; digit < 5; digit++)
-	{
 
-		//temporary save the decimal point of the segment.
-		setBit(&this->boolContainer, getBit(&this->lights[digit], 7), TEMPDECPOINTMEMORY);
 
-		if (text[digit] == ' ')
-		{
-			text[digit] = SPACE_FAKE_ASCII;
-		}
 
-		if (text[digit] == '?')
-		{
-			byte i = random(0, 7);
-			setBit(&this->lights[digit], !getBit(&this->lights[digit], i), i); //random on or off...
-		}
-		else if (text[digit] < 91)
-		{
-			lights[digit] = pgm_read_byte_near(selected_ascii_to_7seg_digit + text[digit] - 48);
-		}
-		else
-		{
 
-			lights[digit] = B01011100;
-		}
 
-		//Set the decimal place lights
-		setBit(&this->lights[digit], getBit(&this->boolContainer, TEMPDECPOINTMEMORY), 7);
-	}
-}
+
+
+
+
+
+// void Multiplexer5x8::NewText(char *text)
+// {
+// 	this->text = text;
+// 	CreateArray();
+// #ifdef ARDUINO_SIMULATION
+// 	mtc->setText(text);
+// 	mtc->setLights(this->lights);
+// #endif
+// }
+
+// //Create Array
+// /*******************************************************************************************/
+// //From the numbers found, says which LEDs need to be turned on
+// void Multiplexer5x8::CreateArray()
+// {
+
+// 	for (byte digit = 0; digit < 5; digit++)
+// 	{
+
+// 		//temporary save the decimal point of the segment.
+// 		setBit(&this->boolContainer, getBit(&this->lights[digit], 7), TEMPDECPOINTMEMORY);
+
+// 		if (text[digit] == ' ')
+// 		{
+// 			text[digit] = SPACE_FAKE_ASCII;
+// 		}
+
+// 		if (text[digit] == '?')
+// 		{
+// 			byte i = random(0, 7);
+// 			setBit(&this->lights[digit], !getBit(&this->lights[digit], i), i); //random on or off...
+// 		}
+// 		else if (text[digit] < 91)
+// 		{
+// 			lights[digit] = pgm_read_byte_near(selected_ascii_to_7seg_digit + text[digit] - 48);
+// 		}
+// 		else
+// 		{
+
+// 			lights[digit] = B01011100;
+// 		}
+
+// 		//Set the decimal place lights
+// 		setBit(&this->lights[digit], getBit(&this->boolContainer, TEMPDECPOINTMEMORY), 7);
+// 	}
+// }
