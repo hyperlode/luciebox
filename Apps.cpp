@@ -12,8 +12,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, Displa
 	this->ledDisp = ledDisp;
 	this->allLights = allLights;
 
-	ledDisp->setMultiplexerData(allLights->getDigits());
-
+	
 	//
 }
 

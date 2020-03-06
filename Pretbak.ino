@@ -137,14 +137,19 @@ void refresh()
     visualsManager.refresh();
     allVisuals.refresh();
 
-    for (uint8_t i = 0; i < BINARY_INPUTS_COUNT; i++)
-    {
-        binaryInputs[i].refresh();
-    }
+    
 }
 
 void input_process()
 {
+
+    // process edges from binaryInputs here, think of it as the previous cycle (done before new input processed.)
+    for (uint8_t i = 0; i < BINARY_INPUTS_COUNT; i++)
+    {
+        binaryInputs[i].refresh();
+    }
+
+
     selectorDial.refresh();
     buttons_1.refresh();
     buttons_2.refresh();
@@ -208,6 +213,7 @@ void setup()
     potentio.setPin(PIN_POTENTIO);
 
     allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+    visualsManager.setMultiplexerData(allVisuals.getDigits());
 
 // if no latching buttons pressed at startup, disable sound
 //(a "Lode listens to the parents"-initiative)
@@ -247,38 +253,50 @@ void setup()
 void loop()
 {
 
-    #ifdef DBUG_REFACTOR_DISP
+#ifdef DBUG_REFACTOR_DISP
+
+    input_process();
+
+    byte *tmp = allVisuals.getDigits();
+
+    if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+        visualsManager.setDecimalPoint(true,0);
+        visualsManager.setDecimalPoint(true,1);
+        // visualsManager.setDecimalPoint(true,3);
+        // visualsManager.setDecimalPoints(0x03);
+    }
+    
+    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+    {
+        //visualsManager.setBlankDisplay();
+        visualsManager.setDecimalPoint(false,0);
+        
+    }
+    
+
+    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+    {
+        allVisuals.setBrightness((byte)potentio.getValueMapped(0, 50), false);
+        //Serial.println(potentio.getValueMapped(0,50));
+       // visualsManager.setBlankDisplay();
+    }
+    visualsManager.refresh();
+
+    // quick check for all lights.
+    if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
+    {
+        for (uint8_t i = 0; i < 5; i++)
+        {
+            tmp[i] = 0xff;
+        }
+    }
+
 
     allVisuals.refresh();
-    input_process();    
-    byte* tmp = allVisuals.getDigits();
     
-    
-    if(binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-     for (uint8_t i=0;i<5;i++){
-        tmp[i] = 0x07;
-      }
 
-    }
-    if(binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-     for (uint8_t i=0;i<5;i++){
-        tmp[i] = 0x00;
-      }
-
-    }
-    if(binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-      allVisuals.setBrightness((byte)potentio.getValueMapped(0,50), false);
-     // Serial.println(potentio.getValueMapped(0,50));
-      for (uint8_t i=0;i<5;i++){
-        tmp[i] = 0xff;
-      }
-
-    }
-    
-    #else
+#else
     // put your main code here, to run repeatedly:
     refresh();
-  #endif
-
-
+#endif
 }

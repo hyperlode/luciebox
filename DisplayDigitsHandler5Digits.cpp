@@ -263,16 +263,18 @@ void DisplayManagement::refresh()
 
 		// start with a clean sheet.
 		multiplexerData[i] = 0;
-
+// Serial.println("---");
 		if (i < 4){
 			// led display digits
 			
-			charToScreen(text[i], &multiplexerData[i]);
-			multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
-			multiplexerData[i] |=  1 << (getBit(&this->decimalPoints, i));
+			//charToScreen(text[i], &multiplexerData[i]);
+			//multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
+			multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
+			// Serial.println(multiplexerData[i], HEX);
 		}else{
 			multiplexerData[i] = lights;
 		}
+		
 	}
 }
 
