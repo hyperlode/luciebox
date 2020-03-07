@@ -12,8 +12,9 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, Displa
 	this->ledDisp = ledDisp;
 	this->allLights = allLights;
 
-	
-	//
+	textHandle = ledDisp->getTextHandle();
+	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
+
 }
 
 void Apps::appSelector(bool init, uint8_t selector)
@@ -470,31 +471,31 @@ void Apps::pomodoroTimer(bool init)
 	switch (display_mode)
 	{
 	case POMODORO_DISPLAY_TIMER:
-		POMODORO_TIMER.getTimeString(textBuf + 1);
+		POMODORO_TIMER.getTimeString(textBuf);
 		break;
 
 	case POMODORO_DISPLAY_PAUSE_INIT_SECS:
 	{
-		timeSecondsToClockString(textBuf + 1, POMODORO_PAUSE_TIME_SECONDS);
+		timeSecondsToClockString(textBuf, POMODORO_PAUSE_TIME_SECONDS);
 		if (millis() % 1000 > 650)
 		{
-			textBuf[1] = 'P';
-			textBuf[2] = 'A';
-			textBuf[3] = 'U';
-			textBuf[4] = 'S';
+			textBuf[0] = 'P';
+			textBuf[1] = 'A';
+			textBuf[2] = 'U';
+			textBuf[3] = 'S';
 		}
 	}
 	break;
 	case POMODORO_DISPLAY_BEEP_PROBABILITY:
 	{
-		timeSecondsToClockString(textBuf + 1, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS);
+		timeSecondsToClockString(textBuf, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS);
 		if (millis() % 1000 > 650)
 		{
 			// rnd beep time....
-			textBuf[1] = 'R';
-			textBuf[2] = 'N';
-			textBuf[3] = 'D';
-			textBuf[4] = 'B';
+			textBuf[0] = 'R';
+			textBuf[1] = 'N';
+			textBuf[2] = 'D';
+			textBuf[3] = 'B';
 		}
 	}
 	break;
@@ -502,10 +503,10 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 1000 > 650)
 		{
-			textBuf[1] = ' ';
-			textBuf[2] = 'Y';
-			textBuf[3] = 'E';
-			textBuf[4] = 'S';
+			textBuf[0] = ' ';
+			textBuf[1] = 'Y';
+			textBuf[2] = 'E';
+			textBuf[3] = 'S';
 		}
 		else
 		{
@@ -518,10 +519,10 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 1000 > 650)
 		{
-			textBuf[1] = ' ';
-			textBuf[2] = 'N';
-			textBuf[3] = 'O';
-			textBuf[4] = ' ';
+			textBuf[0] = ' ';
+			textBuf[1] = 'N';
+			textBuf[2] = 'O';
+			textBuf[3] = ' ';
 		}
 		else
 		{
@@ -552,10 +553,10 @@ void Apps::pomodoroTimer(bool init)
 	}
 	else if (POMODORO_IN_BREAK)
 	{
-		textBuf[1] = 'P';
-		textBuf[2] = 'A';
-		textBuf[3] = 'U';
-		textBuf[4] = 'S';
+		textBuf[0] = 'P';
+		textBuf[1] = 'A';
+		textBuf[2] = 'U';
+		textBuf[3] = 'S';
 	}
 
 	// decimalPoints = 1 << 2;
@@ -566,10 +567,10 @@ void Apps::pomodoroTimer(bool init)
 	// 		//decimalPoints = 1 << 2;
 
 	// 	}else if  (POMODORO_IN_BREAK){
-	// 		textBuf[1]='P';
-	// 		textBuf[2]='A';
-	// 		textBuf[3]='U';
-	// 		textBuf[4]='S';
+	// 		textBuf[0]='P';
+	// 		textBuf[1]='A';
+	// 		textBuf[2]='U';
+	// 		textBuf[3]='S';
 	// 		decimalPoints = 0;
 	// 	}else{
 	// 		decimalPoints = 0;
@@ -593,7 +594,7 @@ void Apps::pomodoroTimer(bool init)
 	}
 
 	//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
-	ledDisp->displayHandler(textBuf);
+	ledDisp->setText(textBuf);
 	ledDisp->SetLedArray(lights);
 }
 
@@ -669,21 +670,21 @@ void Apps::stopwatch(bool init)
 		timeDisplayShift = 4;
 	}
 
+	textBuf[0] = ' ';
 	textBuf[1] = ' ';
-	textBuf[2] = ' ';
 
-	intToDigitsString(textBuf + 1, time_millis, true);
+	intToDigitsString(textBuf, time_millis, true);
 	decimalPoints = 0x1 << timeDisplayShift;
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 	{
 		//timeSecondsToClockString(textBuf, (unsigned int)(time_millis/1000));
-		STOPWATCH_CHRONO.getTimeString(textBuf + 1);
+		STOPWATCH_CHRONO.getTimeString(textBuf);
 	}
 	else
 	{
 		//
-		ledDisp->displayHandler(textBuf);
+		ledDisp->setText(textBuf);
 			ledDisp->setDecimalPoints(decimalPoints);
 	}
 }
@@ -706,15 +707,15 @@ void Apps::modeButtonDebug(bool init)
 			counter = 0;
 		}
 
+		textBuf[0] = ' ';
 		textBuf[1] = ' ';
-		textBuf[2] = ' ';
-		textBuf[3] = 'A';
+		textBuf[2] = 'A';
 
 		switch (counter)
 		{
 		// case 0:{
-		//   // textBuf[4]='0'; // analog A0
-		//   // ledDisp->displayHandler(textBuf);
+		//   // textBuf[3]='0'; // analog A0
+		//   // ledDisp->setText(textBuf);
 		//   // generalTimer.setInitTimeMillis((long)-500);
 		//   break;
 		// }
@@ -725,8 +726,8 @@ void Apps::modeButtonDebug(bool init)
 			break;
 		}
 		// case 2:{
-		//   // textBuf[4]='1'; // analog A1
-		//   // ledDisp->displayHandler(textBuf);
+		//   // textBuf[3]='1'; // analog A1
+		//   // ledDisp->setText(textBuf);
 		//   // generalTimer.setInitTimeMillis((long)-500);
 		//   break;
 		// }
@@ -737,8 +738,8 @@ void Apps::modeButtonDebug(bool init)
 			break;
 		}
 		// case 4:{
-		//   // textBuf[4]='2'; // analog A2
-		//   // ledDisp->displayHandler(textBuf);
+		//   // textBuf[3]='2'; // analog A2
+		//   // ledDisp->setText(textBuf);
 		//   // generalTimer.setInitTimeMillis((long)-500);
 		//   break;
 		// }
@@ -749,8 +750,8 @@ void Apps::modeButtonDebug(bool init)
 			break;
 		}
 		// case 6:{
-		//   textBuf[4]='3';// analog A3
-		//   ledDisp->displayHandler(textBuf);
+		//   textBuf[3]='3';// analog A3
+		//   ledDisp->setText(textBuf);
 		//   // generalTimer.setInitTimeMillis((long)-500);
 		//   break;
 		// }
@@ -761,8 +762,8 @@ void Apps::modeButtonDebug(bool init)
 			break;
 		}
 		// case 8:{
-		//   textBuf[4]='4';// analog A4
-		//   ledDisp->displayHandler(textBuf);
+		//   textBuf[3]='4';// analog A4
+		//   ledDisp->setText(textBuf);
 		//   // generalTimer.setInitTimeMillis((long)-500);
 		//   break;
 		// }
@@ -778,8 +779,8 @@ void Apps::modeButtonDebug(bool init)
 		if (counter % 2 == 0)
 		{
 			// show analog pin
-			textBuf[4] = counter / 2 + 48; // char 0 + analog pin .
-			ledDisp->displayHandler(textBuf);
+			textBuf[3] = counter / 2 + 48; // char 0 + analog pin .
+			ledDisp->setText(textBuf);
 		}
 
 		// show values one seconds, menu items half a second
@@ -962,10 +963,8 @@ void Apps::modeDiceRoll(bool init)
 void Apps::randomModeDisplay(bool forReal)
 {
 	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
-	textBuf[1] = ' ';
-	textBuf[2] = ' ';
-	textBuf[3] = ' ';
-	textBuf[4] = ' ';
+	
+	ledDisp->clearText();
 
 	switch (DICEROLL_RANDOM_TYPE)
 	{
@@ -974,7 +973,7 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		DICEROLL_RANDOM_NUMBER = random(1, 7);
 		// show dice eyes
-		//textBuf[4] = ' ';
+		//textBuf[3] = ' ';
 		for (uint8_t i = 1; i < 4; i++)
 		{
 			// build up dice eyes over three digits
@@ -1060,27 +1059,27 @@ void Apps::randomModeDisplay(bool forReal)
 		//show playing card
 		if (DICEROLL_RANDOM_NUMBER % 13 < 9)
 		{
-			textBuf[2] = DICEROLL_RANDOM_NUMBER % 13 + 49;
+			textBuf[1] = DICEROLL_RANDOM_NUMBER % 13 + 49;
 		}
 		else
 		{
-			textBuf[1] = 49;													// 1
-			textBuf[2] = (3 - (((DICEROLL_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
+			textBuf[0] = 49;													// 1
+			textBuf[1] = (3 - (((DICEROLL_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
 		}
 
 		switch (DICEROLL_RANDOM_NUMBER / 13)
 		{
 		case 0:
-			textBuf[4] = 'H';
+			textBuf[3] = 'H';
 			break;
 		case 1:
-			textBuf[4] = 'D';
+			textBuf[3] = 'D';
 			break;
 		case 2:
-			textBuf[4] = 'S';
+			textBuf[3] = 'S';
 			break;
 		case 3:
-			textBuf[4] = 'C';
+			textBuf[3] = 'C';
 			break;
 		}
 	}
@@ -1100,28 +1099,28 @@ void Apps::randomModeDisplay(bool forReal)
 		DICEROLL_RANDOM_NUMBER = random(0, 26);
 		if (DICEROLL_RANDOM_NUMBER > 8)
 		{
-			textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) / 10 + 48;
+			textBuf[0] = (DICEROLL_RANDOM_NUMBER + 1) / 10 + 48;
 		}
-		textBuf[2] = (DICEROLL_RANDOM_NUMBER + 1) % 10 + 48;
-		textBuf[4] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
-		ledDisp->displayHandler(textBuf);
+		textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) % 10 + 48;
+		textBuf[3] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
+		ledDisp->setText(textBuf);
 	}
 	break;
 	case DICEROLL_HEADSORTAILS:
 	{
 		if (random(0, 2))
 		{
-			textBuf[1] = 'H';
-			textBuf[2] = 'E';
-			textBuf[3] = 'A';
-			textBuf[4] = 'D';
+			textBuf[0] = 'H';
+			textBuf[1] = 'E';
+			textBuf[2] = 'A';
+			textBuf[3] = 'D';
 		}
 		else
 		{
-			textBuf[1] = 'T';
-			textBuf[2] = 'A';
-			textBuf[3] = 'I';
-			textBuf[4] = 'L';
+			textBuf[0] = 'T';
+			textBuf[1] = 'A';
+			textBuf[2] = 'I';
+			textBuf[3] = 'L';
 		}
 	}
 	break;
@@ -1129,24 +1128,24 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		if (random(0, 2))
 		{
-			textBuf[2] = 'Y';
-			textBuf[3] = 'E';
-			textBuf[4] = 'S';
+			textBuf[1] = 'Y';
+			textBuf[2] = 'E';
+			textBuf[3] = 'S';
 		}
 		else
 		{
-			textBuf[2] = 'N';
-			textBuf[3] = 'O';
+			textBuf[1] = 'N';
+			textBuf[2] = 'O';
 		}
 	}
 	break;
 	default:
 	{
-		textBuf[2] = '-';
+		textBuf[1] = '-';
 	}
 	}
 
-	ledDisp->displayHandler(textBuf);
+	ledDisp->setText(textBuf);
 }
 
 // void Apps::modeScroll(bool init){
@@ -1156,10 +1155,10 @@ void Apps::randomModeDisplay(bool forReal)
 //   if (init){
 //	 // display scroll mode
 // //	scrollBuf[0]='L';
-// //	scrollBuf[1]='U';
-// //	scrollBuf[2]='C';
-// //	scrollBuf[3]='I';
-// //	scrollBuf[4]='E';
+// //	scrollBuf[0]='U';
+// //	scrollBuf[1]='C';
+// //	scrollBuf[2]='I';
+// //	scrollBuf[3]='E';
 // //	scrollBuf[5]=' ';
 // //	scrollBuf[6]='B';
 // //	scrollBuf[7]='A';
@@ -1168,10 +1167,10 @@ void Apps::randomModeDisplay(bool forReal)
 // //
 
 //	 this->scrollBuf[0]='H';
-//	 scrollBuf[1]='A';
+//	 scrollBuf[0]='A';
+//	 scrollBuf[1]='P';
 //	 scrollBuf[2]='P';
-//	 scrollBuf[3]='P';
-//	 scrollBuf[4]='Y';
+//	 scrollBuf[3]='Y';
 //	 scrollBuf[5]=' ';
 //	 scrollBuf[6]='B';
 //	 scrollBuf[7]='D';
@@ -1264,10 +1263,10 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		SETTINGS_MODE_SELECTOR++;
 	}
 
+	textBuf[0] = ' ';
 	textBuf[1] = ' ';
 	textBuf[2] = ' ';
 	textBuf[3] = ' ';
-	textBuf[4] = ' ';
 
 	if (SETTINGS_MODE_SELECTOR < 6)
 	{
@@ -1315,18 +1314,18 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		if (updateScreen)
 		{
+			textBuf[0] = '8';
 			textBuf[1] = '8';
 			textBuf[2] = '8';
 			textBuf[3] = '8';
-			textBuf[4] = '8';
 		}
 		else
 		{
 			//display
+			textBuf[0] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
 			textBuf[1] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
 			textBuf[2] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
-			textBuf[3] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
-			textBuf[4] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';'-';
+			textBuf[3] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';'-';
 		}
 
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
@@ -1335,7 +1334,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		}
 		else
 		{
-			textBuf[1] = ' ';
+			textBuf[0] = ' ';
 		}
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 		{
@@ -1343,7 +1342,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		}
 		else
 		{
-			textBuf[2] = ' ';
+			textBuf[1] = ' ';
 		}
 		if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
 		{
@@ -1352,7 +1351,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		}
 		else
 		{
-			textBuf[3] = ' ';
+			textBuf[2] = ' ';
 		}
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
@@ -1361,10 +1360,10 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		}
 		else
 		{
-			textBuf[4] = ' ';
+			textBuf[3] = ' ';
 		}
 
-		ledDisp->displayHandler(textBuf);
+		ledDisp->setText(textBuf);
 
 		allLights->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
 	}
@@ -1393,80 +1392,80 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
 		{
-			textBuf[1] = 'B';
+			textBuf[0] = 'B';
+			textBuf[1] = 'E';
 			textBuf[2] = 'E';
-			textBuf[3] = 'E';
-			textBuf[4] = 'P';
+			textBuf[3] = 'P';
 		}
 		else
 		{
-			textBuf[2] = 'O'; // On Off o char
+			textBuf[1] = 'O'; // On Off o char
 
 			if (buzzer->getPin() == PIN_BUZZER)
 			{
 				//ON
-				//textBuf[1]=' ';
-				textBuf[3] = 'N';
-				// textBuf[4]=' ';
+				//textBuf[0]=' ';
+				textBuf[2] = 'N';
+				// textBuf[3]=' ';
 			}
 			else
 			{
 				// OFF
 
-				// textBuf[1]=' ';
-				// textBuf[2]='O';
+				// textBuf[0]=' ';
+				// textBuf[1]='O';
+				textBuf[2] = 'F';
 				textBuf[3] = 'F';
-				textBuf[4] = 'F';
 			}
-			ledDisp->displayHandler(textBuf);
+			ledDisp->setText(textBuf);
 		}
 	}
 	else if (SETTINGS_MODE_SELECTOR < 10)
 	{
-		textBuf[3] = 'A';
-		textBuf[4] = '0';
+		textBuf[2] = 'A';
+		textBuf[3] = '0';
 		ledDisp->showNumber((int16_t)analogRead(PIN_SELECTOR_DIAL));
 	}
 	else if (SETTINGS_MODE_SELECTOR < 12)
 	{
-		textBuf[3] = 'A';
-		textBuf[4] = '1';
+		textBuf[2] = 'A';
+		textBuf[3] = '1';
 		ledDisp->showNumber((int16_t)analogRead(PIN_BUTTONS_1));
 	}
 	else if (SETTINGS_MODE_SELECTOR < 14)
 	{
-		textBuf[3] = 'A';
-		textBuf[4] = '2';
+		textBuf[2] = 'A';
+		textBuf[3] = '2';
 		ledDisp->showNumber((int16_t)analogRead(PIN_BUTTONS_2));
 	}
 	else if (SETTINGS_MODE_SELECTOR < 16)
 	{
-		textBuf[3] = 'A';
-		textBuf[4] = '3';
+		textBuf[2] = 'A';
+		textBuf[3] = '3';
 		ledDisp->showNumber((int16_t)analogRead(PIN_POTENTIO));
 	}
 	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
-		textBuf[3] = 'A';
-		textBuf[4] = '4';
+		textBuf[2] = 'A';
+		textBuf[3] = '4';
 		ledDisp->showNumber((int16_t)analogRead(PIN_MERCURY_SWITCHES));
 	}
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
 		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(300))
 		{
+			textBuf[0] = 'E';
 			textBuf[1] = 'E';
-			textBuf[2] = 'E';
-			textBuf[3] = 'P';
-			textBuf[4] = 'R';
+			textBuf[2] = 'P';
+			textBuf[3] = 'R';
 		}
 		else
 		{
-			textBuf[1] = 'R';
-			textBuf[2] = 'S';
-			textBuf[3] = 'E';
-			textBuf[4] = 'T';
-			ledDisp->displayHandler(textBuf);
+			textBuf[0] = 'R';
+			textBuf[1] = 'S';
+			textBuf[2] = 'E';
+			textBuf[3] = 'T';
+			ledDisp->setText(textBuf);
 		}
 	}
 	else if (SETTINGS_MODE_SELECTOR < 22)
@@ -1484,18 +1483,18 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 					0);
 			}
 #endif
-			textBuf[1] = 'D';
-			textBuf[2] = 'O';
-			textBuf[3] = 'N';
-			textBuf[4] = 'E';
+			textBuf[0] = 'D';
+			textBuf[1] = 'O';
+			textBuf[2] = 'N';
+			textBuf[3] = 'E';
 		}
 		else
 		{
-			textBuf[1] = 'D';
-			textBuf[2] = 'O';
-			textBuf[3] = 'I';
-			textBuf[4] = 'T';
-			ledDisp->displayHandler(textBuf);
+			textBuf[0] = 'D';
+			textBuf[1] = 'O';
+			textBuf[2] = 'I';
+			textBuf[3] = 'T';
+			ledDisp->setText(textBuf);
 		}
 	}
 	else if (SETTINGS_MODE_SELECTOR < 24)
@@ -1515,8 +1514,8 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		// show menu title (compressed)
 		// if (counter%2 == 0){
 		//   // show analog pin
-		//   textBuf[4] = counter/2 + 48; // char 0 + analog pin .
-		//   ledDisp->displayHandler(textBuf);
+		//   textBuf[3] = counter/2 + 48; // char 0 + analog pin .
+		//   ledDisp->setText(textBuf);
 		// }
 
 		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getTimeIsNegative())
@@ -1526,7 +1525,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
 		{
-			ledDisp->displayHandler(textBuf);
+			ledDisp->setText(textBuf);
 		}
 
 		// show values one seconds, menu items half a second
@@ -1784,7 +1783,7 @@ void Apps::modeSoundSong(bool init)
 
 	buzzer->lastPlayedNoteToDisplay(textBuf, &decimalPoints);
 
-	ledDisp->displayHandler(textBuf);
+	ledDisp->setText(textBuf);
 			ledDisp->setDecimalPoints(decimalPoints);
 }
 
@@ -1893,7 +1892,7 @@ void Apps::modeComposeSong(bool init)
 					buzzer->programBuzzerRoll(potentio->getValueMapped(0, 254));
 
 					buzzer->noteToDisplay(textBuf, &decimalPoints, potentio->getValueMapped(0, 254));
-					ledDisp->displayHandler(textBuf);
+					ledDisp->setText(textBuf);
 			ledDisp->setDecimalPoints(decimalPoints);
 				}
 				defaultDisplay = false;
@@ -1989,7 +1988,7 @@ void Apps::modeComposeSong(bool init)
 			else
 			{
 				buzzer->noteToDisplay(textBuf, &decimalPoints, COMPOSER_SONG[COMPOSER_STEP]);
-				ledDisp->displayHandler(textBuf);
+				ledDisp->setText(textBuf);
 			ledDisp->setDecimalPoints(decimalPoints);
 			}
 		}
@@ -2065,7 +2064,7 @@ void Apps::modeSoundNotes(bool init)
 			SOUND_FUN_NOTE_INDEX++;
 		}
 		buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
-		ledDisp->displayHandler(textBuf);
+		ledDisp->setText(textBuf);
 			ledDisp->setDecimalPoints(decimalPoints);
 	}
 }
@@ -2283,7 +2282,7 @@ void Apps::drawGame(bool init)
 	{
 		drawGameState = drawGameShowPicture;
 		ledDisp->numberToBuf(textBuf, random(0, 10000));
-		// ledDisp->bufToScreenBits(textBuf + 1, &displayAllSegments);
+		// ledDisp->bufToScreenBits(textBuf, &displayAllSegments);
 		ledDisp->convert_4bytesArray_32bits(textBuf, &displayAllSegments,false);
 
 		break;
@@ -2575,6 +2574,7 @@ void Apps::miniMultiTimer(bool init)
 	uint8_t buttonLights;
 
 	uint8_t settingsLights;
+	
 	this->multiTimer.getDisplay(textBuf, &buttonLights, &settingsLights);
 
 	uint8_t lights = 0b00000000;
@@ -2593,9 +2593,9 @@ void Apps::miniMultiTimer(bool init)
 	(LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
 	(LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
 
-	ledDisp->displayHandler(textBuf);
+	//ledDisp->setText(textBuf);
 	ledDisp->SetLedArray(lights);
-	ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 2);
+	ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
 #endif
 
@@ -2605,10 +2605,10 @@ void Apps::tiltSwitchTest(bool init)
 	uint32_t screen = 0;
 	if (init)
 	{
-		textBuf[1] = 'T';
-		textBuf[2] = 'I';
-		textBuf[3] = 'L';
-		textBuf[4] = 'T';
+		textBuf[0] = 'T';
+		textBuf[1] = 'I';
+		textBuf[2] = 'L';
+		textBuf[3] = 'T';
 		counter = 0;
 		counter2 = 0; // counts progress in movement.
 		buzzer->setSpeedRatio(2.0);
@@ -2702,7 +2702,7 @@ void Apps::tiltSwitchTest(bool init)
 		}
 		else
 		{
-			ledDisp->displayHandler(textBuf);
+			ledDisp->setText(textBuf);
 		}
 	}
 
@@ -2724,7 +2724,7 @@ void Apps::modeGeiger(bool init)
 
 	if (init)
 	{
-		//textBuf[4]=' ';
+		//textBuf[3]=' ';
 		COUNTER_GEIGER = 0;
 		GEIGER_TONE_FREQUENY_LOWEST = 2000;
 		GEIGER_TONE_FREQUENCY_HEIGHEST = 4000;
@@ -2824,28 +2824,29 @@ void Apps::modeGeiger(bool init)
 
 		r += GEIGER_INCREASE_CHANCE;
 
-		textBuf[1] = ' ';
+		textBuf[0] = ' ';
 		if (r > potentio->getValueMapped(0, 1048576))
 		{
 			//	buzzer->programBuzzerRoll(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
-			textBuf[1] = '?';
+			textBuf[0] = '?';
 		}
 
 		//all digits same value
 		for (uint8_t i = 2; i < 5; i++)
 		{
-			textBuf[i] = textBuf[1];
+			textBuf[i] = textBuf[0];
 		}
 
-		ledDisp->displayHandler(textBuf);
+		ledDisp->setText(textBuf);
 	}
 }
 
 void Apps::modeSequencer(bool init)
 {
 	int8_t step = 0;
-	bool showNote = false;
+	
+    bool showNote = false;
 
 	if (init)
 	{
@@ -2863,6 +2864,9 @@ void Apps::modeSequencer(bool init)
 			this->SEQUENCER_SONG[i] = C7_8;
 		}
 	}
+
+	// erase screen at start.
+	ledDisp->setBlankDisplay();
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown())
 	{
@@ -2884,14 +2888,12 @@ void Apps::modeSequencer(bool init)
 		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 		{
 			buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-			buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
-			showNote = true;
 		}
 
 		if (binaryInputs[BUTTON_MOMENTARY_0].getValue())
 		{
 			// if button continuously pressed, show notes.
-			buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
+			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 
 			// bonus effect: TRANSPOSE!
@@ -2901,10 +2903,10 @@ void Apps::modeSequencer(bool init)
 			}
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown())
-		{
-			ledDisp->SetFourDigits(displayAllSegments);
-		}
+		// if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown())
+		// {
+		// 	ledDisp->SetFourDigits(displayAllSegments);
+		// }
 
 		// just listen to the potentio note
 		SEQUENCER_TEMP_NOTE = potentio->getValueMapped(0, 255);
@@ -2912,9 +2914,6 @@ void Apps::modeSequencer(bool init)
 		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
 		{
 			buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-			//   ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
-			buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
-			showNote = true;
 		}
 
 		if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
@@ -2922,18 +2921,12 @@ void Apps::modeSequencer(bool init)
 			// if button continuously pressed, rotate potentio to hear notes.
 			if (potentio->getValueStableChangedEdge())
 			{
-
 				buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
-				// ledDisp->showNumber(SEQUENCER_TEMP_NOTE);
-				buzzer->noteToDisplay(textBuf, &decimalPoints, SEQUENCER_TEMP_NOTE);
-				showNote = true;
 			}
+			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
+			showNote = true;
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown())
-		{
-			ledDisp->SetFourDigits(displayAllSegments);
-		}
 
 		// program note to song
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
@@ -3005,12 +2998,12 @@ void Apps::modeSequencer(bool init)
 		}
 
 		// if music note needs to be shown
-		if (showNote)
-		{
-			//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
-			ledDisp->displayHandler(textBuf);
-			ledDisp->setDecimalPoints(decimalPoints);
-		}
+		// if (showNote)
+		// {
+		// 	//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
+		// 	ledDisp->setText(textBuf);
+		// 	ledDisp->setDecimalPoints(decimalPoints);
+		// }
 
 		// handle step change
 		if (step != 0 || init)
@@ -3043,7 +3036,11 @@ void Apps::modeSequencer(bool init)
 			}
 
 			displayAllSegments |= (uint32_t)0x1 << ((8 * (SEQUENCER_STEP_COUNTER / 8)) + 3); // bar at bottom.
+		}
+
+		if (!showNote){
 			ledDisp->SetFourDigits(displayAllSegments);
+
 		}
 	}
 }
@@ -3375,10 +3372,10 @@ void Apps::modeSimon(bool init)
 	{
 	case simonWaitForNewGame:
 	{
+		textBuf[0] = ' ';
 		textBuf[1] = ' ';
 		textBuf[2] = ' ';
 		textBuf[3] = ' ';
-		textBuf[4] = ' ';
 
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
@@ -3398,9 +3395,9 @@ void Apps::modeSimon(bool init)
 		}
 
 		ledDisp->numberToBuf(textBuf, SIMON_PLAYERS_COUNT);
-		//textBuf[1] = ' ';
-		textBuf[2] = 'P';
-		//textBuf[3] = ' ';
+		//textBuf[0] = ' ';
+		textBuf[1] = 'P';
+		//textBuf[2] = ' ';
 
 		// Instead of computer, user choses the next light in simon sequence.
 		SIMON_CUSTOM_BUILD_UP = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
@@ -3488,20 +3485,20 @@ void Apps::modeSimon(bool init)
 			if (millis() % 1000 > 650)
 			{
 				ledDisp->numberToBuf(textBuf, SIMON_LENGTH);
-				textBuf[1] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
-				textBuf[2] = 'P';
+				textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
+				textBuf[1] = 'P';
 			}
 			else
 			{
-				textBuf[1] = ' ';
-				textBuf[2] = 'E';
-				textBuf[3] = 'N';
-				textBuf[4] = 'D';
+				textBuf[0] = ' ';
+				textBuf[1] = 'E';
+				textBuf[2] = 'N';
+				textBuf[3] = 'D';
 			}
 		}
 		else
 		{
-			textBuf[2] = 'S';
+			textBuf[1] = 'S';
 		}
 
 		if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
@@ -3568,8 +3565,8 @@ void Apps::modeSimon(bool init)
 			lights |= binaryInputs[buttons_momentary_indexed[k]].getValue() << lights_indexed[k];
 		}
 
-		textBuf[1] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
-		textBuf[2] = 'P';
+		textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
+		textBuf[1] = 'P';
 		if (pressed_momentary_button == SIMON_NO_BUTTON_PRESSED)
 		{
 			break;
@@ -3657,7 +3654,7 @@ void Apps::modeSimon(bool init)
 	}
 
 	ledDisp->SetLedArray(lights);
-	ledDisp->displayHandler(textBuf);
+	ledDisp->setText(textBuf);
 }
 #endif
 #endif
@@ -3699,7 +3696,6 @@ void Apps::modeReactionGame(bool init)
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x0;
 		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
-
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
 	}
 
@@ -3737,9 +3733,9 @@ void Apps::modeReactionGame(bool init)
 #ifdef ENABLE_EEPROM
 		if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 		{
-			intToDigitsString(textBuf + 1, REACTION_GAME_LEVEL, false); // utilities lode
-			textBuf[1] = 'L';
-			ledDisp->displayHandler(textBuf);
+			intToDigitsString(textBuf, REACTION_GAME_LEVEL, false); // utilities lode
+			textBuf[0] = 'L';
+			ledDisp->setText(textBuf);
 		}
 		else
 		{
@@ -3753,9 +3749,9 @@ void Apps::modeReactionGame(bool init)
 								 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE)));
 		}
 #else
-		intToDigitsString(textBuf + 1, REACTION_GAME_LEVEL, false); // utilities lode
-		textBuf[1] = 'L';
-		ledDisp->displayHandler(textBuf);
+		intToDigitsString(textBuf, REACTION_GAME_LEVEL, false); // utilities lode
+		textBuf[0] = 'L';
+		ledDisp->setText(textBuf);
 #endif
 
 		// play game button pressed
@@ -4029,7 +4025,7 @@ void Apps::modeReactionGame(bool init)
 		if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
 		{
 			//always show unless in soundmode
-			ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET + 1);
+			ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET);
 		}
 
 		// check player pressed a button.
@@ -4062,6 +4058,11 @@ void Apps::modeReactionGame(bool init)
 
 #ifdef ENABLE_EEPROM
 
+		// play death song
+		buzzer->programBuzzerRoll(F4_1);
+		buzzer->programBuzzerRoll(F4_1);
+		buzzer->programBuzzerRoll(F4_1);
+
 		//start high score end timer
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
@@ -4081,13 +4082,12 @@ void Apps::modeReactionGame(bool init)
 		}
 #endif
 
+		// prepare next game delay.
+
 		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
 
-		// play death song
-		buzzer->programBuzzerRoll(F4_1);
-		buzzer->programBuzzerRoll(F4_1);
-		buzzer->programBuzzerRoll(F4_1);
+		
 
 		reactionGameState = reactionFinished;
 
@@ -4112,8 +4112,6 @@ void Apps::modeReactionGame(bool init)
 			else
 			{
 				ledDisp->showNumber(REACTION_GAME_SCORE); //score display. Leave at beginning, to display high score blinking.
-				// intToDigitsString(textBuf+1, REACTION_GAME_SCORE, false);  // utilities lode
-				// ledDisp->displayHandler(textBuf);
 			}
 		}
 		break;
@@ -4186,20 +4184,20 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
-			textBuf[1] = 'S';
-			textBuf[2] = 'A';
-			textBuf[3] = 'V';
-			textBuf[4] = 'E';
+			textBuf[0] = 'S';
+			textBuf[1] = 'A';
+			textBuf[2] = 'V';
+			textBuf[3] = 'E';
 		}
 		else
 		{
-			textBuf[1] = 'L';
-			textBuf[2] = 'O';
-			textBuf[3] = 'A';
-			textBuf[4] = 'D';
+			textBuf[0] = 'L';
+			textBuf[1] = 'O';
+			textBuf[2] = 'A';
+			textBuf[3] = 'D';
 		}
 
-		ledDisp->displayHandler(textBuf);
+		ledDisp->setText(textBuf);
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())

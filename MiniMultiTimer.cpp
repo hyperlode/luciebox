@@ -280,14 +280,14 @@ void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *sett
 	*playerLights = 0b00000000;   //lsb is timer 0, 2nd bit is timer 1, ....
 	*settingsLights = 0b00000000; //settings lights are other lights then timer button lights.
 
+	disp[0] = ' ';
 	disp[1] = ' ';
 	disp[2] = ' ';
 	disp[3] = ' ';
-	disp[4] = ' ';
 
 	if (this->state == initialized)
 	{
-		this->timers[this->activeTimer].getTimeString(disp + 1);
+		this->timers[this->activeTimer].getTimeString(disp);
 
 		for (uint8_t i = 0; i < this->timers_count; i++)
 		{
@@ -321,7 +321,7 @@ void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *sett
 	{
 
 		// displayed timer is not always the active timer (i.e. non active player wants to check his time).
-		this->timers[this->timerDisplayed].getTimeString(disp + 1);
+		this->timers[this->timerDisplayed].getTimeString(disp);
 
 		// run through all timers to set lights
 		for (uint8_t i = 0; i < this->timers_count; i++)
@@ -371,16 +371,16 @@ void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *sett
 
 		if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500))
 		{
-			this->timers[this->activeTimer].getTimeString(disp + 1);
+			this->timers[this->activeTimer].getTimeString(disp);
 			*settingsLights |= LIGHT_SECONDS_BLINKER;
 		}
 		else
 		{
 
-			disp[1] = ' ';
-			disp[2] = 'E';
-			disp[3] = 'N';
-			disp[4] = 'D';
+			// disp[0] = ' ';
+			disp[1] = 'E';
+			disp[2] = 'N';
+			disp[3] = 'D';
 		}
 		//fast blink last surviving timer light.
 		if (millis() % 250 > 125)
@@ -393,14 +393,14 @@ void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *sett
 		if (millis() % 1000 > 500 || this->timerDisplayed != this->activeTimer)
 		{
 			// if other timer than the active timer, show always.
-			this->timers[this->timerDisplayed].getTimeString(disp + 1);
+			this->timers[this->timerDisplayed].getTimeString(disp);
 		}
 		else
 		{
-			disp[1] = 80;
-			disp[2] = 65;
-			disp[3] = 'U';
-			disp[4] = 83;
+			disp[0] = 'P';
+			disp[1] = 'A';
+			disp[2] = 'U';
+			disp[3] = 'S';
 		}
 
 		// timer lights
@@ -442,14 +442,14 @@ void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *sett
 	{
 		if (millis() % 1000 > 650)
 		{
-			disp[1] = 'F';
-			disp[2] = 'I';
-			disp[3] = 'S';
-			disp[4] = 'H';
+			disp[0] = 'F';
+			disp[1] = 'I';
+			disp[2] = 'S';
+			disp[3] = 'H';
 		}
 		else
 		{
-			intToDigitsString(disp + 1, (unsigned int)this->fischerSecs, false); // utilities lode
+			intToDigitsString(disp, (unsigned int)this->fischerSecs, false); // utilities lode
 		}
 		if (millis() % 250 > 125)
 		{
@@ -461,14 +461,14 @@ void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *sett
 		// Serial.println("setStateTimersCount");
 		if (millis() % 1000 > 650)
 		{
-			disp[1] = 'Q';
-			disp[2] = 'T';
-			disp[3] = 'Y';
-			disp[4] = ' ';
+			disp[0] = 'Q';
+			disp[1] = 'T';
+			disp[2] = 'Y';
+			//disp[3] = ' ';
 		}
 		else
 		{
-			intToDigitsString(disp + 1, (unsigned int)this->timers_count, false); // utilities lode
+			intToDigitsString(disp, (unsigned int)this->timers_count, false); // utilities lode
 		}
 
 		// all active timers lights on

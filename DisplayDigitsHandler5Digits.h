@@ -1,11 +1,13 @@
 //Written by Lode Ameije 2013
 #ifndef DisplayDigitsHandler_h
 #define DisplayDigitsHandler_h
-#if defined(ARDUINO) && ARDUINO >= 100
+
+// #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
+// #else
+// #include "WProgram.h"
+// #endif
+
 //#include "SevSeg5Digits.h"
 //#include "Countdowntimer.h"
 #include "SuperTimer.h"
@@ -92,19 +94,28 @@ public:
     // void bufToScreenBits(char *textBuf, uint32_t *screenBits);
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
     
-    void displayHandler(char *inText); // updateDisplayChars
+    void setText(char *inText); // updateDisplayChars
     void setCharToDisplay(char character, uint8_t digit);
+    char* getTextHandle();
+    void clearText();
+
     void showNumber(int16_t number); //updateDisplayNumber
+    
     void SetFourDigits(uint32_t value); //  updateDisplayAllBits
+    
     void setDecimalPoints(byte decimalPoints);
     void setDecimalPoint(boolean isOn, uint8_t digit); // updateDisplayDecimalPoint
+    byte* getDecimalPointsHandle();
+
     void SetLedArray(byte ledsAsBits);  //  updateLights
+    uint8_t* getLedArrayHandle();
     
     void setBlankDisplay(); //eraseAll
 
     void refresh();
 
     void numberToBuf(char *textBuf, int16_t number);
+    void blanksToBuf(char* textBuf);
 
     void convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray);
 

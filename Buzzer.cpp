@@ -213,80 +213,97 @@ void Buzzer::lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints)
 
 void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
 {
+    // assume 4 chars textBuf (empty at arrival (4 spaces))
+    // assumme value of decimalPoints at start is 0x00
 
     if (note % 64 == 0)
     {
         // rest
+        textBuf[0] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
         textBuf[1] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
-        textBuf[2] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
     }
     else
     {
 
-        // note
-        uint8_t noteVal;
-        bool notSharp = false;
-        switch ((note - 1) % 12)
-        {
-        case 0:
-            notSharp = true;
-        case 1:
-            noteVal = 1;
-            break;
-        case 2:
-            notSharp = true;
-            noteVal = 2;
-            break;
-        case 3:
-            notSharp = true;
-        case 4:
-            noteVal = 3;
-            break;
-        case 5:
-            notSharp = true;
-        case 6:
-            noteVal = 4;
-            break;
-        case 7:
-            notSharp = true;
-            noteVal = 5;
-            break;
-        case 8:
-            notSharp = true;
-        case 9:
-            noteVal = 6;
-            break;
-        case 10:
-            notSharp = true;
-        case 11:
-            noteVal = 7;
-            break;
-        }
-        textBuf[1] = noteVal + 64;
+        bool sharps [12] = {false,true,false,false,true,false,true,false,false,true,false,true}; 
+        uint8_t noteVal = ((note-1)%12);
 
-        if (notSharp)
-        {
-            *decimalPoints = 0x00;
-        }
-        else
-        {
-            *decimalPoints = 0x02;
-        }
+        *decimalPoints =  sharps[noteVal] << 0;
+
+        // // note
+        // uint8_t noteVal;
+        // bool notSharp = false;
+        // switch ((note - 1) % 12)
+        // {
+        // case 0:
+        //     notSharp = true;
+        // case 1:
+        //     noteVal = 1;
+        //     break;
+        // case 2:
+        //     notSharp = true;
+        //     noteVal = 2;
+        //     break;
+        // case 3:
+        //     notSharp = true;
+        // case 4:
+        //     noteVal = 3;
+        //     break;
+        // case 5:
+        //     notSharp = true;
+        // case 6:
+        //     noteVal = 4;
+        //     break;
+        // case 7:
+        //     notSharp = true;
+        //     noteVal = 5;
+        //     break;
+        // case 8:
+        //     notSharp = true;
+        // case 9:
+        //     noteVal = 6;
+        //     break;
+        // case 10:
+        //     notSharp = true;
+        // case 11:
+        //     noteVal = 7;
+        //     break;
+        // }
+        textBuf[0] = noteVal + 64;
+
+
+        //*decimalPoints = 0;
+        // if (!notSharp)
+        // {
+        //     *decimalPoints = 0x04;
+        // }
+
+        // *decimalPoints =  ~notSharp << 2;
+
+        // if (notSharp)
+        // {
+        //     *decimalPoints = 0x00;
+        // }
+        // else
+        // {
+        //     *decimalPoints = 0x04;
+        // }
         // octave
         if (note < 4)
         {
             // exceptions, because we don't want negative numbers when doing -4 in our formula
-            textBuf[2] = 48 + 3;
+            textBuf[1] = 48 + 3;
         }
         else
         {
-            textBuf[2] = ((note % 64) - 4) / 12 + 4 + 48;
+            textBuf[1] = ((note % 64) - 4) / 12 + 4 + 48;
         }
     }
-    textBuf[3] = ' ';
+
+    //textBuf[2] = ' '; // optimized: assume empty at start
 
     // note length
-    textBuf[4] = (0x01 << (3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
+    textBuf[3] = (0x01 << (3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
 }
 
 /// ---------------------------

@@ -11,7 +11,7 @@
 
 //#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
-#define DBUG_REFACTOR_DISP
+//#define DBUG_REFACTOR_DISP
 #ifdef ENABLE_SERIAL
 //#define DEBUG_ANALOG_IN
 // #define DEBUG_MERCURY
@@ -261,7 +261,7 @@ void loop()
 
     if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
         
-        visualsManager.setCharToDisplay('Y',3);
+        visualsManager.setCharToDisplay('H',3);
         visualsManager.setCharToDisplay('C',2);
         visualsManager.setCharToDisplay('U',1);
         visualsManager.setCharToDisplay('L',0);

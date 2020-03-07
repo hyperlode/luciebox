@@ -583,7 +583,9 @@ private:
 #endif
 
     char textBuf[6];
+    char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
+    byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
     uint8_t lights;
 
     bool app_init_mode;

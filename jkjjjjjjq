@@ -344,7 +344,7 @@
      if (counter%2 == 0){[m
        // show analog pin[m
        textBuf[4] = counter/2 + 48; // char 0 + analog pin . [m
-       ledDisp->displayHandler(textBuf);[m
+       ledDisp->setText(textBuf);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
@@ -406,7 +406,7 @@
 [32m+[m[41m [m
        buzzer->cleanBuzzerRoll();[m
        buzzer->programBuzzerRoll(14);[m
-       ledDisp->displayHandler(textBuf);[m
+       ledDisp->setText(textBuf);[m
        generalTimer.start();[m
      }[m
 [31m-[m
@@ -671,7 +671,7 @@
        }[m
 [31m-[m
 [32m+[m[41m [m
-       ledDisp->displayHandler(textBuf);[m
+       ledDisp->setText(textBuf);[m
 [32m+[m[41m       [m
        [m
 [31m-     [m
@@ -725,7 +725,7 @@
            textBuf[3]='F'; [m
 [36m@@ -596,39 +596,39 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
          } [m
-         ledDisp->displayHandler(textBuf);[m
+         ledDisp->setText(textBuf);[m
        }[m
 [31m-      [m
 [32m+[m[41m       [m
@@ -792,7 +792,7 @@
          textBuf[2]='O'; [m
          textBuf[3]='I'; [m
          textBuf[4]='T'; [m
-         ledDisp->displayHandler(textBuf);[m
+         ledDisp->setText(textBuf);[m
 [31m-[m
 [32m+[m[41m [m
        }[m
@@ -821,7 +821,7 @@
        // if (counter%2 == 0){[m
        //   // show analog pin[m
        //   textBuf[4] = counter/2 + 48; // char 0 + analog pin . [m
-       //   ledDisp->displayHandler(textBuf);[m
+       //   ledDisp->setText(textBuf);[m
        // }[m
 [31m-[m
 [31m-      [m
@@ -833,7 +833,7 @@
 [31m-      [m
 [32m+[m[41m       [m
        if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500)){[m
-           ledDisp->displayHandler(textBuf);[m
+           ledDisp->setText(textBuf);[m
        }[m
 [31m-[m
 [32m+[m[41m [m
@@ -1604,7 +1604,7 @@
    // }[m
 [31m-  [m
 [32m+[m[41m   [m
- // ledDisp->displayHandler(textBuf);  [m
+ // ledDisp->setText(textBuf);  [m
  // ledDisp->SetSingleDigit(B11111111, 1);  [m
  // ledDisp->SetSingleDigit((uint8_t) (potentio->getValueStable()/4), 3);  [m
 [31m-  [m
@@ -1727,7 +1727,7 @@
    (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_LEFT:false;[m
 [31m-[m
 [32m+[m[41m [m
-   ledDisp->displayHandler(textBuf);[m
+   ledDisp->setText(textBuf);[m
    ledDisp->SetLedArray(lights); [m
    ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights ,2);[m
 [31m-    [m
@@ -1894,7 +1894,7 @@
 [31m-  [m
 [32m+[m[41m   [m
      }else{[m
-       ledDisp->displayHandler(textBuf);[m
+       ledDisp->setText(textBuf);[m
      }[m
    }[m
 [31m-  [m
@@ -2028,7 +2028,7 @@
      }[m
 [31m-    [m
 [32m+[m[41m     [m
-     ledDisp->displayHandler(textBuf);  [m
+     ledDisp->setText(textBuf);  [m
    }[m
  }[m
 [31m-[m
@@ -2096,7 +2096,7 @@
        }[m
 [31m-[m
 [32m+[m[41m [m
-       ledDisp->displayHandler(textBuf);[m
+       ledDisp->setText(textBuf);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
@@ -2568,7 +2568,7 @@
        #ifdef ENABLE_EEPROM[m
        if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){[m
 [36m@@ -2046,8 +2056,8 @@[m [mvoid Apps::modeReactionGame(bool init){[m
-         ledDisp->displayHandler(textBuf);[m
+         ledDisp->setText(textBuf);[m
        }else{[m
          //ledDisp->setBlankDisplay(); //make high score blink[m
 [31m-        [m
@@ -2580,7 +2580,7 @@
                (uint16_t*)[m
 [36m@@ -2064,19 +2074,19 @@[m [mvoid Apps::modeReactionGame(bool init){[m
        textBuf[1] = 'L';[m
-       ledDisp->displayHandler(textBuf);[m
+       ledDisp->setText(textBuf);[m
        #endif[m
 [31m-[m
 [31m-        [m

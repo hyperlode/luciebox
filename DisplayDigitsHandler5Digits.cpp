@@ -46,12 +46,12 @@ DisplayManagement::DisplayManagement()
 // 	{
 // 		text[4 - i] = 64 + number; //ascii 65 = a
 // 	}
-// 	this->displayHandler(text);
+// 	this->setText(text);
 // }
 
 // void DisplayManagement::showNumber(int16_t number, bool noLeadingZeros){
 
-void DisplayManagement::displayHandler(char *inText) // updateDisplayChars
+void DisplayManagement::setText(char *inText) // updateDisplayChars
 {
 	//inText[5] = '\0';
 	//writeStringToDisplay(inText);
@@ -64,10 +64,20 @@ void DisplayManagement::setCharToDisplay(char character, uint8_t digit){
 	this->text[digit] = character;
 }
 
+char* DisplayManagement::getTextHandle(){
+	return this->text;
+}
+
+void DisplayManagement::clearText(){
+
+	blanksToBuf(this->text);
+}
+
+
 void DisplayManagement::showNumber(int16_t number) //updateDisplayNumber
 {
 	numberToBuf(this->text, number);
-	// this->displayHandler(text);
+	// this->setText(text);
 }
 
 void DisplayManagement::SetFourDigits(uint32_t value) //updateDisplayAllBits
@@ -93,13 +103,27 @@ void DisplayManagement::setDecimalPoint(boolean isOn, uint8_t digit) // updateDi
 #ifdef ARDUINO_SIMULATION
 	mtc->setPoint(isOn, digit);
 #endif
+
 }
+
+byte* DisplayManagement::getDecimalPointsHandle()
+{
+	return &decimalPoints;
+}
+
+
 
 void DisplayManagement::SetLedArray(byte ledsAsBits) //  updateLights
 {
 	//sevseg.SetLedArray(ledsAsBits);
 	this->lights = ledsAsBits;
 };
+
+uint8_t* DisplayManagement::getLedArrayHandle(){
+	return &this->lights;
+}
+
+
 
 void DisplayManagement::convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray){
 	
@@ -120,10 +144,7 @@ void DisplayManagement::setBlankDisplay()
 {
 	//this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
 	this->displayBinary = 0;
-	this->text[0]=SPACE_FAKE_ASCII;
-	this->text[1]=SPACE_FAKE_ASCII;
-	this->text[2]=SPACE_FAKE_ASCII;
-	this->text[3]=SPACE_FAKE_ASCII;
+	clearText();
 	this->decimalPoints = 0;
 	this->lights = 0;
 }
@@ -136,6 +157,12 @@ void DisplayManagement::setBlankDisplay()
 // 		*screenBits |= (uint32_t)(textBuf[i]) << (8 * i);
 // 	}
 // }
+void DisplayManagement::blanksToBuf(char* textBuf){
+	textBuf[0]=SPACE_FAKE_ASCII;
+	textBuf[1]=SPACE_FAKE_ASCII;
+	textBuf[2]=SPACE_FAKE_ASCII;
+	textBuf[3]=SPACE_FAKE_ASCII;
+}
 
 void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 {
@@ -145,26 +172,20 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 	int16_t c;
 	number = abs(number);
 	c = number;
-	uint8_t lastDigitNonZero = 3;
+
+	blanksToBuf(textBuf);
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
 
 		textBuf[3 - i] = 48 + c % 10; //ascii 48 = 0
 
-		// memory for saving leading zero's indicator.
-		if (textBuf[3 - i] != 48)
-		{
-			lastDigitNonZero = 2 - i;
-		}
-
 		c /= 10;
+		if (c==0){
+			break;
+		}
 	}
 
-	for (uint8_t i = 0; i < lastDigitNonZero; i++)
-	{
-		textBuf[i] = ' ';
-	}
 }
 
 // void DisplayManagement::SetSingleDigit(uint8_t value, int digit){
@@ -174,7 +195,7 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 
 // void DisplayManagement::displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints)
 // {
-// 	displayHandler(inText);
+// 	setText(inText);
 // 	// always think of 5 digits.
 // 	for (uint8_t i = 0; i < 5; i++)
 // 	{
