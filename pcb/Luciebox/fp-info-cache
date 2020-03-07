@@ -1,4 +1,4 @@
-29843521072827
+32963882266315
 Luciebox
 8X8PADS_100mil
 
@@ -27,6 +27,13 @@ BIG_POTENTIO
 0
 3
 3
+Luciebox
+buzzer
+
+
+0
+2
+2
 Luciebox
 CA56-12SRWA
 4 digit 7 segment green LED, http://www.kingbrightusa.com/images/catalog/SPEC/CA56-12SRWA.pdf
@@ -63,26 +70,12 @@ R-2R package
 10
 10
 Luciebox
-TO-92-3
-http://www.ti.com/lit/ds/symlink/tl431a.pdf
+smd_throughhole_2_pins
+
 
 0
-3
-3
-Luciebox
-TO-220-3
-http://www.st.com/content/ccc/resource/technical/document/datasheet/f9/ed/f5/44/26/b9/43/a4/CD00000911.pdf/files/CD00000911.pdf/jcr:content/translations/en.CD00000911.pdf
-
-0
-3
-3
-Luciebox
-Term_Block_1x7_P5.08mm
-http://www.on-shore.com/wp-content/uploads/2015/09/osttcxx2162.pdf
-
-0
-7
-7
+2
+2
 Luciebox
 Terminal_2x1_100mil
 
@@ -126,9 +119,30 @@ Terminal_13x1_100mil
 13
 13
 Luciebox
-buzzer
+Term_Block_1x7_P5.08mm
+http://www.on-shore.com/wp-content/uploads/2015/09/osttcxx2162.pdf
+
+0
+7
+7
+Luciebox
+TO-92-3
+http://www.ti.com/lit/ds/symlink/tl431a.pdf
+
+0
+3
+3
+Luciebox
+TO-220-3
+http://www.st.com/content/ccc/resource/technical/document/datasheet/f9/ed/f5/44/26/b9/43/a4/CD00000911.pdf/files/CD00000911.pdf/jcr:content/translations/en.CD00000911.pdf
+
+0
+3
+3
+Luciebox
+usb_mini_Molex-0548190519
 
 
 0
-2
-2
+7
+6
