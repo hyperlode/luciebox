@@ -23,7 +23,7 @@ AR Path="/5D761BCA/5D7526DB" Ref="R35"  Part="1"
 AR Path="/5D9307E8/5D7526DB" Ref="R44"  Part="1" 
 F 0 "R44" H 3809 2446 50  0000 L CNN
 F 1 "R_Small" H 3809 2355 50  0000 L CNN
-F 2 "Luciebox:1206" H 3750 2400 50  0001 C CNN
+F 2 "Luciebox:1206_0805" H 3750 2400 50  0001 C CNN
 F 3 "~" H 3750 2400 50  0001 C CNN
 	1    3750 2400
 	0    -1   -1   0   
@@ -37,7 +37,7 @@ AR Path="/5D761BCA/5D7526E1" Ref="R34"  Part="1"
 AR Path="/5D9307E8/5D7526E1" Ref="R43"  Part="1" 
 F 0 "R43" H 3809 1996 50  0000 L CNN
 F 1 "R_Small" H 3809 1905 50  0000 L CNN
-F 2 "Luciebox:1206" H 3750 1950 50  0001 C CNN
+F 2 "Luciebox:1206_0805" H 3750 1950 50  0001 C CNN
 F 3 "~" H 3750 1950 50  0001 C CNN
 	1    3750 1950
 	0    -1   -1   0   
@@ -153,30 +153,6 @@ Wire Wire Line
 Wire Wire Line
 	5750 2850 5250 2850
 Wire Wire Line
-	4150 2850 4150 3500
-Wire Wire Line
-	4150 3500 3250 3500
-Wire Wire Line
-	3250 3500 3250 3700
-Wire Wire Line
-	3150 3450 4100 3450
-Wire Wire Line
-	4100 3450 4100 2400
-Wire Wire Line
-	3150 3450 3150 3700
-Wire Wire Line
-	4050 1950 4050 3400
-Wire Wire Line
-	4050 3400 3050 3400
-Wire Wire Line
-	3050 3400 3050 3700
-Wire Wire Line
-	2950 3350 4000 3350
-Wire Wire Line
-	4000 3350 4000 1500
-Wire Wire Line
-	2950 3350 2950 3700
-Wire Wire Line
 	5750 1500 5750 1950
 Wire Wire Line
 	5750 1950 5750 2400
@@ -194,7 +170,7 @@ AR Path="/5D761BCA/5E6454DE" Ref="R36"  Part="1"
 AR Path="/5D9307E8/5E6454DE" Ref="R45"  Part="1" 
 F 0 "R45" H 3809 2896 50  0000 L CNN
 F 1 "R_Small" H 3809 2805 50  0000 L CNN
-F 2 "Luciebox:1206" H 3750 2850 50  0001 C CNN
+F 2 "Luciebox:1206_0805" H 3750 2850 50  0001 C CNN
 F 3 "~" H 3750 2850 50  0001 C CNN
 	1    3750 2850
 	0    -1   -1   0   
@@ -208,31 +184,11 @@ AR Path="/5D761BCA/5D7526E7" Ref="R33"  Part="1"
 AR Path="/5D9307E8/5D7526E7" Ref="R42"  Part="1" 
 F 0 "R42" H 3809 1546 50  0000 L CNN
 F 1 "R_Small" H 3809 1455 50  0000 L CNN
-F 2 "Luciebox:1206" H 3750 1500 50  0001 C CNN
+F 2 "Luciebox:1206_0805" H 3750 1500 50  0001 C CNN
 F 3 "~" H 3750 1500 50  0001 C CNN
 	1    3750 1500
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	4000 1500 4900 1500
-Wire Wire Line
-	4150 2850 4900 2850
-Wire Wire Line
-	4100 2400 4900 2400
-Wire Wire Line
-	4050 1950 4900 1950
-Wire Wire Line
-	3850 1500 4000 1500
-Connection ~ 4000 1500
-Wire Wire Line
-	3850 1950 4050 1950
-Connection ~ 4050 1950
-Wire Wire Line
-	3850 2400 4100 2400
-Connection ~ 4100 2400
-Wire Wire Line
-	3850 2850 4150 2850
-Connection ~ 4150 2850
 Wire Wire Line
 	3650 1500 3550 1500
 Wire Wire Line
@@ -266,4 +222,48 @@ $EndComp
 Wire Wire Line
 	3550 3000 3550 2850
 Connection ~ 3550 2850
+Wire Wire Line
+	3850 1500 4100 1500
+Wire Wire Line
+	3850 1950 4200 1950
+Wire Wire Line
+	3850 2400 4300 2400
+Wire Wire Line
+	3850 2850 4400 2850
+Wire Wire Line
+	4400 2850 4400 3500
+Wire Wire Line
+	4400 3500 3250 3500
+Wire Wire Line
+	3250 3500 3250 3700
+Connection ~ 4400 2850
+Wire Wire Line
+	4400 2850 4900 2850
+Wire Wire Line
+	3150 3700 3150 3400
+Wire Wire Line
+	3150 3400 4300 3400
+Wire Wire Line
+	4300 3400 4300 2400
+Connection ~ 4300 2400
+Wire Wire Line
+	4300 2400 4900 2400
+Wire Wire Line
+	4200 1950 4200 3300
+Wire Wire Line
+	4200 3300 3050 3300
+Wire Wire Line
+	3050 3300 3050 3700
+Connection ~ 4200 1950
+Wire Wire Line
+	4200 1950 4900 1950
+Wire Wire Line
+	2950 3700 2950 3200
+Wire Wire Line
+	2950 3200 4100 3200
+Wire Wire Line
+	4100 3200 4100 1500
+Connection ~ 4100 1500
+Wire Wire Line
+	4100 1500 4900 1500
 $EndSCHEMATC

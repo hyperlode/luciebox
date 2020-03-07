@@ -1,11 +1,12 @@
 ordered 10x 24CAD all in.  jlcpcb.com W201911141423989
 
-pcb errors encountered to be corrected after delivery:
+pcb errors encountered to be corrected after delivery in v1.0:
+DONE = corrected in v2.0
 DONE -5V arduino to pcb NOT connected
--resistor footprints too big for small SMD components
+DONE -resistor footprints too big for small SMD components
 DONE -add resistor to the 5V used for the NC of the switches, to save for short circuits when switching and NO and NC briefly connected (make before break)
 DO NOT CHANGE-digits were swapped (changed in software)
 DONE -tilt switches: provide dedicated space on board for sensor installation
 DONE -usb micro. --> with extra terminal to connect data line to an Arduino Uno. If pcb is use as shied--> there is the possibility to connect the usb... 
--add diodes to protect power supplies. 
+DONE-add diodes to protect power supplies. 
 -label better: power connector / programming connector.
