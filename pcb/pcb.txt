@@ -9,4 +9,6 @@ DO NOT CHANGE-digits were swapped (changed in software)
 DONE -tilt switches: provide dedicated space on board for sensor installation
 DONE -usb micro. --> with extra terminal to connect data line to an Arduino Uno. If pcb is use as shied--> there is the possibility to connect the usb... 
 DONE-add diodes to protect power supplies. 
--label better: power connector / programming connector.
+DONE -label better: power connector / programming connector.
+DONE -add 8th led light output. 
+DONE -add some more holes for the R-2R ladder bridging (if not all slots are used).

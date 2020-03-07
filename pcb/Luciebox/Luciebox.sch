@@ -360,18 +360,10 @@ Text Label 7250 2500 3    50   ~ 0
 10(PWM-SS)
 Text Label 7000 2500 3    50   ~ 0
 9(PWM)
-Text Label 3350 1000 2    50   ~ 0
-7
 Wire Wire Line
 	3850 1000 3800 1000
 Wire Wire Line
 	3850 1100 3750 1100
-Text Label 3350 1100 2    50   ~ 0
-2
-Text Label 3350 1200 2    50   ~ 0
-4
-Text Label 3350 1300 2    50   ~ 0
-8
 Text Label 3350 1400 2    50   ~ 0
 12(MISO)
 Text Label 3350 1500 2    50   ~ 0
@@ -972,15 +964,6 @@ Wire Wire Line
 	1500 6250 1250 6250
 Text Label 1250 6250 2    50   ~ 0
 A3
-$Sheet
-S 1250 750  500  800 
-U 5D9307E8
-F0 "Tilt switches" 50
-F1 "R2-R_ladder_dac_tilt_switches.sch" 50
-F2 "DAC_analog" O L 1250 950 50 
-$EndSheet
-Text Label 1250 950  2    50   ~ 0
-A4(SDA)
 $Comp
 L Device:Buzzer BZ1
 U 1 1 5D93C6F4
@@ -1806,10 +1789,10 @@ Wire Wire Line
 Wire Wire Line
 	4150 5600 4050 5600
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR0107
 U 1 1 5E92F10F
 P 2250 2350
-F 0 "#PWR?" H 2250 2200 50  0001 C CNN
+F 0 "#PWR0107" H 2250 2200 50  0001 C CNN
 F 1 "VCC" H 2267 2523 50  0000 C CNN
 F 2 "" H 2250 2350 50  0001 C CNN
 F 3 "" H 2250 2350 50  0001 C CNN
@@ -1817,10 +1800,10 @@ F 3 "" H 2250 2350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Luciebox_components:terminal_8x1 T?
+L Luciebox_components:terminal_8x1 T10
 U 1 1 5E94AD11
 P 3350 2300
-F 0 "T?" H 3467 2085 50  0000 C CNN
+F 0 "T10" H 3467 2085 50  0000 C CNN
 F 1 "terminal_8x1" H 3467 2176 50  0000 C CNN
 F 2 "Luciebox:Terminal_8x1_100mil" H 3150 2200 50  0001 C CNN
 F 3 "" H 3300 3400 50  0001 C CNN
@@ -1828,10 +1811,10 @@ F 3 "" H 3300 3400 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L Luciebox_components:terminal_8x1 T?
+L Luciebox_components:terminal_8x1 T9
 U 1 1 5E968FAE
 P 2600 2300
-F 0 "T?" H 2717 2085 50  0000 C CNN
+F 0 "T9" H 2717 2085 50  0000 C CNN
 F 1 "terminal_8x1" H 2717 2176 50  0000 C CNN
 F 2 "Luciebox:Terminal_8x1_100mil" H 2400 2200 50  0001 C CNN
 F 3 "" H 2550 3400 50  0001 C CNN
@@ -1888,4 +1871,21 @@ Wire Wire Line
 Connection ~ 3450 1700
 Wire Wire Line
 	3450 1700 3850 1700
+Text Label 1300 1200 0    50   ~ 0
+A4(SDA)
+Text Label 3350 1300 2    50   ~ 0
+8
+Text Label 3350 1200 2    50   ~ 0
+4
+Text Label 3350 1100 2    50   ~ 0
+2
+Text Label 3350 1000 2    50   ~ 0
+7
+$Sheet
+S 800  800  500  800 
+U 5D9307E8
+F0 "Tilt switches" 50
+F1 "R2-R_ladder_dac_tilt_switches.sch" 50
+F2 "DAC_analog_out" O R 1300 1200 50 
+$EndSheet
 $EndSCHEMATC
