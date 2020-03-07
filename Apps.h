@@ -12,6 +12,9 @@
 #include "PotentioSelector.h"
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
+#include "PretbakSettings.h"
+#include "LedMultiplexer5x8.h"
+
 #ifdef ENABLE_EEPROM
 #include <avr/eeprom.h>
 // #include <EEPROM.h>
@@ -23,7 +26,7 @@
 
 #include "DataPlayer.h"
 
-#include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
+//#include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
 #include "Potentio.h"
@@ -435,8 +438,9 @@ public:
     DisplayManagement *ledDisp;
     Buzzer *buzzer;
     Potentio *potentio;
+    LedMultiplexer5x8* allLights;
 
-    void setPeripherals(BinaryInput *binaryInput, Potentio *potentio, DisplayManagement *ledDisp, Buzzer *buzzer);
+    void setPeripherals(BinaryInput *binaryInput, Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer);
     // void setBuffers(char* textBuf, char*  scrollBuf);
     //void setBuffers(char* textBuf);
     // void test();

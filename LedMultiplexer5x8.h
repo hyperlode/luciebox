@@ -1,8 +1,8 @@
 //Written by Dean Reading, 2012.  deanreading@hotmail.com
 //See .cpp file for info
 
-#ifndef Multiplexer5x8_h
-#define Multiplexer5x8_h
+#ifndef LedMultiplexer5x8_h
+#define LedMultiplexer5x8_h
 
 //#if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -13,23 +13,23 @@
 //#endif
 
 
-class Multiplexer5x8
+class LedMultiplexer5x8
 {
 
 public:
-    Multiplexer5x8();
+    LedMultiplexer5x8();
 
     //Public Functions
     //  void PrintOutput();
     //  void PrintOutput1And4();
-    byte *PrintOutputSeg();
+    void refresh();
     //void NewText(char *text);
     // void Begin(boolean mode_in, byte C1, byte C2, byte C3, byte C4, byte C5, byte UC1, byte UC2, byte UC3, byte UC4, byte UC5, byte UC6, byte UC7, byte UC8);
-    void Multiplexer5x8:Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7)
+    void Begin(boolean mode_isCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S0, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7);
 
     //void Begin(boolean mode_in, byte C1, byte C2, byte C3, byte C4, byte C5, byte LedArrayDigit, byte UC1, byte UC2, byte UC3, byte UC4, byte UC5, byte UC6, byte UC7, byte UC8);
 
-    uint8_t** getDigits();
+    uint8_t* getDigits();
     //void SetSingleDigit(int8_t value, int digit);
     //void SetFourDigits(uint32_t value);
     //void SetDecPointSingle(boolean decDig, int digit);
@@ -43,7 +43,7 @@ public:
 
 private:
     //Private Functions
-    void CreateArray();
+    //void CreateArray();
 
     //Private Variables
     // boolean mode,DigitOn,DigitOff,SegOn,SegOff;
@@ -52,10 +52,9 @@ private:
     uint32_t test;
     byte DigitPins[5];
     byte SegmentPins[8];
-   
-    uint8_t digitValues[5];
-   
-    // boolean lights[5][8];
+    byte digitValues[5];
+    
+     // boolean lights[5][8];
     //uint8_t lights[5];
     
     
