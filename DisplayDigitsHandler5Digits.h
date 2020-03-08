@@ -108,7 +108,7 @@ public:
     byte* getDecimalPointsHandle();
 
     void SetLedArray(byte ledsAsBits);  //  updateLights
-    uint8_t* getLedArrayHandle();
+    byte* getLedArrayHandle();
     
     void setBlankDisplay(); //eraseAll
 

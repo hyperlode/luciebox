@@ -14,6 +14,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, Displa
 
 	textHandle = ledDisp->getTextHandle();
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
+	lightsHandle = ledDisp->getLedArrayHandle();
 
 }
 
@@ -347,13 +348,13 @@ void Apps::pomodoroTimer(bool init)
 			if (POMODORO_IN_BREAK)
 			{
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
-				//buzzer->loadBuzzerTrack(song_happy_dryer);
+				buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 				POMODORO_TIMER.start();
 			}
 			else
 			{
 				// coming out of break. Not executed at starting Pomodoro by switch.
-				//buzzer->loadBuzzerTrack(song_attack);
+				buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 				if (POMODORO_AUTO_RESTART_ENABLED)
 				{
@@ -1578,7 +1579,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 		{
 			buzzer->buzzerOff();
 			buzzer->setSpeedRatio(4);
-			//buzzer->loadBuzzerTrack(alphabeth_song);
+			buzzer->loadBuzzerTrack(songs, SONG_ALPHABET);
 		}
 		else
 		{
@@ -1703,7 +1704,7 @@ void Apps::modeSoundSong(bool init)
 {
 	if (init)
 	{
-		//buzzer->loadBuzzerTrack(song_happy_dryer);
+		buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 		buzzer->setSpeedRatio((float)2);
 	}
 	
@@ -1721,104 +1722,21 @@ void Apps::modeSoundSong(bool init)
 		}
 	}
 
-	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-	{
-		// buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
-		buzzer->loadBuzzerTrack(songs, SONG_DRYER_UNHAPPY);
+	for (uint8_t index=0; index< MOMENTARY_BUTTONS_COUNT; index++){
+
+		if (binaryInputs[buttons_momentary_indexed[index]].getEdgeUp()){
+			if (binaryInputs[LIGHT_LATCHING_SMALL_RIGHT].getValue()){
+				uint8_t song [32];
+
+				saveLoadFromEepromSlot(song, index, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS,true);
+				for (uint8_t i=0; i< 32;i++){
+					buzzer->programBuzzerRoll(song[i]);
+				}
+			}else{
+				buzzer->loadBuzzerTrack(songs, index + (4* binaryInputs[BUTTON_LATCHING_EXTRA].getValue()));	
+			}
+		}
 	}
-
-	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-	{
-		// buzzer->loadBuzzerTrack(songs, SONG_LANG_ZAL_ZE_LEVEN);
-		buzzer->loadBuzzerTrack(songs, SONG_KINDEKE_DOUWEN);
-	}
-
-	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-	{
-		buzzer->loadBuzzerTrack(songs, SONG_ALPHABET );
-	}
-
-// 	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
-// 	{
-// 		// advanced mode scales
-// 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-// 		{
-// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-// 			{
-// 				////buzzer->loadBuzzerTrack(song_attack );
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-// 			{
-// 				////buzzer->loadBuzzerTrack(song_unhappy_dryer);
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(scale_major);
-// 			}
-// #ifdef BUTTON_MOMENTARY_3
-// 			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(scale_pentatonic);
-// 			}
-// #endif
-// 		}
-// 		else
-// 		{
-// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-// 			{
-// 				////buzzer->loadBuzzerTrack(song_retreat );
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-// 			{
-// 				////buzzer->loadBuzzerTrack(song_unhappy_dryer);
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(scale_major_reversed);
-// 			}
-// #ifdef BUTTON_MOMENTARY_3
-// 			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-// 			{
-// 				// //buzzer->loadBuzzerTrack(scale_pentatonic_reversed);
-// 			}
-// #endif
-// 		}
-// 	}
-// 	else
-// 	{
-// 		// simple mode: songs!
-// 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-// 		{
-// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(song_retreat);
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(kindeke_douwen);
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(song_unhappy_dryer);
-// 			}
-// 		}
-// 		else
-// 		{
-// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(song_attack);
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(song_lang_zal_ze_leven);
-// 			}
-// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-// 			{
-// 				//buzzer->loadBuzzerTrack(song_happy_dryer);
-// 			}
-// 		}
-// 	}
-
 	
 	buzzer->lastPlayedNoteToDisplay(textHandle, decimalDotsHandle);
 }
@@ -2350,11 +2268,11 @@ void Apps::drawGame(bool init)
 
 			if (displayAllSegments == displayAllSegmentsBuffer)
 			{
-				//buzzer->loadBuzzerTrack(song_happy_dryer);
+				buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 			}
 			else
 			{
-				//buzzer->loadBuzzerTrack(song_unhappy_dryer);
+				buzzer->loadBuzzerTrack(songs, SONG_DRYER_UNHAPPY);
 			}
 		}
 		break;
@@ -2749,7 +2667,7 @@ void Apps::tiltSwitchTest(bool init)
 		counter++;
 		if (counter == 4)
 		{
-			//buzzer->loadBuzzerTrack(song_happy_dryer);
+			buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 			counter = 0;
 		}
 		counter2 = 0;
@@ -3287,7 +3205,7 @@ void Apps::modeSimon(bool init)
 		{
 			// reached maximum length
 			if (hasSound)
-				//buzzer->loadBuzzerTrack(song_attack);
+				buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
 			simonState = simonWaitForNewGame;
 			break;
 		}
@@ -3338,7 +3256,7 @@ void Apps::modeSimon(bool init)
 		{
 			// player made mistake, start new game
 			if (hasSound)
-				//buzzer->loadBuzzerTrack(scale_major_reversed);
+				buzzer->loadBuzzerTrack(songs, SONG_RETREAT);
 			simonState = simonWaitForNewGame;
 			break;
 		}
@@ -3492,7 +3410,7 @@ void Apps::modeSimon(bool init)
 		// let maximum length breach be a happy crash. I can't afford the bytes!
 		//   if (SIMON_LENGTH >= bytes_list_bufsize) {
 		// 	  // reached maximum length
-		// 	  //buzzer->loadBuzzerTrack(song_attack);
+		// 	  buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 		// 	  simonState = simonWaitForNewGame;
 		// 	  break;
 		//   }
@@ -3738,6 +3656,8 @@ void Apps::modeReactionGame(bool init)
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
 	}
 
+	ledDisp->setBlankDisplay();
+
 	// at any time, leave game when depressing play button.
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown())
 	{
@@ -3874,7 +3794,7 @@ void Apps::modeReactionGame(bool init)
 		// three rows of four horizontal segments in 4 digits 7 segment display.
 		// choose top row random. any combination of 4 (including zero) ==> 16 combinations.
 
-		ledDisp->setBlankDisplay();
+		//ledDisp->setBlankDisplay();
 		lights = 0b00000000;
 
 		uint8_t new_segment;
@@ -3979,10 +3899,10 @@ void Apps::modeReactionGame(bool init)
 			REACTION_GAME_TIMER_STEP = 0;	  //reset animation step
 			TIMER_REACTION_GAME_SPEED.start(); // only restart if 12 steps time per turn
 		}
-		ledDisp->setBlankDisplay(); // yes, this is needed.
+		//ledDisp->setBlankDisplay(); // yes, this is needed.
 		displayAllSegments = 0;		//reset animation graphics screen
 
-		lights = 0b00000000; //reset before switch enquiry
+		//lights = 0b00000000; //reset before switch enquiry
 
 		REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
@@ -3998,10 +3918,11 @@ void Apps::modeReactionGame(bool init)
 		}
 		else
 		{
-			lights |= 1 << lights_indexed[REACTION_GAME_TARGET];
+			//lights |= 1 << lights_indexed[REACTION_GAME_TARGET];
 		}
 
-		ledDisp->SetLedArray(lights);
+		//ledDisp->SetLedArray(lights);
+		
 
 		reactionGameState = reactionPlaying;
 		break;
@@ -4009,7 +3930,6 @@ void Apps::modeReactionGame(bool init)
 
 	case reactionPlaying:
 	{
-
 		if (REACTION_COUNTDOWN_MODE)
 		{
 			// if timer out, always dead.
@@ -4019,15 +3939,8 @@ void Apps::modeReactionGame(bool init)
 			}
 			// show number of segments:
 			REACTION_GAME_TIMER_STEP = 10 - (uint16_t)((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
-			// REACTION_GAME_TIMER_STEP = 11;
-			for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
-			{
-				for (uint8_t i = 0; i < 4; i++)
-				{
-					displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + step * 4 + (i)) << (8 * i);
-				}
-			}
-			ledDisp->SetFourDigits(displayAllSegments);
+			
+			
 		}
 		else
 		{
@@ -4036,11 +3949,7 @@ void Apps::modeReactionGame(bool init)
 			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
 			{
 				// game timing animation update.
-				for (uint8_t i = 0; i < 4; i++)
-				{
-					displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP * 4 + (i)) << (8 * i);
-				}
-				ledDisp->SetFourDigits(displayAllSegments);
+
 
 				REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
 
@@ -4058,6 +3967,19 @@ void Apps::modeReactionGame(bool init)
 				}
 			}
 		}
+		
+		// set led
+		*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
+
+		// set graphics
+		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
+		{
+			for (uint8_t i = 0; i < 4; i++)
+			{
+				displayAllSegments |= (uint32_t)pgm_read_byte_near( disp_4digits_animate_circle + step * 4 + (i)) << (8 * i);
+			}
+		}
+		ledDisp->SetFourDigits(displayAllSegments);
 
 		// set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
 
@@ -4117,7 +4039,7 @@ void Apps::modeReactionGame(bool init)
 							 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE),
 				REACTION_GAME_SCORE);
 
-			//buzzer->loadBuzzerTrack(song_attack);
+			buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
 		}
 #endif
 
@@ -4125,8 +4047,6 @@ void Apps::modeReactionGame(bool init)
 
 		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
-
-		
 
 		reactionGameState = reactionFinished;
 
@@ -4146,7 +4066,7 @@ void Apps::modeReactionGame(bool init)
 			//do nothing.  wait for display high score is finished.
 			if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 			{
-				ledDisp->setBlankDisplay(); //make high score blink
+				//ledDisp->setBlankDisplay(); //make high score blink
 			}
 			else
 			{
@@ -4241,26 +4161,28 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 	{
-		bool loaded = false;
-		for (uint8_t i = 0; i < eepromSlotLength; i++)
-		{
-			uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
-												  (slot_number - 1) * eepromSlotLength + i);
+		bool loadElseSave = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();
+		// for (uint8_t i = 0; i < eepromSlotLength; i++)
+		// {
+			// uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
+			// 									  (slot_number - 1) * eepromSlotLength + i);
 
-			if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-			{
-				//save
-				eeprom_write_byte(eeprom_address, data[i]);
-			}
-			else
-			{
-				//load
-				data[i] = eeprom_read_byte(eeprom_address);
-				loaded = true;
-			}
-		}
+			// if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
+			// {
+			// 	//save
+			// 	eeprom_write_byte(eeprom_address, data[i]);
+		saveLoadFromEepromSlot(data, slot_number - 1, eepromSlotLength, eepromStartAddress, loadElseSave);
+				
+			// }
+			// else
+			// {
+			// 	//load
+			// 	data[i] = eeprom_read_byte(eeprom_address);
+			// 	loaded = true;
+			// }
+		// }
 
-		return loaded;
+		return loadElseSave;
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getValue())
@@ -4268,4 +4190,24 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 		SAVE_LOAD_MENU_BLINK_TIMER.start();
 	}
 	return false;
+}
+
+bool Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave){
+
+	for (uint8_t i = 0; i < eepromSlotLength; i++)
+	{
+		uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
+												slotIndex * eepromSlotLength + i);
+
+		if (loadElseSave)
+		{
+			//load
+			data[i] = eeprom_read_byte(eeprom_address);
+		}
+		else
+		{
+			//save
+			eeprom_write_byte(eeprom_address, data[i]);
+		}
+	}
 }

@@ -394,73 +394,6 @@ const uint8_t songs [] PROGMEM = {
     // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
    
 };
-
-// const uint8_t song_lang_zal_ze_leven[] PROGMEM = {
-//      BUZZER_ROLL_SONG_STOPVALUE};
-    
-// const uint8_t song_happy_dryer[] PROGMEM = {
-//     A6_2, rest_4, rest_2,
-//     Cs7_2, rest_4, rest_2,
-//     E7_4, rest_8, rest_4,
-//     Cs7_4, rest_8, rest_4,
-//     E7_4, rest_8, rest_4,
-//     A7_1, A7_1,
-//     rest_2, BUZZER_ROLL_SONG_STOPVALUE};
-// const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, BUZZER_ROLL_SONG_STOPVALUE};
-// const uint8_t song_attack[] PROGMEM = {Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, BUZZER_ROLL_SONG_STOPVALUE}; // aaanvallueeeeee!
-// const uint8_t kindeke_douwen[] PROGMEM = {
-
-//     // Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1
-//     B7_4, rest_4, rest_2,       // wie
-//     B7_1,                       //zal
-//     rest_2, A7_4, rest_4,       //er
-//     G6_4, rest_4, rest_2,       //ons
-//     B7_1,                       //kind-
-//     B7_4, rest_4, A7_4, rest_4, //-de
-//     G6_4, rest_4, rest_2,       //-ke
-//     A7_1,                       //dou
-//     A7_4, rest_4, rest_2,
-//     C7_4, rest_4, rest_2,
-//     C7_1, //wen
-//     rest_1,
-//     C7_4, rest_4, rest_2, // dat
-//     B7_1,                 // schaars
-//     B7_4, rest_4, B7_4, rest_4,
-//     B7_4, rest_4, rest_2,
-
-//     E7_4, rest_4, rest_2, //
-//     E7_1,
-//     E7_4, rest_4, E7_4, rest_4,
-//     A7_4, rest_4, rest_2,
-
-//     // E7_4,rest_4,rest_2, // dat schaars...
-//     // E7_1,
-//     // rest_2,E7_4, rest_4,
-//     // A7_2,rest_2,
-
-//     // E7_4,rest_4,rest_2, // dat schaars...
-//     // E7_1,
-//     // rest_2,E7_4, rest_4,
-//     // A7_2,rest_2,
-
-//     BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
-
-const uint8_t alphabeth_song[] PROGMEM = {
-
-    C7_4, rest_4, rest_2, 
-    C7_4, rest_4, rest_2, 
-    G7_4, rest_4, rest_2, 
-    G7_4, rest_4, rest_2, 
-    A7_4, rest_4, rest_2, 
-    A7_4, rest_4, rest_2, 
-    G7_1, rest_1,
-    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
-    // G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
-    // C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
-    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
-    BUZZER_ROLL_SONG_STOPVALUE};
-
-// const uint8_t song_retreat[] PROGMEM = {Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1, BUZZER_ROLL_SONG_STOPVALUE}; //  retreat!
 const uint8_t scale_major[] PROGMEM = {C7_2, rest_4, D7_2, rest_4, E7_2, rest_4, F7_2, rest_4, G7_2, rest_4, A7_2, rest_4, B7_2, rest_4, C8_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2, rest_4, G7_2, rest_4, F7_2, rest_4, E7_2, rest_4, D7_2, rest_4, C7_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
 
@@ -552,6 +485,7 @@ public:
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
     void shuffle(uint8_t *list, uint8_t length);
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
+    bool saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
 
 private:
 #ifdef FUNCTION_POINTER_APP_SELECTION
@@ -661,6 +595,7 @@ private:
     char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
+    byte* lightsHandle;
     uint8_t lights;
 
     bool app_init_mode;

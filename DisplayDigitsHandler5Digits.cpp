@@ -119,7 +119,7 @@ void DisplayManagement::SetLedArray(byte ledsAsBits) //  updateLights
 	this->lights = ledsAsBits;
 };
 
-uint8_t* DisplayManagement::getLedArrayHandle(){
+byte* DisplayManagement::getLedArrayHandle(){
 	return &this->lights;
 }
 
