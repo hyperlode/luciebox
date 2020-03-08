@@ -6,6 +6,7 @@
 #define SIMON_APP
 #define ENABLE_REACTION_APP
 
+
 #include "Arduino.h"
 #include "SuperTimer.h"
 #include "Buzzer.h"
@@ -59,6 +60,8 @@
 #define APP_SELECTOR_MULTITIMER_SETTING 22
 #define APP_SELECTOR_MULTITIMER_PLAYING 23
 
+
+
 // #define TILT_FORWARD 	0x00000001
 // #define TILT_BACKWARD 	0x00000010
 // #define TILT_LEFT 		0x00000100
@@ -107,6 +110,7 @@
 #define POMODORO_DISPLAY_SHOW_GOOD 2
 #define POMODORO_DISPLAY_SHOW_BAD 3
 #define POMODORO_DISPLAY_BEEP_PROBABILITY 4
+#define POMODORO_NONSENSE_TIME 60000
 
 // VARIABLE REUSE
 
@@ -582,7 +586,7 @@ private:
 
 #endif
 
-    char textBuf[6];
+    char textBuf[4];
     char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)

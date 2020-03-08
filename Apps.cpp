@@ -239,7 +239,8 @@ bool Apps::init_app(bool init, uint8_t selector)
 
 	if (init)
 	{
-		// init of the init_app...
+		ledDisp->setBlankDisplay();
+		// init of the init_app..
 		this->displayAllSegments = 0;
 		for (uint8_t i = 0; i < 4; i++)
 		{
@@ -312,7 +313,10 @@ void Apps::pomodoroTimer(bool init)
 		POMODORO_STATS_WORKING_GOOD = 0;
 		POMODORO_STATS_WORKING_BAD = 0;
 		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
+	
+		ledDisp->setBlankDisplay();
 	}
+
 	boolean showMenu = true;
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue() &&
 		!init &&
@@ -393,27 +397,37 @@ void Apps::pomodoroTimer(bool init)
 			POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 		}
 #ifdef ENABLE_MULTITIMER
-		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91));
+		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
+		if (potentio->getValueStableChangedEdge()){
+			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91));
 #else
-		uint16_t tmpSeconds = potentio->getValueMapped(0, 1024);
+			uint16_t tmpSeconds = potentio->getValueMapped(0, 1024);
 #endif
-		if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
-		{
-			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
-			POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
+			if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
+			{
+				POMODORO_INIT_TIME_SECONDS = tmpSeconds;
+				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
+			}
 		}
 
 		if (binaryInputs[BUTTON_MOMENTARY_0].getValue())
 		{
-			POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
-			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
+			if(tmpSeconds!= POMODORO_NONSENSE_TIME){
+				POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
+			}
+			 display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
 		}
 
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
 		{
-			POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = tmpSeconds;
+			if(tmpSeconds!= POMODORO_NONSENSE_TIME){
+				POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = tmpSeconds;
+			}
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
 		}
+
+
+		
 
 		if (binaryInputs[BUTTON_MOMENTARY_3].getValue())
 		{
@@ -535,11 +549,12 @@ void Apps::pomodoroTimer(bool init)
 		break;
 	}
 
+	ledDisp->setDecimalPoint(false, 1);
 	// decimalPoints = 0;
 	if (showMenu)
 	{
 		// decimalPoints = 1 << 2;
-		ledDisp->setDecimalPoint(true, 2);
+		ledDisp->setDecimalPoint(true, 1);
 
 		if (millis() % 500 < 250)
 		{
@@ -548,7 +563,7 @@ void Apps::pomodoroTimer(bool init)
 	}
 	else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500))
 	{
-		ledDisp->setDecimalPoint(true, 2);
+		ledDisp->setDecimalPoint(true, 1);
 		lights |= 1 << LIGHT_LATCHING_EXTRA;
 	}
 	else if (POMODORO_IN_BREAK)
@@ -608,18 +623,19 @@ void Apps::stopwatch(bool init)
 
 		STOPWATCH_CHRONO.setInitTimeMillis(0);
 		STOPWATCH_CHRONO.reset();
+		STOPWATCH_CHRONO.startPaused(true);
 	}
 
 	long time_millis = 0;
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown())
-	{
-		STOPWATCH_CHRONO.pause();
-	}
+	// if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown())
+	// {
+	// 	STOPWATCH_CHRONO.pause();
+	// }
 
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp())
-	{
-		STOPWATCH_CHRONO.startPaused(false);
-	}
+	// if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp())
+	// {
+	// 	STOPWATCH_CHRONO.startPaused(false);
+	// }
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
 	{
@@ -652,22 +668,22 @@ void Apps::stopwatch(bool init)
 
 	if (time_millis < 10000)
 	{
-		timeDisplayShift = 1;
+		timeDisplayShift = 0;
 	}
 	else if (time_millis < 100000)
 	{
 		time_millis /= 10;
-		timeDisplayShift = 2;
+		timeDisplayShift = 1;
 	}
 	else if (time_millis < 1000000)
 	{
 		time_millis /= 100;
-		timeDisplayShift = 3;
+		timeDisplayShift = 2;
 	}
 	else
 	{
 		time_millis /= 1000;
-		timeDisplayShift = 4;
+		timeDisplayShift = 3;
 	}
 
 	textBuf[0] = ' ';
@@ -964,8 +980,8 @@ void Apps::randomModeDisplay(bool forReal)
 {
 	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
 	
-	ledDisp->clearText();
-
+	// ledDisp->setBlankDisplay();
+	ledDisp->blanksToBuf(textBuf);
 	switch (DICEROLL_RANDOM_TYPE)
 	{
 
@@ -974,7 +990,7 @@ void Apps::randomModeDisplay(bool forReal)
 		DICEROLL_RANDOM_NUMBER = random(1, 7);
 		// show dice eyes
 		//textBuf[3] = ' ';
-		for (uint8_t i = 1; i < 4; i++)
+		for (uint8_t i = 0; i < 3; i++)
 		{
 			// build up dice eyes over three digits
 
@@ -989,14 +1005,14 @@ void Apps::randomModeDisplay(bool forReal)
 			else if (DICEROLL_RANDOM_NUMBER < 4)
 			{
 				textBuf[i] = ONLY_TOP_SEGMENT_FAKE_ASCII; // assume first digit seg A
-				if (i == 3)
+				if (i == 2)
 				{
 					textBuf[i] = ONLY_BOTTOM_SEGMENT_FAKE_ASCII; // seg D
 				}
 			}
 
 			//second digit
-			if (i == 2 && DICEROLL_RANDOM_NUMBER < 6)
+			if (i == 1 && DICEROLL_RANDOM_NUMBER < 6)
 			{
 				textBuf[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII; // assume odd
 				if (DICEROLL_RANDOM_NUMBER % 2 == 0)
@@ -1045,7 +1061,8 @@ void Apps::randomModeDisplay(bool forReal)
 			DICEROLL_CARD_FROM_DECK_INDEX = 0;
 		}
 	}
-		// NO BREAK, fallthrough to show card!!!!
+	
+	// NO BREAK, fallthrough to show card!!!!
 
 	case DICEROLL_TAKERANDOMCARD:
 	{
@@ -1066,7 +1083,7 @@ void Apps::randomModeDisplay(bool forReal)
 			textBuf[0] = 49;													// 1
 			textBuf[1] = (3 - (((DICEROLL_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
 		}
-
+		
 		switch (DICEROLL_RANDOM_NUMBER / 13)
 		{
 		case 0:
@@ -1103,7 +1120,7 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 		textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) % 10 + 48;
 		textBuf[3] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
-		ledDisp->setText(textBuf);
+		//ledDisp->setText(textBuf);
 	}
 	break;
 	case DICEROLL_HEADSORTAILS:
@@ -1667,6 +1684,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 
 	if (updateScreen)
 	{
+		ledDisp->setBlankDisplay();
 		// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
 		if (numberElseAlphabethMode)
 		{
@@ -1781,10 +1799,11 @@ void Apps::modeSoundSong(bool init)
 		}
 	}
 
-	buzzer->lastPlayedNoteToDisplay(textBuf, &decimalPoints);
+	ledDisp->setBlankDisplay();
+	buzzer->lastPlayedNoteToDisplay(textHandle, decimalDotsHandle);
 
-	ledDisp->setText(textBuf);
-			ledDisp->setDecimalPoints(decimalPoints);
+	// ledDisp->setText(textBuf);
+	// ledDisp->setDecimalPoints(decimalPoints);
 }
 
 void Apps::modeComposeSong(bool init)
@@ -2479,6 +2498,7 @@ void Apps::draw(bool init)
 
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
 
+	ledDisp->setBlankDisplay();
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
 	{
 		// always show index of active drawing if activated.
@@ -2575,7 +2595,7 @@ void Apps::miniMultiTimer(bool init)
 
 	uint8_t settingsLights;
 	
-	this->multiTimer.getDisplay(textBuf, &buttonLights, &settingsLights);
+	this->multiTimer.getDisplay(textHandle, &buttonLights, &settingsLights);
 
 	uint8_t lights = 0b00000000;
 	// timer buttons lights to real lights
@@ -2738,6 +2758,8 @@ void Apps::modeGeiger(bool init)
 	//long r = random(0, 1024);
 	//r = r*r;
 
+	ledDisp->setBlankDisplay();
+	
 	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
 	{
 
@@ -2824,21 +2846,21 @@ void Apps::modeGeiger(bool init)
 
 		r += GEIGER_INCREASE_CHANCE;
 
+
 		textBuf[0] = ' ';
 		if (r > potentio->getValueMapped(0, 1048576))
 		{
 			//	buzzer->programBuzzerRoll(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
 			textBuf[0] = '?';
+			textBuf[1] = '?';
+			textBuf[2] = '?';
+			textBuf[3] = '?';
+			ledDisp->setText(textBuf);
 		}
+		
+		
 
-		//all digits same value
-		for (uint8_t i = 2; i < 5; i++)
-		{
-			textBuf[i] = textBuf[0];
-		}
-
-		ledDisp->setText(textBuf);
 	}
 }
 
