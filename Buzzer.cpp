@@ -6,10 +6,7 @@ Buzzer::Buzzer()
     //constructor
     //init buzzerRoll
 
-    for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
-    {
-        this->buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
-    }
+    cleanBuzzerRoll();
     this->soundFinishedTimeMillis = 0;
     this->speedScale = 1;
     this->transpose = 0;
@@ -42,17 +39,54 @@ uint8_t Buzzer::getPin()
     return this->pin;
 }
 
-void Buzzer::loadBuzzerTrack(const uint8_t *seq)
+void Buzzer::loadBuzzerTrack(const uint8_t *seq, uint8_t song_index)
 {
-    //load a whole track in the buzzer roll
-    //load all bytes from sequence in buffer.
-    uint8_t i = 0;
-    while (pgm_read_byte_near(seq + i) != BUZZER_ROLL_SONG_STOPVALUE and i < BUZZER_ROLL_LENGTH)
-    {
-        programBuzzerRoll(pgm_read_byte_near(seq + i)); //progmem = special command so arrays are read out of flash directly without being loaded in eeprom.
-        i++;
+    // list of songs is an array in flash, every song starts with a length byte of the song. (song cannot be more than 255 bytes)
+
+    // fast forward to correct index.
+    uint16_t song_start_index = 0;
+    for (uint16_t song=0;song<song_index;song++){
+        song_start_index += pgm_read_byte_near(seq +song_start_index); // add length of song to start index (to get to the start of the next song.)
     }
+    // Serial.println(song_start_index);
+    // Serial.println(pgm_read_byte_near(seq +song_start_index));
+    for (uint16_t note_index=1;note_index < pgm_read_byte_near(seq + song_start_index); note_index++){
+        uint8_t note = pgm_read_byte_near(seq + song_start_index + note_index);
+        // Serial.println(note);
+        if (note == BUZZER_ROLL_SONG_STOPVALUE){
+            break;
+        }
+        // Serial.println(note_index);
+        programBuzzerRoll(note);
+    }    
+    // Serial.println("-----");
+
+    // //load a whole track in the buzzer roll
+    // //load all bytes from sequence in buffer.
+    // uint8_t i = 0;
+    // while (pgm_read_byte_near(seq + i) != BUZZER_ROLL_SONG_STOPVALUE and i < BUZZER_ROLL_LENGTH)
+    // {
+    //     programBuzzerRoll(pgm_read_byte_near(seq + i)); //progmem = special command so arrays are read out of flash directly without being loaded in eeprom.
+    //     i++;
+    // }
 }
+// void Buzzer::loadBuzzerTrack(const uint8_t *seq)
+// {
+//     // list of songs is an array, every song starts with a length byte of the song. (song cannot be more than 255 bytes)
+
+    
+//     // fast forward to correct index.
+
+
+//     //load a whole track in the buzzer roll
+//     //load all bytes from sequence in buffer.
+//     uint8_t i = 0;
+//     while (pgm_read_byte_near(seq + i) != BUZZER_ROLL_SONG_STOPVALUE and i < BUZZER_ROLL_LENGTH)
+//     {
+//         programBuzzerRoll(pgm_read_byte_near(seq + i)); //progmem = special command so arrays are read out of flash directly without being loaded in eeprom.
+//         i++;
+//     }
+// }
 
 void Buzzer::programBuzzerRoll(uint8_t sound)
 {

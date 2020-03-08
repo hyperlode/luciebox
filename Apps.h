@@ -226,11 +226,6 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
 };
 
-// const uint8_t disp_dice [] PROGMEM = {
-//   0x00,0x00,0x00,0x00,
-
-// }
-
 const uint8_t disp_4digits_animations[] PROGMEM = {
     0x35,                   // first byte = length of animation in bytes  (here 53, including the length byte)
                             // const uint32_t disp_4digits_swoosh [] PROGMEM = {
@@ -297,8 +292,27 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define ALL_DATA_SIZE 1
 //PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
 
-const uint8_t song_lang_zal_ze_leven[] PROGMEM = {
-    C7_4, rest_4, rest_2,
+#define SONG_DRYER_HAPPY 0
+#define SONG_LANG_ZAL_ZE_LEVEN 1
+#define SONG_ATTACK 2
+
+#define SONG_DRYER_UNHAPPY 4
+#define SONG_KINDEKE_DOUWEN 5
+#define SONG_RETREAT 6
+#define SONG_ALPHABET 7
+
+// one big library. length of song as byte at start. lenght of song INCLUDES the length byte. There is no need then to keep a separate array with start indeces. 
+const uint8_t songs [] PROGMEM = {
+    //happy dryer
+    19, A6_2, rest_4, rest_2,
+    Cs7_2, rest_4, rest_2,
+    E7_4, rest_8, rest_4,
+    Cs7_4, rest_8, rest_4,
+    E7_4, rest_8, rest_4,
+    A7_1, A7_1,
+    rest_2 ,
+    // lang zal ze leven
+    85, C7_4, rest_4, rest_2,
     C7_4, rest_2, C7_8, rest_8,
     C7_4, rest_4, rest_2,
     G6_2, G6_4, rest_2,
@@ -333,21 +347,16 @@ const uint8_t song_lang_zal_ze_leven[] PROGMEM = {
 
     E7_1, E7_2, rest_2,
     D7_1, D7_2, rest_2,
-    C7_1, C7_1, BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t song_happy_dryer[] PROGMEM = {
-    A6_2, rest_4, rest_2,
-    Cs7_2, rest_4, rest_2,
-    E7_4, rest_8, rest_4,
-    Cs7_4, rest_8, rest_4,
-    E7_4, rest_8, rest_4,
-    A7_1, A7_1,
-    rest_2, BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t song_attack[] PROGMEM = {Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, BUZZER_ROLL_SONG_STOPVALUE}; // aaanvallueeeeee!
-const uint8_t kindeke_douwen[] PROGMEM = {
+    C7_1, C7_1,
+    // aaanvallueeeeee!
+    15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
+    // empty slot test
+    1,
 
-    // Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1
-    B7_4, rest_4, rest_2,       // wie
+ // unhappy dryer
+    14, A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
+    // kindeke douwen
+    50, B7_4, rest_4, rest_2,       // wie
     B7_1,                       //zal
     rest_2, A7_4, rest_4,       //er
     G6_4, rest_4, rest_2,       //ons
@@ -368,29 +377,90 @@ const uint8_t kindeke_douwen[] PROGMEM = {
     E7_1,
     E7_4, rest_4, E7_4, rest_4,
     A7_4, rest_4, rest_2,
+    // retreat song
+    15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
 
-    // E7_4,rest_4,rest_2, // dat schaars...
-    // E7_1,
-    // rest_2,E7_4, rest_4,
-    // A7_2,rest_2,
+    // alphabet song
+    21, C7_4, rest_4, rest_2, 
+    C7_4, rest_4, rest_2, 
+    G7_4, rest_4, rest_2, 
+    G7_4, rest_4, rest_2, 
+    A7_4, rest_4, rest_2, 
+    A7_4, rest_4, rest_2, 
+    G7_1, rest_1,
+    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
+    // G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
+    // C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
+    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
+   
+};
 
-    // E7_4,rest_4,rest_2, // dat schaars...
-    // E7_1,
-    // rest_2,E7_4, rest_4,
-    // A7_2,rest_2,
+// const uint8_t song_lang_zal_ze_leven[] PROGMEM = {
+//      BUZZER_ROLL_SONG_STOPVALUE};
+    
+// const uint8_t song_happy_dryer[] PROGMEM = {
+//     A6_2, rest_4, rest_2,
+//     Cs7_2, rest_4, rest_2,
+//     E7_4, rest_8, rest_4,
+//     Cs7_4, rest_8, rest_4,
+//     E7_4, rest_8, rest_4,
+//     A7_1, A7_1,
+//     rest_2, BUZZER_ROLL_SONG_STOPVALUE};
+// const uint8_t song_unhappy_dryer[] PROGMEM = {A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, BUZZER_ROLL_SONG_STOPVALUE};
+// const uint8_t song_attack[] PROGMEM = {Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, BUZZER_ROLL_SONG_STOPVALUE}; // aaanvallueeeeee!
+// const uint8_t kindeke_douwen[] PROGMEM = {
 
-    BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
+//     // Gs6_2,rest_4,Gs6_2,rest_4,Gs6_2,rest_4, Cs7_2,rest_2,rest_2,Gs6_2,rest_4,Cs7_1,Cs7_1,Cs7_1
+//     B7_4, rest_4, rest_2,       // wie
+//     B7_1,                       //zal
+//     rest_2, A7_4, rest_4,       //er
+//     G6_4, rest_4, rest_2,       //ons
+//     B7_1,                       //kind-
+//     B7_4, rest_4, A7_4, rest_4, //-de
+//     G6_4, rest_4, rest_2,       //-ke
+//     A7_1,                       //dou
+//     A7_4, rest_4, rest_2,
+//     C7_4, rest_4, rest_2,
+//     C7_1, //wen
+//     rest_1,
+//     C7_4, rest_4, rest_2, // dat
+//     B7_1,                 // schaars
+//     B7_4, rest_4, B7_4, rest_4,
+//     B7_4, rest_4, rest_2,
+
+//     E7_4, rest_4, rest_2, //
+//     E7_1,
+//     E7_4, rest_4, E7_4, rest_4,
+//     A7_4, rest_4, rest_2,
+
+//     // E7_4,rest_4,rest_2, // dat schaars...
+//     // E7_1,
+//     // rest_2,E7_4, rest_4,
+//     // A7_2,rest_2,
+
+//     // E7_4,rest_4,rest_2, // dat schaars...
+//     // E7_1,
+//     // rest_2,E7_4, rest_4,
+//     // A7_2,rest_2,
+
+//     BUZZER_ROLL_SONG_STOPVALUE}; // kleine kleine moederke alleen
 
 const uint8_t alphabeth_song[] PROGMEM = {
 
-    C7_4, rest_4, rest_2, C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_4, rest_4, rest_2, A7_4, rest_4, rest_2, G7_1, rest_1,
-    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
-    G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
-    C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
-    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
+    C7_4, rest_4, rest_2, 
+    C7_4, rest_4, rest_2, 
+    G7_4, rest_4, rest_2, 
+    G7_4, rest_4, rest_2, 
+    A7_4, rest_4, rest_2, 
+    A7_4, rest_4, rest_2, 
+    G7_1, rest_1,
+    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
+    // G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
+    // C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
+    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
     BUZZER_ROLL_SONG_STOPVALUE};
 
-const uint8_t song_retreat[] PROGMEM = {Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1, BUZZER_ROLL_SONG_STOPVALUE}; //  retreat!
+// const uint8_t song_retreat[] PROGMEM = {Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1, BUZZER_ROLL_SONG_STOPVALUE}; //  retreat!
 const uint8_t scale_major[] PROGMEM = {C7_2, rest_4, D7_2, rest_4, E7_2, rest_4, F7_2, rest_4, G7_2, rest_4, A7_2, rest_4, B7_2, rest_4, C8_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
 const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2, rest_4, G7_2, rest_4, F7_2, rest_4, E7_2, rest_4, D7_2, rest_4, C7_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
 
@@ -418,6 +488,7 @@ const uint32_t disp_4digits_animate[] PROGMEM = {
     0x00, 0xFF, 0xF0, 0x0F,
     0xFF, 0x00, 0x00, 0x01,
     0x01, 0x02, 0x04, 0x08};
+
 const uint32_t disp_4digits_animate_circle[] PROGMEM = {
     0x01, 0x00, 0x00, 0x00,
     0x00, 0x01, 0x00, 0x00,

@@ -347,13 +347,13 @@ void Apps::pomodoroTimer(bool init)
 			if (POMODORO_IN_BREAK)
 			{
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
-				buzzer->loadBuzzerTrack(song_happy_dryer);
+				//buzzer->loadBuzzerTrack(song_happy_dryer);
 				POMODORO_TIMER.start();
 			}
 			else
 			{
 				// coming out of break. Not executed at starting Pomodoro by switch.
-				buzzer->loadBuzzerTrack(song_attack);
+				//buzzer->loadBuzzerTrack(song_attack);
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 				if (POMODORO_AUTO_RESTART_ENABLED)
 				{
@@ -390,6 +390,9 @@ void Apps::pomodoroTimer(bool init)
 	else
 	{
 		// in main menu
+#ifndef ENABLE_MULTITIMER
+		uint16_t tmpSeconds = potentio->getValueMapped(0, 1024);
+#endif
 
 		if (!POMODORO_SHOW_MENU_EDGE)
 		{
@@ -400,8 +403,6 @@ void Apps::pomodoroTimer(bool init)
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
 		if (potentio->getValueStableChangedEdge()){
 			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91));
-#else
-			uint16_t tmpSeconds = potentio->getValueMapped(0, 1024);
 #endif
 			if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
 			{
@@ -1028,7 +1029,7 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		// throw four dice
 		DICEROLL_RANDOM_NUMBER = random(1, 7);
-		for (uint8_t i = 1; i < 5; i++)
+		for (uint8_t i = 0; i < 4; i++)
 		{
 			textBuf[i] = random(49, 55); // char 1 to 6
 		}
@@ -1577,7 +1578,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 		{
 			buzzer->buzzerOff();
 			buzzer->setSpeedRatio(4);
-			buzzer->loadBuzzerTrack(alphabeth_song);
+			//buzzer->loadBuzzerTrack(alphabeth_song);
 		}
 		else
 		{
@@ -1702,10 +1703,12 @@ void Apps::modeSoundSong(bool init)
 {
 	if (init)
 	{
-		buzzer->loadBuzzerTrack(song_happy_dryer);
+		//buzzer->loadBuzzerTrack(song_happy_dryer);
 		buzzer->setSpeedRatio((float)2);
 	}
-
+	
+	ledDisp->setBlankDisplay();
+	
 	if (potentio->getValueStableChangedEdge())
 	{
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
@@ -1718,92 +1721,106 @@ void Apps::modeSoundSong(bool init)
 		}
 	}
 
-	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 	{
-		// advanced mode scales
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-		{
-			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-			{
-				//buzzer->loadBuzzerTrack(song_attack );
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-			{
-				//buzzer->loadBuzzerTrack(song_unhappy_dryer);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(scale_major);
-			}
-#ifdef BUTTON_MOMENTARY_3
-			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(scale_pentatonic);
-			}
-#endif
-		}
-		else
-		{
-			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-			{
-				//buzzer->loadBuzzerTrack(song_retreat );
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-			{
-				//buzzer->loadBuzzerTrack(song_unhappy_dryer);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(scale_major_reversed);
-			}
-#ifdef BUTTON_MOMENTARY_3
-			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-			{
-				// buzzer->loadBuzzerTrack(scale_pentatonic_reversed);
-			}
-#endif
-		}
-	}
-	else
-	{
-		// simple mode: songs!
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-		{
-			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(song_retreat);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(kindeke_douwen);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(song_unhappy_dryer);
-			}
-		}
-		else
-		{
-			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(song_attack);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(song_lang_zal_ze_leven);
-			}
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-			{
-				buzzer->loadBuzzerTrack(song_happy_dryer);
-			}
-		}
+		// buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+		buzzer->loadBuzzerTrack(songs, SONG_DRYER_UNHAPPY);
 	}
 
-	ledDisp->setBlankDisplay();
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+	{
+		// buzzer->loadBuzzerTrack(songs, SONG_LANG_ZAL_ZE_LEVEN);
+		buzzer->loadBuzzerTrack(songs, SONG_KINDEKE_DOUWEN);
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+	{
+		buzzer->loadBuzzerTrack(songs, SONG_ALPHABET );
+	}
+
+// 	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
+// 	{
+// 		// advanced mode scales
+// 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
+// 		{
+// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+// 			{
+// 				////buzzer->loadBuzzerTrack(song_attack );
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+// 			{
+// 				////buzzer->loadBuzzerTrack(song_unhappy_dryer);
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(scale_major);
+// 			}
+// #ifdef BUTTON_MOMENTARY_3
+// 			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(scale_pentatonic);
+// 			}
+// #endif
+// 		}
+// 		else
+// 		{
+// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+// 			{
+// 				////buzzer->loadBuzzerTrack(song_retreat );
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+// 			{
+// 				////buzzer->loadBuzzerTrack(song_unhappy_dryer);
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(scale_major_reversed);
+// 			}
+// #ifdef BUTTON_MOMENTARY_3
+// 			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+// 			{
+// 				// //buzzer->loadBuzzerTrack(scale_pentatonic_reversed);
+// 			}
+// #endif
+// 		}
+// 	}
+// 	else
+// 	{
+// 		// simple mode: songs!
+// 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
+// 		{
+// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(song_retreat);
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(kindeke_douwen);
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(song_unhappy_dryer);
+// 			}
+// 		}
+// 		else
+// 		{
+// 			if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(song_attack);
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(song_lang_zal_ze_leven);
+// 			}
+// 			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+// 			{
+// 				//buzzer->loadBuzzerTrack(song_happy_dryer);
+// 			}
+// 		}
+// 	}
+
+	
 	buzzer->lastPlayedNoteToDisplay(textHandle, decimalDotsHandle);
-
-	// ledDisp->setText(textBuf);
-	// ledDisp->setDecimalPoints(decimalPoints);
 }
 
 void Apps::modeComposeSong(bool init)
@@ -2333,11 +2350,11 @@ void Apps::drawGame(bool init)
 
 			if (displayAllSegments == displayAllSegmentsBuffer)
 			{
-				buzzer->loadBuzzerTrack(song_happy_dryer);
+				//buzzer->loadBuzzerTrack(song_happy_dryer);
 			}
 			else
 			{
-				buzzer->loadBuzzerTrack(song_unhappy_dryer);
+				//buzzer->loadBuzzerTrack(song_unhappy_dryer);
 			}
 		}
 		break;
@@ -2732,7 +2749,7 @@ void Apps::tiltSwitchTest(bool init)
 		counter++;
 		if (counter == 4)
 		{
-			buzzer->loadBuzzerTrack(song_happy_dryer);
+			//buzzer->loadBuzzerTrack(song_happy_dryer);
 			counter = 0;
 		}
 		counter2 = 0;
@@ -2759,7 +2776,7 @@ void Apps::modeGeiger(bool init)
 	//r = r*r;
 
 	ledDisp->setBlankDisplay();
-	
+
 	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
 	{
 
@@ -3270,7 +3287,7 @@ void Apps::modeSimon(bool init)
 		{
 			// reached maximum length
 			if (hasSound)
-				buzzer->loadBuzzerTrack(song_attack);
+				//buzzer->loadBuzzerTrack(song_attack);
 			simonState = simonWaitForNewGame;
 			break;
 		}
@@ -3321,7 +3338,7 @@ void Apps::modeSimon(bool init)
 		{
 			// player made mistake, start new game
 			if (hasSound)
-				buzzer->loadBuzzerTrack(scale_major_reversed);
+				//buzzer->loadBuzzerTrack(scale_major_reversed);
 			simonState = simonWaitForNewGame;
 			break;
 		}
@@ -3475,7 +3492,7 @@ void Apps::modeSimon(bool init)
 		// let maximum length breach be a happy crash. I can't afford the bytes!
 		//   if (SIMON_LENGTH >= bytes_list_bufsize) {
 		// 	  // reached maximum length
-		// 	  buzzer->loadBuzzerTrack(song_attack);
+		// 	  //buzzer->loadBuzzerTrack(song_attack);
 		// 	  simonState = simonWaitForNewGame;
 		// 	  break;
 		//   }
@@ -4100,7 +4117,7 @@ void Apps::modeReactionGame(bool init)
 							 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE),
 				REACTION_GAME_SCORE);
 
-			buzzer->loadBuzzerTrack(song_attack);
+			//buzzer->loadBuzzerTrack(song_attack);
 		}
 #endif
 
