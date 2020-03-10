@@ -1712,7 +1712,7 @@ void Apps::modeSoundSong(bool init)
 	
 	if (potentio->getValueStableChangedEdge())
 	{
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
 			buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12, 12)));
 		}
@@ -1722,18 +1722,22 @@ void Apps::modeSoundSong(bool init)
 		}
 	}
 
+	uint8_t shift = (4* binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue());
+
 	for (uint8_t index=0; index< MOMENTARY_BUTTONS_COUNT; index++){
 
 		if (binaryInputs[buttons_momentary_indexed[index]].getEdgeUp()){
-			if (binaryInputs[LIGHT_LATCHING_SMALL_RIGHT].getValue()){
+			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 				uint8_t song [32];
 
-				saveLoadFromEepromSlot(song, index, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS,true);
+				saveLoadFromEepromSlot(song, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS,true);
 				for (uint8_t i=0; i< 32;i++){
 					buzzer->programBuzzerRoll(song[i]);
 				}
+
 			}else{
-				buzzer->loadBuzzerTrack(songs, index + (4* binaryInputs[BUTTON_LATCHING_EXTRA].getValue()));	
+				buzzer->loadBuzzerTrack(songs, index + shift);	
+				//Serial.println(shift);
 			}
 		}
 	}
