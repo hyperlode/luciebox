@@ -1712,7 +1712,7 @@ void Apps::modeSoundSong(bool init)
 	
 	if (potentio->getValueStableChangedEdge())
 	{
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
 			buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12, 12)));
 		}
@@ -1722,18 +1722,22 @@ void Apps::modeSoundSong(bool init)
 		}
 	}
 
+	uint8_t shift = (4* binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue());
+
 	for (uint8_t index=0; index< MOMENTARY_BUTTONS_COUNT; index++){
 
 		if (binaryInputs[buttons_momentary_indexed[index]].getEdgeUp()){
-			if (binaryInputs[LIGHT_LATCHING_SMALL_RIGHT].getValue()){
+			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 				uint8_t song [32];
 
-				saveLoadFromEepromSlot(song, index, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS,true);
+				saveLoadFromEepromSlot(song, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS,true);
 				for (uint8_t i=0; i< 32;i++){
 					buzzer->programBuzzerRoll(song[i]);
 				}
+
 			}else{
-				buzzer->loadBuzzerTrack(songs, index + (4* binaryInputs[BUTTON_LATCHING_EXTRA].getValue()));	
+				buzzer->loadBuzzerTrack(songs, index + shift);	
+				//Serial.println(shift);
 			}
 		}
 	}
@@ -2222,11 +2226,15 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 
 void Apps::drawGame(bool init)
 {
+	// shows a picture. After it disappears, you have to drawn it exactly as it was. 
 
 	uint32_t cursorBlinker = 0;
 
 	if (init)
 	{
+		drawGameState = drawGameWaitForStart;
+		//ledDisp->numberToBuf(textBuf, 4444);
+		
 	}
 
 	switch (drawGameState)
@@ -2234,11 +2242,55 @@ void Apps::drawGame(bool init)
 
 	case drawGameWaitForStart:
 	{
+		ledDisp->setBlankDisplay();
+		// Serial.println("iinit");
+		
 		drawGameState = drawGameShowPicture;
-		ledDisp->numberToBuf(textBuf, random(0, 10000));
-		// ledDisp->bufToScreenBits(textBuf, &displayAllSegments);
-		ledDisp->convert_4bytesArray_32bits(textBuf, &displayAllSegments,false);
+		// textBuf[0] = 'L';
+		// textBuf[1] = 'O';
+		// textBuf[2] = 'D';
+		// ledDisp->setText(textBuf);
+		// // textHandle[0]= 'A';
+		// get random number
+	
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+			// random number
+			long r = random(0, 10000);
+			ledDisp->numberToBuf(textBuf, (int16_t)r);
+			ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
 
+		}else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+			// random text
+			for (uint8_t i =0;i<4;i++){
+				long r = random (0,25);
+				textBuf[i] = (char)r + 65; 
+
+			}
+			ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+
+		}else{
+			displayAllSegments = 0UL;
+			for (uint8_t i =0;i<32;i++){
+				long r = random (0,2);
+				 if (r){
+				 	displayAllSegments |= 1 << i;
+
+				 }
+
+			}
+		}
+
+	
+		// ledDisp->numberToBuf(textBuf, 1233);
+		//ledDisp->setText(textBuf);
+		// display
+		//ledDisp->setText(textBuf);
+		
+	
+		// store the chosen text as binary data for later comparision
+		
+
+	
 		break;
 	}
 
@@ -2246,12 +2298,14 @@ void Apps::drawGame(bool init)
 	{
 		// displayAllSegments = 0xFF00FF00;
 
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp())
 		{
+			//randomSeed(millis());
 			drawGameState = drawGameDraw;
 			displayAllSegmentsBuffer = displayAllSegments;
 			displayAllSegments = 0;
 		}
+
 		break;
 	}
 
@@ -2259,6 +2313,7 @@ void Apps::drawGame(bool init)
 	{
 		cursorBlinker = modeSingleSegmentManipulation(&displayAllSegments);
 		displayChangeGlobal(&displayAllSegments, false);
+		
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
 		{
 			drawGameState = drawGameEvaluate;
