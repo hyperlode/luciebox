@@ -609,22 +609,22 @@ F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20w
 	1    0    0    -1  
 $EndComp
 $Sheet
-S 1250 2000 500  800 
+S 750  2000 500  800 
 U 5D74964C
 F0 "R2-R_ladder_dac" 50
 F1 "R2-R_ladder_dac.sch" 50
-F2 "DAC_analog" O L 1250 2200 50 
+F2 "DAC_analog" O L 750 2200 50 
 $EndSheet
 $Sheet
-S 1250 3100 500  800 
+S 900  3150 500  800 
 U 5D761BCA
 F0 "sheet5D761BCA" 50
 F1 "R2-R_ladder_dac.sch" 50
-F2 "DAC_analog" O L 1250 3300 50 
+F2 "DAC_analog" O L 900 3350 50 
 $EndSheet
-Text Label 1250 2200 2    50   ~ 0
+Text Label 750  2200 2    50   ~ 0
 A1
-Text Label 1250 3300 2    50   ~ 0
+Text Label 900  3350 2    50   ~ 0
 A2
 $Comp
 L Device:R_Small R7
@@ -1667,40 +1667,40 @@ Connection ~ 6450 4700
 $Comp
 L Device:R_Small R49
 U 1 1 5E1772EF
-P 3050 3500
-F 0 "R49" H 3109 3546 50  0000 L CNN
-F 1 "10K" H 3109 3455 50  0000 L CNN
-F 2 "Luciebox:1206_0805" H 3050 3500 50  0001 C CNN
-F 3 "~" H 3050 3500 50  0001 C CNN
-	1    3050 3500
+P 2700 3550
+F 0 "R49" H 2759 3596 50  0000 L CNN
+F 1 "10K" H 2759 3505 50  0000 L CNN
+F 2 "Luciebox:1206_0805" H 2700 3550 50  0001 C CNN
+F 3 "~" H 2700 3550 50  0001 C CNN
+	1    2700 3550
 	0    1    1    0   
 $EndComp
 $Comp
 L power:VCC #PWR029
 U 1 1 5E19FB8B
-P 3150 3500
-F 0 "#PWR029" H 3150 3350 50  0001 C CNN
-F 1 "VCC" H 3167 3673 50  0000 C CNN
-F 2 "" H 3150 3500 50  0001 C CNN
-F 3 "" H 3150 3500 50  0001 C CNN
-	1    3150 3500
+P 2800 3550
+F 0 "#PWR029" H 2800 3400 50  0001 C CNN
+F 1 "VCC" H 2817 3723 50  0000 C CNN
+F 2 "" H 2800 3550 50  0001 C CNN
+F 3 "" H 2800 3550 50  0001 C CNN
+	1    2800 3550
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:VCC_minimalCurrent #PWR028
 U 1 1 5E1A5201
-P 2550 3450
-F 0 "#PWR028" H 2550 3300 50  0001 C CNN
-F 1 "VCC_minimalCurrent" H 2567 3623 50  0000 C CNN
-F 2 "" H 2550 3450 50  0001 C CNN
-F 3 "" H 2550 3450 50  0001 C CNN
-	1    2550 3450
+P 2200 3500
+F 0 "#PWR028" H 2200 3350 50  0001 C CNN
+F 1 "VCC_minimalCurrent" H 2217 3673 50  0000 C CNN
+F 2 "" H 2200 3500 50  0001 C CNN
+F 3 "" H 2200 3500 50  0001 C CNN
+	1    2200 3500
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2950 3500 2550 3500
+	2600 3550 2200 3550
 Wire Wire Line
-	2550 3500 2550 3450
+	2200 3550 2200 3500
 Wire Wire Line
 	1750 5850 2250 5850
 $Comp
@@ -1888,4 +1888,48 @@ F0 "Tilt switches" 50
 F1 "R2-R_ladder_dac_tilt_switches.sch" 50
 F2 "DAC_analog_out" O R 1300 1200 50 
 $EndSheet
+$Comp
+L Luciebox_components:terminal_8x1 T12
+U 1 1 5EE64EB9
+P 3350 3250
+F 0 "T12" H 3467 3035 50  0000 C CNN
+F 1 "terminal_8x1" H 3467 3126 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 3150 3150 50  0001 C CNN
+F 3 "" H 3300 4350 50  0001 C CNN
+	1    3350 3250
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3450 3000 3450 3950
+Wire Wire Line
+	3450 3950 3400 3950
+Connection ~ 3450 3000
+Wire Wire Line
+	3400 3850 3500 3850
+Wire Wire Line
+	3500 3850 3500 2900
+Wire Wire Line
+	3550 2800 3550 3750
+Wire Wire Line
+	3550 3750 3400 3750
+Wire Wire Line
+	3400 3650 3600 3650
+Wire Wire Line
+	3600 3650 3600 2700
+Wire Wire Line
+	3650 2600 3650 3550
+Wire Wire Line
+	3650 3550 3400 3550
+Wire Wire Line
+	3700 2500 3700 3450
+Wire Wire Line
+	3700 3450 3400 3450
+Wire Wire Line
+	3750 2400 3750 3350
+Wire Wire Line
+	3750 3350 3400 3350
+Wire Wire Line
+	3800 2300 3800 3250
+Wire Wire Line
+	3800 3250 3400 3250
 $EndSCHEMATC
