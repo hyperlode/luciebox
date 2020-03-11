@@ -77,7 +77,7 @@ void DisplayManagement::clearText(){
 void DisplayManagement::showNumber(int16_t number) //updateDisplayNumber
 {
 	numberToBuf(this->text, number);
-	// this->setText(text);
+	this->setText(text);
 }
 
 void DisplayManagement::SetFourDigits(uint32_t value) //updateDisplayAllBits
@@ -125,6 +125,16 @@ byte* DisplayManagement::getLedArrayHandle(){
 
 
 
+void DisplayManagement::convert_text4Bytes_to_32bits(char* text, uint32_t* binary){
+	*binary = 0;
+	for (uint8_t i=0;i<4;i++){
+		byte digitBinary;
+		charToScreen(text[i], &digitBinary);
+		*binary |= (uint32_t) digitBinary << (8*i);		
+	}
+}
+
+
 void DisplayManagement::convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray){
 	
 	if (toArray){
@@ -157,6 +167,7 @@ void DisplayManagement::setBlankDisplay()
 // 		*screenBits |= (uint32_t)(textBuf[i]) << (8 * i);
 // 	}
 // }
+
 void DisplayManagement::blanksToBuf(char* textBuf){
 	textBuf[0]=SPACE_FAKE_ASCII;
 	textBuf[1]=SPACE_FAKE_ASCII;
@@ -179,7 +190,7 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 	{
 
 		textBuf[3 - i] = 48 + c % 10; //ascii 48 = 0
-
+		//textBuf[3 - i] = 48 ;
 		c /= 10;
 		if (c==0){
 			break;
@@ -219,12 +230,6 @@ void DisplayManagement::charsToScreen(char* text, byte* digits)
 void DisplayManagement::charToScreen(char character, byte* digit)
 {
 
-	// for (byte digit = 0; digit < 5; digit++)
-	// {
-
-	//temporary save the decimal point of the segment.
-	//setBit(&this->boolContainer, getBit(&this->lights[digit], 7), TEMPDECPOINTMEMORY);
-
 	if (character == ' ')
 	{
 		character = SPACE_FAKE_ASCII;
@@ -244,31 +249,14 @@ void DisplayManagement::charToScreen(char character, byte* digit)
 	else
 	{
 		// illegal state
-
-		//lights[digit] = B01011100; // default error display.
 	}
-
-	//Set the decimal place lights
-	//setBit(&this->lights[digit], getBit(&this->boolContainer, TEMPDECPOINTMEMORY), 7);
-	// }
 }
-
-// void DisplayManagement::setBrightness(byte value, bool exponential)
-// { //smaller number is brighter
-// 	if (exponential)
-// 	{
-// 		this->brightness = value * value;
-// 	}
-// 	else
-// 	{
-// 		this->brightness = value;
-// 	}
-// }
 
 // void DisplayManagement::getActiveSegmentAddress(byte **carrier)
 // {
 // 	*carrier = this->activeSegment;
 // }
+
 void DisplayManagement::setMultiplexerData(byte* multiplexerDigits){
 	this->multiplexerData = multiplexerDigits;
 }
@@ -276,26 +264,23 @@ void DisplayManagement::setMultiplexerData(byte* multiplexerDigits){
 void DisplayManagement::refresh()
 {
 
-	// this->activeSegment = sevseg.PrintOutputSeg(this->brightness);
-
 	// set it all up.
 
 	for (uint8_t i = 0;i<5;i++){
 
 		// start with a clean sheet.
 		multiplexerData[i] = 0;
-// Serial.println("---");
+
 		if (i < 4){
-			// led display digits
-			
+			// led display digits			
 			charToScreen(text[i], &multiplexerData[i]);
 			multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
 			multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
-			// Serial.println(multiplexerData[i], HEX);
+
 		}else{
+			// button lights
 			multiplexerData[i] = lights;
 		}
-		
 	}
 }
 

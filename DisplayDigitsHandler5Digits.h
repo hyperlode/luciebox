@@ -117,6 +117,8 @@ public:
     void numberToBuf(char *textBuf, int16_t number);
     void blanksToBuf(char* textBuf);
 
+    void convert_text4Bytes_to_32bits(char* text, uint32_t* binary);
+    
     void convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray);
 
     void charsToScreen (char* text, byte* digits);
