@@ -2246,19 +2246,23 @@ void Apps::drawGame(bool init)
 		// Serial.println("iinit");
 		
 		drawGameState = drawGameShowPicture;
-		// textBuf[0] = 'L';
-		// textBuf[1] = 'O';
-		// textBuf[2] = 'D';
-		// ledDisp->setText(textBuf);
-		// // textHandle[0]= 'A';
-		// get random number
 	
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-			// random number
-			long r = random(0, 10000);
-			ledDisp->numberToBuf(textBuf, (int16_t)r);
-			ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
 
+			if(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+				// learn how to read the clock 
+				
+				ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
+				ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+				
+				// add hour:minute divider.
+				displayAllSegments |= 1UL << 15;
+			}else{
+				// random number
+				long r = random(0, 10000);
+				ledDisp->numberToBuf(textBuf, (int16_t)r);
+				ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+			}
 		}else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
 			// random text
 			for (uint8_t i =0;i<4;i++){
@@ -2271,25 +2275,11 @@ void Apps::drawGame(bool init)
 		}else{
 			displayAllSegments = 0UL;
 			for (uint8_t i =0;i<32;i++){
-				long r = random (0,2);
-				 if (r){
-				 	displayAllSegments |= 1 << i;
-
-				 }
-
+				
+				displayAllSegments |= random (0,2) << i;
+				
 			}
 		}
-
-	
-		// ledDisp->numberToBuf(textBuf, 1233);
-		//ledDisp->setText(textBuf);
-		// display
-		//ledDisp->setText(textBuf);
-		
-	
-		// store the chosen text as binary data for later comparision
-		
-
 	
 		break;
 	}
@@ -2312,7 +2302,7 @@ void Apps::drawGame(bool init)
 	case drawGameDraw:
 	{
 		cursorBlinker = modeSingleSegmentManipulation(&displayAllSegments);
-		displayChangeGlobal(&displayAllSegments, false);
+		// bug: you can't use this because of same buffer reuse. displayChangeGlobal(&displayAllSegments, false);
 		
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
 		{
