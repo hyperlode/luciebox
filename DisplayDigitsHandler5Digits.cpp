@@ -168,6 +168,16 @@ void DisplayManagement::setBlankDisplay()
 // 	}
 // }
 
+void DisplayManagement::minutesToMinutesHoursString(char* textBuf, uint16_t minutes){
+
+	textBuf[0] = 48 + minutes/600;
+	minutes %= 600;
+	textBuf[1] = 48 + minutes/60;
+	minutes %= 60;
+	textBuf[2] = 48 + minutes/10; 
+	textBuf[3] = 48 + minutes%10; 
+}
+
 void DisplayManagement::blanksToBuf(char* textBuf){
 	textBuf[0]=SPACE_FAKE_ASCII;
 	textBuf[1]=SPACE_FAKE_ASCII;
