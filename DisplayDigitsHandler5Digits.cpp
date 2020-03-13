@@ -13,6 +13,24 @@ DisplayManagement::DisplayManagement()
 #endif
 };
 
+
+
+
+void DisplayManagement::blanksToBuf(char* textBuf){
+	// textBuf[0]=SPACE_FAKE_ASCII;
+	// textBuf[1]=SPACE_FAKE_ASCII;
+	// textBuf[2]=SPACE_FAKE_ASCII;
+	// textBuf[3]=SPACE_FAKE_ASCII;
+	setStandardTextToTextBuf(*textBuf, 0);
+}
+
+void DisplayManagement::setStandardTextToTextBuf(char* textBuf, uint8_t text_start_address){
+	for(uint8_t i=0;i<4;i++){
+		textBuf[i] = pgm_read_byte_near(text_start_address + i);
+	}
+}
+
+
 void DisplayManagement::setTextBufToDisplay(char *inText) // updateDisplayChars
 {
 	//inText[5] = '\0';
@@ -55,7 +73,7 @@ void DisplayManagement::setDecimalPointsToDisplay(byte decimalPoints){
 	this->decimalPoints = decimalPoints;
 }
 
-void DisplayManagement::setDecimalPoint(boolean isOn, uint8_t digit) // updateDisplayDecimalPoint
+void DisplayManagement::setDecimalPointToDisplay(boolean isOn, uint8_t digit) // updateDisplayDecimalPoint
 {
 	//sevseg.SetDecPointSingle(isOn, digit);
 	if (isOn){
@@ -142,19 +160,6 @@ void DisplayManagement::minutesToMinutesHoursString(char* textBuf, uint16_t minu
 	textBuf[3] = 48 + minutes%10; 
 }
 
-void DisplayManagement::blanksToBuf(char* textBuf){
-	// textBuf[0]=SPACE_FAKE_ASCII;
-	// textBuf[1]=SPACE_FAKE_ASCII;
-	// textBuf[2]=SPACE_FAKE_ASCII;
-	// textBuf[3]=SPACE_FAKE_ASCII;
-	setStandardTextToTextBuf(*textBuf, 0);
-}
-
-void DisplayManagement::setStandardTextToTextBuf(char* textBuf, uint8_t text_start_address){
-	for(uint8_t i=0;i<4;i++){
-		textBuf[i] = pgm_read_byte_near(text_start_address + i);
-	}
-}
 
 void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 {
@@ -191,7 +196,7 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 // 	// always think of 5 digits.
 // 	for (uint8_t i = 0; i < 5; i++)
 // 	{
-// 		setDecimalPoint(*decimalPoints & (0x01 << i), i);
+// 		setDecimalPointToDisplay(*decimalPoints & (0x01 << i), i);
 // 	}
 // }
 

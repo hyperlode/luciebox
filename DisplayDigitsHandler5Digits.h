@@ -98,6 +98,9 @@ public:
     // void bufToScreenBits(char *textBuf, uint32_t *screenBits);
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
     
+
+    void setStandardTextToTextBuf(char* textBuf);
+
     void setTextBufToDisplay(char *inText); // updateDisplayChars
     void setCharToDisplay(char character, uint8_t digit);
     char* getDisplayTextBufHandle();
