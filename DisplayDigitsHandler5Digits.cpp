@@ -21,12 +21,12 @@ void DisplayManagement::blanksToBuf(char* textBuf){
 	// textBuf[1]=SPACE_FAKE_ASCII;
 	// textBuf[2]=SPACE_FAKE_ASCII;
 	// textBuf[3]=SPACE_FAKE_ASCII;
-	setStandardTextToTextBuf(*textBuf, 0);
+	setStandardTextToTextBuf(textBuf, TEXT_SPACES);
 }
 
 void DisplayManagement::setStandardTextToTextBuf(char* textBuf, uint8_t text_start_address){
 	for(uint8_t i=0;i<4;i++){
-		textBuf[i] = pgm_read_byte_near(text_start_address + i);
+		textBuf[i] = pgm_read_byte_near(standard_text + text_start_address + i);
 	}
 }
 
@@ -47,12 +47,6 @@ void DisplayManagement::setCharToDisplay(char character, uint8_t digit){
 char* DisplayManagement::getDisplayTextBufHandle(){
 	return this->text;
 }
-
-void DisplayManagement::clearText(){
-
-	blanksToBuf(this->text);
-}
-
 
 void DisplayManagement::setNumberToDisplay(int16_t number) //updateDisplayNumber
 {
@@ -136,7 +130,7 @@ void DisplayManagement::setBlankDisplay()
 {
 	//this->setBinaryToDisplay(0x00000000); //reset display, includes the decimal points.
 	this->displayBinary = 0;
-	clearText();
+	setStandardTextToTextBuf(this->text, TEXT_SPACES);
 	this->decimalPoints = 0;
 	this->lights = 0;
 }

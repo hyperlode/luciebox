@@ -41,8 +41,7 @@
 #define APP_SELECTOR_DICEROLL 6
 #define APP_SELECTOR_SLOTS 7
 #define APP_SELECTOR_GEIGER 8
-#define APP_SELECTOR_GEIGER_NOTES 9
-
+#define APP_SELECTOR_HACKER_TIME 9
 #define APP_SELECTOR_SOUND_SONG 10
 #define APP_SELECTOR_MOVIE_MODE 11
 
@@ -112,6 +111,10 @@
 #define POMODORO_DISPLAY_BEEP_PROBABILITY 4
 #define POMODORO_NONSENSE_TIME 60000
 
+#define HACKTIME_MEMORY_FLASH 0
+#define HACKTIME_MEMORY_RAM 1
+#define HACKTIME_MEMORY_EEPROM 2
+
 // VARIABLE REUSE
 
 #define TIMER_METRONOME generalTimer
@@ -141,6 +144,7 @@
 #define SEQUENCER_STEP_COUNTER counter
 #define COMPOSER_STEP counter
 #define POMODORO_STATS_WORKING_GOOD counter
+#define HACKTIME_ADDRESS counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -175,6 +179,7 @@
 #define DICEROLL_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
+#define HACKTIME_MEMORY_SELECT coutner5
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
@@ -195,6 +200,7 @@
 #define SIMON_END_OF_GAME general_boolean2
 #define POMODORO_SHOW_MENU_EDGE general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
+#define HACKTIME_SHOWVALUE_ELSE_ADDRESS general_boolean2
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
@@ -477,6 +483,8 @@ public:
     void modeButtonDebug(bool init);
     void miniMultiTimer(bool init);
     void modeDiceRoll(bool init);
+    void modeHackerTime(bool init);
+
 
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);

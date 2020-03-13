@@ -81,9 +81,47 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 
 };
 
+
+#define TEXT_NO 0
+#define TEXT_SPACES 3  
+#define TEXT_YES 6
+#define TEXT_PAUS 9
+#define TEXT_RANDOM_BEEP 14
+#define TEXT_8888 18
+#define TEXT_ALL_HYPHENS 22
+#define TEXT_BEEP 26
+#define TEXT_EEPROM 27
+#define TEXT_RESET 30
+#define TEXT_DONE 34
+#define TEXT_DOIT 38
+#define TEXT_TILT 41
+#define TEXT_RANDOM_SEGMENTS 45
+#define TEXT_SAVE 49
+#define TEXT_END 52
+#define TEXT_LOAD 56
+
+
 const byte standard_text[] PROGMEM = {
-    SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII
-};
+    SPACE_FAKE_ASCII, 'N','O', 
+    SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII,
+    'Y','E','S',
+    'P','A','U','S',
+    'R','N','D','B',
+    '8','8','8','8',
+    ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,
+    'B','E','E','P',
+    'R', 'S','E','T',
+    'D', 'O','N','E',
+    'D', 'O','I','T',
+    'I','L','T',
+    '?','?','?','?',
+    'S','A','V','E',
+    'N','D', SPACE_FAKE_ASCII, 
+    'L','O','A','D'
+
+    
+
+    };
 
 class DisplayManagement
 {
@@ -99,12 +137,13 @@ public:
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
     
 
-    void setStandardTextToTextBuf(char* textBuf);
+   void setStandardTextToTextBuf(char* textBuf, uint8_t text_start_address);
+
 
     void setTextBufToDisplay(char *inText); // updateDisplayChars
     void setCharToDisplay(char character, uint8_t digit);
     char* getDisplayTextBufHandle();
-    void clearText();
+    
 
     void setNumberToDisplay(int16_t number); //updateDisplayNumber
     

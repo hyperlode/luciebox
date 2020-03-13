@@ -152,6 +152,10 @@ void Apps::appSelector(bool init, uint8_t selector)
 			this->modeGeiger(initOnBigLatchInitToo);
 			break;
 
+		case APP_SELECTOR_HACKER_TIME:
+			this->modeHackerTime(initOnBigLatchInitToo);
+			break;
+
 		case APP_SELECTOR_SOUND_SONG:
 			this->modeSoundSong(initOnBigLatchInitToo);
 			break;
@@ -495,10 +499,7 @@ void Apps::pomodoroTimer(bool init)
 		timeSecondsToClockString(textBuf, POMODORO_PAUSE_TIME_SECONDS);
 		if (millis() % 1000 > 650)
 		{
-			textBuf[0] = 'P';
-			textBuf[1] = 'A';
-			textBuf[2] = 'U';
-			textBuf[3] = 'S';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_PAUS);
 		}
 	}
 	break;
@@ -508,10 +509,7 @@ void Apps::pomodoroTimer(bool init)
 		if (millis() % 1000 > 650)
 		{
 			// rnd beep time....
-			textBuf[0] = 'R';
-			textBuf[1] = 'N';
-			textBuf[2] = 'D';
-			textBuf[3] = 'B';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_RANDOM_BEEP);
 		}
 	}
 	break;
@@ -519,10 +517,7 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 1000 > 650)
 		{
-			textBuf[0] = ' ';
-			textBuf[1] = 'Y';
-			textBuf[2] = 'E';
-			textBuf[3] = 'S';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
 		}
 		else
 		{
@@ -535,10 +530,7 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 1000 > 650)
 		{
-			textBuf[0] = ' ';
-			textBuf[1] = 'N';
-			textBuf[2] = 'O';
-			textBuf[3] = ' ';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_NO);
 		}
 		else
 		{
@@ -570,10 +562,7 @@ void Apps::pomodoroTimer(bool init)
 	}
 	else if (POMODORO_IN_BREAK)
 	{
-		textBuf[0] = 'P';
-		textBuf[1] = 'A';
-		textBuf[2] = 'U';
-		textBuf[3] = 'S';
+		ledDisp->setStandardTextToTextBuf(textBuf, TEXT_PAUS);
 	}
 
 	// decimalPoints = 1 << 2;
@@ -1147,21 +1136,18 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		if (random(0, 2))
 		{
-			textBuf[1] = 'Y';
-			textBuf[2] = 'E';
-			textBuf[3] = 'S';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
 		}
 		else
 		{
-			textBuf[1] = 'N';
-			textBuf[2] = 'O';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_NO);
 		}
 	}
 	break;
-	default:
-	{
-		textBuf[1] = '-';
-	}
+	// default:
+	// {
+	// 	textBuf[1] = '-';
+	// }
 	}
 
 	ledDisp->setTextBufToDisplay(textBuf);
@@ -1282,10 +1268,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		SETTINGS_MODE_SELECTOR++;
 	}
 
-	textBuf[0] = ' ';
-	textBuf[1] = ' ';
-	textBuf[2] = ' ';
-	textBuf[3] = ' ';
+	ledDisp->setStandardTextToTextBuf(textBuf, TEXT_SPACES);
 
 	if (SETTINGS_MODE_SELECTOR < 6)
 	{
@@ -1333,18 +1316,12 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		if (updateScreen)
 		{
-			textBuf[0] = '8';
-			textBuf[1] = '8';
-			textBuf[2] = '8';
-			textBuf[3] = '8';
+			// FULL SCREEN
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_8888);
 		}
 		else
 		{
-			//display
-			textBuf[0] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
-			textBuf[1] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
-			textBuf[2] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';
-			textBuf[3] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';'-';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_ALL_HYPHENS);
 		}
 
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
@@ -1411,10 +1388,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
 		{
-			textBuf[0] = 'B';
-			textBuf[1] = 'E';
-			textBuf[2] = 'E';
-			textBuf[3] = 'P';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_BEEP);
 		}
 		else
 		{
@@ -1473,17 +1447,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	{
 		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(300))
 		{
-			textBuf[0] = 'E';
-			textBuf[1] = 'E';
-			textBuf[2] = 'P';
-			textBuf[3] = 'R';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_EEPROM);
 		}
 		else
 		{
-			textBuf[0] = 'R';
-			textBuf[1] = 'S';
-			textBuf[2] = 'E';
-			textBuf[3] = 'T';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_RESET);
 			ledDisp->setTextBufToDisplay(textBuf);
 		}
 	}
@@ -1502,17 +1470,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 					0);
 			}
 #endif
-			textBuf[0] = 'D';
-			textBuf[1] = 'O';
-			textBuf[2] = 'N';
-			textBuf[3] = 'E';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_DONE);
 		}
 		else
 		{
-			textBuf[0] = 'D';
-			textBuf[1] = 'O';
-			textBuf[2] = 'I';
-			textBuf[3] = 'T';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_DOIT);
 			ledDisp->setTextBufToDisplay(textBuf);
 		}
 	}
@@ -2350,6 +2312,34 @@ void Apps::drawGame(bool init)
 	ledDisp->setBinaryToDisplay(displayAllSegments ^ cursorBlinker);
 }
 
+void Apps::modeHackerTime(bool init){
+	// run through all the addresses to see the raw values!
+	if (init){
+		HACKTIME_ADDRESS = 0;
+		HACKTIME_SHOWVALUE_ELSE_ADDRESS = true;
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+		
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+		HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
+	}
+	
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		// no limit checks. This is hacktime!
+		HACKTIME_ADDRESS --;
+	}
+	
+	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+		HACKTIME_ADDRESS ++;
+	}
+	
+
+}
+
+
 void Apps::draw(bool init)
 {
 
@@ -2605,10 +2595,7 @@ void Apps::tiltSwitchTest(bool init)
 	uint32_t screen = 0;
 	if (init)
 	{
-		textBuf[0] = 'T';
-		textBuf[1] = 'I';
-		textBuf[2] = 'L';
-		textBuf[3] = 'T';
+		ledDisp->setStandardTextToTextBuf(textBuf, TEXT_TILT);
 		counter = 0;
 		counter2 = 0; // counts progress in movement.
 		buzzer->setSpeedRatio(2.0);
@@ -2740,8 +2727,9 @@ void Apps::modeGeiger(bool init)
 
 	ledDisp->setBlankDisplay();
 
-	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
 	{
+		// noise mode 
 
 		if (binaryInputs[BUTTON_MOMENTARY_0].getValue())
 		{
@@ -2796,7 +2784,7 @@ void Apps::modeGeiger(bool init)
 				COUNTER_GEIGER++;
 			}
 
-			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
+			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 			{
 				ledDisp->setNumberToDisplay(COUNTER_GEIGER);
 			}
@@ -2832,10 +2820,7 @@ void Apps::modeGeiger(bool init)
 		{
 			//	buzzer->programBuzzerRoll(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
-			textBuf[0] = '?';
-			textBuf[1] = '?';
-			textBuf[2] = '?';
-			textBuf[3] = '?';
+			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_RANDOM_SEGMENTS);
 			ledDisp->setTextBufToDisplay(textBuf);
 		}
 		
@@ -3374,11 +3359,7 @@ void Apps::modeSimon(bool init)
 	{
 	case simonWaitForNewGame:
 	{
-		textBuf[0] = ' ';
-		textBuf[1] = ' ';
-		textBuf[2] = ' ';
-		textBuf[3] = ' ';
-
+		ledDisp->setStandardTextToTextBuf(textBuf,TEXT_SPACES);
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
 			simonState = simonNewGame;
@@ -3492,10 +3473,7 @@ void Apps::modeSimon(bool init)
 			}
 			else
 			{
-				textBuf[0] = ' ';
-				textBuf[1] = 'E';
-				textBuf[2] = 'N';
-				textBuf[3] = 'D';
+				ledDisp->setStandardTextToTextBuf(textBuf,TEXT_END);
 			}
 		}
 		else
@@ -4188,17 +4166,11 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
-			textBuf[0] = 'S';
-			textBuf[1] = 'A';
-			textBuf[2] = 'V';
-			textBuf[3] = 'E';
+			ledDisp->setStandardTextToTextBuf(textBuf,TEXT_SAVE);
 		}
 		else
 		{
-			textBuf[0] = 'L';
-			textBuf[1] = 'O';
-			textBuf[2] = 'A';
-			textBuf[3] = 'D';
+			ledDisp->setStandardTextToTextBuf(textBuf,TEXT_LOAD);
 		}
 
 		ledDisp->setTextBufToDisplay(textBuf);
