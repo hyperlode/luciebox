@@ -13,45 +13,7 @@ DisplayManagement::DisplayManagement()
 #endif
 };
 
-// DisplayManagement::~DisplayManagement()
-// {
-// #ifdef ENABLE_SCROLL
-// 	delete[] scrollTextAddress;
-// #endif
-// };
-
-// void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-// {
-// 	//for extra led array.
-// 	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, LedArrayDigit, S1, S2, S3, S4, S5, S6, S7, S8);
-
-// #ifdef ENABLE_SCROLL
-// 	textStartPos = 0;
-// #endif
-// }
-
-// void DisplayManagement::startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8)
-// {
-// 	sevseg.Begin(dispHasCommonAnode, D0, D1, D2, D3, D4, S1, S2, S3, S4, S5, S6, S7, S8);
-
-// #ifdef ENABLE_SCROLL
-// 	textStartPos = 0;
-// #endif
-// }
-
-// void DisplayManagement::showNumberAsChars(int16_t number)
-// {
-// 	// chars as in the alphabet: A=1, B=2,...
-// 	for (int i = 0; i < 4; i++)
-// 	{
-// 		text[4 - i] = 64 + number; //ascii 65 = a
-// 	}
-// 	this->setText(text);
-// }
-
-// void DisplayManagement::showNumber(int16_t number, bool noLeadingZeros){
-
-void DisplayManagement::setText(char *inText) // updateDisplayChars
+void DisplayManagement::setTextBufToDisplay(char *inText) // updateDisplayChars
 {
 	//inText[5] = '\0';
 	//writeStringToDisplay(inText);
@@ -64,7 +26,7 @@ void DisplayManagement::setCharToDisplay(char character, uint8_t digit){
 	this->text[digit] = character;
 }
 
-char* DisplayManagement::getTextHandle(){
+char* DisplayManagement::getDisplayTextBufHandle(){
 	return this->text;
 }
 
@@ -74,20 +36,22 @@ void DisplayManagement::clearText(){
 }
 
 
-void DisplayManagement::showNumber(int16_t number) //updateDisplayNumber
+void DisplayManagement::setNumberToDisplay(int16_t number) //updateDisplayNumber
 {
 	numberToBuf(this->text, number);
-	this->setText(text);
+	this->setTextBufToDisplay(text);
 }
 
-void DisplayManagement::SetFourDigits(uint32_t value) //updateDisplayAllBits
+void DisplayManagement::setBinaryToDisplay(uint32_t value) //updateDisplayAllBits
 {
 	// value has 32 bits, that's 4x 8 bits. so for four digits by 8 segements.  digit1: DP G F ..... A  , DIGIT 2 DP G ...., ...
-	//sevseg.SetFourDigits(value);
+	//sevseg.setBinaryToDisplay(value);
 	this->displayBinary = value;
 }
 
-void DisplayManagement::setDecimalPoints(byte decimalPoints){
+
+
+void DisplayManagement::setDecimalPointsToDisplay(byte decimalPoints){
 	this->decimalPoints = decimalPoints;
 }
 
@@ -113,9 +77,9 @@ byte* DisplayManagement::getDecimalPointsHandle()
 
 
 
-void DisplayManagement::SetLedArray(byte ledsAsBits) //  updateLights
+void DisplayManagement::setLedArray(byte ledsAsBits) //  updateLights
 {
-	//sevseg.SetLedArray(ledsAsBits);
+	//sevseg.setLedArray(ledsAsBits);
 	this->lights = ledsAsBits;
 };
 
@@ -129,30 +93,30 @@ void DisplayManagement::convert_text4Bytes_to_32bits(char* text, uint32_t* binar
 	*binary = 0;
 	for (uint8_t i=0;i<4;i++){
 		byte digitBinary;
-		charToScreen(text[i], &digitBinary);
+		charToSevenSegment(text[i], &digitBinary);
 		*binary |= (uint32_t) digitBinary << (8*i);		
 	}
 }
 
 
-void DisplayManagement::convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray){
+// void DisplayManagement::convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray){
 	
-	if (toArray){
-		for(uint8_t i=0;i<4;i++){
-			characters[i] = (uint8_t)((*displayAllSegments >> (i * 8)) & 0xFF) ;
-		}
-	}else{
-		*displayAllSegments = 0;
+// 	if (toArray){
+// 		for(uint8_t i=0;i<4;i++){
+// 			characters[i] = (uint8_t)((*displayAllSegments >> (i * 8)) & 0xFF) ;
+// 		}
+// 	}else{
+// 		*displayAllSegments = 0;
 
-		for(uint8_t i=0;i<4;i++){
-			*displayAllSegments |= (uint32_t)(characters[i]) << (8*i); 
-		}
-	}
-}
+// 		for(uint8_t i=0;i<4;i++){
+// 			*displayAllSegments |= (uint32_t)(characters[i]) << (8*i); 
+// 		}
+// 	}
+// }
 
 void DisplayManagement::setBlankDisplay()
 {
-	//this->SetFourDigits(0x00000000); //reset display, includes the decimal points.
+	//this->setBinaryToDisplay(0x00000000); //reset display, includes the decimal points.
 	this->displayBinary = 0;
 	clearText();
 	this->decimalPoints = 0;
@@ -179,10 +143,17 @@ void DisplayManagement::minutesToMinutesHoursString(char* textBuf, uint16_t minu
 }
 
 void DisplayManagement::blanksToBuf(char* textBuf){
-	textBuf[0]=SPACE_FAKE_ASCII;
-	textBuf[1]=SPACE_FAKE_ASCII;
-	textBuf[2]=SPACE_FAKE_ASCII;
-	textBuf[3]=SPACE_FAKE_ASCII;
+	// textBuf[0]=SPACE_FAKE_ASCII;
+	// textBuf[1]=SPACE_FAKE_ASCII;
+	// textBuf[2]=SPACE_FAKE_ASCII;
+	// textBuf[3]=SPACE_FAKE_ASCII;
+	setStandardTextToTextBuf(*textBuf, 0);
+}
+
+void DisplayManagement::setStandardTextToTextBuf(char* textBuf, uint8_t text_start_address){
+	for(uint8_t i=0;i<4;i++){
+		textBuf[i] = pgm_read_byte_near(text_start_address + i);
+	}
 }
 
 void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
@@ -216,7 +187,7 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 
 // void DisplayManagement::displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints)
 // {
-// 	setText(inText);
+// 	setTextBufToDisplay(inText);
 // 	// always think of 5 digits.
 // 	for (uint8_t i = 0; i < 5; i++)
 // 	{
@@ -228,16 +199,16 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number)
 /*******************************************************************************************/
 //From the numbers found, says which LEDs need to be turned on
 
-void DisplayManagement::charsToScreen(char* text, byte* digits)
+void DisplayManagement::charsToSevenSegment(char* text, byte* digits)
 {
 	// expect 4 chars.
 	for (byte index = 0; index < 4; index++)
 	{
-		charToScreen(text[index], &digits[index]);
+		charToSevenSegment(text[index], &digits[index]);
 	}
 }
 
-void DisplayManagement::charToScreen(char character, byte* digit)
+void DisplayManagement::charToSevenSegment(char character, byte* digit)
 {
 
 	if (character == ' ')
@@ -267,7 +238,7 @@ void DisplayManagement::charToScreen(char character, byte* digit)
 // 	*carrier = this->activeSegment;
 // }
 
-void DisplayManagement::setMultiplexerData(byte* multiplexerDigits){
+void DisplayManagement::setMultiplexerBuffer(byte* multiplexerDigits){
 	this->multiplexerData = multiplexerDigits;
 }
 
@@ -283,7 +254,7 @@ void DisplayManagement::refresh()
 
 		if (i < 4){
 			// led display digits			
-			charToScreen(text[i], &multiplexerData[i]);
+			charToSevenSegment(text[i], &multiplexerData[i]);
 			multiplexerData[i] |=  (uint8_t)((displayBinary >> (i * 8)) & 0xFF) ;
 			multiplexerData[i] |=  getBit(&this->decimalPoints, i) << 7;
 

@@ -213,7 +213,7 @@ void setup()
     potentio.setPin(PIN_POTENTIO);
 
     allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-    visualsManager.setMultiplexerData(allVisuals.getDigits());
+    visualsManager.setMultiplexerBuffer(allVisuals.getDigits());
 
 // if no latching buttons pressed at startup, disable sound
 //(a "Lode listens to the parents"-initiative)
@@ -269,9 +269,9 @@ void loop()
     
     if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
     {
-        visualsManager.SetFourDigits(0xFF000000);
-        visualsManager.SetLedArray(0x0F);
-        visualsManager.setDecimalPoint(false,2);
+        visualsManager.setBinaryToDisplay(0xFF000000);
+        visualsManager.setLedArray(0x0F);
+        visualsManager.setDecimalPointToDisplay(false,2);
         
     }
     

@@ -187,14 +187,14 @@
 [32m+[m[41m [m
  void Apps:: setDefaultMode(){[m
    //button lights[m
-   ledDisp->SetLedArray(0b00000000);  // no lights[m
+   ledDisp->setLedArray(0b00000000);  // no lights[m
 [31m-[m
 [32m+[m[41m [m
    //display[m
-   //ledDisp->SetFourDigits(0xC0C0C0C0); //default dispaly 4x minus and decimal point.[m
-   //ledDisp->SetFourDigits(0x80808080); //default dispaly 4x minus[m
+   //ledDisp->setBinaryToDisplay(0xC0C0C0C0); //default dispaly 4x minus and decimal point.[m
+   //ledDisp->setBinaryToDisplay(0x80808080); //default dispaly 4x minus[m
    ledDisp->setBlankDisplay();[m
-   //ledDisp->SetFourDigits(0xC0C0C0C0); [m
+   //ledDisp->setBinaryToDisplay(0xC0C0C0C0); [m
    ledDisp->setBrightness(0,false);[m
 [31m-  [m
 [32m+[m[41m   [m
@@ -250,18 +250,18 @@
 [31m-	}[m
 [31m-[m
 [31m-	if (counter < 32){[m
-[31m-		// ledDisp->SetFourDigits(displaySequence[31-counter]); // use fade in as fade out to set text.[m
-[31m-		ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.[m
+[31m-		// ledDisp->setBinaryToDisplay(displaySequence[31-counter]); // use fade in as fade out to set text.[m
+[31m-		ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.[m
 [31m-[m
 [31m-	}else if (counter < 50){[m
-[31m-		ledDisp->SetFourDigits(this->displayAllSegments);[m
-[31m-		// ledDisp->showNumber(selector);[m
+[31m-		ledDisp->setBinaryToDisplay(this->displayAllSegments);[m
+[31m-		// ledDisp->setNumberToDisplay(selector);[m
 [31m-		[m
 [31m-	}else if (counter == 50){[m
 [31m-		//this->fadeInList(displaySequence, 32, ~this->displayAllSegments);[m
 [31m-		[m
 [31m-	}else if (counter < 82 ){[m
-[31m-		//ledDisp->SetFourDigits(~displaySequence[counter-51]);[m
+[31m-		//ledDisp->setBinaryToDisplay(~displaySequence[counter-51]);[m
 [32m+[m[41m [m
 [32m+[m[32m        //this->fadeInList(step, bytes_list_bufsize, this->displayAllSegments, this->FADE_IN_RANDOM_LIST);[m
 [32m+[m[32m        // counter = 0;[m
@@ -280,19 +280,19 @@
 [32m+[m[32m    }[m
 [32m+[m[41m [m
 [32m+[m[32m    if (counter < 32){[m
-[32m+[m[32m        // ledDisp->SetFourDigits(displaySequence[31-counter]); // use fade in as fade out to set text.[m
-[32m+[m[32m        ledDisp->SetFourDigits(0xFFFFFFFF); // use fade in as fade out to set text.[m
+[32m+[m[32m        // ledDisp->setBinaryToDisplay(displaySequence[31-counter]); // use fade in as fade out to set text.[m
+[32m+[m[32m        ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.[m
 [32m+[m[41m [m
 [32m+[m[32m    }else if (counter < 50){[m
-[32m+[m[32m        ledDisp->SetFourDigits(this->displayAllSegments);[m
-[32m+[m[32m        // ledDisp->showNumber(selector);[m
+[32m+[m[32m        ledDisp->setBinaryToDisplay(this->displayAllSegments);[m
+[32m+[m[32m        // ledDisp->setNumberToDisplay(selector);[m
 [32m+[m[41m         [m
 [32m+[m[32m    }else if (counter == 50){[m
 [32m+[m[32m        //this->fadeInList(displaySequence, 32, ~this->displayAllSegments);[m
 [32m+[m[41m         [m
 [32m+[m[32m    }else if (counter < 82 ){[m
-[32m+[m[32m        //ledDisp->SetFourDigits(~displaySequence[counter-51]);[m
-     ledDisp->SetFourDigits(~ this->fadeInList(counter-51, bytes_list_bufsize, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); [m
+[32m+[m[32m        //ledDisp->setBinaryToDisplay(~displaySequence[counter-51]);[m
+     ledDisp->setBinaryToDisplay(~ this->fadeInList(counter-51, bytes_list_bufsize, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST)); [m
 [31m-		[m
 [31m-	}else {[m
 [31m-		this->setDefaultMode();[m
@@ -344,7 +344,7 @@
      if (counter%2 == 0){[m
        // show analog pin[m
        textBuf[4] = counter/2 + 48; // char 0 + analog pin . [m
-       ledDisp->setText(textBuf);[m
+       ledDisp->setTextBufToDisplay(textBuf);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
@@ -406,7 +406,7 @@
 [32m+[m[41m [m
        buzzer->cleanBuzzerRoll();[m
        buzzer->programBuzzerRoll(14);[m
-       ledDisp->setText(textBuf);[m
+       ledDisp->setTextBufToDisplay(textBuf);[m
        generalTimer.start();[m
      }[m
 [31m-[m
@@ -524,7 +524,7 @@
 [31m-// 			  displayAllSegments = ~displayAllSegments;[m
 [31m-// 		  }[m
 [31m-			  [m
-[31m-// 		  ledDisp->SetFourDigits(displayAllSegments);[m
+[31m-// 		  ledDisp->setBinaryToDisplay(displayAllSegments);[m
 [31m-[m
 [31m-		 [m
 [31m-// 	  }else{[m
@@ -564,7 +564,7 @@
 [32m+[m[32m//            displayAllSegments = ~displayAllSegments;[m
 [32m+[m[32m//        }[m
 [32m+[m[41m               [m
-[32m+[m[32m//        ledDisp->SetFourDigits(displayAllSegments);[m
+[32m+[m[32m//        ledDisp->setBinaryToDisplay(displayAllSegments);[m
 [32m+[m[41m [m
 [32m+[m[41m          [m
 [32m+[m[32m//    }else{[m
@@ -671,7 +671,7 @@
        }[m
 [31m-[m
 [32m+[m[41m [m
-       ledDisp->setText(textBuf);[m
+       ledDisp->setTextBufToDisplay(textBuf);[m
 [32m+[m[41m       [m
        [m
 [31m-     [m
@@ -725,38 +725,38 @@
            textBuf[3]='F'; [m
 [36m@@ -596,39 +596,39 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
          } [m
-         ledDisp->setText(textBuf);[m
+         ledDisp->setTextBufToDisplay(textBuf);[m
        }[m
 [31m-      [m
 [32m+[m[41m       [m
      }else if (SETTINGS_MODE_SELECTOR < 10){[m
        textBuf[3]='A'; [m
        textBuf[4]='0'; [m
-       ledDisp->showNumber( (int16_t) analogRead(PIN_SELECTOR_DIAL)); [m
+       ledDisp->setNumberToDisplay( (int16_t) analogRead(PIN_SELECTOR_DIAL)); [m
 [31m-    [m
 [32m+[m[41m     [m
      }else if (SETTINGS_MODE_SELECTOR < 12){[m
        textBuf[3]='A'; [m
        textBuf[4]='1'; [m
-       ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_1)); [m
+       ledDisp->setNumberToDisplay( (int16_t) analogRead(PIN_BUTTONS_1)); [m
 [31m-    [m
 [32m+[m[41m     [m
      }else if (SETTINGS_MODE_SELECTOR < 14){[m
        textBuf[3]='A'; [m
        textBuf[4]='2'; [m
-       ledDisp->showNumber( (int16_t) analogRead(PIN_BUTTONS_2));[m
+       ledDisp->setNumberToDisplay( (int16_t) analogRead(PIN_BUTTONS_2));[m
 [31m-    [m
 [32m+[m[41m     [m
      }else if (SETTINGS_MODE_SELECTOR < 16){[m
        textBuf[3]='A'; [m
        textBuf[4]='3'; [m
-       ledDisp->showNumber( (int16_t) analogRead(PIN_POTENTIO));[m
+       ledDisp->setNumberToDisplay( (int16_t) analogRead(PIN_POTENTIO));[m
 [31m-[m
 [32m+[m[41m [m
      }else if (SETTINGS_MODE_SELECTOR < 18){[m
        textBuf[3]='A'; [m
        textBuf[4]='4'; [m
-       ledDisp->showNumber( (int16_t) analogRead(PIN_MERCURY_SWITCHES));[m
+       ledDisp->setNumberToDisplay( (int16_t) analogRead(PIN_MERCURY_SWITCHES));[m
 [31m-    [m
 [32m+[m[41m     [m
      }else if (SETTINGS_MODE_SELECTOR < 20){[m
@@ -792,14 +792,14 @@
          textBuf[2]='O'; [m
          textBuf[3]='I'; [m
          textBuf[4]='T'; [m
-         ledDisp->setText(textBuf);[m
+         ledDisp->setTextBufToDisplay(textBuf);[m
 [31m-[m
 [32m+[m[41m [m
        }[m
      }else if (SETTINGS_MODE_SELECTOR < 24){[m
 [31m-    [m
 [32m+[m[41m     [m
-       ledDisp->showNumber(SETTINGS_MODE_SELECTOR);[m
+       ledDisp->setNumberToDisplay(SETTINGS_MODE_SELECTOR);[m
 [31m-[m
 [31m-[m
 [31m-[m
@@ -807,7 +807,7 @@
 [32m+[m[41m [m
 [32m+[m[41m [m
      }else{[m
-       ledDisp->showNumber(SETTINGS_MODE_SELECTOR);[m
+       ledDisp->setNumberToDisplay(SETTINGS_MODE_SELECTOR);[m
      }[m
 [31m-[m
 [31m-[m
@@ -821,7 +821,7 @@
        // if (counter%2 == 0){[m
        //   // show analog pin[m
        //   textBuf[4] = counter/2 + 48; // char 0 + analog pin . [m
-       //   ledDisp->setText(textBuf);[m
+       //   ledDisp->setTextBufToDisplay(textBuf);[m
        // }[m
 [31m-[m
 [31m-      [m
@@ -833,7 +833,7 @@
 [31m-      [m
 [32m+[m[41m       [m
        if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500)){[m
-           ledDisp->setText(textBuf);[m
+           ledDisp->setTextBufToDisplay(textBuf);[m
        }[m
 [31m-[m
 [32m+[m[41m [m
@@ -844,7 +844,7 @@
 [32m+[m[41m      [m
 [32m+[m[41m [m
      }[m
-     ledDisp->SetLedArray(lights);[m
+     ledDisp->setLedArray(lights);[m
  }[m
 [31m-[m
 [32m+[m[41m [m
@@ -917,7 +917,7 @@
 [31m-			[m
 [31m-			generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms[m
 [31m-			generalTimer.start();[m
-[31m-			ledDisp->showNumber( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));[m
+[31m-			ledDisp->setNumberToDisplay( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));[m
 [31m-			[m
 [31m-		}[m
 [31m-	  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){[m
@@ -925,7 +925,7 @@
 [32m+[m[41m             [m
 [32m+[m[32m            generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms[m
 [32m+[m[32m            generalTimer.start();[m
-[32m+[m[32m            ledDisp->showNumber( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));[m
+[32m+[m[32m            ledDisp->setNumberToDisplay( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));[m
 [32m+[m[41m             [m
 [32m+[m[32m        }[m
 [32m+[m[32m      }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){[m
@@ -1027,7 +1027,7 @@
 [32m+[m[41m       [m
        // buzzer->buzzerOff();[m
          // SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);[m
-       // ledDisp->showNumber(SOUND_FUN_NOTE_INDEX);[m
+       // ledDisp->setNumberToDisplay(SOUND_FUN_NOTE_INDEX);[m
 [36m@@ -891,7 +894,7 @@[m [mvoid Apps::modeSoundNotes(){[m
        // }[m
      // }else  [m
@@ -1036,9 +1036,9 @@
 [32m+[m[41m       [m
        if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){[m
          buzzer->buzzerOff();[m
-         ledDisp->showNumber(buzzer->addRandomSoundToRoll(223, 235));[m
+         ledDisp->setNumberToDisplay(buzzer->addRandomSoundToRoll(223, 235));[m
 [36m@@ -906,7 +909,7 @@[m [mvoid Apps::modeSoundNotes(){[m
-         ledDisp->showNumber(buzzer->addRandomSoundToRoll(97, 160));[m
+         ledDisp->setNumberToDisplay(buzzer->addRandomSoundToRoll(97, 160));[m
        }  [m
      }else{ [m
 [31m-[m
@@ -1181,7 +1181,7 @@
 [31m-	}[m
 [31m-	[m
 [31m-	// set to display [m
-[31m-	ledDisp->SetFourDigits(displayAllSegments);[m
+[31m-	ledDisp->setBinaryToDisplay(displayAllSegments);[m
 [32m+[m[32m    //bool nextStep = 0;[m
 [32m+[m[32m     //reset saved led disp state.[m
 [32m+[m[32m    if (init){[m
@@ -1262,7 +1262,7 @@
 [32m+[m[32m    }[m
 [32m+[m[41m     [m
 [32m+[m[32m    // set to display[m[41m [m
-[32m+[m[32m    ledDisp->SetFourDigits(displayAllSegments);[m
+[32m+[m[32m    ledDisp->setBinaryToDisplay(displayAllSegments);[m
  }[m
 [31m-[m
 [32m+[m[41m [m
@@ -1604,7 +1604,7 @@
    // }[m
 [31m-  [m
 [32m+[m[41m   [m
- // ledDisp->setText(textBuf);  [m
+ // ledDisp->setTextBufToDisplay(textBuf);  [m
  // ledDisp->SetSingleDigit(B11111111, 1);  [m
  // ledDisp->SetSingleDigit((uint8_t) (potentio->getValueStable()/4), 3);  [m
 [31m-  [m
@@ -1727,9 +1727,9 @@
    (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_LEFT:false;[m
 [31m-[m
 [32m+[m[41m [m
-   ledDisp->setText(textBuf);[m
-   ledDisp->SetLedArray(lights); [m
-   ledDisp->setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights ,2);[m
+   ledDisp->setTextBufToDisplay(textBuf);[m
+   ledDisp->setLedArray(lights); [m
+   ledDisp->setDecimalPointToDisplay(LIGHT_SECONDS_BLINKER & settingsLights ,2);[m
 [31m-    [m
 [32m+[m[41m     [m
  }[m
@@ -1793,7 +1793,7 @@
 [31m-	 this->dataPlayer.update();[m
 [31m-	 screen = this->dataPlayer.getActive32bit();[m
 [31m-[m
-[31m-	 ledDisp->SetFourDigits(screen);  [m
+[31m-	 ledDisp->setBinaryToDisplay(screen);  [m
 [31m-[m
 [32m+[m[32m         this->dataPlayer.loadDataSet(1);[m
 [32m+[m[32m         this->dataPlayer.setSetIndexDirection(1);[m
@@ -1813,7 +1813,7 @@
 [32m+[m[32m     this->dataPlayer.update();[m
 [32m+[m[32m     screen = this->dataPlayer.getActive32bit();[m
 [32m+[m[41m [m
-[32m+[m[32m     ledDisp->SetFourDigits(screen);[m[41m  [m
+[32m+[m[32m     ledDisp->setBinaryToDisplay(screen);[m[41m  [m
 [32m+[m[41m [m
    }else{[m
 [31m-		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){[m
@@ -1890,11 +1890,11 @@
 [32m+[m[32m                screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [32m+[m[32m              }[m
 [32m+[m[32m          }[m[41m [m
-       ledDisp->SetFourDigits(screen);  [m
+       ledDisp->setBinaryToDisplay(screen);  [m
 [31m-  [m
 [32m+[m[41m   [m
      }else{[m
-       ledDisp->setText(textBuf);[m
+       ledDisp->setTextBufToDisplay(textBuf);[m
      }[m
    }[m
 [31m-  [m
@@ -1939,7 +1939,7 @@
        if (potentio->getValueStableChangedEdge()){[m
          GEIGER_TONE_FREQUENY_LOWEST = potentio->getValueMapped(0,5000);[m
        }[m
-       ledDisp->showNumber(GEIGER_TONE_FREQUENY_LOWEST);[m
+       ledDisp->setNumberToDisplay(GEIGER_TONE_FREQUENY_LOWEST);[m
 [31m-[m
 [32m+[m[41m [m
      }else if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){[m
@@ -1947,7 +1947,7 @@
        if (potentio->getValueStableChangedEdge()){[m
          GEIGER_TONE_FREQUENCY_HEIGHEST = potentio->getValueMapped(0,5000);[m
        }[m
-       ledDisp->showNumber(GEIGER_TONE_FREQUENCY_HEIGHEST);[m
+       ledDisp->setNumberToDisplay(GEIGER_TONE_FREQUENCY_HEIGHEST);[m
 [31m-[m
 [32m+[m[41m [m
      }else if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){[m
@@ -1955,7 +1955,7 @@
        if (potentio->getValueStableChangedEdge()){[m
          GEIGER_TONE_LENGTH = potentio->getValueMapped(0,256);[m
        }[m
-       ledDisp->showNumber(GEIGER_TONE_LENGTH);[m
+       ledDisp->setNumberToDisplay(GEIGER_TONE_LENGTH);[m
 [31m-[m
 [31m-    } else if(binaryInputs[BUTTON_MOMENTARY_3].getValue()){[m
 [32m+[m[41m [m
@@ -1980,13 +1980,13 @@
            );[m
 [31m-[m
 [32m+[m[41m [m
-         ledDisp->showNumber(tmp);[m
+         ledDisp->setNumberToDisplay(tmp);[m
          COUNTER_GEIGER++;[m
        }[m
 [31m-[m
 [32m+[m[41m [m
        if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
-         ledDisp->showNumber(COUNTER_GEIGER);[m
+         ledDisp->setNumberToDisplay(COUNTER_GEIGER);[m
        }[m
 [31m-      [m
 [32m+[m[41m       [m
@@ -2028,7 +2028,7 @@
      }[m
 [31m-    [m
 [32m+[m[41m     [m
-     ledDisp->setText(textBuf);  [m
+     ledDisp->setTextBufToDisplay(textBuf);  [m
    }[m
  }[m
 [31m-[m
@@ -2073,7 +2073,7 @@
      //blink alternatively song number and "load" or "save"[m
      uint8_t song_number  = potentio->getValueMapped(1,9);[m
      if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){[m
-       ledDisp->showNumber(song_number);[m
+       ledDisp->setNumberToDisplay(song_number);[m
 [31m-[m
 [32m+[m[41m [m
      }else{[m
@@ -2096,7 +2096,7 @@
        }[m
 [31m-[m
 [32m+[m[41m [m
-       ledDisp->setText(textBuf);[m
+       ledDisp->setTextBufToDisplay(textBuf);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
@@ -2143,13 +2143,13 @@
 [32m+[m[41m [m
      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){[m
        buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);[m
-       ledDisp->showNumber(SEQUENCER_TEMP_NOTE);[m
+       ledDisp->setNumberToDisplay(SEQUENCER_TEMP_NOTE);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
      if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){[m
        // if button continuously pressed, show notes.[m
-       ledDisp->showNumber(SEQUENCER_TEMP_NOTE);[m
+       ledDisp->setNumberToDisplay(SEQUENCER_TEMP_NOTE);[m
 [31m-[m
 [32m+[m[41m [m
        // bonus effect: TRANSPOSE![m
@@ -2160,7 +2160,7 @@
 [31m-    [m
 [32m+[m[41m     [m
      if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown()){[m
-       ledDisp->SetFourDigits(displayAllSegments);[m
+       ledDisp->setBinaryToDisplay(displayAllSegments);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
@@ -2170,7 +2170,7 @@
 [32m+[m[41m [m
      if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){[m
        buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);[m
-       ledDisp->showNumber(SEQUENCER_TEMP_NOTE);[m
+       ledDisp->setNumberToDisplay(SEQUENCER_TEMP_NOTE);[m
      }[m
 [31m-    [m
 [32m+[m[41m     [m
@@ -2180,13 +2180,13 @@
 [31m-        [m
 [32m+[m[41m         [m
          buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);[m
-         ledDisp->showNumber(SEQUENCER_TEMP_NOTE);[m
+         ledDisp->setNumberToDisplay(SEQUENCER_TEMP_NOTE);[m
        }[m
      } [m
 [31m-    [m
 [32m+[m[41m     [m
      if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeDown()){[m
-       ledDisp->SetFourDigits(displayAllSegments);[m
+       ledDisp->setBinaryToDisplay(displayAllSegments);[m
      }[m
 [31m-[m
 [32m+[m[41m [m
@@ -2280,7 +2280,7 @@
 [31m-      [m
 [32m+[m[41m       [m
        displayAllSegments |=  (uint32_t)0x1 << ((8*(SEQUENCER_STEP_COUNTER / 8))+3) ;  // bar at bottom.[m
-       ledDisp->SetFourDigits(displayAllSegments);[m
+       ledDisp->setBinaryToDisplay(displayAllSegments);[m
 [31m-[m
 [32m+[m[41m [m
      }[m
@@ -2405,7 +2405,7 @@
 [36m@@ -1852,30 +1862,30 @@[m [mvoid Apps::modeMetronome(bool init){[m
        screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_3_POSITION*4 + (i)) << (8*i); [m
      }[m
-     ledDisp->SetFourDigits(screen);[m
+     ledDisp->setBinaryToDisplay(screen);[m
 [31m-[m
 [32m+[m[41m [m
    }  [m
@@ -2456,7 +2456,7 @@
 [31m-[m
 [32m+[m[41m [m
      case simonNewGame: {[m
-       ledDisp->SetLedArray(0);[m
+       ledDisp->setLedArray(0);[m
        // generate new sequence[m
 [36m@@ -1913,7 +1923,7 @@[m [mvoid Apps::modeSimon(bool init)[m
        simonState = simonNewLevel;[m
@@ -2465,7 +2465,7 @@
 [31m-[m
 [32m+[m[41m [m
      case simonNewLevel: {[m
-       ledDisp->showNumber(SIMON_LENGTH);[m
+       ledDisp->setNumberToDisplay(SIMON_LENGTH);[m
        ++SIMON_LENGTH;[m
 [36m@@ -1928,7 +1938,7 @@[m [mvoid Apps::modeSimon(bool init)[m
        generalTimer.start();[m
@@ -2568,19 +2568,19 @@
        #ifdef ENABLE_EEPROM[m
        if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500)){[m
 [36m@@ -2046,8 +2056,8 @@[m [mvoid Apps::modeReactionGame(bool init){[m
-         ledDisp->setText(textBuf);[m
+         ledDisp->setTextBufToDisplay(textBuf);[m
        }else{[m
          //ledDisp->setBlankDisplay(); //make high score blink[m
 [31m-        [m
 [31m-[m
 [32m+[m[41m         [m
 [32m+[m[41m [m
-         ledDisp->showNumber([m
+         ledDisp->setNumberToDisplay([m
            eeprom_read_word([m
                (uint16_t*)[m
 [36m@@ -2064,19 +2074,19 @@[m [mvoid Apps::modeReactionGame(bool init){[m
        textBuf[1] = 'L';[m
-       ledDisp->setText(textBuf);[m
+       ledDisp->setTextBufToDisplay(textBuf);[m
        #endif[m
 [31m-[m
 [31m-        [m
@@ -2730,8 +2730,8 @@
        displayAllSegments = tmp_segments;[m
 [31m-[m
 [32m+[m[41m [m
-       //ledDisp->SetLedArray(lights); [m
-       ledDisp->SetFourDigits(displayAllSegments);[m
+       //ledDisp->setLedArray(lights); [m
+       ledDisp->setBinaryToDisplay(displayAllSegments);[m
        TIMER_REACTION_GAME_SPEED.start();[m
 [31m-[m
 [32m+[m[41m [m
@@ -2786,7 +2786,7 @@
            // success![m
            reactionGameState = reactionMultiNewTurn;[m
 [36m@@ -2228,53 +2238,53 @@[m [mvoid Apps::modeReactionGame(bool init){[m
-       ledDisp->SetFourDigits(displayAllSegments);[m
+       ledDisp->setBinaryToDisplay(displayAllSegments);[m
        break;[m
      }[m
 [31m-[m
@@ -2833,7 +2833,7 @@
        }[m
 [31m-[m
 [32m+[m[41m [m
-       ledDisp->SetLedArray(lights); [m
+       ledDisp->setLedArray(lights); [m
 [31m-[m
 [32m+[m[41m [m
 [32m+[m[41m            [m
@@ -2865,7 +2865,7 @@
 [36m@@ -2289,64 +2299,64 @@[m [mvoid Apps::modeReactionGame(bool init){[m
            }[m
          }[m
-         ledDisp->SetFourDigits(displayAllSegments);[m
+         ledDisp->setBinaryToDisplay(displayAllSegments);[m
 [31m-[m
 [32m+[m[41m [m
        }else{[m
@@ -2877,7 +2877,7 @@
            for (uint8_t i=0;i<4;i++){[m
              displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + REACTION_GAME_TIMER_STEP*4 + (i)) << (8*i); [m
            }[m
-           ledDisp->SetFourDigits(displayAllSegments);[m
+           ledDisp->setBinaryToDisplay(displayAllSegments);[m
 [31m-          [m
 [32m+[m[41m           [m
            REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);[m
@@ -2904,7 +2904,7 @@
 [32m+[m[41m [m
        if ( !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() ){[m
          //always show unless in soundmode[m
-         ledDisp->setDecimalPoint(true, REACTION_GAME_TARGET+1);[m
+         ledDisp->setDecimalPointToDisplay(true, REACTION_GAME_TARGET+1);[m
        }[m
 [31m-[m
 [32m+[m[41m [m
@@ -2986,7 +2986,7 @@
 [31m-            [m
 [32m+[m[41m             [m
          }else{[m
-             ledDisp->showNumber(REACTION_GAME_SCORE); //score display. Leave at beginning, to display high score blinking.[m
+             ledDisp->setNumberToDisplay(REACTION_GAME_SCORE); //score display. Leave at beginning, to display high score blinking.[m
              // intToDigitsString(textBuf+1, REACTION_GAME_SCORE, false);  // utilities lode[m
 [36m@@ -2408,38 +2418,38 @@[m [mvoid Apps::modeReactionGame(bool init){[m
    }[m

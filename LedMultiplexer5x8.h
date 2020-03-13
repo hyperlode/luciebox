@@ -31,9 +31,9 @@ public:
 
     uint8_t* getDigits();
     //void SetSingleDigit(int8_t value, int digit);
-    //void SetFourDigits(uint32_t value);
+    //void setBinaryToDisplay(uint32_t value);
     //void SetDecPointSingle(boolean decDig, int digit);
-    //void SetLedArray(byte ledsAsBits);
+    //void setLedArray(byte ledsAsBits);
 
     void setBrightness(byte value, bool exponential);
     bool getMode();

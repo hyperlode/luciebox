@@ -211,7 +211,7 @@ byte *LedMultiplexer5x8::getDigits()
 // 	this->lights[digit] = value;
 // }
 
-// void LedMultiplexer5x8::SetFourDigits(uint32_t value)
+// void LedMultiplexer5x8::setBinaryToDisplay(uint32_t value)
 // {
 // 	for (uint8_t i = 0; i < 4; i++)
 // 	{
@@ -224,7 +224,7 @@ byte *LedMultiplexer5x8::getDigits()
 // 	setBit(&this->lights[digit], pointIsOn, 7);
 // 	//CreateArray();
 // }
-// void LedMultiplexer5x8::SetLedArray(byte ledsAsBits)
+// void LedMultiplexer5x8::setLedArray(byte ledsAsBits)
 // {
 // 	this->ledArrayValues = ledsAsBits;
 // }
@@ -234,7 +234,7 @@ byte *LedMultiplexer5x8::getDigits()
 // 	this->text = text;
 // 	CreateArray();
 // #ifdef ARDUINO_SIMULATION
-// 	mtc->setText(text);
+// 	mtc->setTextBufToDisplay(text);
 // 	mtc->setLights(this->lights);
 // #endif
 // }

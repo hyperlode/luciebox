@@ -81,6 +81,10 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 
 };
 
+const byte standard_text[] PROGMEM = {
+    SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII
+};
+
 class DisplayManagement
 {
 public:
@@ -90,24 +94,24 @@ public:
     // void startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8);
     // void startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8);
 
-    // void showNumberAsChars(int16_t number); //deprecated
+    // void setNumberToDisplayAsChars(int16_t number); //deprecated
     // void bufToScreenBits(char *textBuf, uint32_t *screenBits);
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
     
-    void setText(char *inText); // updateDisplayChars
+    void setTextBufToDisplay(char *inText); // updateDisplayChars
     void setCharToDisplay(char character, uint8_t digit);
-    char* getTextHandle();
+    char* getDisplayTextBufHandle();
     void clearText();
 
-    void showNumber(int16_t number); //updateDisplayNumber
+    void setNumberToDisplay(int16_t number); //updateDisplayNumber
     
-    void SetFourDigits(uint32_t value); //  updateDisplayAllBits
+    void setBinaryToDisplay(uint32_t value); //  updateDisplayAllBits
     
-    void setDecimalPoints(byte decimalPoints);
-    void setDecimalPoint(boolean isOn, uint8_t digit); // updateDisplayDecimalPoint
+    void setDecimalPointsToDisplay(byte decimalPoints);
+    void setDecimalPointToDisplay(boolean isOn, uint8_t digit); // updateDisplayDecimalPoint
     byte* getDecimalPointsHandle();
 
-    void SetLedArray(byte ledsAsBits);  //  updateLights
+    void setLedArray(byte ledsAsBits);  //  updateLights
     byte* getLedArrayHandle();
     void minutesToMinutesHoursString(char* textBuf, uint16_t minutes);
 
@@ -120,12 +124,12 @@ public:
 
     void convert_text4Bytes_to_32bits(char* text, uint32_t* binary);
 
-    void convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray);
+    //void convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray);
 
-    void charsToScreen (char* text, byte* digits);
-    void charToScreen(char character, byte* digit);
+    void charsToSevenSegment (char* text, byte* digits);
+    void charToSevenSegment(char character, byte* digit);
 
-    void setMultiplexerData(byte* multiplexerDigits);
+    void setMultiplexerBuffer(byte* multiplexerDigits);
 
     //void displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints);  //deprecated
 
