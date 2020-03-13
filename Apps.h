@@ -128,6 +128,7 @@
 #define STOPWATCH_CHRONO generalTimer
 #define POMODORO_TIMER generalTimer
 #define DRAW_GAME_DISPLAY_TIMER generalTimer
+#define HACKTIME_MOVE_TIMER generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2

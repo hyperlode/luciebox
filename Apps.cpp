@@ -2317,12 +2317,34 @@ void Apps::modeHackerTime(bool init){
 	if (init){
 		HACKTIME_ADDRESS = 0;
 		HACKTIME_SHOWVALUE_ELSE_ADDRESS = true;
+		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
+		HACKTIME_MOVE_TIMER.start();
 	}
 
+	const char drive_letter[3] = {'F','R','E'};
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
 		HACKTIME_MEMORY_SELECT ++;
 		if (HACKTIME_MEMORY_SELECT > 2){
 			HACKTIME_MEMORY_SELECT = 0;
+		}
+		HACKTIME_MOVE_TIMER.setInitTimeMillis(-100);
+		HACKTIME_MOVE_TIMER.start();
+	}
+
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+		
+		if (!HACKTIME_MOVE_TIMER.getTimeIsNegative()){
+			HACKTIME_ADDRESS++;
+			HACKTIME_MOVE_TIMER.start();
+		}
+
+		if (potentio->getValueStableChangedEdge()){
+				HACKTIME_MOVE_TIMER.setInitTimeMillis( HACKTIME_MOVE_TIMER.getInitTimeMillis()+ (1 - (2 * potentio->getLastStableValueChangedUp()) * 20 ));
+		}
+
+	}else{
+		if (potentio->getValueStableChangedEdge()){
+				HACKTIME_ADDRESS += 1 - (2 * potentio->getLastStableValueChangedUp());
 		}
 	}
 
@@ -2345,9 +2367,7 @@ void Apps::modeHackerTime(bool init){
 
 	if (HACKTIME_SHOWVALUE_ELSE_ADDRESS){
 		for (uint8_t i=0;i<4;i++){
-
-
-			
+		
 			switch (HACKTIME_MEMORY_SELECT){
 				case HACKTIME_MEMORY_FLASH:
 				
@@ -2371,11 +2391,9 @@ void Apps::modeHackerTime(bool init){
 	}else{
 
 		ledDisp->setNumberToDisplay(HACKTIME_ADDRESS);
+		textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
 	}
-	
-
 }
-
 
 void Apps::draw(bool init)
 {
