@@ -48,6 +48,12 @@ bool Potentio::getLastStableValueChangedUp()
 	return this->potentio_value_last_change_up_else_down;
 }
 
+void Potentio::increaseSubtractAtChange(int16_t* container, uint8_t amount){
+	if (getValueStableChangedEdge()){
+		*container +=  (1 - (2 * getLastStableValueChangedUp())) * amount;
+	}
+}
+
 void Potentio::refresh()
 {
 	//call this to update the value of the analog input. call multiple times to check for stable value.

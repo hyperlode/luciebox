@@ -181,6 +181,7 @@
 #define COMPOSER_SONG_LENGTH counter5
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
 #define HACKTIME_MEMORY_SELECT counter5
+#define DRAW_CURSOR_POTENTIO_INDEX counter5
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
@@ -195,7 +196,7 @@
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
-#define DRAW_POTENIO_SENSITIVITY general_boolean
+//#define DRAW_POTENIO_SENSITIVITY general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
@@ -509,6 +510,7 @@ private:
 #endif
 
     int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    int16_t checkBoundaries(int16_t counter, uint16_t maxValue, uint16_t minValue);
     void randomModeDisplay(bool forReal);
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 

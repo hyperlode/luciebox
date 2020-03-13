@@ -24,11 +24,14 @@ public:
 	bool getValueStableChangedEdge();
 	bool getLastStableValueChangedUp();
 
+	void increaseSubtractAtChange(int16_t* container, uint8_t amount);
+
 private:
 	byte analogPin;
 	int16_t potentio_value;
 	int16_t potentio_value_stable;
 	bool potentio_value_stable_changed;
 	bool potentio_value_last_change_up_else_down;
+	
 };
 #endif

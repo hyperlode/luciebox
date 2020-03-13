@@ -2130,13 +2130,20 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
 
 	// scroll through segments
+	// if (potentio->getValueStableChangedEdge())
+	// {
+	// 	DRAW_POTENIO_SENSITIVITY = !DRAW_POTENIO_SENSITIVITY;
+	// 	if (DRAW_POTENIO_SENSITIVITY)
+	// 	{
+	// 		DRAW_CURSOR_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
+	// 	}
+	// }
 	if (potentio->getValueStableChangedEdge())
 	{
-		DRAW_POTENIO_SENSITIVITY = !DRAW_POTENIO_SENSITIVITY;
-		if (DRAW_POTENIO_SENSITIVITY)
-		{
-			DRAW_CURSOR_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
-		}
+		//DRAW_CURSOR_POTENTIO_INDEX = DRAW_CURSOR_INDEX*2;
+		potentio->increaseSubtractAtChange((int16_t*)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
+		DRAW_CURSOR_POTENTIO_INDEX = checkBoundaries(DRAW_CURSOR_POTENTIO_INDEX, 0, 95);
+		DRAW_CURSOR_INDEX = DRAW_CURSOR_POTENTIO_INDEX / 3;
 	}
 
 	// check for global display change
@@ -2342,10 +2349,13 @@ void Apps::modeHackerTime(bool init){
 				HACKTIME_MOVE_TIMER.setInitTimeMillis( HACKTIME_MOVE_TIMER.getInitTimeMillis()+ (1 - (2 * potentio->getLastStableValueChangedUp()) * 20 ));
 		}
 
+		potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+
 	}else{
-		if (potentio->getValueStableChangedEdge()){
-				HACKTIME_ADDRESS += 1 - (2 * potentio->getLastStableValueChangedUp());
-		}
+		potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+		// if (potentio->getValueStableChangedEdge()){
+		// 		HACKTIME_ADDRESS += 1 - (2 * potentio->getLastStableValueChangedUp());
+		// }
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
@@ -2419,10 +2429,11 @@ void Apps::draw(bool init)
 	{
 
 		// scroll through drawings
-		if (potentio->getValueStableChangedEdge())
-		{
-			DRAW_ACTIVE_DRAWING_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
-		}
+		// if (potentio->getValueStableChangedEdge())
+		// {
+		// 	DRAW_ACTIVE_DRAWING_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
+		// }
+		potentio->increaseSubtractAtChange(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 
 		if (!binaryInputs[BUTTON_MOMENTARY_0].getValue())
 		{ // shift function for saving drawings to eeprom.
@@ -2939,10 +2950,8 @@ void Apps::modeSequencer(bool init)
 			showNote = true;
 
 			// bonus effect: TRANSPOSE!
-			if (potentio->getValueStableChangedEdge())
-			{
-				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
-			}
+			
+			potentio->increaseSubtractAtChange((uint16_t)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
 		}
 
 		// if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown())
@@ -3001,10 +3010,13 @@ void Apps::modeSequencer(bool init)
 
 		if (binaryInputs[BUTTON_MOMENTARY_3].getValue())
 		{
-			if (potentio->getValueStableChangedEdge())
-			{
-				step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
-			}
+			// if (potentio->getValueStableChangedEdge())
+			// {
+			// 	step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
+			// }
+			//}
+			potentio->increaseSubtractAtChange((int8_t)&(step), 1);
+		
 		}
 #endif
 
@@ -3705,7 +3717,11 @@ int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minV
 	{
 		counter--;
 	}
-
+	return checkBoundaries(counter, minValue, maxValue);
+	
+	return counter;
+}
+int16_t Apps::checkBoundaries(int16_t counter, uint16_t minValue, uint16_t maxValue){
 	if (counter > maxValue)
 	{
 		counter = minValue;
