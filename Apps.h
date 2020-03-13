@@ -179,7 +179,7 @@
 #define DICEROLL_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
-#define HACKTIME_MEMORY_SELECT coutner5
+#define HACKTIME_MEMORY_SELECT counter5
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
@@ -529,6 +529,8 @@ private:
 
     uint16_t counter8;
 
+    uint8_t* hacktimeRamReader;
+    
     enum
     {
         bytes_list_bufsize = 100,
@@ -605,7 +607,7 @@ private:
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* lightsHandle;
     uint8_t lights;
-
+    
     bool app_init_mode;
 };
 

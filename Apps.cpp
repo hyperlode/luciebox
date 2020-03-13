@@ -2320,7 +2320,10 @@ void Apps::modeHackerTime(bool init){
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-		
+		HACKTIME_MEMORY_SELECT ++;
+		if (HACKTIME_MEMORY_SELECT > 2){
+			HACKTIME_MEMORY_SELECT = 0;
+		}
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
@@ -2330,10 +2333,44 @@ void Apps::modeHackerTime(bool init){
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		// no limit checks. This is hacktime!
 		HACKTIME_ADDRESS --;
+	    hacktimeRamReader --;
+
 	}
 	
 	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
 		HACKTIME_ADDRESS ++;
+		hacktimeRamReader ++;
+	}
+
+
+	if (HACKTIME_SHOWVALUE_ELSE_ADDRESS){
+		for (uint8_t i=0;i<4;i++){
+
+
+			
+			switch (HACKTIME_MEMORY_SELECT){
+				case HACKTIME_MEMORY_FLASH:
+				
+					textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
+				
+				break;
+
+				case HACKTIME_MEMORY_RAM:
+
+					textHandle[i] = *(hacktimeRamReader + i);
+				
+				break;
+				case HACKTIME_MEMORY_EEPROM:
+
+					textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
+				break;
+
+				
+			}
+		}
+	}else{
+
+		ledDisp->setNumberToDisplay(HACKTIME_ADDRESS);
 	}
 	
 
