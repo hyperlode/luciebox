@@ -70,7 +70,7 @@ void intToDigitsString(char *textBuf, unsigned int number, bool trailingZeros)
 {
 	//for four digits
 	//textBuf must be defined before calling this function "i.e. : char lode [5];  intToDigitsString(lode, 666, true); --> yes, char array must be of length 5! last char will be set to '\0', if then fed to Serial.println, will stop printing at '\0' char. (= String uses this also!).
-	textBuf[4] = '\0';
+	//textBuf[4] = '\0';
 
 	//number of digits
 	unsigned int counter = number;

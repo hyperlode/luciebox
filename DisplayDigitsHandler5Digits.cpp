@@ -13,9 +13,6 @@ DisplayManagement::DisplayManagement()
 #endif
 };
 
-
-
-
 void DisplayManagement::blanksToBuf(char* textBuf){
 	// textBuf[0]=SPACE_FAKE_ASCII;
 	// textBuf[1]=SPACE_FAKE_ASCII;
@@ -29,7 +26,6 @@ void DisplayManagement::setStandardTextToTextBuf(char* textBuf, uint8_t text_sta
 		textBuf[i] = pgm_read_byte_near(standard_text + text_start_address + i);
 	}
 }
-
 
 void DisplayManagement::setTextBufToDisplay(char *inText) // updateDisplayChars
 {
@@ -99,8 +95,6 @@ byte* DisplayManagement::getLedArrayHandle(){
 	return &this->lights;
 }
 
-
-
 void DisplayManagement::convert_text4Bytes_to_32bits(char* text, uint32_t* binary){
 	*binary = 0;
 	for (uint8_t i=0;i<4;i++){
@@ -109,7 +103,6 @@ void DisplayManagement::convert_text4Bytes_to_32bits(char* text, uint32_t* binar
 		*binary |= (uint32_t) digitBinary << (8*i);		
 	}
 }
-
 
 // void DisplayManagement::convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray){
 	

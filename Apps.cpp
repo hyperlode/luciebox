@@ -685,14 +685,12 @@ void Apps::stopwatch(bool init)
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 	{
-		//timeSecondsToClockString(textBuf, (unsigned int)(time_millis/1000));
 		STOPWATCH_CHRONO.getTimeString(textBuf);
 	}
 	else
 	{
-		//
 		ledDisp->setTextBufToDisplay(textBuf);
-			ledDisp->setDecimalPointsToDisplay(decimalPoints);
+		ledDisp->setDecimalPointsToDisplay(decimalPoints);
 	}
 }
 void Apps::modeButtonDebug(bool init)
@@ -1703,7 +1701,6 @@ void Apps::modeSoundSong(bool init)
 			}
 		}
 	}
-	
 	buzzer->lastPlayedNoteToDisplay(textHandle, decimalDotsHandle);
 }
 
@@ -1973,6 +1970,7 @@ void Apps::modeSoundNotes(bool init)
 			buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
 			SOUND_FUN_NOTE_INDEX--;
 		}
+
 		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
 		{
 			buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
@@ -1985,7 +1983,7 @@ void Apps::modeSoundNotes(bool init)
 		}
 		buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
 		ledDisp->setTextBufToDisplay(textBuf);
-			ledDisp->setDecimalPointsToDisplay(decimalPoints);
+		ledDisp->setDecimalPointsToDisplay(decimalPoints);
 	}
 }
 
@@ -2975,7 +2973,7 @@ void Apps::modeSequencer(bool init)
 			{
 				buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
 			}
-			//buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
+			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
 
