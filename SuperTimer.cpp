@@ -13,6 +13,15 @@ SuperTimer::SuperTimer()
 
 //INIT TIME
 
+void SuperTimer::incrementInitTimeMillis(int16_t deltaMillis){
+	this->initTimeMillis += (long)deltaMillis;
+
+	// this mode is used in countdown timer.
+	if (getInitTimeMillis()>-5){
+		this->initTimeMillis = -5;
+	}
+}
+
 void SuperTimer::setInitTimeMillis(long milliSeconds)
 {
 	this->initTimeMillis = milliSeconds;

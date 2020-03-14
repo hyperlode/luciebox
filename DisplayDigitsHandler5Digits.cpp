@@ -4,7 +4,6 @@
 
 DisplayManagement::DisplayManagement()
 {
-	// this->text[5] = '\0';
 	// brightness = (8888 - LED_DISP_BRIGHTNESS) / 1000;
 	setBlankDisplay();
 
@@ -29,8 +28,6 @@ void DisplayManagement::setStandardTextToTextBuf(char* textBuf, uint8_t text_sta
 
 void DisplayManagement::setTextBufToDisplay(char *inText) // updateDisplayChars
 {
-	//inText[5] = '\0';
-	//writeStringToDisplay(inText);
 	for (uint8_t i=0;i<4;i++){
 		setCharToDisplay(inText[i],i);
 	}

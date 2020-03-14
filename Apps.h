@@ -129,6 +129,7 @@
 #define POMODORO_TIMER generalTimer
 #define DRAW_GAME_DISPLAY_TIMER generalTimer
 #define HACKTIME_MOVE_TIMER generalTimer
+#define COUNTING_LETTERS_AND_CHARS_TIMER generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
@@ -487,7 +488,7 @@ public:
     void modeDiceRoll(bool init);
     void modeHackerTime(bool init);
 
-
+    void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
     uint16_t _animationGetStartByte(uint8_t number);

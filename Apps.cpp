@@ -1516,16 +1516,28 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 void Apps::modeCountingLettersAndChars(bool init)
 {
 	//counting mode: numbers and letters.
-	bool updateScreen = false;
 
 	if (init)
 	{
-		updateScreen = true;
-		generalTimer.setInitTimeMillis(-1000);
+		counter = 0;
+		COUNTING_LETTERS_AND_CHARS_TIMER.setInitTimeMillis(-1000);
 		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = true;
 	}
 
+	// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
+
 	const bool numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+	
+	ledDisp->setBlankDisplay();
+	if (numberElseAlphabethMode)
+	{
+		ledDisp->setNumberToDisplay(counter);
+	}
+	else
+	{
+		ledDisp->setCharToDisplay(counter + 65, 3); // 0 is A
+		
+	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 	{
@@ -1534,10 +1546,9 @@ void Apps::modeCountingLettersAndChars(bool init)
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
 	{
-		updateScreen = true;
 		if (!numberElseAlphabethMode)
 		{
-			buzzer->buzzerOff();
+			//buzzer->buzzerOff();
 			buzzer->setSpeedRatio(4);
 			buzzer->loadBuzzerTrack(songs, SONG_ALPHABET);
 		}
@@ -1550,114 +1561,56 @@ void Apps::modeCountingLettersAndChars(bool init)
 	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
 	{
 		counter++;
-		updateScreen = true;
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 	{
 		counter--;
-		updateScreen = true;
 	}
-	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp() )
 	{
-		if (numberElseAlphabethMode)
-		{
-			counter = 0;
-		}
-		else
-		{
-			counter = 1;
-		}
-		updateScreen = true;
+		counter = 0;
 	}
+
 
 	// auto count
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp())
 	{
-		generalTimer.start();
-	}
-
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown())
-	{
-		generalTimer.pause();
+		COUNTING_LETTERS_AND_CHARS_TIMER.start();
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 	{
 		// auto mode
 
-		if (!generalTimer.getTimeIsNegative())
+		if (!COUNTING_LETTERS_AND_CHARS_TIMER.getTimeIsNegative())
 		{
-			if (NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN)
-			{
-				counter++;
-			}
-			else
-			{
-				counter--;
-			}
-			generalTimer.start();
-			updateScreen = true;
+			// time is up. Next letter.
+			counter += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
+			
+			COUNTING_LETTERS_AND_CHARS_TIMER.start();
 		}
 
 		//potentio behaviour
-		if (potentio->getValueStableChangedEdge())
-		{
 
-			generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-			//generalTimer.start();
-			ledDisp->setNumberToDisplay((int16_t)100 * (100 - potentio->getValueMapped(0, 100)));
-		}
+		listenToPotentioToIncrementTimerInit(&COUNTING_LETTERS_AND_CHARS_TIMER,10);
+
+		// if (potentio->getValueStableChangedEdge())
+		// {
+		// 	COUNTING_LETTERS_AND_CHARS_TIMER.setInitTimeMillis((long)(10 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
+		// 	//ledDisp->setNumberToDisplay((int16_t)10 * (100 - potentio->getValueMapped(0, 100)));
+		// }
 	}
 	else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 	{
-		// show number right away depending on potention value
-		if (numberElseAlphabethMode)
-		{
-			counter = (int16_t)(potentio->getValueMapped(0, 100));
-		}
-		else
-		{
-			counter = (int16_t)(potentio->getValueMapped(1, 26)); //1024 to 26 letters.
-		}
-		updateScreen = true;
+		// show number right away depending on potentio value
+		counter = (int16_t)(potentio->getValueMapped(0, 25 + numberElseAlphabethMode*75)); //1024 to 26 letters.
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	if (!numberElseAlphabethMode)
-	{
-		if (counter > 26)
-		{
-			counter = 1;
-		}
-		if (counter < 1)
-		{
-			counter = 26;
-		}
-	}
-	else
-	{
-		//no negative numbers yet for little lucie
-		if (counter < 0)
-		{
-			counter = 100;
-		}
-	}
+	counter = checkBoundaries(counter, 0, 25 + (numberElseAlphabethMode*76) );
 
-	if (updateScreen)
-	{
-		ledDisp->setBlankDisplay();
-		// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
-		if (numberElseAlphabethMode)
-		{
-			ledDisp->setNumberToDisplay(counter);
-		}
-		else
-		{
-			ledDisp->setCharToDisplay(counter + 65, 3); // 0 is A
-			
-		}
-	}
 }
 
 void Apps::modeSoundSong(bool init)
@@ -2343,9 +2296,13 @@ void Apps::modeHackerTime(bool init){
 			HACKTIME_MOVE_TIMER.start();
 		}
 
-		if (potentio->getValueStableChangedEdge()){
-				HACKTIME_MOVE_TIMER.setInitTimeMillis( HACKTIME_MOVE_TIMER.getInitTimeMillis()+ (1 - (2 * potentio->getLastStableValueChangedUp()) * 20 ));
-		}
+		// if (potentio->getValueStableChangedEdge()){
+		// 		HACKTIME_MOVE_TIMER.setInitTimeMillis( HACKTIME_MOVE_TIMER.getInitTimeMillis()+ (1 - (2 * potentio->getLastStableValueChangedUp()) * 20 ));
+		// }
+
+		listenToPotentioToIncrementTimerInit(&HACKTIME_MOVE_TIMER, 20);
+		
+
 
 		potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
 
@@ -2401,6 +2358,12 @@ void Apps::modeHackerTime(bool init){
 		ledDisp->setNumberToDisplay(HACKTIME_ADDRESS);
 		textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
 	}
+}
+
+void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis){
+	int16_t delta = 0;
+	potentio->increaseSubtractAtChange(&delta, increment_millis);
+	aTimer->incrementInitTimeMillis(delta);
 }
 
 void Apps::draw(bool init)
@@ -3033,14 +2996,19 @@ void Apps::modeSequencer(bool init)
 				!binaryInputs[BUTTON_MOMENTARY_1].getValue() &&
 				!binaryInputs[BUTTON_MOMENTARY_2].getValue() &&
 #ifdef BUTTON_MOMENTARY_3
-				!binaryInputs[BUTTON_MOMENTARY_3].getValue() &&
+				!binaryInputs[BUTTON_MOMENTARY_3].getValue() 
+				// &&
 #endif
-				potentio->getValueStableChangedEdge())
+				// potentio->getValueStableChangedEdge()
+				)
 			{
 
 				//  generalTimer.setInitTimeMillis(potentio->getValueMapped(-1024,0));
-				int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
-				generalTimer.setInitTimeMillis(generalTimer.getInitTimeMillis() + tmp * 10); //step +1 or -1
+				// int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
+				// generalTimer.setInitTimeMillis(generalTimer.getInitTimeMillis() + tmp * 10); //step +1 or -1
+
+				listenToPotentioToIncrementTimerInit(&generalTimer,5);
+
 			}
 
 			if (!generalTimer.getTimeIsNegative())
@@ -3109,7 +3077,7 @@ void Apps::modeMetronome(bool init)
 		METRONOME_TICKER_1_POSITION = 0;
 		METRONOME_TICKER_2_POSITION = 0;
 		METRONOME_TICKER_3_POSITION = 0;
-		TIMER_METRONOME.setInitTimeMillis((long)potentio->getValueStable() * -1);
+		TIMER_METRONOME.setInitTimeMillis(-500);
 		TIMER_METRONOME.start();
 		update = true;
 	}
@@ -3121,6 +3089,8 @@ void Apps::modeMetronome(bool init)
 		{
 			TIMER_METRONOME.setInitTimeMillis(potentio->getValueMapped(-1024, 0));
 		}
+		// can't do this because optimizer INCREASES the mem size
+		//listenToPotentioToIncrementTimerInit(&TIMER_METRONOME, 20);
 
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
