@@ -2946,6 +2946,7 @@ void Apps::modeSequencer(bool init)
 		if (binaryInputs[BUTTON_MOMENTARY_0].getValue())
 		{
 			// if button continuously pressed, show notes.
+			
 			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 
@@ -2974,7 +2975,7 @@ void Apps::modeSequencer(bool init)
 			{
 				buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
 			}
-			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
+			//buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
 

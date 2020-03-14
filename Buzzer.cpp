@@ -150,9 +150,9 @@ void Buzzer::doBuzzerRoll()
                 }
             }
 
+            // check if no "rust"
             if (buzzerRoll[this->playSlotCounter] % 64 != 0)
             {
-                //no sound, stop. (rust)
                 freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
             }
 
@@ -250,7 +250,9 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     // assume 4 chars textBuf (empty at arrival (4 spaces))
     // assumme value of decimalPoints at start is 0x00
 
-    if (note % 64 == 0)
+    uint8_t noteVal = note % 64;
+
+    if (noteVal == 0)
     {
         // rest
         textBuf[0] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
@@ -260,8 +262,12 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     {
 
         bool sharps [12] = {false,true,false,false,true,false,true,false,false,true,false,true}; 
-        uint8_t noteVal = ((note-1)%12);
-
+        char notes_chars [12] = {'A','A','B','C','C','D','D','E','F','F','G','G'};
+        // uint8_t noteVal = ((note-1)%12);
+        
+        noteVal %= 12;
+        
+        *decimalPoints = 0;
         *decimalPoints =  sharps[noteVal] << 0;
 
         // // note
@@ -303,10 +309,12 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         //     noteVal = 7;
         //     break;
         // }
-        textBuf[0] = noteVal + 64;
+        // textBuf[0] = noteVal + 64;
+        textBuf[0] = notes_chars[noteVal];
 
 
-        //*decimalPoints = 0;
+
+        // *decimalPoints = 0;
         // if (!notSharp)
         // {
         //     *decimalPoints = 0x04;
@@ -334,7 +342,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         }
     }
 
-    //textBuf[2] = ' '; // optimized: assume empty at start
+    textBuf[2] = ' '; // optimized: assume empty at start
 
     // note length
     textBuf[3] = (0x01 << (3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
