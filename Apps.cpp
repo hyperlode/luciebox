@@ -15,6 +15,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, Displa
 	textHandle = ledDisp->getDisplayTextBufHandle();
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
 	lightsHandle = ledDisp->getLedArrayHandle();
+	// displaySegmentsHandle = ledDisp->getBinaryHandle();
 
 }
 
@@ -1609,7 +1610,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	counter = checkBoundaries(counter, 0, 25 + (numberElseAlphabethMode*76) );
+	checkBoundaries(&counter, 0, 25 + (numberElseAlphabethMode*76) );
 
 }
 
@@ -1844,7 +1845,7 @@ void Apps::modeComposeSong(bool init)
 
 		if (step != 0)
 		{
-			COMPOSER_STEP = nextStepRotate(COMPOSER_STEP, (step + 1) / 2, 0, COMPOSER_SONG_LENGTH - 1);
+			nextStepRotate(&COMPOSER_STEP, (step + 1) / 2, 0, COMPOSER_SONG_LENGTH - 1);
 			buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
 		}
 
@@ -2093,7 +2094,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	{
 		//DRAW_CURSOR_POTENTIO_INDEX = DRAW_CURSOR_INDEX*2;
 		potentio->increaseSubtractAtChange((int16_t*)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
-		DRAW_CURSOR_POTENTIO_INDEX = checkBoundaries(DRAW_CURSOR_POTENTIO_INDEX, 0, 95);
+		checkBoundaries((int16_t)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95);
 		DRAW_CURSOR_INDEX = DRAW_CURSOR_POTENTIO_INDEX / 3;
 	}
 
@@ -3070,34 +3071,26 @@ void Apps::modeMetronome(bool init)
 {
 	// todo: with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen)!
 	bool update = false;
-	bool nextStep = false;
 
 	if (init)
 	{
-		METRONOME_TICKER_1_POSITION = 0;
-		METRONOME_TICKER_2_POSITION = 0;
-		METRONOME_TICKER_3_POSITION = 0;
+		// initializing is silly!
+		// METRONOME_TICKER_1_POSITION = 0;
+		// METRONOME_TICKER_2_POSITION = 0;
+		// METRONOME_TICKER_3_POSITION = 0;
+		
 		TIMER_METRONOME.setInitTimeMillis(-500);
 		TIMER_METRONOME.start();
-		update = true;
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 	{
-
-		if (potentio->getValueStableChangedEdge())
-		{
-			TIMER_METRONOME.setInitTimeMillis(potentio->getValueMapped(-1024, 0));
-		}
-		// can't do this because optimizer INCREASES the mem size
-		//listenToPotentioToIncrementTimerInit(&TIMER_METRONOME, 20);
+		listenToPotentioToIncrementTimerInit(&TIMER_METRONOME,10);
 
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
-
 			TIMER_METRONOME.start();
 			update = true;
-			nextStep = true;
 		}
 	}
 
@@ -3106,91 +3099,45 @@ void Apps::modeMetronome(bool init)
 		//ticker 1,2 and 3 back together (at position of ticker 1)
 		METRONOME_TICKER_2_POSITION = METRONOME_TICKER_1_POSITION;
 		METRONOME_TICKER_3_POSITION = METRONOME_TICKER_1_POSITION;
-		update = true;
 	}
 
-	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-	{
+	displayAllSegments = 0;
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, 1, !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(),C6_4, update|| binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp());
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, 2, !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(),C5_4, update || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp());
+// #ifdef BUTTON_MOMENTARY_3
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, 3, true,C7_8, update );
+// #endif
 
-		//set ticker 2 one step extra forward .
-		METRONOME_TICKER_2_POSITION = this->nextStepRotate(
-			METRONOME_TICKER_2_POSITION,
-			!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(),
-			// true,
-			0,
-			11);
-		update = true;
-	}
+	ledDisp->setBinaryToDisplay(displayAllSegments);
+}
 
-	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-	{
-		//set ticker 3 one step extra forward .
-		METRONOME_TICKER_3_POSITION = this->nextStepRotate(
-			METRONOME_TICKER_3_POSITION,
-			!binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(),
-			// true,
-			0,
-			11);
-		update = true;
-	}
+void Apps::modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step){
+	// every ticker gets updated.
 
-#ifdef BUTTON_MOMENTARY_3
-	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-	{
-		update = true;
-		nextStep = true;
-	}
-#endif
 
-	if (update)
-	{
-
-		if (nextStep)
-		{
-			METRONOME_TICKER_1_POSITION = this->nextStepRotate(
-				METRONOME_TICKER_1_POSITION,
-				true,
+	// check for next step
+	if (binaryInputs[buttons_momentary_indexed[momentary_id]].getEdgeUp() || force_step){
+		uint8_t tmp = *ticker_counter;
+		int16_t ttmp = (int16_t)tmp;
+		this->nextStepRotate(
+				&ttmp,
+				direction,
 				0,
 				11);
-
-			METRONOME_TICKER_2_POSITION = this->nextStepRotate(
-				METRONOME_TICKER_2_POSITION,
-				!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(),
-				// true,
-				0,
-				11);
-			METRONOME_TICKER_3_POSITION = this->nextStepRotate(
-				METRONOME_TICKER_3_POSITION,
-				!binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(),
-				// true,
-				0,
-				11);
-		}
-
-		if (METRONOME_TICKER_1_POSITION == 0)
+		
+		tmp = (uint8_t)ttmp;
+		*ticker_counter = tmp;
+		
+		if (*ticker_counter == 0)
 		{
-			buzzer->programBuzzerRoll(C7_8);
+			buzzer->programBuzzerRoll(sound_at_zero_pass);
 		}
+	}
 
-		if (METRONOME_TICKER_2_POSITION == 0)
-		{
-			buzzer->programBuzzerRoll(C6_4);
-		}
-
-		if ((METRONOME_TICKER_3_POSITION == 0) &&
-			(METRONOME_TICKER_3_POSITION != METRONOME_TICKER_1_POSITION))
-		{
-			buzzer->programBuzzerRoll(C5_4);
-		}
-
-		uint32_t screen = 0;
-		for (uint8_t i = 0; i < 4; i++)
-		{
-			screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_1_POSITION * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
-			screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_2_POSITION * 4 + (i)) << (8 * i);
-			screen |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + METRONOME_TICKER_3_POSITION * 4 + (i)) << (8 * i);
-		}
-		ledDisp->setBinaryToDisplay(screen);
+	// update screen, every cycle.
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + *ticker_counter * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
 	}
 }
 
@@ -3675,31 +3622,33 @@ void Apps::modeSimon(bool init)
 #endif
 #endif
 
-int16_t Apps::nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
+void Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
 
-	if (countUpElseDown)
-	{
-		counter++;
-	}
-	else
-	{
-		counter--;
-	}
-	return checkBoundaries(counter, minValue, maxValue);
+	*counter += -1 + (2 * countUpElseDown);
+	// if (countUpElseDown)
+	// {
+	// 	*counter++;
+	// }
+	// else
+	// {
+	// 	*counter--;
+	// }
 	
-	return counter;
+	checkBoundaries(counter, minValue, maxValue);
+	
+	// return counter;
 }
-int16_t Apps::checkBoundaries(int16_t counter, uint16_t minValue, uint16_t maxValue){
-	if (counter > maxValue)
+void  Apps::checkBoundaries(int16_t* counter, int16_t minValue, int16_t maxValue){
+	if (*counter > maxValue)
 	{
-		counter = minValue;
+		*counter = minValue;
 	}
-	if (counter < minValue)
+	if (*counter < minValue)
 	{
-		counter = maxValue;
+		*counter = maxValue;
 	}
-	return counter;
+	// return counter;
 }
 
 void Apps::modeReactionGame(bool init)
@@ -4014,7 +3963,7 @@ void Apps::modeReactionGame(bool init)
 				// game timing animation update.
 
 
-				REACTION_GAME_TIMER_STEP = this->nextStepRotate(REACTION_GAME_TIMER_STEP, true, 0, 12);
+				this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
 
 				// check game status 'dead'
 				if (REACTION_GAME_TIMER_STEP == 12)

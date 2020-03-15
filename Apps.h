@@ -141,7 +141,6 @@
 #define GEIGER_TONE_FREQUENY_LOWEST counter
 #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY counter
 #define SIMON_LENGTH counter
-#define METRONOME_TICKER_1_POSITION counter
 #define DICEROLL_RANDOM_NUMBER counter
 #define SEQUENCER_STEP_COUNTER counter
 #define COMPOSER_STEP counter
@@ -152,7 +151,6 @@
 #define REACTION_GAME_TIMER_STEP counter2
 #define DRAW_ACTIVE_DRAWING_INDEX counter2
 #define SIMON_INDEX counter2
-#define METRONOME_TICKER_2_POSITION counter2
 #define DEBUGMODE_ACTIVATED counter2
 #define DICEROLL_CARD_FROM_DECK_INDEX counter2
 #define POMODORO_INIT_TIME_SECONDS counter2
@@ -162,7 +160,6 @@
 #define GEIGER_INCREASE_CHANCE counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
-#define METRONOME_TICKER_3_POSITION counter3
 #define SETTINGS_MODE_SELECTOR counter3
 #define DICEROLL_ANIMATION_DELAY counter3
 #define SIMON_RANDOM_PLAYER_SEQUENCE counter3
@@ -183,13 +180,16 @@
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
 #define HACKTIME_MEMORY_SELECT counter5
 #define DRAW_CURSOR_POTENTIO_INDEX counter5
+#define METRONOME_TICKER_1_POSITION counter5
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
 #define DRAW_SHOW_MODE counter6
+#define METRONOME_TICKER_2_POSITION counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
+#define METRONOME_TICKER_3_POSITION counter7
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
 
@@ -480,6 +480,7 @@ public:
     void modeGeiger(bool init);
     void modeSequencer(bool init);
     void modeMetronome(bool init);
+    void modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void modeSimon(bool init);
     void modeReactionGame(bool init);
     void tiltSwitchTest(bool init);
@@ -510,8 +511,8 @@ private:
     MiniMultiTimer multiTimer;
 #endif
 
-    int16_t nextStepRotate(int16_t counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    int16_t checkBoundaries(int16_t counter, uint16_t maxValue, uint16_t minValue);
+    void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue);
     void randomModeDisplay(bool forReal);
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
@@ -609,6 +610,7 @@ private:
     char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
+    //uint32_t* displaySegmentsHandle;
     byte* lightsHandle;
     uint8_t lights;
     
