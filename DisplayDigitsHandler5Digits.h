@@ -132,7 +132,7 @@ public:
     // void startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte LedArrayDigit, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8);
     // void startUp(bool dispHasCommonAnode, byte D0, byte D1, byte D2, byte D3, byte D4, byte S1, byte S2, byte S3, byte S4, byte S5, byte S6, byte S7, byte S8);
 
-    // void setNumberToDisplayAsChars(int16_t number); //deprecated
+    // void setNumberToDisplayAsDecimalAsChars(int16_t number); //deprecated
     // void bufToScreenBits(char *textBuf, uint32_t *screenBits);
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
     
@@ -145,7 +145,8 @@ public:
     char* getDisplayTextBufHandle();
     
 
-    void setNumberToDisplay(int16_t number); //updateDisplayNumber
+    void setNumberToDisplayAsDecimal(int16_t number); //updateDisplayNumber
+    void setNumberToDisplay(int16_t number, boolean asHexadecimal); //updateDisplayNumber
     
     void setBinaryToDisplay(uint32_t value); //  updateDisplayAllBits
     
@@ -161,7 +162,8 @@ public:
 
     void refresh();
 
-    void numberToBuf(char *textBuf, int16_t number);
+    void numberToBufAsDecimal(char *textBuf, int16_t number);
+    void numberToBuf(char *textBuf, int16_t number, bool asHexadecimal);
     void blanksToBuf(char* textBuf);
 
     void convert_text4Bytes_to_32bits(char* text, uint32_t* binary);

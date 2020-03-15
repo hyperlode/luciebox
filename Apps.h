@@ -41,7 +41,7 @@
 #define APP_SELECTOR_DICEROLL 6
 #define APP_SELECTOR_SLOTS 7
 #define APP_SELECTOR_GEIGER 8
-#define APP_SELECTOR_HACKER_TIME 9
+#define APP_SELECTOR_HACK_TIME 9
 #define APP_SELECTOR_SOUND_SONG 10
 #define APP_SELECTOR_MOVIE_MODE 11
 
@@ -186,6 +186,7 @@
 #define POMODORO_AUTO_RESTART_ENABLED counter6
 #define DRAW_SHOW_MODE counter6
 #define METRONOME_TICKER_2_POSITION counter6
+#define HACKTIME_SOUND counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
@@ -197,7 +198,7 @@
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
-//#define DRAW_POTENIO_SENSITIVITY general_boolean
+#define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
@@ -487,7 +488,7 @@ public:
     void modeButtonDebug(bool init);
     void miniMultiTimer(bool init);
     void modeDiceRoll(bool init);
-    void modeHackerTime(bool init);
+    void modeHackTime(bool init);
 
     void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
