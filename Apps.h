@@ -518,7 +518,7 @@ private:
     MiniMultiTimer multiTimer;
 #endif
 
-    void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue);
     void randomModeDisplay(bool forReal);
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
@@ -541,7 +541,6 @@ private:
 
     uint16_t counter8;
 
-    uint8_t* hacktimeRamReader;
     
     enum
     {

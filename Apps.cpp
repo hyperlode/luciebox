@@ -2281,6 +2281,7 @@ void Apps::modeHackTime(bool init){
 		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
 		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
 		HACKTIME_MOVE_TIMER.start();
+		//hacktimeRamReader = 0;
 	}
 
 	const char drive_letter[3] = {'F','R','E'};
@@ -2305,24 +2306,24 @@ void Apps::modeHackTime(bool init){
 		//potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
 
 	}else{
-		potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+		address_changed = potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
 		//HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
-		nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,5);
+		nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,4);
 	}
 	
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 		// no limit checks. This is hacktime!
 		HACKTIME_ADDRESS --;
-	    hacktimeRamReader --;
+	    //hacktimeRamReader --;
 		address_changed = true;
 	}
 	
 	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
 		HACKTIME_ADDRESS ++;
-		hacktimeRamReader ++;
+		//hacktimeRamReader ++;
 	 	address_changed = true;
 		 
 	}
@@ -2332,63 +2333,91 @@ void Apps::modeHackTime(bool init){
 		switch (HACKTIME_MEMORY_SELECT){
 			case HACKTIME_MEMORY_FLASH:
 			
-				array_8_bytes[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
+				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
 			
 			break;
 
 			case HACKTIME_MEMORY_RAM:
 
-				array_8_bytes[i] = *(hacktimeRamReader + i);
+				//textHandle[i] = *(hacktimeRamReader + i);
+				//hacktimeRamReader = (uint8_t*) HACKTIME_ADDRESS;
+				textHandle[i] = *(((uint8_t*) HACKTIME_ADDRESS) + i);
 			
 			break;
 			case HACKTIME_MEMORY_EEPROM:
 
-				array_8_bytes[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
+				textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
 			break;
+			// textBuf[];
 		}
 		
 	}
 
 	if (address_changed && binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ //
-		// buzzer->programBuzzerRoll(textHandle[3]);
-		buzzer->programBuzzerRoll(textBuf[3]);
+		buzzer->programBuzzerRoll(textHandle[3]);
 	}
 	
-	switch(HACKTIME_DISPLAY_MODE){
-		case HACKTIME_DISPLAY_ADDRESS:{
-			if (millis() % 1000 > 200){
+	// compressed display mode (to save memory)
+	if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS){
+		// do nothing
+	}else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES){
+		displayAllSegments = 0;
+		for(uint8_t i=0;i<4;i++){
+			displayAllSegments |= (uint32_t)(textHandle[i]) << (8*i);
+			textHandle[i]=0;
+		}
+		ledDisp->setBinaryToDisplay(displayAllSegments);
+	}else if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS){
+		if (millis() % 1000 > 200){
 
-				ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
-			}else{
-				// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
-				ledDisp->setBlankDisplay();
-				textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
-			}
+			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
+		}else{
+			// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
+			ledDisp->setBlankDisplay();
+			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
 		}
-		break;
-		case HACKTIME_DISPLAY_CHARS:{
-			for(uint8_t i=0;i<4;i++){
-				textHandle[i] = array_8_bytes[i];
-			}
-		}
-		break;
-		case HACKTIME_DISPLAY_BYTES:{
-			displayAllSegments = 0;
-			for(uint8_t i=0;i<4;i++){
-				displayAllSegments |= (array_8_bytes[i]) << (8*i);
-			}
-			ledDisp->setBinaryToDisplay(displayAllSegments);
-		}
-		break;
-		case HACKTIME_DISPLAY_DECIMAL:{
-			ledDisp->setNumberToDisplayAsDecimal(array_8_bytes[0]);
-		}
-		break;
-		case HACKTIME_DISPLAY_HEX:{
-			ledDisp->setNumberToDisplay(array_8_bytes[0],true);
-		}
-		break;
+	}else{
+		ledDisp->setBlankDisplay();
+
+		//ledDisp->setNumberToDisplay((int16_t)textHandle[3],HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+		ledDisp->setNumberToDisplayAsDecimal((uint8_t)textHandle[0]);
+		//ledDisp->setNumberToDisplay(123,HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
 	}
+	// switch(HACKTIME_DISPLAY_MODE){
+	// 	case HACKTIME_DISPLAY_ADDRESS:{
+	// 		if (millis() % 1000 > 200){
+
+	// 			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
+	// 		}else{
+	// 			// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
+	// 			ledDisp->setBlankDisplay();
+	// 			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
+	// 		}
+	// 	}
+	// 	break;
+	// 	case HACKTIME_DISPLAY_CHARS:{
+	// 		for(uint8_t i=0;i<4;i++){
+	// 			textHandle[i] = array_8_bytes[i];
+	// 		}
+	// 	}
+	// 	break;
+	// 	case HACKTIME_DISPLAY_BYTES:{
+	// 		displayAllSegments = 0;
+	// 		for(uint8_t i=0;i<4;i++){
+	// 			displayAllSegments |= (array_8_bytes[i]) << (8*i);
+	// 		}
+	// 		ledDisp->setBinaryToDisplay(displayAllSegments);
+	// 	}
+	// 	break;
+	// 	case HACKTIME_DISPLAY_DECIMAL:{
+	// 		ledDisp->setNumberToDisplayAsDecimal(array_8_bytes[0]);
+	// 	}
+	// 	break;
+	// 	case HACKTIME_DISPLAY_HEX:{
+	// 		ledDisp->setNumberToDisplay(array_8_bytes[0],true);
+	// 	}
+	// 	break;
+	// }
 }
 
 void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis){
@@ -3652,9 +3681,9 @@ void Apps::modeSimon(bool init)
 #endif
 #endif
 
-void Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
+bool Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
-
+	uint16_t original_value;
 	*counter += -1 + (2 * countUpElseDown);
 	// if (countUpElseDown)
 	// {
@@ -3666,8 +3695,7 @@ void Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minVal
 	// }
 	
 	checkBoundaries(counter, minValue, maxValue);
-	
-	// return counter;
+	return original_value != counter;
 }
 void  Apps::checkBoundaries(int16_t* counter, int16_t minValue, int16_t maxValue){
 	if (*counter > maxValue)

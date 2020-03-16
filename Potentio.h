@@ -24,7 +24,7 @@ public:
 	bool getValueStableChangedEdge();
 	bool getLastStableValueChangedUp();
 
-	void increaseSubtractAtChange(int16_t* container, uint8_t amount);
+	bool increaseSubtractAtChange(int16_t* container, uint8_t amount);
 
 private:
 	byte analogPin;

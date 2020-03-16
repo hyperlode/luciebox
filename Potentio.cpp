@@ -48,11 +48,13 @@ bool Potentio::getLastStableValueChangedUp()
 	return this->potentio_value_last_change_up_else_down;
 }
 
-void Potentio::increaseSubtractAtChange(int16_t* container, uint8_t amount){
+bool Potentio::increaseSubtractAtChange(int16_t* container, uint8_t amount){
+	int16_t original_value = *container;
 
 	if (getValueStableChangedEdge()){
 		*container +=  (1 - (2 * getLastStableValueChangedUp())) * amount;
 	}
+	return *container != original_value;
 }
 
 void Potentio::refresh()
