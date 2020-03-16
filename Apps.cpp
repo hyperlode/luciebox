@@ -2278,7 +2278,7 @@ void Apps::modeHackTime(bool init){
 
 	if (init){
 		HACKTIME_ADDRESS = 0;
-		HACKTIME_SHOWVALUE_ELSE_ADDRESS = true;
+		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
 		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
 		HACKTIME_MOVE_TIMER.start();
 	}
@@ -2309,7 +2309,8 @@ void Apps::modeHackTime(bool init){
 	}
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
+		//HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
+		nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,5);
 	}
 	
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
@@ -2317,7 +2318,6 @@ void Apps::modeHackTime(bool init){
 		HACKTIME_ADDRESS --;
 	    hacktimeRamReader --;
 		address_changed = true;
-
 	}
 	
 	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
@@ -2332,37 +2332,62 @@ void Apps::modeHackTime(bool init){
 		switch (HACKTIME_MEMORY_SELECT){
 			case HACKTIME_MEMORY_FLASH:
 			
-				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
+				array_8_bytes[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
 			
 			break;
 
 			case HACKTIME_MEMORY_RAM:
 
-				textHandle[i] = *(hacktimeRamReader + i);
+				array_8_bytes[i] = *(hacktimeRamReader + i);
 			
 			break;
 			case HACKTIME_MEMORY_EEPROM:
 
-				textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
+				array_8_bytes[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
 			break;
 		}
-		HACKTIME_SOUND = textHandle[i];
+		
 	}
 
 	if (address_changed && binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ //
 		// buzzer->programBuzzerRoll(textHandle[3]);
-		buzzer->programBuzzerRoll(HACKTIME_SOUND);
+		buzzer->programBuzzerRoll(textBuf[3]);
 	}
 	
-	if (!HACKTIME_SHOWVALUE_ELSE_ADDRESS){
-		if (millis() % 1000 > 200){
+	switch(HACKTIME_DISPLAY_MODE){
+		case HACKTIME_DISPLAY_ADDRESS:{
+			if (millis() % 1000 > 200){
 
-			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
-		}else{
-			// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
-			ledDisp->setBlankDisplay();
-			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
+				ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
+			}else{
+				// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
+				ledDisp->setBlankDisplay();
+				textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
+			}
 		}
+		break;
+		case HACKTIME_DISPLAY_CHARS:{
+			for(uint8_t i=0;i<4;i++){
+				textHandle[i] = array_8_bytes[i];
+			}
+		}
+		break;
+		case HACKTIME_DISPLAY_BYTES:{
+			displayAllSegments = 0;
+			for(uint8_t i=0;i<4;i++){
+				displayAllSegments |= (array_8_bytes[i]) << (8*i);
+			}
+			ledDisp->setBinaryToDisplay(displayAllSegments);
+		}
+		break;
+		case HACKTIME_DISPLAY_DECIMAL:{
+			ledDisp->setNumberToDisplayAsDecimal(array_8_bytes[0]);
+		}
+		break;
+		case HACKTIME_DISPLAY_HEX:{
+			ledDisp->setNumberToDisplay(array_8_bytes[0],true);
+		}
+		break;
 	}
 }
 
@@ -2919,7 +2944,7 @@ void Apps::modeSequencer(bool init)
 
 			// bonus effect: TRANSPOSE!
 			
-			potentio->increaseSubtractAtChange((uint16_t)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
+			potentio->increaseSubtractAtChange((int16_t)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
 		}
 
 		// if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeDown())
@@ -2983,7 +3008,7 @@ void Apps::modeSequencer(bool init)
 			// 	step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
 			// }
 			//}
-			potentio->increaseSubtractAtChange((int8_t)&(step), 1);
+			potentio->increaseSubtractAtChange((int16_t)&(step), 1);
 		
 		}
 #endif

@@ -115,6 +115,12 @@
 #define HACKTIME_MEMORY_RAM 1
 #define HACKTIME_MEMORY_EEPROM 2
 
+#define HACKTIME_DISPLAY_ADDRESS 0
+#define HACKTIME_DISPLAY_CHARS 1
+#define HACKTIME_DISPLAY_BYTES 2
+#define HACKTIME_DISPLAY_DECIMAL 3
+#define HACKTIME_DISPLAY_HEX 4
+
 // VARIABLE REUSE
 
 #define TIMER_METRONOME generalTimer
@@ -154,6 +160,7 @@
 #define DEBUGMODE_ACTIVATED counter2
 #define DICEROLL_CARD_FROM_DECK_INDEX counter2
 #define POMODORO_INIT_TIME_SECONDS counter2
+#define HACKTIME_DISPLAY_MODE counter2
 
 //#define DRAW_Y_POS counter3
 #define DRAW_CURSOR_INDEX counter3
@@ -204,7 +211,6 @@
 #define SIMON_END_OF_GAME general_boolean2
 #define POMODORO_SHOW_MENU_EDGE general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
-#define HACKTIME_SHOWVALUE_ELSE_ADDRESS general_boolean2
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
