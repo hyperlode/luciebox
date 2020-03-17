@@ -2281,7 +2281,6 @@ void Apps::modeHackTime(bool init){
 		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
 		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
 		HACKTIME_MOVE_TIMER.start();
-		//hacktimeRamReader = 0;
 	}
 
 	const char drive_letter[3] = {'F','R','E'};
@@ -2290,51 +2289,71 @@ void Apps::modeHackTime(bool init){
 		if (HACKTIME_MEMORY_SELECT > 2){
 			HACKTIME_MEMORY_SELECT = 0;
 		}
-		HACKTIME_MOVE_TIMER.setInitTimeMillis(-100);
-		HACKTIME_MOVE_TIMER.start();
+		// HACKTIME_MOVE_TIMER.setInitTimeMillis(-100);
+		// HACKTIME_MOVE_TIMER.start();
 	}
 
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	// write to mem if possible
+	if (address_changed && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){ //		
+		// change value in address location (left char on display)
+
+		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_HEX;
+		// value to change is the one that is in the primary position (arry8bytes 0)
+
+		// change with potentio --> (0->255)
+
+		// check for write button.
 		
-		if (!HACKTIME_MOVE_TIMER.getTimeIsNegative()){
-			HACKTIME_ADDRESS++;
-			HACKTIME_MOVE_TIMER.start();
-			address_changed = true;
+	}else{
+		// change address values
+
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			
+			if (!HACKTIME_MOVE_TIMER.getTimeIsNegative()){
+				HACKTIME_ADDRESS++;
+				HACKTIME_MOVE_TIMER.start();
+				address_changed = true;
+			}
+
+			listenToPotentioToIncrementTimerInit(&HACKTIME_MOVE_TIMER, 20);
+			//potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+
+		}else{
+			address_changed = potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
 		}
 
-		listenToPotentioToIncrementTimerInit(&HACKTIME_MOVE_TIMER, 20);
-		//potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+			//HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
+			nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,4);
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+			
+			HACKTIME_ADDRESS --;
+			address_changed = true;
+		}
+		
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+			// no limit checks. This is hacktime!
+			HACKTIME_ADDRESS ++;
+			address_changed = true;
+			
+		}
 
-	}else{
-		address_changed = potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+		// ok ok, let do one little check.
+		if(HACKTIME_ADDRESS <= 0){
+			HACKTIME_ADDRESS = 0;
+		}
 	}
 
-	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-		//HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
-		nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,4);
-	}
-	
-	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-		// no limit checks. This is hacktime!
-		HACKTIME_ADDRESS --;
-	    //hacktimeRamReader --;
-		address_changed = true;
-	}
-	
-	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-		HACKTIME_ADDRESS ++;
-		//hacktimeRamReader ++;
-	 	address_changed = true;
-		 
-	}
-	
+
 	for (uint8_t i=0;i<4;i++){
 	
 		switch (HACKTIME_MEMORY_SELECT){
 			case HACKTIME_MEMORY_FLASH:
 			
 				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
-			
+			 	
 			break;
 
 			case HACKTIME_MEMORY_RAM:
@@ -2348,41 +2367,42 @@ void Apps::modeHackTime(bool init){
 
 				textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
 			break;
-			// textBuf[];
+			
 		}
+		array_8_bytes[i]= textHandle[i];
 		
 	}
 
 	if (address_changed && binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ //
-		buzzer->programBuzzerRoll(textHandle[3]);
+		buzzer->programBuzzerRoll(array_8_bytes[0]);
 	}
 	
 	// compressed display mode (to save memory)
 	if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS){
 		// do nothing
-	}else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES){
-		displayAllSegments = 0;
-		for(uint8_t i=0;i<4;i++){
-			displayAllSegments |= (uint32_t)(textHandle[i]) << (8*i);
-			textHandle[i]=0;
-		}
-		ledDisp->setBinaryToDisplay(displayAllSegments);
-	}else if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS){
-		if (millis() % 1000 > 200){
-
-			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
-		}else{
-			// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
-			ledDisp->setBlankDisplay();
-			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
-		}
-	}else{
+	}else {
 		ledDisp->setBlankDisplay();
+		
+		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES){
+			displayAllSegments = 0;
+			for(uint8_t i=0;i<4;i++){
+				displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8*i);
+			}
+			ledDisp->setBinaryToDisplay(displayAllSegments);
 
-		//ledDisp->setNumberToDisplay((int16_t)textHandle[3],HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
-		ledDisp->setNumberToDisplayAsDecimal((uint8_t)textHandle[0]);
-		//ledDisp->setNumberToDisplay(123,HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+		}else if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS){
+			if (millis() % 1000 > 200){
+				ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
+			}else{
+				textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
+			}
+
+		}else{
+			ledDisp->setNumberToDisplay(array_8_bytes[0],HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+		}
 	}
+
+
 	// switch(HACKTIME_DISPLAY_MODE){
 	// 	case HACKTIME_DISPLAY_ADDRESS:{
 	// 		if (millis() % 1000 > 200){
