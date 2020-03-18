@@ -2275,6 +2275,7 @@ void Apps::modeHackTime(bool init){
 	// run through all the addresses to see the raw values!
 	
 	bool address_changed = false;
+	const char drive_letter[3] = {'F','R','E'};
 
 	if (init){
 		HACKTIME_ADDRESS = 0;
@@ -2283,52 +2284,77 @@ void Apps::modeHackTime(bool init){
 		HACKTIME_MOVE_TIMER.start();
 	}
 
-	const char drive_letter[3] = {'F','R','E'};
-	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-		HACKTIME_MEMORY_SELECT ++;
-		if (HACKTIME_MEMORY_SELECT > 2){
-			HACKTIME_MEMORY_SELECT = 0;
-		}
-		// HACKTIME_MOVE_TIMER.setInitTimeMillis(-100);
-		// HACKTIME_MOVE_TIMER.start();
-	}
+	
 
 	// write to mem if possible
-	if (address_changed && binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){ //		
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() && HACKTIME_MEMORY_SELECT != HACKTIME_MEMORY_FLASH){ //		
 		// change value in address location (left char on display)
+		// will not work for flash memory
 
 		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_HEX;
 		// value to change is the one that is in the primary position (arry8bytes 0)
 
-		// change with potentio --> (0->255)
+		if (binaryInputs[BUTTON_MOMENTARY_1].getValue()){
+			// change value
+			array_8_bytes[0] = potentio->getValueMapped(0,255);
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+			// store value.
+			switch (HACKTIME_MEMORY_SELECT){
+				// case HACKTIME_MEMORY_FLASH:
 
-		// check for write button.
-		
+				// break;
+				case HACKTIME_MEMORY_RAM:
+					*((uint8_t*) HACKTIME_ADDRESS) = array_8_bytes[0];
+					
+				break;
+				case HACKTIME_MEMORY_EEPROM:
+					eeprom_write_byte((uint8_t*)HACKTIME_ADDRESS , array_8_bytes[0]);
+				break;
+			}
+		}
+			
 	}else{
 		// change address values
+		
+		// which memory are we investigating?
+		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+			HACKTIME_MEMORY_SELECT ++;
+			if (HACKTIME_MEMORY_SELECT > 2){
+				HACKTIME_MEMORY_SELECT = 0;
+			}
+		}
 
+		
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-			
+			// auto scroll mode
 			if (!HACKTIME_MOVE_TIMER.getTimeIsNegative()){
 				HACKTIME_ADDRESS++;
 				HACKTIME_MOVE_TIMER.start();
 				address_changed = true;
 			}
 
+			// set speed.
 			listenToPotentioToIncrementTimerInit(&HACKTIME_MOVE_TIMER, 20);
-			//potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
 
 		}else{
-			address_changed = potentio->increaseSubtractAtChange(&HACKTIME_ADDRESS, 1);
+			// manual scroll 
+			
+			address_changed = potentio->increaseSubtractAtChange(
+					&HACKTIME_ADDRESS, 
+					1 + 99 * binaryInputs[BUTTON_MOMENTARY_2].getValue() + 9  * binaryInputs[BUTTON_MOMENTARY_3].getValue() // speed up memory scroll by pressing buttons.
+					);
 		}
 
+		// display mode change (how to represent the memory value?)
 		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-			//HACKTIME_SHOWVALUE_ELSE_ADDRESS = !HACKTIME_SHOWVALUE_ELSE_ADDRESS;
 			nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,4);
 		}
-		
+
+		// button address change.
+
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-			
+				
 			HACKTIME_ADDRESS --;
 			address_changed = true;
 		}
@@ -2337,42 +2363,39 @@ void Apps::modeHackTime(bool init){
 			// no limit checks. This is hacktime!
 			HACKTIME_ADDRESS ++;
 			address_changed = true;
-			
 		}
 
-		// ok ok, let do one little check.
+		// ok ok, let's do one little check.
 		if(HACKTIME_ADDRESS <= 0){
 			HACKTIME_ADDRESS = 0;
 		}
-	}
-
-
-	for (uint8_t i=0;i<4;i++){
-	
-		switch (HACKTIME_MEMORY_SELECT){
-			case HACKTIME_MEMORY_FLASH:
-			
-				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
-			 	
-			break;
-
-			case HACKTIME_MEMORY_RAM:
-
-				//textHandle[i] = *(hacktimeRamReader + i);
-				//hacktimeRamReader = (uint8_t*) HACKTIME_ADDRESS;
-				textHandle[i] = *(((uint8_t*) HACKTIME_ADDRESS) + i);
-			
-			break;
-			case HACKTIME_MEMORY_EEPROM:
-
-				textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
-			break;
-			
-		}
-		array_8_bytes[i]= textHandle[i];
+				
+		// get value from memory address and memory type
+		for (uint8_t i=0;i<4;i++){
 		
+			switch (HACKTIME_MEMORY_SELECT){
+				case HACKTIME_MEMORY_FLASH:
+				
+					textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
+					
+				break;
+
+				case HACKTIME_MEMORY_RAM:
+
+					textHandle[i] = *(((uint8_t*) HACKTIME_ADDRESS) + i);
+				
+				break;
+				case HACKTIME_MEMORY_EEPROM:
+
+					textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
+				break;
+				
+			}
+			array_8_bytes[i]= textHandle[i];
+		}
 	}
 
+	// convert memory to sounds... Be prepared for a post-modernistic masterpiece. 
 	if (address_changed && binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ //
 		buzzer->programBuzzerRoll(array_8_bytes[0]);
 	}
