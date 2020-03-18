@@ -1559,15 +1559,17 @@ void Apps::modeCountingLettersAndChars(bool init)
 		}
 	}
 
-	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-	{
-		counter++;
-	}
+	// if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+	// {
+	// 	counter++;
+	// }
 
-	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-	{
-		counter--;
-	}
+	// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+	// {
+	// 	counter--;
+	// }
+	listenToMomentary2and3ModifyValue(&counter, 1);
+
 
 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp() )
 	{
@@ -1804,6 +1806,7 @@ void Apps::modeComposeSong(bool init)
 		{
 			step = 1;
 		}
+		// listenToMomentary2and3ModifyValue(&step, 1);
 #else
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		{
@@ -2463,6 +2466,19 @@ void Apps::modeHackTime(bool init){
 	// }
 }
 
+void Apps::listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount){
+	// scroll through drawings.
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+	{
+		*value-=amount;
+	}
+
+	if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+	{
+		*value+=amount;
+	}
+}
+
 void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis){
 	int16_t delta = 0;
 	potentio->increaseSubtractAtChange(&delta, increment_millis);
@@ -2506,28 +2522,30 @@ void Apps::draw(bool init)
 			//this->displayChangeGlobal(&displayAllSegments, false);
 
 			// scroll through drawings.
-			if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-			{
-				DRAW_ACTIVE_DRAWING_INDEX--;
-			}
+			// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+			// {
+			// 	DRAW_ACTIVE_DRAWING_INDEX--;
+			// }
 
-			if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-			{
-				DRAW_ACTIVE_DRAWING_INDEX++;
-			}
+			// if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+			// {
+			// 	DRAW_ACTIVE_DRAWING_INDEX++;
+			// }
+			listenToMomentary2and3ModifyValue(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 		}
 	}
 
 	// set limits on active drawing index (although without limits, it's fun to see the whole eeprom visualized. Wait wait! We put that in HACK mode!!!)
-	if (DRAW_ACTIVE_DRAWING_INDEX < 0)
-	{
-		DRAW_ACTIVE_DRAWING_INDEX = 0;
-	}
+	// if (DRAW_ACTIVE_DRAWING_INDEX < 0)
+	// {
+	// 	DRAW_ACTIVE_DRAWING_INDEX = 0;
+	// }
 
-	if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS)
-	{
-		DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS - 1;
-	}
+	// if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS)
+	// {
+	// 	DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS - 1;
+	// }
+	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, EEPROM_NUMBER_OF_DRAWINGS - 1, 0);
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 	{

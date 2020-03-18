@@ -497,6 +497,7 @@ public:
     void modeHackTime(bool init);
 
     void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis);
+    void listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
     uint16_t _animationGetStartByte(uint8_t number);
