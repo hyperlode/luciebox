@@ -416,11 +416,15 @@ const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2
 const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
 
 #if MOMENTARY_BUTTONS_COUNT == 3
-const uint8_t buttons_momentary_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
+const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
+const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
+                             LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
 #else
-const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, LIGHT_LATCHING_EXTRA, LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
-const uint8_t buttons_momentary_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3};
+const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
+                                    LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
+
+const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
+                                    BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_EXTRA};
 
 #endif
 
@@ -497,9 +501,10 @@ public:
     void modeHackTime(bool init);
 
     void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis);
-    void listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
+    bool listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
+    void displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.

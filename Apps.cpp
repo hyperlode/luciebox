@@ -840,7 +840,7 @@ void Apps::modeDiceRoll(bool init)
 	{
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp())
+			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
 				DICEROLL_RANDOM_TYPE = i + 10 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
 				diceRollState = dicerollRolling;
@@ -885,7 +885,7 @@ void Apps::modeDiceRoll(bool init)
 			for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 			{
 
-				if (binaryInputs[buttons_momentary_indexed[i]].getEdgeDown())
+				if (binaryInputs[buttons_indexed[i]].getEdgeDown())
 				{
 					roll_end = true;
 				}
@@ -1104,12 +1104,7 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		// show letter alphabeth, plus its position.
 		DICEROLL_RANDOM_NUMBER = random(0, 26);
-		if (DICEROLL_RANDOM_NUMBER > 8)
-		{
-			textBuf[0] = (DICEROLL_RANDOM_NUMBER + 1) / 10 + 48;
-		}
-		textBuf[1] = (DICEROLL_RANDOM_NUMBER + 1) % 10 + 48;
-		textBuf[3] = DICEROLL_RANDOM_NUMBER + 65; // show letters alphabet.
+		displayLetterAndPositionInAlphabet(textBuf, DICEROLL_RANDOM_NUMBER);
 		//ledDisp->setTextBufToDisplay(textBuf);
 	}
 	break;
@@ -1246,15 +1241,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	{
 		SETTINGS_MODE_SELECTOR = 0;
 
-		if (analogRead(PIN_BUTTONS_1) == 0 &&
-			analogRead(PIN_BUTTONS_2) == 0 &&
-			analogRead(PIN_POTENTIO) == 0)
-		{
-			DEBUGMODE_ACTIVATED = 666;
-			// SETTINGS_MODE_DISPLAY_VALUES_BLINK.setInitCountDownTimeSecs(1);
-			SETTINGS_MODE_DISPLAY_VALUES_BLINK.setInitCountDownTimeMillis(-1000);
-			SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
-		}
 	}
 
 	// back and forth motion required of the potentio to count up modes
@@ -1280,85 +1266,29 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		// no buzzer
 		// display lights up a segment for each button.
 
-		bool updateScreen = false;
-
 		//delete all content from screen.
 		ledDisp->setBlankDisplay();
 
-		if (binaryInputs[BUTTON_MOMENTARY_0].getValue())
-		{
-			lights |= 1 << LIGHT_MOMENTARY_0;
-			updateScreen = true;
-			SETTINGS_MODE_SELECTOR = 0;
-		}
-		if (binaryInputs[BUTTON_MOMENTARY_2].getValue())
-		{
-			lights |= 1 << LIGHT_MOMENTARY_2;
-			updateScreen = true;
-			SETTINGS_MODE_SELECTOR = 0;
-		}
-		if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
-		{
-			lights |= 1 << LIGHT_MOMENTARY_1;
-			updateScreen = true;
-			SETTINGS_MODE_SELECTOR = 0;
-		}
+		for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+			
+			
+			if (binaryInputs[buttons_indexed[i+4]].getValue()){
+				lights |= 1 << lights_indexed[i+4];
+				if (binaryInputs[buttons_indexed[i]].getValue()){
+					lights |= 1 << lights_indexed[i];
+					textHandle[i] = '8';
 
-#if MOMENTARY_BUTTONS_COUNT == 4
-		if (binaryInputs[BUTTON_MOMENTARY_3].getValue())
-		{
-			lights |= 1 << LIGHT_MOMENTARY_3;
-			updateScreen = true;
-			SETTINGS_MODE_SELECTOR = 0;
-		}
-#endif
+				}else{
+					textHandle[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII;
 
-		if (updateScreen)
-		{
-			// FULL SCREEN
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_8888);
-		}
-		else
-		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_ALL_HYPHENS);
-		}
+				}
 
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
-		{
-			lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
+			}else{
+					textHandle[i] = ' ';
+			}
 		}
-		else
-		{
-			textBuf[0] = ' ';
-		}
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-		{
-			lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
-		}
-		else
-		{
-			textBuf[1] = ' ';
-		}
-		if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue())
-		{
-			lights |= 1 << LIGHT_LATCHING_BIG;
-			updateScreen = true;
-		}
-		else
-		{
-			textBuf[2] = ' ';
-		}
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-		{
-			lights |= 1 << LIGHT_LATCHING_EXTRA;
-			updateScreen = true;
-		}
-		else
-		{
-			textBuf[3] = ' ';
-		}
+		
 
-		ledDisp->setTextBufToDisplay(textBuf);
 
 		allLights->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
 	}
@@ -1385,7 +1315,8 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 
-		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
+		// if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
+		if(millis() % 1000 < 500)
 		{
 			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_BEEP);
 		}
@@ -1444,7 +1375,8 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	}
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
-		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(300))
+		//if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(300))
+		if (millis() % 1000 < 300)
 		{
 			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_EEPROM);
 		}
@@ -1498,12 +1430,13 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		//   ledDisp->setTextBufToDisplay(textBuf);
 		// }
 
-		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getTimeIsNegative())
-		{
-			SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
-		}
+		// if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getTimeIsNegative())
+		// {
+		// 	SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
+		// }
 
-		if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
+		//if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
+		if (millis() % 1000 < 500)
 		{
 			ledDisp->setTextBufToDisplay(textBuf);
 		}
@@ -1512,6 +1445,14 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		//generalTimer.setInitTimeMillis((long) (-500 - (counter%2)*500));
 	}
 	ledDisp->setLedArray(lights);
+}
+void Apps::displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet){
+	if (letterValueAlphabet > 8)
+	{
+		textBuf[0] = (letterValueAlphabet + 1) / 10 + 48;
+	}
+	textBuf[1] = (letterValueAlphabet + 1) % 10 + 48;
+	textBuf[3] = letterValueAlphabet + 65; // show letters alphabet.
 }
 
 void Apps::modeCountingLettersAndChars(bool init)
@@ -1536,7 +1477,9 @@ void Apps::modeCountingLettersAndChars(bool init)
 	}
 	else
 	{
-		ledDisp->setCharToDisplay(counter + 65, 3); // 0 is A
+		//ledDisp->setCharToDisplay(counter + 65, 3); // 0 is A
+		displayLetterAndPositionInAlphabet(textHandle, counter);
+
 		
 	}
 
@@ -1642,7 +1585,7 @@ void Apps::modeSoundSong(bool init)
 
 	for (uint8_t index=0; index< MOMENTARY_BUTTONS_COUNT; index++){
 
-		if (binaryInputs[buttons_momentary_indexed[index]].getEdgeUp()){
+		if (binaryInputs[buttons_indexed[index]].getEdgeUp()){
 			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
 				uint8_t song [32];
 
@@ -1798,15 +1741,16 @@ void Apps::modeComposeSong(bool init)
 			}
 		}
 #ifdef BUTTON_MOMENTARY_3
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-		{
-			step = -1;
-		}
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-		{
-			step = 1;
-		}
-		// listenToMomentary2and3ModifyValue(&step, 1);
+		// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+		// {
+		// 	step = -1;
+		// }
+		// if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+		// {
+		// 	step = 1;
+		// }
+		int16_t tmp = (int16_t)step;
+		listenToMomentary2and3ModifyValue(&tmp, 1);
 #else
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		{
@@ -2345,7 +2289,7 @@ void Apps::modeHackTime(bool init){
 			
 			address_changed = potentio->increaseSubtractAtChange(
 					&HACKTIME_ADDRESS, 
-					1 + 99 * binaryInputs[BUTTON_MOMENTARY_2].getValue() + 9  * binaryInputs[BUTTON_MOMENTARY_3].getValue() // speed up memory scroll by pressing buttons.
+					1 + 99 * binaryInputs[BUTTON_MOMENTARY_2].getValue() + 999  * binaryInputs[BUTTON_MOMENTARY_3].getValue() // speed up memory scroll by pressing buttons.
 					);
 		}
 
@@ -2356,17 +2300,18 @@ void Apps::modeHackTime(bool init){
 
 		// button address change.
 
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+		// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
 				
-			HACKTIME_ADDRESS --;
-			address_changed = true;
-		}
+		// 	HACKTIME_ADDRESS --;
+		// 	address_changed = true;
+		// }
 		
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-			// no limit checks. This is hacktime!
-			HACKTIME_ADDRESS ++;
-			address_changed = true;
-		}
+		// if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+		// 	// no limit checks. This is hacktime!
+		// 	HACKTIME_ADDRESS ++;
+		// 	address_changed = true;
+		// }
+		address_changed = listenToMomentary2and3ModifyValue(&HACKTIME_ADDRESS,1);
 
 		// ok ok, let's do one little check.
 		if(HACKTIME_ADDRESS <= 0){
@@ -2466,8 +2411,10 @@ void Apps::modeHackTime(bool init){
 	// }
 }
 
-void Apps::listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount){
-	// scroll through drawings.
+bool Apps::listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount){
+	
+	int16_t value_memory = *value;
+	
 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 	{
 		*value-=amount;
@@ -2477,6 +2424,7 @@ void Apps::listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount){
 	{
 		*value+=amount;
 	}
+	return value_memory != *value;
 }
 
 void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis){
@@ -2645,11 +2593,11 @@ void Apps::miniMultiTimer(bool init)
 
 	for (uint8_t i = 0; i < MAX_TIMERS_COUNT; i++)
 	{
-		if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp())
+		if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 		{
 			this->multiTimer.playerButtonPressEdgeUp(i);
 		}
-		if (binaryInputs[buttons_momentary_indexed[i]].getEdgeDown())
+		if (binaryInputs[buttons_indexed[i]].getEdgeDown())
 		{
 			this->multiTimer.playerButtonPressEdgeDown(i);
 		}
@@ -2691,7 +2639,7 @@ void Apps::miniMultiTimer(bool init)
 		bool individualTimerSet = false;
 		for (uint8_t i = 0; i < MAX_TIMERS_COUNT; i++)
 		{
-			if (binaryInputs[buttons_momentary_indexed[i]].getValue())
+			if (binaryInputs[buttons_indexed[i]].getValue())
 			{
 				this->multiTimer.setTimerInitCountTimeSecs(i, seconds);
 				individualTimerSet = true;
@@ -2993,11 +2941,11 @@ void Apps::modeSequencer(bool init)
 		SEQUENCER_EEPROM_MODE_BLINK.setInitTimeMillis(-1000);
 		SEQUENCER_EEPROM_MODE_BLINK.start();
 
-		//resets song.
-		for (uint8_t i = 0; i < 32; i++)
-		{
-			this->SEQUENCER_SONG[i] = C7_8;
-		}
+		// //resets song.
+		// for (uint8_t i = 0; i < 32; i++)
+		// {
+		// 	this->SEQUENCER_SONG[i] = C7_8;
+		// }
 	}
 
 	// erase screen at start.
@@ -3447,12 +3395,12 @@ void Apps::modeSimon(bool init)
 	//   // check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
 	//   uint8_t buttonsChanged = 0;
 	//   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
-	// 	buttonsChanged |= (binaryInputs[buttons_momentary_indexed[k]].getEdgeUp() << k);
+	// 	buttonsChanged |= (binaryInputs[buttons_indexed[k]].getEdgeUp() << k);
 	//   }
 	uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
 	for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
 	{
-		if (binaryInputs[buttons_momentary_indexed[k]].getEdgeUp())
+		if (binaryInputs[buttons_indexed[k]].getEdgeUp())
 		{
 			pressed_momentary_button = k;
 		}
@@ -3645,7 +3593,7 @@ void Apps::modeSimon(bool init)
 		for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
 		{
 
-			lights |= binaryInputs[buttons_momentary_indexed[k]].getValue() << lights_indexed[k];
+			lights |= binaryInputs[buttons_indexed[k]].getValue() << lights_indexed[k];
 		}
 
 		textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
@@ -3980,7 +3928,7 @@ void Apps::modeReactionGame(bool init)
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 
-			if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp())
+			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
 				//if DP of this button was on, switch it off. else, die!
 				//check if DP of digit "i" is set
@@ -4125,7 +4073,7 @@ void Apps::modeReactionGame(bool init)
 		{
 
 			// button press
-			if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp())
+			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
 
 				if (i == REACTION_GAME_TARGET)

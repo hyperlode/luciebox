@@ -1636,7 +1636,7 @@
 [31m-  [m
 [32m+[m[41m   [m
    for (uint8_t i = 0; i<MAX_TIMERS_COUNT; i++){[m
-     if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){[m
+     if (binaryInputs[buttons_indexed[i]].getEdgeUp()){[m
        this->multiTimer.playerButtonPressEdgeUp(i);[m
 [36m@@ -1261,36 +1264,36 @@[m [mvoid Apps::miniMultiTimer(bool init){[m
        this->multiTimer.playerButtonPressEdgeDown(i);[m
@@ -2750,7 +2750,7 @@
        for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){[m
 [31m-[m
 [32m+[m[41m [m
-         if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){[m
+         if (binaryInputs[buttons_indexed[i]].getEdgeUp()){[m
            //if DP of this button was on, switch it off. else, die![m
            //check if DP of digit "i" is set[m
 [31m-          [m
@@ -2913,7 +2913,7 @@
 [31m-[m
 [32m+[m[41m [m
          // button press[m
-         if (binaryInputs[buttons_momentary_indexed[i]].getEdgeUp()){[m
+         if (binaryInputs[buttons_indexed[i]].getEdgeUp()){[m
 [31m-          [m
 [32m+[m[41m           [m
            if (i==REACTION_GAME_TARGET){[m

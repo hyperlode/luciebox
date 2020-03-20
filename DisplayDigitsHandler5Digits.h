@@ -87,18 +87,17 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 #define TEXT_YES 6
 #define TEXT_PAUS 9
 #define TEXT_RANDOM_BEEP 14
-#define TEXT_8888 18
-#define TEXT_ALL_HYPHENS 22
-#define TEXT_BEEP 26
-#define TEXT_EEPROM 27
-#define TEXT_RESET 30
-#define TEXT_DONE 34
-#define TEXT_DOIT 38
-#define TEXT_TILT 41
-#define TEXT_RANDOM_SEGMENTS 45
-#define TEXT_SAVE 49
-#define TEXT_END 52
-#define TEXT_LOAD 56
+
+#define TEXT_BEEP 18
+#define TEXT_EEPROM 19
+#define TEXT_RESET 22
+#define TEXT_DONE 26
+#define TEXT_DOIT 30
+#define TEXT_TILT 33
+#define TEXT_RANDOM_SEGMENTS 37
+#define TEXT_SAVE 41
+#define TEXT_END 44
+#define TEXT_LOAD 48
 
 
 const byte standard_text[] PROGMEM = {
@@ -107,8 +106,6 @@ const byte standard_text[] PROGMEM = {
     'Y','E','S',
     'P','A','U','S',
     'R','N','D','B',
-    '8','8','8','8',
-    ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,
     'B','E','E','P',
     'R', 'S','E','T',
     'D', 'O','N','E',
@@ -118,9 +115,6 @@ const byte standard_text[] PROGMEM = {
     'S','A','V','E',
     'N','D', SPACE_FAKE_ASCII, 
     'L','O','A','D'
-
-    
-
     };
 
 class DisplayManagement
