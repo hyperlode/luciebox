@@ -2466,10 +2466,10 @@ void Apps::draw(bool init)
 		if (!binaryInputs[BUTTON_MOMENTARY_0].getValue())
 		{ // shift function for saving drawings to eeprom.
 
-			// check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
-			//this->displayChangeGlobal(&displayAllSegments, false);
+			//check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
+			this->displayChangeGlobal(&displayAllSegments, false);
 
-			// scroll through drawings.
+			//scroll through drawings.
 			// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 			// {
 			// 	DRAW_ACTIVE_DRAWING_INDEX--;
@@ -2493,7 +2493,7 @@ void Apps::draw(bool init)
 	// {
 	// 	DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS - 1;
 	// }
-	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, EEPROM_NUMBER_OF_DRAWINGS - 1, 0);
+	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1);
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 	{
@@ -3170,11 +3170,18 @@ void Apps::modeMetronome(bool init)
 	}
 
 	displayAllSegments = 0;
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(),C6_4, update|| binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp());
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(),C5_4, update || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp());
-// #ifdef BUTTON_MOMENTARY_3
+
+#if MOMENTARY_BUTTONS_COUNT == 4
+	bool forceNextStep = update|| binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp();
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(),C6_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(),C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true,C7_8, update );
-// #endif
+#else
+	bool forceNextStep = update|| binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp();
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue(),C5_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_2, true,C7_8, update );
+
+#endif
 
 	ledDisp->setBinaryToDisplay(displayAllSegments);
 }
@@ -3185,16 +3192,15 @@ void Apps::modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_
 
 	// check for next step
 	if (binaryInputs[momentary_id].getEdgeUp() || force_step){
-		uint8_t tmp = *ticker_counter;
-		int16_t ttmp = (int16_t)tmp;
+		
+		int16_t ttmp = (int16_t)*ticker_counter;
 		this->nextStepRotate(
 				&ttmp,
 				direction,
 				0,
 				11);
 		
-		tmp = (uint8_t)ttmp;
-		*ticker_counter = tmp;
+		*ticker_counter = (uint8_t)ttmp;
 		
 		if (*ticker_counter == 0)
 		{
@@ -3694,14 +3700,6 @@ bool Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minVal
 {
 	uint16_t original_value;
 	*counter += -1 + (2 * countUpElseDown);
-	// if (countUpElseDown)
-	// {
-	// 	*counter++;
-	// }
-	// else
-	// {
-	// 	*counter--;
-	// }
 	
 	checkBoundaries(counter, minValue, maxValue);
 	return original_value != counter;
