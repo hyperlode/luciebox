@@ -1607,7 +1607,7 @@ void Apps::modeComposeSong(bool init)
 {
 
 	bool defaultDisplay = true;
-	int8_t step = 0;
+	int16_t step = 0;
 
 	if (init)
 	{
@@ -1740,7 +1740,7 @@ void Apps::modeComposeSong(bool init)
 				}
 			}
 		}
-#ifdef BUTTON_MOMENTARY_3
+#if MOMENTARY_BUTTONS_COUNT == 4
 		// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		// {
 		// 	step = -1;
@@ -1749,8 +1749,9 @@ void Apps::modeComposeSong(bool init)
 		// {
 		// 	step = 1;
 		// }
-		int16_t tmp = (int16_t)step;
-		listenToMomentary2and3ModifyValue(&tmp, 1);
+		//int16_t tmp = (int16_t)step;
+		listenToMomentary2and3ModifyValue(&step, 1);
+		//step = tmp;
 #else
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		{
