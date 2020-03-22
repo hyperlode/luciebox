@@ -800,76 +800,48 @@ void Apps::modeRandomWorld(bool init)
 {
 	if (init)
 	{
-		// RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-100);
-		// RANDOMWORLD_ROLL_SPEED.start();
-		
-		RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-3000);
-		RANDOMWORLD_AUTODRAW_DELAY.start();
 		RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
 		randomWorldState = randomWorldIdle;
 		RANDOMWORLD_RANDOM_TYPE = 0;
 		randomModeDisplay(false);
 		decimalPoints = 0;
-		// RANDOMWORLD_ANIMATION_DELAY = 14;
+
 		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 100;
 	}
 
-
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
-	
-		listenToPotentioToIncrementTimerInit(&RANDOMWORLD_AUTODRAW_DELAY, 1000); // up down one second at a time.
-
-	
-	}else{
-		// if (potentio->getValueStableChangedEdge()){
-		// 	// display random
-		// 	randomModeDisplay(false);
-		// 	buzzer->programBuzzerRoll(C7_8);
-		// }
-	}
-
-
-
-	// if (potentio->getValueStableChangedEdge())
-	// {
-	// 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-	// 	{
-	// 		// set auto draw time seconds
-	// 		int16_t delay_seconds = potentio->getValueMapped(1, 300);
-	// 		ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
-	// 		RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delay_seconds);
-	// 	}
-	// 	else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-	// 	{
-	// 		//set animation speed time
-	// 		// RANDOMWORLD_ANIMATION_DELAY =  potentio->getValueMapped(0, 50);
-	// 		// ledDisp->setNumberToDisplayAsDecimal(RANDOMWORLD_ANIMATION_DELAY);
-	// 	}
-	// 	else
-	// 	{
-	// 		// display random
-	// 		randomModeDisplay(false);
-	// 		buzzer->programBuzzerRoll(C7_8);
-	// 	}
-	// }
 
 	switch (randomWorldState)
 	{
 
 	case randomWorldIdle:
 	{
+
+		if ( binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+			// set autoroll time.
+
+			uint16_t delay_seconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91)); // 0 seconds to an hour
+			// RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delay_seconds);
+			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
+			// timeSecondsToClockString(textBuf, delay_seconds);
+			if (millis() % 1000 > 750)
+			{
+			 	ledDisp->setStandardTextToTextBuf(textHandle, TEXT_AUTO);
+			}else{
+		
+				ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
+			}
+		}
+
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
 				RANDOMWORLD_RANDOM_TYPE = i + 4 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
 				randomWorldState = randomWorldRolling;
-
+				
 				// set up animation
 				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30 - (binaryInputs[BUTTON_MOMENTARY_2].getValue()*1970)); // special case for upper limit setting for random number.
 				RANDOMWORLD_ROLL_SPEED.start();
-
-
 			}
 		}
 	}
@@ -900,6 +872,7 @@ void Apps::modeRandomWorld(bool init)
 
 		if (roll_end)
 		{
+			
 			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 			{
 				randomWorldState = randomWorldRollingEnd;
@@ -928,6 +901,7 @@ void Apps::modeRandomWorld(bool init)
 		{
 			
 			if (binaryInputs[BUTTON_MOMENTARY_2].getValue() && !RANDOMWORLD_ROLL_SPEED.getTimeIsNegative()){
+				// hack to set upper limit for random number
 
 				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = potentio->getValueMapped(0, 100);
 				
@@ -950,6 +924,7 @@ void Apps::modeRandomWorld(bool init)
 
 	case randomWorldRollingEnd:
 	{
+		
 
 		if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 		{
@@ -979,6 +954,7 @@ void Apps::modeRandomWorld(bool init)
 			// auto roll delay.
 			RANDOMWORLD_AUTODRAW_DELAY.start();
 			randomWorldState = randomWorldAutoRollDelay;
+
 		}
 		else
 		{
@@ -1011,7 +987,7 @@ void Apps::randomModeDisplay(bool forReal)
 {
 	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
 	
-	const int16_t randomUpperLimits[8] = {6,52,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW,2,6,52,26,2}; 
+	const int16_t randomUpperLimits[8] = {6,26,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW,2,6,52,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW,2}; 
 
 	RANDOMWORLD_RANDOM_NUMBER = random(0,randomUpperLimits[RANDOMWORLD_RANDOM_TYPE]);
 	
@@ -1106,7 +1082,7 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		// random number
 
-		ledDisp->numberToBufAsDecimal(textBuf, RANDOMWORLD_RANDOM_NUMBER);
+		ledDisp->numberToBufAsDecimal(textBuf, RANDOMWORLD_RANDOM_NUMBER+1);
 	}
 	break;
 
@@ -1597,7 +1573,7 @@ void Apps::modeSoundSong(bool init)
 
 			}else{
 				buzzer->loadBuzzerTrack(songs, index + shift);	
-				//Serial.println(shift);
+				
 			}
 		}
 	}
@@ -2113,8 +2089,7 @@ void Apps::drawGame(bool init)
 	case drawGameWaitForStart:
 	{
 		ledDisp->setBlankDisplay();
-		// Serial.println("iinit");
-		
+				
 		drawGameState = drawGameShowPicture;
 	
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
