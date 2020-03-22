@@ -97,7 +97,8 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 #define TEXT_SAVE 41
 #define TEXT_END 44
 #define TEXT_LOAD 48
-
+#define TEXT_AUTO 52
+#define TEXT_SET 56
 
 const byte standard_text[] PROGMEM = {
     SPACE_FAKE_ASCII, 'N','O', 
@@ -113,7 +114,9 @@ const byte standard_text[] PROGMEM = {
     '?','?','?','?',
     'S','A','V','E',
     'N','D', SPACE_FAKE_ASCII, 
-    'L','O','A','D'
+    'L','O','A','D',
+    'A','U','T','O',
+    'S','E','T',SPACE_FAKE_ASCII
     };
 
 class DisplayManagement

@@ -97,13 +97,14 @@
 
 
 #define RANDOMWORLD_ROLLONEDICE 0
-#define RANDOMWORLD_ROLLFOURDICE 10
+#define RANDOMWORLD_ROLLFOURDICE 4
 #define RANDOMWORLD_TAKERANDOMCARD 1
-#define RANDOMWORLD_TAKERANDOMCARDFROMDECK 11
+#define RANDOMWORLD_TAKERANDOMCARDFROMDECK 5
 #define RANDOMWORLD_RANDOMNUMBER 2
-#define RANDOMWORLD_RANDOMLETTER 12
+// #define RANDOMWORLD_RANDOMLETTER 6
+#define RANDOMWORLD_TOMBOLA 6
 #define RANDOMWORLD_HEADSORTAILS 3
-#define RANDOMWORLD_YESORNO 13
+#define RANDOMWORLD_YESORNO 7
 
 #define SIMON_NO_ACTIVE_LIGHT 666
 #define SIMON_DEAD_PLAYER 666
@@ -542,6 +543,8 @@ public:
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
     // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
+    uint8_t tombola(uint8_t* indexVariable, uint8_t *sequenceList, uint8_t length);
+    void randomSequence(uint8_t *sequenceList, uint8_t length);
     void shuffle(uint8_t *list, uint8_t length);
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);

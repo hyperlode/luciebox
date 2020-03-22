@@ -253,14 +253,15 @@ bool Apps::init_app(bool init, uint8_t selector)
 			this->displayAllSegments |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
 		}
 
-		// initialize list
-		for (uint8_t i = 0; i < 32; i++)
-		{
-			this->FADE_IN_RANDOM_LIST[i] = i;
-		}
+		// // initialize list
+		// for (uint8_t i = 0; i < 32; i++)
+		// {
+		// 	this->FADE_IN_RANDOM_LIST[i] = i;
+		// }
 
-		// // shuffle in place
-		this->shuffle(this->FADE_IN_RANDOM_LIST, 32);
+		// // // shuffle in place
+		// this->shuffle(this->FADE_IN_RANDOM_LIST, 32);
+		randomSequence(FADE_IN_RANDOM_LIST,32);
 
 		counter = 27;
 		this->TIMER_INIT_APP.setInitTimeMillis(-20);
@@ -810,6 +811,7 @@ void Apps::modeRandomWorld(bool init)
 		randomModeDisplay(false);
 		decimalPoints = 0;
 		// RANDOMWORLD_ANIMATION_DELAY = 14;
+		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 100;
 	}
 
 
@@ -817,12 +819,7 @@ void Apps::modeRandomWorld(bool init)
 	
 		listenToPotentioToIncrementTimerInit(&RANDOMWORLD_AUTODRAW_DELAY, 1000); // up down one second at a time.
 
-	}else if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-
-		// listenToPotentioToIncrementTimerInit(&RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 1
-		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = potentio->getValueMapped(0, 100);
-		ledDisp->setNumberToDisplay(RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, false);
-
+	
 	}else{
 		// if (potentio->getValueStableChangedEdge()){
 		// 	// display random
@@ -865,12 +862,14 @@ void Apps::modeRandomWorld(bool init)
 		{
 			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
-				RANDOMWORLD_RANDOM_TYPE = i + 10 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+				RANDOMWORLD_RANDOM_TYPE = i + 4 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
 				randomWorldState = randomWorldRolling;
 
 				// set up animation
-				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30);
+				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30 - (binaryInputs[BUTTON_MOMENTARY_2].getValue()*1970)); // special case for upper limit setting for random number.
 				RANDOMWORLD_ROLL_SPEED.start();
+
+
 			}
 		}
 	}
@@ -878,24 +877,8 @@ void Apps::modeRandomWorld(bool init)
 
 	case randomWorldRolling:
 	{
-		// during roll all lights on
-
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-		{
-
-			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
-			{
-				buzzer->programBuzzerRoll(C7_8);
-				randomModeDisplay(false);
-
-				RANDOMWORLD_ROLL_SPEED.start();
-			}
-		}
-		else
-		{
-			ledDisp->setNumberToDisplayAsDecimal(8888);
-		}
-
+		
+		// check state
 		bool roll_end = false;
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
@@ -925,6 +908,41 @@ void Apps::modeRandomWorld(bool init)
 			{
 				randomWorldState = randomWorldShowResult;
 				buzzer->programBuzzerRoll(D4_8);
+			}
+		}
+
+
+		// display
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+		{
+
+			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
+			{
+				buzzer->programBuzzerRoll(C7_8);
+				randomModeDisplay(false);
+
+				RANDOMWORLD_ROLL_SPEED.start();
+			}
+		}
+		else
+		{
+			
+			if (binaryInputs[BUTTON_MOMENTARY_2].getValue() && !RANDOMWORLD_ROLL_SPEED.getTimeIsNegative()){
+
+				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = potentio->getValueMapped(0, 100);
+				
+				RANDOMWORLD_CARD_FROM_DECK_INDEX = 0; // reset the tombola.
+
+				if (millis() % 1000 < 200){
+					ledDisp->setStandardTextToTextBuf(textHandle,TEXT_SET);
+				}else{
+					
+					ledDisp->setNumberToDisplay(RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, false);
+				}
+
+			}else{
+				// during roll all lights on
+				ledDisp->setNumberToDisplayAsDecimal(8888);
 			}
 		}
 	}
@@ -993,67 +1011,30 @@ void Apps::randomModeDisplay(bool forReal)
 {
 	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
 	
-	// ledDisp->setBlankDisplay();
+	const int16_t randomUpperLimits[8] = {6,52,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW,2,6,52,26,2}; 
+
+	RANDOMWORLD_RANDOM_NUMBER = random(0,randomUpperLimits[RANDOMWORLD_RANDOM_TYPE]);
+	
 	ledDisp->blanksToBuf(textBuf);
+
+
 	switch (RANDOMWORLD_RANDOM_TYPE)
 	{
 
 	case RANDOMWORLD_ROLLONEDICE:
 	{
-		RANDOMWORLD_RANDOM_NUMBER = random(0,6);
+		
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			textBuf[i] = pgm_read_byte_near(dice_eyes_display + RANDOMWORLD_RANDOM_NUMBER * 4 + (i)); //* 4 --> 4 bytes per dword
 		}
-		
-		// this->displayAllSegments = 0;
-		// for (uint8_t i = 0; i < 4; i++)
-		// {
-		// 	this->displayAllSegments |= (uint32_t)pgm_read_byte_near(dice_eyes_display + RANDOMWORLD_RANDOM_NUMBER * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
-		// }
-		
-		// ledDisp->setBinaryToDisplay(this->displayAllSegments);
-
-		// // show dice eyes
-		// //textBuf[3] = ' ';
-		// for (uint8_t i = 0; i < 3; i++)
-		// {
-		// 	// build up dice eyes over three digits
-
-		// 	//set default for digit 1 2 and 3. Because most used (seg A and D)
-		// 	textBuf[i] = ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII;
-
-		// 	//first and third digit
-		// 	if (RANDOMWORLD_RANDOM_NUMBER == 1)
-		// 	{
-		// 		textBuf[i] = ' ';
-		// 	}
-		// 	else if (RANDOMWORLD_RANDOM_NUMBER < 4)
-		// 	{
-		// 		textBuf[i] = ONLY_TOP_SEGMENT_FAKE_ASCII; // assume first digit seg A
-		// 		if (i == 2)
-		// 		{
-		// 			textBuf[i] = ONLY_BOTTOM_SEGMENT_FAKE_ASCII; // seg D
-		// 		}
-		// 	}
-
-		// 	//second digit
-		// 	if (i == 1 && RANDOMWORLD_RANDOM_NUMBER < 6)
-		// 	{
-		// 		textBuf[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII; // assume odd
-		// 		if (RANDOMWORLD_RANDOM_NUMBER % 2 == 0)
-		// 		{ // if even
-		// 			textBuf[i] = ' ';
-		// 		}
-		// 	}
-		// }
+	
 	}
 	break;
 
 	case RANDOMWORLD_ROLLFOURDICE:
 	{
 		// throw four dice
-		RANDOMWORLD_RANDOM_NUMBER = random(1, 7);
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			textBuf[i] = random(49, 55); // char 1 to 6
@@ -1069,23 +1050,29 @@ void Apps::randomModeDisplay(bool forReal)
 			// don't draw a card if it's not for real. We will not even display a card, as that would be confusing. Just show blanks.
 			break;
 		}
-		// take card off deck
-		if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 0)
-		{
-			// pick card from stack. --> reshuffle if all gone.
-			//shuffle(SIMON_LIST, bytes_list_bufsize);
-			for (int i = 0; i < 52; i++)
-			{
-				CARDS_DECK[i] = i;
-			}
-			shuffle(CARDS_DECK, 52);
-		}
-		RANDOMWORLD_RANDOM_NUMBER = CARDS_DECK[RANDOMWORLD_CARD_FROM_DECK_INDEX];
-		RANDOMWORLD_CARD_FROM_DECK_INDEX++;
-		if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 52)
-		{
-			RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
-		}
+
+		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, 52);
+		
+		// if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 0)
+		// {
+		// 	// pick card from stack. --> reshuffle if all gone.
+		// 	// for (int i = 0; i < 52; i++)
+		// 	// {
+		// 	// 	CARDS_DECK[i] = i;
+		// 	// }
+		// 	// shuffle(CARDS_DECK, 52);
+		// 	randomSequence(CARDS_DECK,52);
+		// }
+
+		// // draw card off deck
+		// RANDOMWORLD_RANDOM_NUMBER = CARDS_DECK[RANDOMWORLD_CARD_FROM_DECK_INDEX];
+
+		// // prepare for next draw
+		// RANDOMWORLD_CARD_FROM_DECK_INDEX++;
+		// if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 52)
+		// {
+		// 	RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
+		// }
 	}
 	
 	// NO BREAK, fallthrough to show card!!!!
@@ -1093,11 +1080,11 @@ void Apps::randomModeDisplay(bool forReal)
 	case RANDOMWORLD_TAKERANDOMCARD:
 	{
 
-		if (RANDOMWORLD_RANDOM_TYPE != RANDOMWORLD_TAKERANDOMCARDFROMDECK)
-		{ // fall through from random card.
-			// random card
-			RANDOMWORLD_RANDOM_NUMBER = random(0, 52); // 52 cards
-		}
+		// if (RANDOMWORLD_RANDOM_TYPE != RANDOMWORLD_TAKERANDOMCARDFROMDECK)
+		// { // fall through from random card.
+		// 	// random card
+		// 	RANDOMWORLD_RANDOM_NUMBER = random(0, 52); // 52 cards
+		// }
 
 		//show playing card
 		if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
@@ -1129,24 +1116,34 @@ void Apps::randomModeDisplay(bool forReal)
 
 	break;
 
+	case RANDOMWORLD_TOMBOLA:
+	{
+		if (!forReal)
+		{
+			// don't draw a card if it's not for real. We will not even display a card, as that would be confusing. Just show blanks.
+			break;
+		}
+		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+	}
+	// NO BREAK HERE we just changed the random number to a part of a raffle draw.
 	case RANDOMWORLD_RANDOMNUMBER:
 	{
 		// random number
 
-		ledDisp->numberToBufAsDecimal(textBuf, random(0, 10000));
+		ledDisp->numberToBufAsDecimal(textBuf, RANDOMWORLD_RANDOM_NUMBER);
 	}
 	break;
-	case RANDOMWORLD_RANDOMLETTER:
-	{
-		// show letter alphabeth, plus its position.
-		RANDOMWORLD_RANDOM_NUMBER = random(0, 26);
-		displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
-		//ledDisp->setTextBufToDisplay(textBuf);
-	}
-	break;
+	// case RANDOMWORLD_RANDOMLETTER:
+	// {
+	// 	// show letter alphabeth, plus its position.
+	// 	//RANDOMWORLD_RANDOM_NUMBER = random(0, 26);
+	// 	displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
+	// 	//ledDisp->setTextBufToDisplay(textBuf);
+	// }
+	// break;
 	case RANDOMWORLD_HEADSORTAILS:
 	{
-		if (random(0, 2))
+		if (RANDOMWORLD_RANDOM_NUMBER)
 		{
 			textBuf[0] = 'H';
 			textBuf[1] = 'E';
@@ -1164,7 +1161,7 @@ void Apps::randomModeDisplay(bool forReal)
 	break;
 	case RANDOMWORLD_YESORNO:
 	{
-		if (random(0, 2))
+		if (RANDOMWORLD_RANDOM_NUMBER)
 		{
 			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
 		}
@@ -1174,10 +1171,7 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 	}
 	break;
-	// default:
-	// {
-	// 	textBuf[1] = '-';
-	// }
+
 	}
 
 	ledDisp->setTextBufToDisplay(textBuf);
@@ -3314,6 +3308,7 @@ void Apps::modeSimon(bool init)
 			SIMON_LIST[k] = k % numButtons;
 		}
 		shuffle(SIMON_LIST, bytes_list_bufsize);
+		
 		SIMON_LENGTH = 0;
 		simonState = simonNewLevel;
 		break;
@@ -4211,6 +4206,32 @@ uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, ui
 		fullScreen |= 1UL << shuffledSequence[i]; // 1UL because if just 1 it's a 16 bit constant. (yep yep Lucie, nonkel Lode lost a couple of hours solving this!)
 	}
 	return fullScreen;
+}
+
+
+
+uint8_t Apps::tombola(uint8_t* indexVariable, uint8_t *sequenceList, uint8_t length){
+	if (*indexVariable == 0)
+	{
+		randomSequence(sequenceList, length);
+		*indexVariable = length;
+	}
+
+	// draw card off deck
+	return sequenceList[--(*indexVariable)]; // 
+
+}
+
+void Apps::randomSequence(uint8_t *sequenceList, uint8_t length){
+	// initialize list
+	for (uint8_t i = 0; i < length; i++)
+	{
+		sequenceList[i] = i;
+	}
+
+	// // shuffle in place
+	this->shuffle(sequenceList, length);
+
 }
 
 void Apps::shuffle(uint8_t *listToShuffle, uint8_t length)
