@@ -81,42 +81,47 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 };
 
 
-#define TEXT_NO 0
-#define TEXT_SPACES 3  
-#define TEXT_YES 6
-#define TEXT_PAUS 9
-#define TEXT_RANDOM_BEEP 14
-
-#define TEXT_BEEP 18
-#define TEXT_EEPROM 19
-#define TEXT_RESET 22
-#define TEXT_DONE 26
-#define TEXT_DOIT 30
-#define TEXT_TILT 33
-#define TEXT_RANDOM_SEGMENTS 37
-#define TEXT_SAVE 41
+#define TEXT_SPACES 0  
+#define TEXT_PAUS 4
+#define TEXT_RANDOM_BEEP 8
+#define TEXT_BEEP 12
+#define TEXT_EEPROM 16
+#define TEXT_RESET 20
+#define TEXT_DONE 24
+#define TEXT_DOIT 28
+#define TEXT_TILT 32
+#define TEXT_RANDOM_SEGMENTS 36
+#define TEXT_SAVE 40
 #define TEXT_END 44
 #define TEXT_LOAD 48
 #define TEXT_AUTO 52
 #define TEXT_SET 56
+#define TEXT_HEAD 60
+#define TEXT_TAIL 64 
+#define TEXT_YES 68
+#define TEXT_NO 72
 
 const byte standard_text[] PROGMEM = {
-    SPACE_FAKE_ASCII, 'N','O', 
     SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII,
-    'Y','E','S',
     'P','A','U','S',
     'R','N','D','B',
     'B','E','E','P',
+    'E', 'E','P','R',
     'R', 'S','E','T',
     'D', 'O','N','E',
     'D', 'O','I','T',
-    'I','L','T',
+    'T','I','L','T',
     '?','?','?','?',
     'S','A','V','E',
-    'N','D', SPACE_FAKE_ASCII, 
+    'E','N','D', SPACE_FAKE_ASCII, 
     'L','O','A','D',
     'A','U','T','O',
-    'S','E','T',SPACE_FAKE_ASCII
+    'S','E','T',SPACE_FAKE_ASCII,
+    'H','E','A','D', //don't change position, indeces calculated, used in random 
+    'T','A','I','L', //don't change position, indeces calculated, used in random 
+    SPACE_FAKE_ASCII, 'N','O', SPACE_FAKE_ASCII,  //don't change position, indeces calculated, used in random 
+    SPACE_FAKE_ASCII,'Y','E','S' //don't change position, indeces calculated, used in random 
+
     };
 
 class DisplayManagement

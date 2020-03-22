@@ -1041,6 +1041,15 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 	}
 	break;
+	
+	case RANDOMWORLD_RANDOMLETTER:
+	{
+		// show letter alphabeth, plus its position.
+		//RANDOMWORLD_RANDOM_NUMBER = random(0, 26);
+		displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
+		//ledDisp->setTextBufToDisplay(textBuf);
+	}
+	break;
 
 	case RANDOMWORLD_TAKERANDOMCARDFROMDECK:
 	{
@@ -1053,39 +1062,6 @@ void Apps::randomModeDisplay(bool forReal)
 
 		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, 52);
 		
-		// if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 0)
-		// {
-		// 	// pick card from stack. --> reshuffle if all gone.
-		// 	// for (int i = 0; i < 52; i++)
-		// 	// {
-		// 	// 	CARDS_DECK[i] = i;
-		// 	// }
-		// 	// shuffle(CARDS_DECK, 52);
-		// 	randomSequence(CARDS_DECK,52);
-		// }
-
-		// // draw card off deck
-		// RANDOMWORLD_RANDOM_NUMBER = CARDS_DECK[RANDOMWORLD_CARD_FROM_DECK_INDEX];
-
-		// // prepare for next draw
-		// RANDOMWORLD_CARD_FROM_DECK_INDEX++;
-		// if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 52)
-		// {
-		// 	RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
-		// }
-	}
-	
-	// NO BREAK, fallthrough to show card!!!!
-
-	case RANDOMWORLD_TAKERANDOMCARD:
-	{
-
-		// if (RANDOMWORLD_RANDOM_TYPE != RANDOMWORLD_TAKERANDOMCARDFROMDECK)
-		// { // fall through from random card.
-		// 	// random card
-		// 	RANDOMWORLD_RANDOM_NUMBER = random(0, 52); // 52 cards
-		// }
-
 		//show playing card
 		if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
 		{
@@ -1120,7 +1096,7 @@ void Apps::randomModeDisplay(bool forReal)
 	{
 		if (!forReal)
 		{
-			// don't draw a card if it's not for real. We will not even display a card, as that would be confusing. Just show blanks.
+			// dont draw if not for real
 			break;
 		}
 		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
@@ -1133,42 +1109,37 @@ void Apps::randomModeDisplay(bool forReal)
 		ledDisp->numberToBufAsDecimal(textBuf, RANDOMWORLD_RANDOM_NUMBER);
 	}
 	break;
-	// case RANDOMWORLD_RANDOMLETTER:
-	// {
-	// 	// show letter alphabeth, plus its position.
-	// 	//RANDOMWORLD_RANDOM_NUMBER = random(0, 26);
-	// 	displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
-	// 	//ledDisp->setTextBufToDisplay(textBuf);
+
+	case RANDOMWORLD_HEADSORTAILS:
+	//{
+		// if (RANDOMWORLD_RANDOM_NUMBER)
+		// {
+		// 	textBuf[0] = 'H';
+		// 	textBuf[1] = 'E';
+		// 	textBuf[2] = 'A';
+		// 	textBuf[3] = 'D';
+		// }
+		// else
+		// {
+		// 	textBuf[0] = 'T';
+		// 	textBuf[1] = 'A';
+		// 	textBuf[2] = 'I';
+		// 	textBuf[3] = 'L';
+		// }
+		//ledDisp->setStandardTextToTextBuf(textBuf, 60 + RANDOMWORLD_RANDOM_NUMBER*4);
 	// }
 	// break;
-	case RANDOMWORLD_HEADSORTAILS:
-	{
-		if (RANDOMWORLD_RANDOM_NUMBER)
-		{
-			textBuf[0] = 'H';
-			textBuf[1] = 'E';
-			textBuf[2] = 'A';
-			textBuf[3] = 'D';
-		}
-		else
-		{
-			textBuf[0] = 'T';
-			textBuf[1] = 'A';
-			textBuf[2] = 'I';
-			textBuf[3] = 'L';
-		}
-	}
-	break;
 	case RANDOMWORLD_YESORNO:
 	{
-		if (RANDOMWORLD_RANDOM_NUMBER)
-		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
-		}
-		else
-		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_NO);
-		}
+		// if (RANDOMWORLD_RANDOM_NUMBER)
+		// {
+		// 	ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
+		// }
+		// else
+		// {
+		// 	ledDisp->setStandardTextToTextBuf(textBuf, TEXT_NO);
+		// }
+		ledDisp->setStandardTextToTextBuf(textBuf, 60 + RANDOMWORLD_RANDOM_NUMBER*4 + (RANDOMWORLD_RANDOM_TYPE - 3)*2 );
 	}
 	break;
 
