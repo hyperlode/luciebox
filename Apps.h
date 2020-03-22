@@ -1,6 +1,9 @@
 #ifndef APPS_H
 #define APPS_H
 
+
+
+
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
 #define SIMON_APP
@@ -15,6 +18,7 @@
 #include "BinaryInput.h"
 #include "PretbakSettings.h"
 #include "LedMultiplexer5x8.h"
+#include "DisplayDigitsHandler5Digits.h"
 
 #ifdef ENABLE_EEPROM
 #include <avr/eeprom.h>
@@ -38,7 +42,7 @@
 #define APP_SELECTOR_SOUND_COMPOSER 3
 #define APP_SELECTOR_STOPWATCH 4
 #define APP_SELECTOR_POMODORO 5
-#define APP_SELECTOR_DICEROLL 6
+#define APP_SELECTOR_RANDOMWORLD 6
 #define APP_SELECTOR_SLOTS 7
 #define APP_SELECTOR_GEIGER 8
 #define APP_SELECTOR_HACK_TIME 9
@@ -77,7 +81,7 @@
 // #define MOVE_DOWN		4
 // #define MOVE_UP	  	    5
 #define ANIMATION_STOP_CODE 0x00
-// enum DiceRollMode:uint8_t{
+// enum RandomWorldMode:uint8_t{
 //   rollOneDice,
 //   rollFourDice,
 //   takeRandomCard,
@@ -87,16 +91,19 @@
 //   headsOrTails,
 //   yesOrNo,
 // };
-// DiceRollMode diceRollMode;
+// RandomWorldMode randomWorldMode;
 
-#define DICEROLL_ROLLONEDICE 0
-#define DICEROLL_ROLLFOURDICE 10
-#define DICEROLL_TAKERANDOMCARD 1
-#define DICEROLL_TAKERANDOMCARDFROMDECK 11
-#define DICEROLL_RANDOMNUMBER 2
-#define DICEROLL_RANDOMLETTER 12
-#define DICEROLL_HEADSORTAILS 3
-#define DICEROLL_YESORNO 13
+
+
+
+#define RANDOMWORLD_ROLLONEDICE 0
+#define RANDOMWORLD_ROLLFOURDICE 10
+#define RANDOMWORLD_TAKERANDOMCARD 1
+#define RANDOMWORLD_TAKERANDOMCARDFROMDECK 11
+#define RANDOMWORLD_RANDOMNUMBER 2
+#define RANDOMWORLD_RANDOMLETTER 12
+#define RANDOMWORLD_HEADSORTAILS 3
+#define RANDOMWORLD_YESORNO 13
 
 #define SIMON_NO_ACTIVE_LIGHT 666
 #define SIMON_DEAD_PLAYER 666
@@ -128,7 +135,7 @@
 #define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
-#define DICEROLL_ROLL_SPEED generalTimer
+#define RANDOMWORLD_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer
 #define SIMON_STEP_TIMER generalTimer
 #define STOPWATCH_CHRONO generalTimer
@@ -139,7 +146,7 @@
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
-#define DICEROLL_AUTODRAW_DELAY generalTimer2
+#define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
 #define SIMON_BLINK_TIMER generalTimer2
 
 #define SOUND_FUN_NOTE_INDEX counter
@@ -147,7 +154,7 @@
 #define GEIGER_TONE_FREQUENY_LOWEST counter
 #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY counter
 #define SIMON_LENGTH counter
-#define DICEROLL_RANDOM_NUMBER counter
+#define RANDOMWORLD_RANDOM_NUMBER counter
 #define SEQUENCER_STEP_COUNTER counter
 #define COMPOSER_STEP counter
 #define POMODORO_STATS_WORKING_GOOD counter
@@ -158,7 +165,7 @@
 #define DRAW_ACTIVE_DRAWING_INDEX counter2
 #define SIMON_INDEX counter2
 #define DEBUGMODE_ACTIVATED counter2
-#define DICEROLL_CARD_FROM_DECK_INDEX counter2
+#define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW counter2
 #define POMODORO_INIT_TIME_SECONDS counter2
 #define HACKTIME_DISPLAY_MODE counter2
 
@@ -168,7 +175,7 @@
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define SETTINGS_MODE_SELECTOR counter3
-#define DICEROLL_ANIMATION_DELAY counter3
+#define RANDOMWORLD_ANIMATION_DELAY counter3
 #define SIMON_RANDOM_PLAYER_SEQUENCE counter3
 #define STOPWATCH_LAP_MEMORY counter3
 #define POMODORO_STATS_WORKING_BAD counter3
@@ -182,7 +189,7 @@
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
 #define SEQUENCER_TEMP_NOTE counter5
-#define DICEROLL_RANDOM_TYPE counter5
+#define RANDOMWORLD_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
 #define HACKTIME_MEMORY_SELECT counter5
@@ -194,6 +201,7 @@
 #define DRAW_SHOW_MODE counter6
 #define METRONOME_TICKER_2_POSITION counter6
 #define HACKTIME_SOUND counter6
+#define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
@@ -220,6 +228,32 @@
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
+
+
+
+// #define ONLY_TOP_SEGMENT_FAKE_ASCII 58
+// #define ONLY_MIDDLE_SEGMENT_FAKE_ASCII 59
+// #define ONLY_BOTTOM_SEGMENT_FAKE_ASCII 60
+// #define ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII 61
+// #define SPACE_FAKE_ASCII 62
+
+const char dice_eyes_display[] PROGMEM = {
+    SPACE_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,
+    ONLY_TOP_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,ONLY_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
+    ONLY_TOP_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
+    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
+    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
+    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII
+};
+
+// const char dice_eyes_display[] PROGMEM = {
+//     NO_SEGMENTS, ONLY_MIDDLE_SEGMENT,NO_SEGMENTS,NO_SEGMENTS,
+//     ONLY_TOP_SEGMENT,NO_SEGMENTS,ONLY_BOTTOM_SEGMENT,NO_SEGMENTS,
+//     ONLY_TOP_SEGMENT,ONLY_MIDDLE_SEGMENT,ONLY_BOTTOM_SEGMENT,NO_SEGMENTS,
+//     ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS,ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS,
+//     ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_MIDDLE_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS,
+//     ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS
+// };
 
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
@@ -497,7 +531,7 @@ public:
     void tiltSwitchTest(bool init);
     void modeButtonDebug(bool init);
     void miniMultiTimer(bool init);
-    void modeDiceRoll(bool init);
+    void modeRandomWorld(bool init);
     void modeHackTime(bool init);
 
     void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis);
@@ -583,15 +617,15 @@ private:
     ReactionGameState reactionGameState;
 #endif
 
-    enum DiceRollState : uint8_t
+    enum RandomWorldState : uint8_t
     {
-        dicerollIdle,
-        dicerollShowResult,
-        dicerollRolling,
-        dicerollRollingEnd,
-        dicerollAutoRollDelay,
+        randomWorldIdle,
+        randomWorldShowResult,
+        randomWorldRolling,
+        randomWorldRollingEnd,
+        randomWorldAutoRollDelay,
     };
-    DiceRollState diceRollState;
+    RandomWorldState randomWorldState;
 
 // enum SettingsState:uint8_t{
 //   settingNormal,

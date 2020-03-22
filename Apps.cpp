@@ -69,8 +69,8 @@ void Apps::appSelector(bool init, uint8_t selector)
 		// 	&Apps::modeComposeSong,
 		// 	&Apps::stopwatch,
 		// 	&Apps::pomodoroTimer,
-		// 	&Apps::modeDiceRoll,
-		// 	&Apps::modeDiceRoll,
+		// 	&Apps::modeRandomWorld,
+		// 	&Apps::modeRandomWorld,
 		// 	&Apps::modeGeiger,
 		// 	&Apps::modeGeiger,
 		// 	&Apps::modeSoundSong,
@@ -92,8 +92,8 @@ void Apps::appSelector(bool init, uint8_t selector)
 		// this->modeComposeSong(initOnBigLatchInitToo);
 		// stopwatch(initOnBigLatchInitToo);
 		// pomodoroTimer(initOnBigLatchInitToo);
-		// this->modeDiceRoll(initOnBigLatchInitToo);
-		//    this->modeDiceRoll(initOnBigLatchInitToo);
+		// this->modeRandomWorld(initOnBigLatchInitToo);
+		//    this->modeRandomWorld(initOnBigLatchInitToo);
 		// this->modeGeiger(initOnBigLatchInitToo);
 		// this->modeGeiger(initOnBigLatchInitToo);
 		// this->modeSoundSong(initOnBigLatchInitToo);
@@ -141,9 +141,9 @@ void Apps::appSelector(bool init, uint8_t selector)
 			pomodoroTimer(initOnBigLatchInitToo);
 			break;
 
-		case APP_SELECTOR_DICEROLL:
+		case APP_SELECTOR_RANDOMWORLD:
 			//this->modeScroll(init);
-			this->modeDiceRoll(initOnBigLatchInitToo);
+			this->modeRandomWorld(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_SLOTS:
@@ -795,77 +795,100 @@ void Apps::modeButtonDebug(bool init)
 	}
 }
 
-void Apps::modeDiceRoll(bool init)
+void Apps::modeRandomWorld(bool init)
 {
 	if (init)
 	{
-		// DICEROLL_ROLL_SPEED.setInitTimeMillis(-100);
-		// DICEROLL_ROLL_SPEED.start();
-
-		DICEROLL_CARD_FROM_DECK_INDEX = 0;
-		diceRollState = dicerollIdle;
-		DICEROLL_RANDOM_TYPE = 0;
+		// RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-100);
+		// RANDOMWORLD_ROLL_SPEED.start();
+		
+		RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-3000);
+		RANDOMWORLD_AUTODRAW_DELAY.start();
+		RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
+		randomWorldState = randomWorldIdle;
+		RANDOMWORLD_RANDOM_TYPE = 0;
 		randomModeDisplay(false);
 		decimalPoints = 0;
-		// DICEROLL_ANIMATION_DELAY = 14;
+		// RANDOMWORLD_ANIMATION_DELAY = 14;
 	}
 
-	if (potentio->getValueStableChangedEdge())
-	{
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-		{
-			// set auto draw time seconds
-			int16_t delay_seconds = potentio->getValueMapped(1, 300);
-			ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
-			DICEROLL_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delay_seconds);
-		}
-		else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-		{
-			//set animation speed time
-			// DICEROLL_ANIMATION_DELAY =  potentio->getValueMapped(0, 50);
-			// ledDisp->setNumberToDisplayAsDecimal(DICEROLL_ANIMATION_DELAY);
-		}
-		else
-		{
-			// display random
-			randomModeDisplay(false);
-			buzzer->programBuzzerRoll(C7_8);
-		}
+
+	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){
+	
+		listenToPotentioToIncrementTimerInit(&RANDOMWORLD_AUTODRAW_DELAY, 1000); // up down one second at a time.
+
+	}else if (binaryInputs[BUTTON_MOMENTARY_2].getValue()){
+
+		// listenToPotentioToIncrementTimerInit(&RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 1
+		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = potentio->getValueMapped(0, 100);
+		ledDisp->setNumberToDisplay(RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, false);
+
+	}else{
+		// if (potentio->getValueStableChangedEdge()){
+		// 	// display random
+		// 	randomModeDisplay(false);
+		// 	buzzer->programBuzzerRoll(C7_8);
+		// }
 	}
 
-	switch (diceRollState)
+
+
+	// if (potentio->getValueStableChangedEdge())
+	// {
+	// 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
+	// 	{
+	// 		// set auto draw time seconds
+	// 		int16_t delay_seconds = potentio->getValueMapped(1, 300);
+	// 		ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
+	// 		RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * delay_seconds);
+	// 	}
+	// 	else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+	// 	{
+	// 		//set animation speed time
+	// 		// RANDOMWORLD_ANIMATION_DELAY =  potentio->getValueMapped(0, 50);
+	// 		// ledDisp->setNumberToDisplayAsDecimal(RANDOMWORLD_ANIMATION_DELAY);
+	// 	}
+	// 	else
+	// 	{
+	// 		// display random
+	// 		randomModeDisplay(false);
+	// 		buzzer->programBuzzerRoll(C7_8);
+	// 	}
+	// }
+
+	switch (randomWorldState)
 	{
 
-	case dicerollIdle:
+	case randomWorldIdle:
 	{
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
-				DICEROLL_RANDOM_TYPE = i + 10 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
-				diceRollState = dicerollRolling;
+				RANDOMWORLD_RANDOM_TYPE = i + 10 * binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();
+				randomWorldState = randomWorldRolling;
 
 				// set up animation
-				DICEROLL_ROLL_SPEED.setInitTimeMillis(-30);
-				DICEROLL_ROLL_SPEED.start();
+				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30);
+				RANDOMWORLD_ROLL_SPEED.start();
 			}
 		}
 	}
 	break;
 
-	case dicerollRolling:
+	case randomWorldRolling:
 	{
 		// during roll all lights on
 
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 		{
 
-			if (!DICEROLL_ROLL_SPEED.getTimeIsNegative())
+			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 			{
 				buzzer->programBuzzerRoll(C7_8);
 				randomModeDisplay(false);
 
-				DICEROLL_ROLL_SPEED.start();
+				RANDOMWORLD_ROLL_SPEED.start();
 			}
 		}
 		else
@@ -896,69 +919,69 @@ void Apps::modeDiceRoll(bool init)
 		{
 			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 			{
-				diceRollState = dicerollRollingEnd;
+				randomWorldState = randomWorldRollingEnd;
 			}
 			else
 			{
-				diceRollState = dicerollShowResult;
+				randomWorldState = randomWorldShowResult;
 				buzzer->programBuzzerRoll(D4_8);
 			}
 		}
 	}
 	break;
 
-	case dicerollRollingEnd:
+	case randomWorldRollingEnd:
 	{
 
-		if (!DICEROLL_ROLL_SPEED.getTimeIsNegative())
+		if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 		{
 			buzzer->programBuzzerRoll(C7_8);
 			randomModeDisplay(false);
 
 			// roll slower and slower until threshold reached.
-			// DICEROLL_ROLL_SPEED.setInitTimeMillis(DICEROLL_ROLL_SPEED.getInitTimeMillis() * ((float)DICEROLL_ANIMATION_DELAY)/10 ); //1.5 //1.4
-			DICEROLL_ROLL_SPEED.setInitTimeMillis(DICEROLL_ROLL_SPEED.getInitTimeMillis() * 1.4); //1.5 //1.4
-			if (DICEROLL_ROLL_SPEED.getInitTimeMillis() < -600)
+			// RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() * ((float)RANDOMWORLD_ANIMATION_DELAY)/10 ); //1.5 //1.4
+			RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() * 1.4); //1.5 //1.4
+			if (RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() < -600)
 			{   //-800 //-600
-				// if (DICEROLL_ROLL_SPEED.getInitTimeMillis() < -100*DICEROLL_ANIMATION_DELAY){  //-800 //-600
-				diceRollState = dicerollShowResult;
+				// if (RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() < -100*RANDOMWORLD_ANIMATION_DELAY){  //-800 //-600
+				randomWorldState = randomWorldShowResult;
 			}
 
-			DICEROLL_ROLL_SPEED.start();
+			RANDOMWORLD_ROLL_SPEED.start();
 		}
 	}
 	break;
 
-	case dicerollShowResult:
+	case randomWorldShowResult:
 	{
 
 		randomModeDisplay(true);
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
 			// auto roll delay.
-			DICEROLL_AUTODRAW_DELAY.start();
-			diceRollState = dicerollAutoRollDelay;
+			RANDOMWORLD_AUTODRAW_DELAY.start();
+			randomWorldState = randomWorldAutoRollDelay;
 		}
 		else
 		{
-			diceRollState = dicerollIdle;
+			randomWorldState = randomWorldIdle;
 		}
 	}
 	break;
 
-	case dicerollAutoRollDelay:
+	case randomWorldAutoRollDelay:
 	{
-		if (!DICEROLL_AUTODRAW_DELAY.getTimeIsNegative())
+		if (!RANDOMWORLD_AUTODRAW_DELAY.getTimeIsNegative())
 		{
 			// set up animation
-			DICEROLL_ROLL_SPEED.setInitTimeMillis(-30);
-			DICEROLL_ROLL_SPEED.start();
+			RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30);
+			RANDOMWORLD_ROLL_SPEED.start();
 
-			diceRollState = dicerollRolling;
+			randomWorldState = randomWorldRolling;
 		}
 		if (!binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 		{
-			diceRollState = dicerollIdle;
+			randomWorldState = randomWorldIdle;
 		}
 	}
 
@@ -972,52 +995,65 @@ void Apps::randomModeDisplay(bool forReal)
 	
 	// ledDisp->setBlankDisplay();
 	ledDisp->blanksToBuf(textBuf);
-	switch (DICEROLL_RANDOM_TYPE)
+	switch (RANDOMWORLD_RANDOM_TYPE)
 	{
 
-	case DICEROLL_ROLLONEDICE:
+	case RANDOMWORLD_ROLLONEDICE:
 	{
-		DICEROLL_RANDOM_NUMBER = random(1, 7);
-		// show dice eyes
-		//textBuf[3] = ' ';
-		for (uint8_t i = 0; i < 3; i++)
+		RANDOMWORLD_RANDOM_NUMBER = random(0,6);
+		for (uint8_t i = 0; i < 4; i++)
 		{
-			// build up dice eyes over three digits
-
-			//set default for digit 1 2 and 3. Because most used (seg A and D)
-			textBuf[i] = ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII;
-
-			//first and third digit
-			if (DICEROLL_RANDOM_NUMBER == 1)
-			{
-				textBuf[i] = ' ';
-			}
-			else if (DICEROLL_RANDOM_NUMBER < 4)
-			{
-				textBuf[i] = ONLY_TOP_SEGMENT_FAKE_ASCII; // assume first digit seg A
-				if (i == 2)
-				{
-					textBuf[i] = ONLY_BOTTOM_SEGMENT_FAKE_ASCII; // seg D
-				}
-			}
-
-			//second digit
-			if (i == 1 && DICEROLL_RANDOM_NUMBER < 6)
-			{
-				textBuf[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII; // assume odd
-				if (DICEROLL_RANDOM_NUMBER % 2 == 0)
-				{ // if even
-					textBuf[i] = ' ';
-				}
-			}
+			textBuf[i] = pgm_read_byte_near(dice_eyes_display + RANDOMWORLD_RANDOM_NUMBER * 4 + (i)); //* 4 --> 4 bytes per dword
 		}
+		
+		// this->displayAllSegments = 0;
+		// for (uint8_t i = 0; i < 4; i++)
+		// {
+		// 	this->displayAllSegments |= (uint32_t)pgm_read_byte_near(dice_eyes_display + RANDOMWORLD_RANDOM_NUMBER * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
+		// }
+		
+		// ledDisp->setBinaryToDisplay(this->displayAllSegments);
+
+		// // show dice eyes
+		// //textBuf[3] = ' ';
+		// for (uint8_t i = 0; i < 3; i++)
+		// {
+		// 	// build up dice eyes over three digits
+
+		// 	//set default for digit 1 2 and 3. Because most used (seg A and D)
+		// 	textBuf[i] = ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII;
+
+		// 	//first and third digit
+		// 	if (RANDOMWORLD_RANDOM_NUMBER == 1)
+		// 	{
+		// 		textBuf[i] = ' ';
+		// 	}
+		// 	else if (RANDOMWORLD_RANDOM_NUMBER < 4)
+		// 	{
+		// 		textBuf[i] = ONLY_TOP_SEGMENT_FAKE_ASCII; // assume first digit seg A
+		// 		if (i == 2)
+		// 		{
+		// 			textBuf[i] = ONLY_BOTTOM_SEGMENT_FAKE_ASCII; // seg D
+		// 		}
+		// 	}
+
+		// 	//second digit
+		// 	if (i == 1 && RANDOMWORLD_RANDOM_NUMBER < 6)
+		// 	{
+		// 		textBuf[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII; // assume odd
+		// 		if (RANDOMWORLD_RANDOM_NUMBER % 2 == 0)
+		// 		{ // if even
+		// 			textBuf[i] = ' ';
+		// 		}
+		// 	}
+		// }
 	}
 	break;
 
-	case DICEROLL_ROLLFOURDICE:
+	case RANDOMWORLD_ROLLFOURDICE:
 	{
 		// throw four dice
-		DICEROLL_RANDOM_NUMBER = random(1, 7);
+		RANDOMWORLD_RANDOM_NUMBER = random(1, 7);
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			textBuf[i] = random(49, 55); // char 1 to 6
@@ -1025,7 +1061,7 @@ void Apps::randomModeDisplay(bool forReal)
 	}
 	break;
 
-	case DICEROLL_TAKERANDOMCARDFROMDECK:
+	case RANDOMWORLD_TAKERANDOMCARDFROMDECK:
 	{
 
 		if (!forReal)
@@ -1034,7 +1070,7 @@ void Apps::randomModeDisplay(bool forReal)
 			break;
 		}
 		// take card off deck
-		if (DICEROLL_CARD_FROM_DECK_INDEX == 0)
+		if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 0)
 		{
 			// pick card from stack. --> reshuffle if all gone.
 			//shuffle(SIMON_LIST, bytes_list_bufsize);
@@ -1044,37 +1080,37 @@ void Apps::randomModeDisplay(bool forReal)
 			}
 			shuffle(CARDS_DECK, 52);
 		}
-		DICEROLL_RANDOM_NUMBER = CARDS_DECK[DICEROLL_CARD_FROM_DECK_INDEX];
-		DICEROLL_CARD_FROM_DECK_INDEX++;
-		if (DICEROLL_CARD_FROM_DECK_INDEX == 52)
+		RANDOMWORLD_RANDOM_NUMBER = CARDS_DECK[RANDOMWORLD_CARD_FROM_DECK_INDEX];
+		RANDOMWORLD_CARD_FROM_DECK_INDEX++;
+		if (RANDOMWORLD_CARD_FROM_DECK_INDEX == 52)
 		{
-			DICEROLL_CARD_FROM_DECK_INDEX = 0;
+			RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
 		}
 	}
 	
 	// NO BREAK, fallthrough to show card!!!!
 
-	case DICEROLL_TAKERANDOMCARD:
+	case RANDOMWORLD_TAKERANDOMCARD:
 	{
 
-		if (DICEROLL_RANDOM_TYPE != DICEROLL_TAKERANDOMCARDFROMDECK)
+		if (RANDOMWORLD_RANDOM_TYPE != RANDOMWORLD_TAKERANDOMCARDFROMDECK)
 		{ // fall through from random card.
 			// random card
-			DICEROLL_RANDOM_NUMBER = random(0, 52); // 52 cards
+			RANDOMWORLD_RANDOM_NUMBER = random(0, 52); // 52 cards
 		}
 
 		//show playing card
-		if (DICEROLL_RANDOM_NUMBER % 13 < 9)
+		if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
 		{
-			textBuf[1] = DICEROLL_RANDOM_NUMBER % 13 + 49;
+			textBuf[1] = RANDOMWORLD_RANDOM_NUMBER % 13 + 49;
 		}
 		else
 		{
 			textBuf[0] = 49;													// 1
-			textBuf[1] = (3 - (((DICEROLL_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
+			textBuf[1] = (3 - (((RANDOMWORLD_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
 		}
 		
-		switch (DICEROLL_RANDOM_NUMBER / 13)
+		switch (RANDOMWORLD_RANDOM_NUMBER / 13)
 		{
 		case 0:
 			textBuf[3] = 'H';
@@ -1093,22 +1129,22 @@ void Apps::randomModeDisplay(bool forReal)
 
 	break;
 
-	case DICEROLL_RANDOMNUMBER:
+	case RANDOMWORLD_RANDOMNUMBER:
 	{
 		// random number
 
 		ledDisp->numberToBufAsDecimal(textBuf, random(0, 10000));
 	}
 	break;
-	case DICEROLL_RANDOMLETTER:
+	case RANDOMWORLD_RANDOMLETTER:
 	{
 		// show letter alphabeth, plus its position.
-		DICEROLL_RANDOM_NUMBER = random(0, 26);
-		displayLetterAndPositionInAlphabet(textBuf, DICEROLL_RANDOM_NUMBER);
+		RANDOMWORLD_RANDOM_NUMBER = random(0, 26);
+		displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
 		//ledDisp->setTextBufToDisplay(textBuf);
 	}
 	break;
-	case DICEROLL_HEADSORTAILS:
+	case RANDOMWORLD_HEADSORTAILS:
 	{
 		if (random(0, 2))
 		{
@@ -1126,7 +1162,7 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 	}
 	break;
-	case DICEROLL_YESORNO:
+	case RANDOMWORLD_YESORNO:
 	{
 		if (random(0, 2))
 		{
@@ -2231,8 +2267,6 @@ void Apps::modeHackTime(bool init){
 		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
 		HACKTIME_MOVE_TIMER.start();
 	}
-
-	
 
 	// write to mem if possible
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() && HACKTIME_MEMORY_SELECT != HACKTIME_MEMORY_FLASH){ //		

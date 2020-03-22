@@ -94,7 +94,7 @@
 [32m+[m[41m           [m
 [32m+[m[32m        case 3:[m
 [32m+[m[32m          //this->modeScroll(init);[m
-       this->modeDiceRoll(init);[m
+       this->modeRandomWorld(init);[m
 [31m-		  break;[m
 [31m-		  [m
 [31m-		case 4:[m
@@ -357,7 +357,7 @@
  }[m
 [31m-[m
 [32m+[m[41m [m
- void Apps::modeDiceRoll(bool init){[m
+ void Apps::modeRandomWorld(bool init){[m
    if (init){[m
 [31m-  [m
 [32m+[m[41m   [m
@@ -384,11 +384,11 @@
    if (binaryInputs[BUTTON_MOMENTARY_2].getValue() || binaryInputs[BUTTON_MOMENTARY_0].getValue()|| binaryInputs[BUTTON_MOMENTARY_1].getValue()){[m
 [31m-    [m
 [32m+[m[41m     [m
-     // DICEROLL_RANDOM_NUMBER ++;[m
-     // if (DICEROLL_RANDOM_NUMBER > 6){  // NO THIS IS TERRIBLE! about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out![m
-     //   DICEROLL_RANDOM_NUMBER = 1;[m
+     // RANDOMWORLD_RANDOM_NUMBER ++;[m
+     // if (RANDOMWORLD_RANDOM_NUMBER > 6){  // NO THIS IS TERRIBLE! about 600 times per second cycling through, so, this is as good as random, or is it? can you time it and predict your roll? I'll leave it in for you to find out![m
+     //   RANDOMWORLD_RANDOM_NUMBER = 1;[m
      // }[m
-     DICEROLL_RANDOM_NUMBER = random (1,7);[m
+     RANDOMWORLD_RANDOM_NUMBER = random (1,7);[m
 [31m-[m
 [32m+[m[41m [m
      if (!generalTimer.getTimeIsNegative()){[m
@@ -400,7 +400,7 @@
          for (uint8_t  i=1;i<4;i++){[m
            textBuf[i]=textBuf[i+1];[m
          }[m
-         textBuf[4] = 48 + DICEROLL_RANDOM_NUMBER; // convert digit to number char.[m
+         textBuf[4] = 48 + RANDOMWORLD_RANDOM_NUMBER; // convert digit to number char.[m
        }[m
 [31m-[m
 [32m+[m[41m [m
@@ -439,18 +439,18 @@
 [31m-[m
 [32m+[m[41m [m
          //first and third digit[m
-         if (DICEROLL_RANDOM_NUMBER == 1){[m
+         if (RANDOMWORLD_RANDOM_NUMBER == 1){[m
            textBuf[i] = ' '; // [m
-[36m@@ -341,7 +341,7 @@[m [mvoid Apps::modeDiceRoll(bool init){[m
+[36m@@ -341,7 +341,7 @@[m [mvoid Apps::modeRandomWorld(bool init){[m
              textBuf[i] = '_'; // seg D[m
            }[m
          }[m
 [31m-[m
 [32m+[m[41m [m
          //second digit[m
-         if (i == 2 && DICEROLL_RANDOM_NUMBER < 6){[m
+         if (i == 2 && RANDOMWORLD_RANDOM_NUMBER < 6){[m
            textBuf[i] = '-'; // assume odd[m
-[36m@@ -352,13 +352,13 @@[m [mvoid Apps::modeDiceRoll(bool init){[m
+[36m@@ -352,13 +352,13 @@[m [mvoid Apps::modeRandomWorld(bool init){[m
        }[m
      }[m
    } [m
@@ -468,7 +468,7 @@
  //   if (init){[m
  //     // display scroll mode[m
  // //    scrollBuf[0]='L';[m
-[36m@@ -372,7 +372,7 @@[m [mvoid Apps::modeDiceRoll(bool init){[m
+[36m@@ -372,7 +372,7 @@[m [mvoid Apps::modeRandomWorld(bool init){[m
  // //    scrollBuf[8]='B';[m
  // //    scrollBuf[9]='Y';[m
  // //[m
@@ -477,7 +477,7 @@
  //     this->scrollBuf[0]='H';[m
  //     scrollBuf[1]='A';[m
  //     scrollBuf[2]='P';[m
-[36m@@ -392,64 +392,64 @@[m [mvoid Apps::modeDiceRoll(bool init){[m
+[36m@@ -392,64 +392,64 @@[m [mvoid Apps::modeRandomWorld(bool init){[m
  //     scrollBuf[16]='Y';[m
  //     //scrollBuf[10]='/0';[m
  //     ledDisp->dispHandlerWithScroll(scrollBuf, true, false);[m
