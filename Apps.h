@@ -511,8 +511,6 @@ public:
     void setDefaultMode();
     void appSelector(bool init, uint8_t selector);
     bool init_app(bool init, uint8_t selector);
-    //void modeScroll(bool init);
-
     void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
@@ -542,7 +540,6 @@ public:
     void displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
-    // void fadeInList(uint32_t* movie, uint8_t length, uint32_t startScreen); //old school used too much ram for the movie buffer.
     uint8_t tombola(uint8_t* indexVariable, uint8_t *sequenceList, uint8_t length);
     void randomSequence(uint8_t *sequenceList, uint8_t length);
     void shuffle(uint8_t *list, uint8_t length);

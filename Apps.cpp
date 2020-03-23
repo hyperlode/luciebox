@@ -1128,92 +1128,6 @@ void Apps::randomModeDisplay(bool forReal)
 	ledDisp->setTextBufToDisplay(textBuf);
 }
 
-// void Apps::modeScroll(bool init){
-
-//   // display scroll mode
-
-//   if (init){
-//	 // display scroll mode
-// //	scrollBuf[0]='L';
-// //	scrollBuf[0]='U';
-// //	scrollBuf[1]='C';
-// //	scrollBuf[2]='I';
-// //	scrollBuf[3]='E';
-// //	scrollBuf[5]=' ';
-// //	scrollBuf[6]='B';
-// //	scrollBuf[7]='A';
-// //	scrollBuf[8]='B';
-// //	scrollBuf[9]='Y';
-// //
-
-//	 this->scrollBuf[0]='H';
-//	 scrollBuf[0]='A';
-//	 scrollBuf[1]='P';
-//	 scrollBuf[2]='P';
-//	 scrollBuf[3]='Y';
-//	 scrollBuf[5]=' ';
-//	 scrollBuf[6]='B';
-//	 scrollBuf[7]='D';
-//	 scrollBuf[8]='A';
-//	 scrollBuf[9]='Y';
-//	 scrollBuf[10]=' ';
-//	 scrollBuf[11]='B';
-//	 scrollBuf[12]='R';
-//	 scrollBuf[13]='A';
-//	 scrollBuf[14]='M';
-//	 scrollBuf[15]='Z';
-//	 scrollBuf[16]='Y';
-//	 //scrollBuf[10]='/0';
-//	 ledDisp->dispHandlerWithScroll(scrollBuf, true, false);
-
-//  this->fadeInList(displaySequence, 32, 0);
-//  counter = 0;
-//  counter2= false;
-
-//  generalTimer.setInitTimeMillis(-200);
-//  generalTimer.start();
-//   }
-//   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-//		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-//			counter++;
-
-//		}
-//		if(!generalTimer.getTimeIsNegative()){
-//			generalTimer.start();
-//			counter++;
-//		}
-//		if (counter>31){
-//			counter = 0;
-//			this->fadeInList(displaySequence, 32, 0);
-//			counter2  = !counter2;
-//		  }
-
-//		if (potentio->getValueStableChangedEdge()){
-//		  generalTimer.setInitTimeMillis((long)( potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms
-//		}
-
-//		displayAllSegments = displaySequence[counter];
-//		if (counter2){
-//			// negative ==> which makes it fade out.
-//			displayAllSegments = ~displayAllSegments;
-//		}
-
-//		ledDisp->setBinaryToDisplay(displayAllSegments);
-
-//	}else{
-//		if (!binaryInputs[BUTTON_MOMENTARY_2].getValue()){
-//		  ledDisp->doScroll();
-//		}
-
-//		if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){
-//		  ledDisp->setScrollSpeed((long)potentio->getValueStable());
-//		}else{
-//		  ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);
-//		}
-//	}
-
-// }
-
 void Apps::modeSimpleButtonsAndLights(bool init)
 {
 	lights = 0b00000000; //reset before switch enquiry
@@ -3926,8 +3840,7 @@ void Apps::modeReactionGame(bool init)
 			}
 			// show number of segments:
 			REACTION_GAME_TIMER_STEP = 10 - (uint16_t)((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
-			
-			
+		
 		}
 		else
 		{
@@ -4049,7 +3962,6 @@ void Apps::modeReactionGame(bool init)
 		}
 		else
 		{
-
 			//do nothing.  wait for display high score is finished.
 			if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 			{
@@ -4068,17 +3980,6 @@ void Apps::modeReactionGame(bool init)
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
 {
-
-	// uint8_t sequence[32];
-	// for (uint8_t i = 0; i < 32; i++) {
-	//  sequence[i] = i;
-	// }
-
-	// // shuffle in place
-	// this->shuffle(sequence, 32);
-
-	// fade in effect, enable random segments.
-	// uint32_t fullScreen = 0x00000000;
 	uint32_t fullScreen = startScreen;
 
 	for (uint8_t i = 0; i < step; i++)
@@ -4169,26 +4070,9 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 	{
 		bool loadElseSave = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();
-		// for (uint8_t i = 0; i < eepromSlotLength; i++)
-		// {
-			// uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
-			// 									  (slot_number - 1) * eepromSlotLength + i);
-
-			// if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
-			// {
-			// 	//save
-			// 	eeprom_write_byte(eeprom_address, data[i]);
+	
 		saveLoadFromEepromSlot(data, slot_number - 1, eepromSlotLength, eepromStartAddress, loadElseSave);
-				
-			// }
-			// else
-			// {
-			// 	//load
-			// 	data[i] = eeprom_read_byte(eeprom_address);
-			// 	loaded = true;
-			// }
-		// }
-
+	
 		return loadElseSave;
 	}
 
