@@ -1222,12 +1222,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	if (init)
 	{
 		SETTINGS_MODE_SELECTOR = 0;
-
 	}
-
-
-
-
 
 	// back and forth motion required of the potentio to count up modes
 	if (potentio->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 == 0)
@@ -1243,7 +1238,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 	if (SETTINGS_MODE_SELECTOR < 6)
 	{
-
 		//normal mode
 
 		// simple repetitive, predictive mode.
@@ -1266,7 +1260,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 				}else{
 					textHandle[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII;
-
 				}
 
 			}else{
@@ -1299,58 +1292,32 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 
-		// if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
 		if(millis() % 1000 < 500)
 		{
 			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_BEEP);
-		}
-		else
+		}		else
 		{
-			textBuf[1] = 'O'; // On Off o char
-
-			if (buzzer->getPin() == PIN_BUZZER)
-			{
-				//ON
-				//textBuf[0]=' ';
-				textBuf[2] = 'N';
-				// textBuf[3]=' ';
+			uint8_t text = TEXT_NO;
+			if (buzzer->getPin() == PIN_BUZZER){
+				
+				text = TEXT_YES;
 			}
-			else
-			{
-				// OFF
-
-				// textBuf[0]=' ';
-				// textBuf[1]='O';
-				textBuf[2] = 'F';
-				textBuf[3] = 'F';
-			}
-			ledDisp->setTextBufToDisplay(textBuf);
+			ledDisp->setStandardTextToTextBuf(textHandle, text );
 		}
 	}
-	
-	
 	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
 		
+		// menu title
 		textBuf[2] = 'A';
 		uint8_t index = (SETTINGS_MODE_SELECTOR - 8)/2 ;
 		textBuf[3] =  48 + index;
+		
+		// Value
 		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
 	}
+	
 	else if (SETTINGS_MODE_SELECTOR < 20)
-	{
-		//if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(300))
-		if (millis() % 1000 < 300)
-		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_EEPROM);
-		}
-		else
-		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_RESET);
-			ledDisp->setTextBufToDisplay(textBuf);
-		}
-	}
-	else if (SETTINGS_MODE_SELECTOR < 22)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
@@ -1365,18 +1332,13 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 					0);
 			}
 #endif
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_DONE);
+			buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 		}
 		else
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_DOIT);
-			ledDisp->setTextBufToDisplay(textBuf);
+			ledDisp->setStandardTextToTextBuf(textHandle, TEXT_RESET);
+			
 		}
-	}
-	else if (SETTINGS_MODE_SELECTOR < 24)
-	{
-
-		ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
 	}
 	else
 	{
@@ -1385,28 +1347,13 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 	if (SETTINGS_MODE_SELECTOR >= 6)
 	{
+		// show values one seconds, menu items half a second
 		// in real settings mode
-
-		// show menu title (compressed)
-		// if (counter%2 == 0){
-		//   // show analog pin
-		//   textBuf[3] = counter/2 + 48; // char 0 + analog pin .
-		//   ledDisp->setTextBufToDisplay(textBuf);
-		// }
-
-		// if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getTimeIsNegative())
-		// {
-		// 	SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();
-		// }
-
-		//if (SETTINGS_MODE_DISPLAY_VALUES_BLINK.getInFirstGivenHundredsPartOfSecond(500))
 		if (millis() % 1000 < 500)
 		{
 			ledDisp->setTextBufToDisplay(textBuf);
 		}
-
-		// show values one seconds, menu items half a second
-		//generalTimer.setInitTimeMillis((long) (-500 - (counter%2)*500));
+	
 	}
 	ledDisp->setLedArray(lights);
 }

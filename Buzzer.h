@@ -309,7 +309,7 @@ public:
 
     void setPin(uint8_t pin);
     uint8_t getPin();
-    void loadBuzzerTrack(const uint8_t *seq);
+    //void loadBuzzerTrack(const uint8_t *seq);
     void loadBuzzerTrack(const uint8_t *seq, uint8_t song_index);
     void programBuzzerRoll(uint8_t sound);
     uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);
