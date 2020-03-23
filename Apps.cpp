@@ -3579,16 +3579,14 @@ void Apps::modeReactionGame(bool init)
 		}
 
 		// special mode for the reaction game: limited total time during which as many points should be collected.
-		REACTION_COUNTDOWN_MODE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();
 		REACTION_GUITAR_HERO_MODE = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();
 
-		// guitar hero and countdown mode should never occure at the same time!
-		if (REACTION_GUITAR_HERO_MODE && REACTION_COUNTDOWN_MODE)
-		{
-			// error!!!
-			REACTION_COUNTDOWN_MODE = false; // no reaction count downmode for guitar hero.
+		REACTION_COUNTDOWN_MODE = false;
+		if (!REACTION_GUITAR_HERO_MODE){
+			// guitar hero and countdown mode should never occure at the same time!
+			REACTION_COUNTDOWN_MODE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();
 		}
-
+		
 // display level and high score
 #ifdef ENABLE_EEPROM
 		if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
@@ -3664,10 +3662,10 @@ void Apps::modeReactionGame(bool init)
 				{
 					buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
 					buzzer->programBuzzerRoll(rest_1);
+					buzzer->programBuzzerRoll(rest_1);
 				}
 
-				buzzer->programBuzzerRoll(rest_1);
-				buzzer->programBuzzerRoll(rest_1);
+				// buzzer->programBuzzerRoll(rest_1);
 			}
 
 			reactionGameState = reactionNewTurn;
@@ -3989,18 +3987,17 @@ uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, ui
 	return fullScreen;
 }
 
-
-
 uint8_t Apps::tombola(uint8_t* indexVariable, uint8_t *sequenceList, uint8_t length){
+	// will populate a list of certain length with unique numbers in random order. At every call, will take a next number until all numbers are depleted. It will then repopulate the list with a new random sequence
 	if (*indexVariable == 0)
 	{
+		buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
 		randomSequence(sequenceList, length);
 		*indexVariable = length;
 	}
 
 	// draw card off deck
 	return sequenceList[--(*indexVariable)]; // 
-
 }
 
 void Apps::randomSequence(uint8_t *sequenceList, uint8_t length){
