@@ -884,7 +884,6 @@ void Apps::modeRandomWorld(bool init)
 			}
 		}
 
-
 		// display
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 		{

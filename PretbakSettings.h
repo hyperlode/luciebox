@@ -91,8 +91,9 @@
 #define BUTTONS_1_COUNT 5
 #define BUTTONS_1_VALUES      \
     {                         \
-        509, 253, 129, 63, 32 \
+        500, 257, 123, 50, 28 \
     }
+     // 509, 253, 129, 63, 32 
 #endif
 
 #define BUTTONS_2_COUNT 3
@@ -107,8 +108,9 @@
 //  #define BUTTONS_2_VALUES {452,219,107}
 #define BUTTONS_2_VALUES \
     {                    \
-        510, 256, 106    \
+        510, 245, 106    \
     }
+    // 510, 256, 106    
 #endif
 
 #define MERCURY_SWITCHES_COUNT 4
