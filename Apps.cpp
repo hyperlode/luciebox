@@ -695,106 +695,111 @@ void Apps::stopwatch(bool init)
 		ledDisp->setDecimalPointsToDisplay(decimalPoints);
 	}
 }
-void Apps::modeButtonDebug(bool init)
-{
-	// integrated debug mode (intended to be able to be activated in the final product in order to debug).
-	// will show in sequence all analog input values.
-	if (init)
-	{
-		generalTimer.setInitTimeMillis(0);
-		generalTimer.start();
-		counter = -1;
-	}
+// void Apps::modeButtonDebug(bool init)
+// {
+// 	// integrated debug mode (intended to be able to be activated in the final product in order to debug).
+// 	// will show in sequence all analog input values.
+// 	if (init)
+// 	{
+// 		generalTimer.setInitTimeMillis(0);
+// 		generalTimer.start();
+// 		counter = -1;
+// 	}
 
-	if (!generalTimer.getTimeIsNegative())
-	{
-		counter++;
-		if (counter > 9)
-		{
-			counter = 0;
-		}
+// 	if (!generalTimer.getTimeIsNegative())
+// 	{
+// 		counter++;
+// 		if (counter > 9)
+// 		{
+// 			counter = 0;
+// 		}
 
-		textBuf[0] = ' ';
-		textBuf[1] = ' ';
-		textBuf[2] = 'A';
+// 		textBuf[0] = ' ';
+// 		textBuf[1] = ' ';
+// 		textBuf[2] = 'A';
 
-		switch (counter)
-		{
-		// case 0:{
-		//   // textBuf[3]='0'; // analog A0
-		//   // ledDisp->setTextBufToDisplay(textBuf);
-		//   // generalTimer.setInitTimeMillis((long)-500);
-		//   break;
-		// }
-		case 1:
-		{
-			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_SELECTOR_DIAL));
-			// generalTimer.setInitTimeMillis((long)-1000);
-			break;
-		}
-		// case 2:{
-		//   // textBuf[3]='1'; // analog A1
-		//   // ledDisp->setTextBufToDisplay(textBuf);
-		//   // generalTimer.setInitTimeMillis((long)-500);
-		//   break;
-		// }
-		case 3:
-		{
-			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_1));
-			// generalTimer.setInitTimeMillis((long)-1000);
-			break;
-		}
-		// case 4:{
-		//   // textBuf[3]='2'; // analog A2
-		//   // ledDisp->setTextBufToDisplay(textBuf);
-		//   // generalTimer.setInitTimeMillis((long)-500);
-		//   break;
-		// }
-		case 5:
-		{
-			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_2));
-			// generalTimer.setInitTimeMillis((long)-1000);
-			break;
-		}
-		// case 6:{
-		//   textBuf[3]='3';// analog A3
-		//   ledDisp->setTextBufToDisplay(textBuf);
-		//   // generalTimer.setInitTimeMillis((long)-500);
-		//   break;
-		// }
-		case 7:
-		{
-			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_POTENTIO));
-			// generalTimer.setInitTimeMillis((long)-1000);
-			break;
-		}
-		// case 8:{
-		//   textBuf[3]='4';// analog A4
-		//   ledDisp->setTextBufToDisplay(textBuf);
-		//   // generalTimer.setInitTimeMillis((long)-500);
-		//   break;
-		// }
-		case 9:
-		{
-			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_MERCURY_SWITCHES));
-			// generalTimer.setInitTimeMillis((long)-1000);
-			break;
-		}
-		}
 
-		// show menu title (compressed)
-		if (counter % 2 == 0)
-		{
-			// show analog pin
-			textBuf[3] = counter / 2 + 48; // char 0 + analog pin .
-			ledDisp->setTextBufToDisplay(textBuf);
-		}
+// 		const uint8_t analog_input_pins [5] = {PIN_SELECTOR_DIAL,PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
 
-		// show values one seconds, menu items half a second
-		generalTimer.setInitTimeMillis((long)(-500 - (counter % 2) * 500));
-		generalTimer.start();
-	}
-}
+
+
+// 		switch (counter)
+// 		{
+// 		// case 0:{
+// 		//   // textBuf[3]='0'; // analog A0
+// 		//   // ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // generalTimer.setInitTimeMillis((long)-500);
+// 		//   break;
+// 		// }
+// 		case 1:
+// 		{
+// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_SELECTOR_DIAL));
+// 			// generalTimer.setInitTimeMillis((long)-1000);
+// 			break;
+// 		}
+// 		// case 2:{
+// 		//   // textBuf[3]='1'; // analog A1
+// 		//   // ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // generalTimer.setInitTimeMillis((long)-500);
+// 		//   break;
+// 		// }
+// 		case 3:
+// 		{
+// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_1));
+// 			// generalTimer.setInitTimeMillis((long)-1000);
+// 			break;
+// 		}
+// 		// case 4:{
+// 		//   // textBuf[3]='2'; // analog A2
+// 		//   // ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // generalTimer.setInitTimeMillis((long)-500);
+// 		//   break;
+// 		// }
+// 		case 5:
+// 		{
+// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_2));
+// 			// generalTimer.setInitTimeMillis((long)-1000);
+// 			break;
+// 		}
+// 		// case 6:{
+// 		//   textBuf[3]='3';// analog A3
+// 		//   ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // generalTimer.setInitTimeMillis((long)-500);
+// 		//   break;
+// 		// }
+// 		case 7:
+// 		{
+// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_POTENTIO));
+// 			// generalTimer.setInitTimeMillis((long)-1000);
+// 			break;
+// 		}
+// 		// case 8:{
+// 		//   textBuf[3]='4';// analog A4
+// 		//   ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // generalTimer.setInitTimeMillis((long)-500);
+// 		//   break;
+// 		// }
+// 		case 9:
+// 		{
+// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_MERCURY_SWITCHES));
+// 			// generalTimer.setInitTimeMillis((long)-1000);
+// 			break;
+// 		}
+// 		}
+
+// 		// show menu title (compressed)
+// 		if (counter % 2 == 0)
+// 		{
+// 			// show analog pin
+// 			textBuf[3] = counter / 2 + 48; // char 0 + analog pin .
+// 			ledDisp->setTextBufToDisplay(textBuf);
+// 		}
+
+// 		// show values one seconds, menu items half a second
+// 		generalTimer.setInitTimeMillis((long)(-500 - (counter % 2) * 500));
+// 		generalTimer.start();
+// 	}
+// }
 
 void Apps::modeRandomWorld(bool init)
 {
@@ -1212,12 +1217,17 @@ void Apps::randomModeDisplay(bool forReal)
 void Apps::modeSimpleButtonsAndLights(bool init)
 {
 	lights = 0b00000000; //reset before switch enquiry
+	const uint8_t analog_input_pins [5] = {PIN_SELECTOR_DIAL,PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
 
 	if (init)
 	{
 		SETTINGS_MODE_SELECTOR = 0;
 
 	}
+
+
+
+
 
 	// back and forth motion required of the potentio to count up modes
 	if (potentio->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 == 0)
@@ -1264,8 +1274,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 		
-
-
 		allLights->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
@@ -1319,35 +1327,15 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			ledDisp->setTextBufToDisplay(textBuf);
 		}
 	}
-	else if (SETTINGS_MODE_SELECTOR < 10)
-	{
-		textBuf[2] = 'A';
-		textBuf[3] = '0';
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_SELECTOR_DIAL));
-	}
-	else if (SETTINGS_MODE_SELECTOR < 12)
-	{
-		textBuf[2] = 'A';
-		textBuf[3] = '1';
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_1));
-	}
-	else if (SETTINGS_MODE_SELECTOR < 14)
-	{
-		textBuf[2] = 'A';
-		textBuf[3] = '2';
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_2));
-	}
-	else if (SETTINGS_MODE_SELECTOR < 16)
-	{
-		textBuf[2] = 'A';
-		textBuf[3] = '3';
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_POTENTIO));
-	}
+	
+	
 	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
+		
 		textBuf[2] = 'A';
-		textBuf[3] = '4';
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_MERCURY_SWITCHES));
+		uint8_t index = (SETTINGS_MODE_SELECTOR - 8)/2 ;
+		textBuf[3] =  48 + index;
+		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
 	}
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
