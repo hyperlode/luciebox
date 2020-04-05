@@ -15,5 +15,5 @@ DONE -label better: power connector / programming connector.
 DONE -add 8th led light output. 
 DONE -add some more holes for the R-2R ladder bridging (if not all slots are used).
 mounting holes check position with chosen box
-led's lights, output close to switches for easy wiring.(buttons with lights).
-resistor bridge for selector knob
+DONE buttons lights, led cathodes output close to switches for easy wiring.(buttons with lights).
+NOPE resistor bridge for selector knob

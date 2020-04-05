@@ -1889,10 +1889,10 @@ F1 "R2-R_ladder_dac_tilt_switches.sch" 50
 F2 "DAC_analog_out" O R 1300 1200 50 
 $EndSheet
 $Comp
-L Luciebox_components:terminal_8x1 T?
+L Luciebox_components:terminal_8x1 T12
 U 1 1 5EE64EB9
 P 3350 3250
-F 0 "T?" H 3467 3035 50  0000 C CNN
+F 0 "T12" H 3467 3035 50  0000 C CNN
 F 1 "terminal_8x1" H 3467 3126 50  0000 C CNN
 F 2 "Luciebox:Terminal_8x1_100mil" H 3150 3150 50  0001 C CNN
 F 3 "" H 3300 4350 50  0001 C CNN
@@ -1907,21 +1907,15 @@ Connection ~ 3450 3000
 Wire Wire Line
 	3400 3850 3500 3850
 Wire Wire Line
-	3500 3850 3500 2900
-Wire Wire Line
-	3550 2800 3550 3750
+	3500 3850 3500 3400
 Wire Wire Line
 	3550 3750 3400 3750
 Wire Wire Line
-	3400 3650 3600 3650
-Wire Wire Line
 	3600 3650 3600 2700
-Wire Wire Line
-	3650 2600 3650 3550
 Wire Wire Line
 	3650 3550 3400 3550
 Wire Wire Line
-	3700 2500 3700 3450
+	3700 2500 3700 3300
 Wire Wire Line
 	3700 3450 3400 3450
 Wire Wire Line
@@ -1932,4 +1926,61 @@ Wire Wire Line
 	3800 2300 3800 3250
 Wire Wire Line
 	3800 3250 3400 3250
+$Comp
+L Luciebox_components:terminal_8x1 T?
+U 1 1 5E835E31
+P 4000 4000
+F 0 "T?" H 4117 3785 50  0000 C CNN
+F 1 "terminal_8x1" H 4117 3876 50  0000 C CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 3800 3900 50  0001 C CNN
+F 3 "" H 3950 5100 50  0001 C CNN
+	1    4000 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3650 2600 3650 3550
+Wire Wire Line
+	3950 3300 3700 3300
+Connection ~ 3700 3300
+Wire Wire Line
+	3700 3300 3700 3450
+Wire Wire Line
+	3950 3400 3500 3400
+Connection ~ 3500 3400
+Wire Wire Line
+	3500 3400 3500 2900
+Wire Wire Line
+	3950 3500 3750 3500
+Wire Wire Line
+	3750 3500 3750 3350
+Connection ~ 3750 3350
+Wire Wire Line
+	3950 3600 3700 3600
+Wire Wire Line
+	3700 3600 3700 3450
+Connection ~ 3700 3450
+Wire Wire Line
+	3400 3650 3600 3650
+Wire Wire Line
+	3550 2800 3550 3700
+Wire Wire Line
+	3950 3700 3550 3700
+Connection ~ 3550 3700
+Wire Wire Line
+	3550 3700 3550 3750
+Wire Wire Line
+	3950 3800 3600 3800
+Wire Wire Line
+	3600 3800 3600 3650
+Connection ~ 3600 3650
+Wire Wire Line
+	3950 3900 3650 3900
+Wire Wire Line
+	3650 3900 3650 3550
+Connection ~ 3650 3550
+Wire Wire Line
+	3950 4000 3450 4000
+Wire Wire Line
+	3450 4000 3450 3950
+Connection ~ 3450 3950
 $EndSCHEMATC
