@@ -158,6 +158,8 @@
 #define COMPOSER_STEP counter
 #define POMODORO_STATS_WORKING_GOOD counter
 #define HACKTIME_ADDRESS counter
+#define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
+
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -167,6 +169,7 @@
 #define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW counter2
 #define POMODORO_INIT_TIME_SECONDS counter2
 #define HACKTIME_DISPLAY_MODE counter2
+#define SOUND_NOTES_SCALE_INDEX counter2
 
 //#define DRAW_Y_POS counter3
 #define DRAW_CURSOR_INDEX counter3
@@ -207,6 +210,8 @@
 #define METRONOME_TICKER_3_POSITION counter7
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
+
+#define SOUND_NOTES_NOTE_INDEX counter9
 
 #define REACTION_COUNTDOWN_MODE general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -253,6 +258,36 @@ const char dice_eyes_display[] PROGMEM = {
 //     ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_MIDDLE_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS,
 //     ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS
 // };
+
+#define SCALES_COUNT 5-1
+
+#define LEN_MAJ 7-1
+#define LEN_MIN 7-1
+#define LEN_PENT_MAJ 5-1
+#define LEN_BLUES_MAJ 6 - 1
+#define LEN_HARM 12-1
+
+#define MAJ 0
+#define MIN 7
+#define PENT 14 
+#define BLUES_MAJ 19
+#define HARM 25
+
+const uint8_t scale_start_indeces [] PROGMEM = {MAJ, MIN ,PENT, BLUES_MAJ, HARM};
+
+const uint8_t scale_lengths [] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BLUES_MAJ, LEN_HARM};
+ 
+ const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,  
+ 2,1,2,2,1,2,2,1 ,
+ 3,2,2,3,2,
+ 3,2,1,1,3,2,
+ 1,1,1,1,1,1,1,1,1,1,1,1};
+
+// const uint8_t scale_major [] PROGMEM = { 2,2,1,2,2,2,1};
+// const uint8_t scale_minor [] PROGMEM = { 2,1,2,2,1,2,2,1};
+// const uint8_t scale_pentatonic_major [] PROGMEM = {3,2,2,3,2};
+// const uint8_t scale_blues_major [] PROGMEM = {3,2,1,1,3,2};  
+// const uint8_t harmonic [] PROGMEM = {1,1,1,1,1,1,1,1,1,1,1,1};
 
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
@@ -457,10 +492,11 @@ const uint8_t songs [] PROGMEM = {
     // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
    
 };
-const uint8_t scale_major[] PROGMEM = {C7_2, rest_4, D7_2, rest_4, E7_2, rest_4, F7_2, rest_4, G7_2, rest_4, A7_2, rest_4, B7_2, rest_4, C8_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
-const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2, rest_4, G7_2, rest_4, F7_2, rest_4, E7_2, rest_4, D7_2, rest_4, C7_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
 
-const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
+// const uint8_t scale_major[] PROGMEM = {C7_2, rest_4, D7_2, rest_4, E7_2, rest_4, F7_2, rest_4, G7_2, rest_4, A7_2, rest_4, B7_2, rest_4, C8_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
+// const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2, rest_4, G7_2, rest_4, F7_2, rest_4, E7_2, rest_4, D7_2, rest_4, C7_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
+
+// const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
 
 #if MOMENTARY_BUTTONS_COUNT == 3
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
@@ -471,7 +507,7 @@ const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MO
                                     LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
-                                    BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_EXTRA};
+                                    BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
 
 #endif
 
@@ -592,6 +628,7 @@ private:
     uint8_t counter7;
 
     uint16_t counter8;
+    int16_t counter9;
 
     
     enum

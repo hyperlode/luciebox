@@ -1175,7 +1175,8 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 				}else{
 					textHandle[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII;
 				}
-
+			}else if (binaryInputs[buttons_indexed[i]].getValue()){
+				textHandle[i] = '0';
 			}else{
 					textHandle[i] = ' ';
 			}
@@ -1192,8 +1193,8 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 			eeprom_update_byte(
 				(uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT,
-				//i,
-				!eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT));
+				!eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT)
+				);
 #endif
 
 			if (buzzer->getPin() == PIN_BUZZER)
@@ -1211,10 +1212,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_BEEP);
 		}		else
 		{
-			uint8_t text = TEXT_NO;
+			
+			uint8_t text = TEXT_YES;
 			if (buzzer->getPin() == PIN_BUZZER){
 				
-				text = TEXT_YES;
+				text = TEXT_NO;
 			}
 			ledDisp->setStandardTextToTextBuf(textHandle, text );
 		}
@@ -1645,7 +1647,8 @@ void Apps::modeSoundNotes(bool init)
 
 	if (init)
 	{
-		decimalPoints = 0xFF;
+		//decimalPoints = 0xFF;
+
 	}
 
 	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
@@ -1657,61 +1660,97 @@ void Apps::modeSoundNotes(bool init)
 	// buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
 	// }
 	// }else
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-	{
+	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+	// {
 
+	// 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+	// 	{
+	// 		buzzer->buzzerOff();
+	// 		ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(223, 235));
+	// 		//0 -> 63 short
+	// 	}
+	// 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+	// 	{
+	// 		buzzer->buzzerOff();
+	// 		ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(160, 223));
+	// 	}
+	// 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+	// 	{
+	// 		buzzer->buzzerOff();
+	// 		ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(97, 160));
+	// 	}
+	// }
+	// else
+	// {
+
+	// 	// simple mode.
+	// 	if (potentio->getValueStableChangedEdge())
+	// 	{
+	// 		//buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
+	// 		SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0, 255);
+	// 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
+	// 		{
+	// 			buzzer->buzzerOff();
+	// 		}
+	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+	// 	}
+
+	// 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+	// 	{
+	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+	// 		SOUND_FUN_NOTE_INDEX--;
+	// 	}
+
+	// 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+	// 	{
+	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+	// 	}
+
+	// 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+	// 	{
+	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+	// 		SOUND_FUN_NOTE_INDEX++;
+	// 	}
+
+	// 	buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
+	// 	ledDisp->setTextBufToDisplay(textBuf);
+	// 	ledDisp->setDecimalPointsToDisplay(decimalPoints);
+	// }
+		
+		//  change scale
 		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 		{
-			buzzer->buzzerOff();
-			ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(223, 235));
-			//0 -> 63 short
+			nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
+			// SOUND_NOTES_SCALE_INDEX = 3;
+			ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_SCALE_INDEX);
+			
 		}
-		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-		{
-			buzzer->buzzerOff();
-			ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(160, 223));
-		}
+
+		// change note
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		{
-			buzzer->buzzerOff();
-			ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(97, 160));
-		}
-	}
-	else
-	{
+			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX,1,0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
+			
 
-		// simple mode.
-		if (potentio->getValueStableChangedEdge())
-		{
-			//buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
-			SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0, 255);
-			if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
-			{
-				buzzer->buzzerOff();
+			uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
+			for (uint8_t i=0;i<pgm_read_byte_near(scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++){
+				nextStepRotate(&SOUND_NOTES_NOTE_INDEX,1,0, 255);
 			}
-			buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
+
+			buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
+			// index to actual note on the scale
+			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
+			//ledDisp->setNumberToDisplayAsDecimal(pgm_read_byte_near(scale_blues_major+SOUND_NOTES_NOTE_ON_SCALE_INDEX));
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+		// reset note (todo: change root!)
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
 		{
-			buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-			SOUND_FUN_NOTE_INDEX--;
+			SOUND_NOTES_NOTE_INDEX = B4_4;
+			SOUND_NOTES_NOTE_ON_SCALE_INDEX = 111;
+
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-		{
-			buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-		}
-
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-		{
-			buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-			SOUND_FUN_NOTE_INDEX++;
-		}
-		buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
-		ledDisp->setTextBufToDisplay(textBuf);
-		ledDisp->setDecimalPointsToDisplay(decimalPoints);
-	}
 }
 
 void Apps::movieAnimationMode(bool init)
