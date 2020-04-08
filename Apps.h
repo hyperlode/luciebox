@@ -181,6 +181,7 @@
 #define SIMON_RANDOM_PLAYER_SEQUENCE counter3
 #define STOPWATCH_LAP_MEMORY counter3
 #define POMODORO_STATS_WORKING_BAD counter3
+#define SOUND_NOTES_SCALE_ROOT counter3
 
 #define REACTION_GAME_TARGET counter4
 #define COUNTER_GEIGER counter4

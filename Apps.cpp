@@ -1648,6 +1648,7 @@ void Apps::modeSoundNotes(bool init)
 	if (init)
 	{
 		//decimalPoints = 0xFF;
+		SOUND_NOTES_SCALE_ROOT = C4_4;
 
 	}
 
@@ -1716,7 +1717,8 @@ void Apps::modeSoundNotes(bool init)
 	// 	ledDisp->setTextBufToDisplay(textBuf);
 	// 	ledDisp->setDecimalPointsToDisplay(decimalPoints);
 	// }
-		
+		bool update = false;
+
 		//  change scale
 		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 		{
@@ -1726,30 +1728,52 @@ void Apps::modeSoundNotes(bool init)
 			
 		}
 
-		// change note
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+		// change scale key (todo: change root!)
+		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
 		{
-			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX,1,0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
-			
-
-			uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
-			for (uint8_t i=0;i<pgm_read_byte_near(scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++){
-				nextStepRotate(&SOUND_NOTES_NOTE_INDEX,1,0, 255);
+			// first keypress, back to root. 
+			// second keypress, change root.
+			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT){
+				SOUND_NOTES_SCALE_ROOT ++;
+				if (SOUND_NOTES_SCALE_ROOT> 11){
+					SOUND_NOTES_SCALE_ROOT = 0;
+				}
 			}
 
+			SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
+			SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
+			update = true;
+
+		}
+
+		// change note
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+		{
+			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX,binaryInputs[BUTTON_MOMENTARY_3].getValue(), 0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
+			update = true;
+		}
+
+
+		if (update){
+
+
+
+			uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
+			
+			for (uint8_t i=0;i<pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++){
+				nextStepRotate(&SOUND_NOTES_NOTE_INDEX,1,0, 255);
+			}
+			
+			// ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_NOTE_ON_SCALE_INDEX);
+			
 			buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
 			// index to actual note on the scale
 			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
 			//ledDisp->setNumberToDisplayAsDecimal(pgm_read_byte_near(scale_blues_major+SOUND_NOTES_NOTE_ON_SCALE_INDEX));
-		}
-
-		// reset note (todo: change root!)
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-		{
-			SOUND_NOTES_NOTE_INDEX = B4_4;
-			SOUND_NOTES_NOTE_ON_SCALE_INDEX = 111;
+		
 
 		}
+	
 
 }
 
