@@ -1648,133 +1648,85 @@ void Apps::modeSoundNotes(bool init)
 	if (init)
 	{
 		//decimalPoints = 0xFF;
-		SOUND_NOTES_SCALE_ROOT = C4_4;
-
+		SOUND_NOTES_SCALE_ROOT = C5_4;
 	}
 
-	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-	// if (potentio->getValueStableChangedEdge()){
+	bool update = false;
+	byte lights = 0b00000000;
 
-	// buzzer->buzzerOff();
-	// SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0,255);
-	// ledDisp->setNumberToDisplayAsDecimal(SOUND_FUN_NOTE_INDEX);
-	// buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	// }
-	// }else
-	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-	// {
+	//  change scale
+	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+	{
+		nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
+		// SOUND_NOTES_SCALE_INDEX = 3;
+		ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_SCALE_INDEX);
+	}
 
-	// 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-	// 	{
-	// 		buzzer->buzzerOff();
-	// 		ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(223, 235));
-	// 		//0 -> 63 short
-	// 	}
-	// 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-	// 	{
-	// 		buzzer->buzzerOff();
-	// 		ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(160, 223));
-	// 	}
-	// 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-	// 	{
-	// 		buzzer->buzzerOff();
-	// 		ledDisp->setNumberToDisplayAsDecimal(buzzer->addRandomSoundToRoll(97, 160));
-	// 	}
-	// }
-	// else
-	// {
+	// change scale key (todo: change root!)
+	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+	{
+		// first keypress, back to root. 
+		// second keypress, change root.
+		if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT){
 
-	// 	// simple mode.
-	// 	if (potentio->getValueStableChangedEdge())
-	// 	{
-	// 		//buzzer->programBuzzerRoll(potentio->getValueStable() /4);;
-	// 		SOUND_FUN_NOTE_INDEX = potentio->getValueMapped(0, 255);
-	// 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
-	// 		{
-	// 			buzzer->buzzerOff();
-	// 		}
-	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	// 	}
-
-	// 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-	// 	{
-	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	// 		SOUND_FUN_NOTE_INDEX--;
-	// 	}
-
-	// 	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-	// 	{
-	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	// 	}
-
-	// 	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-	// 	{
-	// 		buzzer->programBuzzerRoll(SOUND_FUN_NOTE_INDEX);
-	// 		SOUND_FUN_NOTE_INDEX++;
-	// 	}
-
-	// 	buzzer->noteToDisplay(textBuf, &decimalPoints, SOUND_FUN_NOTE_INDEX);
-	// 	ledDisp->setTextBufToDisplay(textBuf);
-	// 	ledDisp->setDecimalPointsToDisplay(decimalPoints);
-	// }
-		bool update = false;
-
-		//  change scale
-		if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-		{
-			nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
-			// SOUND_NOTES_SCALE_INDEX = 3;
-			ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_SCALE_INDEX);
-			
-		}
-
-		// change scale key (todo: change root!)
-		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
-		{
-			// first keypress, back to root. 
-			// second keypress, change root.
-			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT){
-				SOUND_NOTES_SCALE_ROOT ++;
-				if (SOUND_NOTES_SCALE_ROOT> 11){
-					SOUND_NOTES_SCALE_ROOT = 0;
-				}
+			SOUND_NOTES_SCALE_ROOT ++;
+			if (SOUND_NOTES_SCALE_ROOT> 92){
+				SOUND_NOTES_SCALE_ROOT = 80;
 			}
 
-			SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
-			SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
-			update = true;
-
 		}
 
-		// change note
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
-		{
-			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX,binaryInputs[BUTTON_MOMENTARY_3].getValue(), 0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
-			update = true;
-		}
-
-
-		if (update){
-
-
-
-			uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
-			
-			for (uint8_t i=0;i<pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++){
-				nextStepRotate(&SOUND_NOTES_NOTE_INDEX,1,0, 255);
-			}
-			
-			// ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_NOTE_ON_SCALE_INDEX);
-			
-			buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
-			// index to actual note on the scale
-			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
-			//ledDisp->setNumberToDisplayAsDecimal(pgm_read_byte_near(scale_blues_major+SOUND_NOTES_NOTE_ON_SCALE_INDEX));
+		SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
 		
+		SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
+		update = true;
+	}
 
+	// change note potentio
+
+	// update = potentio->increaseSubtractAtChange(&SOUND_NOTES_NOTE_ON_SCALE_INDEX,1);
+
+	bool upElseDown;
+	bool update_note = false;
+		
+	if (potentio->getValueStableChangedEdge()){
+		upElseDown = potentio->getLastStableValueChangedUp();
+		update_note = true;
+	}
+
+	// change note
+	if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+	{
+		upElseDown = binaryInputs[BUTTON_MOMENTARY_3].getValue();
+		update_note = true;
+	}
+
+	if (update_note){
+		nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX, upElseDown, 0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
+
+		uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
+		
+		for (uint8_t i=0;i<pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++){
+			nextStepRotate(&SOUND_NOTES_NOTE_INDEX,upElseDown,0, 255);
+		}		
+	}
+
+	if (update || update_note){
+		// ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_NOTE_ON_SCALE_INDEX);
+		
+			
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+			// buzzer->cleanBuzzerRoll();
+			buzzer->buzzerOff();
+			lights = 0b00000001;
 		}
-	
-
+		
+		buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
+		// index to actual note on the scale
+		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
+		//ledDisp->setNumberToDisplayAsDecimal(pgm_read_byte_near(scale_blues_major+SOUND_NOTES_NOTE_ON_SCALE_INDEX));
+		ledDisp->setLedArray(lights);
+	}
 }
 
 void Apps::movieAnimationMode(bool init)
