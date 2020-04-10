@@ -1656,6 +1656,7 @@ void Apps::modeSoundNotes(bool init)
 		SOUND_NOTE_AUTO_TIMER.setInitTimeMillis(-500);
 		SOUND_NOTE_AUTO_TIMER.start();
 		SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
+		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_STEP_THROUGH_ALL;
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
@@ -1668,21 +1669,35 @@ void Apps::modeSoundNotes(bool init)
 			upElseDown = SOUND_NOTE_AUTO_UP_ELSE_DOWN;
 		}
 
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = !SOUND_NOTE_AUTO_UP_ELSE_DOWN;
+		}
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+			SOUND_NOTES_AUTO_MODE++;
+			if (SOUND_NOTES_AUTO_MODE > 5)
+			{
+				SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_STEP_THROUGH_ALL;
+			}
 		}
 
 		listenToPotentioToIncrementTimerInit(&SOUND_NOTE_AUTO_TIMER,50);
 
 	}else
 	{
-		if (potentio->getValueStableChangedEdge()){
+		// manual mode
+
+		// always step through all notes.
+		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_STEP_THROUGH_ALL;
+
+		// change note with potentio
+		if (potentio->getValueStableChangedEdge())
+		{
 			upElseDown = potentio->getLastStableValueChangedUp();
 			update_note = true;
 		}
 
-		// change note
+		// change note with button press
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
 		{
 			upElseDown = binaryInputs[BUTTON_MOMENTARY_3].getValue();
@@ -1715,37 +1730,60 @@ void Apps::modeSoundNotes(bool init)
 		play_note = true;
 	}
 	
-	if (update_note){
+	if (update_note)
+	{
+		uint8_t note_jumps = 1;
+		//number of notes to skip
+		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_RANDOM ||
+		    SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_RANDOM_IN_LENGTH ||
+		    SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_RANDOM_IN_OCTAVE
+		){
+			upElseDown = random(1,2);
+			note_jumps = random(1,100);
+		}
 
-		// how many steps to next note on scale
-		nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX, upElseDown, 0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
+		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_STEP_THROUGH_ALL ||
+		    SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_STEP_IN_LENGTH ||
+		    SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_STEP_IN_OCTAVE
+		){
+		}
 
-		uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
-		
-		// execute the steps to next note.
-		for (uint8_t i=0;i<pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++){
-			nextStepRotate(&SOUND_NOTES_NOTE_INDEX,upElseDown,0, 255);
-		}		
+		for (uint8_t note_jump = 0; note_jump < note_jumps; note_jumps++){
+
+			// how many steps to next note on scale
+			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX, upElseDown, 0, (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
+			uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
+			// execute the steps to next note.
+			for (uint8_t i=0;i<pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);i++)
+			{
+				nextStepRotate(&SOUND_NOTES_NOTE_INDEX,upElseDown,0, 255);
+			}
+
+		}
+
 	}
 
-	if (play_note || update_note){
+	if (play_note || update_note)
+	{
 
-		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+		{
 			buzzer->buzzerOff();	
 		}
 		buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
 	}
 
 	// index to actual note on the scale
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !binaryInputs[BUTTON_LATCHING_EXTRA].getValue() ){
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
+	{
 		// show scale only in non auto mode.
 		ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_SCALE_INDEX);
 	
-	}else{
+	}
+	else
+	{
 		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
 	}
-	
-	//ledDisp->setLedArray(lights);
 }
 
 void Apps::movieAnimationMode(bool init)
