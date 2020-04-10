@@ -58,7 +58,16 @@ void DisplayManagement::setBinaryToDisplay(uint32_t value) //updateDisplayAllBit
 	this->displayBinary = value;
 }
 
-
+void DisplayManagement::progmemToDisplayBuffer(uint32_t* displayBuffer, uint8_t* progmemAddress)
+{
+	// will take four bytes starting from the progmemAddress (which contains an address)
+	// progmemPosition = 
+	//*displayBuffer = 0;
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		*displayBuffer |= (uint32_t)pgm_read_byte_near(progmemAddress + (i)) << (8 * i); //* 4 --> 4 bytes per dword
+	}
+}
 
 void DisplayManagement::setDecimalPointsToDisplay(byte decimalPoints){
 	this->decimalPoints = decimalPoints;

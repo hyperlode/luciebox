@@ -49,7 +49,7 @@
 #define APP_SELECTOR_SOUND_SONG 10
 #define APP_SELECTOR_MOVIE_MODE 11
 #define APP_SELECTOR_DRAW 12
-#define APP_DRAW_GAME 13
+#define APP_SELECTOR_DRAW_GAME 13
 #define APP_SELECTOR_SETTING 14
 #define APP_SELECTOR_SETTING_TOO 15
 #define APP_SELECTOR_SOUND_METRONOME 16
@@ -288,7 +288,7 @@ const uint8_t scale_start_indeces [] PROGMEM = {MAJ, MIN ,PENT, BLUES_MAJ, HARM}
 
 const uint8_t scale_lengths [] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BLUES_MAJ, LEN_HARM};
  
- const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,  
+const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,  
  2,1,2,2,1,2,2,1 ,
  3,2,2,3,2,
  3,2,1,1,3,2,
@@ -522,21 +522,21 @@ const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTO
 
 #endif
 
-const uint32_t tilt_forward[] PROGMEM = {
+const uint8_t tilt_forward[] PROGMEM = {
     0x08, 0x08, 0x08, 0x08};
-const uint32_t tilt_backward[] PROGMEM = {
+const uint8_t tilt_backward[] PROGMEM = {
     0x01, 0x01, 0x01, 0x01};
-const uint32_t tilt_left[] PROGMEM = {
+const uint8_t tilt_left[] PROGMEM = {
     0x30, 0x30, 0x30, 0x30};
-const uint32_t tilt_right[] PROGMEM = {
+const uint8_t tilt_right[] PROGMEM = {
     0x06, 0x06, 0x06, 0x06};
 
-const uint32_t disp_4digits_animate[] PROGMEM = {
+const uint8_t disp_4digits_animate[] PROGMEM = {
     0x00, 0xFF, 0xF0, 0x0F,
     0xFF, 0x00, 0x00, 0x01,
     0x01, 0x02, 0x04, 0x08};
 
-const uint32_t disp_4digits_animate_circle[] PROGMEM = {
+const uint8_t disp_4digits_animate_circle[] PROGMEM = {
     0x01, 0x00, 0x00, 0x00,
     0x00, 0x01, 0x00, 0x00,
     0x00, 0x00, 0x01, 0x00,
@@ -606,6 +606,7 @@ public:
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
 
 private:
+
 #ifdef FUNCTION_POINTER_APP_SELECTION
     typedef void (Apps::*fptr)(bool init);
     fptr appPointer;

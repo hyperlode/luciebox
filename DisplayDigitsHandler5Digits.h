@@ -158,7 +158,7 @@ public:
     void setLedArray(byte ledsAsBits);  //  updateLights
     byte* getLedArrayHandle();
     void minutesToMinutesHoursString(char* textBuf, uint16_t minutes);
-
+    void progmemToDisplayBuffer(uint32_t* displayBuffer, uint8_t* progmemAddress);
     void setBlankDisplay(); //eraseAll
 
     void refresh();

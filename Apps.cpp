@@ -56,58 +56,41 @@ void Apps::appSelector(bool init, uint8_t selector)
 		// problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
 
 		//https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_74/rzarg/cplr034.htm
-		///////function pointer: working, but with weird audio beeps intermixed. What's going on there?!
-		////// this->appPointer = &Apps::modeSimon;
-		////// (this->*appPointer)(initOnBigLatchInitToo);
+		/////function pointer: working, but with weird audio beeps intermixed. What's going on there?!
+		//// this->appPointer = &Apps::modeSimon;
+		//// (this->*appPointer)(initOnBigLatchInitToo);
 
-		// modeCountingLettersAndChars(initOnBigLatchInitToo);
+		//modeCountingLettersAndChars(initOnBigLatchInitToo);
 
-		// fptr allAppsIndexed [24] = {
-		// 	&Apps::modeCountingLettersAndChars,
-		// 	&Apps::modeSimon,
-		// 	&Apps::modeSoundNotes,
-		// 	&Apps::modeComposeSong,
-		// 	&Apps::stopwatch,
-		// 	&Apps::pomodoroTimer,
-		// 	&Apps::modeRandomWorld,
-		// 	&Apps::modeRandomWorld,
-		// 	&Apps::modeGeiger,
-		// 	&Apps::modeGeiger,
-		// 	&Apps::modeSoundSong,
-		// 	&Apps::draw,
-		// 	&Apps::modeSimpleButtonsAndLights,
-		// 	&Apps::modeSimpleButtonsAndLights,
-		// 	&Apps::modeMetronome,
-		// 	&Apps::modeSequencer,
-		// 	&Apps::modeReactionGame,
-		// 	&Apps::modeReactionGame,
-		// 	&Apps::tiltSwitchTest,
-		// 	&Apps::tiltSwitchTest,
-		// 	&Apps::miniMultiTimer,
-		// 	&Apps::miniMultiTimer
-		// 	};
+		fptr allAppsIndexed [24] = {
+			&Apps::modeCountingLettersAndChars,
+			&Apps::modeSimon,
+			&Apps::modeSoundNotes,
+			&Apps::modeComposeSong,
+			&Apps::stopwatch,
+			&Apps::pomodoroTimer,
+			&Apps::modeRandomWorld,
+			&Apps::modeRandomWorld,
+			&Apps::modeGeiger,
+			&Apps::modeHackTime,
+			&Apps::modeSoundSong,
+			&Apps::movieAnimationMode,
+			&Apps::draw,
+			&Apps::drawGame,
+			&Apps::modeSimpleButtonsAndLights,
+			&Apps::modeSimpleButtonsAndLights,
+			&Apps::modeMetronome,
+			&Apps::modeSequencer,
+			&Apps::modeReactionGame,
+			&Apps::modeReactionGame,
+			&Apps::tiltSwitchTest,
+			&Apps::tiltSwitchTest,
+			&Apps::miniMultiTimer,
+			&Apps::miniMultiTimer
+			};
 
-		// (this->*(allAppsIndexed[appSelector]))(initOnBigLatchInitToo);
+		(this->*(allAppsIndexed[appSelector]))(initOnBigLatchInitToo);
 
-		// this->modeComposeSong(initOnBigLatchInitToo);
-		// stopwatch(initOnBigLatchInitToo);
-		// pomodoroTimer(initOnBigLatchInitToo);
-		// this->modeRandomWorld(initOnBigLatchInitToo);
-		//    this->modeRandomWorld(initOnBigLatchInitToo);
-		// this->modeGeiger(initOnBigLatchInitToo);
-		// this->modeGeiger(initOnBigLatchInitToo);
-		// this->modeSoundSong(initOnBigLatchInitToo);
-		// this->draw(initOnBigLatchInitToo);
-		//     this->modeSimpleButtonsAndLights(init);
-		//     this->modeSimpleButtonsAndLights(init);
-		// this->modeMetronome(initOnBigLatchInitToo);
-		// this->modeSequencer(initOnBigLatchInitToo);
-		// this->modeReactionGame(initOnBigLatchInitToo);
-		// this->modeReactionGame(initOnBigLatchInitToo);
-		// this->tiltSwitchTest(initOnBigLatchInitToo);
-		// this->tiltSwitchTest(initOnBigLatchInitToo);
-		// this->miniMultiTimer(init);
-		// this->miniMultiTimer(init);
 #else
 
 		switch (appSelector)
@@ -165,7 +148,7 @@ void Apps::appSelector(bool init, uint8_t selector)
 			this->draw(initOnBigLatchInitToo);
 			break;
 
-		case APP_DRAW_GAME:
+		case APP_SELECTOR_DRAW_GAME:
 			this->drawGame(initOnBigLatchInitToo);
 			break;
 
@@ -226,17 +209,15 @@ void Apps::setDefaultMode()
 	ledDisp->setLedArray(0b00000000); // no lights
 
 	//display
-	//ledDisp->setBinaryToDisplay(0xC0C0C0C0); //default dispaly 4x minus and decimal point.
-	//ledDisp->setBinaryToDisplay(0x80808080); //default dispaly 4x minus
 	ledDisp->setBlankDisplay();
 	decimalPoints = 0; // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
-	//ledDisp->setBinaryToDisplay(0xC0C0C0C0);
 	allLights->setBrightness(0, false);
 
 	//buzzer
 	buzzer->setSpeedRatio(2);
 	buzzer->buzzerOff(); // stop all sounds that were playing in an app.
 	buzzer->setTranspose(0);
+
 }
 
 bool Apps::init_app(bool init, uint8_t selector)
@@ -248,24 +229,18 @@ bool Apps::init_app(bool init, uint8_t selector)
 		ledDisp->setBlankDisplay();
 		// init of the init_app..
 		this->displayAllSegments = 0;
-		for (uint8_t i = 0; i < 4; i++)
-		{
-			this->displayAllSegments |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
-		}
-
-		// // initialize list
-		// for (uint8_t i = 0; i < 32; i++)
+		// for (uint8_t i = 0; i < 4; i++)
 		// {
-		// 	this->FADE_IN_RANDOM_LIST[i] = i;
+		// 	this->displayAllSegments |= (uint32_t)pgm_read_byte_near(app_splash_screens + selector * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
 		// }
 
-		// // // shuffle in place
-		// this->shuffle(this->FADE_IN_RANDOM_LIST, 32);
+		ledDisp->progmemToDisplayBuffer(&displayAllSegments, app_splash_screens + selector * 4);
+		
+		// // initialize list
 		randomSequence(FADE_IN_RANDOM_LIST,32);
 
 		counter = 27;
 		this->TIMER_INIT_APP.setInitTimeMillis(-20);
-
 		this->TIMER_INIT_APP.start();
 	}
 
@@ -3103,11 +3078,13 @@ void Apps::modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_
 		}
 	}
 
-	// update screen, every cycle.
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + *ticker_counter * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
-	}
+	// // update screen, every cycle.
+	// for (uint8_t i = 0; i < 4; i++)
+	// {
+	// 	displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + *ticker_counter * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
+	// }
+
+	ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + *ticker_counter * 4);
 }
 
 #ifdef SIMON_APP
@@ -3944,10 +3921,11 @@ void Apps::modeReactionGame(bool init)
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
 		{
-			for (uint8_t i = 0; i < 4; i++)
-			{
-				displayAllSegments |= (uint32_t)pgm_read_byte_near( disp_4digits_animate_circle + step * 4 + (i)) << (8 * i);
-			}
+			// for (uint8_t i = 0; i < 4; i++)
+			// {
+			// 	displayAllSegments |= (uint32_t)pgm_read_byte_near( disp_4digits_animate_circle + step * 4 + (i)) << (8 * i);
+			// }
+			ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + step * 4);
 		}
 		ledDisp->setBinaryToDisplay(displayAllSegments);
 
