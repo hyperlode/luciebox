@@ -127,12 +127,12 @@
 #define HACKTIME_DISPLAY_DECIMAL 3
 #define HACKTIME_DISPLAY_HEX 4
 
-#define SOUND_NOTE_MODE_STEP_THROUGH_ALL 0
-#define SOUND_NOTE_MODE_STEP_IN_LENGTH 1
-#define SOUND_NOTE_MODE_STEP_IN_OCTAVE 2
+#define SOUND_NOTE_MODE_ARPEGGIO_UP 0
+#define SOUND_NOTE_MODE_ARPEGGIO_DOWN 1
+#define SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH 2
 #define SOUND_NOTE_MODE_RANDOM 3
-#define SOUND_NOTE_MODE_RANDOM_IN_LENGTH 4
-#define SOUND_NOTE_MODE_RANDOM_IN_OCTAVE 5
+#define SOUND_NOTE_MODE_RANDOM_ERRATIC 4
+#define SOUND_NOTE_MODE_MANUAL 99
 
 // VARIABLE REUSE
 
@@ -196,6 +196,7 @@
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 #define SIMON_ACTIVE_LIGHT counter4
 #define POMODORO_PAUSE_TIME_SECONDS counter4
+#define SOUND_MODE_SCALE_RANGE_LENGTH counter4
 
 #define REACTION_GAME_LEVEL counter5
 #define GEIGER_TONE_LENGTH counter5
@@ -220,6 +221,7 @@
 #define METRONOME_TICKER_3_POSITION counter7
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
+#define SOUND_NOTE_SETTING_TO_DISPLAY counter8
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 
@@ -293,6 +295,11 @@ const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,
  3,2,2,3,2,
  3,2,1,1,3,2,
  1,1,1,1,1,1,1,1,1,1,1,1};
+// const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,  
+//  2,1,2,2,1,2,2,1 ,
+//  3,2,2,3,2,
+//  3,2,1,1,3,2,
+//  1,1,1,1,1,1,1,1,1,1,1,1};
 
 // const uint8_t scale_major [] PROGMEM = { 2,2,1,2,2,2,1};
 // const uint8_t scale_minor [] PROGMEM = { 2,1,2,2,1,2,2,1};
