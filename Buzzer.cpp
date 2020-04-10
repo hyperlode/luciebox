@@ -250,7 +250,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     // assume 4 chars textBuf (empty at arrival (4 spaces))
     // assumme value of decimalPoints at start is 0x00
 
-    uint8_t noteVal = note % 64;
+    uint8_t noteVal = (note) % 64;
 
     if (noteVal == 0)
     {
@@ -264,72 +264,15 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         bool sharps [12] = {false,true,false,false,true,false,true,false,false,true,false,true}; 
         char notes_chars [12] = {'A','A','B','C','C','D','D','E','F','F','G','G'};
         // uint8_t noteVal = ((note-1)%12);
-        
+        noteVal--;
         noteVal %= 12;
         
+        // sharp indicated by a decimal point
         *decimalPoints = 0;
         *decimalPoints =  sharps[noteVal] << 0;
 
-        // // note
-        // uint8_t noteVal;
-        // bool notSharp = false;
-        // switch ((note - 1) % 12)
-        // {
-        // case 0:
-        //     notSharp = true;
-        // case 1:
-        //     noteVal = 1;
-        //     break;
-        // case 2:
-        //     notSharp = true;
-        //     noteVal = 2;
-        //     break;
-        // case 3:
-        //     notSharp = true;
-        // case 4:
-        //     noteVal = 3;
-        //     break;
-        // case 5:
-        //     notSharp = true;
-        // case 6:
-        //     noteVal = 4;
-        //     break;
-        // case 7:
-        //     notSharp = true;
-        //     noteVal = 5;
-        //     break;
-        // case 8:
-        //     notSharp = true;
-        // case 9:
-        //     noteVal = 6;
-        //     break;
-        // case 10:
-        //     notSharp = true;
-        // case 11:
-        //     noteVal = 7;
-        //     break;
-        // }
-        // textBuf[0] = noteVal + 64;
         textBuf[0] = notes_chars[noteVal];
 
-
-
-        // *decimalPoints = 0;
-        // if (!notSharp)
-        // {
-        //     *decimalPoints = 0x04;
-        // }
-
-        // *decimalPoints =  ~notSharp << 2;
-
-        // if (notSharp)
-        // {
-        //     *decimalPoints = 0x00;
-        // }
-        // else
-        // {
-        //     *decimalPoints = 0x04;
-        // }
         // octave
         if (note < 4)
         {

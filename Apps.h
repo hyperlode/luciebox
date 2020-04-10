@@ -142,6 +142,7 @@
 #define DRAW_GAME_DISPLAY_TIMER generalTimer
 #define HACKTIME_MOVE_TIMER generalTimer
 #define COUNTING_LETTERS_AND_CHARS_TIMER generalTimer
+#define SOUND_NOTE_AUTO_TIMER generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
@@ -219,6 +220,7 @@
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
 #define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
+#define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
 
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
