@@ -275,37 +275,28 @@ const char dice_eyes_display[] PROGMEM = {
 #define SCALES_COUNT 5-1
 
 #define LEN_MAJ 7-1
-#define LEN_MIN 7-1
+#define LEN_MIN 8-1
 #define LEN_PENT_MAJ 5-1
-#define LEN_BLUES_MAJ 6 - 1
+#define LEN_BLUES_MAJ 6 -1
 #define LEN_HARM 12-1
 
 #define MAJ 0
 #define MIN 7
-#define PENT 14 
-#define BLUES_MAJ 19
-#define HARM 25
+#define PENT 15 
+#define BLUES_MAJ 20
+#define HARM 26
 
 const uint8_t scale_start_indeces [] PROGMEM = {MAJ, MIN ,PENT, BLUES_MAJ, HARM};
 
 const uint8_t scale_lengths [] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BLUES_MAJ, LEN_HARM};
  
-const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,  
- 2,1,2,2,1,2,2,1 ,
- 3,2,2,3,2,
- 3,2,1,1,3,2,
- 1,1,1,1,1,1,1,1,1,1,1,1};
-// const uint8_t scales [] PROGMEM = { 2,2,1,2,2,2,1,  
-//  2,1,2,2,1,2,2,1 ,
-//  3,2,2,3,2,
-//  3,2,1,1,3,2,
-//  1,1,1,1,1,1,1,1,1,1,1,1};
-
-// const uint8_t scale_major [] PROGMEM = { 2,2,1,2,2,2,1};
-// const uint8_t scale_minor [] PROGMEM = { 2,1,2,2,1,2,2,1};
-// const uint8_t scale_pentatonic_major [] PROGMEM = {3,2,2,3,2};
-// const uint8_t scale_blues_major [] PROGMEM = {3,2,1,1,3,2};  
-// const uint8_t harmonic [] PROGMEM = {1,1,1,1,1,1,1,1,1,1,1,1};
+const uint8_t scales [] PROGMEM = {
+    2,2,1,2,2,2,1,  
+    2,1,2,2,1,2,2,1 ,
+    3,2,2,3,2,
+    3,2,1,1,3,2,
+    1,1,1,1,1,1,1,1,1,1,1,1
+};
 
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
