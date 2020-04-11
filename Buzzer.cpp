@@ -288,8 +288,23 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     textBuf[2] = ' '; // optimized: assume empty at start
 
     // note length
-    textBuf[3] = (0x01 << (3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
+    // textBuf[3] = (0x01 << (3 - (note / 64))) + 48; // 2^(3 -x) --> note length is 8,4,2,1
+    textBuf[3] = this->getLength(note) + 48; // 2^(3 -x) --> note length is 8,4,2,1
 }
+
+
+    // uint8_t Buzzer::getOctave(uint8_t note){
+        
+    // }
+
+    uint8_t Buzzer::getLength(uint8_t note){
+        return 0x01 << (3 - (note / 64)); // 2^(3 -x) --> note length is 8,4,2,1
+    }
+
+    // void nextOctave(uint8_t* note, bool upElseDown);
+    // void changeLength(uint8_t* note, bool upElseDown);
+    // void nextNote(uint8_t* note, bool upElseDown, bool )
+
 
 /// ---------------------------
 /// ---------------------------

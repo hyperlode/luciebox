@@ -1671,17 +1671,18 @@ void Apps::modeSoundNotes(bool init)
 		// always step through all notes.
 		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_MANUAL;
 
-		// change note with potentio
-		if (potentio->getValueStableChangedEdge())
-		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = potentio->getLastStableValueChangedUp();
-			update_note = true;
-		}
+		// // change note with potentio
+		// if (potentio->getValueStableChangedEdge())
+		// {
+		// 	SOUND_NOTE_AUTO_UP_ELSE_DOWN = potentio->getLastStableValueChangedUp();
+		// 	update_note = true;
+		// }
 
 		// change note with button press
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+		bool button_3_edge = binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp();
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || button_3_edge)
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = binaryInputs[BUTTON_MOMENTARY_3].getValue();
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = button_3_edge;
 			update_note = true;
 		}
 	}
@@ -1753,6 +1754,8 @@ void Apps::modeSoundNotes(bool init)
 				distance_to_next_note_on_scale = pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);
 			}
 
+			
+
 			SOUND_NOTE_SETTING_TO_DISPLAY = distance_to_next_note_on_scale;
 			// take number of steps on the chromatic scale to go to desired note
 			for (uint8_t i=0;i<distance_to_next_note_on_scale;i++)
@@ -1766,10 +1769,44 @@ void Apps::modeSoundNotes(bool init)
 				}else{
 					// manual mode 
 					// at every length changes, the octaves don't line up. Adjust manually.
-					nextStepRotate(&SOUND_NOTES_NOTE_INDEX,SOUND_NOTE_AUTO_UP_ELSE_DOWN,0,255 );
-					if(SOUND_NOTES_NOTE_INDEX%64 == 0){
-						SOUND_NOTES_NOTE_INDEX+=4;
+					// uint8_t length = buzzer->getLength((uint8_t)SOUND_NOTES_NOTE_INDEX);
+					// nextStepRotate(&SOUND_NOTES_NOTE_INDEX,SOUND_NOTE_AUTO_UP_ELSE_DOWN,0,255 );
+					// uint8_t length = buzzer->getLength((uint8_t)SOUND_NOTES_NOTE_INDEX);
+
+
+					int16_t note_without_length = SOUND_NOTES_NOTE_INDEX%64;
+
+					if (SOUND_NOTE_AUTO_UP_ELSE_DOWN){
+						note_without_length++;
+						SOUND_NOTES_NOTE_INDEX++;
+					}else{
+						note_without_length--;
+						SOUND_NOTES_NOTE_INDEX--;
 					}
+
+					// check boundaries within note length (and allow overflow)
+					if (note_without_length > 63){
+						SOUND_NOTES_NOTE_INDEX+=4; 
+					}else if(note_without_length <= 0){
+						SOUND_NOTES_NOTE_INDEX -= 4;
+					}
+				
+					// check boundaries over overall range
+					if (SOUND_NOTES_NOTE_INDEX <=0){
+						SOUND_NOTES_NOTE_INDEX = 252;
+					}
+					if (SOUND_NOTES_NOTE_INDEX > 254){
+						SOUND_NOTES_NOTE_INDEX = 3;
+					}
+
+					// 	if(SOUND_NOTES_NOTE_INDEX%64 == 0){
+					// 		SOUND_NOTES_NOTE_INDEX+=4;
+					// 	}
+					// }else{
+					// 	if(SOUND_NOTES_NOTE_INDEX%64 == 0){
+					// 		SOUND_NOTES_NOTE_INDEX+=4;
+					// 	}
+					// }
 				}
 			}
 		}
@@ -1800,6 +1837,7 @@ void Apps::modeSoundNotes(bool init)
 	else
 	{
 		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
+		// ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_NOTE_INDEX);
 	}
 }
 

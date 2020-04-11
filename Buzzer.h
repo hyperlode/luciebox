@@ -71,7 +71,7 @@
 #define A3_4 65
 #define As3_4 66
 #define B3_4 67
-#define C4_4 68
+#define C4_4 68  
 #define Cs4_4 69
 #define D4_4 70
 #define Ds4_4 71
@@ -325,6 +325,12 @@ public:
     void setSpeedRatio(float speedMultiplier);
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
     void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
+    
+    // void getOctave(uint8_t* note);
+    uint8_t getLength(uint8_t note);
+    // void nextOctave(uint8_t* note, bool upElseDown);
+    // void changeLength(uint8_t* note, bool upElseDown);
+    // void nextNote(uint8_t* note, bool upElseDown, bool )
 
 private:
     int8_t transpose;
