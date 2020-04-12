@@ -1621,94 +1621,105 @@ void Apps::modeSoundNotes(bool init)
 	//buzzer with buzzer roll (notes).
 
 	bool play_note = false;
-	
 	bool update_note = false;
 
 	if (init)
 	{
 		//decimalPoints = 0xFF;
 		SOUND_NOTES_SCALE_ROOT = C5_4;
+		SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
 		SOUND_NOTE_AUTO_TIMER.setInitTimeMillis(-500);
 		SOUND_NOTE_AUTO_TIMER.start();
 		SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
-		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_ARPEGGIO_UP;
+		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_MANUAL;
+		SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
+		play_note = true;
+		SOUND_NOTE_SETTING_TO_DISPLAY = 666;
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 	{
-		// auto play mode
+		// auto play
 		if (!SOUND_NOTE_AUTO_TIMER.getTimeIsNegative())
 		{
 			SOUND_NOTE_AUTO_TIMER.start();
 			update_note = true;
-			
 		}
-
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-		{
-			buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
-			
-		}
-
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-			SOUND_NOTES_AUTO_MODE++;
-			if (SOUND_NOTES_AUTO_MODE > 4)
-			{
-				SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_ARPEGGIO_UP;
-			}
-			SOUND_NOTE_SETTING_TO_DISPLAY = SOUND_NOTES_AUTO_MODE;
-		}
-
 		listenToPotentioToIncrementTimerInit(&SOUND_NOTE_AUTO_TIMER,50);
 
 	}else
 	{
-		// manual mode
-
-		// always step through all notes.
-		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_MANUAL;
-
 		// change note with potentio
 		if (potentio->getValueStableChangedEdge())
 		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = potentio->getLastStableValueChangedUp();
 			update_note = true;
 		}
-
-		// change note with button press
-		bool button_3_edge = binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp();
-		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || button_3_edge)
-		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = button_3_edge;
-			update_note = true;
-		}
 	}
 
-	//  change scale
+	// change note length,available in all modes.
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 	{
-		nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
-		SOUND_NOTE_SETTING_TO_DISPLAY = SOUND_NOTES_SCALE_INDEX;
+		buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
+		play_note = true;
 	}
-
-	// change scale key 
-	if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp() || 
-		binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp() ) // set key when changing scale
-
-	{
-		// first keypress, back to root. 
-		// second keypress, change root.
-		if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT){
-
-			SOUND_NOTES_SCALE_ROOT ++;
-			if (SOUND_NOTES_SCALE_ROOT> B5_4){
-				SOUND_NOTES_SCALE_ROOT = C5_4;
-			}
+	
+	// advanced vs manual controls
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		// advanced 
+		
+		//  change scale
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+		{
+			nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
+			SOUND_NOTE_SETTING_TO_DISPLAY = SOUND_NOTES_SCALE_INDEX;
 		}
 
-		SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
-		SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
-		play_note = true;
+		// change key 
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp() || 
+			binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() ) // set key when changing scale
+
+		{
+			// first keypress, back to root. 
+			// second keypress, change root.
+			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT){
+
+				SOUND_NOTES_SCALE_ROOT ++;
+				if (SOUND_NOTES_SCALE_ROOT> B5_4){
+					SOUND_NOTES_SCALE_ROOT = C5_4;
+				}
+			}
+
+			SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
+			SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
+			play_note = true;
+		}
+
+		// change auto play mode
+		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
+		{
+			SOUND_NOTES_AUTO_MODE++;
+			if (SOUND_NOTES_AUTO_MODE > 5)
+			{
+				SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_MANUAL;
+			}
+			SOUND_NOTE_SETTING_TO_DISPLAY = SOUND_NOTES_AUTO_MODE;
+		}
+
+	}else{
+		// easy
+
+		// just play the active note
+		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+			//play_note = true;
+		}
+
+		// change note up / downwith button press
+		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() || binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp())
+		{
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = binaryInputs[BUTTON_MOMENTARY_3].getValue();
+			update_note = true;
+		}
 	}
 	
 	if (update_note)
@@ -1724,12 +1735,15 @@ void Apps::modeSoundNotes(bool init)
 				SOUND_NOTE_AUTO_UP_ELSE_DOWN = !SOUND_NOTE_AUTO_UP_ELSE_DOWN;
 			}
 		}
+		
 		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_ARPEGGIO_UP){
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
 		}
+
 		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_ARPEGGIO_DOWN){
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = false;
 		}		
+
 		if(SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC
 		){			
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = random(0,2);
@@ -1751,24 +1765,19 @@ void Apps::modeSoundNotes(bool init)
 				distance_to_next_note_on_scale = pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);
 			}
 
-			
-
-			SOUND_NOTE_SETTING_TO_DISPLAY = distance_to_next_note_on_scale;
 			// take number of steps on the chromatic scale to go to desired note
 			for (uint8_t i=0;i<distance_to_next_note_on_scale;i++)
 			{
 				buzzer->nextNote(
 					&SOUND_NOTES_NOTE_INDEX,
 					SOUND_NOTE_AUTO_UP_ELSE_DOWN,
-					binaryInputs[BUTTON_LATCHING_EXTRA].getValue()  // check if auto_mode.
+					true
+					//binaryInputs[BUTTON_LATCHING_EXTRA].getValue()  // check if auto_mode.
 					); //
-				
 			}
 		}
-		if (!binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
-			SOUND_NOTE_SETTING_TO_DISPLAY = 666;
 
-		}
+		SOUND_NOTE_SETTING_TO_DISPLAY = 666;
 	}
 
 	if (play_note || update_note)
@@ -1781,13 +1790,12 @@ void Apps::modeSoundNotes(bool init)
 	}
 
 	// index to actual note on the scale
+	// USE A TIMER to end display of settings.
 	if (SOUND_NOTE_SETTING_TO_DISPLAY != 666 )
 	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
 	{
 		// show scale only in non auto mode.
-		// ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_SCALE_INDEX);
 		ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTE_SETTING_TO_DISPLAY);
-	
 	}
 	else
 	{
