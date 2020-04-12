@@ -301,8 +301,53 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         return 0x01 << (3 - (note / 64)); // 2^(3 -x) --> note length is 8,4,2,1
     }
 
+    void Buzzer::nextNote(int16_t* note, bool upElseDown, bool stayInSameLength){
+        // stayInSameLength: at every length changes, the octaves don't line up. Adjust manually.
+        int16_t note_without_length = *note%64;
+
+        if (upElseDown){
+            note_without_length++;
+            *note += 1;
+        }else{
+            note_without_length--;
+            *note -= 1;
+        }
+
+        if(stayInSameLength){  
+            if (note_without_length > 60){
+                *note -= 60; 
+            }else if(note_without_length <= 0){
+                *note += 60;
+            }
+            
+        }else{
+          // check boundaries within note length (and allow overflow)
+            if (note_without_length > 63){
+                *note += 4; 
+            }else if(note_without_length <= 0){
+                *note -= 4;
+            }
+        
+            // check boundaries over overall range
+            if (*note <=0){
+                *note = 252;
+            }
+            if (*note > 254){
+                *note = 3;
+            }
+        }
+    }
+
     // void nextOctave(uint8_t* note, bool upElseDown);
-    // void changeLength(uint8_t* note, bool upElseDown);
+    void Buzzer::changeNoteToNextLength(int16_t* note){
+
+        *note += 64;
+        
+        if (*note>254){
+            note -= 4*64;
+        }
+    }
+
     // void nextNote(uint8_t* note, bool upElseDown, bool )
 
 

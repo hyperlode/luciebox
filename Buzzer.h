@@ -329,8 +329,8 @@ public:
     // void getOctave(uint8_t* note);
     uint8_t getLength(uint8_t note);
     // void nextOctave(uint8_t* note, bool upElseDown);
-    // void changeLength(uint8_t* note, bool upElseDown);
-    // void nextNote(uint8_t* note, bool upElseDown, bool )
+    void changeNoteToNextLength(int16_t* note);
+    void nextNote(int16_t* note, bool upElseDown, bool stayInSameLength);
 
 private:
     int8_t transpose;

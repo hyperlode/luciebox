@@ -91,7 +91,7 @@
 #define BUTTONS_1_COUNT 5
 #define BUTTONS_1_VALUES      \
     {                         \
-        500, 257, 123, 50, 28 \
+        500, 257, 128, 62, 28 \
     }
      // 509, 253, 129, 63, 32 
 #endif
