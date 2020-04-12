@@ -100,6 +100,17 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 #define TEXT_TAIL 64 
 #define TEXT_YES 68
 #define TEXT_NO 72
+#define MAJOR 76
+#define MINOR 80
+#define PENTATONIC 84
+#define BLUES 88
+#define CHROMATIC 92
+#define MANUAL 96
+#define UP 100
+#define DOWN 104
+#define SAWTOOTH 108
+#define RANDOM 112
+#define CRAZY 116
 
 const byte standard_text[] PROGMEM = {
     SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII,
@@ -120,8 +131,18 @@ const byte standard_text[] PROGMEM = {
     'H','E','A','D', //don't change position, indeces calculated, used in random 
     'T','A','I','L', //don't change position, indeces calculated, used in random 
     SPACE_FAKE_ASCII, 'N','O', SPACE_FAKE_ASCII,  //don't change position, indeces calculated, used in random 
-    SPACE_FAKE_ASCII,'Y','E','S' //don't change position, indeces calculated, used in random 
-
+    SPACE_FAKE_ASCII,'Y','E','S', //don't change position, indeces calculated, used in random 
+    'A','J','O','R',
+    'I','N','O','R',
+    'P','E','N','T',
+    'B','L','U','E',
+    'C','H','R','O',
+    'M','A','N','U',
+    SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,'U','P',
+    SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,'D','O',
+    'U','P','D','O',
+    SPACE_FAKE_ASCII,'R','N','D',
+    'C','R','A','Y'
     };
 
 class DisplayManagement

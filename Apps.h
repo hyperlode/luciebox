@@ -127,6 +127,8 @@
 #define HACKTIME_DISPLAY_DECIMAL 3
 #define HACKTIME_DISPLAY_HEX 4
 
+#define SOUND_NOTE_DISPLAY_NOTE 0 
+
 #define SOUND_NOTE_MODE_MANUAL 0 
 #define SOUND_NOTE_MODE_ARPEGGIO_UP 1
 #define SOUND_NOTE_MODE_ARPEGGIO_DOWN 2
@@ -207,7 +209,7 @@
 #define HACKTIME_MEMORY_SELECT counter5
 #define DRAW_CURSOR_POTENTIO_INDEX counter5
 #define METRONOME_TICKER_1_POSITION counter5
-#define SOUND_NOTES_AUTO_MODE counter5
+#define SOUND_NOTES_PROGRESSION_MODE counter5
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
@@ -221,7 +223,7 @@
 #define METRONOME_TICKER_3_POSITION counter7
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
-#define SOUND_NOTE_SETTING_TO_DISPLAY counter8
+#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 
@@ -236,6 +238,7 @@
 #define SIMON_END_OF_GAME general_boolean2
 #define POMODORO_SHOW_MENU_EDGE general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
+#define SOUND_NOTE_PLAY_NOTE general_boolean2
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
@@ -572,6 +575,7 @@ public:
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
     void modeComposeSong(bool init);
+    void modeSoundNotesInitScale();
     void modeSoundNotes(bool init);
     void draw(bool init);
     void drawGame(bool init);
@@ -590,7 +594,7 @@ public:
     void modeRandomWorld(bool init);
     void modeHackTime(bool init);
 
-    void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis);
+    void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis);
     bool listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
@@ -617,7 +621,7 @@ private:
 #endif
 
     bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue);
+    void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeDisplay(bool forReal);
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 

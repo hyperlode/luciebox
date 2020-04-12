@@ -1357,7 +1357,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	checkBoundaries(&counter, 0, 25 + (numberElseAlphabethMode*76) );
+	checkBoundaries(&counter, 0, 25 + (numberElseAlphabethMode*76),true );
 
 }
 
@@ -1616,25 +1616,31 @@ void Apps::modeComposeSong(bool init)
 	}
 }
 
+
+void Apps::modeSoundNotesInitScale(){
+	SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
+	SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
+	SOUND_NOTE_PLAY_NOTE = true;
+}
+
 void Apps::modeSoundNotes(bool init)
 {
+	int16_t delta;
 	//buzzer with buzzer roll (notes).
 
-	bool play_note = false;
 	bool update_note = false;
 
 	if (init)
 	{
-		//decimalPoints = 0xFF;
-		SOUND_NOTES_SCALE_ROOT = C5_4;
-		SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
+		SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
 		SOUND_NOTE_AUTO_TIMER.setInitTimeMillis(-500);
 		SOUND_NOTE_AUTO_TIMER.start();
-		SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
-		SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_MANUAL;
-		SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
-		play_note = true;
-		SOUND_NOTE_SETTING_TO_DISPLAY = 666;
+		SOUND_NOTES_SCALE_ROOT = C4_4;
+		modeSoundNotesInitScale();
+
+		SOUND_NOTES_SCALE_INDEX = 0;
+		
+		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
 	}
 
 	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
@@ -1645,7 +1651,13 @@ void Apps::modeSoundNotes(bool init)
 			SOUND_NOTE_AUTO_TIMER.start();
 			update_note = true;
 		}
-		listenToPotentioToIncrementTimerInit(&SOUND_NOTE_AUTO_TIMER,50);
+
+		
+		delta = (uint16_t)(SOUND_NOTE_AUTO_TIMER.getInitTimeMillis()/-8);
+		
+		checkBoundaries(&delta, 2, 254, false );
+
+		listenToPotentioToIncrementTimerInit(&SOUND_NOTE_AUTO_TIMER, delta);
 
 	}else
 	{
@@ -1661,7 +1673,7 @@ void Apps::modeSoundNotes(bool init)
 	if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
 	{
 		buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
-		play_note = true;
+		SOUND_NOTE_PLAY_NOTE = true;
 	}
 	
 	// advanced vs manual controls
@@ -1672,38 +1684,36 @@ void Apps::modeSoundNotes(bool init)
 		if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
 		{
 			nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
-			SOUND_NOTE_SETTING_TO_DISPLAY = SOUND_NOTES_SCALE_INDEX;
+			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX*4;
+			modeSoundNotesInitScale();			
 		}
 
 		// change key 
-		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp() || 
-			binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp() ) // set key when changing scale
+		if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp() ) // set key when changing scale
 
 		{
 			// first keypress, back to root. 
 			// second keypress, change root.
-			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT){
+			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT ){
 
 				SOUND_NOTES_SCALE_ROOT ++;
 				if (SOUND_NOTES_SCALE_ROOT> B5_4){
-					SOUND_NOTES_SCALE_ROOT = C5_4;
+					SOUND_NOTES_SCALE_ROOT = SOUND_NOTES_SCALE_ROOT;
 				}
 			}
-
-			SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
-			SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
-			play_note = true;
+			
+			modeSoundNotesInitScale();
 		}
 
-		// change auto play mode
+		// change prgression mode
 		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp())
 		{
-			SOUND_NOTES_AUTO_MODE++;
-			if (SOUND_NOTES_AUTO_MODE > 5)
+			SOUND_NOTES_PROGRESSION_MODE++;
+			if (SOUND_NOTES_PROGRESSION_MODE > 5)
 			{
-				SOUND_NOTES_AUTO_MODE = SOUND_NOTE_MODE_MANUAL;
+				SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
 			}
-			SOUND_NOTE_SETTING_TO_DISPLAY = SOUND_NOTES_AUTO_MODE;
+			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
 		}
 
 	}else{
@@ -1711,7 +1721,7 @@ void Apps::modeSoundNotes(bool init)
 
 		// just play the active note
 		if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-			//play_note = true;
+			SOUND_NOTE_PLAY_NOTE = true;
 		}
 
 		// change note up / downwith button press
@@ -1726,26 +1736,30 @@ void Apps::modeSoundNotes(bool init)
 	{
 		uint8_t note_jumps = 1;
 		//number of notes to skip
-		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_RANDOM){
+		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM)
+		{
 			note_jumps = random(0,100);
 		}
 
-		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH){
+		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH)
+		{
 			if (random(0,5) == 0){
 				SOUND_NOTE_AUTO_UP_ELSE_DOWN = !SOUND_NOTE_AUTO_UP_ELSE_DOWN;
 			}
 		}
 		
-		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_ARPEGGIO_UP){
+		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_UP)
+		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
 		}
 
-		if (SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_ARPEGGIO_DOWN){
+		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_DOWN)
+		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = false;
 		}		
 
-		if(SOUND_NOTES_AUTO_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC
-		){			
+		if(SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC)
+		{			
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = random(0,2);
 			note_jumps = random(0,3);
 		}
@@ -1777,30 +1791,29 @@ void Apps::modeSoundNotes(bool init)
 			}
 		}
 
-		SOUND_NOTE_SETTING_TO_DISPLAY = 666;
+		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
+		SOUND_NOTE_PLAY_NOTE = true;
 	}
 
-	if (play_note || update_note)
+	if (SOUND_NOTE_PLAY_NOTE)
 	{
 		if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 		{
 			buzzer->buzzerOff();	
 		}
 		buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
+		SOUND_NOTE_PLAY_NOTE = false;
 	}
 
 	// index to actual note on the scale
-	// USE A TIMER to end display of settings.
-	if (SOUND_NOTE_SETTING_TO_DISPLAY != 666 )
-	// if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() && !binaryInputs[BUTTON_LATCHING_EXTRA].getValue())
+	// USE A TIMER to end display of settings. hmmm not sure if it will be that much better...
+	if (SOUND_NOTE_SETTING_TEXT_TO_DISPLAY == SOUND_NOTE_DISPLAY_NOTE )
 	{
-		// show scale only in non auto mode.
-		ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTE_SETTING_TO_DISPLAY);
+		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
 	}
 	else
 	{
-		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
-		// ledDisp->setNumberToDisplayAsDecimal(SOUND_NOTES_NOTE_INDEX);
+		ledDisp->setStandardTextToTextBuf(textHandle, SOUND_NOTE_SETTING_TEXT_TO_DISPLAY);
 	}
 }
 
@@ -1957,7 +1970,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	{
 		//DRAW_CURSOR_POTENTIO_INDEX = DRAW_CURSOR_INDEX*2;
 		potentio->increaseSubtractAtChange((int16_t*)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
-		checkBoundaries((int16_t)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95);
+		checkBoundaries((int16_t)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95, true);
 		DRAW_CURSOR_INDEX = DRAW_CURSOR_POTENTIO_INDEX / 3;
 	}
 
@@ -2340,8 +2353,9 @@ bool Apps::listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount){
 	return value_memory != *value;
 }
 
-void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int16_t increment_millis){
+void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis){
 	int16_t delta = 0;
+
 	potentio->increaseSubtractAtChange(&delta, increment_millis);
 	aTimer->incrementInitTimeMillis(delta);
 }
@@ -2406,7 +2420,7 @@ void Apps::draw(bool init)
 	// {
 	// 	DRAW_ACTIVE_DRAWING_INDEX = EEPROM_NUMBER_OF_DRAWINGS - 1;
 	// }
-	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1);
+	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1, true);
 
 	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 	{
@@ -3614,21 +3628,28 @@ void Apps::modeSimon(bool init)
 
 bool Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
-	uint16_t original_value;
+	int16_t original_value;
 	*counter += -1 + (2 * countUpElseDown);
 	
-	checkBoundaries(counter, minValue, maxValue);
-	return original_value != counter;
+	checkBoundaries(counter, minValue, maxValue, true);
+	return original_value != *counter;
 }
 
-void  Apps::checkBoundaries(int16_t* counter, int16_t minValue, int16_t maxValue){
+void  Apps::checkBoundaries(int16_t* counter, int16_t minValue, int16_t maxValue, bool rotate){
 	if (*counter > maxValue)
 	{
-		*counter = minValue;
-	}
-	if (*counter < minValue)
+		if (rotate){
+			*counter = minValue;
+		}else{
+			*counter = maxValue;
+		}
+	}else if (*counter < minValue)
 	{
-		*counter = maxValue;
+		if (rotate){
+			*counter = maxValue;
+		}else{
+			*counter = minValue;
+		}
 	}
 	// return counter;
 }
