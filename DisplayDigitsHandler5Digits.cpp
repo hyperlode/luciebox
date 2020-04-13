@@ -58,7 +58,7 @@ void DisplayManagement::setBinaryToDisplay(uint32_t value) //updateDisplayAllBit
 	this->displayBinary = value;
 }
 
-void DisplayManagement::progmemToDisplayBuffer(uint32_t* displayBuffer, uint8_t* progmemAddress)
+void DisplayManagement::progmemToDisplayBuffer(uint32_t* displayBuffer, const uint8_t* progmemAddress)
 {
 	// will take four bytes starting from the progmemAddress (which contains an address)
 	// progmemPosition = 
