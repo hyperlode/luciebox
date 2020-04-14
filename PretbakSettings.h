@@ -129,29 +129,39 @@
     }
 #endif
 
+// postion of buttons in the indexed array.
+#define BUTTON_INDEXED_MOMENTARY_0                  0
+#define BUTTON_INDEXED_MOMENTARY_1                  1
+#define BUTTON_INDEXED_MOMENTARY_2                  2
+#define BUTTON_INDEXED_MOMENTARY_3                  3
+#define BUTTON_INDEXED_LATCHING_BIG_RED             4
+#define BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT      5
+#define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT     6
+#define BUTTON_INDEXED_LATCHING_EXTRA               7
+
 // binary input indeces per button
-#define BUTTON_LATCHING_BIG_RED 2
-#define BUTTON_LATCHING_SMALL_RED_LEFT 1
 #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
+#define BUTTON_LATCHING_SMALL_RED_LEFT 1
+#define BUTTON_LATCHING_BIG_RED 2
+#define BUTTON_MOMENTARY_2 3 // prototype Blue
+#define BUTTON_MOMENTARY_1 4 // prototype Green
+#define BUTTON_MOMENTARY_0 5 //prototype Red
 #define BUTTON_LATCHING_EXTRA 6 //prototype Latching yellow
 
-#define BUTTON_MOMENTARY_0 5 //prototype Red
-#define BUTTON_MOMENTARY_1 4 // prototype Green
-#define BUTTON_MOMENTARY_2 3 // prototype Blue
 
 #if MOMENTARY_BUTTONS_COUNT == 3
 
-#define SWITCH_TILT_FORWARD 10
-#define SWITCH_TILT_BACKWARD 8
-#define SWITCH_TILT_LEFT 7
-#define SWITCH_TILT_RIGHT 9
+    #define SWITCH_TILT_FORWARD 10
+    #define SWITCH_TILT_BACKWARD 8
+    #define SWITCH_TILT_LEFT 7
+    #define SWITCH_TILT_RIGHT 9
 #else
-#define BUTTON_MOMENTARY_3 7 // prototype non existing
+    #define BUTTON_MOMENTARY_3 7 // prototype non existing
 
-#define SWITCH_TILT_FORWARD 11
-#define SWITCH_TILT_BACKWARD 9
-#define SWITCH_TILT_LEFT 8
-#define SWITCH_TILT_RIGHT 10
+    #define SWITCH_TILT_FORWARD 11
+    #define SWITCH_TILT_BACKWARD 9
+    #define SWITCH_TILT_LEFT 8
+    #define SWITCH_TILT_RIGHT 10
 #endif
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
