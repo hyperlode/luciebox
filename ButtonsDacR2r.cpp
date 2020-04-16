@@ -40,7 +40,7 @@ uint8_t ButtonsDacR2r::getButtonsValueRaw()
     01000000000 // /2 because 512 would be the next lowest value
     00000010000 //  /2 because we take only half of the margin to end up in the middle
     */
-        int16_t value_margin = (int16_t)0b00000001 << (ADC_POWERS_OF_TWO - this->buttonsCount - 2); //((ADC_POWERS_OF_TWO) - this->buttonsCount - 1(forgoing one level below least buttonvalue) - 1(for dividing into two, so we end up in the middle of the margin) ;
+        int16_t value_margin = (int16_t)0b00000001 << (ADC_POWERS_OF_TWO - this->buttonsCount - 2); //((ADC_POWERS_OF_TWO) - this->buttonsCount - 1(for going one level below least buttonvalue) - 1(for dividing into two, so we end up in the middle of the margin) ;
 
         if (raw > (checkValue - value_margin))
         {

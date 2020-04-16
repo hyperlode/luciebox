@@ -32,7 +32,6 @@ void Apps::appSelector(bool init, uint8_t selector)
 
 	if (this->app_init_mode)
 	{
-
 		if (this->init_app(init, selector))
 		{
 			// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
@@ -128,10 +127,12 @@ void Apps::appSelector(bool init, uint8_t selector)
 			break;
 
 		case APP_SELECTOR_RANDOMWORLD:
+			// this->quiz(initOnBigLatchInitToo);
 			this->modeRandomWorld(initOnBigLatchInitToo);
 			break;
 
-		case APP_SELECTOR_SLOTS:
+		case APP_SELECTOR_QUIZ:
+			this->quiz(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_GEIGER:
@@ -292,6 +293,101 @@ bool Apps::init_app(bool init, uint8_t selector)
 	}
 	return false;
 }
+
+void Apps::quiz(bool init)
+{
+
+	// quiz app
+	uint8_t lights = 0;
+
+	if (init){
+		quizState = quizInit;
+	}
+
+	switch (quizState)
+	{
+		case quizInit:
+		{
+			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+				QUIZ_SCORE[i] = 0;
+			}
+			quizState = quizWaitForQuizMaster;	
+			lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
+		}
+		break;
+		case quizWaitForQuizMaster:
+		{
+			lights |= 1 << LIGHT_LATCHING_EXTRA;
+
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+				quizState = quizWaitRandomTime;
+				QUIZ_RANDOM_WAIT_TIME.setInitTimeMillis(random(-3000,-500));
+				QUIZ_RANDOM_WAIT_TIME.start();
+			}
+		}
+		break;
+		case quizWaitRandomTime:
+		{	
+			lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
+			if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative()){
+				quizState = quizWaitPlayerPress;
+			}
+
+			// check here, any player pressing his button = score to zero.
+			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+				if (binaryInputsEdgeUp & 1<<i){
+					QUIZ_SCORE[i]=0;
+				}
+			}
+		}
+		break;
+		case quizWaitPlayerPress:
+		{	
+			lights = 0xFF;
+			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+				if (binaryInputsEdgeUp & 1<<i){
+					// add to score.
+					QUIZ_SCORE[i]++;
+					// go to next state
+					
+					quizState = quizPlayerPressed;
+				}
+			}
+		}		
+		break;
+		case quizPlayerPressed:
+		{
+			lights |= 1 << LIGHT_LATCHING_EXTRA;
+			if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
+				quizState = quizWaitForQuizMaster;
+
+			}
+		}
+		break;
+	}
+
+	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+		quizState = quizInit;
+	}
+	
+	int16_t scoreToDisplay = 0;
+	int16_t multiplier = 1000;
+	
+	for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+		scoreToDisplay += multiplier*QUIZ_SCORE[i];
+		multiplier/=10;
+	}
+	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
+
+	// lights |= 1 << lights_indexed[i];
+	ledDisp->setLedArray(lights);
+	
+}
+
+// int8_t Apps::momentaryButtonEdge(){
+	
+// }
 
 void Apps::pomodoroTimer(bool init)
 {

@@ -43,7 +43,7 @@
 #define APP_SELECTOR_STOPWATCH 4
 #define APP_SELECTOR_POMODORO 5
 #define APP_SELECTOR_RANDOMWORLD 6
-#define APP_SELECTOR_SLOTS 7
+#define APP_SELECTOR_QUIZ 7
 #define APP_SELECTOR_GEIGER 8
 #define APP_SELECTOR_HACK_TIME 9
 #define APP_SELECTOR_SOUND_SONG 10
@@ -152,6 +152,7 @@
 #define HACKTIME_MOVE_TIMER generalTimer
 #define COUNTING_LETTERS_AND_CHARS_TIMER generalTimer
 #define SOUND_NOTE_AUTO_TIMER generalTimer
+#define QUIZ_RANDOM_WAIT_TIME generalTimer
 
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
@@ -169,6 +170,7 @@
 #define POMODORO_STATS_WORKING_GOOD counter
 #define HACKTIME_ADDRESS counter
 #define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
+#define QUIZ_ROUNDS_INIT counter
 
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
@@ -211,6 +213,7 @@
 #define METRONOME_TICKER_1_POSITION counter5
 #define SOUND_NOTES_PROGRESSION_MODE counter5
 
+
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
 #define DRAW_SHOW_MODE counter6
@@ -248,6 +251,7 @@
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
+#define QUIZ_SCORE array_8_bytes
 
 
 
@@ -593,6 +597,7 @@ public:
     void miniMultiTimer(bool init);
     void modeRandomWorld(bool init);
     void modeHackTime(bool init);
+    void quiz(bool init);
 
     void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis);
     bool listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
@@ -670,7 +675,6 @@ private:
     // reaction
     enum ReactionGameState : uint8_t
     {
-        // enum ReactionGameState{
         reactionWaitForStart,
         reactionNewGame,
         reactionNewTurn,
@@ -683,6 +687,16 @@ private:
     };
     ReactionGameState reactionGameState;
 #endif
+
+    enum QuizState : uint8_t
+    {
+        quizInit,
+        quizWaitForQuizMaster,
+        quizWaitRandomTime,
+        quizWaitPlayerPress,
+        quizPlayerPressed
+    };
+    QuizState quizState;
 
     enum RandomWorldState : uint8_t
     {
