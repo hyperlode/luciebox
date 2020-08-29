@@ -5,9 +5,9 @@
 
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
-#define SIMON_APP
-#define ENABLE_REACTION_APP
+// #define ENABLE_MULTITIMER
+// #define SIMON_APP
+// #define ENABLE_REACTION_APP
 
 
 #include "Arduino.h"

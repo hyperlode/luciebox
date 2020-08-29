@@ -9,7 +9,7 @@
 #include "Potentio.h"
 #include "PretbakSettings.h"
 
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 //#define DBUG_REFACTOR_DISP
 #ifdef ENABLE_SERIAL

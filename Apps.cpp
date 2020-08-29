@@ -678,7 +678,9 @@ void Apps::pomodoroTimer(bool init)
 	{
 		lights |= 1 << LIGHT_LATCHING_EXTRA;
 		lights |= 1 << LIGHT_MOMENTARY_2;
+#ifdef BUTTON_MOMENTARY_3
 		lights |= 1 << LIGHT_MOMENTARY_3;
+#endif
 	}
 
 	ledDisp->setTextBufToDisplay(textBuf);
@@ -3020,16 +3022,15 @@ void Apps::modeSequencer(bool init)
 			// change speed if default behaviour of potentio.
 			if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)) &&
 				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)) &&
-				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) &&
+				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) 
 #ifdef BUTTON_MOMENTARY_3
-				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)) 
+				&& !(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)) 
 				// &&
 #endif
 				// potentio->getValueStableChangedEdge()
 				)
 			{
 				listenToPotentioToIncrementTimerInit(&generalTimer,5);
-
 			}
 
 			if (!generalTimer.getTimeIsNegative())

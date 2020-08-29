@@ -3,13 +3,23 @@
 #define PIN_DUMMY 66
 #define PIN_DUMMY_2 67
 
+// #define PROTOTYPE
+
 #ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
 
+// #define PIN_DISPLAY_DIGIT_0 PIN_DUMMY //invalid
+// #define PIN_DISPLAY_DIGIT_1 5
+// #define PIN_DISPLAY_DIGIT_2 9
+// #define PIN_DISPLAY_DIGIT_3 10
+// #define PIN_DISPLAY_DIGIT_4 11
 #define PIN_DISPLAY_DIGIT_0 PIN_DUMMY //invalid
-#define PIN_DISPLAY_DIGIT_1 5
+// wires moved on prototype. 
+#define PIN_DISPLAY_DIGIT_0 11 
+#define PIN_DISPLAY_DIGIT_1 10
 #define PIN_DISPLAY_DIGIT_2 9
-#define PIN_DISPLAY_DIGIT_3 10
-#define PIN_DISPLAY_DIGIT_4 11
+#define PIN_DISPLAY_DIGIT_3 5
+
+
 #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
 #define SELECTOR_DIAL_POSITIONS 12
 
@@ -143,26 +153,18 @@
 #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
 #define BUTTON_LATCHING_SMALL_RED_LEFT 1
 #define BUTTON_LATCHING_BIG_RED 2
-#define BUTTON_MOMENTARY_2 3 // prototype Blue
-#define BUTTON_MOMENTARY_1 4 // prototype Green
-#define BUTTON_MOMENTARY_0 5 //prototype Red
-#define BUTTON_LATCHING_EXTRA 6 //prototype Latching yellow
 
+#define BUTTON_MOMENTARY_3 3 // most right (Yellow)
+#define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
+#define BUTTON_MOMENTARY_1 5 // Green (second most left)
+#define BUTTON_MOMENTARY_0 6 // most left (Red)
 
-#if MOMENTARY_BUTTONS_COUNT == 3
+#define BUTTON_LATCHING_EXTRA 7 // Latching yellow 
 
-    #define SWITCH_TILT_FORWARD 10
-    #define SWITCH_TILT_BACKWARD 8
-    #define SWITCH_TILT_LEFT 7
-    #define SWITCH_TILT_RIGHT 9
-#else
-    #define BUTTON_MOMENTARY_3 7 // prototype non existing
-
-    #define SWITCH_TILT_FORWARD 11
-    #define SWITCH_TILT_BACKWARD 9
-    #define SWITCH_TILT_LEFT 8
-    #define SWITCH_TILT_RIGHT 10
-#endif
+#define SWITCH_TILT_FORWARD 11
+#define SWITCH_TILT_BACKWARD 9
+#define SWITCH_TILT_LEFT 8
+#define SWITCH_TILT_RIGHT 10
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
