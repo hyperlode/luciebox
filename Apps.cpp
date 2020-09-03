@@ -28,6 +28,11 @@ void Apps::appSelector(bool init, uint8_t selector)
 	{
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
+
+#ifdef ENABLE_SERIAL
+Serial.println(selector);
+#endif 
+
 	}
 
 	if (this->app_init_mode)
@@ -678,9 +683,7 @@ void Apps::pomodoroTimer(bool init)
 	{
 		lights |= 1 << LIGHT_LATCHING_EXTRA;
 		lights |= 1 << LIGHT_MOMENTARY_2;
-#ifdef BUTTON_MOMENTARY_3
 		lights |= 1 << LIGHT_MOMENTARY_3;
-#endif
 	}
 
 	ledDisp->setTextBufToDisplay(textBuf);
@@ -1327,7 +1330,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		else
 		{
 			ledDisp->setStandardTextToTextBuf(textHandle, TEXT_RESET);
-			
 		}
 	}
 	else
@@ -1345,7 +1347,9 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		}
 	
 	}
+
 	ledDisp->setLedArray(lights);
+	//ledDisp->setLedArray(0);
 }
 void Apps::displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet){
 	if (letterValueAlphabet > 8)

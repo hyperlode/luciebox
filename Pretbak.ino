@@ -1,4 +1,5 @@
 
+#include "PretbakSettings.h"
 #include "DisplayDigitsHandler5Digits.h"
 #include "LedMultiplexer5x8.h"
 #include "PotentioSelector.h"
@@ -7,23 +8,6 @@
 #include "Buzzer.h"
 #include "Apps.h"
 #include "Potentio.h"
-#include "PretbakSettings.h"
-
-#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
-//#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
-//#define DBUG_REFACTOR_DISP
-#ifdef ENABLE_SERIAL
-//#define DEBUG_ANALOG_IN
-// #define DEBUG_MERCURY
-//#define DEBUG_POTENTIO
-//#define DEBUG_BUTTONS
-//#define DEBUG_SELECTOR_KNOB
-//#define DEBUG_MINIMULTITIMER
-//#define DEBUG_SEQUENCER
-
-//#define SUPERDEBUG
-
-#endif
 
 // Lode Ameije 2019-05
 // Pretbak is a busy box for my newly born niece
@@ -65,7 +49,6 @@ void refresh()
 
     //update inputs
     input_process();
-
 #ifdef DEBUG_BUTTONS
     for (uint8_t i = 0; i < BINARY_INPUTS_COUNT; i++)
     {
@@ -118,7 +101,9 @@ void refresh()
         //check if first iteration at new selector value.
         bool init = selectorDial.getValueChangedEdge();
 #ifdef PROTOTYPE
+        #ifndef DEBUG_BUTTONS
         pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
+        #endif
 #else
     pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1); // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 #endif
@@ -132,11 +117,8 @@ void refresh()
         pretbak_apps.appSelector(false, 12); //debug mode
     }
 #endif
-
-    //output process
-    visualsManager.refresh();
-    allVisuals.refresh();
-
+    
+    outputProcess();
     
 }
 
@@ -148,7 +130,6 @@ void input_process()
     {
         binaryInputs[i].refresh();
     }
-
 
     selectorDial.refresh();
     buttons_1.refresh();
@@ -192,11 +173,18 @@ void input_process()
     }
 }
 
+void outputProcess(){
+    //output process
+    visualsManager.refresh();
+    allVisuals.refresh();
+}
+
 void setup()
 {
 
 #ifdef ENABLE_SERIAL
     Serial.begin(9600);
+    Serial.println("initializeee");
 #endif
 
     // put your setup code here, to run once
@@ -213,6 +201,7 @@ void setup()
     potentio.setPin(PIN_POTENTIO);
 
     allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+    // allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
     visualsManager.setMultiplexerBuffer(allVisuals.getDigits());
 
 // if no latching buttons pressed at startup, disable sound
@@ -250,52 +239,79 @@ void setup()
 #endif
 }
 
+void testing(){
+
+}
+
 void loop()
 {
 
 #ifdef DBUG_REFACTOR_DISP
-
     input_process();
 
-    byte *tmp = allVisuals.getDigits();
+    // byte *tmp = allVisuals.getDigits();
 
     if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-        
+        Serial.println("button 3");
+        visualsManager.setCharToDisplay('8',0);
+        visualsManager.setCharToDisplay('0',1);
+        visualsManager.setCharToDisplay('-',2);
         visualsManager.setCharToDisplay('H',3);
-        visualsManager.setCharToDisplay('C',2);
-        visualsManager.setCharToDisplay('U',1);
-        visualsManager.setCharToDisplay('L',0);
+    }
+    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+        Serial.println("button 2");
+        visualsManager.setBlankDisplay();
+    }
+    if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+        Serial.println("button 1");
+        visualsManager.setLedArray(0xFF);
+    }
+    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+        Serial.println("button 0");
+        visualsManager.setLedArray(0);
+    }
+    if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
+        Serial.println("button ext");
+
+    }
+    if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
+        Serial.println("BUTTON_LATCHING_BIG_RED");
+    }
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getEdgeUp()){
+        Serial.println("button BUTTON_LATCHING_SMALL_RED_RIGHT");
+    }
+    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeUp()){
+        Serial.println("BUTTON_LATCHING_SMALL_RED_LEFT" );
     }
     
-    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-    {
-        visualsManager.setBinaryToDisplay(0xFF000000);
-        visualsManager.setLedArray(0x0F);
-        visualsManager.setDecimalPointToDisplay(false,2);
-        
-    }
-    
+    // if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+    // {
+    //     visualsManager.setBinaryToDisplay(0xFF000000);
+    //     visualsManager.setLedArray(0x0F);
+    //     visualsManager.setDecimalPointToDisplay(false,2);
+    // }
 
-    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
-    {
-        allVisuals.setBrightness((byte)potentio.getValueMapped(0, 50), false);
-        //Serial.println(potentio.getValueMapped(0,50));
-       // visualsManager.setBlankDisplay();
-       visualsManager.setBlankDisplay();
-    }
-    visualsManager.refresh();
+    // if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp())
+    // {
+    //     allVisuals.setBrightness((byte)potentio.getValueMapped(0, 50), false);
+    //     //Serial.println(potentio.getValueMapped(0,50));
+    //    // visualsManager.setBlankDisplay();
+    //    visualsManager.setBlankDisplay();
+    // }
+    // visualsManager.refresh();
 
-    // quick check for all lights.
-    if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
-    {
-        for (uint8_t i = 0; i < 5; i++)
-        {
-            tmp[i] = 0xff;
-        }
-    }
+    // // quick check for all lights.
+    // if (binaryInputs[BUTTON_MOMENTARY_1].getValue())
+    // {
+    //     for (uint8_t i = 0; i < 5; i++)
+    //     {
+    //         tmp[i] = 0xff;
+    //     }
+    // }
 
 
-    allVisuals.refresh();
+    // allVisuals.refresh();
+    outputProcess();
     
 
 #else
