@@ -2593,11 +2593,8 @@ void Apps::miniMultiTimer(bool init)
 	{
 		// number of timers
 
-#ifdef PROTOTYPE
-		this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1, 3));
-#else
+
 		this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1, MAX_TIMERS_COUNT));
-#endif
 		// convert value to predefined amount of seconds.
 		uint16_t seconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91)); // 0 seconds to an hour
 
@@ -3176,151 +3173,151 @@ void Apps::modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_
 
 #ifdef SIMON_APP
 
-#ifdef PROTOTYPE
-void Apps::modeSimon(bool init)
-{
-	const int numButtons = 4;
-	const int buttons[numButtons] = {BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-	const byte lights[numButtons] = {1 << LIGHT_LATCHING_EXTRA, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2};
-	const uint8_t sounds[numButtons] = {C4_1, F4_1, A4_1, C5_1};
+// #ifdef PROTOTYPE
+// void Apps::modeSimon(bool init)
+// {
+// 	const int numButtons = 4;
+// 	const int buttons[numButtons] = {BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
+// 	const byte lights[numButtons] = {1 << LIGHT_LATCHING_EXTRA, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2};
+// 	const uint8_t sounds[numButtons] = {C4_1, F4_1, A4_1, C5_1};
 
-	const bool hasSound = (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
-	const bool hasLight = (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) || !hasSound;
+// 	const bool hasSound = (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
+// 	const bool hasLight = (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) || !hasSound;
 
-	if (init)
-	{
-		simonState = simonWaitForNewGame;
-	}
+// 	if (init)
+// 	{
+// 		simonState = simonWaitForNewGame;
+// 	}
 
-	if (init || potentio->getValueStableChangedEdge())
-	{
-		generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000, -100));
-	}
+// 	if (init || potentio->getValueStableChangedEdge())
+// 	{
+// 		generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000, -100));
+// 	}
 
-	uint8_t buttonsChanged = 0;
-	for (int k = 0; k < numButtons; ++k)
-	{
-		const bool changed = (buttons[k] == BUTTON_LATCHING_EXTRA)
-								 ? binaryInputs[buttons[k]].getValueChanged()
-								 : binaryInputs[buttons[k]].getEdgeUp();
-		if (changed)
-		{
-			buttonsChanged |= (1 << k);
-		}
-	}
+// 	uint8_t buttonsChanged = 0;
+// 	for (int k = 0; k < numButtons; ++k)
+// 	{
+// 		const bool changed = (buttons[k] == BUTTON_LATCHING_EXTRA)
+// 								 ? binaryInputs[buttons[k]].getValueChanged()
+// 								 : binaryInputs[buttons[k]].getEdgeUp();
+// 		if (changed)
+// 		{
+// 			buttonsChanged |= (1 << k);
+// 		}
+// 	}
 
-	switch (simonState)
-	{
-	case simonWaitForNewGame:
-	{
-		// all lights on
-		byte allLights = 0;
-		for (int k = 0; k < numButtons; ++k)
-		{
-			allLights |= lights[k];
-		}
-		ledDisp->setLedArray(allLights);
-		if (!buttonsChanged)
-		{
-			break;
-		}
-		simonState = simonNewGame;
-		break;
-	}
+// 	switch (simonState)
+// 	{
+// 	case simonWaitForNewGame:
+// 	{
+// 		// all lights on
+// 		byte allLights = 0;
+// 		for (int k = 0; k < numButtons; ++k)
+// 		{
+// 			allLights |= lights[k];
+// 		}
+// 		ledDisp->setLedArray(allLights);
+// 		if (!buttonsChanged)
+// 		{
+// 			break;
+// 		}
+// 		simonState = simonNewGame;
+// 		break;
+// 	}
 
-	case simonNewGame:
-	{
-		ledDisp->setLedArray(0);
-		// generate new sequence
-		for (int k = 0; k < bytes_list_bufsize; ++k)
-		{
-			SIMON_LIST[k] = k % numButtons;
-		}
-		shuffle(SIMON_LIST, bytes_list_bufsize);
+// 	case simonNewGame:
+// 	{
+// 		ledDisp->setLedArray(0);
+// 		// generate new sequence
+// 		for (int k = 0; k < bytes_list_bufsize; ++k)
+// 		{
+// 			SIMON_LIST[k] = k % numButtons;
+// 		}
+// 		shuffle(SIMON_LIST, bytes_list_bufsize);
 		
-		SIMON_LENGTH = 0;
-		simonState = simonNewLevel;
-		break;
-	}
+// 		SIMON_LENGTH = 0;
+// 		simonState = simonNewLevel;
+// 		break;
+// 	}
 
-	case simonNewLevel:
-	{
-		ledDisp->setNumberToDisplayAsDecimal(SIMON_LENGTH);
-		++SIMON_LENGTH;
-		if (SIMON_LENGTH >= bytes_list_bufsize)
-		{
-			// reached maximum length
-			if (hasSound)
-				buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
-			simonState = simonWaitForNewGame;
-			break;
-		}
-		SIMON_INDEX = -1; // negative index allows for lead-in time
-		simonState = simonPlaySequence;
-		generalTimer.start();
-		break;
-	}
+// 	case simonNewLevel:
+// 	{
+// 		ledDisp->setNumberToDisplayAsDecimal(SIMON_LENGTH);
+// 		++SIMON_LENGTH;
+// 		if (SIMON_LENGTH >= bytes_list_bufsize)
+// 		{
+// 			// reached maximum length
+// 			if (hasSound)
+// 				buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
+// 			simonState = simonWaitForNewGame;
+// 			break;
+// 		}
+// 		SIMON_INDEX = -1; // negative index allows for lead-in time
+// 		simonState = simonPlaySequence;
+// 		generalTimer.start();
+// 		break;
+// 	}
 
-	case simonPlaySequence:
-	{
-		if (generalTimer.getTimeIsNegative())
-		{
-			break;
-		}
-		generalTimer.start();
-		if (SIMON_INDEX < 0)
-		{
-			++SIMON_INDEX; // do-nothing lead in time
-			break;
-		}
-		if (SIMON_INDEX >= SIMON_LENGTH)
-		{
-			// sequence finished, give control to user
-			ledDisp->setLedArray(0);
-			SIMON_INDEX = 0;
-			simonState = simonUserRepeats;
-			break;
-		}
-		// show one button from the sequence
-		const uint8_t button = SIMON_LIST[SIMON_INDEX];
-		if (hasLight)
-			ledDisp->setLedArray(lights[button]);
-		if (hasSound)
-			buzzer->programBuzzerRoll(sounds[button]);
-		++SIMON_INDEX;
-		break;
-	}
+// 	case simonPlaySequence:
+// 	{
+// 		if (generalTimer.getTimeIsNegative())
+// 		{
+// 			break;
+// 		}
+// 		generalTimer.start();
+// 		if (SIMON_INDEX < 0)
+// 		{
+// 			++SIMON_INDEX; // do-nothing lead in time
+// 			break;
+// 		}
+// 		if (SIMON_INDEX >= SIMON_LENGTH)
+// 		{
+// 			// sequence finished, give control to user
+// 			ledDisp->setLedArray(0);
+// 			SIMON_INDEX = 0;
+// 			simonState = simonUserRepeats;
+// 			break;
+// 		}
+// 		// show one button from the sequence
+// 		const uint8_t button = SIMON_LIST[SIMON_INDEX];
+// 		if (hasLight)
+// 			ledDisp->setLedArray(lights[button]);
+// 		if (hasSound)
+// 			buzzer->programBuzzerRoll(sounds[button]);
+// 		++SIMON_INDEX;
+// 		break;
+// 	}
 
-	case simonUserRepeats:
-	{
-		if (!buttonsChanged)
-		{
-			break;
-		}
-		const int expected = SIMON_LIST[SIMON_INDEX];
-		if (buttonsChanged != (1 << expected))
-		{
-			// player made mistake, start new game
-			if (hasSound)
-				buzzer->loadBuzzerTrack(songs, SONG_RETREAT);
-			simonState = simonWaitForNewGame;
-			break;
-		}
-		// player pressed correct button
-		if (hasSound)
-			buzzer->programBuzzerRoll(sounds[expected]);
-		++SIMON_INDEX;
-		if (SIMON_INDEX >= SIMON_LENGTH)
-		{
-			// sequence fully replaced, add one more note
-			simonState = simonNewLevel;
-			break;
-		}
-		break;
-	}
-	}
-}
-#else
+// 	case simonUserRepeats:
+// 	{
+// 		if (!buttonsChanged)
+// 		{
+// 			break;
+// 		}
+// 		const int expected = SIMON_LIST[SIMON_INDEX];
+// 		if (buttonsChanged != (1 << expected))
+// 		{
+// 			// player made mistake, start new game
+// 			if (hasSound)
+// 				buzzer->loadBuzzerTrack(songs, SONG_RETREAT);
+// 			simonState = simonWaitForNewGame;
+// 			break;
+// 		}
+// 		// player pressed correct button
+// 		if (hasSound)
+// 			buzzer->programBuzzerRoll(sounds[expected]);
+// 		++SIMON_INDEX;
+// 		if (SIMON_INDEX >= SIMON_LENGTH)
+// 		{
+// 			// sequence fully replaced, add one more note
+// 			simonState = simonNewLevel;
+// 			break;
+// 		}
+// 		break;
+// 	}
+// 	}
+// }
+// #else
 
 void Apps::modeSimon(bool init)
 {
@@ -3651,7 +3648,7 @@ void Apps::modeSimon(bool init)
 	ledDisp->setLedArray(lights);
 	ledDisp->setTextBufToDisplay(textBuf);
 }
-#endif
+// #endif
 #endif
 
 bool Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
