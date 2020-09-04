@@ -93,8 +93,6 @@ byte* DisplayManagement::getDecimalPointsHandle()
 	return &decimalPoints;
 }
 
-
-
 void DisplayManagement::setLedArray(byte ledsAsBits) //  updateLights
 {
 	//sevseg.setLedArray(ledsAsBits);

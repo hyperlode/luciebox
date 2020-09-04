@@ -28,6 +28,11 @@ void Apps::appSelector(bool init, uint8_t selector)
 	{
 		// title mode (title screen will be displayed before real app starts)
 		this->app_init_mode = true;
+
+#ifdef ENABLE_SERIAL
+Serial.println(selector);
+#endif 
+
 	}
 
 	if (this->app_init_mode)
@@ -1325,7 +1330,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		else
 		{
 			ledDisp->setStandardTextToTextBuf(textHandle, TEXT_RESET);
-			
 		}
 	}
 	else
@@ -1343,7 +1347,9 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		}
 	
 	}
+
 	ledDisp->setLedArray(lights);
+	//ledDisp->setLedArray(0);
 }
 void Apps::displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet){
 	if (letterValueAlphabet > 8)
@@ -3020,16 +3026,15 @@ void Apps::modeSequencer(bool init)
 			// change speed if default behaviour of potentio.
 			if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)) &&
 				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)) &&
-				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) &&
+				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) 
 #ifdef BUTTON_MOMENTARY_3
-				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)) 
+				&& !(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)) 
 				// &&
 #endif
 				// potentio->getValueStableChangedEdge()
 				)
 			{
 				listenToPotentioToIncrementTimerInit(&generalTimer,5);
-
 			}
 
 			if (!generalTimer.getTimeIsNegative())

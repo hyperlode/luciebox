@@ -1,19 +1,39 @@
+
+// #define DBUG_REFACTOR_DISP
+// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
+//#define DBUG_REFACTOR_DISP
+#ifdef ENABLE_SERIAL
+//#define DEBUG_ANALOG_IN
+// #define DEBUG_MERCURY
+//#define DEBUG_POTENTIO
+#define DEBUG_BUTTONS
+//#define DEBUG_SELECTOR_KNOB
+//#define DEBUG_MINIMULTITIMER
+//#define DEBUG_SEQUENCER
+
+//#define SUPERDEBUG
+
+#endif
+
+
+
+
 #define DISPLAY_IS_COMMON_ANODE true //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
 
 #define PIN_DUMMY 66
 #define PIN_DUMMY_2 67
 
-#ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
+#define PROTOTYPE
 
-#define PIN_DISPLAY_DIGIT_0 PIN_DUMMY //invalid
-#define PIN_DISPLAY_DIGIT_1 5
-#define PIN_DISPLAY_DIGIT_2 9
-#define PIN_DISPLAY_DIGIT_3 10
-#define PIN_DISPLAY_DIGIT_4 11
-#define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
-#define SELECTOR_DIAL_POSITIONS 12
+// #ifdef PROTOTYPE //I made a mistake in pcb v1.0.0 by swapping the digit pins. So, now I make it a feature. The prototype hardware has to be changed if we want this to work.
+// #define PIN_DISPLAY_DIGIT_0 PIN_DUMMY //invalid
+// wires moved on prototype. 
 
-#else
+// #else
+
+
+// #endif
 
 #define PIN_DISPLAY_DIGIT_0 11 
 #define PIN_DISPLAY_DIGIT_1 10
@@ -21,8 +41,6 @@
 #define PIN_DISPLAY_DIGIT_3 5
 #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
 #define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
-
-#endif
 
 #define PIN_DISPLAY_SEGMENT_A 7
 #define PIN_DISPLAY_SEGMENT_B 2
@@ -45,12 +63,23 @@
 #ifdef PROTOTYPE
 #define LIGHT_MOMENTARY_0 1          // RED
 #define LIGHT_MOMENTARY_1 6          // GREEN
-#define LIGHT_MOMENTARY_2 2          // BLUE
+#define LIGHT_MOMENTARY_2 7          // BLUE
+#define LIGHT_MOMENTARY_3 2
 #define LIGHT_LATCHING_EXTRA 0       // LATCHING YELLOW
 #define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
 #define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
 #define LIGHT_LATCHING_BIG 5         // big latch
+// #define LIGHT_MOMENTARY_0 1          // RED
+// #define LIGHT_MOMENTARY_1 6          // GREEN
+// #define LIGHT_MOMENTARY_2 2          // BLUE
+// #define LIGHT_MOMENTARY_3 7
+// #define LIGHT_LATCHING_EXTRA 0       // LATCHING YELLOW
+// #define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
+// #define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
+// #define LIGHT_LATCHING_BIG 5         // big latch
+
 #else
+
 #define LIGHT_MOMENTARY_0 1          // momentary 0
 #define LIGHT_MOMENTARY_1 6          // momentary 1
 #define LIGHT_MOMENTARY_2 2          // momentary 2
@@ -75,26 +104,16 @@
 
 #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
 
-#ifdef PROTOTYPE
-#define MOMENTARY_BUTTONS_COUNT 3
-#else
 #define MOMENTARY_BUTTONS_COUNT 4
-#endif
 
-#if MOMENTARY_BUTTONS_COUNT == 3
-#define BUTTONS_1_COUNT 4
-#define BUTTONS_1_VALUES  \
-    {                     \
-        512, 256, 128, 64 \
-    }
-#else
+
 #define BUTTONS_1_COUNT 5
 #define BUTTONS_1_VALUES      \
     {                         \
-        500, 257, 128, 62, 28 \
+        500, 257, 128, 62, 30 \
     }
      // 509, 253, 129, 63, 32 
-#endif
+
 
 #define BUTTONS_2_COUNT 3
 #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0
@@ -143,26 +162,28 @@
 #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
 #define BUTTON_LATCHING_SMALL_RED_LEFT 1
 #define BUTTON_LATCHING_BIG_RED 2
-#define BUTTON_MOMENTARY_2 3 // prototype Blue
-#define BUTTON_MOMENTARY_1 4 // prototype Green
-#define BUTTON_MOMENTARY_0 5 //prototype Red
-#define BUTTON_LATCHING_EXTRA 6 //prototype Latching yellow
+
+// #ifdef PROTOTYPE
+#define BUTTON_LATCHING_EXTRA 7 // Latching yellow 
+
+#define BUTTON_MOMENTARY_0 6 // most left (Red)
+#define BUTTON_MOMENTARY_1 5 // Green (second most left)
+#define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
+#define BUTTON_MOMENTARY_3 3 // most right (Yellow)
+
+// #else
+// #define BUTTON_LATCHING_EXTRA 7 // Latching yellow 
+// #define BUTTON_MOMENTARY_0 6 // most left (Red)
+// #define BUTTON_MOMENTARY_1 5 // Green (second most left)
+// #define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
+// #define BUTTON_MOMENTARY_3 3 // most right (Yellow) 
+// #endif
 
 
-#if MOMENTARY_BUTTONS_COUNT == 3
-
-    #define SWITCH_TILT_FORWARD 10
-    #define SWITCH_TILT_BACKWARD 8
-    #define SWITCH_TILT_LEFT 7
-    #define SWITCH_TILT_RIGHT 9
-#else
-    #define BUTTON_MOMENTARY_3 7 // prototype non existing
-
-    #define SWITCH_TILT_FORWARD 11
-    #define SWITCH_TILT_BACKWARD 9
-    #define SWITCH_TILT_LEFT 8
-    #define SWITCH_TILT_RIGHT 10
-#endif
+#define SWITCH_TILT_FORWARD 11
+#define SWITCH_TILT_BACKWARD 9
+#define SWITCH_TILT_LEFT 8
+#define SWITCH_TILT_RIGHT 10
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 

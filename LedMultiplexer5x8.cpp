@@ -145,14 +145,14 @@ void LedMultiplexer5x8::refresh()
 	for (byte segment = 0; segment < 8; segment++)
 	{
 		digitalWrite(SegmentPins[segment], SEGMENTOFF);
-		// pinMode(SegmentPins[segment], INPUT);
+		pinMode(SegmentPins[segment], INPUT);
 	}
 
 	//turn digits off
 	for (byte digit = 0; digit < 5; digit++)
 	{
 		digitalWrite(DigitPins[digit], DIGITOFF);
-		// pinMode(DigitPins[digit], INPUT);
+		pinMode(DigitPins[digit], INPUT);
 	}
 
 	segActive++;
@@ -201,77 +201,3 @@ byte *LedMultiplexer5x8::getDigits()
 	// get the handle to send the values of all the lights too.
 	return digitValues;
 }
-
-//New Number
-/*******************************************************************************************/
-
-// void LedMultiplexer5x8::SetSingleDigit(int8_t value, int digit)
-// {
-// 	//value =  bits. Segment bit0=segmentA, bit6=segmentG, bit7 = decimal point.
-// 	this->lights[digit] = value;
-// }
-
-// void LedMultiplexer5x8::setBinaryToDisplay(uint32_t value)
-// {
-// 	for (uint8_t i = 0; i < 4; i++)
-// 	{
-// 		this->SetSingleDigit(value >> (8 * i), i + 1);
-// 	}
-// }
-
-// void LedMultiplexer5x8::SetDecPointSingle(boolean pointIsOn, int digit)
-// {
-// 	setBit(&this->lights[digit], pointIsOn, 7);
-// 	//CreateArray();
-// }
-// void LedMultiplexer5x8::setLedArray(byte ledsAsBits)
-// {
-// 	this->ledArrayValues = ledsAsBits;
-// }
-
-// void LedMultiplexer5x8::NewText(char *text)
-// {
-// 	this->text = text;
-// 	CreateArray();
-// #ifdef ARDUINO_SIMULATION
-// 	mtc->setTextBufToDisplay(text);
-// 	mtc->setLights(this->lights);
-// #endif
-// }
-
-// //Create Array
-// /*******************************************************************************************/
-// //From the numbers found, says which LEDs need to be turned on
-// void LedMultiplexer5x8::CreateArray()
-// {
-
-// 	for (byte digit = 0; digit < 5; digit++)
-// 	{
-
-// 		//temporary save the decimal point of the segment.
-// 		setBit(&this->boolContainer, getBit(&this->lights[digit], 7), TEMPDECPOINTMEMORY);
-
-// 		if (text[digit] == ' ')
-// 		{
-// 			text[digit] = SPACE_FAKE_ASCII;
-// 		}
-
-// 		if (text[digit] == '?')
-// 		{
-// 			byte i = random(0, 7);
-// 			setBit(&this->lights[digit], !getBit(&this->lights[digit], i), i); //random on or off...
-// 		}
-// 		else if (text[digit] < 91)
-// 		{
-// 			lights[digit] = pgm_read_byte_near(selected_ascii_to_7seg_digit + text[digit] - 48);
-// 		}
-// 		else
-// 		{
-
-// 			lights[digit] = B01011100;
-// 		}
-
-// 		//Set the decimal place lights
-// 		setBit(&this->lights[digit], getBit(&this->boolContainer, TEMPDECPOINTMEMORY), 7);
-// 	}
-// }

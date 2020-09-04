@@ -9,7 +9,6 @@
 #define SIMON_APP
 #define ENABLE_REACTION_APP
 
-
 #include "Arduino.h"
 #include "SuperTimer.h"
 #include "Buzzer.h"
