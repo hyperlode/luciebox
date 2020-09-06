@@ -1,12 +1,9 @@
 #ifndef APPS_H
 #define APPS_H
 
-
-
-
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
-#define SIMON_APP
+#define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 
 #include "Arduino.h"
@@ -713,7 +710,7 @@ private:
 //   settingButtons,
 //   settingEepromReset
 // };
-#ifdef SIMON_APP
+#ifdef ENABLE_SIMON_APP
     // simon
     enum SimonState : uint8_t
     {

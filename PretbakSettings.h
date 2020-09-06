@@ -10,13 +10,11 @@
 //#define DEBUG_ANALOG_IN
 //#define DEBUG_MERCURY
 //#define DEBUG_POTENTIO
-#define DEBUG_BUTTONS
+//#define DEBUG_BUTTONS
 //#define DEBUG_SELECTOR_KNOB
 //#define DEBUG_MINIMULTITIMER
 //#define DEBUG_SEQUENCER
-
 //#define SUPERDEBUG
-
 #endif
 
 
