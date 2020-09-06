@@ -47,7 +47,9 @@ void Apps::appSelector(bool init, uint8_t selector)
 	if (!this->app_init_mode)
 	{
 
-		uint8_t appSelector = selector * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) > 0);
+		uint8_t appSelector = selector * 2 + 
+				((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) > 0
+			);
 
 		bool initOnBigLatchInitToo = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 
