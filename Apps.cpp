@@ -3230,6 +3230,7 @@ void Apps::modeMetronomeTickerUpdate(uint8_t *ticker_counter, uint8_t momentary_
 	ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + *ticker_counter * 4);
 }
 
+#ifdef ENABLE_SIMON_APP
 void Apps::modeSimon(bool init)
 {
 	uint8_t lights = 0b00000000;
@@ -3559,6 +3560,7 @@ void Apps::modeSimon(bool init)
 	ledDisp->setLedArray(lights);
 	ledDisp->setTextBufToDisplay(textBuf);
 }
+#endif  //ENABLE_SIMON_APP
 
 bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
@@ -3778,13 +3780,31 @@ void Apps::modeReactionGame(bool init)
 
 	case reactionHexPlaying:
 	{
+		REACTION_GAME_HEX_VALUE_TO_FIND = REACTION_GAME_HEX_MEMORY[3];
+		
+		
+		// attempt to optimization, but with a bug, and too tired. So, give it a shot! 
+		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[3];
+		// //Serial.println(REACTION_GAME_HEX_VALUE_TO_FIND);
+
+		// if (REACTION_GAME_HEX_VALUE_TO_FIND == ' ' || REACTION_GAME_HEX_VALUE_TO_FIND == SPACE_FAKE_ASCII){
+		// 	REACTION_GAME_HEX_VALUE_TO_FIND = 0;
+			
+		// }else{
+		// 	if (REACTION_GAME_HEX_VALUE_TO_FIND > 57){
+		// 		REACTION_GAME_HEX_VALUE_TO_FIND -=7;
+		// 	}
+		// 	REACTION_GAME_HEX_VALUE_TO_FIND -= 48;
+		// }
+		
+		
 		// check for all buttons pressed in binary pattern or wrong button press
 		uint8_t build_up_value = 0;
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 			if (binaryInputs[buttons_indexed[i]].getValue())
 			{
-				if  (! ( REACTION_GAME_HEX_MEMORY[3] & (1<<(3-i)) )){
+				if  (! ( REACTION_GAME_HEX_VALUE_TO_FIND & (1<<(3-i)) )){
 					reactionGameState = reactionJustDied;
 				}else{
 					build_up_value |= (1<<(3-i));
@@ -3793,7 +3813,7 @@ void Apps::modeReactionGame(bool init)
 		}
 
 		// check of button press pattern is the sought pattern
-		if ( build_up_value == (0x0F & REACTION_GAME_HEX_MEMORY[3] )){
+		if ( build_up_value == (0x0F & REACTION_GAME_HEX_VALUE_TO_FIND )){
 			REACTION_HEX_GUESSED_CORRECTLY = true;
 			textBuf[3] = ' ';
 		}
