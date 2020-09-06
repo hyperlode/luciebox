@@ -48,18 +48,18 @@ void Apps::appSelector(bool init, uint8_t selector)
 	if (!this->app_init_mode)
 	{
 
-		uint8_t appSelector = selector * 2 + 
-				((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0);
+		uint8_t appSelector = selector * 2 +
+							  ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0);
 
 		bool initOnBigLatchInitToo = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 
-		if (	init || 
-				(initOnBigLatchInitToo && (appSelector != APP_SELECTOR_MULTITIMER_PLAYING)) // it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
-			)
+		if (init ||
+			(initOnBigLatchInitToo && (appSelector != APP_SELECTOR_MULTITIMER_PLAYING)) // it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
+		)
 		{
 #ifdef ENABLE_SERIAL
-					Serial.println("app select:");
-					Serial.println(appSelector);
+			Serial.println("app select:");
+			Serial.println(appSelector);
 #endif
 			// set to init state before a new app starts
 			this->setDefaultMode();
@@ -3230,7 +3230,6 @@ void Apps::modeMetronomeTickerUpdate(uint8_t *ticker_counter, uint8_t momentary_
 	ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + *ticker_counter * 4);
 }
 
-
 void Apps::modeSimon(bool init)
 {
 	uint8_t lights = 0b00000000;
@@ -3561,7 +3560,6 @@ void Apps::modeSimon(bool init)
 	ledDisp->setTextBufToDisplay(textBuf);
 }
 
-
 bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
 	int16_t original_value;
@@ -3608,6 +3606,8 @@ void Apps::modeReactionGame(bool init)
 
 	if (init)
 	{
+	
+		
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x0;
 		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
@@ -3634,13 +3634,14 @@ void Apps::modeReactionGame(bool init)
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
 		}
 
-		// special mode for the reaction game: limited total time during which as many points should be collected.
 		REACTION_GUITAR_HERO_MODE = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED);
 
 		REACTION_COUNTDOWN_MODE = false;
+
+		// guitar hero and countdown mode should never occure at the same time!
 		if (!REACTION_GUITAR_HERO_MODE)
 		{
-			// guitar hero and countdown mode should never occure at the same time!
+			// special mode for the reaction game: limited total time during which as many points should be collected.
 			REACTION_COUNTDOWN_MODE = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 		}
 
@@ -3693,7 +3694,6 @@ void Apps::modeReactionGame(bool init)
 				}
 			}
 		}
-
 		break;
 	}
 
@@ -3703,17 +3703,29 @@ void Apps::modeReactionGame(bool init)
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED))
 		{
-
-			reactionGameState = reactionMultiNewTurn;
+			REACTION_GAME_STEP_TIME_MILLIS = (6 - REACTION_GAME_LEVEL) * -200;
 			displayAllSegments = 0;
 
-			REACTION_GAME_STEP_TIME_MILLIS = (6 - REACTION_GAME_LEVEL) * -200;
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+			{
+				// hex geek mode
+				for (uint8_t i = 0;i<8;i++){
+					REACTION_GAME_HEX_MEMORY[i] = 0;
+				}
+				ledDisp->setStandardTextToTextBuf(textBuf, TEXT_SPACES);
+				reactionGameState = reactionHexNewTurn;
+			}
+			else
+			{
+				// guitar hero mode
+				reactionGameState = reactionMultiNewTurn;
+			}
 		}
 		else
 		{
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 			{
-				// let them all play so the player gets a feel for them.
+				// sound mode let them all play so the player gets a feel for them.
 				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 				{
 					buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
@@ -3740,6 +3752,68 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
+	case reactionHexNewTurn:
+	{
+		// shift textBuf to right
+		for (uint8_t i = 3; i > 0; i--)
+		{
+			textBuf[i] = textBuf[i - 1];
+			REACTION_GAME_HEX_MEMORY[i] = REACTION_GAME_HEX_MEMORY[i - 1];
+		}
+
+		// add new hex char on left
+		textBuf[0] = random(49, 64);
+		REACTION_GAME_HEX_MEMORY[0] = textBuf[0] - 48;
+
+		if (textBuf[0] > 57){
+			textBuf[0] += 7;
+		}
+
+		// prepare next move
+		reactionGameState = reactionHexPlaying;
+		TIMER_REACTION_GAME_SPEED.start();
+		REACTION_HEX_GUESSED_CORRECTLY = false;
+		break;
+	}
+
+	case reactionHexPlaying:
+	{
+		// check for all buttons pressed in binary pattern or wrong button press
+		uint8_t build_up_value = 0;
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			if (binaryInputs[buttons_indexed[i]].getValue())
+			{
+				if  (! ( REACTION_GAME_HEX_MEMORY[3] & (1<<(3-i)) )){
+					reactionGameState = reactionJustDied;
+				}else{
+					build_up_value |= (1<<(3-i));
+				}
+			}
+		}
+
+		// check of button press pattern is the sought pattern
+		if ( build_up_value == (0x0F & REACTION_GAME_HEX_MEMORY[3] )){
+			REACTION_HEX_GUESSED_CORRECTLY = true;
+			textBuf[3] = ' ';
+		}
+
+		// end of move 
+		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+		{
+			// check if correct combination was pressed at end of move
+			reactionGameState = reactionHexNewTurn;
+			if (!REACTION_HEX_GUESSED_CORRECTLY){
+				reactionGameState = reactionJustDied;
+			}
+		}
+
+		// update
+		ledDisp->setLedArray(lights);
+		ledDisp->setTextBufToDisplay(textBuf);
+		break;
+	}
+
 	case reactionMultiNewTurn:
 	{
 		// like in guitar hero, the horizontal segments in the screen fall down and button combo's have to be pressed to "catch" the falling segments.
@@ -3747,7 +3821,7 @@ void Apps::modeReactionGame(bool init)
 		// three rows of four horizontal segments in 4 digits 7 segment display.
 		// choose top row random. any combination of 4 (including zero) ==> 16 combinations.
 
-		lights = 0b00000000;
+		// lights = 0b00000000;
 
 		uint8_t new_segment;
 		uint32_t tmp_segments;
@@ -3788,7 +3862,7 @@ void Apps::modeReactionGame(bool init)
 		displayAllSegments = tmp_segments;
 
 		//ledDisp->setLedArray(lights);
-		ledDisp->setBinaryToDisplay(displayAllSegments);
+		//ledDisp->setBinaryToDisplay(displayAllSegments);
 		TIMER_REACTION_GAME_SPEED.start();
 
 		reactionGameState = reactionMultiPlaying;

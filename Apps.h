@@ -216,6 +216,7 @@
 #define METRONOME_TICKER_2_POSITION counter6
 #define HACKTIME_SOUND counter6
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
+#define REACTION_GAME_HEX_MEMORY counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
@@ -227,6 +228,7 @@
 #define SOUND_NOTES_NOTE_INDEX counter9
 
 #define REACTION_COUNTDOWN_MODE general_boolean
+#define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
@@ -246,6 +248,7 @@
 #define COMPOSER_SONG bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
+#define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
 
@@ -679,6 +682,8 @@ private:
         reactionFinished,
         reactionMultiNewTurn,
         reactionMultiPlaying,
+        reactionHexNewTurn,
+        reactionHexPlaying
 
     };
     ReactionGameState reactionGameState;
