@@ -216,6 +216,7 @@
 #define METRONOME_TICKER_2_POSITION counter6
 #define HACKTIME_SOUND counter6
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
+#define REACTION_GAME_HEX_ACTIVE_DIGIT counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
@@ -227,7 +228,7 @@
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 
-#define REACTION_COUNTDOWN_MODE general_boolean
+#define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
@@ -424,6 +425,7 @@ const uint8_t songs [] PROGMEM = {
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
+    // 1,  // empty slot instead of lang zal ze leven
     // lang zal ze leven
     85, C7_4, rest_4, rest_2,
     C7_4, rest_2, C7_8, rest_8,
@@ -627,6 +629,7 @@ private:
     bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeDisplay(bool forReal);
+    void textBufToDisplay();
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
     SuperTimer generalTimer;
@@ -682,7 +685,8 @@ private:
         reactionFinished,
         reactionMultiNewTurn,
         reactionMultiPlaying,
-        reactionHexNewTurn,
+        reactionHexNextStep,
+        reactionHexWaitForButtonsRelease,
         reactionHexPlaying
 
     };
