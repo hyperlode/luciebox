@@ -216,6 +216,7 @@
 #define METRONOME_TICKER_2_POSITION counter6
 #define HACKTIME_SOUND counter6
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
+#define REACTION_GAME_HEX_ACTIVE_DIGIT counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
@@ -406,7 +407,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 //PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
 
 #define SONG_DRYER_HAPPY 0
-#define SONG_LANG_ZAL_ZE_LEVEN 1
+// #define SONG_LANG_ZAL_ZE_LEVEN 1
 #define SONG_ATTACK 2
 
 #define SONG_DRYER_UNHAPPY 4
@@ -424,43 +425,44 @@ const uint8_t songs [] PROGMEM = {
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
-    // lang zal ze leven
-    85, C7_4, rest_4, rest_2,
-    C7_4, rest_2, C7_8, rest_8,
-    C7_4, rest_4, rest_2,
-    G6_2, G6_4, rest_2,
+    1,  // empty slot instead of lang zal ze leven
+    // // lang zal ze leven
+    // 85, C7_4, rest_4, rest_2,
+    // C7_4, rest_2, C7_8, rest_8,
+    // C7_4, rest_4, rest_2,
+    // G6_2, G6_4, rest_2,
 
-    E7_4, rest_4, rest_2,
-    E7_4, rest_2, E7_8, rest_8,
-    E7_4, rest_4, rest_2,
-    C7_2, C7_4, rest_2,
+    // E7_4, rest_4, rest_2,
+    // E7_4, rest_2, E7_8, rest_8,
+    // E7_4, rest_4, rest_2,
+    // C7_2, C7_4, rest_2,
 
-    G7_4, rest_4, rest_2,
-    G7_4, rest_2, G7_8, rest_8,
+    // G7_4, rest_4, rest_2,
+    // G7_4, rest_2, G7_8, rest_8,
 
-    A7_8, rest_8, rest_4,
-    G7_8, rest_8, rest_4,
+    // A7_8, rest_8, rest_4,
+    // G7_8, rest_8, rest_4,
 
-    F7_8, rest_8, rest_4,
-    E7_8, rest_8, rest_4,
+    // F7_8, rest_8, rest_4,
+    // E7_8, rest_8, rest_4,
 
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    rest_4,
-    G7_8, rest_8, rest_4,
-    F7_8, rest_8, rest_4,
+    // D7_2, D7_4, rest_4,
+    // D7_2, D7_4, rest_4,
+    // D7_2, D7_4, rest_4,
+    // rest_4,
+    // G7_8, rest_8, rest_4,
+    // F7_8, rest_8, rest_4,
 
-    E7_1, E7_2, rest_2,
-    F7_1, F7_2, rest_2,
+    // E7_1, E7_2, rest_2,
+    // F7_1, F7_2, rest_2,
 
-    G7_1, G7_2, rest_2,
-    A7_2, A7_4, rest_4,
-    F7_2, F7_4, rest_4,
+    // G7_1, G7_2, rest_2,
+    // A7_2, A7_4, rest_4,
+    // F7_2, F7_4, rest_4,
 
-    E7_1, E7_2, rest_2,
-    D7_1, D7_2, rest_2,
-    C7_1, C7_1,
+    // E7_1, E7_2, rest_2,
+    // D7_1, D7_2, rest_2,
+    // C7_1, C7_1,
     // aaanvallueeeeee!
     15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
     // empty slot test
@@ -682,7 +684,8 @@ private:
         reactionFinished,
         reactionMultiNewTurn,
         reactionMultiPlaying,
-        reactionHexNewTurn,
+        reactionHexNextStep,
+        reactionHexWaitForButtonsRelease,
         reactionHexPlaying
 
     };

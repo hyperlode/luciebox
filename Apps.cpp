@@ -331,6 +331,9 @@ void Apps::quiz(bool init)
 		lights |= 1 << LIGHT_LATCHING_EXTRA;
 
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+		// if (binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_EXTRA) ||
+		// 	binaryInputsEdgeUp && (1 << BUTTON_LATCHING_SMALL_RED_RIGHT))
+
 		{
 			quizState = quizWaitRandomTime;
 			QUIZ_RANDOM_WAIT_TIME.setInitTimeMillis(random(-3000, -500));
@@ -1505,8 +1508,9 @@ void Apps::modeSoundSong(bool init)
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 			{
 				uint8_t song[32];
-
+#ifdef ENABLE_EEPROM
 				saveLoadFromEepromSlot(song, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
+#endif
 				for (uint8_t i = 0; i < 32; i++)
 				{
 					buzzer->programBuzzerRoll(song[i]);
@@ -1541,6 +1545,7 @@ void Apps::modeComposeSong(bool init)
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
+#ifdef ENABLE_EEPROM
 		bool loaded;
 		loaded = saveLoadMenu(COMPOSER_SONG, 4, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS);
 
@@ -1559,6 +1564,7 @@ void Apps::modeComposeSong(bool init)
 				}
 			}
 		}
+#endif
 	}
 	else
 	{
@@ -1682,9 +1688,7 @@ void Apps::modeComposeSong(bool init)
 		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-#ifdef BUTTON_MOMENTARY_3
 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) &&
-#endif
 			potentio->getValueStableChangedEdge())
 		{
 			int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
@@ -1835,7 +1839,8 @@ void Apps::modeSoundNotes(bool init)
 		}
 
 		// change note up / downwith button press
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2) || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2) ||
+		   (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3));
 			update_note = true;
@@ -2521,11 +2526,12 @@ void Apps::draw(bool init)
 			listenToMomentary2and3ModifyValue(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 		}
 	}
-
+#ifdef ENABLE_EEPROM
 	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1, true);
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
+
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			// special function in save image to eeprom mode.
@@ -2577,6 +2583,7 @@ void Apps::draw(bool init)
 				}
 			}
 		}
+
 	}
 	else if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY)
 	{
@@ -2589,6 +2596,7 @@ void Apps::draw(bool init)
 		}
 		this->displayChangeGlobal(&displayAllSegments, true);
 	}
+#endif
 
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
 
@@ -2978,7 +2986,9 @@ void Apps::modeSequencer(bool init)
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
+#ifdef ENABLE_EEPROM
 		this->saveLoadMenu(this->SEQUENCER_SONG, 9, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS);
+#endif
 	}
 	else
 	{
@@ -3081,12 +3091,8 @@ void Apps::modeSequencer(bool init)
 			// change speed if default behaviour of potentio.
 			if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
 				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2))
-#ifdef BUTTON_MOMENTARY_3
-				&& !(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
-			// &&
-#endif
-				// potentio->getValueStableChangedEdge()
+				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
 			)
 			{
 				listenToPotentioToIncrementTimerInit(&generalTimer, 5);
@@ -3183,18 +3189,10 @@ void Apps::modeMetronome(bool init)
 
 	displayAllSegments = 0;
 
-#if MOMENTARY_BUTTONS_COUNT == 4
 	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)), C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true, C7_8, update);
-#else
-	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)), C5_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_2, true, C7_8, update);
-
-#endif
-
 	ledDisp->setBinaryToDisplay(displayAllSegments);
 }
 
@@ -3715,7 +3713,7 @@ void Apps::modeReactionGame(bool init)
 					REACTION_GAME_HEX_MEMORY[i] = 0;
 				}
 				ledDisp->setStandardTextToTextBuf(textBuf, TEXT_SPACES);
-				reactionGameState = reactionHexNewTurn;
+				reactionGameState = reactionHexNextStep;
 			}
 			else
 			{
@@ -3754,7 +3752,7 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
-	case reactionHexNewTurn:
+	case reactionHexNextStep:
 	{
 		// shift textBuf to right
 		for (uint8_t i = 3; i > 0; i--)
@@ -3778,13 +3776,32 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
+	case reactionHexWaitForButtonsRelease:
+	{
+		// all buttons need to be release before we can check for a new press.
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+		{
+			reactionGameState = reactionHexPlaying;
+		}
+		ledDisp->setTextBufToDisplay(textBuf);
+		break;
+	}
+
 	case reactionHexPlaying:
 	{
-		REACTION_GAME_HEX_VALUE_TO_FIND = REACTION_GAME_HEX_MEMORY[3];
+		// #define TTEST
+		REACTION_GAME_HEX_ACTIVE_DIGIT = 3;
+		while(REACTION_GAME_HEX_ACTIVE_DIGIT > 0 && (textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == ' '|| textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII)){
+			REACTION_GAME_HEX_ACTIVE_DIGIT--;
+		}
+		// Serial.println(REACTION_GAME_HEX_ACTIVE_DIGIT);
 		
-		
-		// attempt to optimization, but with a bug, and too tired. So, give it a shot! 
-		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[3];
+		// #ifdef TTEST
+		// //attempt to optimization, but with a bug, and too tired. So, give it a shot! 
+		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT];
 		// //Serial.println(REACTION_GAME_HEX_VALUE_TO_FIND);
 
 		// if (REACTION_GAME_HEX_VALUE_TO_FIND == ' ' || REACTION_GAME_HEX_VALUE_TO_FIND == SPACE_FAKE_ASCII){
@@ -3797,7 +3814,12 @@ void Apps::modeReactionGame(bool init)
 		// 	REACTION_GAME_HEX_VALUE_TO_FIND -= 48;
 		// }
 		
+		// #else
+
+		REACTION_GAME_HEX_VALUE_TO_FIND = REACTION_GAME_HEX_MEMORY[REACTION_GAME_HEX_ACTIVE_DIGIT];
 		
+		// #endif
+
 		// check for all buttons pressed in binary pattern or wrong button press
 		uint8_t build_up_value = 0;
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3814,22 +3836,26 @@ void Apps::modeReactionGame(bool init)
 
 		// check of button press pattern is the sought pattern
 		if ( build_up_value == (0x0F & REACTION_GAME_HEX_VALUE_TO_FIND )){
+			reactionGameState = reactionHexWaitForButtonsRelease;
 			REACTION_HEX_GUESSED_CORRECTLY = true;
-			textBuf[3] = ' ';
+			textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = ' ';
+			REACTION_GAME_SCORE++;
+			// Serial.println("good");
 		}
 
 		// end of move 
 		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
 		{
+			// Serial.println("end of step");
 			// check if correct combination was pressed at end of move
-			reactionGameState = reactionHexNewTurn;
-			if (!REACTION_HEX_GUESSED_CORRECTLY){
+			reactionGameState = reactionHexNextStep;
+			if (!REACTION_HEX_GUESSED_CORRECTLY && REACTION_GAME_HEX_ACTIVE_DIGIT==3){
 				reactionGameState = reactionJustDied;
 			}
 		}
 
 		// update
-		ledDisp->setLedArray(lights);
+		// ledDisp->setLedArray(lights);
 		ledDisp->setTextBufToDisplay(textBuf);
 		break;
 	}
