@@ -407,7 +407,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 //PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
 
 #define SONG_DRYER_HAPPY 0
-#define SONG_LANG_ZAL_ZE_LEVEN 1
+// #define SONG_LANG_ZAL_ZE_LEVEN 1
 #define SONG_ATTACK 2
 
 #define SONG_DRYER_UNHAPPY 4
