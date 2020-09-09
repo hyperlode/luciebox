@@ -629,7 +629,19 @@ private:
     bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeDisplay(bool forReal);
+
+    // functions for compression the memory size
     void textBufToDisplay();
+    void addNoteToBuzzer(uint8_t note);
+    void buzzerOff();
+    void loadBuzzerTrack(uint8_t songIndex);
+    void setBlankDisplay();
+    void setLedArray(byte lights);
+    void setStandardTextToTextBuf(uint8_t textPosition);
+    void setStandardTextToTextHANDLE(uint8_t textPosition);
+    void numberToBufAsDecimal(int16_t number);
+    
+    // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
     SuperTimer generalTimer;

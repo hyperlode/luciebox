@@ -118,14 +118,15 @@
 #endif
 
 // postion of buttons in the indexed array.
-#define BUTTON_INDEXED_MOMENTARY_0 0
+// don't change indeces, for the sake of compression code, the sequence is fixed 
+#define BUTTON_INDEXED_MOMENTARY_0 0  
 #define BUTTON_INDEXED_MOMENTARY_1 1
 #define BUTTON_INDEXED_MOMENTARY_2 2
 #define BUTTON_INDEXED_MOMENTARY_3 3
-#define BUTTON_INDEXED_LATCHING_BIG_RED 4
-#define BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT 5
-#define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT 6
-#define BUTTON_INDEXED_LATCHING_EXTRA 7
+#define BUTTON_INDEXED_LATCHING_BIG_RED 4  // latching 0
+#define BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT 5 // latching 1 
+#define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT 6  // latching 2
+#define BUTTON_INDEXED_LATCHING_EXTRA 7  // latching 3
 
 // binary input indeces per button
 #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
