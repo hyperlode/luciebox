@@ -87,6 +87,11 @@ void Buzzer::loadBuzzerTrack(const uint8_t *seq, uint8_t song_index)
 //         i++;
 //     }
 // }
+// void Buzzer:: addNoteToBuzzerRoll(uint8_t sound, uint8_t repeater){
+//     for (uint8_t i=0;i<repeater;i++){
+//         this->programBuzzerRoll(sound);
+//     }
+// }
 
 void Buzzer::programBuzzerRoll(uint8_t sound)
 {

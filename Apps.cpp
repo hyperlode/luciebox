@@ -2857,7 +2857,7 @@ void Apps::modeGeiger(bool init)
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
-		// noise mode
+		// note mode
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
@@ -2886,7 +2886,7 @@ void Apps::modeGeiger(bool init)
 			}
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_LENGTH);
 
-#ifdef BUTTON_MOMENTARY_3
+
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
@@ -2896,7 +2896,7 @@ void Apps::modeGeiger(bool init)
 					potentio->getValueMapped(0, 500),
 					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
 			}
-#endif
+
 		}
 		else
 		{
@@ -2926,7 +2926,7 @@ void Apps::modeGeiger(bool init)
 		// todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
 
 		// If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			// binaryInputs[SWITCH_TILT_FORWARD].getValue() ||
 			// r *= 2; //
@@ -2942,7 +2942,7 @@ void Apps::modeGeiger(bool init)
 
 		r += GEIGER_INCREASE_CHANCE;
 
-		textBuf[0] = ' ';
+		// textBuf[0] = ' ';
 		if (r > potentio->getValueMapped(0, 1048576))
 		{
 			//	addNoteToBuzzer(1); //not beep but "puck"
@@ -3487,10 +3487,7 @@ void Apps::modeSimon(bool init)
 		if (pressed_momentary_button != expected)
 		{
 			// player made mistake, player dies
-			addNoteToBuzzer(C4_1);
-			addNoteToBuzzer(C4_1);
-			addNoteToBuzzer(C4_1);
-			addNoteToBuzzer(C4_1);
+			this->addNoteToBuzzerRepeated(C4_1, 4);
 			simonState = simonPlayerDead;
 			break;
 		}
@@ -3607,12 +3604,19 @@ void Apps::modeReactionGame(bool init)
 
 	if (init)
 	{
-	
-		
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x0;
-		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
+		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(1);  // not 0, blinking does not look nice otherwise.
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
+
+		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
+		// never twice the same sound. Only first notes of array will be used.
+		for (uint8_t i = 0; i < 12; i++)
+		{
+			REACTION_GAME_TEMP_SELECTED_NOTES[i] =  234 + i ;//234, 245
+		}
+		this->shuffle(REACTION_GAME_TEMP_SELECTED_NOTES, 12);
+		
 	}
 
 	setBlankDisplay();
@@ -3635,11 +3639,10 @@ void Apps::modeReactionGame(bool init)
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
 		}
 
-		REACTION_GUITAR_HERO_MODE = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED);
-
-		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = false;
-
-		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
+		// check options
+		REACTION_GUITAR_HERO_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0;
+		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0;
+		REACTION_SOUND_MODE_GUITAR_HEX_HERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0;
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
@@ -3667,26 +3670,21 @@ void Apps::modeReactionGame(bool init)
 		// play game button pressed
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			reactionGameState = reactionNewGame;
-
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+			if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
-				//play by sound
+				// sound mode let them all play so the player gets a feel for them.
 				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 				{
-
-					REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(234, 245);
-
-					for (uint8_t j = 0; j < i; j++)
-					{
-						// never twice the same sound
-						if (REACTION_GAME_SELECTED_SOUNDS[j] == REACTION_GAME_SELECTED_SOUNDS[i])
-						{
-							i--;
-						}
-					}
+					addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[i]);
+					this->addNoteToBuzzerRepeated(rest_1, 2);
 				}
+				addNoteToBuzzerRepeated(rest_1, 4);
+				reactionGameState = reactionWaitBeforeNewTurn;
+
+			}else{
+				reactionGameState = reactionNewGame;
 			}
+
 		}
 		break;
 	}
@@ -3700,7 +3698,7 @@ void Apps::modeReactionGame(bool init)
 			REACTION_GAME_STEP_TIME_MILLIS = (6 - REACTION_GAME_LEVEL) * -200;
 			displayAllSegments = 0;
 
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+			if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
 				// hex geek mode
 				for (uint8_t i = 0;i<8;i++){
@@ -3712,23 +3710,15 @@ void Apps::modeReactionGame(bool init)
 			else
 			{
 				// guitar hero mode
-				reactionGameState = reactionMultiNewTurn;
+				reactionGameState = reactionGuitarHeroNewTurn;
 			}
 		}
 		else
 		{
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
-			{
-				// sound mode let them all play so the player gets a feel for them.
-				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-				{
-					addNoteToBuzzer(REACTION_GAME_SELECTED_SOUNDS[i]);
-					addNoteToBuzzer(rest_1);
-					addNoteToBuzzer(rest_1);
-				}
-			}
 
-			reactionGameState = reactionNewTurn;
+			if (buzzer->getBuzzerRollEmpty()){ // in sound mode, wait till demo is done
+				reactionGameState = reactionNewTurn;
+			}
 
 			if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 			{
@@ -3856,7 +3846,7 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
-	case reactionMultiNewTurn:
+	case reactionGuitarHeroNewTurn:
 	{
 		// like in guitar hero, the horizontal segments in the screen fall down and button combo's have to be pressed to "catch" the falling segments.
 
@@ -3869,7 +3859,7 @@ void Apps::modeReactionGame(bool init)
 			uint8_t new_segment;
 			uint32_t tmp_segments;
 			tmp_segments = 0;
-			addNoteToBuzzer(1	);
+			addNoteToBuzzer(1);
 
 			// treat every segment separatly
 			for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3906,11 +3896,11 @@ void Apps::modeReactionGame(bool init)
 		}
 		
 		TIMER_REACTION_GAME_SPEED.start();
-		reactionGameState = reactionMultiPlaying;
+		reactionGameState = reactionGuitarHeroPlaying;
 		break;
 	}
 
-	case reactionMultiPlaying:
+	case reactionGuitarHeroPlaying:
 	{
 
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3951,7 +3941,7 @@ void Apps::modeReactionGame(bool init)
 			{
 				
 				// success!
-				reactionGameState = reactionMultiNewTurn;
+				reactionGameState = reactionGuitarHeroNewTurn;
 				//REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
 			}
 		}
@@ -3970,15 +3960,16 @@ void Apps::modeReactionGame(bool init)
 
 		REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 		{
 
-			//play by sounds
-			for (uint8_t j = 0; j < 4; j++)
-			{
-				addNoteToBuzzer(rest_1);
-			}
-			addNoteToBuzzer(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
+			// //play by sounds
+			// for (uint8_t j = 0; j < 4; j++)
+			// {
+			// 	addNoteToBuzzer(rest_1);
+			// }
+			// addNoteToBuzzer(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
+			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[REACTION_GAME_TARGET]);
 		}
 		else
 		{
@@ -3986,6 +3977,14 @@ void Apps::modeReactionGame(bool init)
 		}
 
 		reactionGameState = reactionPlaying;
+		break;
+	}
+
+	case reactionWaitBeforeNewTurn:
+	{
+		if (buzzer->getBuzzerRollEmpty()){
+			reactionGameState = reactionNewTurn;
+		}
 		break;
 	}
 
@@ -4026,8 +4025,8 @@ void Apps::modeReactionGame(bool init)
 			}
 		}
 
-		// set led
-		*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
+		
+		
 
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
@@ -4038,10 +4037,13 @@ void Apps::modeReactionGame(bool init)
 
 		// set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
 
-		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)))
+		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 		{
 			//always show unless in soundmode
 			ledDisp->setDecimalPointToDisplay(true, REACTION_GAME_TARGET);
+			// set led
+			*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
+			
 		}
 
 		// check player pressed a button.
@@ -4054,7 +4056,16 @@ void Apps::modeReactionGame(bool init)
 				{
 					//right button
 					REACTION_GAME_SCORE++;
-					reactionGameState = reactionNewTurn;
+					if (REACTION_SOUND_MODE_GUITAR_HEX_HERO){
+						
+						addNoteToBuzzerRepeated(rest_1, 4);
+						
+						reactionGameState = reactionWaitBeforeNewTurn;
+
+					}else{
+						reactionGameState = reactionNewTurn;
+
+					}
 				}
 				else
 				{
@@ -4078,9 +4089,7 @@ void Apps::modeReactionGame(bool init)
 #ifdef ENABLE_EEPROM
 
 		// play death song
-		addNoteToBuzzer(F4_1);
-		addNoteToBuzzer(F4_1);
-		addNoteToBuzzer(F4_1);
+		addNoteToBuzzerRepeated(F4_1, 3);
 
 		//start high score end timer
 		if (REACTION_GAME_SCORE > (int16_t)
@@ -4133,6 +4142,13 @@ void Apps::modeReactionGame(bool init)
 	}
 	}
 #endif
+
+	if (REACTION_SOUND_MODE_GUITAR_HEX_HERO){
+		*lightsHandle |= 1 << LIGHT_LATCHING_SMALL_LEFT;
+	}
+	if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){
+		*lightsHandle |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
+	}
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
@@ -4267,6 +4283,12 @@ void Apps::textBufToDisplay(){
 
 void Apps::addNoteToBuzzer(uint8_t note){
 	buzzer->programBuzzerRoll(note);
+}
+
+void Apps::addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater){
+	for (uint8_t i=0;i<repeater;i++){
+        this->addNoteToBuzzer(note);
+    }
 }
 
 void Apps::setBlankDisplay(){

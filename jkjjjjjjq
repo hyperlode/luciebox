@@ -2623,7 +2623,7 @@
        if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
 [31m-[m
 [32m+[m[41m [m
-         reactionGameState = reactionMultiNewTurn;[m
+         reactionGameState = reactionGuitarHeroNewTurn;[m
          displayAllSegments = 0;[m
 [31m-[m
 [32m+[m[41m [m
@@ -2668,7 +2668,7 @@
      }[m
 [31m-[m
 [32m+[m[41m [m
-     case reactionMultiNewTurn: {[m
+     case reactionGuitarHeroNewTurn: {[m
        // like in guitar hero, the horizontal segments in the screen fall down and button combo's have to be pressed to "catch" the falling segments.[m
 [31m-      [m
 [32m+[m[41m       [m
@@ -2735,7 +2735,7 @@
        TIMER_REACTION_GAME_SPEED.start();[m
 [31m-[m
 [32m+[m[41m [m
-       reactionGameState = reactionMultiPlaying;[m
+       reactionGameState = reactionGuitarHeroPlaying;[m
        break; [m
      }[m
 [31m-[m
@@ -2744,7 +2744,7 @@
 [32m+[m[41m [m
 [32m+[m[41m [m
 [32m+[m[41m [m
-     case reactionMultiPlaying: {[m
+     case reactionGuitarHeroPlaying: {[m
 [31m-[m
 [32m+[m[41m [m
        for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){[m
@@ -2784,7 +2784,7 @@
 [32m+[m[41m           [m
          }else{[m
            // success![m
-           reactionGameState = reactionMultiNewTurn;[m
+           reactionGameState = reactionGuitarHeroNewTurn;[m
 [36m@@ -2228,53 +2238,53 @@[m [mvoid Apps::modeReactionGame(bool init){[m
        ledDisp->setBinaryToDisplay(displayAllSegments);[m
        break;[m

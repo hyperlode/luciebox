@@ -242,11 +242,14 @@
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 
+#define REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
+#define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -515,18 +518,18 @@ const uint8_t songs [] PROGMEM = {
 
 // const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
 
-#if MOMENTARY_BUTTONS_COUNT == 3
-const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
-                             LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
-#else
+// #if MOMENTARY_BUTTONS_COUNT == 3
+// const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
+// const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
+//                              LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
+// #else
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
                                     LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
                                     BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
 
-#endif
+// #endif
 
 const uint8_t tilt_forward[] PROGMEM = {
     0x08, 0x08, 0x08, 0x08};
@@ -633,6 +636,7 @@ private:
     // functions for compression the memory size
     void textBufToDisplay();
     void addNoteToBuzzer(uint8_t note);
+    void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
     void buzzerOff();
     void loadBuzzerTrack(uint8_t songIndex);
     void setBlankDisplay();
@@ -652,6 +656,7 @@ private:
     //reused variables per app
     bool general_boolean;
     bool general_boolean2;
+    bool general_boolean3;
     int16_t counter;
     int16_t counter2;
     long counter3;
@@ -692,11 +697,12 @@ private:
         reactionWaitForStart,
         reactionNewGame,
         reactionNewTurn,
+        reactionWaitBeforeNewTurn,
         reactionPlaying,
         reactionJustDied,
         reactionFinished,
-        reactionMultiNewTurn,
-        reactionMultiPlaying,
+        reactionGuitarHeroNewTurn,
+        reactionGuitarHeroPlaying,
         reactionHexNextStep,
         reactionHexWaitForButtonsRelease,
         reactionHexPlaying
