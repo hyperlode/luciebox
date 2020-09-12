@@ -3633,7 +3633,7 @@ void Apps::modeReactionGame(bool init)
 	case reactionWaitForStart:
 	{
 		// change level
-		REACTION_GAME_LEVEL = (potentio->getValueMapped(1, 5)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+		REACTION_GAME_LEVEL = (potentio->getValueMapped(0, 4)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
 		if (potentio->getValueStableChangedEdge())
 		{
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
@@ -3648,7 +3648,7 @@ void Apps::modeReactionGame(bool init)
 #ifdef ENABLE_EEPROM
 		if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 		{
-			intToDigitsString(textBuf, REACTION_GAME_LEVEL, false); // utilities lode
+			intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
 			textBuf[0] = 'L';
 			textBufToDisplay();
 		}
@@ -3656,13 +3656,19 @@ void Apps::modeReactionGame(bool init)
 		{
 			ledDisp->setNumberToDisplayAsDecimal(
 				eeprom_read_word(
-					(uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-								 REACTION_GAME_LEVEL * 2 +
-								 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-								 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)));
+					// (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+					// 			 REACTION_GAME_LEVEL * 2 +
+					// 			 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+					// 			 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+					(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+								REACTION_GUITAR_HERO_MODE * 48 +
+								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								 ));
+
 		}
 #else
-		intToDigitsString(textBuf, REACTION_GAME_LEVEL, false); // utilities lode
+		intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
 		textBuf[0] = 'L';
 		textBufToDisplay();
 #endif
@@ -3691,7 +3697,7 @@ void Apps::modeReactionGame(bool init)
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED))
 		{
-			REACTION_GAME_STEP_TIME_MILLIS = (6 - REACTION_GAME_LEVEL) * -200;
+			REACTION_GAME_STEP_TIME_MILLIS = (5 - REACTION_GAME_LEVEL) * -200;
 			displayAllSegments = 0;
 
 			if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
@@ -3718,11 +3724,11 @@ void Apps::modeReactionGame(bool init)
 				if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 				{
 					// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL)) * -4000; // step speed depending on level
+					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
 				}
 				else
 				{
-					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
 				}
 			}
 		}
@@ -4019,7 +4025,7 @@ void Apps::modeReactionGame(bool init)
 		}
 		ledDisp->setBinaryToDisplay(displayAllSegments);
 
-		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 1)
+		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 0)
 		{
 			// in the easy level of sound mode, we show the lights.
 
@@ -4076,17 +4082,28 @@ void Apps::modeReactionGame(bool init)
 		//start high score end timer
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
-										  (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-													   REACTION_GAME_LEVEL * 2 +
-													   EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-													   EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)))
+										//   (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+													//    REACTION_GAME_LEVEL * 2 +
+													//    EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+													//    EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)))
+									(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+								REACTION_GUITAR_HERO_MODE * 48 +
+								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								 ))
 		{
 			eeprom_update_word(
-				(uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-							 REACTION_GAME_LEVEL * 2 +
-							 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-							 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE),
-				REACTION_GAME_SCORE);
+				// (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+				// 			 REACTION_GAME_LEVEL * 2 +
+				// 			 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+				// 			 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE),
+				// REACTION_GAME_SCORE);
+				(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+								REACTION_GUITAR_HERO_MODE * 48 +
+								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								,REACTION_GAME_SCORE
+								);
 
 			loadBuzzerTrack(SONG_ATTACK);
 		}
