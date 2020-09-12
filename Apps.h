@@ -136,7 +136,6 @@
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_INIT_APP generalTimer
-#define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define RANDOMWORLD_ROLL_SPEED generalTimer
@@ -150,6 +149,8 @@
 #define SOUND_NOTE_AUTO_TIMER generalTimer
 #define QUIZ_RANDOM_WAIT_TIME generalTimer
 
+#define TIMER_REACTION_GAME_SPEED generalTimer2
+#define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
@@ -228,7 +229,6 @@
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 
-#define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
@@ -243,6 +243,8 @@
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 
 #define REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+
+#define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
@@ -657,6 +659,7 @@ private:
     bool general_boolean;
     bool general_boolean2;
     bool general_boolean3;
+    bool general_boolean4;
     int16_t counter;
     int16_t counter2;
     long counter3;

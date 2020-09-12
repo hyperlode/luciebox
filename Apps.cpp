@@ -3606,7 +3606,7 @@ void Apps::modeReactionGame(bool init)
 	{
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x0;
-		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(1);  // not 0, blinking does not look nice otherwise.
+		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);  // 1 better than 0?  blinking does not look nice otherwise.
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
 
 		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
@@ -3670,7 +3670,7 @@ void Apps::modeReactionGame(bool init)
 		// play game button pressed
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+			if (!REACTION_GUITAR_HERO_MODE && REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
 				// sound mode let them all play so the player gets a feel for them.
 				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3679,12 +3679,8 @@ void Apps::modeReactionGame(bool init)
 					this->addNoteToBuzzerRepeated(rest_1, 2);
 				}
 				addNoteToBuzzerRepeated(rest_1, 4);
-				reactionGameState = reactionWaitBeforeNewTurn;
-
-			}else{
-				reactionGameState = reactionNewGame;
 			}
-
+			reactionGameState = reactionNewGame;
 		}
 		break;
 	}
@@ -3718,16 +3714,16 @@ void Apps::modeReactionGame(bool init)
 
 			if (buzzer->getBuzzerRollEmpty()){ // in sound mode, wait till demo is done
 				reactionGameState = reactionNewTurn;
-			}
 
-			if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
-			{
-				// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-				REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL)) * -4000; // step speed depending on level
-			}
-			else
-			{
-				REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+				if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+				{
+					// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
+					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL)) * -4000; // step speed depending on level
+				}
+				else
+				{
+					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+				}
 			}
 		}
 
@@ -3770,6 +3766,8 @@ void Apps::modeReactionGame(bool init)
 		{
 			reactionGameState = reactionHexPlaying;
 		}
+
+
 		textBufToDisplay();
 		break;
 	}
@@ -3949,6 +3947,14 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
+	case reactionWaitBeforeNewTurn:
+	{
+		if (buzzer->getBuzzerRollEmpty()){
+			reactionGameState = reactionNewTurn;
+		}
+		break;
+	}
+
 	case reactionNewTurn:
 	{
 		if (!OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
@@ -3962,29 +3968,10 @@ void Apps::modeReactionGame(bool init)
 
 		if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 		{
-
-			// //play by sounds
-			// for (uint8_t j = 0; j < 4; j++)
-			// {
-			// 	addNoteToBuzzer(rest_1);
-			// }
-			// addNoteToBuzzer(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
 			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[REACTION_GAME_TARGET]);
-		}
-		else
-		{
-			//lights |= 1 << lights_indexed[REACTION_GAME_TARGET];
 		}
 
 		reactionGameState = reactionPlaying;
-		break;
-	}
-
-	case reactionWaitBeforeNewTurn:
-	{
-		if (buzzer->getBuzzerRollEmpty()){
-			reactionGameState = reactionNewTurn;
-		}
 		break;
 	}
 
@@ -4025,9 +4012,6 @@ void Apps::modeReactionGame(bool init)
 			}
 		}
 
-		
-		
-
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
 		{
@@ -4035,15 +4019,14 @@ void Apps::modeReactionGame(bool init)
 		}
 		ledDisp->setBinaryToDisplay(displayAllSegments);
 
-		// set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
-
-		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 1)
 		{
-			//always show unless in soundmode
+			// in the easy level of sound mode, we show the lights.
+
+			// show decimal point for digit corresponding with button
 			ledDisp->setDecimalPointToDisplay(true, REACTION_GAME_TARGET);
-			// set led
+			// set appropriate led per button
 			*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
-			
 		}
 
 		// check player pressed a button.
@@ -4056,15 +4039,14 @@ void Apps::modeReactionGame(bool init)
 				{
 					//right button
 					REACTION_GAME_SCORE++;
-					if (REACTION_SOUND_MODE_GUITAR_HEX_HERO){
-						
-						addNoteToBuzzerRepeated(rest_1, 4);
-						
-						reactionGameState = reactionWaitBeforeNewTurn;
 
+					if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+					{
+						// a small pause must be implemented after the button press before the new turn as off not to confuse the player
+						addNoteToBuzzerRepeated(rest_1, 4);
+						reactionGameState = reactionWaitBeforeNewTurn;
 					}else{
 						reactionGameState = reactionNewTurn;
-
 					}
 				}
 				else
@@ -4112,8 +4094,8 @@ void Apps::modeReactionGame(bool init)
 
 		// prepare next game delay.
 
-		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-		TIMER_REACTION_GAME_RESTART_DELAY.start();
+		TIMER_REACTION_END_OF_GAME_DELAY.setInitTimeMillis(-2000);
+		TIMER_REACTION_END_OF_GAME_DELAY.start();
 
 		reactionGameState = reactionFinished;
 
@@ -4122,7 +4104,7 @@ void Apps::modeReactionGame(bool init)
 
 	case reactionFinished:
 	{
-		if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative())
+		if (!TIMER_REACTION_END_OF_GAME_DELAY.getTimeIsNegative())
 		{
 			//end of display high score, next game
 			reactionGameState = reactionNewGame;
@@ -4130,7 +4112,7 @@ void Apps::modeReactionGame(bool init)
 		else
 		{
 			//do nothing.  wait for display high score is finished.
-			if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
+			if (TIMER_REACTION_END_OF_GAME_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 			{
 			}
 			else
@@ -4143,12 +4125,9 @@ void Apps::modeReactionGame(bool init)
 	}
 #endif
 
-	if (REACTION_SOUND_MODE_GUITAR_HEX_HERO){
-		*lightsHandle |= 1 << LIGHT_LATCHING_SMALL_LEFT;
-	}
-	if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){
-		*lightsHandle |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
-	}
+	*lightsHandle |= REACTION_SOUND_MODE_GUITAR_HEX_HERO << LIGHT_LATCHING_SMALL_LEFT;
+	*lightsHandle |= OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE << LIGHT_LATCHING_SMALL_RIGHT;
+	*lightsHandle |= REACTION_GUITAR_HERO_MODE << LIGHT_LATCHING_BIG;
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
