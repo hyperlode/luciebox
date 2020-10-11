@@ -16,6 +16,7 @@ public:
 	void setValue(int16_t value);
 
     void setIncrement(uint8_t increment);
+	void setSensitivity(uint8_t sensitivity);
 	void refresh();
     
     void interruptChannelA();
@@ -29,26 +30,22 @@ private:
 	byte pinChannelB;
 
 	uint8_t increment;
+	uint8_t sensitivity; //rotary step per count.
+	uint8_t sensitivity_counter ;
 
-
+	int16_t value;
+	int value_memory;   // 
 	boolean value_changed;
 
-	volatile boolean initialized = false;
-
-	// volatile unsigned int encoderPos = 0;  // a counter for the dial
-	int16_t value;
-	volatile int encoderPos = 0;  // a counter for the dial
-	int value_memory;   // 
+	volatile int encoderPos;  //raw dial counter
 
 	// interrupt service routine vars
 	volatile boolean A_set = false;
 	volatile boolean B_set = false;
-
 	volatile boolean A_waitfor = false;
 	volatile boolean B_waitfor = false;
 	volatile boolean A_changedir_waitfor = false;
 	volatile boolean B_changedir_waitfor = false;
-
 	volatile boolean ccwElseCw = false;  // rotation direction: counter-clockwise if true. clockwise if false.
 };
 #endif

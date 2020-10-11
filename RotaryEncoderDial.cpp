@@ -6,6 +6,10 @@
 RotaryEncoderDial::RotaryEncoderDial()
 {
   this->increment = 1;
+  this->encoderPos = 0;
+
+  this->sensitivity = 0;
+  this->sensitivity_counter = 0;
 }
 
 bool RotaryEncoderDial::getValueChanged(){
@@ -33,6 +37,14 @@ void RotaryEncoderDial::setValue(int16_t value){
 
 int16_t RotaryEncoderDial::getValue(){
   return this->value;
+}
+
+void RotaryEncoderDial::setSensitivity(uint8_t sensitivity){
+  // number of steps for encoder before a step is detected and the value incremented.
+  // 1 is no extra steps added.
+  // 96 is full turn per step.
+  this->sensitivity = sensitivity-1;
+  this->sensitivity_counter = 0;
 }
 
 void RotaryEncoderDial::setIncrement(uint8_t increment){
@@ -84,10 +96,18 @@ void RotaryEncoderDial::checkState(){
   // check the state if it satisfies the requirements for a step or a change of direction
   if (this->A_set == this->A_waitfor && this->B_set == this->B_waitfor){
     // next step
-    if (ccwElseCw){
-      this->encoderPos -=this->increment;
+
+    if (this->sensitivity_counter == this->sensitivity){
+      if (ccwElseCw){
+        this->encoderPos -=this->increment;
+      }else{
+        this->encoderPos +=this->increment;
+      }
+     
+      this->sensitivity_counter = 0;
+
     }else{
-      this->encoderPos +=this->increment;
+      this->sensitivity_counter++;
     }
     this->setNewState();
     
@@ -95,6 +115,7 @@ void RotaryEncoderDial::checkState(){
     // change of dir
     this->ccwElseCw = !this->ccwElseCw;
     this->setNewState();
+    this->sensitivity_counter = 0;
   }
 }
 

@@ -121,14 +121,18 @@ void refresh()
 
 #ifdef DEBUG_ENCODER_DIAL
    if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-       encoder_dial.setIncrement(10);
+    //    encoder_dial.setIncrement(10);
    }
 
     if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-       encoder_dial.setIncrement(1);
+    //    encoder_dial.setIncrement(1);
+       encoder_dial.setSensitivity(1);
    }
    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
        Serial.println(encoder_dial.getValue());
+   }
+   if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
+       encoder_dial.setSensitivity(24);
    }
 
    if (encoder_dial.getValueChanged()){
