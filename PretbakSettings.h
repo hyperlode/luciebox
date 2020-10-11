@@ -1,12 +1,14 @@
 
 // #define DBUG_REFACTOR_DISP
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 //#define DBUG_REFACTOR_DISP
 
 // #define PROTOTYPE
+//#define ENABLE_APPS 
 
 #ifdef ENABLE_SERIAL
+#define DEBUG_ENCODER_DIAL
 //#define DEBUG_ANALOG_IN
 //#define DEBUG_MERCURY
 //#define DEBUG_POTENTIO
@@ -29,22 +31,25 @@
 #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
 
 #define PIN_DISPLAY_SEGMENT_A 7
-#define PIN_DISPLAY_SEGMENT_B 2
+#define PIN_DISPLAY_SEGMENT_B A3 //2
 #define PIN_DISPLAY_SEGMENT_C 4
 #define PIN_DISPLAY_SEGMENT_D 8
 #define PIN_DISPLAY_SEGMENT_E 12
 #define PIN_DISPLAY_SEGMENT_F 13
-#define PIN_DISPLAY_SEGMENT_G 3
+#define PIN_DISPLAY_SEGMENT_G A5 //3
 
 #ifndef ENABLE_SERIAL
 #define PIN_DISPLAY_SEGMENT_DP 0
+
+#define PIN_BUZZER_FAKE 68
+#define PIN_BUZZER 1   // buzzer was A5
+
 #else
 #define PIN_DISPLAY_SEGMENT_DP PIN_DUMMY_2
+#define PIN_BUZZER_FAKE 68
+#define PIN_BUZZER PIN_BUZZER_FAKE
 #endif
 
-#define PIN_BUZZER A5
-// #define PIN_BUZZER PIN_DUMMY_3
-#define PIN_BUZZER_FAKE 68
 
 #ifdef PROTOTYPE
 #define LIGHT_MOMENTARY_0 1 // RED
@@ -69,7 +74,10 @@
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
 #define PIN_BUTTONS_2 A2
-#define PIN_POTENTIO A3
+// #define PIN_POTENTIO A3
+#define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
+#define PIN_ROTARY_ENCODER_DIAL_CHANNEL_B 3
+
 #define PIN_MERCURY_SWITCHES A4
 
 #define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)

@@ -30,7 +30,8 @@
 //#include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
 #include "PretbakSettings.h"
-#include "Potentio.h"
+// #include "Potentio.h"
+#include "RotaryEncoderDial.h"
 
 #define APP_SELECTOR_LETTERS_AND_CHARS 0
 #define APP_SELECTOR_SIMON 1
@@ -570,10 +571,10 @@ public:
     BinaryInput *binaryInputs;
     DisplayManagement *ledDisp;
     Buzzer *buzzer;
-    Potentio *potentio;
+    RotaryEncoderDial *dial;
     LedMultiplexer5x8* allLights;
 
-    void setPeripherals(BinaryInput *binaryInput, Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer);
+    void setPeripherals(BinaryInput *binaryInput, RotaryEncoderDial *dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer);
     // void setBuffers(char* textBuf, char*  scrollBuf);
     //void setBuffers(char* textBuf);
     // void test();

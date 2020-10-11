@@ -8,7 +8,8 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *dial, D
 {
 	this->buzzer = buzzer;
 	this->binaryInputs = binaryInputs;
-	this->potentio = potentio;
+	//this->potentio = potentio;
+	this->dial = dial;
 	this->ledDisp = ledDisp;
 	this->allLights = allLights;
 

@@ -6,8 +6,11 @@
 #include "ButtonsDacR2r.h"
 #include "BinaryInput.h"
 #include "Buzzer.h"
+#ifdef ENABLE_APPS
 #include "Apps.h"
-#include "Potentio.h"
+#endif
+// #include "Potentio.h"
+#include "RotaryEncoderDial.h"
 
 // Lode Ameije 2019-05
 // Pretbak is a busy box for my newly born niece
@@ -20,7 +23,9 @@ uint16_t setValues_2[BUTTONS_2_COUNT] = BUTTONS_2_VALUES;
 uint16_t setValues_mercury[MERCURY_SWITCHES_COUNT] = MERCURY_SWITCHES_VALUES;
 
 //pretbak
+#ifdef ENABLE_APPS
 Apps pretbak_apps;
+#endif
 
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
@@ -28,7 +33,7 @@ PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2;       // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
-Potentio potentio;
+RotaryEncoderDial encoder_dial;
 
 // OUTPUT
 DisplayManagement visualsManager;
@@ -43,6 +48,15 @@ Buzzer buzzer;
 //debug mode
 bool debugMode;
 #endif
+
+// hack to get interrupts nicely going without too much magic.
+// https://forum.arduino.cc/index.php?topic=41713.0
+void isr0(){
+    encoder_dial.interruptChannelA();
+}
+void isr1(){
+    encoder_dial.interruptChannelB();
+}
 
 void refresh()
 {
@@ -97,33 +111,48 @@ void refresh()
         bool init = selectorDial.getValueChangedEdge();
 
 #ifdef DEBUG_SELECTOR_KNOB
-    if (selectorDial.getValueChangedEdge()){
-        //Serial.println(SELECTOR_DIAL_POSITIONS);
+    if (selectorDial.getValueChangedEdge()){       
+         //Serial.println(SELECTOR_DIAL_POSITIONS);
         Serial.println("selector:");
         Serial.println(selectorDial.getSelectorValue());
         Serial.println(analogRead(PIN_SELECTOR_DIAL));
     }
 #endif
 
+#ifdef DEBUG_ENCODER_DIAL
+   if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+       encoder_dial.setIncrement(10);
+   }
 
-#ifdef PROTOTYPE
-    #ifndef DEBUG_BUTTONS
-    pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
-    #endif
+    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
+       encoder_dial.setIncrement(1);
+   }
+   if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+       Serial.println(encoder_dial.getValue());
+   }
+
+   if (encoder_dial.getValueChanged()){
+        Serial.println(encoder_dial.getValue());
+    }
+    
 #else
+#ifdef ENABLE_APPS
     pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1); // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 #endif
+#endif
 
-    buzzer.doBuzzerRoll();
+        buzzer.doBuzzerRoll();
 
 #ifdef ENABLE_ANALOG_PIN_DEBUG
     }
     else
     {
+        #ifdef ENABLE_APPS
         pretbak_apps.appSelector(false, 12); //debug mode
+        #endif
     }
 #endif
-    
+
     outputProcess();
     
 }
@@ -141,7 +170,7 @@ void input_process()
     buttons_1.refresh();
     buttons_2.refresh();
     mercurySwitches.refresh();
-    potentio.refresh();
+    encoder_dial.refresh();
 
     if (buttons_2.getValueChangedEdge())
     {
@@ -185,12 +214,16 @@ void outputProcess(){
     allVisuals.refresh();
 }
 
+
+
 void setup()
 {
+    // trick to use the easy arduino libary instead of complicated native functions
+    attachInterrupt(0, isr0, CHANGE);
+    attachInterrupt(1, isr1, CHANGE);
 
 #ifdef ENABLE_SERIAL
     Serial.begin(9600);
-    Serial.println("initializeee");
 #endif
 
     // put your setup code here, to run once
@@ -204,10 +237,9 @@ void setup()
     mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
     mercurySwitches.setDebounceMillis(30);
 
-    potentio.setPin(PIN_POTENTIO);
+    encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
 
     allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-    // allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
     visualsManager.setMultiplexerBuffer(allVisuals.getDigits());
 
 // if no latching buttons pressed at startup, disable sound
@@ -230,9 +262,10 @@ void setup()
     buzzer.setPin(PIN_BUZZER);
 #endif
 
-    pretbak_apps.setPeripherals(binaryInputs, &potentio, &visualsManager, &allVisuals, &buzzer);
-    //pretbak_apps.setBuffers( textBuf);
+#ifdef ENABLE_APPS
+    pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &allVisuals, &buzzer);
     pretbak_apps.setDefaultMode();
+#endif
 
 #ifdef ENABLE_ANALOG_PIN_DEBUG
     // if one of the push buttons is pressed at startup, activate debugmode.
@@ -245,10 +278,6 @@ void setup()
 #endif
 }
 
-void testing(){
-
-}
-
 void loop()
 {
 
@@ -258,17 +287,18 @@ void loop()
     // byte *tmp = allVisuals.getDigits();
 
     if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-        Serial.println("button 3");
-        visualsManager.setCharToDisplay('8',0);
-        visualsManager.setCharToDisplay('0',1);
-        visualsManager.setCharToDisplay('-',2);
-        visualsManager.setCharToDisplay('H',3);
+        
+        visualsManager.setCharToDisplay('8',3);
+        visualsManager.setCharToDisplay('0',2);
+        visualsManager.setCharToDisplay('-',1);
+        visualsManager.setCharToDisplay('H',0);
     }
-    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
+    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
+    {
         Serial.println("button 2");
         visualsManager.setBlankDisplay();
     }
-    if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
+     if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
         Serial.println("button 1");
         visualsManager.setLedArray(0xFF);
     }
@@ -289,7 +319,7 @@ void loop()
     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeUp()){
         Serial.println("BUTTON_LATCHING_SMALL_RED_LEFT" );
     }
-    
+
     // if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
     // {
     //     visualsManager.setBinaryToDisplay(0xFF000000);
@@ -315,10 +345,10 @@ void loop()
     //     }
     // }
 
-
     // allVisuals.refresh();
+
+    allVisuals.refresh();
     outputProcess();
-    
 
 #else
     // put your main code here, to run repeatedly:
