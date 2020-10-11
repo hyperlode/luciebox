@@ -87,12 +87,7 @@ void refresh()
         //modes functionality (apps)
         //mode change
         //if (selectorDial.getValueChangedEdge()) {
-#ifdef DEBUG_SELECTOR_KNOB
-        //Serial.println(SELECTOR_DIAL_POSITIONS);
-        Serial.println("selector:");
-        Serial.println(selectorDial.getSelectorValue());
-        Serial.println(analogRead(PIN_SELECTOR_DIAL));
-#endif
+
 
         //}
 
@@ -100,15 +95,26 @@ void refresh()
 
         //check if first iteration at new selector value.
         bool init = selectorDial.getValueChangedEdge();
+
+#ifdef DEBUG_SELECTOR_KNOB
+    if (selectorDial.getValueChangedEdge()){
+        //Serial.println(SELECTOR_DIAL_POSITIONS);
+        Serial.println("selector:");
+        Serial.println(selectorDial.getSelectorValue());
+        Serial.println(analogRead(PIN_SELECTOR_DIAL));
+    }
+#endif
+
+
 #ifdef PROTOTYPE
-        #ifndef DEBUG_BUTTONS
-        pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
-        #endif
+    #ifndef DEBUG_BUTTONS
+    pretbak_apps.appSelector(init, selectorDial.getSelectorValue());
+    #endif
 #else
     pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1); // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 #endif
 
-        buzzer.doBuzzerRoll();
+    buzzer.doBuzzerRoll();
 
 #ifdef ENABLE_ANALOG_PIN_DEBUG
     }

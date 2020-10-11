@@ -1,12 +1,9 @@
 #ifndef APPS_H
 #define APPS_H
 
-
-
-
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
-#define SIMON_APP
+#define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 
 #include "Arduino.h"
@@ -139,7 +136,6 @@
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_INIT_APP generalTimer
-#define TIMER_REACTION_GAME_SPEED generalTimer
 #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define RANDOMWORLD_ROLL_SPEED generalTimer
@@ -153,6 +149,8 @@
 #define SOUND_NOTE_AUTO_TIMER generalTimer
 #define QUIZ_RANDOM_WAIT_TIME generalTimer
 
+#define TIMER_REACTION_GAME_SPEED generalTimer2
+#define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
 #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
@@ -219,17 +217,19 @@
 #define METRONOME_TICKER_2_POSITION counter6
 #define HACKTIME_SOUND counter6
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
+#define REACTION_GAME_HEX_ACTIVE_DIGIT counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
 #define METRONOME_TICKER_3_POSITION counter7
+#define REACTION_GAME_HEX_VALUE_TO_FIND counter7
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 
-#define REACTION_COUNTDOWN_MODE general_boolean
+#define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
@@ -242,13 +242,19 @@
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 
+#define REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+
+#define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
+
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
+#define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
+#define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
 
@@ -406,7 +412,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 //PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
 
 #define SONG_DRYER_HAPPY 0
-#define SONG_LANG_ZAL_ZE_LEVEN 1
+// #define SONG_LANG_ZAL_ZE_LEVEN 1
 #define SONG_ATTACK 2
 
 #define SONG_DRYER_UNHAPPY 4
@@ -424,6 +430,7 @@ const uint8_t songs [] PROGMEM = {
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
+    // 1,  // empty slot instead of lang zal ze leven
     // lang zal ze leven
     85, C7_4, rest_4, rest_2,
     C7_4, rest_2, C7_8, rest_8,
@@ -513,18 +520,18 @@ const uint8_t songs [] PROGMEM = {
 
 // const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
 
-#if MOMENTARY_BUTTONS_COUNT == 3
-const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
-                             LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
-#else
+// #if MOMENTARY_BUTTONS_COUNT == 3
+// const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
+// const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
+//                              LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
+// #else
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
                                     LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
                                     BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
 
-#endif
+// #endif
 
 const uint8_t tilt_forward[] PROGMEM = {
     0x08, 0x08, 0x08, 0x08};
@@ -627,6 +634,20 @@ private:
     bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeDisplay(bool forReal);
+
+    // functions for compression the memory size
+    void textBufToDisplay();
+    void addNoteToBuzzer(uint8_t note);
+    void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
+    void buzzerOff();
+    void loadBuzzerTrack(uint8_t songIndex);
+    void setBlankDisplay();
+    void setLedArray(byte lights);
+    void setStandardTextToTextBuf(uint8_t textPosition);
+    void setStandardTextToTextHANDLE(uint8_t textPosition);
+    void numberToBufAsDecimal(int16_t number);
+    
+    // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
     SuperTimer generalTimer;
@@ -637,6 +658,8 @@ private:
     //reused variables per app
     bool general_boolean;
     bool general_boolean2;
+    bool general_boolean3;
+    bool general_boolean4;
     int16_t counter;
     int16_t counter2;
     long counter3;
@@ -677,11 +700,15 @@ private:
         reactionWaitForStart,
         reactionNewGame,
         reactionNewTurn,
+        reactionWaitBeforeNewTurn,
         reactionPlaying,
         reactionJustDied,
         reactionFinished,
-        reactionMultiNewTurn,
-        reactionMultiPlaying,
+        reactionGuitarHeroNewTurn,
+        reactionGuitarHeroPlaying,
+        reactionHexNextStep,
+        reactionHexWaitForButtonsRelease,
+        reactionHexPlaying
 
     };
     ReactionGameState reactionGameState;
@@ -713,7 +740,7 @@ private:
 //   settingButtons,
 //   settingEepromReset
 // };
-#ifdef SIMON_APP
+#ifdef ENABLE_SIMON_APP
     // simon
     enum SimonState : uint8_t
     {

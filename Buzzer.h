@@ -312,6 +312,7 @@ public:
     //void loadBuzzerTrack(const uint8_t *seq);
     void loadBuzzerTrack(const uint8_t *seq, uint8_t song_index);
     void programBuzzerRoll(uint8_t sound);
+    // void addNoteToBuzzerRoll(uint8_t sound, uint8_t repeater);
     uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);
     void doBuzzerRoll();
     uint8_t getNextBuzzerRollSlot(bool getNextEmptySlot);

@@ -2553,14 +2553,14 @@
 [31m-[m
 [32m+[m[41m [m
        // special mode for the reaction game: limited total time during which as many points should be collected. [m
-       REACTION_COUNTDOWN_MODE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();[m
+       OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();[m
        REACTION_GUITAR_HERO_MODE = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();[m
 [31m-[m
 [32m+[m[41m [m
        // guitar hero and countdown mode should never occure at the same time![m
-       if (REACTION_GUITAR_HERO_MODE && REACTION_COUNTDOWN_MODE){[m
+       if (REACTION_GUITAR_HERO_MODE && OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){[m
          // error!!![m
-         REACTION_COUNTDOWN_MODE = false; // no reaction count downmode for guitar hero.[m
+         OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = false; // no reaction count downmode for guitar hero.[m
        }[m
 [31m-[m
 [32m+[m[41m [m
@@ -2623,7 +2623,7 @@
        if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
 [31m-[m
 [32m+[m[41m [m
-         reactionGameState = reactionMultiNewTurn;[m
+         reactionGameState = reactionGuitarHeroNewTurn;[m
          displayAllSegments = 0;[m
 [31m-[m
 [32m+[m[41m [m
@@ -2647,7 +2647,7 @@
          reactionGameState = reactionNewTurn;[m
 [31m-[m
 [32m+[m[41m [m
-         if (REACTION_COUNTDOWN_MODE){[m
+         if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){[m
            // if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)[m
            REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL )) * -4000; // step speed depending on level[m
 [31m-[m
@@ -2668,7 +2668,7 @@
      }[m
 [31m-[m
 [32m+[m[41m [m
-     case reactionMultiNewTurn: {[m
+     case reactionGuitarHeroNewTurn: {[m
        // like in guitar hero, the horizontal segments in the screen fall down and button combo's have to be pressed to "catch" the falling segments.[m
 [31m-      [m
 [32m+[m[41m       [m
@@ -2735,7 +2735,7 @@
        TIMER_REACTION_GAME_SPEED.start();[m
 [31m-[m
 [32m+[m[41m [m
-       reactionGameState = reactionMultiPlaying;[m
+       reactionGameState = reactionGuitarHeroPlaying;[m
        break; [m
      }[m
 [31m-[m
@@ -2744,7 +2744,7 @@
 [32m+[m[41m [m
 [32m+[m[41m [m
 [32m+[m[41m [m
-     case reactionMultiPlaying: {[m
+     case reactionGuitarHeroPlaying: {[m
 [31m-[m
 [32m+[m[41m [m
        for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){[m
@@ -2784,7 +2784,7 @@
 [32m+[m[41m           [m
          }else{[m
            // success![m
-           reactionGameState = reactionMultiNewTurn;[m
+           reactionGameState = reactionGuitarHeroNewTurn;[m
 [36m@@ -2228,53 +2238,53 @@[m [mvoid Apps::modeReactionGame(bool init){[m
        ledDisp->setBinaryToDisplay(displayAllSegments);[m
        break;[m
@@ -2794,7 +2794,7 @@
      case reactionNewTurn:{[m
 [31m-     [m
 [32m+[m[41m      [m
-       if (!REACTION_COUNTDOWN_MODE){[m
+       if (!OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){[m
 [31m-       [m
 [32m+[m[41m        [m
          REACTION_GAME_TIMER_STEP= 0; //reset animation step[m
@@ -2859,7 +2859,7 @@
 [31m-      [m
 [32m+[m[41m       [m
 [32m+[m[41m       [m
-       if (REACTION_COUNTDOWN_MODE){[m
+       if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){[m
          // if timer out, always dead.[m
          if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative()){[m
 [36m@@ -2289,64 +2299,64 @@[m [mvoid Apps::modeReactionGame(bool init){[m

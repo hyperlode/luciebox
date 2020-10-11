@@ -4,7 +4,7 @@
 
 Apps::Apps(){};
 
-void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer)
+void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8 *allLights, Buzzer *buzzer)
 {
 	this->buzzer = buzzer;
 	this->binaryInputs = binaryInputs;
@@ -16,7 +16,6 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, Displa
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
 	lightsHandle = ledDisp->getLedArrayHandle();
 	// displaySegmentsHandle = ledDisp->getBinaryHandle();
-
 }
 
 void Apps::appSelector(bool init, uint8_t selector)
@@ -30,9 +29,9 @@ void Apps::appSelector(bool init, uint8_t selector)
 		this->app_init_mode = true;
 
 #ifdef ENABLE_SERIAL
-Serial.println(selector);
-#endif 
-
+		Serial.println("select knob:");
+		Serial.println(selector);
+#endif
 	}
 
 	if (this->app_init_mode)
@@ -49,15 +48,23 @@ Serial.println(selector);
 	if (!this->app_init_mode)
 	{
 
-		uint8_t appSelector = selector * 2 + ((binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)) > 0);
+		uint8_t appSelector = selector * 2 +
+							  ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0);
 
 		bool initOnBigLatchInitToo = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
 
-		if (init || (initOnBigLatchInitToo && (appSelector != APP_SELECTOR_MULTITIMER_PLAYING)))
+		if (init ||
+			(initOnBigLatchInitToo && (appSelector != APP_SELECTOR_MULTITIMER_PLAYING)) // it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
+		)
 		{
-			// it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
+#ifdef ENABLE_SERIAL
+			Serial.println("app select:");
+			Serial.println(appSelector);
+#endif
+			// set to init state before a new app starts
 			this->setDefaultMode();
 		}
+
 #ifdef FUNCTION_POINTER_APP_SELECTION
 		// problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
 
@@ -68,7 +75,7 @@ Serial.println(selector);
 
 		//modeCountingLettersAndChars(initOnBigLatchInitToo);
 
-		fptr allAppsIndexed [24] = {
+		fptr allAppsIndexed[24] = {
 			&Apps::modeCountingLettersAndChars,
 			&Apps::modeSimon,
 			&Apps::modeSoundNotes,
@@ -92,14 +99,11 @@ Serial.println(selector);
 			&Apps::tiltSwitchTest,
 			&Apps::tiltSwitchTest,
 			&Apps::miniMultiTimer,
-			&Apps::miniMultiTimer
-			};
+			&Apps::miniMultiTimer};
 
 		(this->*(allAppsIndexed[appSelector]))(initOnBigLatchInitToo);
 
 #else
-
-		
 
 		switch (appSelector)
 		{
@@ -110,7 +114,7 @@ Serial.println(selector);
 
 		case APP_SELECTOR_SIMON:
 
-#ifdef SIMON_APP
+#ifdef ENABLE_SIMON_APP
 			this->modeSimon(initOnBigLatchInitToo);
 #endif
 			break;
@@ -218,16 +222,16 @@ Serial.println(selector);
 void Apps::updateEveryAppCycleBefore()
 {
 	binaryInputsEdgeUp = 0;
-    binaryInputsEdgeDown = 0;
-    binaryInputsValue = 0;
+	binaryInputsEdgeDown = 0;
+	binaryInputsValue = 0;
 
-    // load quick access bytes.
-    for (uint8_t i=0;i<8;i++){
-        binaryInputsEdgeUp |= binaryInputs[buttons_indexed[i]].getEdgeUp() << i;
-        binaryInputsEdgeDown |= binaryInputs[buttons_indexed[i]].getEdgeDown() << i;
-        binaryInputsValue |= binaryInputs[buttons_indexed[i]].getValue() << i;
-    }
-
+	// load quick access bytes.
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		binaryInputsEdgeUp |= binaryInputs[buttons_indexed[i]].getEdgeUp() << i;
+		binaryInputsEdgeDown |= binaryInputs[buttons_indexed[i]].getEdgeDown() << i;
+		binaryInputsValue |= binaryInputs[buttons_indexed[i]].getValue() << i;
+	}
 }
 // void Apps::updateDisplay()
 // {
@@ -238,16 +242,16 @@ void Apps::updateEveryAppCycleBefore()
 void Apps::setDefaultMode()
 {
 	//button lights
-	ledDisp->setLedArray(0b00000000); // no lights
+	setLedArray(0b00000000); // no lights
 
 	//display
-	ledDisp->setBlankDisplay();
+	setBlankDisplay();
 	decimalPoints = 0; // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
 	allLights->setBrightness(0, false);
 
 	//buzzer
 	buzzer->setSpeedRatio(2);
-	buzzer->buzzerOff(); // stop all sounds that were playing in an app.
+	buzzerOff(); // stop all sounds that were playing in an app.
 	buzzer->setTranspose(0);
 }
 
@@ -257,14 +261,14 @@ bool Apps::init_app(bool init, uint8_t selector)
 
 	if (init)
 	{
-		ledDisp->setBlankDisplay();
+		setBlankDisplay();
 		// init of the init_app..
 		this->displayAllSegments = 0;
 
 		ledDisp->progmemToDisplayBuffer(&displayAllSegments, app_splash_screens + selector * 4);
-		
+
 		// // initialize list
-		randomSequence(FADE_IN_RANDOM_LIST,32);
+		randomSequence(FADE_IN_RANDOM_LIST, 32);
 
 		counter = 27;
 		this->TIMER_INIT_APP.setInitTimeMillis(-20);
@@ -305,93 +309,105 @@ void Apps::quiz(bool init)
 	// quiz app
 	uint8_t lights = 0;
 
-	if (init){
+	if (init)
+	{
 		quizState = quizInit;
 	}
 
 	switch (quizState)
 	{
-		case quizInit:
+	case quizInit:
+	{
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+			QUIZ_SCORE[i] = 0;
+		}
+		quizState = quizWaitForQuizMaster;
+		lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
+	}
+	break;
+	case quizWaitForQuizMaster:
+	{
+		lights |= 1 << LIGHT_LATCHING_EXTRA;
+
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+		// if (binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_EXTRA) ||
+		// 	binaryInputsEdgeUp && (1 << BUTTON_LATCHING_SMALL_RED_RIGHT))
+
+		{
+			quizState = quizWaitRandomTime;
+			QUIZ_RANDOM_WAIT_TIME.setInitTimeMillis(random(-3000, -500));
+			QUIZ_RANDOM_WAIT_TIME.start();
+		}
+	}
+	break;
+	case quizWaitRandomTime:
+	{
+		lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
+		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
+		{
+			quizState = quizWaitPlayerPress;
+		}
+
+		// check here, any player pressing his button = score to zero.
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			if (binaryInputsEdgeUp & 1 << i)
+			{
 				QUIZ_SCORE[i] = 0;
 			}
-			quizState = quizWaitForQuizMaster;	
-			lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
 		}
-		break;
-		case quizWaitForQuizMaster:
+	}
+	break;
+	case quizWaitPlayerPress:
+	{
+		lights = 0xFF;
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			lights |= 1 << LIGHT_LATCHING_EXTRA;
+			if (binaryInputsEdgeUp & 1 << i)
+			{
+				// add to score.
+				QUIZ_SCORE[i]++;
+				// go to next state
 
-			if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-				quizState = quizWaitRandomTime;
-				QUIZ_RANDOM_WAIT_TIME.setInitTimeMillis(random(-3000,-500));
-				QUIZ_RANDOM_WAIT_TIME.start();
+				quizState = quizPlayerPressed;
 			}
 		}
-		break;
-		case quizWaitRandomTime:
-		{	
-			lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
-			if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative()){
-				quizState = quizWaitPlayerPress;
-			}
-
-			// check here, any player pressing his button = score to zero.
-			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-				if (binaryInputsEdgeUp & 1<<i){
-					QUIZ_SCORE[i]=0;
-				}
-			}
-		}
-		break;
-		case quizWaitPlayerPress:
-		{	
-			lights = 0xFF;
-			for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-				if (binaryInputsEdgeUp & 1<<i){
-					// add to score.
-					QUIZ_SCORE[i]++;
-					// go to next state
-					
-					quizState = quizPlayerPressed;
-				}
-			}
-		}		
-		break;
-		case quizPlayerPressed:
+	}
+	break;
+	case quizPlayerPressed:
+	{
+		lights |= 1 << LIGHT_LATCHING_EXTRA;
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 		{
-			lights |= 1 << LIGHT_LATCHING_EXTRA;
-			if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){
-				quizState = quizWaitForQuizMaster;
-
-			}
+			quizState = quizWaitForQuizMaster;
 		}
-		break;
+	}
+	break;
 	}
 
 	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
+	{
 		quizState = quizInit;
 	}
-	
+
 	int16_t scoreToDisplay = 0;
 	int16_t multiplier = 1000;
-	
-	for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
-		scoreToDisplay += multiplier*QUIZ_SCORE[i];
-		multiplier/=10;
+
+	for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+	{
+		scoreToDisplay += multiplier * QUIZ_SCORE[i];
+		multiplier /= 10;
 	}
 	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
 
 	// lights |= 1 << lights_indexed[i];
-	ledDisp->setLedArray(lights);
-	
+	setLedArray(lights);
 }
 
 // int8_t Apps::momentaryButtonEdge(){
-	
+
 // }
 
 void Apps::pomodoroTimer(bool init)
@@ -410,12 +426,12 @@ void Apps::pomodoroTimer(bool init)
 		POMODORO_STATS_WORKING_GOOD = 0;
 		POMODORO_STATS_WORKING_BAD = 0;
 		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
-	
-		ledDisp->setBlankDisplay();
+
+		setBlankDisplay();
 	}
 
 	boolean showMenu = true;
-	if ((binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)) &&
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) &&
 		!init &&
 		(POMODORO_AUTO_RESTART_ENABLED || (!POMODORO_IN_BREAK)) // if not auto restart, we don't even do a break
 	)
@@ -423,7 +439,7 @@ void Apps::pomodoroTimer(bool init)
 		showMenu = false;
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		POMODORO_IN_BREAK = false;
 	}
@@ -444,13 +460,13 @@ void Apps::pomodoroTimer(bool init)
 			if (POMODORO_IN_BREAK)
 			{
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
-				buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+				loadBuzzerTrack(SONG_DRYER_HAPPY);
 				POMODORO_TIMER.start();
 			}
 			else
 			{
 				// coming out of break. Not executed at starting Pomodoro by switch.
-				buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
+				loadBuzzerTrack(SONG_ATTACK);
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 				if (POMODORO_AUTO_RESTART_ENABLED)
 				{
@@ -463,23 +479,23 @@ void Apps::pomodoroTimer(bool init)
 			}
 		}
 
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 			POMODORO_STATS_WORKING_BAD++;
 		}
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
 			POMODORO_STATS_WORKING_GOOD++;
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)) ||
-			(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
+			(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)) ||
-			(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) ||
+			(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
 		}
@@ -498,44 +514,47 @@ void Apps::pomodoroTimer(bool init)
 		}
 #ifdef ENABLE_MULTITIMER
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
-		if (potentio->getValueStableChangedEdge()){
+		if (potentio->getValueStableChangedEdge())
+		{
 			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91));
 #endif
-			if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)))
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
 				POMODORO_INIT_TIME_SECONDS = tmpSeconds;
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 			}
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
-			if(tmpSeconds!= POMODORO_NONSENSE_TIME){
+			if (tmpSeconds != POMODORO_NONSENSE_TIME)
+			{
 				POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
 			}
-			 display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
+			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
 		}
 
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 		{
-			if(tmpSeconds!= POMODORO_NONSENSE_TIME){
+			if (tmpSeconds != POMODORO_NONSENSE_TIME)
+			{
 				POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = tmpSeconds;
 			}
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
 	}
 
-	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
+	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 
 	// POMODORO_SHOW_MENU_EDGE is our edge detector
 	POMODORO_SHOW_MENU_EDGE = showMenu;
@@ -554,7 +573,7 @@ void Apps::pomodoroTimer(bool init)
 				// random has 0 included. as we have to take into account the double ticking,
 				// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
 
-				buzzer->programBuzzerRoll(C5_1);
+				addNoteToBuzzer(C5_1);
 			};
 		}
 
@@ -586,7 +605,7 @@ void Apps::pomodoroTimer(bool init)
 		timeSecondsToClockString(textBuf, POMODORO_PAUSE_TIME_SECONDS);
 		if (millis() % 1000 > 650)
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_PAUS);
+			setStandardTextToTextBuf(TEXT_PAUS);
 		}
 	}
 	break;
@@ -596,7 +615,7 @@ void Apps::pomodoroTimer(bool init)
 		if (millis() % 1000 > 650)
 		{
 			// rnd beep time....
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_RANDOM_BEEP);
+			setStandardTextToTextBuf(TEXT_RANDOM_BEEP);
 		}
 	}
 	break;
@@ -604,11 +623,11 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 1000 > 650)
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
+			setStandardTextToTextBuf(TEXT_YES);
 		}
 		else
 		{
-			ledDisp->numberToBufAsDecimal(textBuf, POMODORO_STATS_WORKING_GOOD);
+			numberToBufAsDecimal(POMODORO_STATS_WORKING_GOOD);
 		}
 	}
 	break;
@@ -617,11 +636,11 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 1000 > 650)
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_NO);
+			setStandardTextToTextBuf(TEXT_NO);
 		}
 		else
 		{
-			ledDisp->numberToBufAsDecimal(textBuf, POMODORO_STATS_WORKING_BAD);
+			numberToBufAsDecimal(POMODORO_STATS_WORKING_BAD);
 		}
 	}
 	break;
@@ -649,7 +668,7 @@ void Apps::pomodoroTimer(bool init)
 	}
 	else if (POMODORO_IN_BREAK)
 	{
-		ledDisp->setStandardTextToTextBuf(textBuf, TEXT_PAUS);
+		setStandardTextToTextBuf(TEXT_PAUS);
 	}
 
 	// decimalPoints = 1 << 2;
@@ -686,8 +705,8 @@ void Apps::pomodoroTimer(bool init)
 		lights |= 1 << LIGHT_MOMENTARY_3;
 	}
 
-	ledDisp->setTextBufToDisplay(textBuf);
-	ledDisp->setLedArray(lights);
+	textBufToDisplay();
+	setLedArray(lights);
 }
 
 void Apps::stopwatch(bool init)
@@ -715,28 +734,28 @@ void Apps::stopwatch(bool init)
 	// 	STOPWATCH_CHRONO.startPaused(false);
 	// }
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		// save and show laptime at press
 		STOPWATCH_LAP_MEMORY = STOPWATCH_CHRONO.getTimeMillis();
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
 		// reset
 		// STOPWATCH_CHRONO.reset();
 		STOPWATCH_CHRONO.startPaused(STOPWATCH_CHRONO.getIsPaused());
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
 		STOPWATCH_CHRONO.paused(!STOPWATCH_CHRONO.getIsPaused());
 	}
 
 	time_millis = STOPWATCH_CHRONO.getTimeMillis();
 
-	if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)) ||
-		(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)))
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
+		(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 	{
 		// show saved laptime at press
 		time_millis = STOPWATCH_LAP_MEMORY;
@@ -768,13 +787,13 @@ void Apps::stopwatch(bool init)
 	intToDigitsString(textBuf, time_millis, true);
 	decimalPoints = 0x1 << timeDisplayShift;
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		STOPWATCH_CHRONO.getTimeString(textBuf);
 	}
 	else
 	{
-		ledDisp->setTextBufToDisplay(textBuf);
+		textBufToDisplay();
 		ledDisp->setDecimalPointsToDisplay(decimalPoints);
 	}
 }
@@ -801,16 +820,13 @@ void Apps::stopwatch(bool init)
 // 		textBuf[1] = ' ';
 // 		textBuf[2] = 'A';
 
-
 // 		const uint8_t analog_input_pins [5] = {PIN_SELECTOR_DIAL,PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
-
-
 
 // 		switch (counter)
 // 		{
 // 		// case 0:{
 // 		//   // textBuf[3]='0'; // analog A0
-// 		//   // ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // textBufToDisplay();
 // 		//   // generalTimer.setInitTimeMillis((long)-500);
 // 		//   break;
 // 		// }
@@ -822,7 +838,7 @@ void Apps::stopwatch(bool init)
 // 		}
 // 		// case 2:{
 // 		//   // textBuf[3]='1'; // analog A1
-// 		//   // ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // textBufToDisplay();
 // 		//   // generalTimer.setInitTimeMillis((long)-500);
 // 		//   break;
 // 		// }
@@ -834,7 +850,7 @@ void Apps::stopwatch(bool init)
 // 		}
 // 		// case 4:{
 // 		//   // textBuf[3]='2'; // analog A2
-// 		//   // ledDisp->setTextBufToDisplay(textBuf);
+// 		//   // textBufToDisplay();
 // 		//   // generalTimer.setInitTimeMillis((long)-500);
 // 		//   break;
 // 		// }
@@ -846,7 +862,7 @@ void Apps::stopwatch(bool init)
 // 		}
 // 		// case 6:{
 // 		//   textBuf[3]='3';// analog A3
-// 		//   ledDisp->setTextBufToDisplay(textBuf);
+// 		//   textBufToDisplay();
 // 		//   // generalTimer.setInitTimeMillis((long)-500);
 // 		//   break;
 // 		// }
@@ -858,7 +874,7 @@ void Apps::stopwatch(bool init)
 // 		}
 // 		// case 8:{
 // 		//   textBuf[3]='4';// analog A4
-// 		//   ledDisp->setTextBufToDisplay(textBuf);
+// 		//   textBufToDisplay();
 // 		//   // generalTimer.setInitTimeMillis((long)-500);
 // 		//   break;
 // 		// }
@@ -875,7 +891,7 @@ void Apps::stopwatch(bool init)
 // 		{
 // 			// show analog pin
 // 			textBuf[3] = counter / 2 + 48; // char 0 + analog pin .
-// 			ledDisp->setTextBufToDisplay(textBuf);
+// 			textBufToDisplay();
 // 		}
 
 // 		// show values one seconds, menu items half a second
@@ -903,18 +919,21 @@ void Apps::modeRandomWorld(bool init)
 	case randomWorldIdle:
 	{
 
-		if ( binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)){
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
+		{
 			// set autoroll time.
 
 			uint16_t delay_seconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91)); // 0 seconds to an hour
-			
+
 			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
-			
+
 			if (millis() % 1000 > 750)
 			{
-			 	ledDisp->setStandardTextToTextBuf(textHandle, TEXT_AUTO);
-			}else{
-		
+				setStandardTextToTextHANDLE(TEXT_AUTO);
+			}
+			else
+			{
+
 				ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
 			}
 		}
@@ -923,11 +942,11 @@ void Apps::modeRandomWorld(bool init)
 		{
 			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
 			{
-				RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0 );
+				RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0);
 				randomWorldState = randomWorldRolling;
-				
+
 				// set up animation
-				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30 - (((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2))>0)*1970)); // special case for upper limit setting for random number.
+				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30 - (((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) * 1970)); // special case for upper limit setting for random number.
 				RANDOMWORLD_ROLL_SPEED.start();
 			}
 		}
@@ -938,7 +957,7 @@ void Apps::modeRandomWorld(bool init)
 	{
 		// check state
 		bool roll_end = false;
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// autoroll no need for button
 			roll_end = true;
@@ -957,23 +976,23 @@ void Apps::modeRandomWorld(bool init)
 
 		if (roll_end)
 		{
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 			{
 				randomWorldState = randomWorldRollingEnd;
 			}
 			else
 			{
 				randomWorldState = randomWorldShowResult;
-				buzzer->programBuzzerRoll(D4_8);
+				addNoteToBuzzer(D4_8);
 			}
 		}
 
 		// display
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 		{
 			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 			{
-				buzzer->programBuzzerRoll(C7_8);
+				addNoteToBuzzer(C7_8);
 				randomModeDisplay(false);
 
 				RANDOMWORLD_ROLL_SPEED.start();
@@ -981,21 +1000,26 @@ void Apps::modeRandomWorld(bool init)
 		}
 		else
 		{
-			if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) && !RANDOMWORLD_ROLL_SPEED.getTimeIsNegative()){
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) && !RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
+			{
 				// hack to set upper limit for random number
 
 				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = potentio->getValueMapped(0, 100);
-				
+
 				RANDOMWORLD_CARD_FROM_DECK_INDEX = 0; // reset the tombola.
 
-				if (millis() % 1000 < 200){
-					ledDisp->setStandardTextToTextBuf(textHandle,TEXT_SET);
-				}else{
-					
+				if (millis() % 1000 < 200)
+				{
+					setStandardTextToTextHANDLE(TEXT_SET);
+				}
+				else
+				{
+
 					ledDisp->setNumberToDisplay(RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, false);
 				}
-
-			}else{
+			}
+			else
+			{
 				// during roll all lights on
 				ledDisp->setNumberToDisplayAsDecimal(8888);
 			}
@@ -1007,13 +1031,13 @@ void Apps::modeRandomWorld(bool init)
 	{
 		if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 		{
-			buzzer->programBuzzerRoll(C7_8);
+			addNoteToBuzzer(C7_8);
 			randomModeDisplay(false);
 
 			// roll slower and slower until threshold reached.
 			RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() * 1.4);
 			if (RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() < -600)
-			{   
+			{
 				randomWorldState = randomWorldShowResult;
 			}
 
@@ -1026,12 +1050,11 @@ void Apps::modeRandomWorld(bool init)
 	{
 
 		randomModeDisplay(true);
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// auto roll delay.
 			RANDOMWORLD_AUTODRAW_DELAY.start();
 			randomWorldState = randomWorldAutoRollDelay;
-
 		}
 		else
 		{
@@ -1050,7 +1073,7 @@ void Apps::modeRandomWorld(bool init)
 
 			randomWorldState = randomWorldRolling;
 		}
-		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)))
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)))
 		{
 			randomWorldState = randomWorldIdle;
 		}
@@ -1063,25 +1086,23 @@ void Apps::modeRandomWorld(bool init)
 void Apps::randomModeDisplay(bool forReal)
 {
 	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
-	
-	const int16_t randomUpperLimits[8] = {6,26,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW,2,6,52,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW,2}; 
 
-	RANDOMWORLD_RANDOM_NUMBER = random(0,randomUpperLimits[RANDOMWORLD_RANDOM_TYPE]);
-	
+	const int16_t randomUpperLimits[8] = {6, 26, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 2, 6, 52, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 2};
+
+	RANDOMWORLD_RANDOM_NUMBER = random(0, randomUpperLimits[RANDOMWORLD_RANDOM_TYPE]);
+
 	ledDisp->blanksToBuf(textBuf);
-
 
 	switch (RANDOMWORLD_RANDOM_TYPE)
 	{
 
 	case RANDOMWORLD_ROLLONEDICE:
 	{
-		
+
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			textBuf[i] = pgm_read_byte_near(dice_eyes_display + RANDOMWORLD_RANDOM_NUMBER * 4 + (i)); //* 4 --> 4 bytes per dword
 		}
-	
 	}
 	break;
 
@@ -1094,7 +1115,7 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 	}
 	break;
-	
+
 	case RANDOMWORLD_RANDOMLETTER:
 	{
 		// show letter alphabeth, plus its position.
@@ -1112,7 +1133,7 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 
 		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, 52);
-		
+
 		//show playing card
 		if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
 		{
@@ -1120,10 +1141,10 @@ void Apps::randomModeDisplay(bool forReal)
 		}
 		else
 		{
-			textBuf[0] = 49;													// 1
+			textBuf[0] = 49;													   // 1
 			textBuf[1] = (3 - (((RANDOMWORLD_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
 		}
-		
+
 		switch (RANDOMWORLD_RANDOM_NUMBER / 13)
 		{
 		case 0:
@@ -1150,66 +1171,64 @@ void Apps::randomModeDisplay(bool forReal)
 			// dont draw if not for real
 			break;
 		}
-		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK,RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
 	}
 	// NO BREAK HERE we just changed the random number to a part of a raffle draw.
 	case RANDOMWORLD_RANDOMNUMBER:
 	{
 		// random number
 
-		ledDisp->numberToBufAsDecimal(textBuf, RANDOMWORLD_RANDOM_NUMBER+1);
+		numberToBufAsDecimal(RANDOMWORLD_RANDOM_NUMBER + 1);
 	}
 	break;
 
 	case RANDOMWORLD_HEADSORTAILS:
 	//{
-		// if (RANDOMWORLD_RANDOM_NUMBER)
-		// {
-		// 	textBuf[0] = 'H';
-		// 	textBuf[1] = 'E';
-		// 	textBuf[2] = 'A';
-		// 	textBuf[3] = 'D';
-		// }
-		// else
-		// {
-		// 	textBuf[0] = 'T';
-		// 	textBuf[1] = 'A';
-		// 	textBuf[2] = 'I';
-		// 	textBuf[3] = 'L';
-		// }
-		//ledDisp->setStandardTextToTextBuf(textBuf, 60 + RANDOMWORLD_RANDOM_NUMBER*4);
+	// if (RANDOMWORLD_RANDOM_NUMBER)
+	// {
+	// 	textBuf[0] = 'H';
+	// 	textBuf[1] = 'E';
+	// 	textBuf[2] = 'A';
+	// 	textBuf[3] = 'D';
+	// }
+	// else
+	// {
+	// 	textBuf[0] = 'T';
+	// 	textBuf[1] = 'A';
+	// 	textBuf[2] = 'I';
+	// 	textBuf[3] = 'L';
+	// }
+	//setStandardTextToTextBuf(60 + RANDOMWORLD_RANDOM_NUMBER*4);
 	// }
 	// break;
 	case RANDOMWORLD_YESORNO:
 	{
 		// if (RANDOMWORLD_RANDOM_NUMBER)
 		// {
-		// 	ledDisp->setStandardTextToTextBuf(textBuf, TEXT_YES);
+		// 	setStandardTextToTextBuf(TEXT_YES);
 		// }
 		// else
 		// {
-		// 	ledDisp->setStandardTextToTextBuf(textBuf, TEXT_NO);
+		// 	setStandardTextToTextBuf(TEXT_NO);
 		// }
-		ledDisp->setStandardTextToTextBuf(textBuf, 60 + RANDOMWORLD_RANDOM_NUMBER*4 + (RANDOMWORLD_RANDOM_TYPE - 3)*2 );
+		setStandardTextToTextBuf(60 + RANDOMWORLD_RANDOM_NUMBER * 4 + (RANDOMWORLD_RANDOM_TYPE - 3) * 2);
 	}
 	break;
-
 	}
 
-	ledDisp->setTextBufToDisplay(textBuf);
+	textBufToDisplay();
 }
 
 void Apps::modeSimpleButtonsAndLights(bool init)
 {
 	lights = 0b00000000; //reset before switch enquiry
-	const uint8_t analog_input_pins [5] = {PIN_SELECTOR_DIAL,PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
+	const uint8_t analog_input_pins[5] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
 
 	if (init)
 	{
 		SETTINGS_MODE_SELECTOR = 0;
 	}
 
-		
 	// back and forth motion required of the potentio to count up modes
 	if (potentio->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 == 0)
 	{
@@ -1220,7 +1239,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		SETTINGS_MODE_SELECTOR++;
 	}
 
-	ledDisp->setStandardTextToTextBuf(textBuf, TEXT_SPACES);
+	setStandardTextToTextBuf(TEXT_SPACES);
 
 	if (SETTINGS_MODE_SELECTOR < 6)
 	{
@@ -1233,45 +1252,49 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		// display lights up a segment for each button.
 
 		//delete all content from screen.
-		ledDisp->setBlankDisplay();
-		
+		setBlankDisplay();
 
-		for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
 
-			// every momentary button has a matching latching button assigned			
-			if (binaryInputs[buttons_indexed[i+4]].getValue()){
-				
-				lights |= 1 << lights_indexed[i+4];
-								
-				if (binaryInputs[buttons_indexed[i]].getValue()){
+			// every momentary button has a matching latching button assigned
+			if (binaryInputs[buttons_indexed[i + 4]].getValue())
+			{
+
+				lights |= 1 << lights_indexed[i + 4];
+
+				if (binaryInputs[buttons_indexed[i]].getValue())
+				{
 					lights |= 1 << lights_indexed[i];
 					textHandle[i] = '8';
-
-				}else{
+				}
+				else
+				{
 					textHandle[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII;
 				}
-
-			}else if (binaryInputs[buttons_indexed[i]].getValue()){
+			}
+			else if (binaryInputs[buttons_indexed[i]].getValue())
+			{
 				textHandle[i] = '0';
-				
-			}else{
-					textHandle[i] = ' ';
+			}
+			else
+			{
+				textHandle[i] = ' ';
 			}
 		}
-		
+
 		allLights->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
 #ifdef ENABLE_EEPROM
 
 			eeprom_update_byte(
 				(uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT,
-				!eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT)
-				);
+				!eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT));
 #endif
 
 			if (buzzer->getPin() == PIN_BUZZER)
@@ -1284,36 +1307,38 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 
-		if(millis() % 1000 < 500)
+		if (millis() % 1000 < 500)
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_BEEP);
-		}		else
+			setStandardTextToTextBuf(TEXT_BEEP);
+		}
+		else
 		{
-			
+
 			uint8_t text = TEXT_YES;
-			if (buzzer->getPin() == PIN_BUZZER){
-				
+			if (buzzer->getPin() == PIN_BUZZER)
+			{
+
 				text = TEXT_NO;
 			}
-			ledDisp->setStandardTextToTextBuf(textHandle, text );
+			setStandardTextToTextHANDLE(text);
 		}
 	}
 	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
-		
+
 		// menu title
 		textBuf[2] = 'A';
-		uint8_t index = (SETTINGS_MODE_SELECTOR - 8)/2 ;
-		textBuf[3] =  48 + index;
-		
+		uint8_t index = (SETTINGS_MODE_SELECTOR - 8) / 2;
+		textBuf[3] = 48 + index;
+
 		// Value
 		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
 	}
-	
+
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
 
 #ifdef ENABLE_EEPROM
@@ -1325,11 +1350,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 					0);
 			}
 #endif
-			buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+			loadBuzzerTrack(SONG_DRYER_HAPPY);
 		}
 		else
 		{
-			ledDisp->setStandardTextToTextBuf(textHandle, TEXT_RESET);
+			setStandardTextToTextHANDLE(TEXT_RESET);
 		}
 	}
 	else
@@ -1343,15 +1368,15 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		// in real settings mode
 		if (millis() % 1000 < 500)
 		{
-			ledDisp->setTextBufToDisplay(textBuf);
+			textBufToDisplay();
 		}
-	
 	}
 
-	ledDisp->setLedArray(lights);
-	//ledDisp->setLedArray(0);
+	setLedArray(lights);
+	//setLedArray(0);
 }
-void Apps::displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet){
+void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet)
+{
 	if (letterValueAlphabet > 8)
 	{
 		textBuf[0] = (letterValueAlphabet + 1) / 10 + 48;
@@ -1364,8 +1389,8 @@ void Apps::modeCountingLettersAndChars(bool init)
 {
 	//counting mode: numbers and letters.
 
-	const bool numberElseAlphabethMode = !(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
-	
+	const bool numberElseAlphabethMode = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
+
 	if (init)
 	{
 		counter = 0;
@@ -1374,8 +1399,8 @@ void Apps::modeCountingLettersAndChars(bool init)
 	}
 
 	// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
-	
-	ledDisp->setBlankDisplay();
+
+	setBlankDisplay();
 	if (numberElseAlphabethMode)
 	{
 		ledDisp->setNumberToDisplayAsDecimal(counter);
@@ -1385,7 +1410,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 		displayLetterAndPositionInAlphabet(textHandle, counter);
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = !NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN;
 	}
@@ -1395,11 +1420,11 @@ void Apps::modeCountingLettersAndChars(bool init)
 		if (!numberElseAlphabethMode)
 		{
 			buzzer->setSpeedRatio(4);
-			buzzer->loadBuzzerTrack(songs, SONG_ALPHABET);
+			loadBuzzerTrack(SONG_ALPHABET);
 		}
 		else
 		{
-			buzzer->buzzerOff();
+			buzzerOff();
 		}
 	}
 
@@ -1414,20 +1439,18 @@ void Apps::modeCountingLettersAndChars(bool init)
 	// }
 	listenToMomentary2and3ModifyValue(&counter, 1);
 
-
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1) )
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		counter = 0;
 	}
 
-
 	// auto count
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		COUNTING_LETTERS_AND_CHARS_TIMER.start();
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// auto mode
 
@@ -1435,38 +1458,37 @@ void Apps::modeCountingLettersAndChars(bool init)
 		{
 			// time is up. Next letter.
 			counter += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
-			
+
 			COUNTING_LETTERS_AND_CHARS_TIMER.start();
 		}
 
 		//potentio behaviour
 
-		listenToPotentioToIncrementTimerInit(&COUNTING_LETTERS_AND_CHARS_TIMER,10);
+		listenToPotentioToIncrementTimerInit(&COUNTING_LETTERS_AND_CHARS_TIMER, 10);
 	}
-	else if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		// show number right away depending on potentio value
-		counter = (int16_t)(potentio->getValueMapped(0, 25 + numberElseAlphabethMode*75)); //1024 to 26 letters.
+		counter = (int16_t)(potentio->getValueMapped(0, 25 + numberElseAlphabethMode * 75)); //1024 to 26 letters.
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	checkBoundaries(&counter, 0, 25 + (numberElseAlphabethMode*76),true );
-
+	checkBoundaries(&counter, 0, 25 + (numberElseAlphabethMode * 76), true);
 }
 
 void Apps::modeSoundSong(bool init)
 {
 	if (init)
 	{
-		buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+		loadBuzzerTrack(SONG_DRYER_HAPPY);
 		buzzer->setSpeedRatio((float)2);
 	}
-	
-	ledDisp->setBlankDisplay();
-	
+
+	setBlankDisplay();
+
 	if (potentio->getValueStableChangedEdge())
 	{
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12, 12)));
 		}
@@ -1476,22 +1498,27 @@ void Apps::modeSoundSong(bool init)
 		}
 	}
 
-	uint8_t shift = (4* ((binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
+	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
 
-	for (uint8_t index=0; index< MOMENTARY_BUTTONS_COUNT; index++){
+	for (uint8_t index = 0; index < MOMENTARY_BUTTONS_COUNT; index++)
+	{
 
-		if (binaryInputs[buttons_indexed[index]].getEdgeUp()){
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
-				uint8_t song [32];
-
-				saveLoadFromEepromSlot(song, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS,true);
-				for (uint8_t i=0; i< 32;i++){
-					buzzer->programBuzzerRoll(song[i]);
+		if (binaryInputs[buttons_indexed[index]].getEdgeUp())
+		{
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+			{
+				uint8_t song[32];
+#ifdef ENABLE_EEPROM
+				saveLoadFromEepromSlot(song, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
+#endif
+				for (uint8_t i = 0; i < 32; i++)
+				{
+					addNoteToBuzzer(song[i]);
 				}
-
-			}else{
-				buzzer->loadBuzzerTrack(songs, index + shift);	
-				
+			}
+			else
+			{
+				loadBuzzerTrack(index + shift);
 			}
 		}
 	}
@@ -1516,8 +1543,9 @@ void Apps::modeComposeSong(bool init)
 		COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
+#ifdef ENABLE_EEPROM
 		bool loaded;
 		loaded = saveLoadMenu(COMPOSER_SONG, 4, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS);
 
@@ -1536,15 +1564,16 @@ void Apps::modeComposeSong(bool init)
 				}
 			}
 		}
+#endif
 	}
 	else
 	{
 
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 		{
 			// display song by index (enable insert delete position)
 
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				//delete current position
 
@@ -1560,7 +1589,7 @@ void Apps::modeComposeSong(bool init)
 				COMPOSER_SONG_LENGTH--;
 			}
 
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
 				//insert after current index (and move to it)
 				if (COMPOSER_SONG_LENGTH >= bytes_list_bufsize - 2)
@@ -1587,35 +1616,35 @@ void Apps::modeComposeSong(bool init)
 		{
 
 			// display song by note (enable programming and listening to notes)
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				// just listen to note on index in song
-				buzzer->buzzerOff();
-				buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+				buzzerOff();
+				addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 			}
 
-			if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 			{
 				// just play notes selected with potentio
 				if (potentio->getValueStableChangedEdge())
 				{
-					buzzer->buzzerOff();
-					buzzer->programBuzzerRoll(potentio->getValueMapped(0, 254));
+					buzzerOff();
+					addNoteToBuzzer(potentio->getValueMapped(0, 254));
 
 					buzzer->noteToDisplay(textBuf, &decimalPoints, potentio->getValueMapped(0, 254));
-					ledDisp->setTextBufToDisplay(textBuf);
-			ledDisp->setDecimalPointsToDisplay(decimalPoints);
+					textBufToDisplay();
+					ledDisp->setDecimalPointsToDisplay(decimalPoints);
 				}
 				defaultDisplay = false;
 			}
 
 			// program note in song
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
 
 				COMPOSER_SONG[COMPOSER_STEP] = potentio->getValueMapped(0, 254);
-				buzzer->buzzerOff();
-				buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+				buzzerOff();
+				addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 
 				// if note added to end, expand song length and add default note
 				if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
@@ -1625,27 +1654,27 @@ void Apps::modeComposeSong(bool init)
 				}
 			}
 
-			if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)))
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
 				if (potentio->getValueStableChangedEdge())
 				{
 					COMPOSER_SONG[COMPOSER_STEP] = potentio->getValueMapped(0, 255);
-					buzzer->buzzerOff();
-					buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+					buzzerOff();
+					addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 				}
 			}
 		}
 #if MOMENTARY_BUTTONS_COUNT == 4
 		listenToMomentary2and3ModifyValue(&step, 1);
 #else
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 			step = 1;
 		}
 #endif
 
 		// autoplay
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 
 			if (!COMPOSER_STEP_TIMER.getTimeIsNegative())
@@ -1656,16 +1685,14 @@ void Apps::modeComposeSong(bool init)
 		}
 
 		//default potentio behaviour
-		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)) &&
-			!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)) &&
-			!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) &&
-#ifdef BUTTON_MOMENTARY_3
-			!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)) &&
-#endif
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) &&
 			potentio->getValueStableChangedEdge())
 		{
 			int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 			{
 				// change speed if default behaviour of potentio.
 				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + tmp * 10); //step +1 or -1
@@ -1679,27 +1706,28 @@ void Apps::modeComposeSong(bool init)
 		if (step != 0)
 		{
 			nextStepRotate(&COMPOSER_STEP, (step + 1) / 2, 0, COMPOSER_SONG_LENGTH - 1);
-			buzzer->programBuzzerRoll(COMPOSER_SONG[COMPOSER_STEP]);
+			addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 		}
 
 		//sometimes overrule screen if potentio looking for a note.
 		if (defaultDisplay)
 		{
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 			{
 				ledDisp->setNumberToDisplayAsDecimal(COMPOSER_STEP);
 			}
 			else
 			{
 				buzzer->noteToDisplay(textBuf, &decimalPoints, COMPOSER_SONG[COMPOSER_STEP]);
-				ledDisp->setTextBufToDisplay(textBuf);
+				textBufToDisplay();
 				ledDisp->setDecimalPointsToDisplay(decimalPoints);
 			}
 		}
 	}
 }
 
-void Apps::modeSoundNotesInitScale(){
+void Apps::modeSoundNotesInitScale()
+{
 	SOUND_NOTES_NOTE_INDEX = SOUND_NOTES_SCALE_ROOT;
 	SOUND_NOTES_NOTE_ON_SCALE_INDEX = 0;
 	SOUND_NOTE_PLAY_NOTE = true;
@@ -1721,11 +1749,11 @@ void Apps::modeSoundNotes(bool init)
 		modeSoundNotesInitScale();
 
 		SOUND_NOTES_SCALE_INDEX = 0;
-		
+
 		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// auto play
 		if (!SOUND_NOTE_AUTO_TIMER.getTimeIsNegative())
@@ -1734,13 +1762,13 @@ void Apps::modeSoundNotes(bool init)
 			update_note = true;
 		}
 
-		delta = (uint16_t)(SOUND_NOTE_AUTO_TIMER.getInitTimeMillis()/-8);
-		
-		checkBoundaries(&delta, 2, 254, false );
+		delta = (uint16_t)(SOUND_NOTE_AUTO_TIMER.getInitTimeMillis() / -8);
+
+		checkBoundaries(&delta, 2, 254, false);
 
 		listenToPotentioToIncrementTimerInit(&SOUND_NOTE_AUTO_TIMER, delta);
-
-	}else
+	}
+	else
 	{
 		// change note with potentio
 		if (potentio->getValueStableChangedEdge())
@@ -1751,43 +1779,46 @@ void Apps::modeSoundNotes(bool init)
 	}
 
 	// change note length,available in all modes.
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
 		SOUND_NOTE_PLAY_NOTE = true;
 	}
-	
+
 	// advanced vs manual controls
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
-		// advanced 
-		
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	{
+		// advanced
+
 		//  change scale
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			nextStepRotate(&SOUND_NOTES_SCALE_INDEX,1,0, SCALES_COUNT);
-			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX*4;
-			modeSoundNotesInitScale();			
+			nextStepRotate(&SOUND_NOTES_SCALE_INDEX, 1, 0, SCALES_COUNT);
+			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX * 4;
+			modeSoundNotesInitScale();
 		}
 
-		// change key 
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3) ) // set key when changing scale
+		// change key
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3)) // set key when changing scale
 
 		{
-			// first keypress, back to root. 
+			// first keypress, back to root.
 			// second keypress, change root.
-			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT ){
+			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT)
+			{
 
-				SOUND_NOTES_SCALE_ROOT ++;
-				if (SOUND_NOTES_SCALE_ROOT> B5_4){
+				SOUND_NOTES_SCALE_ROOT++;
+				if (SOUND_NOTES_SCALE_ROOT > B5_4)
+				{
 					SOUND_NOTES_SCALE_ROOT = SOUND_NOTES_SCALE_ROOT;
 				}
 			}
-			
+
 			modeSoundNotesInitScale();
 		}
 
 		// change progression mode
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
 			SOUND_NOTES_PROGRESSION_MODE++;
 			if (SOUND_NOTES_PROGRESSION_MODE > 5)
@@ -1796,39 +1827,43 @@ void Apps::modeSoundNotes(bool init)
 			}
 			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
 		}
-
-	}else{
+	}
+	else
+	{
 		// easy
 
 		// just play the active note
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1)){
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+		{
 			SOUND_NOTE_PLAY_NOTE = true;
 		}
 
 		// change note up / downwith button press
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2) || binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2) ||
+		   (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3));
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3));
 			update_note = true;
 		}
 	}
-	
+
 	if (update_note)
 	{
 		uint8_t note_jumps = 1;
 		//number of notes to skip
 		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM)
 		{
-			note_jumps = random(0,100);
+			note_jumps = random(0, 100);
 		}
 
 		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH)
 		{
-			if (random(0,5) == 0){
+			if (random(0, 5) == 0)
+			{
 				SOUND_NOTE_AUTO_UP_ELSE_DOWN = !SOUND_NOTE_AUTO_UP_ELSE_DOWN;
 			}
 		}
-		
+
 		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_UP)
 		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
@@ -1837,41 +1872,41 @@ void Apps::modeSoundNotes(bool init)
 		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_DOWN)
 		{
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = false;
-		}		
-
-		if(SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC)
-		{			
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = random(0,2);
-			note_jumps = random(0,3);
 		}
 
-		// every jump is one step on the scale. 
-		for (uint8_t note_jump = 0; note_jump < note_jumps; note_jump++){
+		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC)
+		{
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = random(0, 2);
+			note_jumps = random(0, 3);
+		}
+
+		// every jump is one step on the scale.
+		for (uint8_t note_jump = 0; note_jump < note_jumps; note_jump++)
+		{
 
 			// which scale are we on
-			uint8_t scale_start_index =  pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
-			
-			uint8_t distance_to_next_note_on_scale = pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);
+			uint8_t scale_start_index = pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
+
+			uint8_t distance_to_next_note_on_scale = pgm_read_byte_near(scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);
 
 			// next index on scale
-			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX, 
-				SOUND_NOTE_AUTO_UP_ELSE_DOWN, 
-				0, 
-				(int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX)
-				);
-			
-			if (!SOUND_NOTE_AUTO_UP_ELSE_DOWN){
-				distance_to_next_note_on_scale = pgm_read_byte_near( scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);
+			nextStepRotate(&SOUND_NOTES_NOTE_ON_SCALE_INDEX,
+						   SOUND_NOTE_AUTO_UP_ELSE_DOWN,
+						   0,
+						   (int16_t)pgm_read_byte_near(scale_lengths + SOUND_NOTES_SCALE_INDEX));
+
+			if (!SOUND_NOTE_AUTO_UP_ELSE_DOWN)
+			{
+				distance_to_next_note_on_scale = pgm_read_byte_near(scales + scale_start_index + SOUND_NOTES_NOTE_ON_SCALE_INDEX);
 			}
 
 			// take number of steps on the chromatic scale to go to desired note
-			for (uint8_t i=0;i<distance_to_next_note_on_scale;i++)
+			for (uint8_t i = 0; i < distance_to_next_note_on_scale; i++)
 			{
 				buzzer->nextNote(
 					&SOUND_NOTES_NOTE_INDEX,
 					SOUND_NOTE_AUTO_UP_ELSE_DOWN,
-					true
-					); 
+					true);
 			}
 		}
 
@@ -1881,23 +1916,23 @@ void Apps::modeSoundNotes(bool init)
 
 	if (SOUND_NOTE_PLAY_NOTE)
 	{
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 		{
-			buzzer->buzzerOff();	
+			buzzerOff();
 		}
-		buzzer->programBuzzerRoll(SOUND_NOTES_NOTE_INDEX);
+		addNoteToBuzzer(SOUND_NOTES_NOTE_INDEX);
 		SOUND_NOTE_PLAY_NOTE = false;
 	}
 
 	// index to actual note on the scale
 	// USE A TIMER to end display of settings. hmmm not sure if it will be that much better...
-	if (SOUND_NOTE_SETTING_TEXT_TO_DISPLAY == SOUND_NOTE_DISPLAY_NOTE )
+	if (SOUND_NOTE_SETTING_TEXT_TO_DISPLAY == SOUND_NOTE_DISPLAY_NOTE)
 	{
 		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
 	}
 	else
 	{
-		ledDisp->setStandardTextToTextBuf(textHandle, SOUND_NOTE_SETTING_TEXT_TO_DISPLAY);
+		setStandardTextToTextHANDLE(SOUND_NOTE_SETTING_TEXT_TO_DISPLAY);
 	}
 }
 
@@ -1913,7 +1948,7 @@ void Apps::movieAnimationMode(bool init)
 		MOVIE_MODE_SHOW_NEGATIVE = false;
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// manual mode
 		if (potentio->getValueStableChangedEdge())
@@ -1923,14 +1958,14 @@ void Apps::movieAnimationMode(bool init)
 		}
 
 		// one step forward
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
 			this->dataPlayer.setSetIndexDirection(1);
 			this->dataPlayer.moveIndexSteps(counter);
 		}
 
 		// one step backward
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 			this->dataPlayer.setSetIndexDirection(0);
 			this->dataPlayer.moveIndexSteps(counter);
@@ -1945,24 +1980,24 @@ void Apps::movieAnimationMode(bool init)
 			dataPlayer.setAutoStepSpeed(potentio->getValueMapped(-1024, 0));
 		}
 
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 			this->dataPlayer.setSetIndexDirection(2);
 		}
 
-		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)))
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			this->dataPlayer.update(); // this to pause the movie while holding.
 		}
 	}
 
 	// next movie
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		this->dataPlayer.nextDataSet(true);
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		MOVIE_MODE_SHOW_NEGATIVE = !MOVIE_MODE_SHOW_NEGATIVE;
 	}
@@ -1989,7 +2024,7 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 		DRAW_SHOW_MODE = 3; // prepare for next button press to save buffer and show inversion.
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 
 		DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE = 0 : DRAW_SHOW_MODE++;
@@ -2026,21 +2061,21 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	// scroll through segments
 	if (potentio->getValueStableChangedEdge())
 	{
-		potentio->increaseSubtractAtChange((int16_t*)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
-		checkBoundaries((int16_t*)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95, true);
+		potentio->increaseSubtractAtChange((int16_t *)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
+		checkBoundaries((int16_t *)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95, true);
 		DRAW_CURSOR_INDEX = DRAW_CURSOR_POTENTIO_INDEX / 3;
 	}
 
 	// check for global display change
 	this->displayChangeGlobal(&displayAllSegments, false);
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		*display_buffer ^= (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9) * 8;
 		this->displayChangeGlobal(display_buffer, true);
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
 		// move inside digit
 		DRAW_CURSOR_INDEX++;
@@ -2050,7 +2085,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 		}
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
 		// move digit
 		DRAW_CURSOR_INDEX += 9;
@@ -2068,7 +2103,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	}
 
 	//add blinking cursor. (depending on time, we set the active segment)
-	if (millis() % 250 > 125 )
+	if (millis() % 250 > 125)
 	{
 		return (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9) * 8;
 	}
@@ -2080,15 +2115,14 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 
 void Apps::drawGame(bool init)
 {
-	// shows a picture. After it disappears, you have to drawn it exactly as it was. 
+	// shows a picture. After it disappears, you have to drawn it exactly as it was.
 
 	uint32_t cursorBlinker = 0;
 
 	if (init)
 	{
 		drawGameState = drawGameWaitForStart;
-		//ledDisp->numberToBufAsDecimal(textBuf, 4444);
-		
+		//numberToBufAsDecimal(4444);
 	}
 
 	switch (drawGameState)
@@ -2096,43 +2130,50 @@ void Apps::drawGame(bool init)
 
 	case drawGameWaitForStart:
 	{
-		ledDisp->setBlankDisplay();
-				
-		drawGameState = drawGameShowPicture;
-	
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
+		setBlankDisplay();
 
-			if(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
-				// learn how to read the clock 
-				
+		drawGameState = drawGameShowPicture;
+
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		{
+
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+			{
+				// learn how to read the clock
+
 				ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
 				ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-				
+
 				// add hour:minute divider.
 				displayAllSegments |= 1UL << 15;
-			}else{
+			}
+			else
+			{
 				// random number
 				long r = random(0, 10000);
-				ledDisp->numberToBufAsDecimal(textBuf, (int16_t)r);
+				numberToBufAsDecimal((int16_t)r);
 				ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
 			}
-		}else if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+		}
+		else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		{
 			// random text
-			for (uint8_t i =0;i<4;i++){
-				long r = random (0,25);
-				textBuf[i] = (char)r + 65; 
-
+			for (uint8_t i = 0; i < 4; i++)
+			{
+				long r = random(0, 25);
+				textBuf[i] = (char)r + 65;
 			}
 			ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-
-		}else{
+		}
+		else
+		{
 			displayAllSegments = 0UL;
-			for (uint8_t i =0;i<32;i++)
+			for (uint8_t i = 0; i < 32; i++)
 			{
-				displayAllSegments |= random (0,2) << i;
+				displayAllSegments |= random(0, 2) << i;
 			}
 		}
-	
+
 		break;
 	}
 
@@ -2140,7 +2181,7 @@ void Apps::drawGame(bool init)
 	{
 		// displayAllSegments = 0xFF00FF00;
 
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			drawGameState = drawGameDraw;
 			displayAllSegmentsBuffer = displayAllSegments;
@@ -2154,7 +2195,7 @@ void Apps::drawGame(bool init)
 	{
 		cursorBlinker = modeSingleSegmentManipulation(&displayAllSegments);
 		// bug: you can't use this because of same buffer reuse. displayChangeGlobal(&displayAllSegments, false);
-		
+
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
 		{
 			drawGameState = drawGameEvaluate;
@@ -2164,11 +2205,11 @@ void Apps::drawGame(bool init)
 
 			if (displayAllSegments == displayAllSegmentsBuffer)
 			{
-				buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+				loadBuzzerTrack(SONG_DRYER_HAPPY);
 			}
 			else
 			{
-				buzzer->loadBuzzerTrack(songs, SONG_DRYER_UNHAPPY);
+				loadBuzzerTrack(SONG_DRYER_UNHAPPY);
 			}
 		}
 		break;
@@ -2201,13 +2242,15 @@ void Apps::drawGame(bool init)
 	ledDisp->setBinaryToDisplay(displayAllSegments ^ cursorBlinker);
 }
 
-void Apps::modeHackTime(bool init){
+void Apps::modeHackTime(bool init)
+{
 	// run through all the addresses to see the raw values!
-	
-	bool address_changed = false;
-	const char drive_letter[3] = {'F','R','E'};
 
-	if (init){
+	bool address_changed = false;
+	const char drive_letter[3] = {'F', 'R', 'E'};
+
+	if (init)
+	{
 		HACKTIME_ADDRESS = 0;
 		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
 		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
@@ -2215,48 +2258,56 @@ void Apps::modeHackTime(bool init){
 	}
 
 	// write to mem if possible
-	if ((binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) && HACKTIME_MEMORY_SELECT != HACKTIME_MEMORY_FLASH){ //		
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) && HACKTIME_MEMORY_SELECT != HACKTIME_MEMORY_FLASH)
+	{ //
 		// change value in address location (left char on display)
 		// will not work for flash memory
 
 		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_HEX;
 		// value to change is the one that is in the primary position (arry8bytes 0)
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1))){
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+		{
 			// change value
-			array_8_bytes[0] = potentio->getValueMapped(0,255);
+			array_8_bytes[0] = potentio->getValueMapped(0, 255);
 		}
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0)){
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		{
 			// store value.
-			switch (HACKTIME_MEMORY_SELECT){
-				// case HACKTIME_MEMORY_FLASH:
+			switch (HACKTIME_MEMORY_SELECT)
+			{
+			// case HACKTIME_MEMORY_FLASH:
 
-				// break;
-				case HACKTIME_MEMORY_RAM:
-					*((uint8_t*) HACKTIME_ADDRESS) = array_8_bytes[0];
-					
+			// break;
+			case HACKTIME_MEMORY_RAM:
+				*((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
+
 				break;
-				case HACKTIME_MEMORY_EEPROM:
-					eeprom_write_byte((uint8_t*)HACKTIME_ADDRESS , array_8_bytes[0]);
+			case HACKTIME_MEMORY_EEPROM:
+				eeprom_write_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
 				break;
 			}
 		}
-			
-	}else{
+	}
+	else
+	{
 		// change address values
-		
+
 		// which memory are we investigating?
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0)){
-			HACKTIME_MEMORY_SELECT ++;
-			if (HACKTIME_MEMORY_SELECT > 2){
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		{
+			HACKTIME_MEMORY_SELECT++;
+			if (HACKTIME_MEMORY_SELECT > 2)
+			{
 				HACKTIME_MEMORY_SELECT = 0;
 			}
 		}
 
-		
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)){
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
+		{
 			// auto scroll mode
-			if (!HACKTIME_MOVE_TIMER.getTimeIsNegative()){
+			if (!HACKTIME_MOVE_TIMER.getTimeIsNegative())
+			{
 				HACKTIME_ADDRESS++;
 				HACKTIME_MOVE_TIMER.start();
 				address_changed = true;
@@ -2264,97 +2315,111 @@ void Apps::modeHackTime(bool init){
 
 			// set speed.
 			listenToPotentioToIncrementTimerInit(&HACKTIME_MOVE_TIMER, 20);
+		}
+		else
+		{
+			// manual scroll
 
-		}else{
-			// manual scroll 
-			
 			address_changed = potentio->increaseSubtractAtChange(
-					&HACKTIME_ADDRESS, 
-					1 + 99 * ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2))>0) + 
-					999  * ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3))>0) // speed up memory scroll by pressing buttons.
-					);
+				&HACKTIME_ADDRESS,
+				1 + 99 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) +
+					999 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) > 0) // speed up memory scroll by pressing buttons.
+			);
 		}
 
 		// display mode change (how to represent the memory value?)
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1)){
-			nextStepRotate(&HACKTIME_DISPLAY_MODE,1,0,4);
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+		{
+			nextStepRotate(&HACKTIME_DISPLAY_MODE, 1, 0, 4);
 		}
 
 		// button address change.
 
 		// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2)){
-				
+
 		// 	HACKTIME_ADDRESS --;
 		// 	address_changed = true;
 		// }
-		
+
 		// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3)){
 		// 	// no limit checks. This is hacktime!
 		// 	HACKTIME_ADDRESS ++;
 		// 	address_changed = true;
 		// }
-		address_changed = listenToMomentary2and3ModifyValue(&HACKTIME_ADDRESS,1);
+		address_changed = listenToMomentary2and3ModifyValue(&HACKTIME_ADDRESS, 1);
 
 		// ok ok, let's do one little check.
-		if(HACKTIME_ADDRESS <= 0){
+		if (HACKTIME_ADDRESS <= 0)
+		{
 			HACKTIME_ADDRESS = 0;
 		}
-				
+
 		// get value from memory address and memory type
-		for (uint8_t i=0;i<4;i++){
-		
-			switch (HACKTIME_MEMORY_SELECT){
-				case HACKTIME_MEMORY_FLASH:
-				
-					textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS+i);
-					
+		for (uint8_t i = 0; i < 4; i++)
+		{
+
+			switch (HACKTIME_MEMORY_SELECT)
+			{
+			case HACKTIME_MEMORY_FLASH:
+
+				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
+
 				break;
 
-				case HACKTIME_MEMORY_RAM:
+			case HACKTIME_MEMORY_RAM:
 
-					textHandle[i] = *(((uint8_t*) HACKTIME_ADDRESS) + i);
-				
-				break;
-				case HACKTIME_MEMORY_EEPROM:
+				textHandle[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
 
-					textHandle[i] = eeprom_read_byte((uint8_t*)HACKTIME_ADDRESS + i);
 				break;
-				
+			case HACKTIME_MEMORY_EEPROM:
+
+				textHandle[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
+				break;
 			}
-			array_8_bytes[i]= textHandle[i];
+			array_8_bytes[i] = textHandle[i];
 		}
 	}
 
-	// convert memory to sounds... Be prepared for a post-modernistic masterpiece. 
-	if (address_changed && (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))){ //
-		buzzer->programBuzzerRoll(array_8_bytes[0]);
+	// convert memory to sounds... Be prepared for a post-modernistic masterpiece.
+	if (address_changed && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)))
+	{ //
+		addNoteToBuzzer(array_8_bytes[0]);
 	}
-	
+
 	// compressed display mode (to save memory)
-	if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS){
+	if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS)
+	{
 		// do nothing
-	}else {
-		ledDisp->setBlankDisplay();
-		
-		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES){
+	}
+	else
+	{
+		setBlankDisplay();
+
+		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
+		{
 			displayAllSegments = 0;
-			for(uint8_t i=0;i<4;i++){
-				displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8*i);
+			for (uint8_t i = 0; i < 4; i++)
+			{
+				displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
 			}
 			ledDisp->setBinaryToDisplay(displayAllSegments);
-
-		}else if(HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS){
-			if (millis() % 1000 > 200){
+		}
+		else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS)
+		{
+			if (millis() % 1000 > 200)
+			{
 				ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
-			}else{
+			}
+			else
+			{
 				textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
 			}
-
-		}else{
-			ledDisp->setNumberToDisplay(array_8_bytes[0],HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+		}
+		else
+		{
+			ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
 		}
 	}
-
 
 	// switch(HACKTIME_DISPLAY_MODE){
 	// 	case HACKTIME_DISPLAY_ADDRESS:{
@@ -2363,7 +2428,7 @@ void Apps::modeHackTime(bool init){
 	// 			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
 	// 		}else{
 	// 			// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
-	// 			ledDisp->setBlankDisplay();
+	// 			setBlankDisplay();
 	// 			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
 	// 		}
 	// 	}
@@ -2393,25 +2458,27 @@ void Apps::modeHackTime(bool init){
 	// }
 }
 
-bool Apps::listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount){
-	
+bool Apps::listenToMomentary2and3ModifyValue(int16_t *value, uint8_t amount)
+{
+
 	int16_t value_memory = *value;
-	
+
 	//if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
-		*value-=amount;
+		*value -= amount;
 	}
 
 	// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
-		*value+=amount;
+		*value += amount;
 	}
 	return value_memory != *value;
 }
 
-void Apps::listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis){
+void Apps::listenToPotentioToIncrementTimerInit(SuperTimer *aTimer, int8_t increment_millis)
+{
 	int16_t delta = 0;
 
 	potentio->increaseSubtractAtChange(&delta, increment_millis);
@@ -2432,8 +2499,8 @@ void Apps::draw(bool init)
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 	}
 
-	if ((binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)) && 
-		!(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)))
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) &&
+		!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)))
 	{
 		//   // modify drawing on display in draw mode.
 		//   // if in save to eeprom mode, always only scroll through drawings.
@@ -2449,7 +2516,7 @@ void Apps::draw(bool init)
 		// }
 		potentio->increaseSubtractAtChange(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 
-		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{ // shift function for saving drawings to eeprom.
 
 			//check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
@@ -2459,15 +2526,16 @@ void Apps::draw(bool init)
 			listenToMomentary2and3ModifyValue(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 		}
 	}
-
+#ifdef ENABLE_EEPROM
 	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1, true);
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			// special function in save image to eeprom mode.
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 			{
 				// insert
 
@@ -2492,7 +2560,7 @@ void Apps::draw(bool init)
 				}
 			}
 
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 			{
 				// delete slot. (and shift all drawings.)
 				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
@@ -2506,7 +2574,7 @@ void Apps::draw(bool init)
 		}
 		else
 		{
-			if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
 				// save active drawing on display to eeprom.
 				for (uint8_t i = 0; i < 4; i++)
@@ -2515,6 +2583,7 @@ void Apps::draw(bool init)
 				}
 			}
 		}
+
 	}
 	else if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY)
 	{
@@ -2527,11 +2596,12 @@ void Apps::draw(bool init)
 		}
 		this->displayChangeGlobal(&displayAllSegments, true);
 	}
+#endif
 
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
 
-	ledDisp->setBlankDisplay();
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	setBlankDisplay();
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
 		// always show index of active drawing if activated.
 		ledDisp->setNumberToDisplayAsDecimal(DRAW_ACTIVE_DRAWING_INDEX + 1); // in the real world, most of the people start counting from 1. Welcome to an eternal discussion Lucie!
@@ -2580,24 +2650,20 @@ void Apps::miniMultiTimer(bool init)
 	}
 
 	// PAUSE Switch
-	this->multiTimer.setStatePause(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)); // do not only work on edge here, as latching switch can  be in any state.
+	this->multiTimer.setStatePause(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// # set number of timers SWITCH
-	this->multiTimer.setStateTimersCount(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)); // do not only work on edge here, as latching switch can  be in any state.
+	this->multiTimer.setStateTimersCount(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// set fischer timer SWITCH
-	this->multiTimer.setStateFischerTimer(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)); // do not only work on edge here, as latching switch can  be in any state.
+	this->multiTimer.setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// THE DIAL
 	if (potentio->getValueStableChangedEdge())
 	{
 		// number of timers
 
-#ifdef PROTOTYPE
-		this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1, 3));
-#else
 		this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1, MAX_TIMERS_COUNT));
-#endif
 		// convert value to predefined amount of seconds.
 		uint16_t seconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91)); // 0 seconds to an hour
 
@@ -2626,7 +2692,7 @@ void Apps::miniMultiTimer(bool init)
 	uint8_t buttonLights;
 
 	uint8_t settingsLights;
-	
+
 	this->multiTimer.getDisplay(textHandle, &buttonLights, &settingsLights);
 
 	uint8_t lights = 0b00000000;
@@ -2645,8 +2711,8 @@ void Apps::miniMultiTimer(bool init)
 	(LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
 	(LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
 
-	//ledDisp->setTextBufToDisplay(textBuf);
-	ledDisp->setLedArray(lights);
+	//textBufToDisplay();
+	setLedArray(lights);
 	ledDisp->setDecimalPointToDisplay(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
 #endif
@@ -2657,7 +2723,7 @@ void Apps::tiltSwitchTest(bool init)
 	uint32_t screen = 0;
 	if (init)
 	{
-		ledDisp->setStandardTextToTextBuf(textBuf, TEXT_TILT);
+		setStandardTextToTextBuf(TEXT_TILT);
 		counter = 0;
 		counter2 = 0; // counts progress in movement.
 		buzzer->setSpeedRatio(2.0);
@@ -2669,7 +2735,7 @@ void Apps::tiltSwitchTest(bool init)
 		this->dataPlayer.setAutoStepSpeed(-30);
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED))
 	{
 		// movie for each gesture
 
@@ -2702,25 +2768,25 @@ void Apps::tiltSwitchTest(bool init)
 	{
 		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown())
 		{
-			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			addNoteToBuzzer(1); //not beep but "puck"
 			counter2 |= 0x01 << TILT_FORWARD;
 		}
 
 		if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown())
 		{
-			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			addNoteToBuzzer(1); //not beep but "puck"
 			counter2 |= 0x01 << TILT_BACKWARD;
 		}
 
 		if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown())
 		{
-			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			addNoteToBuzzer(1); //not beep but "puck"
 			counter2 |= 0x01 << TILT_LEFT;
 		}
 
 		if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown())
 		{
-			buzzer->programBuzzerRoll(1); //not beep but "puck"
+			addNoteToBuzzer(1); //not beep but "puck"
 			counter2 |= 0x01 << TILT_RIGHT;
 		}
 
@@ -2751,7 +2817,7 @@ void Apps::tiltSwitchTest(bool init)
 		}
 		else
 		{
-			ledDisp->setTextBufToDisplay(textBuf);
+			textBufToDisplay();
 		}
 	}
 
@@ -2761,7 +2827,7 @@ void Apps::tiltSwitchTest(bool init)
 		counter++;
 		if (counter == 4)
 		{
-			buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+			loadBuzzerTrack(SONG_DRYER_HAPPY);
 			counter = 0;
 		}
 		counter2 = 0;
@@ -2787,13 +2853,13 @@ void Apps::modeGeiger(bool init)
 	//long r = random(0, 1024);
 	//r = r*r;
 
-	ledDisp->setBlankDisplay();
+	setBlankDisplay();
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
-		// noise mode 
+		// note mode
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			//lower
 			if (potentio->getValueStableChangedEdge())
@@ -2802,7 +2868,7 @@ void Apps::modeGeiger(bool init)
 			}
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENY_LOWEST);
 		}
-		else if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)))
+		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			//upper
 			if (potentio->getValueStableChangedEdge())
@@ -2811,7 +2877,7 @@ void Apps::modeGeiger(bool init)
 			}
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENCY_HEIGHEST);
 		}
-		else if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)))
+		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			//length
 			if (potentio->getValueStableChangedEdge())
@@ -2820,17 +2886,17 @@ void Apps::modeGeiger(bool init)
 			}
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_LENGTH);
 
-#ifdef BUTTON_MOMENTARY_3
+
 		}
-		else if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)))
+		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			if (potentio->getValueStableChangedEdge())
 			{
 				buzzer->playTone(
 					potentio->getValueMapped(0, 500),
-					(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
+					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
 			}
-#endif
+
 		}
 		else
 		{
@@ -2840,13 +2906,13 @@ void Apps::modeGeiger(bool init)
 				long tmp = random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST + 1);
 				buzzer->playTone(
 					tmp,
-					(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
+					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
 
 				ledDisp->setNumberToDisplayAsDecimal(tmp);
 				COUNTER_GEIGER++;
 			}
 
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 			{
 				ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);
 			}
@@ -2860,7 +2926,7 @@ void Apps::modeGeiger(bool init)
 		// todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
 
 		// If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			// binaryInputs[SWITCH_TILT_FORWARD].getValue() ||
 			// r *= 2; //
@@ -2876,14 +2942,13 @@ void Apps::modeGeiger(bool init)
 
 		r += GEIGER_INCREASE_CHANCE;
 
-
-		textBuf[0] = ' ';
+		// textBuf[0] = ' ';
 		if (r > potentio->getValueMapped(0, 1048576))
 		{
-			//	buzzer->programBuzzerRoll(1); //not beep but "puck"
+			//	addNoteToBuzzer(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
-			ledDisp->setStandardTextToTextBuf(textBuf, TEXT_RANDOM_SEGMENTS);
-			ledDisp->setTextBufToDisplay(textBuf);
+			setStandardTextToTextBuf(TEXT_RANDOM_SEGMENTS);
+			textBufToDisplay();
 		}
 	}
 }
@@ -2891,8 +2956,8 @@ void Apps::modeGeiger(bool init)
 void Apps::modeSequencer(bool init)
 {
 	int8_t step = 0;
-	
-    bool showNote = false;
+
+	bool showNote = false;
 
 	if (init)
 	{
@@ -2912,16 +2977,18 @@ void Apps::modeSequencer(bool init)
 	}
 
 	// erase screen at start.
-	ledDisp->setBlankDisplay();
+	setBlankDisplay();
 
-	if (this->binaryInputsEdgeDown & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
 		init = true; // make sure we display the sequencer when returning from save/load mode
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
+#ifdef ENABLE_EEPROM
 		this->saveLoadMenu(this->SEQUENCER_SONG, 9, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS);
+#endif
 	}
 	else
 	{
@@ -2931,21 +2998,21 @@ void Apps::modeSequencer(bool init)
 
 		SEQUENCER_TEMP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
 
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
+			addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			// if button continuously pressed, show notes.
-			
+
 			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 
 			// bonus effect: TRANSPOSE!
-			
-			potentio->increaseSubtractAtChange((int16_t*)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
+
+			potentio->increaseSubtractAtChange((int16_t *)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
 		}
 
 		// if ((this->binaryInputsEdgeDown & (1<<BUTTON_INDEXED_MOMENTARY_0)))
@@ -2956,32 +3023,31 @@ void Apps::modeSequencer(bool init)
 		// just listen to the potentio note
 		SEQUENCER_TEMP_NOTE = potentio->getValueMapped(0, 255);
 
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_1))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
-			buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
+			addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			// if button continuously pressed, rotate potentio to hear notes.
 			if (potentio->getValueStableChangedEdge())
 			{
-				buzzer->programBuzzerRoll(SEQUENCER_TEMP_NOTE);
+				addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
 			}
 			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
 
-
 		// program note to song
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 
 			uint8_t note = potentio->getValueMapped(0, 255);
 
-			buzzer->programBuzzerRoll(note);
+			addNoteToBuzzer(note);
 
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 			{
 				//copy to all measures
 				for (uint8_t i = 0; i < 4; i++)
@@ -2997,44 +3063,39 @@ void Apps::modeSequencer(bool init)
 
 #ifdef BUTTON_MOMENTARY_3
 		// song progression
-		if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
 			step = 1;
 		}
 
-		if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			// if (potentio->getValueStableChangedEdge())
 			// {
 			// 	step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
 			// }
 			//}
-			potentio->increaseSubtractAtChange((int16_t*)&(step), 1);
-		
+			potentio->increaseSubtractAtChange((int16_t *)&(step), 1);
 		}
 #endif
 
-		if (this->binaryInputsEdgeDown & (1<<BUTTON_LATCHING_EXTRA))
+		if (this->binaryInputsEdgeDown & (1 << BUTTON_LATCHING_EXTRA))
 		{
 			// reset transpose when stop autoplay.
 			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
 		}
 
 		// autoplay
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// change speed if default behaviour of potentio.
-			if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)) &&
-				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)) &&
-				!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_2)) 
-#ifdef BUTTON_MOMENTARY_3
-				&& !(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_3)) 
-				// &&
-#endif
-				// potentio->getValueStableChangedEdge()
-				)
+			if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
+			)
 			{
-				listenToPotentioToIncrementTimerInit(&generalTimer,5);
+				listenToPotentioToIncrementTimerInit(&generalTimer, 5);
 			}
 
 			if (!generalTimer.getTimeIsNegative())
@@ -3048,7 +3109,7 @@ void Apps::modeSequencer(bool init)
 		// if (showNote)
 		// {
 		// 	//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
-		// 	ledDisp->setTextBufToDisplay(textBuf);
+		// 	textBufToDisplay();
 		// 	ledDisp->setDecimalPointsToDisplay(decimalPoints);
 		// }
 
@@ -3067,9 +3128,9 @@ void Apps::modeSequencer(bool init)
 				SEQUENCER_STEP_COUNTER = 0;
 			}
 
-			buzzer->programBuzzerRoll(
+			addNoteToBuzzer(
 				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] +
-				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0))>0));
+				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) > 0));
 
 			// sequencer shows every step in 32 notes bar. 8steps (circle) times 4 measures (bar on bottom)
 			displayAllSegments = 0;
@@ -3085,9 +3146,9 @@ void Apps::modeSequencer(bool init)
 			displayAllSegments |= (uint32_t)0x1 << ((8 * (SEQUENCER_STEP_COUNTER / 8)) + 3); // bar at bottom.
 		}
 
-		if (!showNote){
+		if (!showNote)
+		{
 			ledDisp->setBinaryToDisplay(displayAllSegments);
-
 		}
 	}
 }
@@ -3103,14 +3164,14 @@ void Apps::modeMetronome(bool init)
 		// METRONOME_TICKER_1_POSITION = 0;
 		// METRONOME_TICKER_2_POSITION = 0;
 		// METRONOME_TICKER_3_POSITION = 0;
-		
+
 		TIMER_METRONOME.setInitTimeMillis(-500);
 		TIMER_METRONOME.start();
 	}
 
-	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		listenToPotentioToIncrementTimerInit(&TIMER_METRONOME,10);
+		listenToPotentioToIncrementTimerInit(&TIMER_METRONOME, 10);
 
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
@@ -3119,7 +3180,7 @@ void Apps::modeMetronome(bool init)
 		}
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		//ticker 1,2 and 3 back together (at position of ticker 1)
 		METRONOME_TICKER_2_POSITION = METRONOME_TICKER_1_POSITION;
@@ -3128,40 +3189,33 @@ void Apps::modeMetronome(bool init)
 
 	displayAllSegments = 0;
 
-#if MOMENTARY_BUTTONS_COUNT == 4
-	bool forceNextStep = update|| binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)),C6_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, !(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)),C5_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true,C7_8, update );
-#else
-	bool forceNextStep = update|| binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)),C5_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_2, true,C7_8, update );
-
-#endif
-
+	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)), C5_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true, C7_8, update);
 	ledDisp->setBinaryToDisplay(displayAllSegments);
 }
 
-void Apps::modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step){
+void Apps::modeMetronomeTickerUpdate(uint8_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step)
+{
 	// every ticker gets updated.
 
-
 	// check for next step
-	if (binaryInputs[momentary_id].getEdgeUp() || force_step){
-		
+	if (binaryInputs[momentary_id].getEdgeUp() || force_step)
+	{
+
 		int16_t ttmp = (int16_t)*ticker_counter;
 		this->nextStepRotate(
-				&ttmp,
-				direction,
-				0,
-				11);
-		
+			&ttmp,
+			direction,
+			0,
+			11);
+
 		*ticker_counter = (uint8_t)ttmp;
-		
+
 		if (*ticker_counter == 0)
 		{
-			buzzer->programBuzzerRoll(sound_at_zero_pass);
+			addNoteToBuzzer(sound_at_zero_pass);
 		}
 	}
 
@@ -3174,154 +3228,7 @@ void Apps::modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_
 	ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + *ticker_counter * 4);
 }
 
-#ifdef SIMON_APP
-
-#ifdef PROTOTYPE
-void Apps::modeSimon(bool init)
-{
-	const int numButtons = 4;
-	const int buttons[numButtons] = {BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-	const byte lights[numButtons] = {1 << LIGHT_LATCHING_EXTRA, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2};
-	const uint8_t sounds[numButtons] = {C4_1, F4_1, A4_1, C5_1};
-
-	const bool hasSound = (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
-	const bool hasLight = (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) || !hasSound;
-
-	if (init)
-	{
-		simonState = simonWaitForNewGame;
-	}
-
-	if (init || potentio->getValueStableChangedEdge())
-	{
-		generalTimer.setInitTimeMillis(potentio->getValueMapped(-1000, -100));
-	}
-
-	uint8_t buttonsChanged = 0;
-	for (int k = 0; k < numButtons; ++k)
-	{
-		const bool changed = (buttons[k] == BUTTON_LATCHING_EXTRA)
-								 ? binaryInputs[buttons[k]].getValueChanged()
-								 : binaryInputs[buttons[k]].getEdgeUp();
-		if (changed)
-		{
-			buttonsChanged |= (1 << k);
-		}
-	}
-
-	switch (simonState)
-	{
-	case simonWaitForNewGame:
-	{
-		// all lights on
-		byte allLights = 0;
-		for (int k = 0; k < numButtons; ++k)
-		{
-			allLights |= lights[k];
-		}
-		ledDisp->setLedArray(allLights);
-		if (!buttonsChanged)
-		{
-			break;
-		}
-		simonState = simonNewGame;
-		break;
-	}
-
-	case simonNewGame:
-	{
-		ledDisp->setLedArray(0);
-		// generate new sequence
-		for (int k = 0; k < bytes_list_bufsize; ++k)
-		{
-			SIMON_LIST[k] = k % numButtons;
-		}
-		shuffle(SIMON_LIST, bytes_list_bufsize);
-		
-		SIMON_LENGTH = 0;
-		simonState = simonNewLevel;
-		break;
-	}
-
-	case simonNewLevel:
-	{
-		ledDisp->setNumberToDisplayAsDecimal(SIMON_LENGTH);
-		++SIMON_LENGTH;
-		if (SIMON_LENGTH >= bytes_list_bufsize)
-		{
-			// reached maximum length
-			if (hasSound)
-				buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
-			simonState = simonWaitForNewGame;
-			break;
-		}
-		SIMON_INDEX = -1; // negative index allows for lead-in time
-		simonState = simonPlaySequence;
-		generalTimer.start();
-		break;
-	}
-
-	case simonPlaySequence:
-	{
-		if (generalTimer.getTimeIsNegative())
-		{
-			break;
-		}
-		generalTimer.start();
-		if (SIMON_INDEX < 0)
-		{
-			++SIMON_INDEX; // do-nothing lead in time
-			break;
-		}
-		if (SIMON_INDEX >= SIMON_LENGTH)
-		{
-			// sequence finished, give control to user
-			ledDisp->setLedArray(0);
-			SIMON_INDEX = 0;
-			simonState = simonUserRepeats;
-			break;
-		}
-		// show one button from the sequence
-		const uint8_t button = SIMON_LIST[SIMON_INDEX];
-		if (hasLight)
-			ledDisp->setLedArray(lights[button]);
-		if (hasSound)
-			buzzer->programBuzzerRoll(sounds[button]);
-		++SIMON_INDEX;
-		break;
-	}
-
-	case simonUserRepeats:
-	{
-		if (!buttonsChanged)
-		{
-			break;
-		}
-		const int expected = SIMON_LIST[SIMON_INDEX];
-		if (buttonsChanged != (1 << expected))
-		{
-			// player made mistake, start new game
-			if (hasSound)
-				buzzer->loadBuzzerTrack(songs, SONG_RETREAT);
-			simonState = simonWaitForNewGame;
-			break;
-		}
-		// player pressed correct button
-		if (hasSound)
-			buzzer->programBuzzerRoll(sounds[expected]);
-		++SIMON_INDEX;
-		if (SIMON_INDEX >= SIMON_LENGTH)
-		{
-			// sequence fully replaced, add one more note
-			simonState = simonNewLevel;
-			break;
-		}
-		break;
-	}
-	}
-}
-#else
-
+#ifdef ENABLE_SIMON_APP
 void Apps::modeSimon(bool init)
 {
 	uint8_t lights = 0b00000000;
@@ -3336,7 +3243,7 @@ void Apps::modeSimon(bool init)
 		// SIMON_LEVEL = 1; // levels don't look that appealing. I choose one speed and you'll have to stick with it.
 	}
 
-	if (!(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)) || init)
+	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) || init)
 	{
 		// at any time, if play button off: no more playing!
 		simonState = simonWaitForNewGame;
@@ -3375,8 +3282,8 @@ void Apps::modeSimon(bool init)
 	{
 	case simonWaitForNewGame:
 	{
-		ledDisp->setStandardTextToTextBuf(textBuf,TEXT_SPACES);
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		setStandardTextToTextBuf(TEXT_SPACES);
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			simonState = simonNewGame;
 		}
@@ -3393,22 +3300,23 @@ void Apps::modeSimon(bool init)
 			SIMON_PLAYERS_COUNT = potentio->getValueMapped(1, SIMON_MAX_PLAYERS);
 		}
 
-		ledDisp->numberToBufAsDecimal(textBuf, SIMON_PLAYERS_COUNT);
+		numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
 		//textBuf[0] = ' ';
 		textBuf[1] = 'P';
 		//textBuf[2] = ' ';
 
 		// Instead of computer, user choses the next light in simon sequence.
-		SIMON_CUSTOM_BUILD_UP = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT);
+		SIMON_CUSTOM_BUILD_UP = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT);
 
 		// random player sequence during game if multiplayer
-		SIMON_RANDOM_PLAYER_SEQUENCE = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
+		SIMON_RANDOM_PLAYER_SEQUENCE = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 
 		break;
 	}
 
 	case simonNewGame:
 	{
+		loadBuzzerTrack(SONG_DRYER_HAPPY);
 		SIMON_END_OF_GAME = false;
 		SIMON_PLAYERS_ALIVE_COUNT = SIMON_PLAYERS_COUNT;
 
@@ -3445,13 +3353,13 @@ void Apps::modeSimon(bool init)
 		// set first player
 		SIMON_PLAYER_PLAYING_INDEX = 0; // this is just the index.
 
-		ledDisp->numberToBufAsDecimal(textBuf, SIMON_LENGTH);
+		numberToBufAsDecimal(SIMON_LENGTH);
 		//intToDigitsString(textBuf+1, SIMON_LENGTH, false);
 
-		// let maximum length breach be a happy crash. I can't afford the bytes!
+		// let 'maximum length breach' be a happy crash. I can't afford the bytes!
 		//   if (SIMON_LENGTH >= bytes_list_bufsize) {
 		// 	  // reached maximum length
-		// 	  buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+		// 	  loadBuzzerTrack(SONG_DRYER_HAPPY);
 		// 	  simonState = simonWaitForNewGame;
 		// 	  break;
 		//   }
@@ -3482,13 +3390,13 @@ void Apps::modeSimon(bool init)
 
 			if (millis() % 1000 > 650)
 			{
-				ledDisp->numberToBufAsDecimal(textBuf, SIMON_LENGTH);
+				numberToBufAsDecimal(SIMON_LENGTH);
 				textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
 				textBuf[1] = 'P';
 			}
 			else
 			{
-				ledDisp->setStandardTextToTextBuf(textBuf,TEXT_END);
+				setStandardTextToTextBuf(TEXT_END);
 			}
 		}
 		else
@@ -3539,7 +3447,7 @@ void Apps::modeSimon(bool init)
 
 		SIMON_BLINK_TIMER.start();
 
-		buzzer->programBuzzerRoll(A3_8);
+		addNoteToBuzzer(A3_8);
 		++SIMON_INDEX;
 		break;
 	}
@@ -3579,24 +3487,21 @@ void Apps::modeSimon(bool init)
 		if (pressed_momentary_button != expected)
 		{
 			// player made mistake, player dies
-			buzzer->programBuzzerRoll(C4_1);
-			buzzer->programBuzzerRoll(C4_1);
-			buzzer->programBuzzerRoll(C4_1);
-			buzzer->programBuzzerRoll(C4_1);
+			this->addNoteToBuzzerRepeated(C4_1, 4);
 			simonState = simonPlayerDead;
 			break;
 		}
 		// player pressed correct button
-		buzzer->programBuzzerRoll(A3_8);
+		addNoteToBuzzer(A3_8);
 
 		++SIMON_INDEX;
 
 		if (SIMON_INDEX >= SIMON_LENGTH)
 		{
 			// sequence done!
-			buzzer->programBuzzerRoll(E5_4);
-			buzzer->programBuzzerRoll(rest_1);
-			buzzer->programBuzzerRoll(B6_1);
+			addNoteToBuzzer(E5_4);
+			addNoteToBuzzer(rest_1);
+			addNoteToBuzzer(B6_1);
 			simonState = simonNextPlayer;
 			break;
 		}
@@ -3648,35 +3553,42 @@ void Apps::modeSimon(bool init)
 	break;
 	}
 
-	ledDisp->setLedArray(lights);
-	ledDisp->setTextBufToDisplay(textBuf);
+	setLedArray(lights);
+	textBufToDisplay();
 }
-#endif
-#endif
+#endif  //ENABLE_SIMON_APP
 
-bool Apps::nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
+bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
 	int16_t original_value;
 	*counter += -1 + (2 * countUpElseDown);
-	
+
 	checkBoundaries(counter, minValue, maxValue, true);
 	return original_value != *counter;
 	// return false;
 }
 
-void  Apps::checkBoundaries(int16_t* counter, int16_t minValue, int16_t maxValue, bool rotate){
+void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
+{
 	if (*counter > maxValue)
 	{
-		if (rotate){
+		if (rotate)
+		{
 			*counter = minValue;
-		}else{
+		}
+		else
+		{
 			*counter = maxValue;
 		}
-	}else if (*counter < minValue)
+	}
+	else if (*counter < minValue)
 	{
-		if (rotate){
+		if (rotate)
+		{
 			*counter = maxValue;
-		}else{
+		}
+		else
+		{
 			*counter = minValue;
 		}
 	}
@@ -3694,14 +3606,23 @@ void Apps::modeReactionGame(bool init)
 	{
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x0;
-		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);
+		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);  // 1 better than 0?  blinking does not look nice otherwise.
 		TIMER_REACTION_GAME_RESTART_DELAY.start();
+
+		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
+		// never twice the same sound. Only first notes of array will be used.
+		for (uint8_t i = 0; i < 12; i++)
+		{
+			REACTION_GAME_TEMP_SELECTED_NOTES[i] =  234 + i ;//234, 245
+		}
+		this->shuffle(REACTION_GAME_TEMP_SELECTED_NOTES, 12);
+		
 	}
 
-	ledDisp->setBlankDisplay();
+	setBlankDisplay();
 
 	// at any time, leave game when depressing play button.
-	if (this->binaryInputsEdgeDown & (1<<BUTTON_LATCHING_EXTRA))
+	if (this->binaryInputsEdgeDown & (1 << BUTTON_LATCHING_EXTRA))
 	{
 		reactionGameState = reactionWaitForStart;
 	}
@@ -3712,71 +3633,61 @@ void Apps::modeReactionGame(bool init)
 	case reactionWaitForStart:
 	{
 		// change level
-		REACTION_GAME_LEVEL = (potentio->getValueMapped(1, 5)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+		REACTION_GAME_LEVEL = (potentio->getValueMapped(0, 4)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
 		if (potentio->getValueStableChangedEdge())
 		{
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
 		}
 
-		// special mode for the reaction game: limited total time during which as many points should be collected.
-		REACTION_GUITAR_HERO_MODE = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA);
+		// check options
+		REACTION_GUITAR_HERO_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0;
+		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0;
+		REACTION_SOUND_MODE_GUITAR_HEX_HERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0;
 
-		REACTION_COUNTDOWN_MODE = false;
-		if (!REACTION_GUITAR_HERO_MODE){
-			// guitar hero and countdown mode should never occure at the same time!
-			REACTION_COUNTDOWN_MODE = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
-		}
-		
-// display level and high score
+		// display level and high score
 #ifdef ENABLE_EEPROM
 		if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 		{
-			intToDigitsString(textBuf, REACTION_GAME_LEVEL, false); // utilities lode
+			intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
 			textBuf[0] = 'L';
-			ledDisp->setTextBufToDisplay(textBuf);
+			textBufToDisplay();
 		}
 		else
 		{
-			//ledDisp->setBlankDisplay(); //make high score blink
-
 			ledDisp->setNumberToDisplayAsDecimal(
 				eeprom_read_word(
-					(uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-								 REACTION_GAME_LEVEL * 2 +
-								 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-								 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE)));
+					// (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+					// 			 REACTION_GAME_LEVEL * 2 +
+					// 			 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+					// 			 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+					(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+								REACTION_GUITAR_HERO_MODE * 48 +
+								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								 ));
+
 		}
 #else
-		intToDigitsString(textBuf, REACTION_GAME_LEVEL, false); // utilities lode
+		intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
 		textBuf[0] = 'L';
-		ledDisp->setTextBufToDisplay(textBuf);
+		textBufToDisplay();
 #endif
 
 		// play game button pressed
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			reactionGameState = reactionNewGame;
-
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+			if (!REACTION_GUITAR_HERO_MODE && REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
-				//play by sound
+				// sound mode let them all play so the player gets a feel for them.
 				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 				{
-
-					REACTION_GAME_SELECTED_SOUNDS[i] = (uint8_t)random(234, 245);
-
-					for (uint8_t j = 0; j < i; j++)
-					{
-						// never twice the same sound
-						if (REACTION_GAME_SELECTED_SOUNDS[j] == REACTION_GAME_SELECTED_SOUNDS[i])
-						{
-							i--;
-						}
-					}
+					addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[i]);
+					this->addNoteToBuzzerRepeated(rest_1, 2);
 				}
+				addNoteToBuzzerRepeated(rest_1, 4);
 			}
+			reactionGameState = reactionNewGame;
 		}
-
 		break;
 	}
 
@@ -3784,37 +3695,41 @@ void Apps::modeReactionGame(bool init)
 	{
 		REACTION_GAME_SCORE = 0;
 
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED))
 		{
-
-			reactionGameState = reactionMultiNewTurn;
+			REACTION_GAME_STEP_TIME_MILLIS = (5 - REACTION_GAME_LEVEL) * -200;
 			displayAllSegments = 0;
 
-			REACTION_GAME_STEP_TIME_MILLIS = (6 - REACTION_GAME_LEVEL) * -200;
-		}
-		else
-		{
-			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+			if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
-				// let them all play so the player gets a feel for them.
-				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-				{
-					buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);
-					buzzer->programBuzzerRoll(rest_1);
-					buzzer->programBuzzerRoll(rest_1);
+				// hex geek mode
+				for (uint8_t i = 0;i<8;i++){
+					REACTION_GAME_HEX_MEMORY[i] = 0;
 				}
-			}
-
-			reactionGameState = reactionNewTurn;
-
-			if (REACTION_COUNTDOWN_MODE)
-			{
-				// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-				REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL)) * -4000; // step speed depending on level
+				setStandardTextToTextBuf(TEXT_SPACES);
+				reactionGameState = reactionHexNextStep;
 			}
 			else
 			{
-				REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+				// guitar hero mode
+				reactionGameState = reactionGuitarHeroNewTurn;
+			}
+		}
+		else
+		{
+
+			if (buzzer->getBuzzerRollEmpty()){ // in sound mode, wait till demo is done
+				reactionGameState = reactionNewTurn;
+
+				if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+				{
+					// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
+					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
+				}
+				else
+				{
+					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+				}
 			}
 		}
 
@@ -3823,62 +3738,173 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
-	case reactionMultiNewTurn:
+	case reactionHexNextStep:
+	{
+		// shift textBuf to right
+		for (uint8_t i = 3; i > 0; i--)
+		{
+			textBuf[i] = textBuf[i - 1];
+			REACTION_GAME_HEX_MEMORY[i] = REACTION_GAME_HEX_MEMORY[i - 1];
+		}
+
+		// add new hex char on left
+		textBuf[0] = random(49, 64);
+		REACTION_GAME_HEX_MEMORY[0] = textBuf[0] - 48;
+
+		if (textBuf[0] > 57){
+			textBuf[0] += 7;
+		}
+
+		// prepare next move
+		reactionGameState = reactionHexPlaying;
+		TIMER_REACTION_GAME_SPEED.start();
+		REACTION_HEX_GUESSED_CORRECTLY = false;
+		break;
+	}
+
+	case reactionHexWaitForButtonsRelease:
+	{
+		// all buttons need to be release before we can check for a new press.
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+		{
+			reactionGameState = reactionHexPlaying;
+		}
+
+
+		textBufToDisplay();
+		break;
+	}
+
+	case reactionHexPlaying:
+	{
+		// #define TTEST
+		REACTION_GAME_HEX_ACTIVE_DIGIT = 3;
+		while(REACTION_GAME_HEX_ACTIVE_DIGIT > 0 && (textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == ' '|| textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII)){
+			REACTION_GAME_HEX_ACTIVE_DIGIT--;
+		}
+		// Serial.println(REACTION_GAME_HEX_ACTIVE_DIGIT);
+		
+		// #ifdef TTEST
+		// //attempt to optimization, but with a bug, and too tired. So, give it a shot! 
+		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT];
+		// //Serial.println(REACTION_GAME_HEX_VALUE_TO_FIND);
+
+		// if (REACTION_GAME_HEX_VALUE_TO_FIND == ' ' || REACTION_GAME_HEX_VALUE_TO_FIND == SPACE_FAKE_ASCII){
+		// 	REACTION_GAME_HEX_VALUE_TO_FIND = 0;
+			
+		// }else{
+		// 	if (REACTION_GAME_HEX_VALUE_TO_FIND > 57){
+		// 		REACTION_GAME_HEX_VALUE_TO_FIND -=7;
+		// 	}
+		// 	REACTION_GAME_HEX_VALUE_TO_FIND -= 48;
+		// }
+		
+		// #else
+
+		REACTION_GAME_HEX_VALUE_TO_FIND = REACTION_GAME_HEX_MEMORY[REACTION_GAME_HEX_ACTIVE_DIGIT];
+		
+		// #endif
+
+		// check for all buttons pressed in binary pattern or wrong button press
+		uint8_t build_up_value = 0;
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			if (binaryInputs[buttons_indexed[i]].getValue())
+			{
+				if  (! ( REACTION_GAME_HEX_VALUE_TO_FIND & (1<<(3-i)) )){
+					reactionGameState = reactionJustDied;
+				}else{
+					build_up_value |= (1<<(3-i));
+				}
+			}
+		}
+
+		if (! (reactionGameState == reactionJustDied)){
+
+			// check of button press pattern is the sought pattern
+			if ( build_up_value == (0x0F & REACTION_GAME_HEX_VALUE_TO_FIND )){
+				reactionGameState = reactionHexWaitForButtonsRelease;
+				REACTION_HEX_GUESSED_CORRECTLY = true;
+				textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = ' ';
+				REACTION_GAME_SCORE++;
+				// Serial.println("good");
+			}
+
+			// end of move 
+			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+			{
+				// Serial.println("end of step");
+				// check if correct combination was pressed at end of move
+				reactionGameState = reactionHexNextStep;
+				if (!REACTION_HEX_GUESSED_CORRECTLY && REACTION_GAME_HEX_ACTIVE_DIGIT==3){
+					reactionGameState = reactionJustDied;
+				}
+			}
+		}
+
+		// update
+		textBufToDisplay();
+		break;
+	}
+
+	case reactionGuitarHeroNewTurn:
 	{
 		// like in guitar hero, the horizontal segments in the screen fall down and button combo's have to be pressed to "catch" the falling segments.
 
 		// three rows of four horizontal segments in 4 digits 7 segment display.
 		// choose top row random. any combination of 4 (including zero) ==> 16 combinations.
 
-		lights = 0b00000000;
 
-		uint8_t new_segment;
-		uint32_t tmp_segments;
+		if (random(0,10) || !OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){
+			
+			uint8_t new_segment;
+			uint32_t tmp_segments;
+			tmp_segments = 0;
+			addNoteToBuzzer(1);
 
-		tmp_segments = 0;
-
-		// treat every segment separatly
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		{
-			new_segment = 0;
-			// get relevant segment
-
-			//mid seg to bottom seg
-			new_segment |= ((displayAllSegments >> (8 * i)) & 0b01000000) >> 3; // G segment, move to D segment  0G00D000
-
-			//mid seg to DP seg
-			new_segment |= ((displayAllSegments >> (8 * i)) & 0b01000000) << 1; // G segment, move to DP segment  DP.G.0.0.0.0.0.0
-
-			//top seg to mid seg
-			new_segment |= ((displayAllSegments >> (8 * i)) & 0b00000001) << 6; // A segment, ON or OFF?, move to G segment
-
-			// random top
-			// if (random(0, 2)){  // 0 or 1  // move to segment A)
-			//   new_segment |= 1;
-			// }else{
-			//   new_segment &= ~(0b00000001);
-			// }
-			// new_segment |= random(0, 2);
-
-			if (random(0, 100) > 50)
+			// treat every segment separatly
+			for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 			{
-				new_segment |= 0b00000001;
+				new_segment = 0;
+				// get relevant segment
+
+				//mid seg to bottom seg
+				new_segment |= ((displayAllSegments >> (8 * i)) & 0b01000000) >> 3; // G segment, move to D segment  0G00D000
+
+				//mid seg to DP seg
+				new_segment |= ((displayAllSegments >> (8 * i)) & 0b01000000) << 1; // G segment, move to DP segment  DP.G.0.0.0.0.0.0
+
+				//top seg to mid seg
+				new_segment |= ((displayAllSegments >> (8 * i)) & 0b00000001) << 6; // A segment, ON or OFF?, move to G segment
+
+				// random top
+				// if (random(0, 2)){  // 0 or 1  // move to segment A)
+				//   new_segment |= 1;
+				// }else{
+				//   new_segment &= ~(0b00000001);
+				// }
+				// new_segment |= random(0, 2);
+
+				if (random(0, 100) > 50)
+				{
+					new_segment |= 0b00000001;
+				}
+
+				tmp_segments |= ((uint32_t)new_segment) << (8 * i);
 			}
 
-			tmp_segments |= ((uint32_t)new_segment) << (8 * i);
+			displayAllSegments = tmp_segments;
 		}
-
-		displayAllSegments = tmp_segments;
-
-		//ledDisp->setLedArray(lights);
-		ledDisp->setBinaryToDisplay(displayAllSegments);
+		
 		TIMER_REACTION_GAME_SPEED.start();
-
-		reactionGameState = reactionMultiPlaying;
+		reactionGameState = reactionGuitarHeroPlaying;
 		break;
 	}
 
-	case reactionMultiPlaying:
+	case reactionGuitarHeroPlaying:
 	{
 
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3892,7 +3918,8 @@ void Apps::modeReactionGame(bool init)
 				if (displayAllSegments & (0x80UL << 8 * i))
 				{
 					// DP is on, set to zero.
-					buzzer->addRandomSoundToRoll(190, 198);
+					// buzzer->addRandomSoundToRoll(190, 198);
+					addNoteToBuzzer(103 + i);
 					displayAllSegments &= ~(0x80UL << 8 * i);
 					REACTION_GAME_SCORE++;
 				}
@@ -3916,8 +3943,9 @@ void Apps::modeReactionGame(bool init)
 			}
 			else
 			{
+				
 				// success!
-				reactionGameState = reactionMultiNewTurn;
+				reactionGameState = reactionGuitarHeroNewTurn;
 				//REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
 			}
 		}
@@ -3925,31 +3953,28 @@ void Apps::modeReactionGame(bool init)
 		break;
 	}
 
+	case reactionWaitBeforeNewTurn:
+	{
+		if (buzzer->getBuzzerRollEmpty()){
+			reactionGameState = reactionNewTurn;
+		}
+		break;
+	}
+
 	case reactionNewTurn:
 	{
-		if (!REACTION_COUNTDOWN_MODE)
+		if (!OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 		{
-
-			REACTION_GAME_TIMER_STEP = 0;	  //reset animation step
+			REACTION_GAME_TIMER_STEP = 0;	   //reset animation step
 			TIMER_REACTION_GAME_SPEED.start(); // only restart if 12 steps time per turn
 		}
-		displayAllSegments = 0;		//reset animation graphics screen
+		displayAllSegments = 0; //reset animation graphics screen
 
 		REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 		{
-
-			//play by sounds
-			for (uint8_t j = 0; j < 4; j++)
-			{
-				buzzer->programBuzzerRoll(rest_1);
-			}
-			buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[REACTION_GAME_TARGET]);
-		}
-		else
-		{
-			//lights |= 1 << lights_indexed[REACTION_GAME_TARGET];
+			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[REACTION_GAME_TARGET]);
 		}
 
 		reactionGameState = reactionPlaying;
@@ -3958,7 +3983,7 @@ void Apps::modeReactionGame(bool init)
 
 	case reactionPlaying:
 	{
-		if (REACTION_COUNTDOWN_MODE)
+		if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 		{
 			// if timer out, always dead.
 			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
@@ -3967,7 +3992,6 @@ void Apps::modeReactionGame(bool init)
 			}
 			// show number of segments:
 			REACTION_GAME_TIMER_STEP = 10 - (uint16_t)((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
-		
 		}
 		else
 		{
@@ -3993,9 +4017,6 @@ void Apps::modeReactionGame(bool init)
 				}
 			}
 		}
-		
-		// set led
-		*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
 
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
@@ -4004,12 +4025,14 @@ void Apps::modeReactionGame(bool init)
 		}
 		ledDisp->setBinaryToDisplay(displayAllSegments);
 
-		// set decimal point as "button lights" helper, in bright daylight button lights might not be visible.
-
-		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)))
+		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 0)
 		{
-			//always show unless in soundmode
+			// in the easy level of sound mode, we show the lights.
+
+			// show decimal point for digit corresponding with button
 			ledDisp->setDecimalPointToDisplay(true, REACTION_GAME_TARGET);
+			// set appropriate led per button
+			*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
 		}
 
 		// check player pressed a button.
@@ -4022,12 +4045,25 @@ void Apps::modeReactionGame(bool init)
 				{
 					//right button
 					REACTION_GAME_SCORE++;
-					reactionGameState = reactionNewTurn;
+
+					if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+					{
+						// a small pause must be implemented after the button press before the new turn as off not to confuse the player
+						addNoteToBuzzerRepeated(rest_1, 4);
+						reactionGameState = reactionWaitBeforeNewTurn;
+					}else{
+						reactionGameState = reactionNewTurn;
+					}
 				}
 				else
 				{
 					//wrong button
 					reactionGameState = reactionJustDied;
+
+					// zero points if you fail during the timed challenge
+					if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE){
+						REACTION_GAME_SCORE=0;
+					}
 				}
 			}
 		}
@@ -4041,34 +4077,42 @@ void Apps::modeReactionGame(bool init)
 #ifdef ENABLE_EEPROM
 
 		// play death song
-		buzzer->programBuzzerRoll(F4_1);
-		buzzer->programBuzzerRoll(F4_1);
-		buzzer->programBuzzerRoll(F4_1);
+		addNoteToBuzzerRepeated(F4_1, 3);
 
 		//start high score end timer
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
-										  (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-													   REACTION_GAME_LEVEL * 2 +
-													   EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-													   EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE))
-			)
+										//   (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+													//    REACTION_GAME_LEVEL * 2 +
+													//    EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+													//    EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)))
+									(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+								REACTION_GUITAR_HERO_MODE * 48 +
+								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								 ))
 		{
 			eeprom_update_word(
-				(uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-							 REACTION_GAME_LEVEL * 2 +
-							 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-							 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * REACTION_COUNTDOWN_MODE),
-				REACTION_GAME_SCORE);
+				// (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+				// 			 REACTION_GAME_LEVEL * 2 +
+				// 			 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
+				// 			 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE),
+				// REACTION_GAME_SCORE);
+				(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+								REACTION_GUITAR_HERO_MODE * 48 +
+								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								,REACTION_GAME_SCORE
+								);
 
-			buzzer->loadBuzzerTrack(songs, SONG_ATTACK);
+			loadBuzzerTrack(SONG_ATTACK);
 		}
 #endif
 
 		// prepare next game delay.
 
-		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(-2000);
-		TIMER_REACTION_GAME_RESTART_DELAY.start();
+		TIMER_REACTION_END_OF_GAME_DELAY.setInitTimeMillis(-2000);
+		TIMER_REACTION_END_OF_GAME_DELAY.start();
 
 		reactionGameState = reactionFinished;
 
@@ -4077,7 +4121,7 @@ void Apps::modeReactionGame(bool init)
 
 	case reactionFinished:
 	{
-		if (!TIMER_REACTION_GAME_RESTART_DELAY.getTimeIsNegative())
+		if (!TIMER_REACTION_END_OF_GAME_DELAY.getTimeIsNegative())
 		{
 			//end of display high score, next game
 			reactionGameState = reactionNewGame;
@@ -4085,7 +4129,7 @@ void Apps::modeReactionGame(bool init)
 		else
 		{
 			//do nothing.  wait for display high score is finished.
-			if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
+			if (TIMER_REACTION_END_OF_GAME_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 			{
 			}
 			else
@@ -4097,6 +4141,10 @@ void Apps::modeReactionGame(bool init)
 	}
 	}
 #endif
+
+	*lightsHandle |= REACTION_SOUND_MODE_GUITAR_HEX_HERO << LIGHT_LATCHING_SMALL_LEFT;
+	*lightsHandle |= OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE << LIGHT_LATCHING_SMALL_RIGHT;
+	*lightsHandle |= REACTION_GUITAR_HERO_MODE << LIGHT_LATCHING_BIG;
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
@@ -4110,20 +4158,24 @@ uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, ui
 	return fullScreen;
 }
 
-uint8_t Apps::tombola(uint8_t* indexVariable, uint8_t *sequenceList, uint8_t length){
+uint8_t Apps::tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length)
+{
 	// will populate a list of certain length with unique numbers in random order. At every call, will take a next number until all numbers are depleted. It will then repopulate the list with a new random sequence
 	if (*indexVariable == 0)
 	{
-		buzzer->loadBuzzerTrack(songs, SONG_DRYER_HAPPY);
+		loadBuzzerTrack(SONG_DRYER_HAPPY);
 		randomSequence(sequenceList, length);
 		*indexVariable = length;
 	}
 
 	// draw card off deck
-	return sequenceList[--(*indexVariable)]; // 
+	return sequenceList[--(*indexVariable)]; //
 }
 
-void Apps::randomSequence(uint8_t *sequenceList, uint8_t length){
+
+
+void Apps::randomSequence(uint8_t *sequenceList, uint8_t length)
+{
 	// initialize list
 	for (uint8_t i = 0; i < length; i++)
 	{
@@ -4173,40 +4225,41 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	}
 	else
 	{
-		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf,TEXT_SAVE);
+			setStandardTextToTextBuf(TEXT_SAVE);
 		}
 		else
 		{
-			ledDisp->setStandardTextToTextBuf(textBuf,TEXT_LOAD);
+			setStandardTextToTextBuf(TEXT_LOAD);
 		}
 
-		ledDisp->setTextBufToDisplay(textBuf);
+		textBufToDisplay();
 	}
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
-		bool loadElseSave = !(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA));
-	
+		bool loadElseSave = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA));
+
 		saveLoadFromEepromSlot(data, slot_number - 1, eepromSlotLength, eepromStartAddress, loadElseSave);
-	
+
 		return loadElseSave;
 	}
 
-	if ((binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 	{
 		SAVE_LOAD_MENU_BLINK_TIMER.start();
 	}
 	return false;
 }
 
-void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave){
+void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave)
+{
 
 	for (uint8_t i = 0; i < eepromSlotLength; i++)
 	{
 		uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
-												slotIndex * eepromSlotLength + i);
+											  slotIndex * eepromSlotLength + i);
 		if (loadElseSave)
 		{
 			//load
@@ -4218,4 +4271,54 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
 			eeprom_write_byte(eeprom_address, data[i]);
 		}
 	}
+}
+
+void Apps::textBufToDisplay(){
+	ledDisp->setTextBufToDisplay(textBuf);
+}
+
+void Apps::addNoteToBuzzer(uint8_t note){
+	buzzer->programBuzzerRoll(note);
+}
+
+void Apps::addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater){
+	for (uint8_t i=0;i<repeater;i++){
+        this->addNoteToBuzzer(note);
+    }
+}
+
+void Apps::setBlankDisplay(){
+	ledDisp->setBlankDisplay();
+}
+void Apps::setLedArray(byte lights){
+	ledDisp->setLedArray(lights);
+}
+
+void Apps::buzzerOff(){
+	buzzer->buzzerOff(); // stop all sounds that were playing in an app.
+}
+
+
+void Apps::setStandardTextToTextBuf(uint8_t textPosition){
+	ledDisp->setStandardTextToTextBuf(textBuf, textPosition);
+}
+
+void Apps::setStandardTextToTextHANDLE(uint8_t textPosition){
+	ledDisp->setStandardTextToTextBuf(textHandle, textPosition);
+}
+
+// does not decrease footprint!
+// bool  Apps::isNoMomentaryButtonOn(){
+// 	return !(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+// 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+// 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+// 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
+// }
+
+void Apps::numberToBufAsDecimal(int16_t number){
+	ledDisp->numberToBufAsDecimal(textBuf, number);
+}
+
+void Apps::loadBuzzerTrack(uint8_t songIndex){
+	buzzer->loadBuzzerTrack(songs, songIndex);
 }
