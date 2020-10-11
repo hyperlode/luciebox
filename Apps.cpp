@@ -4,7 +4,7 @@
 
 Apps::Apps(){};
 
-void Apps::setPeripherals(BinaryInput binaryInputs[], Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8 *allLights, Buzzer *buzzer)
+void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer)
 {
 	this->buzzer = buzzer;
 	this->binaryInputs = binaryInputs;
@@ -4082,10 +4082,6 @@ void Apps::modeReactionGame(bool init)
 		//start high score end timer
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
-										//   (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-													//    REACTION_GAME_LEVEL * 2 +
-													//    EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-													//    EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)))
 									(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
 								REACTION_GUITAR_HERO_MODE * 48 +
 								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
@@ -4093,11 +4089,7 @@ void Apps::modeReactionGame(bool init)
 								 ))
 		{
 			eeprom_update_word(
-				// (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-				// 			 REACTION_GAME_LEVEL * 2 +
-				// 			 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-				// 			 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE),
-				// REACTION_GAME_SCORE);
+			
 				(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
 								REACTION_GUITAR_HERO_MODE * 48 +
 								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
