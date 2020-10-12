@@ -4,12 +4,11 @@
 
 Apps::Apps(){};
 
-void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer)
+void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer)
 {
 	this->buzzer = buzzer;
 	this->binaryInputs = binaryInputs;
-	//this->potentio = potentio;
-	this->dial = dial;
+	this->encoder_dial = encoder_dial;
 	this->ledDisp = ledDisp;
 	this->allLights = allLights;
 
@@ -505,7 +504,7 @@ void Apps::pomodoroTimer(bool init)
 	{
 		// in main menu
 #ifndef ENABLE_MULTITIMER
-		uint16_t tmpSeconds = potentio->getValueMapped(0, 1024);
+		uint16_t tmpSeconds = encoder_dial->getValueMapped(0, 1024);
 #endif
 
 		if (!POMODORO_SHOW_MENU_EDGE)
@@ -513,11 +512,18 @@ void Apps::pomodoroTimer(bool init)
 			POMODORO_TIMER.reset();
 			POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 		}
-#ifdef ENABLE_MULTITIMER
+
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
-		if (potentio->getValueStableChangedEdge())
+		encoder_dial->setUpperLimit(90,false);
+		if (encoder_dial->getValueChanged())
 		{
-			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91));
+
+#ifdef ENABLE_MULTITIMER
+			// uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90));
+			
+			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValue());
+			#else
+			uint16_t tmpSeconds = encoder_dial->getValue();
 #endif
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
@@ -561,7 +567,9 @@ void Apps::pomodoroTimer(bool init)
 	POMODORO_SHOW_MENU_EDGE = showMenu;
 
 	// ticking sound
-	long tick_duration = potentio->getValueMapped(0, 40);
+	// long tick_duration = encoder_dial->getValueMapped(0, 40);
+	encoder_dial->setUpperLimit(40,true);
+	int16_t tick_duration = encoder_dial->getValue();
 	bool tick_twice_a_second = tick_duration > 20;
 	if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 	{
@@ -798,108 +806,6 @@ void Apps::stopwatch(bool init)
 		ledDisp->setDecimalPointsToDisplay(decimalPoints);
 	}
 }
-// void Apps::modeButtonDebug(bool init)
-// {
-// 	// integrated debug mode (intended to be able to be activated in the final product in order to debug).
-// 	// will show in sequence all analog input values.
-// 	if (init)
-// 	{
-// 		generalTimer.setInitTimeMillis(0);
-// 		generalTimer.start();
-// 		counter = -1;
-// 	}
-
-// 	if (!generalTimer.getTimeIsNegative())
-// 	{
-// 		counter++;
-// 		if (counter > 9)
-// 		{
-// 			counter = 0;
-// 		}
-
-// 		textBuf[0] = ' ';
-// 		textBuf[1] = ' ';
-// 		textBuf[2] = 'A';
-
-// 		const uint8_t analog_input_pins [5] = {PIN_SELECTOR_DIAL,PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
-
-// 		switch (counter)
-// 		{
-// 		// case 0:{
-// 		//   // textBuf[3]='0'; // analog A0
-// 		//   // textBufToDisplay();
-// 		//   // generalTimer.setInitTimeMillis((long)-500);
-// 		//   break;
-// 		// }
-// 		case 1:
-// 		{
-// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_SELECTOR_DIAL));
-// 			// generalTimer.setInitTimeMillis((long)-1000);
-// 			break;
-// 		}
-// 		// case 2:{
-// 		//   // textBuf[3]='1'; // analog A1
-// 		//   // textBufToDisplay();
-// 		//   // generalTimer.setInitTimeMillis((long)-500);
-// 		//   break;
-// 		// }
-// 		case 3:
-// 		{
-// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_1));
-// 			// generalTimer.setInitTimeMillis((long)-1000);
-// 			break;
-// 		}
-// 		// case 4:{
-// 		//   // textBuf[3]='2'; // analog A2
-// 		//   // textBufToDisplay();
-// 		//   // generalTimer.setInitTimeMillis((long)-500);
-// 		//   break;
-// 		// }
-// 		case 5:
-// 		{
-// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_BUTTONS_2));
-// 			// generalTimer.setInitTimeMillis((long)-1000);
-// 			break;
-// 		}
-// 		// case 6:{
-// 		//   textBuf[3]='3';// analog A3
-// 		//   textBufToDisplay();
-// 		//   // generalTimer.setInitTimeMillis((long)-500);
-// 		//   break;
-// 		// }
-// 		case 7:
-// 		{
-// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_POTENTIO));
-// 			// generalTimer.setInitTimeMillis((long)-1000);
-// 			break;
-// 		}
-// 		// case 8:{
-// 		//   textBuf[3]='4';// analog A4
-// 		//   textBufToDisplay();
-// 		//   // generalTimer.setInitTimeMillis((long)-500);
-// 		//   break;
-// 		// }
-// 		case 9:
-// 		{
-// 			ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(PIN_MERCURY_SWITCHES));
-// 			// generalTimer.setInitTimeMillis((long)-1000);
-// 			break;
-// 		}
-// 		}
-
-// 		// show menu title (compressed)
-// 		if (counter % 2 == 0)
-// 		{
-// 			// show analog pin
-// 			textBuf[3] = counter / 2 + 48; // char 0 + analog pin .
-// 			textBufToDisplay();
-// 		}
-
-// 		// show values one seconds, menu items half a second
-// 		generalTimer.setInitTimeMillis((long)(-500 - (counter % 2) * 500));
-// 		generalTimer.start();
-// 	}
-// }
 
 void Apps::modeRandomWorld(bool init)
 {
@@ -924,7 +830,7 @@ void Apps::modeRandomWorld(bool init)
 		{
 			// set autoroll time.
 
-			uint16_t delay_seconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91)); // 0 seconds to an hour
+			uint16_t delay_seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90)); // 0 seconds to an hour
 
 			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
 
@@ -1005,7 +911,7 @@ void Apps::modeRandomWorld(bool init)
 			{
 				// hack to set upper limit for random number
 
-				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = potentio->getValueMapped(0, 100);
+				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = encoder_dial->getValueMapped(0, 100);
 
 				RANDOMWORLD_CARD_FROM_DECK_INDEX = 0; // reset the tombola.
 
@@ -1223,7 +1129,7 @@ void Apps::randomModeDisplay(bool forReal)
 void Apps::modeSimpleButtonsAndLights(bool init)
 {
 	lights = 0b00000000; //reset before switch enquiry
-	const uint8_t analog_input_pins[5] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_POTENTIO, PIN_MERCURY_SWITCHES};
+	const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_MERCURY_SWITCHES};
 
 	if (init)
 	{
@@ -1231,11 +1137,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	}
 
 	// back and forth motion required of the potentio to count up modes
-	if (potentio->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 == 0)
+	if (encoder_dial->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 == 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
-	else if (potentio->getValue() > 1000 && SETTINGS_MODE_SELECTOR % 2 != 0)
+	else if (encoder_dial->getValue() > 1000 && SETTINGS_MODE_SELECTOR % 2 != 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
@@ -1284,7 +1190,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 
-		allLights->setBrightness((byte)(50 - potentio->getValueMapped(0, 50)), false);
+		allLights->setBrightness((byte)(50 - encoder_dial->getValueMapped(0, 50)), false);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
@@ -1324,7 +1230,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			setStandardTextToTextHANDLE(text);
 		}
 	}
-	else if (SETTINGS_MODE_SELECTOR < 18)
+	else if (SETTINGS_MODE_SELECTOR < 16)
 	{
 
 		// menu title
@@ -1336,7 +1242,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
 	}
 
-	else if (SETTINGS_MODE_SELECTOR < 20)
+	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -1470,7 +1376,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 	else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		// show number right away depending on potentio value
-		counter = (int16_t)(potentio->getValueMapped(0, 25 + numberElseAlphabethMode * 75)); //1024 to 26 letters.
+		counter = (int16_t)(encoder_dial->getValueMapped(0, 25 + numberElseAlphabethMode * 75)); //1024 to 26 letters.
 	}
 
 	//only do the characters of the alphabet in lettermode.
@@ -1487,17 +1393,19 @@ void Apps::modeSoundSong(bool init)
 
 	setBlankDisplay();
 
-	if (potentio->getValueStableChangedEdge())
-	{
+	// if (encoder_dial->getValueChanged())
+	// {
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12, 12)));
+			buzzer->changeTranspose((int8_t)(encoder_dial->getValueChanged())); // 12 -> -12
 		}
 		else
 		{
-			buzzer->setSpeedRatio((float)(potentio->getValue()) / 256);
+			if (encoder_dial->getValueChanged()){ // only change if not zero
+				buzzer->changeSpeedRatio( encoder_dial->getValueChanged()>0 );
+			}
 		}
-	}
+	// }
 
 	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
 
@@ -1627,12 +1535,11 @@ void Apps::modeComposeSong(bool init)
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 			{
 				// just play notes selected with potentio
-				if (potentio->getValueStableChangedEdge())
+				if (encoder_dial->getValueChanged())
 				{
 					buzzerOff();
-					addNoteToBuzzer(potentio->getValueMapped(0, 254));
-
-					buzzer->noteToDisplay(textBuf, &decimalPoints, potentio->getValueMapped(0, 254));
+					addNoteToBuzzer(encoder_dial->getValueMapped(0, 254));
+					buzzer->noteToDisplay(textBuf, &decimalPoints, encoder_dial->getValueMapped(0, 254));
 					textBufToDisplay();
 					ledDisp->setDecimalPointsToDisplay(decimalPoints);
 				}
@@ -1643,7 +1550,7 @@ void Apps::modeComposeSong(bool init)
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
 
-				COMPOSER_SONG[COMPOSER_STEP] = potentio->getValueMapped(0, 254);
+				COMPOSER_SONG[COMPOSER_STEP] = encoder_dial->getValueMapped(0, 254);
 				buzzerOff();
 				addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 
@@ -1657,9 +1564,9 @@ void Apps::modeComposeSong(bool init)
 
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
-				if (potentio->getValueStableChangedEdge())
+				if (encoder_dial->getValueChanged())
 				{
-					COMPOSER_SONG[COMPOSER_STEP] = potentio->getValueMapped(0, 255);
+					COMPOSER_SONG[COMPOSER_STEP] = encoder_dial->getValueMapped(0, 255);
 					buzzerOff();
 					addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 				}
@@ -1689,18 +1596,19 @@ void Apps::modeComposeSong(bool init)
 		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
 			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) &&
-			potentio->getValueStableChangedEdge())
+			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))) 
 		{
-			int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
+			// int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
+
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 			{
 				// change speed if default behaviour of potentio.
-				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + tmp * 10); //step +1 or -1
+				// COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + tmp * 10); //step +1 or -1
+				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + encoder_dial->getValueChanged() *10); //step +1 or -1
 			}
 			else
 			{
-				step = tmp;
+				step = encoder_dial->getValueChanged(); ////step +1 or -1
 			}
 		}
 
@@ -1772,9 +1680,9 @@ void Apps::modeSoundNotes(bool init)
 	else
 	{
 		// change note with potentio
-		if (potentio->getValueStableChangedEdge())
+		if (encoder_dial->getValueChanged())
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = potentio->getLastStableValueChangedUp();
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = encoder_dial->getValueChanged()>0;
 			update_note = true;
 		}
 	}
@@ -1952,9 +1860,9 @@ void Apps::movieAnimationMode(bool init)
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// manual mode
-		if (potentio->getValueStableChangedEdge())
+		if (encoder_dial->getValueChanged())
 		{
-			this->dataPlayer.setSetIndexDirection(potentio->getLastStableValueChangedUp());
+			this->dataPlayer.setSetIndexDirection(encoder_dial->getValueChanged()>0);
 			this->dataPlayer.moveIndexSteps(counter); // every frame is four bytes. advance four to move one frame.
 		}
 
@@ -1976,9 +1884,9 @@ void Apps::movieAnimationMode(bool init)
 	{
 		// auto mode.
 
-		if (potentio->getValueStableChangedEdge())
+		if (encoder_dial->getValueChanged())
 		{
-			dataPlayer.setAutoStepSpeed(potentio->getValueMapped(-1024, 0));
+			dataPlayer.setAutoStepSpeed(encoder_dial->getValueMapped(0, 1024) - 1024);
 		}
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -2060,10 +1968,13 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
 
 	// scroll through segments
-	if (potentio->getValueStableChangedEdge())
+	if (encoder_dial->getValueChanged())
 	{
-		potentio->increaseSubtractAtChange((int16_t *)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
-		checkBoundaries((int16_t *)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95, true);
+		// potentio->increaseSubtractAtChange((int16_t *)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
+
+		//checkBoundaries((int16_t *)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95, true);
+		encoder_dial->setUpperLimit(0,95);
+		DRAW_CURSOR_POTENTIO_INDEX = encoder_dial->getValue();
 		DRAW_CURSOR_INDEX = DRAW_CURSOR_POTENTIO_INDEX / 3;
 	}
 
@@ -2270,7 +2181,7 @@ void Apps::modeHackTime(bool init)
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			// change value
-			array_8_bytes[0] = potentio->getValueMapped(0, 255);
+			array_8_bytes[0] = encoder_dial->getValueMapped(0, 255);
 		}
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
@@ -2321,11 +2232,16 @@ void Apps::modeHackTime(bool init)
 		{
 			// manual scroll
 
-			address_changed = potentio->increaseSubtractAtChange(
-				&HACKTIME_ADDRESS,
-				1 + 99 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) +
-					999 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) > 0) // speed up memory scroll by pressing buttons.
-			);
+			// address_changed = potentio->increaseSubtractAtChange(
+			// 	&HACKTIME_ADDRESS,
+			// 	1 + 99 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) +
+			// 		999 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) > 0) // speed up memory scroll by pressing buttons.
+			// );
+			if (encoder_dial->getValueChanged()){
+				address_changed = true;
+				HACKTIME_ADDRESS += encoder_dial->getValueChanged() ;  // todo change rate depending on buttons pressed: BUTTON_INDEXED_MOMENTARY_2 -> *100,  BUTTON_INDEXED_MOMENTARY_3 -> *1000,
+			}
+			
 		}
 
 		// display mode change (how to represent the memory value?)
@@ -2480,10 +2396,9 @@ bool Apps::listenToMomentary2and3ModifyValue(int16_t *value, uint8_t amount)
 
 void Apps::listenToPotentioToIncrementTimerInit(SuperTimer *aTimer, int8_t increment_millis)
 {
-	int16_t delta = 0;
-
-	potentio->increaseSubtractAtChange(&delta, increment_millis);
-	aTimer->incrementInitTimeMillis(delta);
+	//potentio->increaseSubtractAtChange(&delta, increment_millis);
+	
+	aTimer->incrementInitTimeMillis(encoder_dial->getValueChanged());
 }
 
 void Apps::draw(bool init)
@@ -2511,12 +2426,14 @@ void Apps::draw(bool init)
 	{
 
 		// scroll through drawings
-		// if (potentio->getValueStableChangedEdge())
+		// if (potentio->getValueChanged())
 		// {
 		// 	DRAW_ACTIVE_DRAWING_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
 		// }
-		potentio->increaseSubtractAtChange(&DRAW_ACTIVE_DRAWING_INDEX, 1);
+		// potentio->increaseSubtractAtChange(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 
+		DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getValueChanged();
+		
 		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{ // shift function for saving drawings to eeprom.
 
@@ -2660,13 +2577,15 @@ void Apps::miniMultiTimer(bool init)
 	this->multiTimer.setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// THE DIAL
-	if (potentio->getValueStableChangedEdge())
+	if (encoder_dial->getValueChanged())
 	{
 		// number of timers
+		int16_t encoder_mapped = encoder_dial->getValueMapped(0, 90);
 
-		this->multiTimer.setTimersCount((uint8_t)potentio->getValueMapped(1, MAX_TIMERS_COUNT));
+		// this->multiTimer.setTimersCount((uint8_t)encoder_dial->getValueMapped(1, MAX_TIMERS_COUNT));
+		this->multiTimer.setTimersCount((uint8_t) (float)encoder_mapped / 25); // todo HACK
 		// convert value to predefined amount of seconds.
-		uint16_t seconds = this->multiTimer.getIndexedTime(potentio->getValueMapped(0, 91)); // 0 seconds to an hour
+		uint16_t seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90)); // 0 seconds to an hour
 
 		// pass through to multitimer app, it has to decide about validity.
 		bool individualTimerSet = false;
@@ -2863,41 +2782,49 @@ void Apps::modeGeiger(bool init)
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			//lower
-			if (potentio->getValueStableChangedEdge())
-			{
-				GEIGER_TONE_FREQUENY_LOWEST = potentio->getValueMapped(0, 5000);
-			}
+			// if (encoder_dial->getValueChanged())
+			// {
+			// 	GEIGER_TONE_FREQUENY_LOWEST = encoder_dial->getValueMapped(0, 5000);
+			// }
+			
+			GEIGER_TONE_FREQUENY_LOWEST += encoder_dial->getValueChanged();
+			checkBoundaries(&GEIGER_TONE_FREQUENY_LOWEST, 5000, 0, false);
+
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENY_LOWEST);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			//upper
-			if (potentio->getValueStableChangedEdge())
-			{
-				GEIGER_TONE_FREQUENCY_HEIGHEST = potentio->getValueMapped(0, 5000);
-			}
+			// if (encoder_dial->getValueChanged())
+			// {
+			// 	GEIGER_TONE_FREQUENCY_HEIGHEST = encoder_dial->getValueMapped(0, 5000);
+			// }
+			GEIGER_TONE_FREQUENCY_HEIGHEST += encoder_dial->getValueChanged();
+			checkBoundaries(&GEIGER_TONE_FREQUENCY_HEIGHEST, 5000, 0, false);
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENCY_HEIGHEST);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			//length
-			if (potentio->getValueStableChangedEdge())
-			{
-				GEIGER_TONE_LENGTH = potentio->getValueMapped(0, 256);
-			}
+			// if (encoder_dial->getValueChanged())
+			// {
+			// 	GEIGER_TONE_LENGTH = encoder_dial->getValueMapped(0, 256);
+			// }
+			GEIGER_TONE_LENGTH += encoder_dial->getValueChanged();
+			//checkBoundaries(&GEIGER_TONE_LENGTH, 256, 0, false);
+			
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_LENGTH);
 
 
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			if (potentio->getValueStableChangedEdge())
+			if (encoder_dial->getValueChanged())
 			{
 				buzzer->playTone(
-					potentio->getValueMapped(0, 500),
+					encoder_dial->getValueMapped(0, 500),
 					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
 			}
-
 		}
 		else
 		{
@@ -2918,7 +2845,7 @@ void Apps::modeGeiger(bool init)
 				ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);
 			}
 
-			GEIGER_PROBABILITY_THRESHOLD = potentio->getValueMapped(0, 1048576);
+			GEIGER_PROBABILITY_THRESHOLD = encoder_dial->getValueMapped(0, 1048576);
 		}
 	}
 	else
@@ -2944,7 +2871,7 @@ void Apps::modeGeiger(bool init)
 		r += GEIGER_INCREASE_CHANCE;
 
 		// textBuf[0] = ' ';
-		if (r > potentio->getValueMapped(0, 1048576))
+		if (r > encoder_dial->getValueMapped(0, 1048576))
 		{
 			//	addNoteToBuzzer(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
@@ -2964,7 +2891,9 @@ void Apps::modeSequencer(bool init)
 	{
 		SEQUENCER_STEP_COUNTER = 0;
 		SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
-		generalTimer.setInitTimeMillis((long)potentio->getValueStable() * -1);
+		//generalTimer.setInitTimeMillis((long)potentio->getValueStable() * -1);
+		encoder_dial->setValue(-1000);
+		generalTimer.setInitTimeMillis(encoder_dial->getValue());
 		generalTimer.start();
 
 		SEQUENCER_EEPROM_MODE_BLINK.setInitTimeMillis(-1000);
@@ -3013,7 +2942,8 @@ void Apps::modeSequencer(bool init)
 
 			// bonus effect: TRANSPOSE!
 
-			potentio->increaseSubtractAtChange((int16_t *)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
+			//potentio->increaseSubtractAtChange((int16_t *)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
+			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getValueChanged();
 		}
 
 		// if ((this->binaryInputsEdgeDown & (1<<BUTTON_INDEXED_MOMENTARY_0)))
@@ -3022,7 +2952,8 @@ void Apps::modeSequencer(bool init)
 		// }
 
 		// just listen to the potentio note
-		SEQUENCER_TEMP_NOTE = potentio->getValueMapped(0, 255);
+		// SEQUENCER_TEMP_NOTE = encoder_dial->getValueMapped(0, 255);
+		SEQUENCER_TEMP_NOTE += encoder_dial->getValueChanged();
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
@@ -3031,8 +2962,9 @@ void Apps::modeSequencer(bool init)
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
+			buzzer->buzzerOff();
 			// if button continuously pressed, rotate potentio to hear notes.
-			if (potentio->getValueStableChangedEdge())
+			if (encoder_dial->getValueChanged())
 			{
 				addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
 			}
@@ -3044,7 +2976,7 @@ void Apps::modeSequencer(bool init)
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 
-			uint8_t note = potentio->getValueMapped(0, 255);
+			uint8_t note = encoder_dial->getValueMapped(0, 255);
 
 			addNoteToBuzzer(note);
 
@@ -3062,7 +2994,6 @@ void Apps::modeSequencer(bool init)
 			}
 		}
 
-#ifdef BUTTON_MOMENTARY_3
 		// song progression
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
@@ -3071,14 +3002,15 @@ void Apps::modeSequencer(bool init)
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			// if (potentio->getValueStableChangedEdge())
+			// if (potentio->getValueChanged())
 			// {
 			// 	step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
 			// }
 			//}
-			potentio->increaseSubtractAtChange((int16_t *)&(step), 1);
+			//potentio->increaseSubtractAtChange((int16_t *)&(step), 1);
+			step += encoder_dial->getValueChanged();
+
 		}
-#endif
 
 		if (this->binaryInputsEdgeDown & (1 << BUTTON_LATCHING_EXTRA))
 		{
@@ -3296,9 +3228,9 @@ void Apps::modeSimon(bool init)
 		}
 
 		// number of players.
-		if (potentio->getValueStableChangedEdge())
+		if (encoder_dial->getValueChanged())
 		{
-			SIMON_PLAYERS_COUNT = potentio->getValueMapped(1, SIMON_MAX_PLAYERS);
+			SIMON_PLAYERS_COUNT = encoder_dial->getValueMapped(1, SIMON_MAX_PLAYERS);
 		}
 
 		numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
@@ -3634,8 +3566,8 @@ void Apps::modeReactionGame(bool init)
 	case reactionWaitForStart:
 	{
 		// change level
-		REACTION_GAME_LEVEL = (potentio->getValueMapped(0, 4)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-		if (potentio->getValueStableChangedEdge())
+		REACTION_GAME_LEVEL = (encoder_dial->getValueMapped(0, 4)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+		if (encoder_dial->getValueChanged())
 		{
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
 		}
@@ -4211,7 +4143,12 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 	// load/save songs
 	//blink alternatively song number and "load" or "save"
-	uint8_t slot_number = potentio->getValueMapped(1, slotCount);
+
+	encoder_dial->setUpperLimit(slotCount, false); //todo: minimum should be "1"
+	encoder_dial->setSensitivity(10);
+	uint8_t slot_number = encoder_dial->getValue();
+	
+	// uint8_t slot_number = encoder_dial->getValueMapped(1, slotCount);
 	if (SAVE_LOAD_MENU_BLINK_TIMER.getInFirstGivenHundredsPartOfSecond(500))
 	{
 		ledDisp->setNumberToDisplayAsDecimal(slot_number);

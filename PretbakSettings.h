@@ -1,11 +1,11 @@
 
 // #define DBUG_REFACTOR_DISP
-#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 //#define DBUG_REFACTOR_DISP
 
 // #define PROTOTYPE
-//#define ENABLE_APPS 
+#define ENABLE_APPS 
 
 #ifdef ENABLE_SERIAL
 #define DEBUG_ENCODER_DIAL

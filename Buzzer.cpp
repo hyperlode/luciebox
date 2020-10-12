@@ -12,6 +12,10 @@ Buzzer::Buzzer()
     this->transpose = 0;
 }
 
+void Buzzer::changeTranspose(int8_t delta){
+    this->setTranspose(this->transpose + delta);
+}
+
 void Buzzer::setTranspose(int8_t offset)
 {
     if (offset < -12)
@@ -174,6 +178,14 @@ void Buzzer::doBuzzerRoll()
             this->soundFinishedTimeMillis = millis() + (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (1 << buzzerRoll[this->playSlotCounter] / 63));
         }
     }
+}
+
+void Buzzer::changeSpeedRatio(bool increaseElseDecrease){
+    float multiplier = 0.95;
+    if (increaseElseDecrease){
+        multiplier = 1.05;
+    }
+    this->speedScale *=  multiplier;  
 }
 
 void Buzzer::setSpeedRatio(float speedMultiplier)

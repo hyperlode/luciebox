@@ -10,10 +10,26 @@ RotaryEncoderDial::RotaryEncoderDial()
 
   this->sensitivity = 0;
   this->sensitivity_counter = 0;
+  this->maxValue = 32767;
+  this->minToMax = false;
 }
 
 bool RotaryEncoderDial::getValueChanged(){
   return this->value_changed;
+}
+
+void RotaryEncoderDial::setUpperLimit(int16_t maxValue, boolean minToMax){
+  this->maxValue = maxValue;
+  this->minToMax = minToMax;
+  if (this->value > this->maxValue){
+    this->value = this->maxValue;
+  }
+}
+
+int16_t RotaryEncoderDial::getValueMapped(int16_t minValue, int16_t maxValue){
+  // hacked. Not yet nicely done!!!
+  this->setUpperLimit (maxValue, false);
+  return this->getValue();
 }
 
 void RotaryEncoderDial::refresh(){
@@ -22,7 +38,7 @@ void RotaryEncoderDial::refresh(){
   interrupts();
 
   // edge detection here, so it stays 'on' until next refresh.
-  this->value_changed = this->value_memory != this->value;
+  this->value_changed = this->value - this->value_memory;
   
   this->value_memory = this->value;
 }
@@ -32,7 +48,7 @@ void RotaryEncoderDial::setValue(int16_t value){
   this->encoderPos = value;
   interrupts();
   this->refresh();
-  this->value_changed = false; // let's not detect edges if we set the value manually.
+  this->value_changed = 0; // let's not detect edges if we set the value manually.
 }
 
 int16_t RotaryEncoderDial::getValue(){
@@ -100,8 +116,25 @@ void RotaryEncoderDial::checkState(){
     if (this->sensitivity_counter == this->sensitivity){
       if (ccwElseCw){
         this->encoderPos -=this->increment;
+        if (this->encoderPos < 0){
+          if (this->minToMax){
+            this->encoderPos = this->maxValue;
+
+          }else{
+            this->encoderPos = 0;
+          }
+        }
+
       }else{
         this->encoderPos +=this->increment;
+         if (this->encoderPos > this->maxValue){
+          if (this->minToMax){
+            this->encoderPos = 0;
+
+          }else{
+            this->encoderPos = this->maxValue;
+          }
+        }
       }
      
       this->sensitivity_counter = 0;

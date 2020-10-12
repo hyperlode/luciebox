@@ -119,30 +119,9 @@ void refresh()
     }
 #endif
 
-#ifdef DEBUG_ENCODER_DIAL
-   if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-    //    encoder_dial.setIncrement(10);
-   }
 
-    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-    //    encoder_dial.setIncrement(1);
-       encoder_dial.setSensitivity(1);
-   }
-   if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){
-       Serial.println(encoder_dial.getValue());
-   }
-   if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-       encoder_dial.setSensitivity(24);
-   }
-
-   if (encoder_dial.getValueChanged()){
-        Serial.println(encoder_dial.getValue());
-    }
-    
-#else
 #ifdef ENABLE_APPS
     pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1); // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
-#endif
 #endif
 
         buzzer.doBuzzerRoll();
