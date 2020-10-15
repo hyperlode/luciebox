@@ -253,6 +253,10 @@ void Apps::setDefaultMode()
 	buzzer->setSpeedRatio(2);
 	buzzerOff(); // stop all sounds that were playing in an app.
 	buzzer->setTranspose(0);
+
+	//encoder
+	encoder_dial->setRange(1023,true); // allow overflow. (this makes it different from the limited potentio.)
+	encoder_dial->setValue(0);
 }
 
 bool Apps::init_app(bool init, uint8_t selector)
@@ -514,7 +518,7 @@ void Apps::pomodoroTimer(bool init)
 		}
 
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
-		encoder_dial->setUpperLimit(90,false);
+		encoder_dial->setRange(90,false);
 		if (encoder_dial->getValueChanged())
 		{
 
@@ -568,7 +572,7 @@ void Apps::pomodoroTimer(bool init)
 
 	// ticking sound
 	// long tick_duration = encoder_dial->getValueMapped(0, 40);
-	encoder_dial->setUpperLimit(40,true);
+	encoder_dial->setRange(40,true);
 	int16_t tick_duration = encoder_dial->getValue();
 	bool tick_twice_a_second = tick_duration > 20;
 	if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
@@ -830,7 +834,7 @@ void Apps::modeRandomWorld(bool init)
 		{
 			// set autoroll time.
 
-			uint16_t delay_seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90)); // 0 seconds to an hour
+			uint16_t delay_seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false)); // 0 seconds to an hour
 
 			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
 
@@ -840,7 +844,6 @@ void Apps::modeRandomWorld(bool init)
 			}
 			else
 			{
-
 				ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
 			}
 		}
@@ -911,7 +914,7 @@ void Apps::modeRandomWorld(bool init)
 			{
 				// hack to set upper limit for random number
 
-				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = encoder_dial->getValueMapped(0, 100);
+				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = encoder_dial->getValueLimited(100, false);
 
 				RANDOMWORLD_CARD_FROM_DECK_INDEX = 0; // reset the tombola.
 
@@ -1052,21 +1055,25 @@ void Apps::randomModeDisplay(bool forReal)
 			textBuf[1] = (3 - (((RANDOMWORLD_RANDOM_NUMBER) % 13) + 1) % 10) + 48; // 9,10,11,13 to char 0 1 2 3
 		}
 
-		switch (RANDOMWORLD_RANDOM_NUMBER / 13)
-		{
-		case 0:
-			textBuf[3] = 'H';
-			break;
-		case 1:
-			textBuf[3] = 'D';
-			break;
-		case 2:
-			textBuf[3] = 'S';
-			break;
-		case 3:
-			textBuf[3] = 'C';
-			break;
-		}
+		char test [4]  = {'H','D','S','C'};
+		textBuf[3] = test[RANDOMWORLD_RANDOM_NUMBER / 13];
+
+		// switch (RANDOMWORLD_RANDOM_NUMBER / 13)
+		// {
+		
+		// case 0:
+		// 	textBuf[3] = 'H';
+		// 	break;
+		// case 1:
+		// 	textBuf[3] = 'D';
+		// 	break;
+		// case 2:
+		// 	textBuf[3] = 'S';
+		// 	break;
+		// case 3:
+		// 	textBuf[3] = 'C';
+		// 	break;
+		// }
 	}
 
 	break;
@@ -1344,7 +1351,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 	// {
 	// 	counter--;
 	// }
-	listenToMomentary2and3ModifyValue(&counter, 1);
+	modifyValueUpDownWithMomentary2And3(&counter, 1);
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
@@ -1388,24 +1395,18 @@ void Apps::modeSoundSong(bool init)
 	if (init)
 	{
 		loadBuzzerTrack(SONG_DRYER_HAPPY);
-		buzzer->setSpeedRatio((float)2);
 	}
 
 	setBlankDisplay();
 
-	// if (encoder_dial->getValueChanged())
-	// {
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
-		{
-			buzzer->changeTranspose((int8_t)(encoder_dial->getValueChanged())); // 12 -> -12
-		}
-		else
-		{
-			if (encoder_dial->getValueChanged()){ // only change if not zero
-				buzzer->changeSpeedRatio( encoder_dial->getValueChanged()>0 );
-			}
-		}
-	// }
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
+	{
+		buzzer->changeTranspose(encoder_dial->getValueChanged()); 
+	}
+	else
+	{
+		buzzer->changeSpeedRatio(encoder_dial->getValueChanged());
+	}
 
 	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
 
@@ -1573,7 +1574,7 @@ void Apps::modeComposeSong(bool init)
 			}
 		}
 #if MOMENTARY_BUTTONS_COUNT == 4
-		listenToMomentary2and3ModifyValue(&step, 1);
+		modifyValueUpDownWithMomentary2And3(&step, 1);
 #else
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
@@ -1970,12 +1971,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	// scroll through segments
 	if (encoder_dial->getValueChanged())
 	{
-		// potentio->increaseSubtractAtChange((int16_t *)&(DRAW_CURSOR_POTENTIO_INDEX), 1);
-
-		//checkBoundaries((int16_t *)&DRAW_CURSOR_POTENTIO_INDEX, 0, 95, true);
-		encoder_dial->setUpperLimit(0,95);
-		DRAW_CURSOR_POTENTIO_INDEX = encoder_dial->getValue();
-		DRAW_CURSOR_INDEX = DRAW_CURSOR_POTENTIO_INDEX / 3;
+		DRAW_CURSOR_INDEX = encoder_dial->getValueLimited(35,true);
 	}
 
 	// check for global display change
@@ -2181,8 +2177,9 @@ void Apps::modeHackTime(bool init)
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			// change value
-			array_8_bytes[0] = encoder_dial->getValueMapped(0, 255);
+			array_8_bytes[0] = encoder_dial->getValueLimited(255,false);
 		}
+
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
 			// store value.
@@ -2263,7 +2260,7 @@ void Apps::modeHackTime(bool init)
 		// 	HACKTIME_ADDRESS ++;
 		// 	address_changed = true;
 		// }
-		address_changed = listenToMomentary2and3ModifyValue(&HACKTIME_ADDRESS, 1);
+		address_changed = modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
 
 		// ok ok, let's do one little check.
 		if (HACKTIME_ADDRESS <= 0)
@@ -2375,7 +2372,7 @@ void Apps::modeHackTime(bool init)
 	// }
 }
 
-bool Apps::listenToMomentary2and3ModifyValue(int16_t *value, uint8_t amount)
+bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 {
 
 	int16_t value_memory = *value;
@@ -2413,6 +2410,7 @@ void Apps::draw(bool init)
 
 		DRAW_ACTIVE_DRAWING_INDEX = 0;
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
+		
 	}
 
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) &&
@@ -2420,6 +2418,7 @@ void Apps::draw(bool init)
 	{
 		//   // modify drawing on display in draw mode.
 		//   // if in save to eeprom mode, always only scroll through drawings.
+
 		cursorBlinker = this->modeSingleSegmentManipulation(&displayAllSegments);
 	}
 	else
@@ -2441,7 +2440,7 @@ void Apps::draw(bool init)
 			this->displayChangeGlobal(&displayAllSegments, false);
 
 			//scroll through drawings.
-			listenToMomentary2and3ModifyValue(&DRAW_ACTIVE_DRAWING_INDEX, 1);
+			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 		}
 	}
 #ifdef ENABLE_EEPROM
@@ -2580,12 +2579,11 @@ void Apps::miniMultiTimer(bool init)
 	if (encoder_dial->getValueChanged())
 	{
 		// number of timers
-		int16_t encoder_mapped = encoder_dial->getValueMapped(0, 90);
+		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
 
-		// this->multiTimer.setTimersCount((uint8_t)encoder_dial->getValueMapped(1, MAX_TIMERS_COUNT));
-		this->multiTimer.setTimersCount((uint8_t) (float)encoder_mapped / 25); // todo HACK
+		this->multiTimer.setTimersCount((uint8_t) ((float)encoder_mapped / 25) + 1); 
 		// convert value to predefined amount of seconds.
-		uint16_t seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90)); // 0 seconds to an hour
+		uint16_t seconds = this->multiTimer.getIndexedTime(encoder_mapped); // 0 seconds to an hour
 
 		// pass through to multitimer app, it has to decide about validity.
 		bool individualTimerSet = false;
@@ -2787,8 +2785,8 @@ void Apps::modeGeiger(bool init)
 			// 	GEIGER_TONE_FREQUENY_LOWEST = encoder_dial->getValueMapped(0, 5000);
 			// }
 			
-			GEIGER_TONE_FREQUENY_LOWEST += encoder_dial->getValueChanged();
-			checkBoundaries(&GEIGER_TONE_FREQUENY_LOWEST, 5000, 0, false);
+			GEIGER_TONE_FREQUENY_LOWEST = encoder_dial->getValueLimited(500,false) * 10;
+			// checkBoundaries(&GEIGER_TONE_FREQUENY_LOWEST, 5000, 0, false);
 
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENY_LOWEST);
 		}
@@ -2799,8 +2797,8 @@ void Apps::modeGeiger(bool init)
 			// {
 			// 	GEIGER_TONE_FREQUENCY_HEIGHEST = encoder_dial->getValueMapped(0, 5000);
 			// }
-			GEIGER_TONE_FREQUENCY_HEIGHEST += encoder_dial->getValueChanged();
-			checkBoundaries(&GEIGER_TONE_FREQUENCY_HEIGHEST, 5000, 0, false);
+			GEIGER_TONE_FREQUENCY_HEIGHEST = encoder_dial->getValueLimited(500,false) * 10;
+			// checkBoundaries(&GEIGER_TONE_FREQUENCY_HEIGHEST, 5000, 0, false);
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENCY_HEIGHEST);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
@@ -2810,19 +2808,18 @@ void Apps::modeGeiger(bool init)
 			// {
 			// 	GEIGER_TONE_LENGTH = encoder_dial->getValueMapped(0, 256);
 			// }
-			GEIGER_TONE_LENGTH += encoder_dial->getValueChanged();
+			// GEIGER_TONE_LENGTH += encoder_dial->getValueChanged();
+			GEIGER_TONE_LENGTH = encoder_dial->getValueLimited(255,false);
 			//checkBoundaries(&GEIGER_TONE_LENGTH, 256, 0, false);
 			
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_LENGTH);
-
-
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			if (encoder_dial->getValueChanged())
 			{
 				buzzer->playTone(
-					encoder_dial->getValueMapped(0, 500),
+					encoder_dial->getValueLimited(500,false),
 					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
 			}
 		}
@@ -2845,7 +2842,7 @@ void Apps::modeGeiger(bool init)
 				ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);
 			}
 
-			GEIGER_PROBABILITY_THRESHOLD = encoder_dial->getValueMapped(0, 1048576);
+			GEIGER_PROBABILITY_THRESHOLD = encoder_dial->getValueLimited(1024, false) * 1024;
 		}
 	}
 	else
@@ -2871,7 +2868,7 @@ void Apps::modeGeiger(bool init)
 		r += GEIGER_INCREASE_CHANCE;
 
 		// textBuf[0] = ' ';
-		if (r > encoder_dial->getValueMapped(0, 1048576))
+		if (r > encoder_dial->getValueLimited(1024, false) * 1024)
 		{
 			//	addNoteToBuzzer(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
@@ -4144,7 +4141,7 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	// load/save songs
 	//blink alternatively song number and "load" or "save"
 
-	encoder_dial->setUpperLimit(slotCount, false); //todo: minimum should be "1"
+	encoder_dial->setRange(slotCount, false); //todo: minimum should be "1"
 	encoder_dial->setSensitivity(10);
 	uint8_t slot_number = encoder_dial->getValue();
 	

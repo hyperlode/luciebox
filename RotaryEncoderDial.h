@@ -37,16 +37,17 @@ public:
 
 	void setPins(byte pinChannelA, byte pinChannelB);
 	
-	bool getValueChanged();
+	int16_t getValueChanged();
     int16_t getValue();
 	void setValue(int16_t value);
 
     void setIncrement(uint8_t increment);
 	void setSensitivity(uint8_t sensitivity);
-	void setUpperLimit(int16_t maxValue, boolean minToMax);
+	void setRange(int16_t maxValue, boolean minToMax);
 	void refresh();
 
 	int16_t getValueMapped(int16_t minValue, int16_t maxValue);
+	int16_t getValueLimited(int16_t maxValue, boolean jumpAtEnd);
     
     void interruptChannelA();
     void interruptChannelB();
@@ -65,8 +66,8 @@ private:
 	boolean minToMax;
 
 	int16_t value;
-	int value_memory;   // 
 	int16_t value_changed;
+	int16_t value_memory;   // 
 
 	volatile int encoderPos;  //raw dial counter
 

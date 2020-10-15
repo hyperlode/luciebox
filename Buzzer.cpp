@@ -179,13 +179,9 @@ void Buzzer::doBuzzerRoll()
         }
     }
 }
-
-void Buzzer::changeSpeedRatio(bool increaseElseDecrease){
-    float multiplier = 0.95;
-    if (increaseElseDecrease){
-        multiplier = 1.05;
-    }
-    this->speedScale *=  multiplier;  
+void Buzzer::changeSpeedRatio(int8_t delta){
+    // provide -1, 0 or 1 for best results
+    this->speedScale *= 1 + 0.01 * (float)delta;
 }
 
 void Buzzer::setSpeedRatio(float speedMultiplier)

@@ -318,14 +318,16 @@ public:
     uint8_t getNextBuzzerRollSlot(bool getNextEmptySlot);
     uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty();
+   
     void changeTranspose(int8_t delta);
     void setTranspose(int8_t offset);
+    void changeSpeedRatio(int8_t delta);
+    void setSpeedRatio(float speedMultiplier);
+   
     void cleanBuzzerRoll();
     // void buzzerOn(uint16_t freq);
     void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerOff();
-    void setSpeedRatio(float speedMultiplier);
-    void changeSpeedRatio(bool increaseElseDecrease);
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
     void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
     
@@ -336,8 +338,8 @@ public:
     void nextNote(int16_t* note, bool upElseDown, bool stayInSameLength);
 
 private:
-    int8_t transpose;
     float speedScale;
+    int8_t transpose;
     uint8_t pin;
     uint8_t buzzerRoll[BUZZER_ROLL_LENGTH];
     uint8_t playSlotCounter;

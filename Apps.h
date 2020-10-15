@@ -4,7 +4,7 @@
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
 #define ENABLE_SIMON_APP
-#define ENABLE_REACTION_APP
+// #define ENABLE_REACTION_APP
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -603,7 +603,7 @@ public:
     void quiz(bool init);
 
     void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis);
-    bool listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
+    bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
     void displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet);

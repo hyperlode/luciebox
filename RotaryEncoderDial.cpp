@@ -14,11 +14,11 @@ RotaryEncoderDial::RotaryEncoderDial()
   this->minToMax = false;
 }
 
-bool RotaryEncoderDial::getValueChanged(){
+int16_t RotaryEncoderDial::getValueChanged(){
   return this->value_changed;
 }
 
-void RotaryEncoderDial::setUpperLimit(int16_t maxValue, boolean minToMax){
+void RotaryEncoderDial::setRange(int16_t maxValue, boolean minToMax){
   this->maxValue = maxValue;
   this->minToMax = minToMax;
   if (this->value > this->maxValue){
@@ -26,9 +26,15 @@ void RotaryEncoderDial::setUpperLimit(int16_t maxValue, boolean minToMax){
   }
 }
 
+int16_t RotaryEncoderDial::getValueLimited(int16_t maxValue, boolean jumpAtEnd){
+  this->setRange (maxValue, jumpAtEnd);
+  return this->getValue();
+}
+
 int16_t RotaryEncoderDial::getValueMapped(int16_t minValue, int16_t maxValue){
+  // DEPRECATED!
   // hacked. Not yet nicely done!!!
-  this->setUpperLimit (maxValue, false);
+  this->setRange (maxValue, false);
   return this->getValue();
 }
 
@@ -39,6 +45,9 @@ void RotaryEncoderDial::refresh(){
 
   // edge detection here, so it stays 'on' until next refresh.
   this->value_changed = this->value - this->value_memory;
+  // #ifdef ENABLE_SERIAL
+  
+  // #endif
   
   this->value_memory = this->value;
 }
