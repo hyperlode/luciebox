@@ -5,8 +5,8 @@
 //empty constructor
 RotaryEncoderDial::RotaryEncoderDial()
 {
-  this->increment = 1;
-  this->encoderPos = 0;
+  // this->increment = 1;
+  // this->encoderPos = 0;
 
   this->sensitivity = 0;
   this->sensitivity_counter = 0;
@@ -14,9 +14,9 @@ RotaryEncoderDial::RotaryEncoderDial()
   this->minToMax = false;
 }
 
-int16_t RotaryEncoderDial::getValueChanged(){
+int8_t RotaryEncoderDial::getValueChanged(){
   // only take into account small increases. if it jumps. 
-  return this->value_changed;
+  return this->delta_memory;
 }
 
 void RotaryEncoderDial::setRange(int16_t maxValue, boolean minToMax){
@@ -41,11 +41,30 @@ int16_t RotaryEncoderDial::getValueMapped(int16_t minValue, int16_t maxValue){
 
 void RotaryEncoderDial::refresh(){
   noInterrupts();
-  this->value = this->encoderPos; // non atomic action (16bit value on 8 bit processor), so an interrupt can ruin it! 
+  this->delta_memory = this->delta;
+  this->delta = 0;
   interrupts();
+  this->value += this->delta_memory; // non atomic action (16bit value on 8 bit processor), so an interrupt can ruin it! 
+
+
+  if (this->value < 0){
+    if (this->minToMax){
+      this->value = this->maxValue;
+
+    }else{
+      this->value = 0;
+    }
+  }else if (this->value > this->maxValue){
+    if (this->minToMax){
+      this->value = 0;
+
+    }else{
+      this->value = this->maxValue;
+    }
+  }
 
   // edge detection here, so it stays 'on' until next refresh.
-  this->value_changed = this->value - this->value_memory;
+  // this->value_changed = this->value - this->value_memory;
   // #ifdef ENABLE_SERIAL
   
   // #endif
@@ -54,11 +73,12 @@ void RotaryEncoderDial::refresh(){
 }
 
 void RotaryEncoderDial::setValue(int16_t value){
-  noInterrupts();
-  this->encoderPos = value;
-  interrupts();
+  // noInterrupts();
+  // this->delta_memory = 0;
+  // interrupts();
+  this->value = value;
   this->refresh();
-  this->value_changed = 0; // let's not detect edges if we set the value manually.
+  // this->value_changed = 0; // let's not detect edges if we set the value manually.
 }
 
 int16_t RotaryEncoderDial::getValue(){
@@ -73,9 +93,9 @@ void RotaryEncoderDial::setSensitivity(uint8_t sensitivity){
   this->sensitivity_counter = 0;
 }
 
-void RotaryEncoderDial::setIncrement(uint8_t increment){
-  this->increment = increment;
-}
+// void RotaryEncoderDial::setIncrement(uint8_t increment){
+//   this->increment = increment;
+// }
 
 void RotaryEncoderDial::setPins(byte pinChannelA, byte pinChannelB ){
   // https://www.onetransistor.eu/2019/05/arduino-class-interrupts-and-callbacks.html     
@@ -125,26 +145,9 @@ void RotaryEncoderDial::checkState(){
 
     if (this->sensitivity_counter == this->sensitivity){
       if (ccwElseCw){
-        this->encoderPos -=this->increment;
-        if (this->encoderPos < 0){
-          if (this->minToMax){
-            this->encoderPos = this->maxValue;
-
-          }else{
-            this->encoderPos = 0;
-          }
-        }
-
+        this->delta--;
       }else{
-        this->encoderPos +=this->increment;
-         if (this->encoderPos > this->maxValue){
-          if (this->minToMax){
-            this->encoderPos = 0;
-
-          }else{
-            this->encoderPos = this->maxValue;
-          }
-        }
+        this->delta++;
       }
      
       this->sensitivity_counter = 0;

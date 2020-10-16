@@ -1081,9 +1081,7 @@ void Apps::randomModeDisplay(bool forReal)
 	case RANDOMWORLD_RANDOMNUMBER:
 	{
 		// random number
-
 		numberToBufAsDecimal(RANDOMWORLD_RANDOM_NUMBER + 1);
-		// Serial.println("fehhe");
 	}
 	break;
 
@@ -1135,13 +1133,9 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	}
 
 	// // back and forth motion required of the potentio to count up modes
-	// if (encoder_dial->getValueChanged()){
-	// 	Serial.println("feie");
-	// }
 	if (encoder_dial->getValueChanged() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
-		// Serial.println(SETTINGS_MODE_SELECTOR);
 	}
 	else if (encoder_dial->getValueChanged() > 0 && SETTINGS_MODE_SELECTOR % 2 != 0)
 	{
@@ -1185,14 +1179,6 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 			else if (binaryInputs[buttons_indexed[i]].getValue())
 			{
-				if (binaryInputsEdgeUp != 0){
-				Serial.println("----");
-				Serial.println(binaryInputsValue, BIN);
-				Serial.println((int16_t)analogRead(analog_input_pins[PIN_BUTTONS_1]));
-				Serial.println((int16_t)analogRead(analog_input_pins[PIN_BUTTONS_2]));
-
-				}
-
 				textHandle[i] = '0';
 			}
 			else
@@ -1360,7 +1346,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 		}
 
 		// set timer speed
-		dialOnEdgeChangeInitTimerPercentage(&COUNTING_LETTERS_AND_CHARS_TIMER, 10);
+		dialOnEdgeChangeInitTimerPercentage(&COUNTING_LETTERS_AND_CHARS_TIMER);
 	}
 	else // if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
@@ -1518,12 +1504,13 @@ void Apps::modeComposeSong(bool init)
 
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 			{
-				// just play notes selected with potentio
+				// just play notes selected with dial
 				if (encoder_dial->getValueChanged())
 				{
 					buzzerOff();
-					addNoteToBuzzer(encoder_dial->getValueMapped(0, 254));
-					buzzer->noteToDisplay(textBuf, &decimalPoints, encoder_dial->getValueMapped(0, 254));
+					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
+					addNoteToBuzzer(note);
+					buzzer->noteToDisplay(textBuf, &decimalPoints, note);
 					textBufToDisplay();
 					ledDisp->setDecimalPointsToDisplay(decimalPoints);
 				}
@@ -1533,8 +1520,8 @@ void Apps::modeComposeSong(bool init)
 			// program note in song
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
-
-				COMPOSER_SONG[COMPOSER_STEP] = encoder_dial->getValueMapped(0, 254);
+				uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
+				COMPOSER_SONG[COMPOSER_STEP] = note;
 				buzzerOff();
 				addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 
@@ -1550,7 +1537,8 @@ void Apps::modeComposeSong(bool init)
 			{
 				if (encoder_dial->getValueChanged())
 				{
-					COMPOSER_SONG[COMPOSER_STEP] = encoder_dial->getValueMapped(0, 255);
+					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
+					COMPOSER_SONG[COMPOSER_STEP] = note;
 					buzzerOff();
 					addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 				}
@@ -1660,11 +1648,11 @@ void Apps::modeSoundNotes(bool init)
 			update_note = true;
 		}
 
-		delta = (uint16_t)(SOUND_NOTE_AUTO_TIMER.getInitTimeMillis() / -8);
+		// delta = (uint16_t)(SOUND_NOTE_AUTO_TIMER.getInitTimeMillis() / -8);
 
-		checkBoundaries(&delta, 2, 254, false);
+		// checkBoundaries(&delta, 2, 254, false);
 
-		dialOnEdgeChangeInitTimerPercentage(&SOUND_NOTE_AUTO_TIMER, delta);
+		dialOnEdgeChangeInitTimerPercentage(&SOUND_NOTE_AUTO_TIMER);
 	}
 	else
 	{
@@ -1875,7 +1863,7 @@ void Apps::movieAnimationMode(bool init)
 
 		if (encoder_dial->getValueChanged())
 		{
-			dataPlayer.setAutoStepSpeed(encoder_dial->getValueMapped(0, 1024) - 1024);
+			dataPlayer.setAutoStepSpeed(encoder_dial->getValueLimited(1023, false) - 1023);
 		}
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -2211,7 +2199,7 @@ void Apps::modeHackTime(bool init)
 			}
 
 			// set speed.
-			dialOnEdgeChangeInitTimerPercentage(&HACKTIME_MOVE_TIMER, 20);
+			dialOnEdgeChangeInitTimerPercentage(&HACKTIME_MOVE_TIMER);
 		}
 		else
 		{
@@ -2379,26 +2367,23 @@ bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 	return value_memory != *value;
 }
 
-void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer, int8_t increment_millis)
+void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 {
-	//potentio->increaseSubtractAtChange(&delta, increment_millis);
-	
-	//aTimer->incrementInitTimeMillis(encoder_dial->getValueChanged() * increment_millis);
+	// fixed to one percent for now.
 	// only works for countdown times (negative init value)!
 	if (encoder_dial->getValueChanged()){
-		float t = (float)(aTimer->getInitTimeMillis());
-		if (t > -0.01){
-			t = -0.01;
+		long original = (aTimer->getInitTimeMillis());
+		long result = long((float)original* ( 1 - (float)(encoder_dial->getValueChanged()) * 0.01));
+		// Serial.println(original);
+		// Serial.println(result);
+		// if value to small to make an absolute difference, force it! (make sure to stay negative)
+		if (original == result){
+			result -= encoder_dial->getValueChanged() * encoder_dial->getValueChanged();
 		}
-		float mult = 1 + (float)(encoder_dial->getValueChanged()) * 0.01;
-		
-		Serial.println(t);
-		Serial.println(mult);
+
 		aTimer->setInitTimeMillis(
-			 (long)(t * mult)
+			result	 
 			);
-		Serial.println(aTimer->getInitTimeMillis());
-		Serial.println("fefeff");
 	}
 }
 
@@ -2977,7 +2962,7 @@ void Apps::modeSequencer(bool init)
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 
-			uint8_t note = encoder_dial->getValueMapped(0, 255);
+			uint8_t note = encoder_dial->getValueLimited(255, false);
 
 			addNoteToBuzzer(note);
 
@@ -3033,7 +3018,7 @@ void Apps::modeSequencer(bool init)
 			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
 			// )
 			{
-				dialOnEdgeChangeInitTimerPercentage(&generalTimer, 5);
+				dialOnEdgeChangeInitTimerPercentage(&generalTimer);
 			}
 
 			if (!generalTimer.getTimeIsNegative())
@@ -3109,7 +3094,7 @@ void Apps::modeMetronome(bool init)
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME, 10);
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
 
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
@@ -3235,7 +3220,7 @@ void Apps::modeSimon(bool init)
 		// number of players.
 		if (encoder_dial->getValueChanged())
 		{
-			SIMON_PLAYERS_COUNT = encoder_dial->getValueMapped(1, SIMON_MAX_PLAYERS);
+			SIMON_PLAYERS_COUNT = encoder_dial->getValueMapped(SIMON_MAX_PLAYERS - 1, false) + 1; // start counting from player 1 to display
 		}
 
 		numberToBufAsDecimal(SIMON_PLAYERS_COUNT);

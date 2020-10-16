@@ -37,11 +37,11 @@ public:
 
 	void setPins(byte pinChannelA, byte pinChannelB);
 	
-	int16_t getValueChanged();
+	int8_t getValueChanged();
     int16_t getValue();
 	void setValue(int16_t value);
 
-    void setIncrement(uint8_t increment);
+    // void setIncrement(uint8_t increment);
 	void setSensitivity(uint8_t sensitivity);
 	void setRange(int16_t maxValue, boolean minToMax);
 	void refresh();
@@ -59,17 +59,19 @@ private:
 	byte pinChannelA;
 	byte pinChannelB;
 
-	uint8_t increment;
+	// uint8_t increment;
 	uint8_t sensitivity; //rotary step per count.
 	uint8_t sensitivity_counter ;
 	int16_t maxValue;
+	volatile int8_t delta;
+	int8_t delta_memory;
 	boolean minToMax;
 
 	int16_t value;
 	int16_t value_changed;
 	int16_t value_memory;   // 
 
-	volatile int encoderPos;  //raw dial counter
+	// volatile int encoderPos;  //raw dial counter
 
 	// interrupt service routine vars
 	volatile boolean A_set = false;
