@@ -1,6 +1,6 @@
 
 // #define DBUG_REFACTOR_DISP
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 //#define DBUG_REFACTOR_DISP
 
@@ -36,17 +36,18 @@
 #define PIN_DISPLAY_SEGMENT_D 8
 #define PIN_DISPLAY_SEGMENT_E 12
 #define PIN_DISPLAY_SEGMENT_F 13
-#define PIN_DISPLAY_SEGMENT_G 1 // was 3
  
 #define PIN_BUZZER_FAKE 68
 
+#define PIN_BUZZER A5 
+
 #ifdef ENABLE_SERIAL
 #define PIN_DISPLAY_SEGMENT_DP PIN_DUMMY_2
-#define PIN_BUZZER A5 // PIN_BUZZER PIN_BUZZER_FAKE
+#define PIN_DISPLAY_SEGMENT_G PIN_DUMMY_2 // was 3
 
 #else
 #define PIN_DISPLAY_SEGMENT_DP 0
-#define PIN_BUZZER A5 
+#define PIN_DISPLAY_SEGMENT_G 1 // was 3
 
 #endif
 

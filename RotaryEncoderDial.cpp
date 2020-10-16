@@ -15,6 +15,7 @@ RotaryEncoderDial::RotaryEncoderDial()
 }
 
 int16_t RotaryEncoderDial::getValueChanged(){
+  // only take into account small increases. if it jumps. 
   return this->value_changed;
 }
 

@@ -233,6 +233,7 @@
 #define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
 #define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
 
+#define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
 #define POMODORO_SHOW_MENU_EDGE general_boolean2
@@ -602,7 +603,7 @@ public:
     void modeHackTime(bool init);
     void quiz(bool init);
 
-    void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis);
+    void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer, int8_t increment_millis);
     bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);

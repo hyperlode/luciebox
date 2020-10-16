@@ -336,7 +336,7 @@ void Apps::quiz(bool init)
 
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
 		// if (binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_EXTRA) ||
-		// 	binaryInputsEdgeUp && (1 << BUTTON_LATCHING_SMALL_RED_RIGHT))
+		// 	binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 
 		{
 			quizState = quizWaitRandomTime;
@@ -737,7 +737,7 @@ void Apps::stopwatch(bool init)
 		STOPWATCH_CHRONO.startPaused(true);
 	}
 
-	// if (binaryInputsEdgedown& (1<<BUTTON_LATCHING_EXTRA))
+	// if (binaryInputsEdgedown& (1<<BUTTON_INDEXED_LATCHING_EXTRA))
 	// {
 	// 	STOPWATCH_CHRONO.pause();
 	// }
@@ -867,6 +867,8 @@ void Apps::modeRandomWorld(bool init)
 	{
 		// check state
 		bool roll_end = false;
+
+		//if autoroll
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// autoroll no need for button
@@ -875,12 +877,16 @@ void Apps::modeRandomWorld(bool init)
 		else
 		{
 			// wait for button release
-			for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-			{
-				if (binaryInputs[buttons_indexed[i]].getEdgeDown())
-				{
-					roll_end = true;
-				}
+			
+			// the following build up of the mask looks cumbersome, but, it's all done at precompiler time. , so it's just one byte of flash memory. 
+			byte momentary_buttons_mask = 
+				1<<BUTTON_INDEXED_MOMENTARY_0 | 
+				1<<BUTTON_INDEXED_MOMENTARY_1 |
+				1<<BUTTON_INDEXED_MOMENTARY_2 |
+				1<<BUTTON_INDEXED_MOMENTARY_3;
+
+			if ((binaryInputsEdgeDown & momentary_buttons_mask) > 0){
+			 	roll_end = true;
 			}
 		}
 
@@ -900,6 +906,7 @@ void Apps::modeRandomWorld(bool init)
 		// display
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 		{
+			// animated
 			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 			{
 				addNoteToBuzzer(C7_8);
@@ -910,6 +917,10 @@ void Apps::modeRandomWorld(bool init)
 		}
 		else
 		{
+			// during roll all lights on
+			ledDisp->setNumberToDisplayAsDecimal(8888);
+			
+			// check for continued key press at random number generator to activate settings menu
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) && !RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 			{
 				// hack to set upper limit for random number
@@ -927,11 +938,6 @@ void Apps::modeRandomWorld(bool init)
 
 					ledDisp->setNumberToDisplay(RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, false);
 				}
-			}
-			else
-			{
-				// during roll all lights on
-				ledDisp->setNumberToDisplayAsDecimal(8888);
 			}
 		}
 	}
@@ -1057,23 +1063,6 @@ void Apps::randomModeDisplay(bool forReal)
 
 		char test [4]  = {'H','D','S','C'};
 		textBuf[3] = test[RANDOMWORLD_RANDOM_NUMBER / 13];
-
-		// switch (RANDOMWORLD_RANDOM_NUMBER / 13)
-		// {
-		
-		// case 0:
-		// 	textBuf[3] = 'H';
-		// 	break;
-		// case 1:
-		// 	textBuf[3] = 'D';
-		// 	break;
-		// case 2:
-		// 	textBuf[3] = 'S';
-		// 	break;
-		// case 3:
-		// 	textBuf[3] = 'C';
-		// 	break;
-		// }
 	}
 
 	break;
@@ -1086,6 +1075,7 @@ void Apps::randomModeDisplay(bool forReal)
 			break;
 		}
 		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+		
 	}
 	// NO BREAK HERE we just changed the random number to a part of a raffle draw.
 	case RANDOMWORLD_RANDOMNUMBER:
@@ -1093,6 +1083,7 @@ void Apps::randomModeDisplay(bool forReal)
 		// random number
 
 		numberToBufAsDecimal(RANDOMWORLD_RANDOM_NUMBER + 1);
+		// Serial.println("fehhe");
 	}
 	break;
 
@@ -1143,12 +1134,16 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		SETTINGS_MODE_SELECTOR = 0;
 	}
 
-	// back and forth motion required of the potentio to count up modes
-	if (encoder_dial->getValue() < 5 && SETTINGS_MODE_SELECTOR % 2 == 0)
+	// // back and forth motion required of the potentio to count up modes
+	// if (encoder_dial->getValueChanged()){
+	// 	Serial.println("feie");
+	// }
+	if (encoder_dial->getValueChanged() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
+		// Serial.println(SETTINGS_MODE_SELECTOR);
 	}
-	else if (encoder_dial->getValue() > 1000 && SETTINGS_MODE_SELECTOR % 2 != 0)
+	else if (encoder_dial->getValueChanged() > 0 && SETTINGS_MODE_SELECTOR % 2 != 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
@@ -1170,10 +1165,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-
 			// every momentary button has a matching latching button assigned
 			if (binaryInputs[buttons_indexed[i + 4]].getValue())
 			{
+				
+				// momentary button pressed while its matching latching button is ON?
 
 				lights |= 1 << lights_indexed[i + 4];
 
@@ -1189,6 +1185,14 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 			else if (binaryInputs[buttons_indexed[i]].getValue())
 			{
+				if (binaryInputsEdgeUp != 0){
+				Serial.println("----");
+				Serial.println(binaryInputsValue, BIN);
+				Serial.println((int16_t)analogRead(analog_input_pins[PIN_BUTTONS_1]));
+				Serial.println((int16_t)analogRead(analog_input_pins[PIN_BUTTONS_2]));
+
+				}
+
 				textHandle[i] = '0';
 			}
 			else
@@ -1197,7 +1201,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 
-		allLights->setBrightness((byte)(50 - encoder_dial->getValueMapped(0, 50)), false);
+		allLights->setBrightness((byte)(50 - encoder_dial->getValueLimited(50,false)), false);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
@@ -1301,9 +1305,9 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 
 void Apps::modeCountingLettersAndChars(bool init)
 {
-	//counting mode: numbers and letters.
+	//counting mode: numbers and letters. 
 
-	const bool numberElseAlphabethMode = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
+	NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT));
 
 	if (init)
 	{
@@ -1315,7 +1319,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 	// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
 
 	setBlankDisplay();
-	if (numberElseAlphabethMode)
+	if (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
 	{
 		ledDisp->setNumberToDisplayAsDecimal(counter);
 	}
@@ -1329,65 +1333,44 @@ void Apps::modeCountingLettersAndChars(bool init)
 		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = !NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN;
 	}
 
-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
-	{
-		if (!numberElseAlphabethMode)
-		{
-			buzzer->setSpeedRatio(4);
-			loadBuzzerTrack(SONG_ALPHABET);
-		}
-		else
-		{
-			buzzerOff();
-		}
-	}
-
-	// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
-	// {
-	// 	counter++;
-	// }
-
-	// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
-	// {
-	// 	counter--;
-	// }
-	modifyValueUpDownWithMomentary2And3(&counter, 1);
-
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		counter = 0;
 	}
+	
+	modifyValueUpDownWithMomentary2And3(&counter, 1);
 
-	// auto count
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
+ 	// auto count
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA) )
 	{
+		if (!NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE){
+			buzzer->setSpeedRatio(4);
+			loadBuzzerTrack(SONG_ALPHABET);
+		}
 		COUNTING_LETTERS_AND_CHARS_TIMER.start();
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		// auto mode
-
+		// auto mode next item
 		if (!COUNTING_LETTERS_AND_CHARS_TIMER.getTimeIsNegative())
 		{
-			// time is up. Next letter.
 			counter += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
-
 			COUNTING_LETTERS_AND_CHARS_TIMER.start();
 		}
 
-		//potentio behaviour
-
-		listenToPotentioToIncrementTimerInit(&COUNTING_LETTERS_AND_CHARS_TIMER, 10);
+		// set timer speed
+		dialOnEdgeChangeInitTimerPercentage(&COUNTING_LETTERS_AND_CHARS_TIMER, 10);
 	}
-	else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	else // if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		// show number right away depending on potentio value
-		counter = (int16_t)(encoder_dial->getValueMapped(0, 25 + numberElseAlphabethMode * 75)); //1024 to 26 letters.
+		//counter = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
+		counter += encoder_dial->getValueChanged();
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	checkBoundaries(&counter, 0, 25 + (numberElseAlphabethMode * 76), true);
+	checkBoundaries(&counter, 0, 25 + (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 76), true);
 }
 
 void Apps::modeSoundSong(bool init)
@@ -1594,10 +1577,15 @@ void Apps::modeComposeSong(bool init)
 		}
 
 		//default potentio behaviour
-		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))) 
+
+
+		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+		if ((binaryInputsValue & momentary_buttons_mask) == 0) // no buttons pressed
+		// if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))) 
+
 		{
 			// int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
 
@@ -1676,7 +1664,7 @@ void Apps::modeSoundNotes(bool init)
 
 		checkBoundaries(&delta, 2, 254, false);
 
-		listenToPotentioToIncrementTimerInit(&SOUND_NOTE_AUTO_TIMER, delta);
+		dialOnEdgeChangeInitTimerPercentage(&SOUND_NOTE_AUTO_TIMER, delta);
 	}
 	else
 	{
@@ -2223,7 +2211,7 @@ void Apps::modeHackTime(bool init)
 			}
 
 			// set speed.
-			listenToPotentioToIncrementTimerInit(&HACKTIME_MOVE_TIMER, 20);
+			dialOnEdgeChangeInitTimerPercentage(&HACKTIME_MOVE_TIMER, 20);
 		}
 		else
 		{
@@ -2391,11 +2379,27 @@ bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 	return value_memory != *value;
 }
 
-void Apps::listenToPotentioToIncrementTimerInit(SuperTimer *aTimer, int8_t increment_millis)
+void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer, int8_t increment_millis)
 {
 	//potentio->increaseSubtractAtChange(&delta, increment_millis);
 	
-	aTimer->incrementInitTimeMillis(encoder_dial->getValueChanged());
+	//aTimer->incrementInitTimeMillis(encoder_dial->getValueChanged() * increment_millis);
+	// only works for countdown times (negative init value)!
+	if (encoder_dial->getValueChanged()){
+		float t = (float)(aTimer->getInitTimeMillis());
+		if (t > -0.01){
+			t = -0.01;
+		}
+		float mult = 1 + (float)(encoder_dial->getValueChanged()) * 0.01;
+		
+		Serial.println(t);
+		Serial.println(mult);
+		aTimer->setInitTimeMillis(
+			 (long)(t * mult)
+			);
+		Serial.println(aTimer->getInitTimeMillis());
+		Serial.println("fefeff");
+	}
 }
 
 void Apps::draw(bool init)
@@ -3009,7 +3013,7 @@ void Apps::modeSequencer(bool init)
 
 		}
 
-		if (this->binaryInputsEdgeDown & (1 << BUTTON_LATCHING_EXTRA))
+		if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// reset transpose when stop autoplay.
 			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
@@ -3018,14 +3022,18 @@ void Apps::modeSequencer(bool init)
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			// change speed if default behaviour of potentio.
-			if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
-				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-				!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
-			)
+
+			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+			if ((binaryInputsValue & momentary_buttons_mask) == 0) // no button pressed
+			// change speed is default behaviour of dial
+
+			// if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
+			// )
 			{
-				listenToPotentioToIncrementTimerInit(&generalTimer, 5);
+				dialOnEdgeChangeInitTimerPercentage(&generalTimer, 5);
 			}
 
 			if (!generalTimer.getTimeIsNegative())
@@ -3101,7 +3109,7 @@ void Apps::modeMetronome(bool init)
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		listenToPotentioToIncrementTimerInit(&TIMER_METRONOME, 10);
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME, 10);
 
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
@@ -3552,7 +3560,7 @@ void Apps::modeReactionGame(bool init)
 	setBlankDisplay();
 
 	// at any time, leave game when depressing play button.
-	if (this->binaryInputsEdgeDown & (1 << BUTTON_LATCHING_EXTRA))
+	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		reactionGameState = reactionWaitForStart;
 	}
