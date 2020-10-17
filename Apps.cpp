@@ -507,9 +507,9 @@ void Apps::pomodoroTimer(bool init)
 	else
 	{
 		// in main menu
-#ifndef ENABLE_MULTITIMER
-		uint16_t tmpSeconds = encoder_dial->getValueMapped(0, 1024);
-#endif
+// #ifndef ENABLE_MULTITIMER
+// 		uint16_t tmpSeconds = encoder_dial->getValueMapped(0, 1024);
+// #endif
 
 		if (!POMODORO_SHOW_MENU_EDGE)
 		{
@@ -518,16 +518,17 @@ void Apps::pomodoroTimer(bool init)
 		}
 
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
-		encoder_dial->setRange(90,false);
+		// encoder_dial->setRange(90,false);
+
 		if (encoder_dial->getValueChanged())
 		{
 
 #ifdef ENABLE_MULTITIMER
 			// uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90));
 			
-			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValue());
-			#else
-			uint16_t tmpSeconds = encoder_dial->getValue();
+			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
+#else
+			uint16_t tmpSeconds = encoder_dial->getValueLimited(60,false) * 30;
 #endif
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
@@ -833,9 +834,11 @@ void Apps::modeRandomWorld(bool init)
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// set autoroll time.
-
+#ifdef ENABLE_MULTITIMER
 			uint16_t delay_seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false)); // 0 seconds to an hour
-
+#else
+			uint16_t delay_seconds = encoder_dial->getValueLimited(100,false) * 30;
+#endif
 			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
 
 			if (millis() % 1000 > 750)
@@ -2877,10 +2880,9 @@ void Apps::modeSequencer(bool init)
 	{
 		SEQUENCER_STEP_COUNTER = 0;
 		SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
-		//generalTimer.setInitTimeMillis((long)potentio->getValueStable() * -1);
-		encoder_dial->setValue(-1000);
-		generalTimer.setInitTimeMillis(encoder_dial->getValue());
-		generalTimer.start();
+
+		SEQUENCER_SPEED.setInitTimeMillis(-1000);
+		SEQUENCER_SPEED.start();
 
 		SEQUENCER_EEPROM_MODE_BLINK.setInitTimeMillis(-1000);
 		SEQUENCER_EEPROM_MODE_BLINK.start();
@@ -3007,24 +3009,18 @@ void Apps::modeSequencer(bool init)
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-
 			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 			if ((binaryInputsValue & momentary_buttons_mask) == 0) // no button pressed
-			// change speed is default behaviour of dial
 
-			// if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
-			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-			// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
-			// )
+			// change speed is default behaviour of dial
 			{
-				dialOnEdgeChangeInitTimerPercentage(&generalTimer);
+				dialOnEdgeChangeInitTimerPercentage(&SEQUENCER_SPEED);
 			}
 
-			if (!generalTimer.getTimeIsNegative())
+			if (!SEQUENCER_SPEED.getTimeIsNegative())
 			{
 				step = 1;
-				generalTimer.start();
+				SEQUENCER_SPEED.start();
 			}
 		}
 
@@ -3101,6 +3097,8 @@ void Apps::modeMetronome(bool init)
 			TIMER_METRONOME.start();
 			update = true;
 		}
+	}else{
+		update = encoder_dial->getValueChanged() !=0;
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -3556,7 +3554,7 @@ void Apps::modeReactionGame(bool init)
 	case reactionWaitForStart:
 	{
 		// change level
-		REACTION_GAME_LEVEL = (encoder_dial->getValueMapped(0, 4)); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+		REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(64,false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
 		if (encoder_dial->getValueChanged())
 		{
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
@@ -3565,7 +3563,7 @@ void Apps::modeReactionGame(bool init)
 		// check options
 		REACTION_GUITAR_HERO_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0;
 		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0;
-		REACTION_SOUND_MODE_GUITAR_HEX_HERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0;
+		EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0;
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
@@ -3579,14 +3577,11 @@ void Apps::modeReactionGame(bool init)
 		{
 			ledDisp->setNumberToDisplayAsDecimal(
 				eeprom_read_word(
-					// (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-					// 			 REACTION_GAME_LEVEL * 2 +
-					// 			 EEPROM_REACTION_GAME_GUITAR_HERO_EXTRA_OFFSET * REACTION_GUITAR_HERO_MODE +
-					// 			 EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET * OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 					(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
 								REACTION_GUITAR_HERO_MODE * 48 +
-								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
-								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
+								REACTION_GAME_LEVEL
 								 ));
 
 		}
@@ -3599,7 +3594,7 @@ void Apps::modeReactionGame(bool init)
 		// play game button pressed
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
-			if (!REACTION_GUITAR_HERO_MODE && REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+			if (!REACTION_GUITAR_HERO_MODE && EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
 				// sound mode let them all play so the player gets a feel for them.
 				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3623,7 +3618,7 @@ void Apps::modeReactionGame(bool init)
 			REACTION_GAME_STEP_TIME_MILLIS = (5 - REACTION_GAME_LEVEL) * -200;
 			displayAllSegments = 0;
 
-			if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+			if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
 				// hex geek mode
 				for (uint8_t i = 0;i<8;i++){
@@ -3688,10 +3683,13 @@ void Apps::modeReactionGame(bool init)
 	case reactionHexWaitForButtonsRelease:
 	{
 		// all buttons need to be release before we can check for a new press.
-		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-			!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+		// if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
+		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
+		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
+		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+		// {
+		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+		if ((binaryInputsValue & momentary_buttons_mask) == 0) // no buttons pressed
 		{
 			reactionGameState = reactionHexPlaying;
 		}
@@ -3703,14 +3701,17 @@ void Apps::modeReactionGame(bool init)
 
 	case reactionHexPlaying:
 	{
-		// #define TTEST
 		REACTION_GAME_HEX_ACTIVE_DIGIT = 3;
-		while(REACTION_GAME_HEX_ACTIVE_DIGIT > 0 && (textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == ' '|| textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII)){
+		while(
+			REACTION_GAME_HEX_ACTIVE_DIGIT > 0 
+			&& 
+			(textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == ' '
+				|| textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII)
+			){
 			REACTION_GAME_HEX_ACTIVE_DIGIT--;
 		}
 		// Serial.println(REACTION_GAME_HEX_ACTIVE_DIGIT);
 		
-		// #ifdef TTEST
 		// //attempt to optimization, but with a bug, and too tired. So, give it a shot! 
 		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT];
 		// //Serial.println(REACTION_GAME_HEX_VALUE_TO_FIND);
@@ -3729,8 +3730,6 @@ void Apps::modeReactionGame(bool init)
 
 		REACTION_GAME_HEX_VALUE_TO_FIND = REACTION_GAME_HEX_MEMORY[REACTION_GAME_HEX_ACTIVE_DIGIT];
 		
-		// #endif
-
 		// check for all buttons pressed in binary pattern or wrong button press
 		uint8_t build_up_value = 0;
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -3753,13 +3752,11 @@ void Apps::modeReactionGame(bool init)
 				REACTION_HEX_GUESSED_CORRECTLY = true;
 				textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = ' ';
 				REACTION_GAME_SCORE++;
-				// Serial.println("good");
 			}
 
 			// end of move 
 			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
 			{
-				// Serial.println("end of step");
 				// check if correct combination was pressed at end of move
 				reactionGameState = reactionHexNextStep;
 				if (!REACTION_HEX_GUESSED_CORRECTLY && REACTION_GAME_HEX_ACTIVE_DIGIT==3){
@@ -3895,7 +3892,7 @@ void Apps::modeReactionGame(bool init)
 
 		REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
-		if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+		if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 		{
 			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[REACTION_GAME_TARGET]);
 		}
@@ -3948,7 +3945,7 @@ void Apps::modeReactionGame(bool init)
 		}
 		ledDisp->setBinaryToDisplay(displayAllSegments);
 
-		if (!REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 0)
+		if (!EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 0)
 		{
 			// in the easy level of sound mode, we show the lights.
 
@@ -3969,7 +3966,7 @@ void Apps::modeReactionGame(bool init)
 					//right button
 					REACTION_GAME_SCORE++;
 
-					if (REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+					if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 					{
 						// a small pause must be implemented after the button press before the new turn as off not to confuse the player
 						addNoteToBuzzerRepeated(rest_1, 4);
@@ -4007,16 +4004,19 @@ void Apps::modeReactionGame(bool init)
 									  eeprom_read_word(
 									(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
 								REACTION_GUITAR_HERO_MODE * 48 +
-								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
-								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
+								REACTION_GAME_LEVEL
 								 ))
 		{
+
 			eeprom_update_word(
 			
 				(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
 								REACTION_GUITAR_HERO_MODE * 48 +
-								REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
-								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12
+								EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
+								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
+								REACTION_GAME_LEVEL
 								,REACTION_GAME_SCORE
 								);
 
@@ -4057,7 +4057,7 @@ void Apps::modeReactionGame(bool init)
 	}
 #endif
 
-	*lightsHandle |= REACTION_SOUND_MODE_GUITAR_HEX_HERO << LIGHT_LATCHING_SMALL_LEFT;
+	*lightsHandle |= EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO << LIGHT_LATCHING_SMALL_LEFT;
 	*lightsHandle |= OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE << LIGHT_LATCHING_SMALL_RIGHT;
 	*lightsHandle |= REACTION_GUITAR_HERO_MODE << LIGHT_LATCHING_BIG;
 }

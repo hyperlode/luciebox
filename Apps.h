@@ -2,7 +2,7 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
+// #define ENABLE_MULTITIMER
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 
@@ -145,6 +145,8 @@
 #define COUNTING_LETTERS_AND_CHARS_TIMER generalTimer
 #define SOUND_NOTE_AUTO_TIMER generalTimer
 #define QUIZ_RANDOM_WAIT_TIME generalTimer
+#define SEQUENCER_SPEED generalTimer
+
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
 #define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
@@ -240,7 +242,7 @@
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 
-#define REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+#define EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
 
 #define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
