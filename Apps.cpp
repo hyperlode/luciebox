@@ -3109,12 +3109,21 @@ void Apps::modeMetronome(bool init)
 	}
 
 	displayAllSegments = 0;
-
 	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3);
+	
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)), C5_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, true, C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true, C7_8, update);
-	ledDisp->setBinaryToDisplay(displayAllSegments);
+	
+	ledDisp->setBlankDisplay();
+	if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+		// bpm --> full 12 step circles per minute.   timing is per step. so: 60bpm == 1 circle / second = timer: 1000/12 = 83.333ms/step
+		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) (1.4388* (float)TIMER_METRONOME.getInitTimeMillis() ) + 180);
+
+	}else{
+		ledDisp->setBinaryToDisplay(displayAllSegments);
+	}
+
 }
 
 void Apps::modeMetronomeTickerUpdate(uint8_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step)
