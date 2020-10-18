@@ -1950,7 +1950,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	// scroll through segments
 	if (encoder_dial->getDelta())
 	{
-		DRAW_CURSOR_INDEX = encoder_dial->getValueLimited(35,true);
+		DRAW_CURSOR_INDEX = encoder_dial->getValueLimited(71,true) / 2; // 36 positions, but, make dial less sensitive
 	}
 
 	// check for global display change
@@ -2009,7 +2009,6 @@ void Apps::drawGame(bool init)
 	if (init)
 	{
 		drawGameState = drawGameWaitForStart;
-		//numberToBufAsDecimal(4444);
 	}
 
 	switch (drawGameState)
@@ -2054,6 +2053,7 @@ void Apps::drawGame(bool init)
 		}
 		else
 		{
+			// random segments
 			displayAllSegments = 0UL;
 			for (uint8_t i = 0; i < 32; i++)
 			{
@@ -2066,15 +2066,17 @@ void Apps::drawGame(bool init)
 
 	case drawGameShowPicture:
 	{
-		// displayAllSegments = 0xFF00FF00;
-
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			drawGameState = drawGameDraw;
 			displayAllSegmentsBuffer = displayAllSegments;
 			displayAllSegments = 0;
 		}
-
+		byte option_latching_buttons_mask = 1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT | 1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT ;
+		if (( (binaryInputsEdgeDown | binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detecred
+		{
+			drawGameState = drawGameWaitForStart;
+		}
 		break;
 	}
 
@@ -2086,8 +2088,6 @@ void Apps::drawGame(bool init)
 		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
 		{
 			drawGameState = drawGameEvaluate;
-
-			//DRAW_GAME_DISPLAY_TIMER.setInitTimeMillis(-3000);
 			DRAW_GAME_DISPLAY_TIMER.start();
 
 			if (displayAllSegments == displayAllSegmentsBuffer)
@@ -2105,21 +2105,20 @@ void Apps::drawGame(bool init)
 	case drawGameEvaluate:
 	{
 		// wait for user input to continue.
-		// if (!DRAW_GAME_DISPLAY_TIMER.getTimeIsNegative()){
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged())
+		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+		if ((binaryInputsEdgeUp & momentary_buttons_mask) != 0) // a button pressed
 		{
 			drawGameState = drawGameWaitForStart;
 		}
 
+		// show difference result with original drawing
 		if (DRAW_GAME_DISPLAY_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, true))
 		{
-			//if (millis() % 500 > 250){
 			uint32_t displayAllSegments_swap_buffer;
 			displayAllSegments_swap_buffer = displayAllSegments;
 			displayAllSegments = displayAllSegmentsBuffer;
 			displayAllSegmentsBuffer = displayAllSegments_swap_buffer;
 		}
-
 		break;
 	}
 
