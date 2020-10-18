@@ -520,7 +520,7 @@ void Apps::pomodoroTimer(bool init)
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
 		// encoder_dial->setRange(90,false);
 
-		if (encoder_dial->getValueChanged())
+		if (encoder_dial->getDelta())
 		{
 
 #ifdef ENABLE_MULTITIMER
@@ -1136,11 +1136,11 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 	}
 
 	// // back and forth motion required of the potentio to count up modes
-	if (encoder_dial->getValueChanged() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0)
+	if (encoder_dial->getDelta() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
-	else if (encoder_dial->getValueChanged() > 0 && SETTINGS_MODE_SELECTOR % 2 != 0)
+	else if (encoder_dial->getDelta() > 0 && SETTINGS_MODE_SELECTOR % 2 != 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
@@ -1355,7 +1355,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 	{
 		// show number right away depending on potentio value
 		//counter = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
-		counter += encoder_dial->getValueChanged();
+		counter += encoder_dial->getDelta();
 	}
 
 	//only do the characters of the alphabet in lettermode.
@@ -1373,11 +1373,11 @@ void Apps::modeSoundSong(bool init)
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		buzzer->changeTranspose(encoder_dial->getValueChanged()); 
+		buzzer->changeTranspose(encoder_dial->getDelta()); 
 	}
 	else
 	{
-		buzzer->changeSpeedRatio(encoder_dial->getValueChanged());
+		buzzer->changeSpeedRatio(encoder_dial->getDelta());
 	}
 
 	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
@@ -1508,7 +1508,7 @@ void Apps::modeComposeSong(bool init)
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 			{
 				// just play notes selected with dial
-				if (encoder_dial->getValueChanged())
+				if (encoder_dial->getDelta())
 				{
 					buzzerOff();
 					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
@@ -1538,7 +1538,7 @@ void Apps::modeComposeSong(bool init)
 
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
-				if (encoder_dial->getValueChanged())
+				if (encoder_dial->getDelta())
 				{
 					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
 					COMPOSER_SONG[COMPOSER_STEP] = note;
@@ -1584,11 +1584,11 @@ void Apps::modeComposeSong(bool init)
 			{
 				// change speed if default behaviour of potentio.
 				// COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + tmp * 10); //step +1 or -1
-				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + encoder_dial->getValueChanged() *10); //step +1 or -1
+				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + encoder_dial->getDelta() *10); //step +1 or -1
 			}
 			else
 			{
-				step = encoder_dial->getValueChanged(); ////step +1 or -1
+				step = encoder_dial->getDelta(); ////step +1 or -1
 			}
 		}
 
@@ -1660,9 +1660,9 @@ void Apps::modeSoundNotes(bool init)
 	else
 	{
 		// change note with potentio
-		if (encoder_dial->getValueChanged())
+		if (encoder_dial->getDelta())
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = encoder_dial->getValueChanged()>0;
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = encoder_dial->getDelta()>0;
 			update_note = true;
 		}
 	}
@@ -1840,9 +1840,9 @@ void Apps::movieAnimationMode(bool init)
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// manual mode
-		if (encoder_dial->getValueChanged())
+		if (encoder_dial->getDelta())
 		{
-			this->dataPlayer.setSetIndexDirection(encoder_dial->getValueChanged()>0);
+			this->dataPlayer.setSetIndexDirection(encoder_dial->getDelta()>0);
 			this->dataPlayer.moveIndexSteps(counter); // every frame is four bytes. advance four to move one frame.
 		}
 
@@ -1864,7 +1864,7 @@ void Apps::movieAnimationMode(bool init)
 	{
 		// auto mode.
 
-		if (encoder_dial->getValueChanged())
+		if (encoder_dial->getDelta())
 		{
 			dataPlayer.setAutoStepSpeed(encoder_dial->getValueLimited(1023, false) - 1023);
 		}
@@ -1948,7 +1948,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
 
 	// scroll through segments
-	if (encoder_dial->getValueChanged())
+	if (encoder_dial->getDelta())
 	{
 		DRAW_CURSOR_INDEX = encoder_dial->getValueLimited(35,true);
 	}
@@ -2002,7 +2002,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 
 void Apps::drawGame(bool init)
 {
-	// shows a picture. After it disappears, you have to drawn it exactly as it was.
+	// shows a picture. After it disappears, you have to draw it exactly as it was.
 
 	uint32_t cursorBlinker = 0;
 
@@ -2213,9 +2213,9 @@ void Apps::modeHackTime(bool init)
 			// 	1 + 99 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) +
 			// 		999 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) > 0) // speed up memory scroll by pressing buttons.
 			// );
-			if (encoder_dial->getValueChanged()){
+			if (encoder_dial->getDelta()){
 				address_changed = true;
-				HACKTIME_ADDRESS += encoder_dial->getValueChanged() ;  // todo change rate depending on buttons pressed: BUTTON_INDEXED_MOMENTARY_2 -> *100,  BUTTON_INDEXED_MOMENTARY_3 -> *1000,
+				HACKTIME_ADDRESS += encoder_dial->getDelta() ;  // todo change rate depending on buttons pressed: BUTTON_INDEXED_MOMENTARY_2 -> *100,  BUTTON_INDEXED_MOMENTARY_3 -> *1000,
 			}
 			
 		}
@@ -2374,14 +2374,14 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 {
 	// fixed to one percent for now.
 	// only works for countdown times (negative init value)!
-	if (encoder_dial->getValueChanged()){
+	if (encoder_dial->getDelta()){
 		long original = (aTimer->getInitTimeMillis());
-		long result = long((float)original* ( 1 - (float)(encoder_dial->getValueChanged()) * 0.01));
+		long result = long((float)original* ( 1 - (float)(encoder_dial->getDelta()) * 0.01));
 		// Serial.println(original);
 		// Serial.println(result);
 		// if value to small to make an absolute difference, force it! (make sure to stay negative)
 		if (original == result){
-			result -= encoder_dial->getValueChanged() * encoder_dial->getValueChanged();
+			result -= encoder_dial->getDelta() * encoder_dial->getDelta();
 		}
 
 		aTimer->setInitTimeMillis(
@@ -2393,18 +2393,20 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 void Apps::draw(bool init)
 {
 
+	// scroll through drawings from eeprom memories
+	// change drawings with a fancy painting app
+	// save drawings too eeprom
+	// manage drawings library by deleting or inserting slots. This is good when making animations. 
+
 	uint32_t cursorBlinker = 0;
 
 	if (init)
 	{
-		//reset saved led disp state.
-		// no memory wasting with setting to zero, instead, we'll load the first picture right away
-
 		DRAW_ACTIVE_DRAWING_INDEX = 0;
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
-		
 	}
 
+	// VIEW / MODIFY drawing
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) &&
 		!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)))
 	{
@@ -2415,15 +2417,8 @@ void Apps::draw(bool init)
 	}
 	else
 	{
-
 		// scroll through drawings
-		// if (potentio->getValueChanged())
-		// {
-		// 	DRAW_ACTIVE_DRAWING_INDEX += 1 - (2 * potentio->getLastStableValueChangedUp());
-		// }
-		// potentio->increaseSubtractAtChange(&DRAW_ACTIVE_DRAWING_INDEX, 1);
-
-		DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getValueChanged();
+		DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getDelta();
 		
 		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{ // shift function for saving drawings to eeprom.
@@ -2435,69 +2430,71 @@ void Apps::draw(bool init)
 			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX, 1);
 		}
 	}
+
+	// SAVE / LOAD drawings from memory
 #ifdef ENABLE_EEPROM
 	checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1, true);
 
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
+		// eeprom save mode
 
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
-			// special function in save image to eeprom mode.
+			// SHIFT button to insert or delete drawing slots from eeprom
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 			{
-				// insert
-
-				// //insert after current index (and move to it)
+				//insert slot after current index (and move to it)
 				if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS - 1)
 				{
 					// one picture before the last one is the last position where you can still insert a drawing.
 				}
 				else
 				{
-
 					// work with eeprom addresses, not with picture indexes.
 					for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 1);
-						 i >= EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
+						 i >= EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX-1) * 4;
 						 i--)
 					{
 						// move all pictures one up.
 						uint8_t tmp = eeprom_read_byte((uint8_t *)(i));
 						eeprom_write_byte((uint8_t *)(i + 4), tmp);
 					}
-					DRAW_ACTIVE_DRAWING_INDEX++; // move to "new picture."
 				}
 			}
 
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 			{
 				// delete slot. (and shift all drawings.)
-				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4;
+				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX+1) * 4;
 					 i < EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
 					 i++)
 				{
 					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
 					eeprom_write_byte((uint8_t *)(i), tmp);
 				}
+				// DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY ++; // hack to make it refersh the drawing.
 			}
 		}
 		else
 		{
-			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				// save active drawing on display to eeprom.
 				for (uint8_t i = 0; i < 4; i++)
 				{
-					eeprom_write_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i), (uint8_t)((displayAllSegments >> (i * 8)) & 0xFF));
+					eeprom_write_byte(
+						(uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
+						(uint8_t)((displayAllSegments >> (i * 8)) & 0xFF)
+						);
 				}
 			}
 		}
-
 	}
-	else if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY)
+	
+	if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY)
 	{
-		// load drawing from memory at request.
-		// load drawing
+		// load drawing from memory only if index changed
 		displayAllSegments = 0;
 		for (uint8_t i = 0; i < 4; i++)
 		{
@@ -2509,15 +2506,16 @@ void Apps::draw(bool init)
 
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
 
+	// OUTPUT to display
 	setBlankDisplay();
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
-		// always show index of active drawing if activated.
-		ledDisp->setNumberToDisplayAsDecimal(DRAW_ACTIVE_DRAWING_INDEX + 1); // in the real world, most of the people start counting from 1. Welcome to an eternal discussion Lucie!
+		// number: always show index of active drawing if activated.
+		ledDisp->setNumberToDisplayAsDecimal(DRAW_ACTIVE_DRAWING_INDEX ); // do +1 or not?  in the real world, most of the people start counting from 1. Welcome to an eternal discussion Lucie!
 	}
 	else
 	{
-		// set display
+		// drawing: set display
 		ledDisp->setBinaryToDisplay(displayAllSegments ^ cursorBlinker);
 	}
 }
@@ -2568,7 +2566,7 @@ void Apps::miniMultiTimer(bool init)
 	this->multiTimer.setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// THE DIAL
-	if (encoder_dial->getValueChanged())
+	if (encoder_dial->getDelta())
 	{
 		// number of timers
 		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
@@ -2772,7 +2770,7 @@ void Apps::modeGeiger(bool init)
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			//lower
-			// if (encoder_dial->getValueChanged())
+			// if (encoder_dial->getDelta())
 			// {
 			// 	GEIGER_TONE_FREQUENY_LOWEST = encoder_dial->getValueMapped(0, 5000);
 			// }
@@ -2785,7 +2783,7 @@ void Apps::modeGeiger(bool init)
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			//upper
-			// if (encoder_dial->getValueChanged())
+			// if (encoder_dial->getDelta())
 			// {
 			// 	GEIGER_TONE_FREQUENCY_HEIGHEST = encoder_dial->getValueMapped(0, 5000);
 			// }
@@ -2796,11 +2794,11 @@ void Apps::modeGeiger(bool init)
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			//length
-			// if (encoder_dial->getValueChanged())
+			// if (encoder_dial->getDelta())
 			// {
 			// 	GEIGER_TONE_LENGTH = encoder_dial->getValueMapped(0, 256);
 			// }
-			// GEIGER_TONE_LENGTH += encoder_dial->getValueChanged();
+			// GEIGER_TONE_LENGTH += encoder_dial->getDelta();
 			GEIGER_TONE_LENGTH = encoder_dial->getValueLimited(255,false);
 			//checkBoundaries(&GEIGER_TONE_LENGTH, 256, 0, false);
 			
@@ -2808,7 +2806,7 @@ void Apps::modeGeiger(bool init)
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			if (encoder_dial->getValueChanged())
+			if (encoder_dial->getDelta())
 			{
 				buzzer->playTone(
 					encoder_dial->getValueLimited(500,false),
@@ -2931,7 +2929,7 @@ void Apps::modeSequencer(bool init)
 			// bonus effect: TRANSPOSE!
 
 			//potentio->increaseSubtractAtChange((int16_t *)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
-			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getValueChanged();
+			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getDelta();
 		}
 
 		// if ((this->binaryInputsEdgeDown & (1<<BUTTON_INDEXED_MOMENTARY_0)))
@@ -2941,7 +2939,7 @@ void Apps::modeSequencer(bool init)
 
 		// just listen to the potentio note
 		// SEQUENCER_TEMP_NOTE = encoder_dial->getValueMapped(0, 255);
-		SEQUENCER_TEMP_NOTE += encoder_dial->getValueChanged();
+		SEQUENCER_TEMP_NOTE += encoder_dial->getDelta();
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
@@ -2952,7 +2950,7 @@ void Apps::modeSequencer(bool init)
 		{
 			buzzer->buzzerOff();
 			// if button continuously pressed, rotate potentio to hear notes.
-			if (encoder_dial->getValueChanged())
+			if (encoder_dial->getDelta())
 			{
 				addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
 			}
@@ -2996,7 +2994,7 @@ void Apps::modeSequencer(bool init)
 			// }
 			//}
 			//potentio->increaseSubtractAtChange((int16_t *)&(step), 1);
-			step += encoder_dial->getValueChanged();
+			step += encoder_dial->getDelta();
 
 		}
 
@@ -3088,9 +3086,9 @@ void Apps::modeMetronome(bool init)
 		TIMER_METRONOME.start();
 	}
 
+	dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
 
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
@@ -3098,7 +3096,7 @@ void Apps::modeMetronome(bool init)
 			update = true;
 		}
 	}else{
-		update = encoder_dial->getValueChanged() !=0;
+		update = encoder_dial->getDelta() !=0;
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -3110,7 +3108,7 @@ void Apps::modeMetronome(bool init)
 
 	displayAllSegments = 0;
 	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3);
-	
+
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, true, C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true, C7_8, update);
@@ -3225,7 +3223,7 @@ void Apps::modeSimon(bool init)
 		}
 
 		// number of players.
-		if (encoder_dial->getValueChanged())
+		if (encoder_dial->getDelta())
 		{
 			SIMON_PLAYERS_COUNT = encoder_dial->getValueMapped(SIMON_MAX_PLAYERS - 1, false) + 1; // start counting from player 1 to display
 		}
@@ -3564,7 +3562,7 @@ void Apps::modeReactionGame(bool init)
 	{
 		// change level
 		REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(64,false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
-		if (encoder_dial->getValueChanged())
+		if (encoder_dial->getDelta())
 		{
 			TIMER_REACTION_GAME_RESTART_DELAY.start();
 		}

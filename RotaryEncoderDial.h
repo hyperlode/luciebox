@@ -37,7 +37,7 @@ public:
 
 	void setPins(byte pinChannelA, byte pinChannelB);
 	
-	int8_t getValueChanged();
+	int8_t getDelta();
     int16_t getValue();
 	void setValue(int16_t value);
 

@@ -14,7 +14,7 @@ RotaryEncoderDial::RotaryEncoderDial()
   this->minToMax = false;
 }
 
-int8_t RotaryEncoderDial::getValueChanged(){
+int8_t RotaryEncoderDial::getDelta(){
   // only take into account small increases. if it jumps. 
   return this->delta_memory;
 }
