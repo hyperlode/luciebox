@@ -1377,7 +1377,7 @@ void Apps::modeSoundSong(bool init)
 	}
 	else
 	{
-		buzzer->changeSpeedRatio(encoder_dial->getDelta());
+		buzzerChangeSpeedRatioWithEncoderDial();
 	}
 
 	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
@@ -1501,8 +1501,8 @@ void Apps::modeComposeSong(bool init)
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				// just listen to note on index in song
-				buzzerOff();
-				addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
+				
+				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 			}
 
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
@@ -1510,9 +1510,9 @@ void Apps::modeComposeSong(bool init)
 				// just play notes selected with dial
 				if (encoder_dial->getDelta())
 				{
-					buzzerOff();
+					
 					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
-					addNoteToBuzzer(note);
+					buzzerOffAndAddNote(note);
 					buzzer->noteToDisplay(textBuf, &decimalPoints, note);
 					textBufToDisplay();
 					ledDisp->setDecimalPointsToDisplay(decimalPoints);
@@ -1525,8 +1525,8 @@ void Apps::modeComposeSong(bool init)
 			{
 				uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
 				COMPOSER_SONG[COMPOSER_STEP] = note;
-				buzzerOff();
-				addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
+				
+				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 
 				// if note added to end, expand song length and add default note
 				if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
@@ -1542,8 +1542,8 @@ void Apps::modeComposeSong(bool init)
 				{
 					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
 					COMPOSER_SONG[COMPOSER_STEP] = note;
-					buzzerOff();
-					addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
+					
+					buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 				}
 			}
 		}
@@ -1902,7 +1902,7 @@ void Apps::movieAnimationMode(bool init)
 	}
 
 	// set to display
-	ledDisp->setBinaryToDisplay(displayAllSegments);
+	displayAllSegmentsToScreen();
 }
 
 void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
@@ -2275,7 +2275,7 @@ void Apps::modeHackTime(bool init)
 	// convert memory to sounds... Be prepared for a post-modernistic masterpiece.
 	if (address_changed && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)))
 	{ //
-		addNoteToBuzzer(array_8_bytes[0]);
+		buzzerOffAndAddNote(array_8_bytes[0]);
 	}
 
 	// compressed display mode (to save memory)
@@ -2294,7 +2294,7 @@ void Apps::modeHackTime(bool init)
 			{
 				displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
 			}
-			ledDisp->setBinaryToDisplay(displayAllSegments);
+			displayAllSegmentsToScreen();
 		}
 		else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS)
 		{
@@ -2336,7 +2336,7 @@ void Apps::modeHackTime(bool init)
 	// 		for(uint8_t i=0;i<4;i++){
 	// 			displayAllSegments |= (array_8_bytes[i]) << (8*i);
 	// 		}
-	// 		ledDisp->setBinaryToDisplay(displayAllSegments);
+	// 		displayAllSegmentsToScreen();
 	// 	}
 	// 	break;
 	// 	case HACKTIME_DISPLAY_DECIMAL:{
@@ -2925,7 +2925,7 @@ void Apps::modeSequencer(bool init)
 
 		// if ((this->binaryInputsEdgeDown & (1<<BUTTON_INDEXED_MOMENTARY_0)))
 		// {
-		// 	ledDisp->setBinaryToDisplay(displayAllSegments);
+		// 	displayAllSegmentsToScreen();
 		// }
 
 		// just listen to the potentio note
@@ -2939,12 +2939,11 @@ void Apps::modeSequencer(bool init)
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
-			buzzer->buzzerOff();
+			
 			// if button continuously pressed, rotate potentio to hear notes.
-			if (encoder_dial->getDelta())
-			{
-				addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
-			}
+			
+			buzzerOffAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
+			
 			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
@@ -3056,43 +3055,44 @@ void Apps::modeSequencer(bool init)
 
 		if (!showNote)
 		{
-			ledDisp->setBinaryToDisplay(displayAllSegments);
+			displayAllSegmentsToScreen();
 		}
 	}
 }
 
 void Apps::modeMetronome(bool init)
 {
-	// todo: with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen)!
+	// todo: LFO:  with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen)!
 	bool update = false;
 
 	if (init)
 	{
-		// initializing is silly!
-		// METRONOME_TICKER_1_POSITION = 0;
-		// METRONOME_TICKER_2_POSITION = 0;
-		// METRONOME_TICKER_3_POSITION = 0;
-
-		TIMER_METRONOME.setInitTimeMillis(-500);
+		TIMER_METRONOME.setInitTimeMillis(-166);
 		TIMER_METRONOME.start();
+		
 	}
 
 	dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-
+		// auto counting (metronome)
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
 			TIMER_METRONOME.start();
 			update = true;
 		}
+	}else if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
+		// manual mode
+		update = encoder_dial->getDelta() != 0;
 	}else{
-		update = encoder_dial->getDelta() !=0;
+		buzzerChangeSpeedRatioWithEncoderDial();
+		buzzerOffAndAddNoteAtEncoderDialChange(C6_4);
+		
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
-		//ticker 1,2 and 3 back together (at position of ticker 1)
+		// ticker 1,2 and 3 back together (at position of ticker 1)
 		METRONOME_TICKER_2_POSITION = METRONOME_TICKER_1_POSITION;
 		METRONOME_TICKER_3_POSITION = METRONOME_TICKER_1_POSITION;
 	}
@@ -3100,50 +3100,38 @@ void Apps::modeMetronome(bool init)
 	displayAllSegments = 0;
 	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3);
 
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_MOMENTARY_2, true, C5_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_MOMENTARY_3, true, C7_8, update);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_INDEXED_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_INDEXED_MOMENTARY_2, true, C5_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_INDEXED_MOMENTARY_3, true, C7_8, update);
 	
 	ledDisp->setBlankDisplay();
 	if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
 		// bpm --> full 12 step circles per minute.   timing is per step. so: 60bpm == 1 circle / second = timer: 1000/12 = 83.333ms/step
-		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) (1.4388* (float)TIMER_METRONOME.getInitTimeMillis() ) + 180);
+		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) ( 1 / (12* (float)TIMER_METRONOME.getInitTimeMillis()/60000 ))); // millis/step to fullcirclesp/minute (bpm)
 
 	}else{
-		ledDisp->setBinaryToDisplay(displayAllSegments);
+		displayAllSegmentsToScreen();
 	}
-
 }
 
-void Apps::modeMetronomeTickerUpdate(uint8_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step)
+void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step)
 {
 	// every ticker gets updated.
 
 	// check for next step
-	if (binaryInputs[momentary_id].getEdgeUp() || force_step)
+	if (binaryInputsEdgeUp & 1<<momentary_id || force_step)
 	{
-
-		int16_t ttmp = (int16_t)*ticker_counter;
 		this->nextStepRotate(
-			&ttmp,
+			ticker_counter,
 			direction,
 			0,
 			11);
-
-		*ticker_counter = (uint8_t)ttmp;
 
 		if (*ticker_counter == 0)
 		{
 			addNoteToBuzzer(sound_at_zero_pass);
 		}
 	}
-
-	// // update screen, every cycle.
-	// for (uint8_t i = 0; i < 4; i++)
-	// {
-	// 	displayAllSegments |= (uint32_t)pgm_read_byte_near(disp_4digits_animate_circle + *ticker_counter * 4 + (i)) << (8 * i); //* 4 --> 4 bytes per dword
-	// }
-
 	ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + *ticker_counter * 4);
 }
 
@@ -3865,7 +3853,7 @@ void Apps::modeReactionGame(bool init)
 				//REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
 			}
 		}
-		ledDisp->setBinaryToDisplay(displayAllSegments);
+		displayAllSegmentsToScreen();
 		break;
 	}
 
@@ -3939,7 +3927,7 @@ void Apps::modeReactionGame(bool init)
 		{
 			ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + step * 4);
 		}
-		ledDisp->setBinaryToDisplay(displayAllSegments);
+		displayAllSegmentsToScreen();
 
 		if (!EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 0)
 		{
@@ -4189,8 +4177,23 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
 	}
 }
 
+void Apps::displayAllSegmentsToScreen(){
+	ledDisp->setBinaryToDisplay(this->displayAllSegments);
+}
+
 void Apps::textBufToDisplay(){
 	ledDisp->setTextBufToDisplay(textBuf);
+}
+
+void Apps::buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note){
+	if (encoder_dial->getDelta()){
+		buzzerOffAndAddNote(note);
+	}
+}
+
+void Apps::buzzerOffAndAddNote(uint8_t note){
+	buzzerOff();
+	addNoteToBuzzer(note);
 }
 
 void Apps::addNoteToBuzzer(uint8_t note){
@@ -4212,6 +4215,10 @@ void Apps::setLedArray(byte lights){
 
 void Apps::buzzerOff(){
 	buzzer->buzzerOff(); // stop all sounds that were playing in an app.
+}
+
+void Apps::buzzerChangeSpeedRatioWithEncoderDial(){
+	buzzer->changeSpeedRatio(encoder_dial->getDelta());
 }
 
 

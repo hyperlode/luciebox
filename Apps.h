@@ -167,7 +167,7 @@
 #define HACKTIME_ADDRESS counter
 #define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
 #define QUIZ_ROUNDS_INIT counter
-
+#define METRONOME_TICKER_3_POSITION counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -178,6 +178,7 @@
 #define POMODORO_INIT_TIME_SECONDS counter2
 #define HACKTIME_DISPLAY_MODE counter2
 #define SOUND_NOTES_SCALE_INDEX counter2
+#define METRONOME_TICKER_2_POSITION counter2
 
 //#define DRAW_Y_POS counter3
 #define DRAW_CURSOR_INDEX counter3
@@ -205,21 +206,18 @@
 #define SIMON_PLAYERS_ALIVE_COUNT counter5
 #define HACKTIME_MEMORY_SELECT counter5
 #define DRAW_CURSOR_POTENTIO_INDEX counter5
-#define METRONOME_TICKER_1_POSITION counter5
 #define SOUND_NOTES_PROGRESSION_MODE counter5
 
 
 #define SIMON_PLAYERS_COUNT counter6
 #define POMODORO_AUTO_RESTART_ENABLED counter6
 #define DRAW_SHOW_MODE counter6
-#define METRONOME_TICKER_2_POSITION counter6
 #define HACKTIME_SOUND counter6
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
 #define REACTION_GAME_HEX_ACTIVE_DIGIT counter6
 
 #define SIMON_PLAYER_PLAYING_INDEX counter7
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
-#define METRONOME_TICKER_3_POSITION counter7
 #define REACTION_GAME_HEX_VALUE_TO_FIND counter7
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
@@ -228,6 +226,7 @@
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 #define GEIGER_TONE_LENGTH counter9
+#define METRONOME_TICKER_1_POSITION counter9
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -596,7 +595,7 @@ public:
     void modeGeiger(bool init);
     void modeSequencer(bool init);
     void modeMetronome(bool init);
-    void modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
+    void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void modeSimon(bool init);
     void modeReactionGame(bool init);
     void tiltSwitchTest(bool init);
@@ -620,6 +619,7 @@ public:
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
     void updateEveryAppCycleBefore();
     void geigerToneHelper();
+    
 private:
 
 #ifdef FUNCTION_POINTER_APP_SELECTION
@@ -639,9 +639,13 @@ private:
 
     // functions for compression the memory size
     void textBufToDisplay();
+    void displayAllSegmentsToScreen();
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
     void buzzerOff();
+    void buzzerOffAndAddNote(uint8_t note);
+    void buzzerChangeSpeedRatioWithEncoderDial();
+    void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
     void setBlankDisplay();
     void setLedArray(byte lights);
