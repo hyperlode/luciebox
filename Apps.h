@@ -2,7 +2,7 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-// #define ENABLE_MULTITIMER
+#define ENABLE_MULTITIMER
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 
@@ -181,7 +181,6 @@
 
 //#define DRAW_Y_POS counter3
 #define DRAW_CURSOR_INDEX counter3
-#define GEIGER_INCREASE_CHANCE counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
 #define SETTINGS_MODE_SELECTOR counter3
@@ -192,14 +191,14 @@
 #define SOUND_NOTES_SCALE_ROOT counter3
 
 #define REACTION_GAME_TARGET counter4
-#define COUNTER_GEIGER counter4
+#define GEIGER_INCREASE_CHANCE counter4
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 #define SIMON_ACTIVE_LIGHT counter4
 #define POMODORO_PAUSE_TIME_SECONDS counter4
 #define SOUND_MODE_SCALE_RANGE_LENGTH counter4
 
+// #define GEIGER_ counter5
 #define REACTION_GAME_LEVEL counter5
-#define GEIGER_TONE_LENGTH counter5
 #define SEQUENCER_TEMP_NOTE counter5
 #define RANDOMWORLD_RANDOM_TYPE counter5
 #define COMPOSER_SONG_LENGTH counter5
@@ -225,8 +224,10 @@
 
 #define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
+#define COUNTER_GEIGER counter8
 
 #define SOUND_NOTES_NOTE_INDEX counter9
+#define GEIGER_TONE_LENGTH counter9
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -618,6 +619,7 @@ public:
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
     void updateEveryAppCycleBefore();
+    void geigerToneHelper();
 private:
 
 #ifdef FUNCTION_POINTER_APP_SELECTION
@@ -667,7 +669,6 @@ private:
     uint8_t counter5;
     uint8_t counter6;
     uint8_t counter7;
-
     uint16_t counter8;
     int16_t counter9;
 

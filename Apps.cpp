@@ -2376,8 +2376,6 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 	if (encoder_dial->getDelta()){
 		long original = (aTimer->getInitTimeMillis());
 		long result = long((float)original* ( 1 - (float)(encoder_dial->getDelta()) * 0.01));
-		// Serial.println(original);
-		// Serial.println(result);
 		// if value to small to make an absolute difference, force it! (make sure to stay negative)
 		if (original == result){
 			result -= encoder_dial->getDelta() * encoder_dial->getDelta();
@@ -2751,6 +2749,9 @@ void Apps::modeGeiger(bool init)
 		GEIGER_TONE_FREQUENY_LOWEST = 2000;
 		GEIGER_TONE_FREQUENCY_HEIGHEST = 4000;
 		GEIGER_TONE_LENGTH = 10;
+		GEIGER_PROBABILITY_THRESHOLD = 950000;
+		GEIGER_INCREASE_CHANCE = 0;
+		
 	}
 
 	//play tick.
@@ -2759,79 +2760,51 @@ void Apps::modeGeiger(bool init)
 	long r = random(0, 1024) * random(0, 1024);
 	//long r = random(0, 1024);
 	//r = r*r;
-
 	setBlankDisplay();
+
+	
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
 		// note mode
+		int8_t delta = encoder_dial->getDelta();
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			//lower
-			// if (encoder_dial->getDelta())
-			// {
-			// 	GEIGER_TONE_FREQUENY_LOWEST = encoder_dial->getValueMapped(0, 5000);
-			// }
-			
-			GEIGER_TONE_FREQUENY_LOWEST = encoder_dial->getValueLimited(500,false) * 10;
-			// checkBoundaries(&GEIGER_TONE_FREQUENY_LOWEST, 5000, 0, false);
-
+			GEIGER_TONE_FREQUENY_LOWEST +=  delta * 10;
+			checkBoundaries(&GEIGER_TONE_FREQUENY_LOWEST, 0, 5000, false);
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENY_LOWEST);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			//upper
-			// if (encoder_dial->getDelta())
-			// {
-			// 	GEIGER_TONE_FREQUENCY_HEIGHEST = encoder_dial->getValueMapped(0, 5000);
-			// }
-			GEIGER_TONE_FREQUENCY_HEIGHEST = encoder_dial->getValueLimited(500,false) * 10;
-			// checkBoundaries(&GEIGER_TONE_FREQUENCY_HEIGHEST, 5000, 0, false);
+			GEIGER_TONE_FREQUENCY_HEIGHEST += delta * 10;
+			checkBoundaries(&GEIGER_TONE_FREQUENCY_HEIGHEST, 0, 5000, false);
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENCY_HEIGHEST);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			//length
-			// if (encoder_dial->getDelta())
-			// {
-			// 	GEIGER_TONE_LENGTH = encoder_dial->getValueMapped(0, 256);
-			// }
-			// GEIGER_TONE_LENGTH += encoder_dial->getDelta();
-			GEIGER_TONE_LENGTH = encoder_dial->getValueLimited(255,false);
-			//checkBoundaries(&GEIGER_TONE_LENGTH, 256, 0, false);
-			
+			GEIGER_TONE_LENGTH += delta;
+			checkBoundaries(&GEIGER_TONE_LENGTH, 1, 255, false);
 			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_LENGTH);
+			
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			if (encoder_dial->getDelta())
+			if (delta)
 			{
-				buzzer->playTone(
-					encoder_dial->getValueLimited(500,false),
-					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
+				this->geigerToneHelper();
 			}
+			
+		}else{
+			GEIGER_PROBABILITY_THRESHOLD -= encoder_dial->getDelta() * 10 *1024;
 		}
-		else
-		{
 
-			if (r > GEIGER_PROBABILITY_THRESHOLD)
-			{ // 1024*1024
-				long tmp = random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST + 1);
-				buzzer->playTone(
-					tmp,
-					(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
-
-				ledDisp->setNumberToDisplayAsDecimal(tmp);
-				COUNTER_GEIGER++;
-			}
-
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
-			{
-				ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);
-			}
-
-			GEIGER_PROBABILITY_THRESHOLD = encoder_dial->getValueLimited(1024, false) * 1024;
+		if (r > GEIGER_PROBABILITY_THRESHOLD)
+		{ // 1024*1024
+			this->geigerToneHelper();
 		}
 	}
 	else
@@ -2842,29 +2815,48 @@ void Apps::modeGeiger(bool init)
 		// If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			// binaryInputs[SWITCH_TILT_FORWARD].getValue() ||
-			// r *= 2; //
-			GEIGER_INCREASE_CHANCE += 1000;
+			GEIGER_INCREASE_CHANCE += 1;
 		}
 		else
 		{
 			if (GEIGER_INCREASE_CHANCE > 0)
 			{
-				GEIGER_INCREASE_CHANCE -= 1500;
+				GEIGER_INCREASE_CHANCE -= 1;
 			}
 		}
+		r += (long)(GEIGER_INCREASE_CHANCE)*1000;
 
-		r += GEIGER_INCREASE_CHANCE;
-
+		GEIGER_PROBABILITY_THRESHOLD -= encoder_dial->getDelta() * 10 *1024;
+		// GEIGER_PROBABILITY_THRESHOLD = 1000*1024;
 		// textBuf[0] = ' ';
-		if (r > encoder_dial->getValueLimited(1024, false) * 1024)
+		// if (r > encoder_dial->getValueLimited(1024, false) * 1024)
+		// if (r > GEIGER_PROBABILITY_THRESHOLD)
+		if (r > GEIGER_PROBABILITY_THRESHOLD)
 		{
 			//	addNoteToBuzzer(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
 			setStandardTextToTextBuf(TEXT_RANDOM_SEGMENTS);
 			textBufToDisplay();
+			COUNTER_GEIGER++;
 		}
 	}
+
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	{
+		ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);
+	}
+	
+}
+
+void Apps::geigerToneHelper(){
+	unsigned int random_frequency_within_limits = random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST + 1);
+	
+	buzzer->playTone(
+		random_frequency_within_limits,
+		(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) ? 0 : GEIGER_TONE_LENGTH);
+
+	ledDisp->setNumberToDisplayAsDecimal(random_frequency_within_limits);
+	COUNTER_GEIGER++;
 }
 
 void Apps::modeSequencer(bool init)
@@ -3716,11 +3708,9 @@ void Apps::modeReactionGame(bool init)
 			){
 			REACTION_GAME_HEX_ACTIVE_DIGIT--;
 		}
-		// Serial.println(REACTION_GAME_HEX_ACTIVE_DIGIT);
 		
 		// //attempt to optimization, but with a bug, and too tired. So, give it a shot! 
 		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT];
-		// //Serial.println(REACTION_GAME_HEX_VALUE_TO_FIND);
 
 		// if (REACTION_GAME_HEX_VALUE_TO_FIND == ' ' || REACTION_GAME_HEX_VALUE_TO_FIND == SPACE_FAKE_ASCII){
 		// 	REACTION_GAME_HEX_VALUE_TO_FIND = 0;
