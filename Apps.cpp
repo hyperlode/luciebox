@@ -3180,8 +3180,7 @@ void Apps::modeSimon(bool init)
 	uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
 	for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
 	{
-		// if (binaryInputs[buttons_indexed[k]].getEdgeUp())
-		if (binaryInputs[buttons_indexed[k]].getEdgeUp())
+		if (binaryInputsEdgeUp & 1<<k)
 		{
 			pressed_momentary_button = k;
 		}
