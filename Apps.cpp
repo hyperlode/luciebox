@@ -3072,9 +3072,9 @@ void Apps::modeMetronome(bool init)
 		
 	}
 
-	dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
 		// auto counting (metronome)
 		if (!TIMER_METRONOME.getTimeIsNegative())
 		{
@@ -3100,8 +3100,8 @@ void Apps::modeMetronome(bool init)
 	displayAllSegments = 0;
 	bool forceNextStep = update || binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3);
 
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_INDEXED_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
-	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_INDEXED_MOMENTARY_2, true, C5_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_3_POSITION, BUTTON_INDEXED_MOMENTARY_1, !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)), C6_4, forceNextStep);
+	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_INDEXED_MOMENTARY_2, true, C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_INDEXED_MOMENTARY_3, true, C7_8, update);
 	
 	ledDisp->setBlankDisplay();
