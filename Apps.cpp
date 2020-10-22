@@ -3081,13 +3081,14 @@ void Apps::modeMetronome(bool init)
 			TIMER_METRONOME.start();
 			update = true;
 		}
+
 	}else if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
 		// manual mode
 		update = encoder_dial->getDelta() != 0;
+
 	}else{
 		buzzerChangeSpeedRatioWithEncoderDial();
 		buzzerOffAndAddNoteAtEncoderDialChange(C6_4);
-		
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -3150,7 +3151,7 @@ void Apps::modeSimon(bool init)
 		// SIMON_LEVEL = 1; // levels don't look that appealing. I choose one speed and you'll have to stick with it.
 	}
 
-	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) || init)
+	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) )
 	{
 		// at any time, if play button off: no more playing!
 		simonState = simonWaitForNewGame;
@@ -3179,6 +3180,7 @@ void Apps::modeSimon(bool init)
 	uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
 	for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
 	{
+		// if (binaryInputs[buttons_indexed[k]].getEdgeUp())
 		if (binaryInputs[buttons_indexed[k]].getEdgeUp())
 		{
 			pressed_momentary_button = k;
@@ -3195,6 +3197,7 @@ void Apps::modeSimon(bool init)
 			simonState = simonNewGame;
 		}
 
+
 		// play button light blinking invitingly.
 		if (millis() % 250 > 125)
 		{
@@ -3202,10 +3205,7 @@ void Apps::modeSimon(bool init)
 		}
 
 		// number of players.
-		if (encoder_dial->getDelta())
-		{
-			SIMON_PLAYERS_COUNT = encoder_dial->getValueMapped(SIMON_MAX_PLAYERS - 1, false) + 1; // start counting from player 1 to display
-		}
+		SIMON_PLAYERS_COUNT= (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false)/4 + 1); // start counting from player 0 to display
 
 		numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
 		//textBuf[0] = ' ';
