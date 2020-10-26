@@ -646,6 +646,7 @@ private:
     void buzzerOffAndAddNote(uint8_t note);
     void buzzerChangeSpeedRatioWithEncoderDial();
     void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
+    void noteToDisplay(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
     void setBlankDisplay();
     void setLedArray(byte lights);

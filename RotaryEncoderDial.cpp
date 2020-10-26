@@ -32,12 +32,12 @@ int16_t RotaryEncoderDial::getValueLimited(int16_t maxValue, boolean jumpAtEnd){
   return this->getValue();
 }
 
-int16_t RotaryEncoderDial::getValueMapped(int16_t minValue, int16_t maxValue){
-  // DEPRECATED!
-  // hacked. Not yet nicely done!!!
-  this->setRange (maxValue, false);
-  return this->getValue();
-}
+// int16_t RotaryEncoderDial::getValueMapped(int16_t minValue, int16_t maxValue){
+//   // DEPRECATED!
+//   // hacked. Not yet nicely done!!!
+//   this->setRange (maxValue, false);
+//   return this->getValue();
+// }
 
 void RotaryEncoderDial::refresh(){
   noInterrupts();

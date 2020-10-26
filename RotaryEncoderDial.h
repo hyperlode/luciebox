@@ -46,7 +46,7 @@ public:
 	void setRange(int16_t maxValue, boolean minToMax);
 	void refresh();
 
-	int16_t getValueMapped(int16_t minValue, int16_t maxValue);
+	// int16_t getValueMapped(int16_t minValue, int16_t maxValue);
 	int16_t getValueLimited(int16_t maxValue, boolean jumpAtEnd);
     
     void interruptChannelA();

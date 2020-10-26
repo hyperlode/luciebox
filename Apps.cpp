@@ -573,9 +573,12 @@ void Apps::pomodoroTimer(bool init)
 
 	// ticking sound
 	// long tick_duration = encoder_dial->getValueMapped(0, 40);
-	encoder_dial->setRange(40,true);
-	int16_t tick_duration = encoder_dial->getValue();
-	bool tick_twice_a_second = tick_duration > 20;
+	// encoder_dial->setRange(40,true);
+	// int16_t tick_duration = encoder_dial->getValue();
+	uint8_t tick_duration = encoder_dial->getValueLimited(160,true) ;  // was 40, but set to 160 for less sensitivity. do again divide by four to limit options.
+	bool tick_twice_a_second = tick_duration > 80;
+	tick_duration = tick_duration % 80; 
+
 	if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 	{
 		if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0)
@@ -596,17 +599,17 @@ void Apps::pomodoroTimer(bool init)
 			// no sound when zero
 
 			// twenty settings, for each mode (two ticks or one tick per second)
-			if (tick_duration > 20)
+			// if (tick_duration > 20)
+			// {
+			// 	tick_duration -= 20;
+			// }
+			if (buzzer->getBuzzerRollEmpty()) // if alarm sounds, no ticking!
 			{
-				tick_duration -= 20;
-			}
-			if (buzzer->getBuzzerRollEmpty())
-			{
-				// if alarm sounds, no ticking!
-				buzzer->playTone(8000, tick_duration); // works well
+				buzzer->playTone(500, tick_duration); // works well
 			}
 		}
 	}
+
 	// display
 	switch (display_mode)
 	{
@@ -1453,7 +1456,7 @@ void Apps::modeComposeSong(bool init)
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 		{
-			// display song by index (enable insert delete position)
+			// display song notes by their position (index) in song (enable insert delete position)
 
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
@@ -1480,7 +1483,6 @@ void Apps::modeComposeSong(bool init)
 				}
 				else
 				{
-
 					// remember, last note of longest song possible MUST be BUZZER_ROLL_SONG_STOPVALUE, don't copy a note to it.
 					for (uint8_t i = bytes_list_bufsize - 3; i > COMPOSER_STEP; i--)
 					{
@@ -1491,17 +1493,14 @@ void Apps::modeComposeSong(bool init)
 					step = 1; // move to new position
 				}
 			}
-
 			ledDisp->setNumberToDisplayAsDecimal(COMPOSER_STEP);
 		}
 		else
 		{
-
 			// display song by note (enable programming and listening to notes)
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				// just listen to note on index in song
-				
 				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 			}
 
@@ -1510,12 +1509,9 @@ void Apps::modeComposeSong(bool init)
 				// just play notes selected with dial
 				if (encoder_dial->getDelta())
 				{
-					
-					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
+					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, false);
 					buzzerOffAndAddNote(note);
-					buzzer->noteToDisplay(textBuf, &decimalPoints, note);
-					textBufToDisplay();
-					ledDisp->setDecimalPointsToDisplay(decimalPoints);
+					noteToDisplay(note);
 				}
 				defaultDisplay = false;
 			}
@@ -1523,9 +1519,7 @@ void Apps::modeComposeSong(bool init)
 			// program note in song
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
-				uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
-				COMPOSER_SONG[COMPOSER_STEP] = note;
-				
+				COMPOSER_SONG[COMPOSER_STEP] = (uint8_t)encoder_dial->getValueLimited(255, true);
 				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 
 				// if note added to end, expand song length and add default note
@@ -1540,21 +1534,13 @@ void Apps::modeComposeSong(bool init)
 			{
 				if (encoder_dial->getDelta())
 				{
-					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, true);
-					COMPOSER_SONG[COMPOSER_STEP] = note;
-					
+					COMPOSER_SONG[COMPOSER_STEP] = (uint8_t)encoder_dial->getValueLimited(255, true);
 					buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 				}
 			}
 		}
-#if MOMENTARY_BUTTONS_COUNT == 4
+
 		modifyValueUpDownWithMomentary2And3(&step, 1);
-#else
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-		{
-			step = 1;
-		}
-#endif
 
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -1568,22 +1554,12 @@ void Apps::modeComposeSong(bool init)
 		}
 
 		//default potentio behaviour
-
-
 		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 		if ((binaryInputsValue & momentary_buttons_mask) == 0) // no buttons pressed
-		// if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
-		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))) 
-
 		{
-			// int8_t tmp = 2 * potentio->getLastStableValueChangedUp() - 1;
-
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 			{
 				// change speed if default behaviour of potentio.
-				// COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + tmp * 10); //step +1 or -1
 				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + encoder_dial->getDelta() *10); //step +1 or -1
 			}
 			else
@@ -1607,9 +1583,9 @@ void Apps::modeComposeSong(bool init)
 			}
 			else
 			{
-				buzzer->noteToDisplay(textBuf, &decimalPoints, COMPOSER_SONG[COMPOSER_STEP]);
-				textBufToDisplay();
-				ledDisp->setDecimalPointsToDisplay(decimalPoints);
+				noteToDisplay( COMPOSER_SONG[COMPOSER_STEP]);
+				// textBufToDisplay();
+				// ledDisp->setDecimalPointsToDisplay(decimalPoints);
 			}
 		}
 	}
@@ -1817,7 +1793,7 @@ void Apps::modeSoundNotes(bool init)
 	// USE A TIMER to end display of settings. hmmm not sure if it will be that much better...
 	if (SOUND_NOTE_SETTING_TEXT_TO_DISPLAY == SOUND_NOTE_DISPLAY_NOTE)
 	{
-		buzzer->noteToDisplay(textHandle, decimalDotsHandle, SOUND_NOTES_NOTE_INDEX);
+		noteToDisplay( SOUND_NOTES_NOTE_INDEX);
 	}
 	else
 	{
@@ -2914,7 +2890,7 @@ void Apps::modeSequencer(bool init)
 		{
 			// if button continuously pressed, show notes.
 
-			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
+			noteToDisplay( SEQUENCER_TEMP_NOTE);
 			showNote = true;
 
 			// bonus effect: TRANSPOSE!
@@ -2944,7 +2920,7 @@ void Apps::modeSequencer(bool init)
 			
 			buzzerOffAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
 			
-			buzzer->noteToDisplay(textHandle, decimalDotsHandle, SEQUENCER_TEMP_NOTE);
+			noteToDisplay( SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
 
@@ -4117,9 +4093,10 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	// load/save songs
 	//blink alternatively song number and "load" or "save"
 
-	encoder_dial->setRange(slotCount, false); //todo: minimum should be "1"
-	encoder_dial->setSensitivity(10);
-	uint8_t slot_number = encoder_dial->getValue();
+	// encoder_dial->setRange(slotCount, false); //todo: minimum should be "1"
+	// encoder_dial->setSensitivity(10);
+	// uint8_t slot_number = encoder_dial->getValue();
+	uint8_t slot_number = encoder_dial->getValueLimited(slotCount*16, false) / 16;
 	
 	// uint8_t slot_number = encoder_dial->getValueMapped(1, slotCount);
 	if (SAVE_LOAD_MENU_BLINK_TIMER.getInFirstGivenHundredsPartOfSecond(500))
@@ -4203,6 +4180,9 @@ void Apps::addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater){
 	for (uint8_t i=0;i<repeater;i++){
         this->addNoteToBuzzer(note);
     }
+}
+void Apps::noteToDisplay(uint8_t note){
+	buzzer->noteToDisplay(textHandle, decimalDotsHandle,note);
 }
 
 void Apps::setBlankDisplay(){
