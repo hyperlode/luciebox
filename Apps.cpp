@@ -2107,57 +2107,61 @@ void Apps::modeHackTime(bool init)
 
 	if (init)
 	{
-		HACKTIME_ADDRESS = 0;
-		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
+		// HACKTIME_ADDRESS = 0;
+		// HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
 		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
 		HACKTIME_MOVE_TIMER.start();
 	}
 
+	
+	setBlankDisplay();
+
 	// write to mem if possible
-	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) && HACKTIME_MEMORY_SELECT != HACKTIME_MEMORY_FLASH)
-	{ //
+	if (!init && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) 
+		)
+	{ 
+
 		// change value in address location (left char on display)
 		// will not work for flash memory
+		array_8_bytes[0] += encoder_dial->getDelta();
 
-		HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_HEX;
-		// value to change is the one that is in the primary position (arry8bytes 0)
+		if (encoder_dial->getDelta()){
 
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
-		{
-			// change value
-			array_8_bytes[0] = encoder_dial->getValueLimited(255,false);
-		}
-
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
-		{
 			// store value.
 			switch (HACKTIME_MEMORY_SELECT)
 			{
 			// case HACKTIME_MEMORY_FLASH:
-
+				//it's not possible to write to flash
 			// break;
+
 			case HACKTIME_MEMORY_RAM:
 				*((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
-
+				addNoteToBuzzer(C5_8);
 				break;
+
 			case HACKTIME_MEMORY_EEPROM:
 				eeprom_write_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
+				addNoteToBuzzer(C5_8);
 				break;
 			}
 		}
 	}
 	else
 	{
-		// change address values
-
-		// which memory are we investigating?
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			HACKTIME_MEMORY_SELECT++;
-			if (HACKTIME_MEMORY_SELECT > 2)
-			{
-				HACKTIME_MEMORY_SELECT = 0;
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))){
+				// which memory are we investigating?
+				nextStepRotate(&HACKTIME_MEMORY_SELECT, 1, 0, 2);
+			}else{
+				// display mode change (how to represent the memory value?)
+				nextStepRotate(&HACKTIME_DISPLAY_MODE, 1, 0, 3);
 			}
+		}
+		
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1)){
+			// sound mode.
+			HACKTIME_VALUE_TO_SOUND = !HACKTIME_VALUE_TO_SOUND;
 		}
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -2176,65 +2180,45 @@ void Apps::modeHackTime(bool init)
 		else
 		{
 			// manual scroll
-
-			// address_changed = potentio->increaseSubtractAtChange(
-			// 	&HACKTIME_ADDRESS,
-			// 	1 + 99 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) +
-			// 		999 * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)) > 0) // speed up memory scroll by pressing buttons.
-			// );
 			if (encoder_dial->getDelta()){
 				address_changed = true;
-				HACKTIME_ADDRESS += encoder_dial->getDelta() ;  // todo change rate depending on buttons pressed: BUTTON_INDEXED_MOMENTARY_2 -> *100,  BUTTON_INDEXED_MOMENTARY_3 -> *1000,
+				HACKTIME_ADDRESS += encoder_dial->getDelta() * ( 
+						1 
+						+ 15* ((binaryInputsValue & 1<<BUTTON_INDEXED_MOMENTARY_3)>0)
+						+ 255* ((binaryInputsValue & 1<<BUTTON_INDEXED_MOMENTARY_2)>0)  
+						//+ 4095 *((binaryInputsValue & 1<<BUTTON_INDEXED_MOMENTARY_1)>0) // saving memory here. but, it's not really needed. with 32000 address locations, going time 255 is fast enough. (takes about 125 steps)
+				 	)
+				  	;  
+			}else{
+
+				// button address change.
+				address_changed = address_changed || modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
 			}
 			
 		}
 
-		// display mode change (how to represent the memory value?)
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-		{
-			nextStepRotate(&HACKTIME_DISPLAY_MODE, 1, 0, 4);
-		}
-
-		// button address change.
-
-		// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2)){
-
-		// 	HACKTIME_ADDRESS --;
-		// 	address_changed = true;
-		// }
-
-		// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3)){
-		// 	// no limit checks. This is hacktime!
-		// 	HACKTIME_ADDRESS ++;
-		// 	address_changed = true;
-		// }
-		address_changed = modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
 
 		// ok ok, let's do one little check.
 		if (HACKTIME_ADDRESS <= 0)
 		{
 			HACKTIME_ADDRESS = 0;
 		}
-
+		
+		
 		// get value from memory address and memory type
 		for (uint8_t i = 0; i < 4; i++)
 		{
-
 			switch (HACKTIME_MEMORY_SELECT)
 			{
 			case HACKTIME_MEMORY_FLASH:
-
 				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
-
 				break;
 
 			case HACKTIME_MEMORY_RAM:
-
 				textHandle[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
-
 				break;
-			case HACKTIME_MEMORY_EEPROM:
 
+			case HACKTIME_MEMORY_EEPROM:
 				textHandle[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
 				break;
 			}
@@ -2243,81 +2227,56 @@ void Apps::modeHackTime(bool init)
 	}
 
 	// convert memory to sounds... Be prepared for a post-modernistic masterpiece.
-	if (address_changed && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)))
-	{ //
+	if (address_changed && HACKTIME_VALUE_TO_SOUND)
+	{ 
 		buzzerOffAndAddNote(array_8_bytes[0]);
 	}
 
-	// compressed display mode (to save memory)
-	if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS)
-	{
-		// do nothing
-	}
-	else
-	{
-		setBlankDisplay();
+	// display 
+	
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+		// display address location
 
-		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
+		if (millis() % 1000 > 200)
 		{
-			displayAllSegments = 0;
-			for (uint8_t i = 0; i < 4; i++)
-			{
-				displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
-			}
-			displayAllSegmentsToScreen();
-		}
-		else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_ADDRESS)
-		{
-			if (millis() % 1000 > 200)
-			{
-				ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
-			}
-			else
-			{
-				textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
-			}
+			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
 		}
 		else
 		{
-			ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
+			// ledDisp->setBlankDisplay();
+			textHandle[1] = SPACE_FAKE_ASCII;
+			textHandle[2] = SPACE_FAKE_ASCII;
+			textHandle[3] = SPACE_FAKE_ASCII;
+		}
+
+	}else{
+		// compressed display mode (to save memory)
+		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS)
+		{
+			// // do nothing
+			// for(uint8_t i=0;i<4;i++){
+			// 	textHandle[i] = array_8_bytes[i];
+			// }
+		}
+		else
+		{
+			if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
+			{
+				displayAllSegments = 0;
+				for (uint8_t i = 0; i < 4; i++)
+				{
+					displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
+				}
+				displayAllSegmentsToScreen();
+			}
+			
+			else
+			{
+				ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+			}
 		}
 	}
-
-	// switch(HACKTIME_DISPLAY_MODE){
-	// 	case HACKTIME_DISPLAY_ADDRESS:{
-	// 		if (millis() % 1000 > 200){
-
-	// 			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true);
-	// 		}else{
-	// 			// ledDisp->setNumberToDisplayAsDecimal(HACKTIME_ADDRESS);
-	// 			setBlankDisplay();
-	// 			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
-	// 		}
-	// 	}
-	// 	break;
-	// 	case HACKTIME_DISPLAY_CHARS:{
-	// 		for(uint8_t i=0;i<4;i++){
-	// 			textHandle[i] = array_8_bytes[i];
-	// 		}
-	// 	}
-	// 	break;
-	// 	case HACKTIME_DISPLAY_BYTES:{
-	// 		displayAllSegments = 0;
-	// 		for(uint8_t i=0;i<4;i++){
-	// 			displayAllSegments |= (array_8_bytes[i]) << (8*i);
-	// 		}
-	// 		displayAllSegmentsToScreen();
-	// 	}
-	// 	break;
-	// 	case HACKTIME_DISPLAY_DECIMAL:{
-	// 		ledDisp->setNumberToDisplayAsDecimal(array_8_bytes[0]);
-	// 	}
-	// 	break;
-	// 	case HACKTIME_DISPLAY_HEX:{
-	// 		ledDisp->setNumberToDisplay(array_8_bytes[0],true);
-	// 	}
-	// 	break;
-	// }
 }
 
 bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
