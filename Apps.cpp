@@ -1627,10 +1627,6 @@ void Apps::modeSoundNotes(bool init)
 			update_note = true;
 		}
 
-		// delta = (uint16_t)(SOUND_NOTE_AUTO_TIMER.getInitTimeMillis() / -8);
-
-		// checkBoundaries(&delta, 2, 254, false);
-
 		dialOnEdgeChangeInitTimerPercentage(&SOUND_NOTE_AUTO_TIMER);
 	}
 	else
@@ -1671,7 +1667,6 @@ void Apps::modeSoundNotes(bool init)
 			// second keypress, change root.
 			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT)
 			{
-
 				SOUND_NOTES_SCALE_ROOT++;
 				if (SOUND_NOTES_SCALE_ROOT > B5_4)
 				{
@@ -1891,7 +1886,6 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
-
 		DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE = 0 : DRAW_SHOW_MODE++;
 
 		switch (DRAW_SHOW_MODE)
@@ -2862,6 +2856,7 @@ void Apps::modeSequencer(bool init)
 	// erase screen at start.
 	setBlankDisplay();
 
+
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
 		init = true; // make sure we display the sequencer when returning from save/load mode
@@ -2878,7 +2873,6 @@ void Apps::modeSequencer(bool init)
 		// manipulate the sequencer
 
 		// visualize programmed note
-
 		SEQUENCER_TEMP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -2899,27 +2893,20 @@ void Apps::modeSequencer(bool init)
 			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getDelta();
 		}
 
-		// if ((this->binaryInputsEdgeDown & (1<<BUTTON_INDEXED_MOMENTARY_0)))
-		// {
-		// 	displayAllSegmentsToScreen();
-		// }
-
 		// just listen to the potentio note
-		// SEQUENCER_TEMP_NOTE = encoder_dial->getValueMapped(0, 255);
-		SEQUENCER_TEMP_NOTE += encoder_dial->getDelta();
+		SEQUENCER_TEMP_NOTE = encoder_dial->getValueLimited(255,true);
+		// SEQUENCER_TEMP_NOTE += encoder_dial->getDelta();
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
-			addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
+			buzzerOffAndAddNote(SEQUENCER_TEMP_NOTE);
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			
-			// if button continuously pressed, rotate potentio to hear notes.
-			
+			// if button continuously pressed, listen to notes as they are chosen
 			buzzerOffAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
-			
 			noteToDisplay( SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
@@ -2927,22 +2914,20 @@ void Apps::modeSequencer(bool init)
 		// program note to song
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-
-			uint8_t note = encoder_dial->getValueLimited(255, false);
-
-			addNoteToBuzzer(note);
+			// uint8_t note = encoder_dial->getValueLimited(255, false);
+			buzzerOffAndAddNote(SEQUENCER_TEMP_NOTE);
 
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 			{
 				//copy to all measures
 				for (uint8_t i = 0; i < 4; i++)
 				{
-					this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = note;
+					this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = SEQUENCER_TEMP_NOTE;
 				}
 			}
 			else
 			{
-				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = note;
+				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = SEQUENCER_TEMP_NOTE;
 			}
 		}
 
@@ -2954,14 +2939,7 @@ void Apps::modeSequencer(bool init)
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			// if (potentio->getValueChanged())
-			// {
-			// 	step = 2 * potentio->getLastStableValueChangedUp() - 1; //step +1 or -1
-			// }
-			//}
-			//potentio->increaseSubtractAtChange((int16_t *)&(step), 1);
 			step += encoder_dial->getDelta();
-
 		}
 
 		if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -2987,14 +2965,6 @@ void Apps::modeSequencer(bool init)
 				SEQUENCER_SPEED.start();
 			}
 		}
-
-		// if music note needs to be shown
-		// if (showNote)
-		// {
-		// 	//ledDisp->displaySetTextAndDecimalPoints(textBuf, &decimalPoints);
-		// 	textBufToDisplay();
-		// 	ledDisp->setDecimalPointsToDisplay(decimalPoints);
-		// }
 
 		// handle step change
 		if (step != 0 || init)
