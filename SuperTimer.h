@@ -47,6 +47,7 @@ public:
 	unsigned int getTimeSecondsCountDownTimer();
 	long getTimeMillisCountDownTimer();
 	void getTimeString(char *textBuf);
+	bool getSecondsBlinker();
 
 #ifdef ENABLE_CALLIBRATION
 	void setCallibrationMillis(float *callibrationRatio);

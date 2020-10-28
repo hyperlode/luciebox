@@ -232,21 +232,19 @@ void Apps::updateEveryAppCycleBefore()
 		binaryInputsEdgeDown |= binaryInputs[buttons_indexed[i]].getEdgeDown() << i;
 		binaryInputsValue |= binaryInputs[buttons_indexed[i]].getValue() << i;
 	}
-}
-// void Apps::updateDisplay()
-// {
-// 	// every cycle display update.
 
-// }
+	// it's important to realize the display is reset before every cycle. Do not forget to update it all the time.
+	setBlankDisplay();
+}
 
 void Apps::setDefaultMode()
 {
 	//button lights
-	setLedArray(0b00000000); // no lights
+	// setLedArray(0b00000000); // no lights
 
 	//display
-	setBlankDisplay();
-	decimalPoints = 0; // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
+	// setBlankDisplay();
+	// decimalPoints = 0; // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
 	allLights->setBrightness(0, false);
 
 	//buzzer
@@ -265,7 +263,8 @@ bool Apps::init_app(bool init, uint8_t selector)
 
 	if (init)
 	{
-		setBlankDisplay();
+		// setBlankDisplay();
+		
 		// init of the init_app..
 		this->displayAllSegments = 0;
 
@@ -431,7 +430,7 @@ void Apps::pomodoroTimer(bool init)
 		POMODORO_STATS_WORKING_BAD = 0;
 		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
 
-		setBlankDisplay();
+		// setBlankDisplay();
 	}
 
 	boolean showMenu = true;
@@ -666,27 +665,31 @@ void Apps::pomodoroTimer(bool init)
 		break;
 	}
 
-	ledDisp->setDecimalPointToDisplay(false, 1);
+	// setDecimalPoint(false, 1);
 	// decimalPoints = 0;
 	if (showMenu)
 	{
 		// decimalPoints = 1 << 2;
-		ledDisp->setDecimalPointToDisplay(true, 1);
+		// decimalPointTimingOn();
 
 		if (millis() % 500 < 250)
 		{
-			lights |= 1 << LIGHT_LATCHING_EXTRA;
+			// lights |= 1 << LIGHT_LATCHING_EXTRA;
+			lights |= 1 << lights_indexed[LIGHT_INDEXED_LATCHING_EXTRA];
 		}
+		
 	}
-	else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500))
-	{
-		ledDisp->setDecimalPointToDisplay(true, 1);
-		lights |= 1 << LIGHT_LATCHING_EXTRA;
-	}
+	// else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500))
+	// {
+	// 	// decimalPointTimingOn();
+	// 	lights |= 1 << LIGHT_LATCHING_EXTRA;
+	// }
 	else if (POMODORO_IN_BREAK)
 	{
 		setStandardTextToTextBuf(TEXT_PAUS);
 	}
+
+	setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(),1);
 
 	// decimalPoints = 1 << 2;
 	// 	//lights|= 1<<LIGHT_LATCHING_EXTRA;
@@ -778,41 +781,34 @@ void Apps::stopwatch(bool init)
 		time_millis = STOPWATCH_LAP_MEMORY;
 	}
 
-	if (time_millis < 10000)
-	{
-		timeDisplayShift = 0;
-	}
-	else if (time_millis < 100000)
-	{
-		time_millis /= 10;
-		timeDisplayShift = 1;
-	}
-	else if (time_millis < 1000000)
-	{
-		time_millis /= 100;
-		timeDisplayShift = 2;
-	}
-	else
-	{
-		time_millis /= 1000;
-		timeDisplayShift = 3;
-	}
-
-	textBuf[0] = ' ';
-	textBuf[1] = ' ';
-
-	intToDigitsString(textBuf, time_millis, true);
-	decimalPoints = 0x1 << timeDisplayShift;
-
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		STOPWATCH_CHRONO.getTimeString(textBuf);
+		
+		
+		setDecimalPoint(STOPWATCH_CHRONO.getSecondsBlinker(), 1);
 	}
 	else
 	{
-		textBufToDisplay();
-		ledDisp->setDecimalPointsToDisplay(decimalPoints);
+		timeDisplayShift = 0;
+		while (time_millis > 9999){
+			timeDisplayShift++;
+			time_millis /= 10;
+		}
+
+		textBuf[0] = ' ';
+		textBuf[1] = ' ';
+
+		intToDigitsString(textBuf, time_millis, true);
+
+		setDecimalPoint(true, timeDisplayShift);
+		// decimalPoints = 0x1 << timeDisplayShift;
+		
+		// textBufToDisplay();
+		// ledDisp->setDecimalPointsToDisplay(decimalPoints);
+
 	}
+		textBufToDisplay();
 }
 
 void Apps::modeRandomWorld(bool init)
@@ -822,11 +818,14 @@ void Apps::modeRandomWorld(bool init)
 		RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
 		randomWorldState = randomWorldIdle;
 		RANDOMWORLD_RANDOM_TYPE = 0;
-		randomModeDisplay(false);
-		decimalPoints = 0;
+		randomModeTrigger(false);
+		// decimalPoints = 0;
 
 		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 100;
 	}
+
+	// textbuf contains the actual random generated graphics. Set to display at start, because it might be overriden in this routine.
+	textBufToDisplay();
 
 	switch (randomWorldState)
 	{
@@ -836,6 +835,7 @@ void Apps::modeRandomWorld(bool init)
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
+
 			// set autoroll time.
 #ifdef ENABLE_MULTITIMER
 			uint16_t delay_seconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false)); // 0 seconds to an hour
@@ -916,7 +916,7 @@ void Apps::modeRandomWorld(bool init)
 			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 			{
 				addNoteToBuzzer(C7_8);
-				randomModeDisplay(false);
+				randomModeTrigger(false);
 
 				RANDOMWORLD_ROLL_SPEED.start();
 			}
@@ -954,7 +954,7 @@ void Apps::modeRandomWorld(bool init)
 		if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
 		{
 			addNoteToBuzzer(C7_8);
-			randomModeDisplay(false);
+			randomModeTrigger(false);
 
 			// roll slower and slower until threshold reached.
 			RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() * 1.4);
@@ -971,7 +971,7 @@ void Apps::modeRandomWorld(bool init)
 	case randomWorldShowResult:
 	{
 
-		randomModeDisplay(true);
+		randomModeTrigger(true);
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// auto roll delay.
@@ -1005,8 +1005,10 @@ void Apps::modeRandomWorld(bool init)
 	}
 }
 
-void Apps::randomModeDisplay(bool forReal)
+void Apps::randomModeTrigger(bool forReal)
 {
+	// set the textBuf.
+
 	// forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
 
 	const int16_t randomUpperLimits[8] = {6, 26, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 2, 6, 52, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 2};
@@ -1125,7 +1127,6 @@ void Apps::randomModeDisplay(bool forReal)
 	break;
 	}
 
-	textBufToDisplay();
 }
 
 void Apps::modeSimpleButtonsAndLights(bool init)
@@ -1161,7 +1162,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 		// display lights up a segment for each button.
 
 		//delete all content from screen.
-		setBlankDisplay();
+		// setBlankDisplay();
 
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
@@ -1310,7 +1311,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 
 	// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
 
-	setBlankDisplay();
+	// setBlankDisplay();
 	if (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
 	{
 		ledDisp->setNumberToDisplayAsDecimal(counter);
@@ -1372,7 +1373,7 @@ void Apps::modeSoundSong(bool init)
 		loadBuzzerTrack(SONG_DRYER_HAPPY);
 	}
 
-	setBlankDisplay();
+	// setBlankDisplay();
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
@@ -1986,7 +1987,7 @@ void Apps::drawGame(bool init)
 
 	case drawGameWaitForStart:
 	{
-		setBlankDisplay();
+		// setBlankDisplay();
 
 		drawGameState = drawGameShowPicture;
 
@@ -2114,7 +2115,7 @@ void Apps::modeHackTime(bool init)
 	}
 
 	
-	setBlankDisplay();
+	// setBlankDisplay();
 
 	// write to mem if possible
 	if (!init && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) 
@@ -2433,7 +2434,7 @@ void Apps::draw(bool init)
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
 
 	// OUTPUT to display
-	setBlankDisplay();
+	// setBlankDisplay();
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		// number: always show index of active drawing if activated.
@@ -2547,7 +2548,7 @@ void Apps::miniMultiTimer(bool init)
 
 	//textBufToDisplay();
 	setLedArray(lights);
-	ledDisp->setDecimalPointToDisplay(LIGHT_SECONDS_BLINKER & settingsLights, 1);
+	setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
 #endif
 
@@ -2689,7 +2690,7 @@ void Apps::modeGeiger(bool init)
 	long r = random(0, 1024) * random(0, 1024);
 	//long r = random(0, 1024);
 	//r = r*r;
-	setBlankDisplay();
+	// setBlankDisplay();
 
 	
 
@@ -2813,7 +2814,7 @@ void Apps::modeSequencer(bool init)
 	}
 
 	// erase screen at start.
-	setBlankDisplay();
+	// setBlankDisplay();
 
 
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
@@ -3010,7 +3011,7 @@ void Apps::modeMetronome(bool init)
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_INDEXED_MOMENTARY_2, true, C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_INDEXED_MOMENTARY_3, true, C7_8, update);
 	
-	ledDisp->setBlankDisplay();
+	// ledDisp->setBlankDisplay();
 	if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
 		// bpm --> full 12 step circles per minute.   timing is per step. so: 60bpm == 1 circle / second = timer: 1000/12 = 83.333ms/step
 		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) ( 1 / (12* (float)TIMER_METRONOME.getInitTimeMillis()/60000 ))); // millis/step to fullcirclesp/minute (bpm)
@@ -3430,7 +3431,7 @@ void Apps::modeReactionGame(bool init)
 		
 	}
 
-	setBlankDisplay();
+	// setBlankDisplay();
 
 	// at any time, leave game when depressing play button.
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -3838,7 +3839,7 @@ void Apps::modeReactionGame(bool init)
 			// in the easy level of sound mode, we show the lights.
 
 			// show decimal point for digit corresponding with button
-			ledDisp->setDecimalPointToDisplay(true, REACTION_GAME_TARGET);
+			setDecimalPoint(true, REACTION_GAME_TARGET);
 			// set appropriate led per button
 			*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
 		}
@@ -4112,6 +4113,14 @@ void Apps::addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater){
 }
 void Apps::noteToDisplay(uint8_t note){
 	buzzer->noteToDisplay(textHandle, decimalDotsHandle,note);
+}
+
+void Apps::setDecimalPoint(bool onElseOff, uint8_t digit){
+	ledDisp->setDecimalPointToDisplay(onElseOff,digit);
+}
+
+void Apps::decimalPointTimingOn(){
+	setDecimalPoint(true,1);
 }
 
 void Apps::setBlankDisplay(){

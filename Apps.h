@@ -635,10 +635,12 @@ private:
 
     bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
-    void randomModeDisplay(bool forReal);
+    void randomModeTrigger(bool forReal);
 
     // functions for compression the memory size
     void textBufToDisplay();
+    void decimalPointTimingOn();
+    void setDecimalPoint(bool onElseOff, uint8_t digit);
     void displayAllSegmentsToScreen();
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
