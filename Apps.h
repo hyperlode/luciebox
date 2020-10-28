@@ -137,7 +137,7 @@
 #define RANDOMWORLD_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer
 #define SIMON_STEP_TIMER generalTimer
-#define STOPWATCH_CHRONO generalTimer
+#define STOPWATCH_CHRONO_1 generalTimer
 #define POMODORO_TIMER generalTimer
 #define DRAW_GAME_DISPLAY_TIMER generalTimer
 #define HACKTIME_MOVE_TIMER generalTimer
@@ -153,6 +153,7 @@
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
 #define SIMON_BLINK_TIMER generalTimer2
+#define STOPWATCH_CHRONO_2 generalTimer2
 
 #define SOUND_FUN_NOTE_INDEX counter
 #define REACTION_GAME_SCORE counter
@@ -186,7 +187,7 @@
 #define SETTINGS_MODE_SELECTOR counter3
 #define RANDOMWORLD_ANIMATION_DELAY counter3
 #define SIMON_RANDOM_PLAYER_SEQUENCE counter3
-#define STOPWATCH_LAP_MEMORY counter3
+#define STOPWATCH_LAP_MEMORY_1 counter3
 #define POMODORO_STATS_WORKING_BAD counter3
 #define SOUND_NOTES_SCALE_ROOT counter3
 
@@ -227,6 +228,8 @@
 #define METRONOME_TICKER_1_POSITION counter9
 #define HACKTIME_MEMORY_SELECT counter9  // was 5
 
+#define STOPWATCH_LAP_MEMORY_2 counter10
+
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
@@ -246,6 +249,7 @@
 
 #define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
+
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
@@ -257,6 +261,7 @@
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
+
 
 
 
@@ -655,12 +660,14 @@ private:
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
+    // void resetTimer(SuperTimer* pTimer);
     
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
     SuperTimer generalTimer;
     SuperTimer generalTimer2;
+    SuperTimer* pSsuperTimer;
     uint32_t displayAllSegments;
     uint32_t displayAllSegmentsBuffer;
 
@@ -678,6 +685,8 @@ private:
     uint8_t counter7;
     uint16_t counter8;
     int16_t counter9;
+    long counter10;
+    long* pLongValue;
 
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;

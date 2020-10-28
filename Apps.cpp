@@ -263,8 +263,6 @@ bool Apps::init_app(bool init, uint8_t selector)
 
 	if (init)
 	{
-		// setBlankDisplay();
-		
 		// init of the init_app..
 		this->displayAllSegments = 0;
 
@@ -408,10 +406,6 @@ void Apps::quiz(bool init)
 	// lights |= 1 << lights_indexed[i];
 	setLedArray(lights);
 }
-
-// int8_t Apps::momentaryButtonEdge(){
-
-// }
 
 void Apps::pomodoroTimer(bool init)
 {
@@ -729,6 +723,12 @@ void Apps::pomodoroTimer(bool init)
 	setLedArray(lights);
 }
 
+// void Apps::resetTimer(SuperTimer* pTimer){
+// 		pTimer->setInitTimeMillis(0);
+// 		pTimer->reset();
+// 		pTimer->startPaused(true);		
+// }
+
 void Apps::stopwatch(bool init)
 {
 	// classic stopwatch
@@ -737,56 +737,59 @@ void Apps::stopwatch(bool init)
 
 	if (init)
 	{
-		STOPWATCH_LAP_MEMORY = 0;
+		
 
-		STOPWATCH_CHRONO.setInitTimeMillis(0);
-		STOPWATCH_CHRONO.reset();
-		STOPWATCH_CHRONO.startPaused(true);
+		STOPWATCH_LAP_MEMORY_1 = 0;
+		STOPWATCH_LAP_MEMORY_2 = 0;
+
+		// resetTimer(&STOPWATCH_CHRONO_1);
+		// resetTimer(&STOPWATCH_CHRONO_2);
+		STOPWATCH_CHRONO_1.setInitTimeMillis(0);
+		STOPWATCH_CHRONO_1.reset();
+		STOPWATCH_CHRONO_1.startPaused(true);
+		STOPWATCH_CHRONO_2.setInitTimeMillis(0);
+		STOPWATCH_CHRONO_2.reset();
+		STOPWATCH_CHRONO_2.startPaused(true);
 	}
 
-	// if (binaryInputsEdgedown& (1<<BUTTON_INDEXED_LATCHING_EXTRA))
-	// {
-	// 	STOPWATCH_CHRONO.pause();
-	// }
+	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)){
+		pSsuperTimer = &STOPWATCH_CHRONO_1;
+		pLongValue = &STOPWATCH_LAP_MEMORY_1;
+	}else{
+		pSsuperTimer = &STOPWATCH_CHRONO_2;
+		pLongValue = &STOPWATCH_LAP_MEMORY_2;
+	}
 
-	// if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA))
-	// {
-	// 	STOPWATCH_CHRONO.startPaused(false);
-	// }
-
+	time_millis = pSsuperTimer->getTimeMillis();
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		// save and show laptime at press
-		STOPWATCH_LAP_MEMORY = STOPWATCH_CHRONO.getTimeMillis();
+		*pLongValue = time_millis;
 	}
 
+	bool paused = pSsuperTimer->getIsPaused();
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
-		// reset
-		// STOPWATCH_CHRONO.reset();
-		STOPWATCH_CHRONO.startPaused(STOPWATCH_CHRONO.getIsPaused());
+		// set chronometer to zero
+		pSsuperTimer->startPaused(paused);
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
-		STOPWATCH_CHRONO.paused(!STOPWATCH_CHRONO.getIsPaused());
+		pSsuperTimer->paused(!paused);
 	}
-
-	time_millis = STOPWATCH_CHRONO.getTimeMillis();
 
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
 		(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 	{
 		// show saved laptime at press
-		time_millis = STOPWATCH_LAP_MEMORY;
+		time_millis = *pLongValue;
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
-		STOPWATCH_CHRONO.getTimeString(textBuf);
-		
-		
-		setDecimalPoint(STOPWATCH_CHRONO.getSecondsBlinker(), 1);
+		pSsuperTimer->getTimeString(textBuf);
+		setDecimalPoint(pSsuperTimer->getSecondsBlinker(), 1);
 	}
 	else
 	{
@@ -802,13 +805,11 @@ void Apps::stopwatch(bool init)
 		intToDigitsString(textBuf, time_millis, true);
 
 		setDecimalPoint(true, timeDisplayShift);
-		// decimalPoints = 0x1 << timeDisplayShift;
-		
-		// textBufToDisplay();
-		// ledDisp->setDecimalPointsToDisplay(decimalPoints);
 
 	}
-		textBufToDisplay();
+
+	textBufToDisplay();
+
 }
 
 void Apps::modeRandomWorld(bool init)
@@ -1585,8 +1586,6 @@ void Apps::modeComposeSong(bool init)
 			else
 			{
 				noteToDisplay( COMPOSER_SONG[COMPOSER_STEP]);
-				// textBufToDisplay();
-				// ledDisp->setDecimalPointsToDisplay(decimalPoints);
 			}
 		}
 	}
@@ -2546,7 +2545,6 @@ void Apps::miniMultiTimer(bool init)
 	(LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
 	(LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
 
-	//textBufToDisplay();
 	setLedArray(lights);
 	setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
@@ -2975,7 +2973,9 @@ void Apps::modeMetronome(bool init)
 	{
 		TIMER_METRONOME.setInitTimeMillis(-166);
 		TIMER_METRONOME.start();
-		
+		METRONOME_TICKER_1_POSITION = 0;
+		METRONOME_TICKER_2_POSITION = 0;
+		METRONOME_TICKER_3_POSITION = 0;
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
