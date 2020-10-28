@@ -236,9 +236,11 @@
 #define POMODORO_IN_BREAK general_boolean
 #define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
 #define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
+#define STOPWATCH_PAUSED_1 general_boolean
 
-#define HACKTIME_VALUE_TO_SOUND general_boolean
-#define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean
+#define STOPWATCH_PAUSED_2 general_boolean2
+#define HACKTIME_VALUE_TO_SOUND general_boolean2
+#define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean2
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
 #define POMODORO_SHOW_MENU_EDGE general_boolean2
@@ -435,44 +437,44 @@ const uint8_t songs [] PROGMEM = {
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
-    // 1,  // empty slot instead of lang zal ze leven
+    1,  // empty slot instead of lang zal ze leven
     // lang zal ze leven
-    85, C7_4, rest_4, rest_2,
-    C7_4, rest_2, C7_8, rest_8,
-    C7_4, rest_4, rest_2,
-    G6_2, G6_4, rest_2,
+    // 85, C7_4, rest_4, rest_2,
+    // C7_4, rest_2, C7_8, rest_8,
+    // C7_4, rest_4, rest_2,
+    // G6_2, G6_4, rest_2,
 
-    E7_4, rest_4, rest_2,
-    E7_4, rest_2, E7_8, rest_8,
-    E7_4, rest_4, rest_2,
-    C7_2, C7_4, rest_2,
+    // E7_4, rest_4, rest_2,
+    // E7_4, rest_2, E7_8, rest_8,
+    // E7_4, rest_4, rest_2,
+    // C7_2, C7_4, rest_2,
 
-    G7_4, rest_4, rest_2,
-    G7_4, rest_2, G7_8, rest_8,
+    // G7_4, rest_4, rest_2,
+    // G7_4, rest_2, G7_8, rest_8,
 
-    A7_8, rest_8, rest_4,
-    G7_8, rest_8, rest_4,
+    // A7_8, rest_8, rest_4,
+    // G7_8, rest_8, rest_4,
 
-    F7_8, rest_8, rest_4,
-    E7_8, rest_8, rest_4,
+    // F7_8, rest_8, rest_4,
+    // E7_8, rest_8, rest_4,
 
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    rest_4,
-    G7_8, rest_8, rest_4,
-    F7_8, rest_8, rest_4,
+    // D7_2, D7_4, rest_4,
+    // D7_2, D7_4, rest_4,
+    // D7_2, D7_4, rest_4,
+    // rest_4,
+    // G7_8, rest_8, rest_4,
+    // F7_8, rest_8, rest_4,
 
-    E7_1, E7_2, rest_2,
-    F7_1, F7_2, rest_2,
+    // E7_1, E7_2, rest_2,
+    // F7_1, F7_2, rest_2,
 
-    G7_1, G7_2, rest_2,
-    A7_2, A7_4, rest_4,
-    F7_2, F7_4, rest_4,
+    // G7_1, G7_2, rest_2,
+    // A7_2, A7_4, rest_4,
+    // F7_2, F7_4, rest_4,
 
-    E7_1, E7_2, rest_2,
-    D7_1, D7_2, rest_2,
-    C7_1, C7_1,
+    // E7_1, E7_2, rest_2,
+    // D7_1, D7_2, rest_2,
+    // C7_1, C7_1,
     // aaanvallueeeeee!
     15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
     // empty slot test
@@ -480,28 +482,29 @@ const uint8_t songs [] PROGMEM = {
 
  // unhappy dryer
     14, A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
-    // kindeke douwen
-    50, B7_4, rest_4, rest_2,       // wie
-    B7_1,                       //zal
-    rest_2, A7_4, rest_4,       //er
-    G6_4, rest_4, rest_2,       //ons
-    B7_1,                       //kind-
-    B7_4, rest_4, A7_4, rest_4, //-de
-    G6_4, rest_4, rest_2,       //-ke
-    A7_1,                       //dou
-    A7_4, rest_4, rest_2,
-    C7_4, rest_4, rest_2,
-    C7_1, //wen
-    rest_1,
-    C7_4, rest_4, rest_2, // dat
-    B7_1,                 // schaars
-    B7_4, rest_4, B7_4, rest_4,
-    B7_4, rest_4, rest_2,
+    1, //dummy for kindeke douwen
+    // // kindeke douwen
+    // 50, B7_4, rest_4, rest_2,       // wie
+    // B7_1,                       //zal
+    // rest_2, A7_4, rest_4,       //er
+    // G6_4, rest_4, rest_2,       //ons
+    // B7_1,                       //kind-
+    // B7_4, rest_4, A7_4, rest_4, //-de
+    // G6_4, rest_4, rest_2,       //-ke
+    // A7_1,                       //dou
+    // A7_4, rest_4, rest_2,
+    // C7_4, rest_4, rest_2,
+    // C7_1, //wen
+    // rest_1,
+    // C7_4, rest_4, rest_2, // dat
+    // B7_1,                 // schaars
+    // B7_4, rest_4, B7_4, rest_4,
+    // B7_4, rest_4, rest_2,
 
-    E7_4, rest_4, rest_2, //
-    E7_1,
-    E7_4, rest_4, E7_4, rest_4,
-    A7_4, rest_4, rest_2,
+    // E7_4, rest_4, rest_2, //
+    // E7_1,
+    // E7_4, rest_4, E7_4, rest_4,
+    // A7_4, rest_4, rest_2,
     // retreat song
     15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
 
