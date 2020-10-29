@@ -411,63 +411,46 @@ void Apps::pomodoroTimer(bool init)
 	{
 		POMODORO_INIT_TIME_SECONDS = POMODORO_INIT_DEFAULT_SECS;
 		POMODORO_PAUSE_TIME_SECONDS = POMODORO_PAUSE_DEFAULT_SECS;
-
-		// most variables set at main menu init.
-		POMODORO_SHOW_MENU_EDGE = false; // at init make sure to run through main menu once to set all varialbes that are always set at main menu entering.
-
 		POMODORO_STATS_WORKING_GOOD = 0;
 		POMODORO_STATS_WORKING_BAD = 0;
 		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
-
-		// setBlankDisplay();
 	}
+	
+	bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA) );
 
-	boolean showMenu = true;
-	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) &&
-		!init &&
-		(POMODORO_AUTO_RESTART_ENABLED || (!POMODORO_IN_BREAK)) // if not auto restart, we don't even do a break
-	)
-	{
-		showMenu = false;
+	if (binaryInputsEdgeUp & (1<<BUTTON_LATCHING_EXTRA)){
+		POMODORO_TIMER.start();
 	}
-
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
-	{
-		POMODORO_IN_BREAK = false;
-	}
-
+	
 	// in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
-	if (!showMenu)
+	if (!in_menu)
 	{
 		// pomodoro timer running
-
-		if (POMODORO_SHOW_MENU_EDGE)
-		{
-			POMODORO_TIMER.start();
-		}
 
 		if (!POMODORO_TIMER.getTimeIsNegative())
 		{
 			POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
 			if (POMODORO_IN_BREAK)
 			{
-				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
+				// finished main pomodoro
 				loadBuzzerTrack(SONG_DRYER_HAPPY);
-				POMODORO_TIMER.start();
+
+				if (POMODORO_AUTO_RESTART_ENABLED)
+				{
+					POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
+					POMODORO_TIMER.start();
+				}else{
+					POMODORO_TIMER.reset();
+					POMODORO_IN_BREAK = false;
+				}
 			}
 			else
 			{
 				// coming out of break. Not executed at starting Pomodoro by switch.
+
 				loadBuzzerTrack(SONG_ATTACK);
 				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
-				if (POMODORO_AUTO_RESTART_ENABLED)
-				{
-					POMODORO_TIMER.start();
-				}
-				else
-				{
-					POMODORO_SHOW_MENU_EDGE = true;
-				}
+				POMODORO_TIMER.start();
 			}
 		}
 
@@ -495,34 +478,18 @@ void Apps::pomodoroTimer(bool init)
 	else
 	{
 		// in main menu
-// #ifndef ENABLE_MULTITIMER
-// 		uint16_t tmpSeconds = encoder_dial->getValueMapped(0, 1024);
-// #endif
-
-		if (!POMODORO_SHOW_MENU_EDGE)
-		{
-			POMODORO_TIMER.reset();
-			POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
-		}
-
+		POMODORO_TIMER.reset();
+		POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
 		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
-		// encoder_dial->setRange(90,false);
 
 		if (encoder_dial->getDelta())
 		{
 
 #ifdef ENABLE_MULTITIMER
-			// uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueMapped(0, 90));
-			
-			uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
+			tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
 #else
-			uint16_t tmpSeconds = encoder_dial->getValueLimited(60,false) * 30;
+			tmpSeconds = encoder_dial->getValueLimited(60,false) * 30;
 #endif
-			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
-			{
-				POMODORO_INIT_TIME_SECONDS = tmpSeconds;
-				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
-			}
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
@@ -532,15 +499,20 @@ void Apps::pomodoroTimer(bool init)
 				POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
 			}
 			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
-		}
 
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		}else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 		{
 			if (tmpSeconds != POMODORO_NONSENSE_TIME)
 			{
 				POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = tmpSeconds;
 			}
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
+
+		}else{
+			if (tmpSeconds != POMODORO_NONSENSE_TIME)
+			{
+			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
+			}
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
@@ -556,28 +528,19 @@ void Apps::pomodoroTimer(bool init)
 
 	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 
-	// POMODORO_SHOW_MENU_EDGE is our edge detector
-	POMODORO_SHOW_MENU_EDGE = showMenu;
-
 	// ticking sound
-	// long tick_duration = encoder_dial->getValueMapped(0, 40);
-	// encoder_dial->setRange(40,true);
-	// int16_t tick_duration = encoder_dial->getValue();
-	uint8_t tick_duration = encoder_dial->getValueLimited(160,true) ;  // was 40, but set to 160 for less sensitivity. do again divide by four to limit options.
-	bool tick_twice_a_second = tick_duration > 80;
-	tick_duration = tick_duration % 80; 
+	uint8_t tick_duration = encoder_dial->getValueLimited(160,true) / 2 ;  // was 40, but set to 80 for less sensitivity. do again divide by four to limit options.
+	bool tick_twice_a_second = tick_duration > 40;
+	tick_duration = tick_duration % 40; 
 
 	if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 	{
 		if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0)
 		{
-			// on average every two minutes play beep
-			// if ( random(0,21) > 19 + (tick_twice_a_second) ){
 			if (random(0, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS * 2) <= 1 - (tick_twice_a_second))
 			{
 				// random has 0 included. as we have to take into account the double ticking,
 				// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
-
 				addNoteToBuzzer(C5_1);
 			};
 		}
@@ -585,12 +548,6 @@ void Apps::pomodoroTimer(bool init)
 		if (tick_duration > 0)
 		{
 			// no sound when zero
-
-			// twenty settings, for each mode (two ticks or one tick per second)
-			// if (tick_duration > 20)
-			// {
-			// 	tick_duration -= 20;
-			// }
 			if (buzzer->getBuzzerRollEmpty()) // if alarm sounds, no ticking!
 			{
 				buzzer->playTone(500, tick_duration); // works well
@@ -603,6 +560,9 @@ void Apps::pomodoroTimer(bool init)
 	{
 	case POMODORO_DISPLAY_TIMER:
 		POMODORO_TIMER.getTimeString(textBuf);
+		if (POMODORO_IN_BREAK && millis() % 1000 > 650){
+			setStandardTextToTextBuf(TEXT_PAUS);
+		}
 		break;
 
 	case POMODORO_DISPLAY_PAUSE_INIT_SECS:
@@ -654,13 +614,8 @@ void Apps::pomodoroTimer(bool init)
 		break;
 	}
 
-	// setDecimalPoint(false, 1);
-	// decimalPoints = 0;
-	if (showMenu)
+	if (in_menu)
 	{
-		// decimalPoints = 1 << 2;
-		// decimalPointTimingOn();
-
 		if (millis() % 500 < 250)
 		{
 			// lights |= 1 << LIGHT_LATCHING_EXTRA;
@@ -673,16 +628,16 @@ void Apps::pomodoroTimer(bool init)
 	// 	// decimalPointTimingOn();
 	// 	lights |= 1 << LIGHT_LATCHING_EXTRA;
 	// }
-	else if (POMODORO_IN_BREAK)
-	{
-		setStandardTextToTextBuf(TEXT_PAUS);
-	}
+	// else if (POMODORO_IN_BREAK)
+	// {
+	// 	setStandardTextToTextBuf(TEXT_PAUS);
+	// }
 
 	setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(),1);
 
 	// decimalPoints = 1 << 2;
 	// 	//lights|= 1<<LIGHT_LATCHING_EXTRA;
-	// 	if (showMenu){
+	// 	if (in_menu){
 
 	// 	}else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
 	// 		//decimalPoints = 1 << 2;
@@ -707,7 +662,7 @@ void Apps::pomodoroTimer(bool init)
 	{
 		lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
 	}
-	if (!showMenu)
+	if (!in_menu)
 	{
 		lights |= 1 << LIGHT_LATCHING_EXTRA;
 		lights |= 1 << LIGHT_MOMENTARY_2;
@@ -1768,9 +1723,6 @@ void Apps::modeSoundNotesInitScale()
 
 void Apps::modeSoundNotes(bool init)
 {
-	int16_t delta;
-	//buzzer with buzzer roll (notes).
-
 	bool update_note = false;
 
 	if (init)
@@ -1841,7 +1793,6 @@ void Apps::modeSoundNotes(bool init)
 					SOUND_NOTES_SCALE_ROOT = SOUND_NOTES_SCALE_ROOT;
 				}
 			}
-
 			modeSoundNotesInitScale();
 		}
 
@@ -1911,7 +1862,6 @@ void Apps::modeSoundNotes(bool init)
 		// every jump is one step on the scale.
 		for (uint8_t note_jump = 0; note_jump < note_jumps; note_jump++)
 		{
-
 			// which scale are we on
 			uint8_t scale_start_index = pgm_read_byte_near(scale_start_indeces + SOUND_NOTES_SCALE_INDEX);
 
@@ -2862,14 +2812,14 @@ void Apps::modeGeiger(bool init)
 		}
 
 		if (r > GEIGER_PROBABILITY_THRESHOLD)
-		{ // 1024*1024
+		{ 
+			// 1024*1024
 			this->geigerToneHelper();
 		}
 	}
 	else
 	{
 		// simple Geiger mode
-		// todo: idea: if tilted forward, dramatically increase chance, tilted backward, decrease. This way, we can truly simulate a geiger counte.r
 
 		// If you press the button and approach an object, the object appears super radio active! hi-la-ri-ous!
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
@@ -2886,13 +2836,8 @@ void Apps::modeGeiger(bool init)
 		r += (long)(GEIGER_INCREASE_CHANCE)*1000;
 
 		GEIGER_PROBABILITY_THRESHOLD -= encoder_dial->getDelta() * 10 *1024;
-		// GEIGER_PROBABILITY_THRESHOLD = 1000*1024;
-		// textBuf[0] = ' ';
-		// if (r > encoder_dial->getValueLimited(1024, false) * 1024)
-		// if (r > GEIGER_PROBABILITY_THRESHOLD)
 		if (r > GEIGER_PROBABILITY_THRESHOLD)
 		{
-			//	addNoteToBuzzer(1); //not beep but "puck"
 			buzzer->playTone((unsigned int)50, 10);
 			setStandardTextToTextBuf(TEXT_RANDOM_SEGMENTS);
 			textBufToDisplay();
@@ -2975,14 +2920,11 @@ void Apps::modeSequencer(bool init)
 			showNote = true;
 
 			// bonus effect: TRANSPOSE!
-
-			//potentio->increaseSubtractAtChange((int16_t *)&(SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET), 1);
 			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getDelta();
 		}
 
 		// just listen to the potentio note
 		SEQUENCER_TEMP_NOTE = encoder_dial->getValueLimited(255,true);
-		// SEQUENCER_TEMP_NOTE += encoder_dial->getDelta();
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
@@ -3000,7 +2942,6 @@ void Apps::modeSequencer(bool init)
 		// program note to song
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			// uint8_t note = encoder_dial->getValueLimited(255, false);
 			buzzerOffAndAddNote(SEQUENCER_TEMP_NOTE);
 
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
@@ -3084,7 +3025,7 @@ void Apps::modeSequencer(bool init)
 
 void Apps::modeMetronome(bool init)
 {
-	// todo: LFO:  with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen)!
+	// todo: LFO:  with extra timer, create slight timing offset in second ticker, for fun effects (zwevingen) --> I think nonkel Lode was too optimistic about the available memory at the beginning. We went for a metronome here, not for trippy hippy
 	bool update = false;
 
 	if (init)
@@ -3196,11 +3137,7 @@ void Apps::modeSimon(bool init)
 		lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
 	}
 
-	//   // check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
-	//   uint8_t buttonsChanged = 0;
-	//   for (int k = 0; k <  MOMENTARY_BUTTONS_COUNT; ++k) {
-	// 	buttonsChanged |= (binaryInputs[buttons_indexed[k]].getEdgeUp() << k);
-	//   }
+	// check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
 	uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
 	for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
 	{
@@ -3486,42 +3423,6 @@ void Apps::modeSimon(bool init)
 	textBufToDisplay();
 }
 #endif  //ENABLE_SIMON_APP
-
-bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
-{
-	int16_t original_value;
-	*counter += -1 + (2 * countUpElseDown);
-
-	checkBoundaries(counter, minValue, maxValue, true);
-	return original_value != *counter;
-	// return false;
-}
-
-void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
-{
-	if (*counter > maxValue)
-	{
-		if (rotate)
-		{
-			*counter = minValue;
-		}
-		else
-		{
-			*counter = maxValue;
-		}
-	}
-	else if (*counter < minValue)
-	{
-		if (rotate)
-		{
-			*counter = maxValue;
-		}
-		else
-		{
-			*counter = minValue;
-		}
-	}
-}
 
 void Apps::modeReactionGame(bool init)
 {
@@ -4068,6 +3969,42 @@ void Apps::modeReactionGame(bool init)
 	*lightsHandle |= REACTION_GUITAR_HERO_MODE << LIGHT_LATCHING_BIG;
 }
 
+
+bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
+{
+	int16_t original_value;
+	*counter += -1 + (2 * countUpElseDown);
+
+	checkBoundaries(counter, minValue, maxValue, true);
+	return original_value != *counter;
+}
+
+void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
+{
+	if (*counter > maxValue)
+	{
+		if (rotate)
+		{
+			*counter = minValue;
+		}
+		else
+		{
+			*counter = maxValue;
+		}
+	}
+	else if (*counter < minValue)
+	{
+		if (rotate)
+		{
+			*counter = maxValue;
+		}
+		else
+		{
+			*counter = minValue;
+		}
+	}
+}
+
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
 {
 	uint32_t fullScreen = startScreen;
@@ -4092,8 +4029,6 @@ uint8_t Apps::tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t len
 	// draw card off deck
 	return sequenceList[--(*indexVariable)]; //
 }
-
-
 
 void Apps::randomSequence(uint8_t *sequenceList, uint8_t length)
 {
@@ -4137,17 +4072,13 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 		SAVE_LOAD_MENU_BLINK_TIMER.start();
 	}
 
-	// load/save songs
-	//blink alternatively song number and "load" or "save"
+	// load/save data
 
-	// encoder_dial->setRange(slotCount, false); //todo: minimum should be "1"
-	// encoder_dial->setSensitivity(10);
-	// uint8_t slot_number = encoder_dial->getValue();
 	uint8_t slot_number = encoder_dial->getValueLimited(slotCount*16, false) / 16;
 	
-	// uint8_t slot_number = encoder_dial->getValueMapped(1, slotCount);
 	if (SAVE_LOAD_MENU_BLINK_TIMER.getInFirstGivenHundredsPartOfSecond(500))
 	{
+		//blink alternatively song number and "load" or "save"
 		ledDisp->setNumberToDisplayAsDecimal(slot_number);
 	}
 	else
@@ -4182,7 +4113,6 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave)
 {
-
 	for (uint8_t i = 0; i < eepromSlotLength; i++)
 	{
 		uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
@@ -4254,7 +4184,6 @@ void Apps::buzzerOff(){
 void Apps::buzzerChangeSpeedRatioWithEncoderDial(){
 	buzzer->changeSpeedRatio(encoder_dial->getDelta());
 }
-
 
 void Apps::setStandardTextToTextBuf(uint8_t textPosition){
 	ledDisp->setStandardTextToTextBuf(textBuf, textPosition);
