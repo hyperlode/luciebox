@@ -5,6 +5,7 @@
 #define ENABLE_MULTITIMER
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
+#define ENABLE_TILT_SWITCHES
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -145,6 +146,7 @@
 #define SOUND_NOTE_AUTO_TIMER generalTimer
 #define QUIZ_RANDOM_WAIT_TIME generalTimer
 #define SEQUENCER_SPEED generalTimer
+#define TILT_TIMER generalTimer
 
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
@@ -168,6 +170,7 @@
 #define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
 #define QUIZ_ROUNDS_INIT counter
 #define METRONOME_TICKER_3_POSITION counter
+#define TILT_EXPECTED_SWITCH_INDEX counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -179,8 +182,8 @@
 #define HACKTIME_DISPLAY_MODE counter2
 #define SOUND_NOTES_SCALE_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
+#define TILT_CYCLE_COUNTER counter2
 
-//#define DRAW_Y_POS counter3
 #define DRAW_CURSOR_INDEX counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
 #define REACTION_GAME_STEP_TIME_MILLIS counter3
@@ -198,7 +201,6 @@
 #define POMODORO_PAUSE_TIME_SECONDS counter4
 #define SOUND_MODE_SCALE_RANGE_LENGTH counter4
 
-// #define GEIGER_ counter5
 #define REACTION_GAME_LEVEL counter5
 #define SEQUENCER_TEMP_NOTE counter5
 #define RANDOMWORLD_RANDOM_TYPE counter5
@@ -437,44 +439,44 @@ const uint8_t songs [] PROGMEM = {
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
-    1,  // empty slot instead of lang zal ze leven
+    // 1,  // dummy empty slot instead of lang zal ze leven
     // lang zal ze leven
-    // 85, C7_4, rest_4, rest_2,
-    // C7_4, rest_2, C7_8, rest_8,
-    // C7_4, rest_4, rest_2,
-    // G6_2, G6_4, rest_2,
+    85, C7_4, rest_4, rest_2,
+    C7_4, rest_2, C7_8, rest_8,
+    C7_4, rest_4, rest_2,
+    G6_2, G6_4, rest_2,
 
-    // E7_4, rest_4, rest_2,
-    // E7_4, rest_2, E7_8, rest_8,
-    // E7_4, rest_4, rest_2,
-    // C7_2, C7_4, rest_2,
+    E7_4, rest_4, rest_2,
+    E7_4, rest_2, E7_8, rest_8,
+    E7_4, rest_4, rest_2,
+    C7_2, C7_4, rest_2,
 
-    // G7_4, rest_4, rest_2,
-    // G7_4, rest_2, G7_8, rest_8,
+    G7_4, rest_4, rest_2,
+    G7_4, rest_2, G7_8, rest_8,
 
-    // A7_8, rest_8, rest_4,
-    // G7_8, rest_8, rest_4,
+    A7_8, rest_8, rest_4,
+    G7_8, rest_8, rest_4,
 
-    // F7_8, rest_8, rest_4,
-    // E7_8, rest_8, rest_4,
+    F7_8, rest_8, rest_4,
+    E7_8, rest_8, rest_4,
 
-    // D7_2, D7_4, rest_4,
-    // D7_2, D7_4, rest_4,
-    // D7_2, D7_4, rest_4,
-    // rest_4,
-    // G7_8, rest_8, rest_4,
-    // F7_8, rest_8, rest_4,
+    D7_2, D7_4, rest_4,
+    D7_2, D7_4, rest_4,
+    D7_2, D7_4, rest_4,
+    rest_4,
+    G7_8, rest_8, rest_4,
+    F7_8, rest_8, rest_4,
 
-    // E7_1, E7_2, rest_2,
-    // F7_1, F7_2, rest_2,
+    E7_1, E7_2, rest_2,
+    F7_1, F7_2, rest_2,
 
-    // G7_1, G7_2, rest_2,
-    // A7_2, A7_4, rest_4,
-    // F7_2, F7_4, rest_4,
+    G7_1, G7_2, rest_2,
+    A7_2, A7_4, rest_4,
+    F7_2, F7_4, rest_4,
 
-    // E7_1, E7_2, rest_2,
-    // D7_1, D7_2, rest_2,
-    // C7_1, C7_1,
+    E7_1, E7_2, rest_2,
+    D7_1, D7_2, rest_2,
+    C7_1, C7_1,
     // aaanvallueeeeee!
     15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
     // empty slot test
@@ -482,29 +484,29 @@ const uint8_t songs [] PROGMEM = {
 
  // unhappy dryer
     14, A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
-    1, //dummy for kindeke douwen
-    // // kindeke douwen
-    // 50, B7_4, rest_4, rest_2,       // wie
-    // B7_1,                       //zal
-    // rest_2, A7_4, rest_4,       //er
-    // G6_4, rest_4, rest_2,       //ons
-    // B7_1,                       //kind-
-    // B7_4, rest_4, A7_4, rest_4, //-de
-    // G6_4, rest_4, rest_2,       //-ke
-    // A7_1,                       //dou
-    // A7_4, rest_4, rest_2,
-    // C7_4, rest_4, rest_2,
-    // C7_1, //wen
-    // rest_1,
-    // C7_4, rest_4, rest_2, // dat
-    // B7_1,                 // schaars
-    // B7_4, rest_4, B7_4, rest_4,
-    // B7_4, rest_4, rest_2,
+    // 1, //dummy for kindeke douwen
+    // kindeke douwen
+    50, B7_4, rest_4, rest_2,       // wie
+    B7_1,                       //zal
+    rest_2, A7_4, rest_4,       //er
+    G6_4, rest_4, rest_2,       //ons
+    B7_1,                       //kind-
+    B7_4, rest_4, A7_4, rest_4, //-de
+    G6_4, rest_4, rest_2,       //-ke
+    A7_1,                       //dou
+    A7_4, rest_4, rest_2,
+    C7_4, rest_4, rest_2,
+    C7_1, //wen
+    rest_1,
+    C7_4, rest_4, rest_2, // dat
+    B7_1,                 // schaars
+    B7_4, rest_4, B7_4, rest_4,
+    B7_4, rest_4, rest_2,
 
-    // E7_4, rest_4, rest_2, //
-    // E7_1,
-    // E7_4, rest_4, E7_4, rest_4,
-    // A7_4, rest_4, rest_2,
+    E7_4, rest_4, rest_2, //
+    E7_1,
+    E7_4, rest_4, E7_4, rest_4,
+    A7_4, rest_4, rest_2,
     // retreat song
     15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
 
@@ -538,6 +540,7 @@ const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MO
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
                                     BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
+const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD,SWITCH_TILT_LEFT,SWITCH_TILT_BACKWARD,SWITCH_TILT_RIGHT};
 
 // #endif
 

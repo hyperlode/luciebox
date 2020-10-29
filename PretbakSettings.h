@@ -131,7 +131,7 @@
 #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
 #define MERCURY_SWITCHES_VALUES \
     {                           \
-        512, 256, 128, 64       \
+        450, 262, 128, 64       \
     }
 #endif
 

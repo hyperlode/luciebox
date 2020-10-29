@@ -188,10 +188,12 @@ void Apps::appSelector(bool init, uint8_t selector)
 #endif
 			break;
 
+#ifdef ENABLE_TILT_SWITCHES
 		case APP_SELECTOR_TILT:
 		case APP_SELECTOR_TILT_ADVANCED:
 			this->tiltSwitchTest(initOnBigLatchInitToo);
 			break;
+#endif
 
 		case APP_SELECTOR_MULTITIMER_SETTING:
 		case APP_SELECTOR_MULTITIMER_PLAYING:
@@ -2723,122 +2725,92 @@ void Apps::miniMultiTimer(bool init)
 }
 #endif
 
+#ifdef ENABLE_TILT_SWITCHES
 void Apps::tiltSwitchTest(bool init)
 {
 	// four tilt switches are positioned as such that they are "ON" in rest position.
-	uint32_t screen = 0;
+	const uint8_t segments_to_fill [] = {70,12,73,45}; // one segment has four sides. we want seg 0 to be on for forward, 1 and 2 for right, 3 for backward, and 4 and 5 for left. Black magic was needed in this limited memory environment.
 	if (init)
 	{
 		setStandardTextToTextBuf(TEXT_TILT);
-		counter = 0;
-		counter2 = 0; // counts progress in movement.
-		buzzer->setSpeedRatio(2.0);
 
-		this->dataPlayer.loadAllData(disp_4digits_animations);
+		TILT_EXPECTED_SWITCH_INDEX = 0;
+		TILT_CYCLE_COUNTER = 0;
+		displayAllSegments = 0;
 
-		this->dataPlayer.setAutoSteps(4);
-		this->dataPlayer.setAutoStep(true);
-		this->dataPlayer.setAutoStepSpeed(-30);
+		
+
+
 	}
 
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED))
-	{
-		// movie for each gesture
+	// time the amount of cycles.
 
-		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown())
-		{
-			this->dataPlayer.loadDataSet(1);
-			this->dataPlayer.setSetIndexDirection(1);
-		}
-		if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown())
-		{
-			this->dataPlayer.loadDataSet(1);
-			this->dataPlayer.setSetIndexDirection(0);
-		}
-		if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown())
-		{
-			this->dataPlayer.loadDataSet(0);
-			this->dataPlayer.setSetIndexDirection(1);
-		}
-		if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown())
-		{
-			this->dataPlayer.loadDataSet(0);
-			this->dataPlayer.setSetIndexDirection(0);
-		}
-		this->dataPlayer.update();
-		screen = this->dataPlayer.getActive32bit();
+	if (binaryInputs[mercury_switches_indexed[TILT_EXPECTED_SWITCH_INDEX]].getEdgeUp()){
 
-		ledDisp->setBinaryToDisplay(screen);
+		displayAllSegments ^= 1<< (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX]/10);
+		displayAllSegments ^= 1<< (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX]%10);
+		displayAllSegments &= ~(1L<<7); 
+		
+		// if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+		// 	TILT_EXPECTED_SWITCH_INDEX+=4;
+
+		// }else 
+		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
+			TILT_EXPECTED_SWITCH_INDEX+=2;
+
+		}else{
+			TILT_EXPECTED_SWITCH_INDEX++;
+		}
+		
+		if (TILT_EXPECTED_SWITCH_INDEX >= 4){
+			TILT_CYCLE_COUNTER ++;
+			TILT_EXPECTED_SWITCH_INDEX = 0;
+			loadBuzzerTrack(SONG_ATTACK);
+		}
+		addNoteToBuzzer(1); //not beep but "puck"
+		
 	}
-	else
-	{
-		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown())
-		{
-			addNoteToBuzzer(1); //not beep but "puck"
-			counter2 |= 0x01 << TILT_FORWARD;
-		}
-
-		if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown())
-		{
-			addNoteToBuzzer(1); //not beep but "puck"
-			counter2 |= 0x01 << TILT_BACKWARD;
-		}
-
-		if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown())
-		{
-			addNoteToBuzzer(1); //not beep but "puck"
-			counter2 |= 0x01 << TILT_LEFT;
-		}
-
-		if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown())
-		{
-			addNoteToBuzzer(1); //not beep but "puck"
-			counter2 |= 0x01 << TILT_RIGHT;
-		}
-
-		if (counter2 > 0 || counter > 0)
-		{
-
-			for (uint8_t i = 0; i <= counter; i++)
-			{
-
-				if (1 << TILT_FORWARD & counter2 || i < counter)
-				{
-					screen |= (uint32_t)pgm_read_byte_near(tilt_forward + i) << (8 * i); //* 4 --> 4 bytes per dword
-				}
-				if (1 << TILT_BACKWARD & counter2 || i < counter)
-				{
-					screen |= (uint32_t)pgm_read_byte_near(tilt_backward + i) << (8 * i); //* 4 --> 4 bytes per dword
-				}
-				if (1 << TILT_LEFT & counter2 || i < counter)
-				{
-					screen |= (uint32_t)pgm_read_byte_near(tilt_left + i) << (8 * i); //* 4 --> 4 bytes per dword
-				}
-				if (1 << TILT_RIGHT & counter2 || i < counter)
-				{
-					screen |= (uint32_t)pgm_read_byte_near(tilt_right + i) << (8 * i); //* 4 --> 4 bytes per dword
-				}
-			}
-			ledDisp->setBinaryToDisplay(screen);
-		}
-		else
-		{
-			textBufToDisplay();
-		}
+	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0)){
+		TILT_CYCLE_COUNTER = 0;
 	}
 
-	// keep track of progress
-	if (counter2 == 0x0F)
-	{ //if a digit is complete
-		counter++;
-		if (counter == 4)
-		{
-			loadBuzzerTrack(SONG_DRYER_HAPPY);
-			counter = 0;
-		}
-		counter2 = 0;
+	if (binaryInputsEdgeUp & (1 << BUTTON_LATCHING_EXTRA)){
+		// start timer
+		TILT_TIMER.start();
+		TILT_CYCLE_COUNTER = 0;
 	}
+
+	// display 
+	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+		setDecimalPoint(TILT_TIMER.getSecondsBlinker(),1);
+		TILT_TIMER.getTimeString(textBuf);
+		textBufToDisplay();
+		
+	}else{
+		ledDisp->setNumberToDisplayAsDecimal(TILT_CYCLE_COUNTER);
+		ledDisp->setBinaryToDisplay(displayAllSegments);
+	}
+
+	// normal vs timed mode.
+	if (binaryInputsValue & 1 << BUTTON_LATCHING_EXTRA){
+		
+		if (!TILT_TIMER.getTimeIsNegative()){
+			loadBuzzerTrack(SONG_DRYER_UNHAPPY);
+			TILT_TIMER.reset();
+		}
+	}else{
+
+#ifdef ENABLE_MULTITIMER
+		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
+#else
+		uint16_t tmpSeconds = encoder_dial->getValueLimited(60,false) * 30;
+#endif
+		TILT_TIMER.setInitCountDownTimeSecs(tmpSeconds);
+		TILT_TIMER.reset();
+	}
+
 }
+#endif
 
 void Apps::modeGeiger(bool init)
 {
