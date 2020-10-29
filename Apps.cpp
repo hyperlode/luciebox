@@ -416,6 +416,8 @@ void Apps::pomodoroTimer(bool init)
 		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
 	}
 	
+	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
+
 	bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA) );
 
 	if (binaryInputsEdgeUp & (1<<BUTTON_LATCHING_EXTRA)){
@@ -474,6 +476,34 @@ void Apps::pomodoroTimer(bool init)
 		{
 			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
 		}
+
+		// ticking sound / random checkup-beep
+		uint8_t tick_duration = encoder_dial->getValueLimited(160,false) / 2 ;  // was 40, but set to 80 for less sensitivity. do again divide by four to limit options.
+		bool tick_twice_a_second = tick_duration > 40;
+		tick_duration = tick_duration % 40; 
+
+		if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
+		{
+			if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0)
+			{
+				if (random(0, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS * 2) <= 1 - (tick_twice_a_second))
+				{
+					// random has 0 included. as we have to take into account the double ticking,
+					// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
+					addNoteToBuzzer(C5_1);
+				};
+			}
+
+			if (tick_duration > 0)
+			{
+				// no sound when zero
+				if (buzzer->getBuzzerRollEmpty()) // if alarm sounds, no ticking!
+				{
+					buzzer->playTone(500, tick_duration); // works well
+				}
+			}
+		}
+		
 	}
 	else
 	{
@@ -526,34 +556,8 @@ void Apps::pomodoroTimer(bool init)
 		}
 	}
 
-	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
-
-	// ticking sound
-	uint8_t tick_duration = encoder_dial->getValueLimited(160,true) / 2 ;  // was 40, but set to 80 for less sensitivity. do again divide by four to limit options.
-	bool tick_twice_a_second = tick_duration > 40;
-	tick_duration = tick_duration % 40; 
-
-	if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
-	{
-		if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0)
-		{
-			if (random(0, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS * 2) <= 1 - (tick_twice_a_second))
-			{
-				// random has 0 included. as we have to take into account the double ticking,
-				// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
-				addNoteToBuzzer(C5_1);
-			};
-		}
-
-		if (tick_duration > 0)
-		{
-			// no sound when zero
-			if (buzzer->getBuzzerRollEmpty()) // if alarm sounds, no ticking!
-			{
-				buzzer->playTone(500, tick_duration); // works well
-			}
-		}
-	}
+	
+	
 
 	// display
 	switch (display_mode)

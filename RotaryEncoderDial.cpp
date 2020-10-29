@@ -11,7 +11,7 @@ RotaryEncoderDial::RotaryEncoderDial()
   this->sensitivity = 0;
   this->sensitivity_counter = 0;
   this->maxValue = 32767;
-  this->minToMax = false;
+  this->overflowToOtherSide = false;
 }
 
 int8_t RotaryEncoderDial::getDelta(){
@@ -19,9 +19,9 @@ int8_t RotaryEncoderDial::getDelta(){
   return this->delta_memory;
 }
 
-void RotaryEncoderDial::setRange(int16_t maxValue, boolean minToMax){
+void RotaryEncoderDial::setRange(int16_t maxValue, boolean overflowToOtherSide){
   this->maxValue = maxValue;
-  this->minToMax = minToMax;
+  this->overflowToOtherSide = overflowToOtherSide;
   if (this->value > this->maxValue){
     this->value = this->maxValue;
   }
@@ -41,21 +41,22 @@ int16_t RotaryEncoderDial::getValueLimited(int16_t maxValue, boolean jumpAtEnd){
 
 void RotaryEncoderDial::refresh(){
   noInterrupts();
+  // disable interrupts when working with values that are modified by them.
   this->delta_memory = this->delta;
   this->delta = 0;
   interrupts();
-  this->value += this->delta_memory; // non atomic action (16bit value on 8 bit processor), so an interrupt can ruin it! 
+  // take care for non atomic actions (16bit value on 8 bit processor), so an interrupt can ruin it! 
+  this->value += this->delta_memory; 
 
 
   if (this->value < 0){
-    if (this->minToMax){
+    if (this->overflowToOtherSide){
       this->value = this->maxValue;
-
     }else{
       this->value = 0;
     }
   }else if (this->value > this->maxValue){
-    if (this->minToMax){
+    if (this->overflowToOtherSide){
       this->value = 0;
 
     }else{
