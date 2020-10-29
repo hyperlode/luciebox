@@ -102,8 +102,10 @@
 #define SIMON_DEAD_PLAYER 666
 #define SIMON_MAX_PLAYERS 8
 #define SIMON_NO_BUTTON_PRESSED 111
-#define POMODORO_INIT_DEFAULT_SECS 1500
-#define POMODORO_PAUSE_DEFAULT_SECS 300
+#define POMODORO_INIT_DEFAULT_TIME_INDEX 50 //1500s
+#define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25 //300s
+#define POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX 16 //60s
+
 #define POMODORO_DISPLAY_TIMER 0
 #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
 #define POMODORO_DISPLAY_SHOW_GOOD 2
@@ -165,12 +167,12 @@
 #define RANDOMWORLD_RANDOM_NUMBER counter
 #define SEQUENCER_STEP_COUNTER counter
 #define COMPOSER_STEP counter
-#define POMODORO_STATS_WORKING_GOOD counter
 #define HACKTIME_ADDRESS counter
 #define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
 #define QUIZ_ROUNDS_INIT counter
 #define METRONOME_TICKER_3_POSITION counter
 #define TILT_EXPECTED_SWITCH_INDEX counter
+#define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -178,7 +180,7 @@
 #define SIMON_INDEX counter2
 #define DEBUGMODE_ACTIVATED counter2
 #define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW counter2
-#define POMODORO_INIT_TIME_SECONDS counter2
+#define POMODORO_MAIN_CLOCK_TIME_INDEX counter2
 #define HACKTIME_DISPLAY_MODE counter2
 #define SOUND_NOTES_SCALE_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
@@ -198,7 +200,6 @@
 #define GEIGER_INCREASE_CHANCE counter4
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 #define SIMON_ACTIVE_LIGHT counter4
-#define POMODORO_PAUSE_TIME_SECONDS counter4
 #define SOUND_MODE_SCALE_RANGE_LENGTH counter4
 
 #define REACTION_GAME_LEVEL counter5
@@ -221,7 +222,6 @@
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
 #define REACTION_GAME_HEX_VALUE_TO_FIND counter7
 
-#define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
 #define COUNTER_GEIGER counter8
 
@@ -229,8 +229,10 @@
 #define GEIGER_TONE_LENGTH counter9
 #define METRONOME_TICKER_1_POSITION counter9
 #define HACKTIME_MEMORY_SELECT counter9  // was 5
+#define POMODORO_PAUSE_TIME_INDEX counter9
 
 #define STOPWATCH_LAP_MEMORY_2 counter10
+#define POMODORO_STATS_WORKING_GOOD counter10
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -247,6 +249,7 @@
 #define SIMON_END_OF_GAME general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
+#define POMODORO_ENABLE_INTERVAL_BEEP general_boolean2
 
 #define EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
 
@@ -642,11 +645,13 @@ private:
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
 #endif
-
     bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    bool nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
 
+
+    unsigned int indexToTimeSeconds(int16_t index);
     // functions for compression the memory size
     void textBufToDisplay();
     void decimalPointTimingOn();

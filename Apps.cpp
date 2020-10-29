@@ -409,14 +409,15 @@ void Apps::pomodoroTimer(bool init)
 
 	if (init)
 	{
-		POMODORO_INIT_TIME_SECONDS = POMODORO_INIT_DEFAULT_SECS;
-		POMODORO_PAUSE_TIME_SECONDS = POMODORO_PAUSE_DEFAULT_SECS;
+		POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
+		POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
 		POMODORO_STATS_WORKING_GOOD = 0;
 		POMODORO_STATS_WORKING_BAD = 0;
-		POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = 0; // zero means disabled.
+		POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
 	}
 	
-	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
+	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT);
+	POMODORO_ENABLE_INTERVAL_BEEP = binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 
 	bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA) );
 
@@ -439,7 +440,7 @@ void Apps::pomodoroTimer(bool init)
 
 				if (POMODORO_AUTO_RESTART_ENABLED)
 				{
-					POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_PAUSE_TIME_SECONDS);
+					POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
 					POMODORO_TIMER.start();
 				}else{
 					POMODORO_TIMER.reset();
@@ -451,7 +452,7 @@ void Apps::pomodoroTimer(bool init)
 				// coming out of break. Not executed at starting Pomodoro by switch.
 
 				loadBuzzerTrack(SONG_ATTACK);
-				POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
+				POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
 				POMODORO_TIMER.start();
 			}
 		}
@@ -484,9 +485,11 @@ void Apps::pomodoroTimer(bool init)
 
 		if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 		{
-			if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0)
+			if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0 
+			&& POMODORO_ENABLE_INTERVAL_BEEP
+			)
 			{
-				if (random(0, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS * 2) <= 1 - (tick_twice_a_second))
+				if (random(0, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX) * 2) <= 1 - (tick_twice_a_second))
 				{
 					// random has 0 included. as we have to take into account the double ticking,
 					// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
@@ -503,84 +506,68 @@ void Apps::pomodoroTimer(bool init)
 				}
 			}
 		}
-		
 	}
 	else
 	{
 		// in main menu
 		POMODORO_TIMER.reset();
-		POMODORO_TIMER.setInitCountDownTimeSecs(POMODORO_INIT_TIME_SECONDS);
-		uint16_t tmpSeconds = POMODORO_NONSENSE_TIME;
+		POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
 
-		if (encoder_dial->getDelta())
-		{
-
-#ifdef ENABLE_MULTITIMER
-			tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
-#else
-			tmpSeconds = encoder_dial->getValueLimited(60,false) * 30;
-#endif
-		}
-
+		// set timer up for change
+		int16_t* active_seconds_modifier = &POMODORO_MAIN_CLOCK_TIME_INDEX; // normal time setting is default option
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
-			if (tmpSeconds != POMODORO_NONSENSE_TIME)
-			{
-				POMODORO_PAUSE_TIME_SECONDS = tmpSeconds;
-			}
+			active_seconds_modifier = &POMODORO_PAUSE_TIME_INDEX;
 			display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
 
-		}else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		}else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
-			if (tmpSeconds != POMODORO_NONSENSE_TIME)
-			{
-				POMODORO_PROBABILITY_BEEP_EVERY_SECONDS = tmpSeconds;
-			}
+			active_seconds_modifier = &POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX;
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
-
-		}else{
-			if (tmpSeconds != POMODORO_NONSENSE_TIME)
-			{
-			POMODORO_INIT_TIME_SECONDS = tmpSeconds;
-			}
 		}
 
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
-		{
-			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+		// actually change the set up timer
+		if (encoder_dial->getDelta()){
+			nextStep(active_seconds_modifier,encoder_dial->getDelta()>0,0,90,false);
 		}
 
+		// show performance results
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			display_mode = POMODORO_DISPLAY_SHOW_BAD;
 		}
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+		{
+			display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+		}
 	}
-
-	
-	
 
 	// display
 	switch (display_mode)
 	{
+
 	case POMODORO_DISPLAY_TIMER:
+	{
 		POMODORO_TIMER.getTimeString(textBuf);
 		if (POMODORO_IN_BREAK && millis() % 1000 > 650){
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
-		break;
+	}
+	break;
 
 	case POMODORO_DISPLAY_PAUSE_INIT_SECS:
 	{
-		timeSecondsToClockString(textBuf, POMODORO_PAUSE_TIME_SECONDS);
+		timeSecondsToClockString(textBuf, indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
 		if (millis() % 1000 > 650)
 		{
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
 	}
 	break;
+
 	case POMODORO_DISPLAY_BEEP_PROBABILITY:
 	{
-		timeSecondsToClockString(textBuf, POMODORO_PROBABILITY_BEEP_EVERY_SECONDS);
+		timeSecondsToClockString(textBuf, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX));
 		if (millis() % 1000 > 650)
 		{
 			// rnd beep time....
@@ -588,6 +575,7 @@ void Apps::pomodoroTimer(bool init)
 		}
 	}
 	break;
+
 	case POMODORO_DISPLAY_SHOW_GOOD:
 	{
 		if (millis() % 1000 > 650)
@@ -622,49 +610,24 @@ void Apps::pomodoroTimer(bool init)
 	{
 		if (millis() % 500 < 250)
 		{
-			// lights |= 1 << LIGHT_LATCHING_EXTRA;
 			lights |= 1 << lights_indexed[LIGHT_INDEXED_LATCHING_EXTRA];
 		}
-		
 	}
-	// else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500))
-	// {
-	// 	// decimalPointTimingOn();
-	// 	lights |= 1 << LIGHT_LATCHING_EXTRA;
-	// }
-	// else if (POMODORO_IN_BREAK)
-	// {
-	// 	setStandardTextToTextBuf(TEXT_PAUS);
-	// }
 
 	setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(),1);
 
-	// decimalPoints = 1 << 2;
-	// 	//lights|= 1<<LIGHT_LATCHING_EXTRA;
-	// 	if (in_menu){
-
-	// 	}else if (POMODORO_TIMER.getInFirstGivenHundredsPartOfSecond(500)){
-	// 		//decimalPoints = 1 << 2;
-
-	// 	}else if  (POMODORO_IN_BREAK){
-	// 		textBuf[0]='P';
-	// 		textBuf[1]='A';
-	// 		textBuf[2]='U';
-	// 		textBuf[3]='S';
-	// 		decimalPoints = 0;
-	// 	}else{
-	// 		decimalPoints = 0;
-	// 	}
-
 	// leds
-
-	if (POMODORO_PROBABILITY_BEEP_EVERY_SECONDS > 0)
+	if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
 	{
 		lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
 	}
-	if (POMODORO_AUTO_RESTART_ENABLED)
+	if (POMODORO_ENABLE_INTERVAL_BEEP)
 	{
 		lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
+	}
+	if (POMODORO_AUTO_RESTART_ENABLED)
+	{
+		lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
 	}
 	if (!in_menu)
 	{
@@ -3974,13 +3937,17 @@ void Apps::modeReactionGame(bool init)
 }
 
 
-bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
-{
+bool Apps::nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide){
 	int16_t original_value;
 	*counter += -1 + (2 * countUpElseDown);
 
-	checkBoundaries(counter, minValue, maxValue, true);
+	checkBoundaries(counter, minValue, maxValue, overflowToOtherSide);
 	return original_value != *counter;
+}
+
+bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
+{
+	return nextStep(counter, countUpElseDown, minValue, maxValue, true);
 }
 
 void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
@@ -4189,6 +4156,13 @@ void Apps::buzzerChangeSpeedRatioWithEncoderDial(){
 	buzzer->changeSpeedRatio(encoder_dial->getDelta());
 }
 
+unsigned int Apps::indexToTimeSeconds(int16_t index){
+#ifdef ENABLE_MULTITIMER
+	return this->multiTimer.getIndexedTime(index);
+#else
+	return index * index; // untested
+#endif
+}
 void Apps::setStandardTextToTextBuf(uint8_t textPosition){
 	ledDisp->setStandardTextToTextBuf(textBuf, textPosition);
 }
