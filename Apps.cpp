@@ -216,11 +216,6 @@ void Apps::appSelector(bool init, uint8_t selector)
 	}
 }
 
-// void Apps::updateEveryAppCycleAfter()
-// {
-
-// }
-
 void Apps::updateEveryAppCycleBefore()
 {
 	binaryInputsEdgeUp = 0;
@@ -239,14 +234,12 @@ void Apps::updateEveryAppCycleBefore()
 	setBlankDisplay();
 }
 
+// void Apps::updateEveryAppCycleAfter()
+// {
+// }
+
 void Apps::setDefaultMode()
 {
-	//button lights
-	// setLedArray(0b00000000); // no lights
-
-	//display
-	// setBlankDisplay();
-	// decimalPoints = 0; // set all decimal points off. segment 4 = bit 3, ....   00043210 (segment number)
 	allLights->setBrightness(0, false);
 
 	//buzzer
@@ -261,7 +254,7 @@ void Apps::setDefaultMode()
 
 bool Apps::init_app(bool init, uint8_t selector)
 {
-	// shows splash screen
+	// shows animated introduction splash screen
 
 	if (init)
 	{
@@ -270,10 +263,10 @@ bool Apps::init_app(bool init, uint8_t selector)
 
 		ledDisp->progmemToDisplayBuffer(&displayAllSegments, app_splash_screens + selector * 4);
 
-		// // initialize list
+		// initialize list
 		randomSequence(FADE_IN_RANDOM_LIST, 32);
 
-		counter = 27;
+		counter = 27; 
 		this->TIMER_INIT_APP.setInitTimeMillis(-20);
 		this->TIMER_INIT_APP.start();
 
@@ -2737,10 +2730,6 @@ void Apps::tiltSwitchTest(bool init)
 		TILT_EXPECTED_SWITCH_INDEX = 0;
 		TILT_CYCLE_COUNTER = 0;
 		displayAllSegments = 0;
-
-		
-
-
 	}
 
 	// time the amount of cycles.
@@ -2749,7 +2738,7 @@ void Apps::tiltSwitchTest(bool init)
 
 		displayAllSegments ^= 1<< (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX]/10);
 		displayAllSegments ^= 1<< (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX]%10);
-		displayAllSegments &= ~(1L<<7); 
+		displayAllSegments &= ~(1UL<<7); 
 		
 		// if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
 		// 	TILT_EXPECTED_SWITCH_INDEX+=4;
@@ -2762,14 +2751,15 @@ void Apps::tiltSwitchTest(bool init)
 			TILT_EXPECTED_SWITCH_INDEX++;
 		}
 		
+		addNoteToBuzzer(1); //not beep but "puck"
 		if (TILT_EXPECTED_SWITCH_INDEX >= 4){
 			TILT_CYCLE_COUNTER ++;
 			TILT_EXPECTED_SWITCH_INDEX = 0;
-			loadBuzzerTrack(SONG_ATTACK);
+			addNoteToBuzzer(rest_2); // would you believe it, it sounds like a chicken. this is the kedeeeeet  in the tok tok tok kedeeet (the ke is also a tok sound)
+			addNoteToBuzzer(C7_1); 
 		}
-		addNoteToBuzzer(1); //not beep but "puck"
-		
 	}
+
 	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_0)){
 		TILT_CYCLE_COUNTER = 0;
 	}
@@ -2808,7 +2798,6 @@ void Apps::tiltSwitchTest(bool init)
 		TILT_TIMER.setInitCountDownTimeSecs(tmpSeconds);
 		TILT_TIMER.reset();
 	}
-
 }
 #endif
 
@@ -2824,7 +2813,6 @@ void Apps::modeGeiger(bool init)
 		GEIGER_TONE_LENGTH = 10;
 		GEIGER_PROBABILITY_THRESHOLD = 950000;
 		GEIGER_INCREASE_CHANCE = 0;
-		
 	}
 
 	//play tick.
@@ -2834,8 +2822,6 @@ void Apps::modeGeiger(bool init)
 	//long r = random(0, 1024);
 	//r = r*r;
 	// setBlankDisplay();
-
-	
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
@@ -2918,7 +2904,6 @@ void Apps::modeGeiger(bool init)
 	{
 		ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);
 	}
-	
 }
 
 void Apps::geigerToneHelper(){
@@ -2958,7 +2943,6 @@ void Apps::modeSequencer(bool init)
 
 	// erase screen at start.
 	// setBlankDisplay();
-
 
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
@@ -3007,7 +2991,6 @@ void Apps::modeSequencer(bool init)
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
-			
 			// if button continuously pressed, listen to notes as they are chosen
 			buzzerOffAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
 			noteToDisplay( SEQUENCER_TEMP_NOTE);
@@ -3072,17 +3055,7 @@ void Apps::modeSequencer(bool init)
 		// handle step change
 		if (step != 0 || init)
 		{
-			SEQUENCER_STEP_COUNTER += step;
-
-			if (SEQUENCER_STEP_COUNTER < 0)
-			{
-				SEQUENCER_STEP_COUNTER = 31;
-			}
-
-			if (SEQUENCER_STEP_COUNTER > 31)
-			{
-				SEQUENCER_STEP_COUNTER = 0;
-			}
+			nextStepRotate(&SEQUENCER_STEP_COUNTER,true,0,32);
 
 			addNoteToBuzzer(
 				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] +
@@ -3156,7 +3129,7 @@ void Apps::modeMetronome(bool init)
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_INDEXED_MOMENTARY_2, true, C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_INDEXED_MOMENTARY_3, true, C7_8, update);
 	
-	// ledDisp->setBlankDisplay();
+	// display
 	if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
 		// bpm --> full 12 step circles per minute.   timing is per step. so: 60bpm == 1 circle / second = timer: 1000/12 = 83.333ms/step
 		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) ( 1 / (12* (float)TIMER_METRONOME.getInitTimeMillis()/60000 ))); // millis/step to fullcirclesp/minute (bpm)
@@ -3246,7 +3219,6 @@ void Apps::modeSimon(bool init)
 		{
 			simonState = simonNewGame;
 		}
-
 
 		// play button light blinking invitingly.
 		if (millis() % 250 > 125)
