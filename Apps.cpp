@@ -136,7 +136,6 @@ void Apps::appSelector(bool init, uint8_t selector)
 			break;
 
 		case APP_SELECTOR_RANDOMWORLD:
-			// this->quiz(initOnBigLatchInitToo);
 			this->modeRandomWorld(initOnBigLatchInitToo);
 			break;
 
@@ -1881,65 +1880,102 @@ void Apps::modeSoundNotes(bool init)
 	}
 }
 
+bool Apps::loadScreenFromFlash(int16_t frame_index)
+{
+	this->displayAllSegments = 0;
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		this->displayAllSegments |= (uint32_t)pgm_read_byte_near((int16_t)disp_4digits_animations + frame_index*4 + i) << (8 * i); //* 4 --> 4 bytes per dword
+	}
+
+	// check for end of movie
+	uint32_t stop_screen = (uint32_t)ANIMATION_STOP_CODE_PART_0 <<0 |  (uint32_t)ANIMATION_STOP_CODE_PART_1 <<8 |  (uint32_t)ANIMATION_STOP_CODE_PART_2 <<16 |  (uint32_t)ANIMATION_STOP_CODE_PART_3 <<24;
+
+	if(displayAllSegments == stop_screen){
+		return false;
+	}else{
+		return true;
+	}
+}
+
+void Apps::loadMovie(){
+	MOVIE_MODE_MOVIE_FRAME_INDEX_START = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] ;
+	MOVIE_MODE_MOVIE_FRAME_INDEX_STOP = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX + 1] ;
+	MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START;
+}
+
 void Apps::movieAnimationMode(bool init)
 {
 	//reset saved led disp state.
 	if (init)
 	{
-		counter = 4; // display is four characters. Four bytes.So, it should advance four bytes every frame (default). But, it could give fun effects to change that number and see what happens...
-		this->dataPlayer.loadAllData(disp_4digits_animations);
-		this->dataPlayer.loadDataSet(1);
-		this->dataPlayer.setAutoSteps(4);
 		MOVIE_MODE_SHOW_NEGATIVE = false;
+		MOVIE_MODE_FRAME_INTERVAL_TIMER.setInitTimeMillis(-500);
+		MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
+
+		// get stops for flash
+		// MOVIE_MODE_STOPS --> contains the stop frame index for the corresponding movie index.
+		uint8_t movie_index = 0;
+		for (byte frame_index = 0; frame_index < MAX_FRAMES_MOVIES_FLASH; frame_index++){
+			MOVIE_MODE_STOPS[movie_index ] = 0; // 
+			if (!loadScreenFromFlash(frame_index)){
+				MOVIE_MODE_STOPS[movie_index ] = frame_index; // stop frame of the previous movie 
+				movie_index++;
+			}
+		}
+		MOVIE_MODE_FLASH_MOVIE_INDEX = 0;
+		loadMovie();
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// manual mode
-		if (encoder_dial->getDelta())
-		{
-			this->dataPlayer.setSetIndexDirection(encoder_dial->getDelta()>0);
-			this->dataPlayer.moveIndexSteps(counter); // every frame is four bytes. advance four to move one frame.
-		}
+		MOVIE_MODE_FLASH_FRAME_INDEX += encoder_dial->getDelta();
 
 		// one step forward
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
-			this->dataPlayer.setSetIndexDirection(1);
-			this->dataPlayer.moveIndexSteps(counter);
+			MOVIE_MODE_FLASH_FRAME_INDEX += 1;
 		}
 
 		// one step backward
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			this->dataPlayer.setSetIndexDirection(0);
-			this->dataPlayer.moveIndexSteps(counter);
+			MOVIE_MODE_FLASH_FRAME_INDEX -= 1;
 		}
 	}
 	else
 	{
 		// auto mode.
 
-		if (encoder_dial->getDelta())
+		dialOnEdgeChangeInitTimerPercentage(&MOVIE_MODE_FRAME_INTERVAL_TIMER);
+
+		if (!MOVIE_MODE_FRAME_INTERVAL_TIMER.getTimeIsNegative())
 		{
-			dataPlayer.setAutoStepSpeed(encoder_dial->getValueLimited(1023, false) - 1023);
+			MOVIE_MODE_FLASH_FRAME_INDEX += 1;
+			MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 		}
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			this->dataPlayer.setSetIndexDirection(2);
+			// this->dataPlayer.setSetIndexDirection(2);
 		}
 
-		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			this->dataPlayer.update(); // this to pause the movie while holding.
+			// this->dataPlayer.update(); // this to pause the movie while holding.
 		}
 	}
 
 	// next movie
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
-		this->dataPlayer.nextDataSet(true);
+		MOVIE_MODE_FLASH_MOVIE_INDEX++;
+		if (MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] == 0){
+			MOVIE_MODE_FLASH_MOVIE_INDEX = 0;
+		}
+		loadMovie();
+		// MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX - 1] + 1; // plus 1 to jump over "stop"
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
@@ -1947,8 +1983,39 @@ void Apps::movieAnimationMode(bool init)
 		MOVIE_MODE_SHOW_NEGATIVE = !MOVIE_MODE_SHOW_NEGATIVE;
 	}
 
-	// get the display data.
-	displayAllSegments = this->dataPlayer.getActive32bit();
+	if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_MOVIE_FRAME_INDEX_STOP){
+		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START + 1;
+	}else if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_MOVIE_FRAME_INDEX_START){
+		MOVIE_MODE_FLASH_FRAME_INDEX =  MOVIE_MODE_MOVIE_FRAME_INDEX_STOP - 1;
+	}
+
+	// // check for end of movie
+	// if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX]){
+
+	// 	// load start of movie
+	// 	if (MOVIE_MODE_FLASH_MOVIE_INDEX == 0){
+	// 		// if first movie, just go to first frame.
+	// 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
+
+	// 	}else{
+	// 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX - 1] + 1; // plus 1 to jump over "stop"
+	// 	}
+	// }
+
+	// // check for end of movie backwards
+	// if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX - 1]){
+
+	// 	// load start of movie
+	// 	if (MOVIE_MODE_FLASH_MOVIE_INDEX == 0){
+	// 		// if first movie, just go to first frame.
+	// 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
+
+	// 	}else{
+	// 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] + 1; // plus 1 to jump over "stop"
+	// 	}
+	// }
+
+	loadScreenFromFlash(MOVIE_MODE_FLASH_FRAME_INDEX);
 
 	// invert all data in picture
 	if (MOVIE_MODE_SHOW_NEGATIVE)

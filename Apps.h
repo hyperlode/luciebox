@@ -72,7 +72,10 @@
 // #define MOVE_LEFT		3
 // #define MOVE_DOWN		4
 // #define MOVE_UP	  	    5
-#define ANIMATION_STOP_CODE 0x00
+#define ANIMATION_STOP_CODE_PART_0 0x00
+#define ANIMATION_STOP_CODE_PART_1 0xFF
+#define ANIMATION_STOP_CODE_PART_2 0xFF
+#define ANIMATION_STOP_CODE_PART_3 0x04
 // enum RandomWorldMode:uint8_t{
 //   rollOneDice,
 //   rollFourDice,
@@ -149,7 +152,7 @@
 #define QUIZ_RANDOM_WAIT_TIME generalTimer
 #define SEQUENCER_SPEED generalTimer
 #define TILT_TIMER generalTimer
-
+#define MOVIE_MODE_FRAME_INTERVAL_TIMER generalTimer
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
 #define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
@@ -173,6 +176,7 @@
 #define METRONOME_TICKER_3_POSITION counter
 #define TILT_EXPECTED_SWITCH_INDEX counter
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX counter
+#define MOVIE_MODE_FLASH_FRAME_INDEX counter
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
 #define REACTION_GAME_TIMER_STEP counter2
@@ -185,6 +189,7 @@
 #define SOUND_NOTES_SCALE_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
 #define TILT_CYCLE_COUNTER counter2
+#define MOVIE_MODE_FLASH_MOVIE_INDEX counter2 
 
 #define DRAW_CURSOR_INDEX counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
@@ -201,6 +206,8 @@
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
 #define SIMON_ACTIVE_LIGHT counter4
 #define SOUND_MODE_SCALE_RANGE_LENGTH counter4
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_START counter4
+
 
 #define REACTION_GAME_LEVEL counter5
 #define SEQUENCER_TEMP_NOTE counter5
@@ -224,6 +231,7 @@
 
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
 #define COUNTER_GEIGER counter8
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_STOP counter8
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 #define GEIGER_TONE_LENGTH counter9
@@ -262,6 +270,7 @@
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
+#define MOVIE_MODE_STOPS bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -356,9 +365,11 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
 };
 
+
+#define MAX_FRAMES_MOVIES_FLASH 70
+
 const uint8_t disp_4digits_animations[] PROGMEM = {
-    0x35,                   // first byte = length of animation in bytes  (here 53, including the length byte)
-                            // const uint32_t disp_4digits_swoosh [] PROGMEM = {
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // horizontal right to left sweep.
     0x00, 0x00, 0x00, 0x06,
     0x00, 0x00, 0x00, 0x49,
@@ -372,14 +383,15 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x06, 0x00, 0x00, 0x00,
     0x49, 0x00, 0x00, 0x00,
     0x30, 0x00, 0x00, 0x00, //last byte is byte 52.
-    0x19,                   //length of next animation (25 including the length)  byte53
+
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // vertical swoop
     0x01, 0x01, 0x01, 0x01,
     0x22, 0x22, 0x22, 0x22,
     0x40, 0x40, 0x40, 0x40,
     0x14, 0x14, 0x14, 0x14,
     0x08, 0x08, 0x08, 0x08, // byte 77,
-    0x81,                   // ( length of following animation, including the length byte)
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 
     0x00, 0x00, 0x00, 0x00,
 
@@ -416,7 +428,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x00, 0x8E,
     0x00, 0x00, 0x00, 0x84,
 
-    ANIMATION_STOP_CODE //length 0 byte is stop byte.
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 };
 
 #define ALL_DATA_SIZE 1
@@ -670,6 +682,10 @@ private:
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
+    
+    void loadMovie();
+    bool loadScreenFromFlash(int16_t address);
+
     // void resetTimer(SuperTimer* pTimer);
     
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
