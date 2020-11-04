@@ -55,45 +55,18 @@
 #define APP_SELECTOR_MULTITIMER_SETTING 22
 #define APP_SELECTOR_MULTITIMER_PLAYING 23
 
-
-
-// #define TILT_FORWARD 	0x00000001
-// #define TILT_BACKWARD 	0x00000010
-// #define TILT_LEFT 		0x00000100
-// #define TILT_RIGHT 		0x00001000
 #define TILT_FORWARD 0
 #define TILT_BACKWARD 1
 #define TILT_LEFT 2
 #define TILT_RIGHT 3
 
-// #define DO_NOTHING		0
-// #define TOGGLE_SEGMENT	1
-// #define MOVE_RIGHT		2
-// #define MOVE_LEFT		3
-// #define MOVE_DOWN		4
-// #define MOVE_UP	  	    5
-#define ANIMATION_STOP_CODE_PART_0 0x00
-#define ANIMATION_STOP_CODE_PART_1 0xFF
-#define ANIMATION_STOP_CODE_PART_2 0xFF
-#define ANIMATION_STOP_CODE_PART_3 0x04
-// enum RandomWorldMode:uint8_t{
-//   rollOneDice,
-//   rollFourDice,
-//   takeRandomCard,
-//   takeRandomCardFromDeck,
-//   randomNumber,
-//   randomLetter,
-//   headsOrTails,
-//   yesOrNo,
-// };
-// RandomWorldMode randomWorldMode;
-
-
-
+#define ANIMATION_STOP_CODE_PART_0 0x6D
+#define ANIMATION_STOP_CODE_PART_1 0x70
+#define ANIMATION_STOP_CODE_PART_2 0x5C
+#define ANIMATION_STOP_CODE_PART_3 0xF3
 
 #define RANDOMWORLD_ROLLONEDICE 0
 #define RANDOMWORLD_ROLLFOURDICE 4
-// #define RANDOMWORLD_TAKERANDOMCARD 1
 #define RANDOMWORLD_RANDOMLETTER 1
 #define RANDOMWORLD_TAKERANDOMCARDFROMDECK 5
 #define RANDOMWORLD_RANDOMNUMBER 2
@@ -367,6 +340,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
 
 #define MAX_FRAMES_MOVIES_FLASH 70
+#define MOVIE_INDEX_EMPTY 255
 
 const uint8_t disp_4digits_animations[] PROGMEM = {
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
@@ -684,7 +658,7 @@ private:
     void numberToBufAsDecimal(int16_t number);
     
     void loadMovie();
-    bool loadScreenFromFlash(int16_t address);
+    bool loadScreenFromMemory(int16_t address);
 
     // void resetTimer(SuperTimer* pTimer);
     

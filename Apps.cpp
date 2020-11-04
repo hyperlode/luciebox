@@ -1880,12 +1880,19 @@ void Apps::modeSoundNotes(bool init)
 	}
 }
 
-bool Apps::loadScreenFromFlash(int16_t frame_index)
+bool Apps::loadScreenFromMemory(int16_t frame_index)
 {
 	this->displayAllSegments = 0;
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		this->displayAllSegments |= (uint32_t)pgm_read_byte_near((int16_t)disp_4digits_animations + frame_index*4 + i) << (8 * i); //* 4 --> 4 bytes per dword
+		if (frame_index < MAX_FRAMES_MOVIES_FLASH){
+			//flash
+			this->displayAllSegments |= (uint32_t)pgm_read_byte_near((int16_t)disp_4digits_animations + frame_index*4 + i) << (8 * i); //* 4 --> 4 bytes per dword
+
+		}else{
+			//eeprom
+			this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + (frame_index - MAX_FRAMES_MOVIES_FLASH)  * 4 + i))) << (i * 8);
+		}
 	}
 
 	// check for end of movie
@@ -1913,16 +1920,19 @@ void Apps::movieAnimationMode(bool init)
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.setInitTimeMillis(-500);
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 
-		// get stops for flash
+		// get stops for flash movies 
 		// MOVIE_MODE_STOPS --> contains the stop frame index for the corresponding movie index.
 		uint8_t movie_index = 0;
-		for (byte frame_index = 0; frame_index < MAX_FRAMES_MOVIES_FLASH; frame_index++){
-			MOVIE_MODE_STOPS[movie_index ] = 0; // 
-			if (!loadScreenFromFlash(frame_index)){
+		for (byte frame_index = 0; frame_index < MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS; frame_index++){
+			
+			MOVIE_MODE_STOPS[movie_index+1] = MOVIE_INDEX_EMPTY; // last movie with no stop is empty.  
+			
+			if (!loadScreenFromMemory(frame_index)){
 				MOVIE_MODE_STOPS[movie_index ] = frame_index; // stop frame of the previous movie 
 				movie_index++;
 			}
 		}
+
 		MOVIE_MODE_FLASH_MOVIE_INDEX = 0;
 		loadMovie();
 	}
@@ -1971,7 +1981,9 @@ void Apps::movieAnimationMode(bool init)
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		MOVIE_MODE_FLASH_MOVIE_INDEX++;
-		if (MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] == 0){
+		
+		if (MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] == MOVIE_INDEX_EMPTY){
+			// go back to first movie at the end.
 			MOVIE_MODE_FLASH_MOVIE_INDEX = 0;
 		}
 		loadMovie();
@@ -1985,37 +1997,12 @@ void Apps::movieAnimationMode(bool init)
 
 	if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_MOVIE_FRAME_INDEX_STOP){
 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START + 1;
+
 	}else if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_MOVIE_FRAME_INDEX_START){
 		MOVIE_MODE_FLASH_FRAME_INDEX =  MOVIE_MODE_MOVIE_FRAME_INDEX_STOP - 1;
 	}
 
-	// // check for end of movie
-	// if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX]){
-
-	// 	// load start of movie
-	// 	if (MOVIE_MODE_FLASH_MOVIE_INDEX == 0){
-	// 		// if first movie, just go to first frame.
-	// 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
-
-	// 	}else{
-	// 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX - 1] + 1; // plus 1 to jump over "stop"
-	// 	}
-	// }
-
-	// // check for end of movie backwards
-	// if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX - 1]){
-
-	// 	// load start of movie
-	// 	if (MOVIE_MODE_FLASH_MOVIE_INDEX == 0){
-	// 		// if first movie, just go to first frame.
-	// 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
-
-	// 	}else{
-	// 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] + 1; // plus 1 to jump over "stop"
-	// 	}
-	// }
-
-	loadScreenFromFlash(MOVIE_MODE_FLASH_FRAME_INDEX);
+	loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX);
 
 	// invert all data in picture
 	if (MOVIE_MODE_SHOW_NEGATIVE)
@@ -2038,7 +2025,7 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
-		DRAW_SHOW_MODE >= 3 ? DRAW_SHOW_MODE = 0 : DRAW_SHOW_MODE++;
+		DRAW_SHOW_MODE >= 4 ? DRAW_SHOW_MODE = 0 : DRAW_SHOW_MODE++;
 
 		switch (DRAW_SHOW_MODE)
 		{
@@ -2052,10 +2039,14 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 			*display_buffer = 0;
 			break;
 		case 2:
+			//special stop frame (for end of animations)
+			*display_buffer = (uint32_t)ANIMATION_STOP_CODE_PART_0 <<0 |  (uint32_t)ANIMATION_STOP_CODE_PART_1 <<8 |  (uint32_t)ANIMATION_STOP_CODE_PART_2 <<16 |  (uint32_t)ANIMATION_STOP_CODE_PART_3 <<24;
+			break;
+		case 3:
 			//full
 			*display_buffer = 0xFFFFFFFF;
 			break;
-		case 3:
+		case 4:
 			//restore
 			*display_buffer = displayAllSegmentsBuffer;
 		}
