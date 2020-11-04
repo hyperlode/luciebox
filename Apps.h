@@ -162,7 +162,6 @@
 #define SOUND_NOTES_SCALE_INDEX counter2
 #define METRONOME_TICKER_2_POSITION counter2
 #define TILT_CYCLE_COUNTER counter2
-#define MOVIE_MODE_FLASH_MOVIE_INDEX counter2 
 
 #define DRAW_CURSOR_INDEX counter3
 #define GEIGER_PROBABILITY_THRESHOLD counter3
@@ -204,7 +203,7 @@
 
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
 #define COUNTER_GEIGER counter8
-#define MOVIE_MODE_MOVIE_FRAME_INDEX_STOP counter8
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_END counter8
 
 #define SOUND_NOTES_NOTE_INDEX counter9
 #define GEIGER_TONE_LENGTH counter9
@@ -233,6 +232,7 @@
 #define POMODORO_ENABLE_INTERVAL_BEEP general_boolean2
 
 #define EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+#define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 
 #define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
@@ -657,7 +657,7 @@ private:
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
     
-    void loadMovie();
+    void loadNextMovie();
     bool loadScreenFromMemory(int16_t address);
 
     // void resetTimer(SuperTimer* pTimer);

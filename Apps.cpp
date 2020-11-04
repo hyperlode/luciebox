@@ -1905,10 +1905,33 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 	}
 }
 
-void Apps::loadMovie(){
-	MOVIE_MODE_MOVIE_FRAME_INDEX_START = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] ;
-	MOVIE_MODE_MOVIE_FRAME_INDEX_STOP = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX + 1] ;
-	MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START;
+void Apps::loadNextMovie(){
+
+	bool startFrameSet = false;
+
+	// set new stop frame index
+	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !startFrameSet){
+
+		// check if over limit (last movie)
+		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS)){
+			startFrameSet = true;
+			MOVIE_MODE_MOVIE_FRAME_INDEX_START = 1;
+			MOVIE_MODE_FLASH_FRAME_INDEX = 1;
+		}
+
+		// presume for next iteration to not come anymore.
+		if (!startFrameSet){
+			MOVIE_MODE_MOVIE_FRAME_INDEX_START = MOVIE_MODE_FLASH_FRAME_INDEX + 1;
+		}else{
+			MOVIE_MODE_MOVIE_FRAME_INDEX_END = MOVIE_MODE_FLASH_FRAME_INDEX ;
+		}
+		
+		if (!loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX)){
+			startFrameSet = true;
+		}
+		
+		MOVIE_MODE_FLASH_FRAME_INDEX++;
+	}
 }
 
 void Apps::movieAnimationMode(bool init)
@@ -1919,22 +1942,8 @@ void Apps::movieAnimationMode(bool init)
 		MOVIE_MODE_SHOW_NEGATIVE = false;
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.setInitTimeMillis(-500);
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
-
-		// get stops for flash movies 
-		// MOVIE_MODE_STOPS --> contains the stop frame index for the corresponding movie index.
-		uint8_t movie_index = 0;
-		for (byte frame_index = 0; frame_index < MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS; frame_index++){
-			
-			MOVIE_MODE_STOPS[movie_index+1] = MOVIE_INDEX_EMPTY; // last movie with no stop is empty.  
-			
-			if (!loadScreenFromMemory(frame_index)){
-				MOVIE_MODE_STOPS[movie_index ] = frame_index; // stop frame of the previous movie 
-				movie_index++;
-			}
-		}
-
-		MOVIE_MODE_FLASH_MOVIE_INDEX = 0;
-		loadMovie();
+		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
+		loadNextMovie();
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -1945,13 +1954,13 @@ void Apps::movieAnimationMode(bool init)
 		// one step forward
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
-			MOVIE_MODE_FLASH_FRAME_INDEX += 1;
+			MOVIE_MODE_FLASH_FRAME_INDEX++;
 		}
 
 		// one step backward
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			MOVIE_MODE_FLASH_FRAME_INDEX -= 1;
+			MOVIE_MODE_FLASH_FRAME_INDEX--;
 		}
 	}
 	else
@@ -1962,32 +1971,28 @@ void Apps::movieAnimationMode(bool init)
 
 		if (!MOVIE_MODE_FRAME_INTERVAL_TIMER.getTimeIsNegative())
 		{
-			MOVIE_MODE_FLASH_FRAME_INDEX += 1;
+			MOVIE_MODE_FLASH_FRAME_INDEX += (1 - 2*MOVIE_MODE_AUTO_BACKWARDS);
 			MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 		}
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 			// this->dataPlayer.setSetIndexDirection(2);
+			// MOVIE_MODE_AUTO_BACKWARDS = !MOVIE_MODE_AUTO_BACKWARDS;
+			MOVIE_MODE_AUTO_BACKWARDS = true;
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
 			// this->dataPlayer.update(); // this to pause the movie while holding.
+			MOVIE_MODE_AUTO_BACKWARDS = false;
 		}
 	}
 
 	// next movie
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
-		MOVIE_MODE_FLASH_MOVIE_INDEX++;
-		
-		if (MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX] == MOVIE_INDEX_EMPTY){
-			// go back to first movie at the end.
-			MOVIE_MODE_FLASH_MOVIE_INDEX = 0;
-		}
-		loadMovie();
-		// MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_STOPS[MOVIE_MODE_FLASH_MOVIE_INDEX - 1] + 1; // plus 1 to jump over "stop"
+		loadNextMovie();
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
@@ -1995,11 +2000,12 @@ void Apps::movieAnimationMode(bool init)
 		MOVIE_MODE_SHOW_NEGATIVE = !MOVIE_MODE_SHOW_NEGATIVE;
 	}
 
-	if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_MOVIE_FRAME_INDEX_STOP){
-		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START + 1;
+	// check limits of movie 
+	if (MOVIE_MODE_FLASH_FRAME_INDEX >  MOVIE_MODE_MOVIE_FRAME_INDEX_END){ 
+		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START;
 
-	}else if (MOVIE_MODE_FLASH_FRAME_INDEX ==  MOVIE_MODE_MOVIE_FRAME_INDEX_START){
-		MOVIE_MODE_FLASH_FRAME_INDEX =  MOVIE_MODE_MOVIE_FRAME_INDEX_STOP - 1;
+	}else if (MOVIE_MODE_FLASH_FRAME_INDEX <  MOVIE_MODE_MOVIE_FRAME_INDEX_START){
+		MOVIE_MODE_FLASH_FRAME_INDEX =  MOVIE_MODE_MOVIE_FRAME_INDEX_END;
 	}
 
 	loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX);
