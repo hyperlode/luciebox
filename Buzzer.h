@@ -260,6 +260,7 @@
 #define As8_1 254
 // #define rest_top_up_to_1 254 // adds silence to previous note until full note length; i.e. if 1/4 note, will add 3/4 silence.
 // #define B8_1 255  = BUZZER_ROLL_SONG_STOPVALUE
+#define BUZZER_ROLL_SONG_STOPVALUE 255
 
 #define BUZZER_MINUTE_BEEP_FREQUENCY 4000 //beep at each minute with this frequency
 #define BUZZER_MINUTEBEEP_DURATION_MILLIS 20
@@ -282,7 +283,6 @@
 // #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 63
 #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 15
 #define BUZZER_ROLL_BASE_FREQUENCY 220
-#define BUZZER_ROLL_SONG_STOPVALUE 255
 //
 //const uint8_t song_pause [] PROGMEM = {39,126,170,126,BUZZER_ROLL_SONG_STOPVALUE};
 //// const uint8_t song_simple_beep [] PROGMEM = {51,63,BUZZER_ROLL_SONG_STOPVALUE};
@@ -310,7 +310,7 @@ public:
     void setPin(uint8_t pin);
     uint8_t getPin();
     //void loadBuzzerTrack(const uint8_t *seq);
-    void loadBuzzerTrack(const uint8_t *seq, uint8_t song_index);
+    // void loadBuzzerTrack(const uint8_t *seq, uint8_t song_index);
     void programBuzzerRoll(uint8_t sound);
     // void addNoteToBuzzerRoll(uint8_t sound, uint8_t repeater);
     uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);

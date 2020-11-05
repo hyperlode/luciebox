@@ -41,25 +41,25 @@ uint8_t Buzzer::getPin()
     return this->pin;
 }
 
-void Buzzer::loadBuzzerTrack(const uint8_t *seq, uint8_t song_index)
-{
-    // list of songs is an array in flash, every song starts with a length byte of the song. (song cannot be more than 255 bytes)
+// void Buzzer::loadBuzzerTrack(const uint8_t *seq, uint8_t song_index)
+// {
+//     // list of songs is an array in flash, every song starts with a length byte of the song. (song cannot be more than 255 bytes)
 
-    // fast forward to correct index.
-    uint16_t song_start_index = 0;
-    for (uint16_t song=0;song<song_index;song++){
-        song_start_index += pgm_read_byte_near(seq +song_start_index); // add length of song to start index (to get to the start of the next song.)
-    }
+//     // fast forward to correct index.
+//     uint16_t song_start_index = 0;
+//     for (uint16_t song=0;song<song_index;song++){
+//         song_start_index += pgm_read_byte_near(seq +song_start_index); // add length of song to start index (to get to the start of the next song.)
+//     }
 
-    for (uint16_t note_index=1;note_index < pgm_read_byte_near(seq + song_start_index); note_index++){
+//     for (uint16_t note_index=1;note_index < pgm_read_byte_near(seq + song_start_index); note_index++){
     
-        uint8_t note = pgm_read_byte_near(seq + song_start_index + note_index);
-        if (note == BUZZER_ROLL_SONG_STOPVALUE){
-            break;
-        }
-        programBuzzerRoll(note);
-    }    
-}
+//         uint8_t note = pgm_read_byte_near(seq + song_start_index + note_index);
+//         if (note == BUZZER_ROLL_SONG_STOPVALUE){
+//             break;
+//         }
+//         programBuzzerRoll(note);
+//     }    
+// }
 
 void Buzzer::programBuzzerRoll(uint8_t sound)
 {

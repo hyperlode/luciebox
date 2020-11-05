@@ -244,6 +244,7 @@
 #define COMPOSER_SONG bytes_list
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 #define MOVIE_MODE_STOPS bytes_list
+#define MODE_SOUND_SONG_BUFFER bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -297,7 +298,7 @@ const uint8_t scale_lengths [] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BL
  
 const uint8_t scales [] PROGMEM = {
     2,2,1,2,2,2,1,  
-    2,1,2,2,1,2,2,1 ,
+    2,1,2,2,1,2,2,1,
     3,2,2,3,2,
     3,2,1,1,3,2,
     1,1,1,1,1,1,1,1,1,1,1,1
@@ -308,7 +309,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
     // 0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
     0xc4, 0x88, 0x50, 0x00, // student koala    
-    //0xD8, 0xE9, 0xCB, 0xC4, // abstract drol or tank
+    //0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
     0x5e, 0x01, 0x5f, 0x00, // music notes
     0x00, 0xd0, 0xab, 0x44, // stopwatch
     // 0x39, 0x09, 0x09, 0x0F, // abstractbig circle
@@ -383,7 +384,6 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 
     0x00, 0x00, 0x00, 0x00,
-
     0x21, 0x00, 0x00, 0x00, // sweep in
     0x71, 0x00, 0x00, 0x00,
     0x7B, 0x00, 0x00, 0x00,
@@ -416,36 +416,65 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x00, 0xDE,
     0x00, 0x00, 0x00, 0x8E,
     0x00, 0x00, 0x00, 0x84,
-
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-    
 };
 
-#define ALL_DATA_SIZE 1
-//PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
-
 #define SONG_DRYER_HAPPY 0
-// #define SONG_LANG_ZAL_ZE_LEVEN 1
+#define SONG_LANG_ZAL_ZE_LEVEN 1
 #define SONG_ATTACK 2
-
+#define SONG_EMPTY 3
 #define SONG_DRYER_UNHAPPY 4
 #define SONG_KINDEKE_DOUWEN 5
 #define SONG_RETREAT 6
 #define SONG_ALPHABET 7
 
+
+#define LEN_SONG_DRYER_HAPPY 18
+#define LEN_LANG_ZAL_ZE_LEVEN 84
+#define LEN_SONG_ATTACK 14
+#define LEN_SONG_EMPTY 0
+#define LEN_SONG_DRYER_UNHAPPY 13
+#define LEN_SONG_KINDEKE_DOUWEN 49
+#define LEN_SONG_RETREAT 14
+#define LEN_SONG_ALPHABET 20
+
+const uint8_t song_lengths [] PROGMEM = {
+    LEN_SONG_DRYER_HAPPY,
+    LEN_LANG_ZAL_ZE_LEVEN,
+    LEN_SONG_ATTACK,
+    LEN_SONG_EMPTY,
+    LEN_SONG_DRYER_UNHAPPY,
+    LEN_SONG_KINDEKE_DOUWEN,
+    LEN_SONG_RETREAT,
+    LEN_SONG_ALPHABET,
+};
+
+const uint8_t song_indeces [] PROGMEM = {
+    0,
+    LEN_SONG_DRYER_HAPPY,
+    LEN_SONG_DRYER_HAPPY + LEN_LANG_ZAL_ZE_LEVEN,
+    LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_LANG_ZAL_ZE_LEVEN,
+    LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY+ LEN_SONG_DRYER_HAPPY + LEN_SONG_ATTACK,
+    LEN_SONG_ATTACK + LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_SONG_DRYER_UNHAPPY,
+    LEN_SONG_DRYER_UNHAPPY + LEN_SONG_ATTACK + LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_SONG_KINDEKE_DOUWEN,
+    LEN_SONG_KINDEKE_DOUWEN + LEN_SONG_DRYER_UNHAPPY + LEN_SONG_ATTACK + LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_SONG_RETREAT,
+    };
+ 
 // one big library. length of song as byte at start. lenght of song INCLUDES the length byte. There is no need then to keep a separate array with start indeces. 
 const uint8_t songs [] PROGMEM = {
     //happy dryer
-    19, A6_2, rest_4, rest_2,
+    A6_2, rest_4, rest_2,
     Cs7_2, rest_4, rest_2,
     E7_4, rest_8, rest_4,
     Cs7_4, rest_8, rest_4,
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
+    
     // 1,  // dummy empty slot instead of lang zal ze leven
     // lang zal ze leven
-    85, C7_4, rest_4, rest_2,
+    
+    C7_4, rest_4, rest_2,
     C7_4, rest_2, C7_8, rest_8,
     C7_4, rest_4, rest_2,
     G6_2, G6_4, rest_2,
@@ -481,16 +510,17 @@ const uint8_t songs [] PROGMEM = {
     E7_1, E7_2, rest_2,
     D7_1, D7_2, rest_2,
     C7_1, C7_1,
+    
     // aaanvallueeeeee!
-    15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
-    // empty slot test
-    1,
-
+     Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
+    
+    
  // unhappy dryer
-    14, A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
+    A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
     // 1, //dummy for kindeke douwen
+    
     // kindeke douwen
-    50, B7_4, rest_4, rest_2,       // wie
+    B7_4, rest_4, rest_2,       // wie
     B7_1,                       //zal
     rest_2, A7_4, rest_4,       //er
     G6_4, rest_4, rest_2,       //ons
@@ -511,11 +541,14 @@ const uint8_t songs [] PROGMEM = {
     E7_1,
     E7_4, rest_4, E7_4, rest_4,
     A7_4, rest_4, rest_2,
+    
     // retreat song
-    15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
+    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
 
+    
+    
     // alphabet song
-    21, C7_4, rest_4, rest_2, 
+    C7_4, rest_4, rest_2, 
     C7_4, rest_4, rest_2, 
     G7_4, rest_4, rest_2, 
     G7_4, rest_4, rest_2, 
@@ -539,6 +572,7 @@ const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MO
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
                                     BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
+
 const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD,SWITCH_TILT_LEFT,SWITCH_TILT_BACKWARD,SWITCH_TILT_RIGHT};
 
 class Apps
@@ -599,7 +633,6 @@ public:
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
     void updateEveryAppCycleBefore();
     void geigerToneHelper();
-    
 private:
 
 #ifdef FUNCTION_POINTER_APP_SELECTION
@@ -607,7 +640,7 @@ private:
     fptr appPointer;
 #endif
 
-    DataPlayer dataPlayer;
+    // DataPlayer dataPlayer;
 
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
@@ -618,6 +651,9 @@ private:
     void randomModeTrigger(bool forReal);
 
 
+    void progmemToBuffer(const uint8_t *offset, uint8_t length);
+    uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
+    
     unsigned int indexToTimeSeconds(int16_t index);
     // functions for compression the memory size
     void textBufToDisplay();

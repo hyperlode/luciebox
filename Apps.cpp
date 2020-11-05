@@ -1302,13 +1302,12 @@ void Apps::modeSoundSong(bool init)
 		{
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 			{
-				uint8_t song[32];
 #ifdef ENABLE_EEPROM
-				saveLoadFromEepromSlot(song, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
+				saveLoadFromEepromSlot(MODE_SOUND_SONG_BUFFER, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
 #endif
-				for (uint8_t i = 0; i < 32; i++)
+				for (uint8_t i = 0; i < EEPROM_SEQUENCER_SONG_LENGTH; i++)
 				{
-					addNoteToBuzzer(song[i]);
+					addNoteToBuzzer(MODE_SOUND_SONG_BUFFER[i]);
 				}
 			}
 			else
@@ -3972,6 +3971,8 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave)
 {
+	// an eeprom slot in this context is a dedicated space of "eepromSlotLength" bytes.
+
 	for (uint8_t i = 0; i < eepromSlotLength; i++)
 	{
 		uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
@@ -4085,5 +4086,51 @@ void Apps::numberToBufAsDecimal(int16_t number){
 }
 
 void Apps::loadBuzzerTrack(uint8_t songIndex){
-	buzzer->loadBuzzerTrack(songs, songIndex);
+	
+	// // buzzer->loadBuzzerTrack(songs, songIndex);
+	// // fast forward to correct index.
+	// uint8_t index = 0;
+	// uint8_t length = 0;
+	// uint16_t total_song_offset = 0;
+	// do{
+    // 	length = progmemToBufferUntil(songs + total_song_offset , BUZZER_ROLL_SONG_STOPVALUE);
+	// 	total_song_offset += length;
+	// 	index++;
+
+	// }while(index-1 != songIndex );
+	
+	// for (uint8_t i=0;i<length-1;i++){ //length-1 because stop is included
+	// 	buzzer->programBuzzerRoll(this->bytes_list[i]);
+	// }
+	songIndex = SONG_ALPHABET;
+	
+	//Serial.println(songIndex);
+	uint8_t length = song_lengths[songIndex];
+	progmemToBuffer(songs + song_indeces[songIndex], length);
+
+	for (uint8_t i=0;i<length;i++){ //length-1 because stop is included
+		buzzer->programBuzzerRoll(this->bytes_list[i]);
+	}
+}
+
+uint8_t Apps::progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue){
+	// max length = 255. 
+	// move from progmem to universal bytes buffer in ram until a value 
+	// warning: MAKE SURE THERE IS A STOP! Or it will continue ~forever~
+	// return length including stopcondition.
+	uint8_t i=0;
+	do{
+		this->bytes_list[i] = pgm_read_byte_near(offset + i); 
+		i++;
+		
+	}while(this->bytes_list[i] != stopConditionValue);
+
+	return i;
+}
+
+void Apps::progmemToBuffer(const uint8_t* offset, uint8_t length){
+	// move from progmem to universal bytes buffer in ram.
+	for (uint8_t i=0;i<length;i++){
+		this->bytes_list[i] = pgm_read_byte_near(offset + i); 
+	}
 }
