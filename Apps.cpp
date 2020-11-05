@@ -260,7 +260,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 		// init of the init_app..
 		this->displayAllSegments = 0;
 
-		ledDisp->progmemToDisplayBuffer(&displayAllSegments, app_splash_screens + selector * 4);
+		flashPictureToDisplayAllSegments(app_splash_screens + selector * 4);
 
 		// initialize list
 		randomSequence(FADE_IN_RANDOM_LIST, 32);
@@ -1973,7 +1973,7 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 
 	if (frame_index < MAX_FRAMES_MOVIES_FLASH){
 		//flash
-		ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animations + frame_index*4);
+		flashPictureToDisplayAllSegments(disp_4digits_animations + frame_index*4);
 	}else{
 		//eeprom
 		eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, frame_index - MAX_FRAMES_MOVIES_FLASH);
@@ -1989,11 +1989,7 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 	}
 }
 
-void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex){
-	for (uint8_t i = 0; i < 4; i++){
-		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(offset + pictureIndex * 4 + i))) << (i * 8);
-	}
-}
+
 
 void Apps::loadNextMovie(){
 
@@ -3138,7 +3134,7 @@ void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_
 			addNoteToBuzzer(sound_at_zero_pass);
 		}
 	}
-	ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + *ticker_counter * 4);
+	flashPictureToDisplayAllSegments( disp_4digits_animate_circle + *ticker_counter * 4);
 }
 
 #ifdef ENABLE_SIMON_APP
@@ -3888,7 +3884,7 @@ void Apps::modeReactionGame(bool init)
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
 		{
-			ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animate_circle + step * 4);
+			flashPictureToDisplayAllSegments(disp_4digits_animate_circle + step * 4);
 		}
 		displayAllSegmentsToScreen();
 
@@ -4176,6 +4172,19 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
 
 void Apps::displayAllSegmentsToScreen(){
 	ledDisp->setBinaryToDisplay(this->displayAllSegments);
+}
+
+void Apps::flashPictureToDisplayAllSegments(const uint8_t* progmemAddress){
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		this->displayAllSegments |= (uint32_t)pgm_read_byte_near(progmemAddress + (i)) << (8 * i); //* 4 --> 4 bytes per dword
+	}
+}
+
+void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex){
+	for (uint8_t i = 0; i < 4; i++){
+		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(offset + pictureIndex * 4 + i))) << (i * 8);
+	}
 }
 
 void Apps::textBufToDisplay(){

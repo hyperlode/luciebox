@@ -661,6 +661,7 @@ private:
     bool loadScreenFromMemory(int16_t address);
 
     void eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex);
+    void flashPictureToDisplayAllSegments(const uint8_t* progmemAddress);
 
     // void resetTimer(SuperTimer* pTimer);
     
