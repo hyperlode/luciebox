@@ -639,105 +639,12 @@ void Apps::pomodoroTimer(bool init)
 	setLedArray(lights);
 }
 
-// void Apps::resetTimer(SuperTimer* pTimer){
-// 		pTimer->setInitTimeMillis(0);
-// 		pTimer->reset();
-// 		pTimer->startPaused(true);		
-// }
+void Apps::resetStopwatch(SuperTimer* pTimer){
+		pTimer->setInitTimeMillis(0);
+		pTimer->reset();
+		pTimer->startPaused(true);		
+}
 
-
-// void Apps::stopwatch(bool init)
-// {
-// 	// classic stopwatch
-// 	long time_millis = 0;
-// 	uint8_t timeDisplayShift = 0;
-
-// 	if (init)
-// 	{
-		
-
-// 		STOPWATCH_LAP_MEMORY_1 = 0;
-// 		STOPWATCH_LAP_MEMORY_2 = 0;
-
-// 		// resetTimer(&STOPWATCH_CHRONO_1);
-// 		// resetTimer(&STOPWATCH_CHRONO_2);
-// 		STOPWATCH_CHRONO_1.setInitTimeMillis(0);
-// 		STOPWATCH_CHRONO_1.reset();
-// 		STOPWATCH_CHRONO_1.startPaused(true);
-// 		STOPWATCH_CHRONO_2.setInitTimeMillis(0);
-// 		STOPWATCH_CHRONO_2.reset();
-// 		STOPWATCH_CHRONO_2.startPaused(true);
-// 	}
-
-// 	time_millis = pSsuperTimer->getTimeMillis();
-// 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-// 	{
-// 		// save and show laptime at press
-// 		// *pLongValue = time_millis;
-// 	}
-
-// 	STOPWATCH_PAUSED_1 = STOPWATCH_CHRONO_1.getIsPaused();
-// 	STOPWATCH_PAUSED_2 = STOPWATCH_CHRONO_2.getIsPaused();
-// 	bool chrono1Else2 = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA);
-// 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-// 	{
-// 		// set chronometer to zero
-// 		if (chrono1Else2){
-// 			STOPWATCH_CHRONO_1.startPaused(STOPWATCH_PAUSED_1);
-// 		}else{
-// 			STOPWATCH_CHRONO_2.startPaused(STOPWATCH_PAUSED_2);
-// 		}
-
-// 	}
-
-// 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
-// 	{
-// 		if (chrono1Else2){
-// 			STOPWATCH_CHRONO_1.paused(!STOPWATCH_PAUSED_1);
-// 		}else{
-// 			STOPWATCH_CHRONO_2.paused(!STOPWATCH_PAUSED_2);
-// 		}
-// 	}
-
-// 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
-// 		(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
-// 	{
-// 		// show saved laptime at press
-// 		time_millis = *pLongValue;
-// 	}
-
-// 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
-// 	{
-// 		bool secondsBlinker = STOPWATCH_CHRONO_1.getSecondsBlinker();
-// 		if (chrono1Else2){
-// 			STOPWATCH_CHRONO_1.getTimeString(textBuf);
-			
-// 		}else{
-// 			STOPWATCH_CHRONO_2.getTimeString(textBuf);
-// 			secondsBlinker = STOPWATCH_CHRONO_1.getSecondsBlinker();
-// 		}
-// 		setDecimalPoint(secondsBlinker, 1);
-// 	}
-// 	else
-// 	{
-// 		timeDisplayShift = 0;
-// 		while (time_millis > 9999){
-// 			timeDisplayShift++;
-// 			time_millis /= 10;
-// 		}
-
-// 		textBuf[0] = ' ';
-// 		textBuf[1] = ' ';
-
-// 		intToDigitsString(textBuf, time_millis, true);
-
-// 		setDecimalPoint(true, timeDisplayShift);
-
-// 	}
-
-// 	textBufToDisplay();
-
-// }
 void Apps::stopwatch(bool init)
 {
 	// classic stopwatch
@@ -746,19 +653,11 @@ void Apps::stopwatch(bool init)
 
 	if (init)
 	{
-		
-
 		STOPWATCH_LAP_MEMORY_1 = 0;
 		STOPWATCH_LAP_MEMORY_2 = 0;
 
-		// resetTimer(&STOPWATCH_CHRONO_1);
-		// resetTimer(&STOPWATCH_CHRONO_2);
-		STOPWATCH_CHRONO_1.setInitTimeMillis(0);
-		STOPWATCH_CHRONO_1.reset();
-		STOPWATCH_CHRONO_1.startPaused(true);
-		STOPWATCH_CHRONO_2.setInitTimeMillis(0);
-		STOPWATCH_CHRONO_2.reset();
-		STOPWATCH_CHRONO_2.startPaused(true);
+		resetStopwatch(&STOPWATCH_CHRONO_1);
+		resetStopwatch(&STOPWATCH_CHRONO_2);
 	}
 
 	if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA)){
@@ -820,86 +719,6 @@ void Apps::stopwatch(bool init)
 	textBufToDisplay();
 
 }
-// void Apps::stopwatch(bool init)
-// {
-// 	// classic stopwatch
-// 	long time_millis = 0;
-// 	uint8_t timeDisplayShift = 0;
-
-// 	SuperTimer timers [2]= {STOPWATCH_CHRONO_1, STOPWATCH_CHRONO_2};
-
-// 	if (init)
-// 	{
-// 		STOPWATCH_LAP_MEMORY_1 = 0;
-// 		STOPWATCH_LAP_MEMORY_2 = 0;
-
-// 		for (uint8_t i=0;i<2;i++){
-// 			timers[i].setInitTimeMillis(0);
-// 			timers[i].reset();
-// 			timers[i].startPaused(true);
-// 		}
-// 	}
-
-// 	bool chrono1Else2 = binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_EXTRA);
-	
-// 	if (chrono1Else2){
-// 		pLongValue = &STOPWATCH_LAP_MEMORY_1;
-// 	}else{
-	
-// 		pLongValue = &STOPWATCH_LAP_MEMORY_2;
-// 	}
-
-// 	time_millis = pSsuperTimer->getTimeMillis();
-// 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-// 	{
-// 		// save and show laptime at press
-// 		*pLongValue = time_millis;
-// 	}
-
-// 	bool paused = pSsuperTimer->getIsPaused();
-// 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-// 	{
-// 		// set chronometer to zero
-// 		timers[chrono1Else2].startPaused(paused);
-// 	}
-
-// 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
-// 	{
-// 		timers[chrono1Else2].paused(!paused);
-// 	}
-
-// 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
-// 		(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
-// 	{
-// 		// show saved laptime at press
-// 		time_millis = *pLongValue;
-// 	}
-
-// 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
-// 	{
-// 		timers[chrono1Else2].getTimeString(textBuf);
-// 		setDecimalPoint(timers[chrono1Else2].getSecondsBlinker(), 1);
-// 	}
-// 	else
-// 	{
-// 		timeDisplayShift = 0;
-// 		while (time_millis > 9999){
-// 			timeDisplayShift++;
-// 			time_millis /= 10;
-// 		}
-
-// 		textBuf[0] = ' ';
-// 		textBuf[1] = ' ';
-
-// 		intToDigitsString(textBuf, time_millis, true);
-
-// 		setDecimalPoint(true, timeDisplayShift);
-
-// 	}
-
-// 	textBufToDisplay();
-
-// }
 
 void Apps::modeRandomWorld(bool init)
 {

@@ -663,7 +663,7 @@ private:
     void eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex);
     void flashPictureToDisplayAllSegments(const uint8_t* progmemAddress);
 
-    // void resetTimer(SuperTimer* pTimer);
+    void resetStopwatch(SuperTimer* pTimer);
     
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
