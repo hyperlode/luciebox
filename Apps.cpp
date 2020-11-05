@@ -1880,60 +1880,6 @@ void Apps::modeSoundNotes(bool init)
 	}
 }
 
-bool Apps::loadScreenFromMemory(int16_t frame_index)
-{
-	this->displayAllSegments = 0;
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		if (frame_index < MAX_FRAMES_MOVIES_FLASH){
-			//flash
-			this->displayAllSegments |= (uint32_t)pgm_read_byte_near((int16_t)disp_4digits_animations + frame_index*4 + i) << (8 * i); //* 4 --> 4 bytes per dword
-
-		}else{
-			//eeprom
-			this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + (frame_index - MAX_FRAMES_MOVIES_FLASH)  * 4 + i))) << (i * 8);
-		}
-	}
-
-	// check for end of movie
-	uint32_t stop_screen = (uint32_t)ANIMATION_STOP_CODE_PART_0 <<0 |  (uint32_t)ANIMATION_STOP_CODE_PART_1 <<8 |  (uint32_t)ANIMATION_STOP_CODE_PART_2 <<16 |  (uint32_t)ANIMATION_STOP_CODE_PART_3 <<24;
-
-	if(displayAllSegments == stop_screen){
-		return false;
-	}else{
-		return true;
-	}
-}
-
-void Apps::loadNextMovie(){
-
-	bool startFrameSet = false;
-
-	// set new stop frame index
-	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !startFrameSet){
-
-		// check if over limit (last movie)
-		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS)){
-			startFrameSet = true;
-			MOVIE_MODE_MOVIE_FRAME_INDEX_START = 1;
-			MOVIE_MODE_FLASH_FRAME_INDEX = 1;
-		}
-
-		// presume for next iteration to not come anymore.
-		if (!startFrameSet){
-			MOVIE_MODE_MOVIE_FRAME_INDEX_START = MOVIE_MODE_FLASH_FRAME_INDEX + 1;
-		}else{
-			MOVIE_MODE_MOVIE_FRAME_INDEX_END = MOVIE_MODE_FLASH_FRAME_INDEX ;
-		}
-		
-		if (!loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX)){
-			startFrameSet = true;
-		}
-		
-		MOVIE_MODE_FLASH_FRAME_INDEX++;
-	}
-}
-
 void Apps::movieAnimationMode(bool init)
 {
 	//reset saved led disp state.
@@ -2021,6 +1967,67 @@ void Apps::movieAnimationMode(bool init)
 	displayAllSegmentsToScreen();
 }
 
+bool Apps::loadScreenFromMemory(int16_t frame_index)
+{
+	this->displayAllSegments = 0;
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		if (frame_index < MAX_FRAMES_MOVIES_FLASH){
+			//flash
+			this->displayAllSegments |= (uint32_t)pgm_read_byte_near((int16_t)disp_4digits_animations + frame_index*4 + i) << (8 * i); //* 4 --> 4 bytes per dword
+
+		}else{
+			//eeprom
+			eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, frame_index - MAX_FRAMES_MOVIES_FLASH);
+		}
+	}
+
+	// check for end of movie
+	uint32_t stop_screen = (uint32_t)ANIMATION_STOP_CODE_PART_0 <<0 |  (uint32_t)ANIMATION_STOP_CODE_PART_1 <<8 |  (uint32_t)ANIMATION_STOP_CODE_PART_2 <<16 |  (uint32_t)ANIMATION_STOP_CODE_PART_3 <<24;
+
+	if(displayAllSegments == stop_screen){
+		return false;
+	}else{
+		return true;
+	}
+}
+
+void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex){
+	for (uint8_t i = 0; i < 4; i++){
+		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(offset + pictureIndex * 4 + i))) << (i * 8);
+		 						    
+	}
+}
+
+void Apps::loadNextMovie(){
+
+	bool startFrameSet = false;
+
+	// set new stop frame index
+	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !startFrameSet){
+
+		// check if over limit (last movie)
+		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS)){
+			startFrameSet = true;
+			MOVIE_MODE_MOVIE_FRAME_INDEX_START = 1;
+			MOVIE_MODE_FLASH_FRAME_INDEX = 1;
+		}
+
+		// presume for next iteration to not come anymore.
+		if (!startFrameSet){
+			MOVIE_MODE_MOVIE_FRAME_INDEX_START = MOVIE_MODE_FLASH_FRAME_INDEX + 1;
+		}else{
+			MOVIE_MODE_MOVIE_FRAME_INDEX_END = MOVIE_MODE_FLASH_FRAME_INDEX ;
+		}
+		
+		if (!loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX)){
+			startFrameSet = true;
+		}
+		
+		MOVIE_MODE_FLASH_FRAME_INDEX++;
+	}
+}
+
 void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 {
 	// global picture operations
@@ -2040,18 +2047,22 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 			displayAllSegmentsBuffer = *display_buffer;
 			*display_buffer = ~*display_buffer;
 			break;
+
 		case 1:
 			//blank
 			*display_buffer = 0;
 			break;
+			
 		case 2:
 			//special stop frame (for end of animations)
 			*display_buffer = (uint32_t)ANIMATION_STOP_CODE_PART_0 <<0 |  (uint32_t)ANIMATION_STOP_CODE_PART_1 <<8 |  (uint32_t)ANIMATION_STOP_CODE_PART_2 <<16 |  (uint32_t)ANIMATION_STOP_CODE_PART_3 <<24;
 			break;
+			
 		case 3:
 			//full
 			*display_buffer = 0xFFFFFFFF;
 			break;
+			
 		case 4:
 			//restore
 			*display_buffer = displayAllSegmentsBuffer;
@@ -2571,10 +2582,12 @@ void Apps::draw(bool init)
 	{
 		// load drawing from memory only if index changed
 		displayAllSegments = 0;
-		for (uint8_t i = 0; i < 4; i++)
-		{
-			displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i))) << (i * 8);
-		}
+		// for (uint8_t i = 0; i < 4; i++)
+		// {
+			// displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i))) << (i * 8);
+			eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, DRAW_ACTIVE_DRAWING_INDEX);
+		// }
+
 		this->displayChangeGlobal(&displayAllSegments, true);
 	}
 #endif

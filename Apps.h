@@ -660,6 +660,8 @@ private:
     void loadNextMovie();
     bool loadScreenFromMemory(int16_t address);
 
+    void eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex);
+
     // void resetTimer(SuperTimer* pTimer);
     
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
