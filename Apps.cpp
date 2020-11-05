@@ -1970,16 +1970,13 @@ void Apps::movieAnimationMode(bool init)
 bool Apps::loadScreenFromMemory(int16_t frame_index)
 {
 	this->displayAllSegments = 0;
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		if (frame_index < MAX_FRAMES_MOVIES_FLASH){
-			//flash
-			this->displayAllSegments |= (uint32_t)pgm_read_byte_near((int16_t)disp_4digits_animations + frame_index*4 + i) << (8 * i); //* 4 --> 4 bytes per dword
 
-		}else{
-			//eeprom
-			eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, frame_index - MAX_FRAMES_MOVIES_FLASH);
-		}
+	if (frame_index < MAX_FRAMES_MOVIES_FLASH){
+		//flash
+		ledDisp->progmemToDisplayBuffer(&displayAllSegments, disp_4digits_animations + frame_index*4);
+	}else{
+		//eeprom
+		eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, frame_index - MAX_FRAMES_MOVIES_FLASH);
 	}
 
 	// check for end of movie
@@ -1995,7 +1992,6 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex){
 	for (uint8_t i = 0; i < 4; i++){
 		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(offset + pictureIndex * 4 + i))) << (i * 8);
-		 						    
 	}
 }
 
