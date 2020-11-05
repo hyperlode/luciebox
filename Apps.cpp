@@ -2953,7 +2953,7 @@ void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_
 			addNoteToBuzzer(sound_at_zero_pass);
 		}
 	}
-	flashPictureToDisplayAllSegments( disp_4digits_animate_circle + *ticker_counter * 4);
+	flashPictureToDisplayAllSegments( disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + *ticker_counter * 4);
 }
 
 #ifdef ENABLE_SIMON_APP
@@ -3703,7 +3703,7 @@ void Apps::modeReactionGame(bool init)
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
 		{
-			flashPictureToDisplayAllSegments(disp_4digits_animate_circle + step * 4);
+			flashPictureToDisplayAllSegments(disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + step * 4);
 		}
 		displayAllSegmentsToScreen();
 

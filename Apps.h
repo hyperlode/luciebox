@@ -341,8 +341,23 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
 #define MAX_FRAMES_MOVIES_FLASH 70
 #define MOVIE_INDEX_EMPTY 255
+#define ANIMATE_CIRCLE_OFFSET 0
 
 const uint8_t disp_4digits_animations[] PROGMEM = {
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    0x01, 0x00, 0x00, 0x00,  // animate circle (KEEP IT FIRST, some apps depend on it.)
+    0x00, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x01, 0x00,
+    0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x02,
+    0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x08,
+    0x00, 0x00, 0x08, 0x00,
+    0x00, 0x08, 0x00, 0x00,
+    0x08, 0x00, 0x00, 0x00,
+    0x10, 0x00, 0x00, 0x00,
+    0x20, 0x00, 0x00, 0x00,
+    
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // horizontal right to left sweep.
     0x00, 0x00, 0x00, 0x06,
@@ -403,6 +418,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x00, 0x84,
 
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    
 };
 
 #define ALL_DATA_SIZE 1
@@ -518,47 +534,12 @@ const uint8_t songs [] PROGMEM = {
 
 // const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
 
-// #if MOMENTARY_BUTTONS_COUNT == 3
-// const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-// const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
-//                              LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
-// #else
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
                                     LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
                                     BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
 const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD,SWITCH_TILT_LEFT,SWITCH_TILT_BACKWARD,SWITCH_TILT_RIGHT};
-
-// #endif
-
-const uint8_t tilt_forward[] PROGMEM = {
-    0x08, 0x08, 0x08, 0x08};
-const uint8_t tilt_backward[] PROGMEM = {
-    0x01, 0x01, 0x01, 0x01};
-const uint8_t tilt_left[] PROGMEM = {
-    0x30, 0x30, 0x30, 0x30};
-const uint8_t tilt_right[] PROGMEM = {
-    0x06, 0x06, 0x06, 0x06};
-
-const uint8_t disp_4digits_animate[] PROGMEM = {
-    0x00, 0xFF, 0xF0, 0x0F,
-    0xFF, 0x00, 0x00, 0x01,
-    0x01, 0x02, 0x04, 0x08};
-
-const uint8_t disp_4digits_animate_circle[] PROGMEM = {
-    0x01, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x00, 0x00,
-    0x00, 0x00, 0x01, 0x00,
-    0x00, 0x00, 0x00, 0x01,
-    0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00, 0x00, 0x04,
-    0x00, 0x00, 0x00, 0x08,
-    0x00, 0x00, 0x08, 0x00,
-    0x00, 0x08, 0x00, 0x00,
-    0x08, 0x00, 0x00, 0x00,
-    0x10, 0x00, 0x00, 0x00,
-    0x20, 0x00, 0x00, 0x00};
 
 class Apps
 {
