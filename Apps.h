@@ -220,6 +220,7 @@
 #define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
 #define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
 #define STOPWATCH_PAUSED_1 general_boolean
+#define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
 #define HACKTIME_VALUE_TO_SOUND general_boolean2

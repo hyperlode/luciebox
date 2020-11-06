@@ -1700,6 +1700,10 @@ void Apps::modeSoundNotes(bool init)
 
 void Apps::modeMovie(bool init)
 {
+	bool sound_on = false;
+	bool reload_soundtrack = false;
+	bool movie_restart = false;
+	
 	//reset saved led disp state.
 	if (init)
 	{
@@ -1709,87 +1713,119 @@ void Apps::modeMovie(bool init)
 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
 		loadNextMovie();
 		MOVIE_MODE_SOUNDTRACK_INDEX = 0;
+		MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START = true;
 	}
+
+	// sound ON/OFF
+
+	sound_on = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT));
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
-		modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_SOUNDTRACK_INDEX, 1);
-	}
+		// sound settings
+		reload_soundtrack = modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_SOUNDTRACK_INDEX, 1);
 
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
-		if (MOVIE_MODE_SOUNDTRACK_INDEX < SONGS_COUNT){
-			if (buzzer->getBuzzerRollEmpty()){
-				loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+		{
+			MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START = !MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START;	
+		}
+
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0)){
+			reload_soundtrack = true;
+		}
+
+	}else{
+
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
+		{
+			// manual mode
+			MOVIE_MODE_FLASH_FRAME_INDEX += encoder_dial->getDelta();
+
+			// one step forward
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
+			{
+				MOVIE_MODE_FLASH_FRAME_INDEX++;
 			}
 
-		}else{
-			// eeprom custom songs
-
+			// one step backward
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+			{
+				MOVIE_MODE_FLASH_FRAME_INDEX--;
+			}
 		}
-
-	}
-
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
-	{
-		// manual mode
-		MOVIE_MODE_FLASH_FRAME_INDEX += encoder_dial->getDelta();
-
-		// one step forward
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
+		else
 		{
-			MOVIE_MODE_FLASH_FRAME_INDEX++;
+			// auto mode.
+
+			dialOnEdgeChangeInitTimerPercentage(&MOVIE_MODE_FRAME_INTERVAL_TIMER);
+
+			
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+			{
+				// this->dataPlayer.setSetIndexDirection(2);
+				// MOVIE_MODE_AUTO_BACKWARDS = !MOVIE_MODE_AUTO_BACKWARDS;
+				MOVIE_MODE_AUTO_BACKWARDS = true;
+			}
+
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+			{
+				// this->dataPlayer.update(); // this to pause the movie while holding.
+				MOVIE_MODE_AUTO_BACKWARDS = false;
+			}
 		}
 
-		// one step backward
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+		// next movie
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			MOVIE_MODE_FLASH_FRAME_INDEX--;
+			loadNextMovie();
+		}
+
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+		{
+			MOVIE_MODE_SHOW_NEGATIVE = !MOVIE_MODE_SHOW_NEGATIVE;
 		}
 	}
-	else
-	{
-		// auto mode.
-
-		dialOnEdgeChangeInitTimerPercentage(&MOVIE_MODE_FRAME_INTERVAL_TIMER);
-
+	
+	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))){
 		if (!MOVIE_MODE_FRAME_INTERVAL_TIMER.getTimeIsNegative())
 		{
 			MOVIE_MODE_FLASH_FRAME_INDEX += (1 - 2*MOVIE_MODE_AUTO_BACKWARDS);
 			MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 		}
-
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-		{
-			// this->dataPlayer.setSetIndexDirection(2);
-			// MOVIE_MODE_AUTO_BACKWARDS = !MOVIE_MODE_AUTO_BACKWARDS;
-			MOVIE_MODE_AUTO_BACKWARDS = true;
-		}
-
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
-		{
-			// this->dataPlayer.update(); // this to pause the movie while holding.
-			MOVIE_MODE_AUTO_BACKWARDS = false;
-		}
-	}
-
-	// next movie
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
-	{
-		loadNextMovie();
-	}
-
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-	{
-		MOVIE_MODE_SHOW_NEGATIVE = !MOVIE_MODE_SHOW_NEGATIVE;
 	}
 
 	// check limits of movie 
 	if (MOVIE_MODE_FLASH_FRAME_INDEX >  MOVIE_MODE_MOVIE_FRAME_INDEX_END){ 
 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START;
-
+		movie_restart = true;
+		
 	}else if (MOVIE_MODE_FLASH_FRAME_INDEX <  MOVIE_MODE_MOVIE_FRAME_INDEX_START){
 		MOVIE_MODE_FLASH_FRAME_INDEX =  MOVIE_MODE_MOVIE_FRAME_INDEX_END;
+		movie_restart = true;
+	}
+	
+
+	if (MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START){
+		reload_soundtrack = reload_soundtrack || movie_restart;
+
+	}else if (buzzer->getBuzzerRollEmpty()){
+		reload_soundtrack = true;
 	}
 
+	
+	// soundtrack
+	if (reload_soundtrack && sound_on){
+	
+		buzzerOff();
+		if (MOVIE_MODE_SOUNDTRACK_INDEX < SONGS_COUNT){
+			loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
+			
+		}else{
+			// eeprom custom songs
+
+		}
+	}
+
+	// graphics
 	loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX);
 
 	// invert all data in picture
