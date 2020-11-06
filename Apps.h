@@ -436,7 +436,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_DRYER_UNHAPPY 13
 #define LEN_SONG_KINDEKE_DOUWEN 49
 #define LEN_SONG_RETREAT 14
-#define LEN_SONG_ALPHABET 20
+#define LEN_SONG_ALPHABET 100
 
 const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_DRYER_HAPPY,
@@ -448,17 +448,6 @@ const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_RETREAT,
     LEN_SONG_ALPHABET,
 };
-
-const uint8_t song_indeces [] PROGMEM = {
-    0,
-    LEN_SONG_DRYER_HAPPY,
-    LEN_SONG_DRYER_HAPPY + LEN_LANG_ZAL_ZE_LEVEN,
-    LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_LANG_ZAL_ZE_LEVEN,
-    LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY+ LEN_SONG_DRYER_HAPPY + LEN_SONG_ATTACK,
-    LEN_SONG_ATTACK + LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_SONG_DRYER_UNHAPPY,
-    LEN_SONG_DRYER_UNHAPPY + LEN_SONG_ATTACK + LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_SONG_KINDEKE_DOUWEN,
-    LEN_SONG_KINDEKE_DOUWEN + LEN_SONG_DRYER_UNHAPPY + LEN_SONG_ATTACK + LEN_LANG_ZAL_ZE_LEVEN + LEN_SONG_EMPTY + LEN_SONG_DRYER_HAPPY + LEN_SONG_RETREAT,
-    };
  
 // one big library. length of song as byte at start. lenght of song INCLUDES the length byte. There is no need then to keep a separate array with start indeces. 
 const uint8_t songs [] PROGMEM = {
@@ -471,7 +460,6 @@ const uint8_t songs [] PROGMEM = {
     A7_1, A7_1,
     rest_2 ,
     
-    // 1,  // dummy empty slot instead of lang zal ze leven
     // lang zal ze leven
     
     C7_4, rest_4, rest_2,
@@ -517,7 +505,6 @@ const uint8_t songs [] PROGMEM = {
     
  // unhappy dryer
     A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
-    // 1, //dummy for kindeke douwen
     
     // kindeke douwen
     B7_4, rest_4, rest_2,       // wie
@@ -544,8 +531,6 @@ const uint8_t songs [] PROGMEM = {
     
     // retreat song
     Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
-
-    
     
     // alphabet song
     C7_4, rest_4, rest_2, 
@@ -555,10 +540,10 @@ const uint8_t songs [] PROGMEM = {
     A7_4, rest_4, rest_2, 
     A7_4, rest_4, rest_2, 
     G7_1, rest_1,
-    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
-    // G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
-    // C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
-    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
+    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
+    G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
+    C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
+    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
    
 };
 

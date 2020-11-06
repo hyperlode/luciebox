@@ -4087,33 +4087,23 @@ void Apps::numberToBufAsDecimal(int16_t number){
 
 void Apps::loadBuzzerTrack(uint8_t songIndex){
 	
-	// // buzzer->loadBuzzerTrack(songs, songIndex);
-	// // fast forward to correct index.
-	// uint8_t index = 0;
-	// uint8_t length = 0;
-	// uint16_t total_song_offset = 0;
-	// do{
-    // 	length = progmemToBufferUntil(songs + total_song_offset , BUZZER_ROLL_SONG_STOPVALUE);
-	// 	total_song_offset += length;
-	// 	index++;
+	uint8_t length=0;
+	uint8_t song_start_index = 0;
 
-	// }while(index-1 != songIndex );
-	
-	// for (uint8_t i=0;i<length-1;i++){ //length-1 because stop is included
-	// 	buzzer->programBuzzerRoll(this->bytes_list[i]);
-	// }
-	songIndex = SONG_ALPHABET;
-	
-	//Serial.println(songIndex);
-	uint8_t length = song_lengths[songIndex];
-	progmemToBuffer(songs + song_indeces[songIndex], length);
+	// start index is all lenghts from previous songs counted up 
+	for(uint8_t i=0;i<=songIndex;i++){
+		song_start_index += length; 
+		length = pgm_read_byte_near(song_lengths + i);
+	}
+
+	progmemToBuffer(songs + song_start_index , length);
 
 	for (uint8_t i=0;i<length;i++){ //length-1 because stop is included
 		buzzer->programBuzzerRoll(this->bytes_list[i]);
 	}
 }
 
-uint8_t Apps::progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue){
+uint8_t Apps::progmemToBufferUntil(const uint8_t* offset, uint8_t stopConditionValue){
 	// max length = 255. 
 	// move from progmem to universal bytes buffer in ram until a value 
 	// warning: MAKE SURE THERE IS A STOP! Or it will continue ~forever~
