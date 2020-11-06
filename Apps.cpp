@@ -87,7 +87,7 @@ void Apps::appSelector(bool init, uint8_t selector)
 			&Apps::modeGeiger,
 			&Apps::modeHackTime,
 			&Apps::modeSoundSong,
-			&Apps::movieAnimationMode,
+			&Apps::modeMovie,
 			&Apps::draw,
 			&Apps::drawGame,
 			&Apps::modeSimpleButtonsAndLights,
@@ -164,7 +164,7 @@ void Apps::appSelector(bool init, uint8_t selector)
 			break;
 
 		case APP_SELECTOR_MOVIE_MODE:
-			this->movieAnimationMode(initOnBigLatchInitToo);
+			this->modeMovie(initOnBigLatchInitToo);
 			break;
 
 		case APP_SELECTOR_SETTING:
@@ -265,7 +265,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 		// initialize list
 		randomSequence(FADE_IN_RANDOM_LIST, 32);
 
-		counter = 27; 
+		INIT_SPLASH_ANIMATION_STEP = 27; 
 		this->TIMER_INIT_APP.setInitTimeMillis(-20);
 		this->TIMER_INIT_APP.start();
 
@@ -276,20 +276,20 @@ bool Apps::init_app(bool init, uint8_t selector)
 	if (!this->TIMER_INIT_APP.getTimeIsNegative())
 	{
 		this->TIMER_INIT_APP.start();
-		counter++;
+		INIT_SPLASH_ANIMATION_STEP++;
 	}
 
-	if (counter < 32)
+	if (INIT_SPLASH_ANIMATION_STEP < 32)
 	{
 		ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.
 	}
-	else if (counter < 50)
+	else if (INIT_SPLASH_ANIMATION_STEP < 50)
 	{
 		ledDisp->setBinaryToDisplay(this->displayAllSegments);
 	}
-	else if (counter < 82)
+	else if (INIT_SPLASH_ANIMATION_STEP < 82)
 	{
-		ledDisp->setBinaryToDisplay(~this->fadeInList(counter - 51, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
+		ledDisp->setBinaryToDisplay(~this->fadeInList(INIT_SPLASH_ANIMATION_STEP - 51, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
 	}
 	else
 	{
@@ -1213,7 +1213,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 
 	if (init)
 	{
-		counter = 0;
+		LETTERS_AND_CHARS_COUNTER = 0;
 		COUNTING_LETTERS_AND_CHARS_TIMER.setInitTimeMillis(-1000);
 		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = true;
 	}
@@ -1223,11 +1223,11 @@ void Apps::modeCountingLettersAndChars(bool init)
 	// setBlankDisplay();
 	if (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
 	{
-		ledDisp->setNumberToDisplayAsDecimal(counter);
+		ledDisp->setNumberToDisplayAsDecimal(LETTERS_AND_CHARS_COUNTER);
 	}
 	else
 	{
-		displayLetterAndPositionInAlphabet(textHandle, counter);
+		displayLetterAndPositionInAlphabet(textHandle, LETTERS_AND_CHARS_COUNTER);
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -1237,10 +1237,10 @@ void Apps::modeCountingLettersAndChars(bool init)
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
-		counter = 0;
+		LETTERS_AND_CHARS_COUNTER = 0;
 	}
 	
-	modifyValueUpDownWithMomentary2And3(&counter, 1);
+	modifyValueUpDownWithMomentary2And3(&LETTERS_AND_CHARS_COUNTER, 1);
 
  	// auto count
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA) )
@@ -1257,7 +1257,7 @@ void Apps::modeCountingLettersAndChars(bool init)
 		// auto mode next item
 		if (!COUNTING_LETTERS_AND_CHARS_TIMER.getTimeIsNegative())
 		{
-			counter += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
+			LETTERS_AND_CHARS_COUNTER += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
 			COUNTING_LETTERS_AND_CHARS_TIMER.start();
 		}
 
@@ -1267,12 +1267,12 @@ void Apps::modeCountingLettersAndChars(bool init)
 	else // if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		// show number right away depending on potentio value
-		//counter = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
-		counter += encoder_dial->getDelta();
+		//LETTERS_AND_CHARS_COUNTER = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
+		LETTERS_AND_CHARS_COUNTER += encoder_dial->getDelta();
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	checkBoundaries(&counter, 0, 25 + (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 76), true);
+	checkBoundaries(&LETTERS_AND_CHARS_COUNTER, 0, 25 + (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 76), true);
 }
 
 void Apps::modeSoundSong(bool init)
@@ -1698,7 +1698,7 @@ void Apps::modeSoundNotes(bool init)
 	}
 }
 
-void Apps::movieAnimationMode(bool init)
+void Apps::modeMovie(bool init)
 {
 	//reset saved led disp state.
 	if (init)
@@ -1708,6 +1708,24 @@ void Apps::movieAnimationMode(bool init)
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
 		loadNextMovie();
+		MOVIE_MODE_SOUNDTRACK_INDEX = 0;
+	}
+
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
+		modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_SOUNDTRACK_INDEX, 1);
+	}
+
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+		if (MOVIE_MODE_SOUNDTRACK_INDEX < SONGS_COUNT){
+			if (buzzer->getBuzzerRollEmpty()){
+				loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
+			}
+
+		}else{
+			// eeprom custom songs
+
+		}
+
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))

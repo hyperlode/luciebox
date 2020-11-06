@@ -78,10 +78,10 @@
 #define SIMON_DEAD_PLAYER 666
 #define SIMON_MAX_PLAYERS 8
 #define SIMON_NO_BUTTON_PRESSED 111
+
 #define POMODORO_INIT_DEFAULT_TIME_INDEX 50 //1500s
 #define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25 //300s
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX 16 //60s
-
 #define POMODORO_DISPLAY_TIMER 0
 #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
 #define POMODORO_DISPLAY_SHOW_GOOD 2
@@ -92,14 +92,12 @@
 #define HACKTIME_MEMORY_FLASH 0
 #define HACKTIME_MEMORY_RAM 1
 #define HACKTIME_MEMORY_EEPROM 2
-
 #define HACKTIME_DISPLAY_CHARS 0
 #define HACKTIME_DISPLAY_BYTES 1
 #define HACKTIME_DISPLAY_DECIMAL 2
 #define HACKTIME_DISPLAY_HEX 3
 
 #define SOUND_NOTE_DISPLAY_NOTE 0 
-
 #define SOUND_NOTE_MODE_MANUAL 0 
 #define SOUND_NOTE_MODE_ARPEGGIO_UP 1
 #define SOUND_NOTE_MODE_ARPEGGIO_DOWN 2
@@ -135,84 +133,85 @@
 #define SIMON_BLINK_TIMER generalTimer2
 #define STOPWATCH_CHRONO_2 generalTimer2
 
-#define SOUND_FUN_NOTE_INDEX counter
-#define REACTION_GAME_SCORE counter
-#define GEIGER_TONE_FREQUENY_LOWEST counter
-#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY counter
-#define SIMON_LENGTH counter
-#define RANDOMWORLD_RANDOM_NUMBER counter
-#define SEQUENCER_STEP_COUNTER counter
-#define COMPOSER_STEP counter
-#define HACKTIME_ADDRESS counter
-#define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
-#define QUIZ_ROUNDS_INIT counter
-#define METRONOME_TICKER_3_POSITION counter
-#define TILT_EXPECTED_SWITCH_INDEX counter
-#define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX counter
-#define MOVIE_MODE_FLASH_FRAME_INDEX counter
+#define LETTERS_AND_CHARS_COUNTER general_int16_t_1
+#define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
+#define SOUND_FUN_NOTE_INDEX general_int16_t_1
+#define REACTION_GAME_SCORE general_int16_t_1
+#define GEIGER_TONE_FREQUENY_LOWEST general_int16_t_1
+#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
+#define SIMON_LENGTH general_int16_t_1
+#define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
+#define SEQUENCER_STEP_COUNTER general_int16_t_1
+#define COMPOSER_STEP general_int16_t_1
+#define HACKTIME_ADDRESS general_int16_t_1
+#define SOUND_NOTES_NOTE_ON_SCALE_INDEX general_int16_t_1
+#define QUIZ_ROUNDS_INIT general_int16_t_1
+#define METRONOME_TICKER_3_POSITION general_int16_t_1
+#define TILT_EXPECTED_SWITCH_INDEX general_int16_t_1
+#define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
+#define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
 
-#define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
-#define REACTION_GAME_TIMER_STEP counter2
-#define DRAW_ACTIVE_DRAWING_INDEX counter2
-#define SIMON_INDEX counter2
-#define DEBUGMODE_ACTIVATED counter2
-#define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW counter2
-#define POMODORO_MAIN_CLOCK_TIME_INDEX counter2
-#define HACKTIME_DISPLAY_MODE counter2
-#define SOUND_NOTES_SCALE_INDEX counter2
-#define METRONOME_TICKER_2_POSITION counter2
-#define TILT_CYCLE_COUNTER counter2
+#define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
+#define REACTION_GAME_TIMER_STEP general_int16_t_2
+#define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
+#define SIMON_INDEX general_int16_t_2
+#define DEBUGMODE_ACTIVATED general_int16_t_2
+#define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW general_int16_t_2
+#define POMODORO_MAIN_CLOCK_TIME_INDEX general_int16_t_2
+#define HACKTIME_DISPLAY_MODE general_int16_t_2
+#define SOUND_NOTES_SCALE_INDEX general_int16_t_2
+#define METRONOME_TICKER_2_POSITION general_int16_t_2
+#define TILT_CYCLE_COUNTER general_int16_t_2
 
-#define DRAW_CURSOR_INDEX counter3
-#define GEIGER_PROBABILITY_THRESHOLD counter3
-#define REACTION_GAME_STEP_TIME_MILLIS counter3
-#define SETTINGS_MODE_SELECTOR counter3
-#define RANDOMWORLD_ANIMATION_DELAY counter3
-#define SIMON_RANDOM_PLAYER_SEQUENCE counter3
-#define STOPWATCH_LAP_MEMORY_1 counter3
-#define POMODORO_STATS_WORKING_BAD counter3
-#define SOUND_NOTES_SCALE_ROOT counter3
+#define DRAW_CURSOR_INDEX general_long_1
+#define GEIGER_PROBABILITY_THRESHOLD general_long_1
+#define REACTION_GAME_STEP_TIME_MILLIS general_long_1
+#define SETTINGS_MODE_SELECTOR general_long_1
+#define RANDOMWORLD_ANIMATION_DELAY general_long_1
+#define SIMON_RANDOM_PLAYER_SEQUENCE general_long_1
+#define STOPWATCH_LAP_MEMORY_1 general_long_1
+#define POMODORO_STATS_WORKING_BAD general_long_1
+#define SOUND_NOTES_SCALE_ROOT general_long_1
 
-#define REACTION_GAME_TARGET counter4
-#define GEIGER_INCREASE_CHANCE counter4
-#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
-#define SIMON_ACTIVE_LIGHT counter4
-#define SOUND_MODE_SCALE_RANGE_LENGTH counter4
-#define MOVIE_MODE_MOVIE_FRAME_INDEX_START counter4
+#define REACTION_GAME_TARGET general_uint16_t_1
+#define GEIGER_INCREASE_CHANCE general_uint16_t_1
+#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
+#define SIMON_ACTIVE_LIGHT general_uint16_t_1
+#define SOUND_MODE_SCALE_RANGE_LENGTH general_uint16_t_1
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_START general_uint16_t_1
 
+#define REACTION_GAME_LEVEL general_uint8_t_1
+#define SEQUENCER_TEMP_NOTE general_uint8_t_1
+#define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
+#define COMPOSER_SONG_LENGTH general_uint8_t_1
+#define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
+#define DRAW_CURSOR_POTENTIO_INDEX general_uint8_t_1
+#define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
 
-#define REACTION_GAME_LEVEL counter5
-#define SEQUENCER_TEMP_NOTE counter5
-#define RANDOMWORLD_RANDOM_TYPE counter5
-#define COMPOSER_SONG_LENGTH counter5
-#define SIMON_PLAYERS_ALIVE_COUNT counter5
-#define DRAW_CURSOR_POTENTIO_INDEX counter5
-#define SOUND_NOTES_PROGRESSION_MODE counter5
+#define SIMON_PLAYERS_COUNT general_uint8_t_2
+#define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
+#define DRAW_SHOW_MODE general_uint8_t_2
+#define HACKTIME_SOUND general_uint8_t_2
+#define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
+#define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
 
+#define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
+#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
+#define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
 
-#define SIMON_PLAYERS_COUNT counter6
-#define POMODORO_AUTO_RESTART_ENABLED counter6
-#define DRAW_SHOW_MODE counter6
-#define HACKTIME_SOUND counter6
-#define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
-#define REACTION_GAME_HEX_ACTIVE_DIGIT counter6
+#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
+#define COUNTER_GEIGER general_uint16_t_2
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_uint16_t_2
 
-#define SIMON_PLAYER_PLAYING_INDEX counter7
-#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
-#define REACTION_GAME_HEX_VALUE_TO_FIND counter7
+#define SOUND_NOTES_NOTE_INDEX general_int16_t_3
+#define GEIGER_TONE_LENGTH general_int16_t_3
+#define METRONOME_TICKER_1_POSITION general_int16_t_3
+#define HACKTIME_MEMORY_SELECT general_int16_t_3  // was 5
+#define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
+#define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
 
-#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
-#define COUNTER_GEIGER counter8
-#define MOVIE_MODE_MOVIE_FRAME_INDEX_END counter8
-
-#define SOUND_NOTES_NOTE_INDEX counter9
-#define GEIGER_TONE_LENGTH counter9
-#define METRONOME_TICKER_1_POSITION counter9
-#define HACKTIME_MEMORY_SELECT counter9  // was 5
-#define POMODORO_PAUSE_TIME_INDEX counter9
-
-#define STOPWATCH_LAP_MEMORY_2 counter10
-#define POMODORO_STATS_WORKING_GOOD counter10
+#define STOPWATCH_LAP_MEMORY_2 general_long_2
+#define POMODORO_STATS_WORKING_GOOD general_long_2
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
@@ -236,7 +235,6 @@
 
 #define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
-
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
 #define FADE_IN_RANDOM_LIST bytes_list
@@ -250,15 +248,6 @@
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
-
-
-
-
-// #define ONLY_TOP_SEGMENT_FAKE_ASCII 58
-// #define ONLY_MIDDLE_SEGMENT_FAKE_ASCII 59
-// #define ONLY_BOTTOM_SEGMENT_FAKE_ASCII 60
-// #define ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII 61
-// #define SPACE_FAKE_ASCII 62
 
 const char dice_eyes_display[] PROGMEM = {
     SPACE_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,
@@ -336,9 +325,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
     0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
     0x5F, 0x79, 0x1C, 0x3D  // DBUG
-
 };
-
 
 #define MAX_FRAMES_MOVIES_FLASH 70
 #define MOVIE_INDEX_EMPTY 255
@@ -428,7 +415,6 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define SONG_RETREAT 6
 #define SONG_ALPHABET 7
 
-
 #define LEN_SONG_DRYER_HAPPY 18
 #define LEN_LANG_ZAL_ZE_LEVEN 84
 #define LEN_SONG_ATTACK 14
@@ -437,6 +423,8 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_KINDEKE_DOUWEN 49
 #define LEN_SONG_RETREAT 14
 #define LEN_SONG_ALPHABET 100
+
+#define SONGS_COUNT 8
 
 const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_DRYER_HAPPY,
@@ -461,7 +449,6 @@ const uint8_t songs [] PROGMEM = {
     rest_2 ,
     
     // lang zal ze leven
-    
     C7_4, rest_4, rest_2,
     C7_4, rest_2, C7_8, rest_8,
     C7_4, rest_4, rest_2,
@@ -502,8 +489,7 @@ const uint8_t songs [] PROGMEM = {
     // aaanvallueeeeee!
      Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
     
-    
- // unhappy dryer
+    // unhappy dryer
     A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
     
     // kindeke douwen
@@ -544,13 +530,7 @@ const uint8_t songs [] PROGMEM = {
     G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
     C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
     F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
-   
 };
-
-// const uint8_t scale_major[] PROGMEM = {C7_2, rest_4, D7_2, rest_4, E7_2, rest_4, F7_2, rest_4, G7_2, rest_4, A7_2, rest_4, B7_2, rest_4, C8_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
-// const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2, rest_4, G7_2, rest_4, F7_2, rest_4, E7_2, rest_4, D7_2, rest_4, C7_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
-
-// const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
 
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
                                     LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
@@ -573,13 +553,11 @@ public:
     LedMultiplexer5x8* allLights;
 
     void setPeripherals(BinaryInput *binaryInput, RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer);
-    // void setBuffers(char* textBuf, char*  scrollBuf);
-    //void setBuffers(char* textBuf);
-    // void test();
 
     void setDefaultMode();
-    void appSelector(bool init, uint8_t selector);
     bool init_app(bool init, uint8_t selector);
+    void appSelector(bool init, uint8_t selector);
+
     void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
@@ -588,13 +566,12 @@ public:
     void modeSoundNotes(bool init);
     void draw(bool init);
     void drawGame(bool init);
-    void movieAnimationMode(bool init);
+    void modeMovie(bool init);
     void pomodoroTimer(bool init);
     void stopwatch(bool init);
     void modeGeiger(bool init);
     void modeSequencer(bool init);
     void modeMetronome(bool init);
-    void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void modeSimon(bool init);
     void modeReactionGame(bool init);
     void tiltSwitchTest(bool init);
@@ -604,6 +581,7 @@ public:
     void modeHackTime(bool init);
     void quiz(bool init);
 
+    void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
     bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
@@ -625,8 +603,6 @@ private:
     fptr appPointer;
 #endif
 
-    // DataPlayer dataPlayer;
-
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
 #endif
@@ -635,12 +611,11 @@ private:
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
 
-
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
     
     unsigned int indexToTimeSeconds(int16_t index);
-    // functions for compression the memory size
+
     void textBufToDisplay();
     void decimalPointTimingOn();
     void setDecimalPoint(bool onElseOff, uint8_t digit);
@@ -681,16 +656,16 @@ private:
     bool general_boolean2;
     bool general_boolean3;
     bool general_boolean4;
-    int16_t counter;
-    int16_t counter2;
-    long counter3;
-    uint16_t counter4;
-    uint8_t counter5;
-    uint8_t counter6;
-    uint8_t counter7;
-    uint16_t counter8;
-    int16_t counter9;
-    long counter10;
+    int16_t general_int16_t_1;
+    int16_t general_int16_t_2;
+    long general_long_1;
+    uint16_t general_uint16_t_1;
+    uint8_t general_uint8_t_1;
+    uint8_t general_uint8_t_2;
+    uint8_t general_uint8_t_3;
+    uint16_t general_uint16_t_2;
+    int16_t general_int16_t_3;
+    long general_long_2;
     long* pLongValue;
 
     byte binaryInputsValue;
@@ -756,17 +731,10 @@ private:
     };
     RandomWorldState randomWorldState;
 
-// enum SettingsState:uint8_t{
-//   settingNormal,
-//   settingSound,
-//   settingButtons,
-//   settingEepromReset
-// };
 #ifdef ENABLE_SIMON_APP
     // simon
     enum SimonState : uint8_t
     {
-        // enum SimonState{
         simonWaitForNewGame,
         simonNewGame,
         simonNewLevel,
@@ -785,7 +753,6 @@ private:
     char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
-    //uint32_t* displaySegmentsHandle;
     byte* lightsHandle;
     uint8_t lights;
     
