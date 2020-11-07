@@ -226,6 +226,14 @@ long SuperTimer::getTimeMillis()
 	}
 }
 
+bool SuperTimer::getCountDownTimerElapsedAndRestart(){
+	if (!this->getTimeIsNegative()){
+		this->start();
+		return true;
+	}else{
+		return false;
+	}
+}
 bool SuperTimer::getTimeIsNegative()
 {
 	// as long as time is negative, timer is counting down. Else, counting up.

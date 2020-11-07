@@ -41,6 +41,7 @@ public:
 	void setOffsetInitTimeMillis(long offsetMillis);
 
 	long getTimeMillis();
+	bool getCountDownTimerElapsedAndRestart();
 	bool getTimeIsNegative();
 	long getTimeSeconds();
 	unsigned int getTimeSecondsAbsolute();

@@ -276,9 +276,9 @@ bool Apps::init_app(bool init, uint8_t selector)
 	}
 
 	// advance one frame
-	if (!this->TIMER_INIT_APP.getTimeIsNegative())
+	if (this->TIMER_INIT_APP.getCountDownTimerElapsedAndRestart())
 	{
-		this->TIMER_INIT_APP.start();
+		
 		INIT_SPLASH_ANIMATION_STEP++;
 	}
 
@@ -317,11 +317,9 @@ void Apps::modeScreenSaver(bool init)
 
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))){
 
-		if (!this->TIMER_SCREEN_SAVER.getTimeIsNegative())
+		if (this->TIMER_SCREEN_SAVER.getCountDownTimerElapsedAndRestart())
 		{
-			this->TIMER_SCREEN_SAVER.start();
 			MODE_SCREEN_SAVER_STEP++;
-		
 		}
 		dialOnEdgeChangeInitTimerPercentage(&TIMER_SCREEN_SAVER);
 
@@ -882,12 +880,10 @@ void Apps::modeRandomWorld(bool init)
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 		{
 			// animated
-			if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
+			if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
 			{
 				addNoteToBuzzer(C7_8);
 				randomModeTrigger(false);
-
-				RANDOMWORLD_ROLL_SPEED.start();
 			}
 		}
 		else
@@ -920,7 +916,7 @@ void Apps::modeRandomWorld(bool init)
 
 	case randomWorldRollingEnd:
 	{
-		if (!RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
+		if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
 		{
 			addNoteToBuzzer(C7_8);
 			randomModeTrigger(false);
@@ -931,8 +927,6 @@ void Apps::modeRandomWorld(bool init)
 			{
 				randomWorldState = randomWorldShowResult;
 			}
-
-			RANDOMWORLD_ROLL_SPEED.start();
 		}
 	}
 	break;
@@ -1315,10 +1309,9 @@ void Apps::modeCountingLettersAndChars(bool init)
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// auto mode next item
-		if (!COUNTING_LETTERS_AND_CHARS_TIMER.getTimeIsNegative())
+		if (COUNTING_LETTERS_AND_CHARS_TIMER.getCountDownTimerElapsedAndRestart())
 		{
 			LETTERS_AND_CHARS_COUNTER += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
-			COUNTING_LETTERS_AND_CHARS_TIMER.start();
 		}
 
 		// set timer speed
@@ -1505,10 +1498,9 @@ void Apps::modeComposeSong(bool init)
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 
-			if (!COMPOSER_STEP_TIMER.getTimeIsNegative())
+			if (COMPOSER_STEP_TIMER.getCountDownTimerElapsedAndRestart())
 			{
 				step = 1;
-				COMPOSER_STEP_TIMER.start();
 			}
 		}
 
@@ -1575,9 +1567,8 @@ void Apps::modeSoundNotes(bool init)
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
 		// auto play
-		if (!SOUND_NOTE_AUTO_TIMER.getTimeIsNegative())
+		if (SOUND_NOTE_AUTO_TIMER.getCountDownTimerElapsedAndRestart())
 		{
-			SOUND_NOTE_AUTO_TIMER.start();
 			update_note = true;
 		}
 
@@ -1836,10 +1827,9 @@ void Apps::modeMovie(bool init)
 	}
 	
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))){
-		if (!MOVIE_MODE_FRAME_INTERVAL_TIMER.getTimeIsNegative())
+		if (MOVIE_MODE_FRAME_INTERVAL_TIMER.getCountDownTimerElapsedAndRestart())
 		{
 			MOVIE_MODE_FLASH_FRAME_INDEX += (1 - 2*MOVIE_MODE_AUTO_BACKWARDS);
-			MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 		}
 	}
 
@@ -2227,10 +2217,9 @@ void Apps::modeHackTime(bool init)
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			// auto scroll mode
-			if (!HACKTIME_MOVE_TIMER.getTimeIsNegative())
+			if (HACKTIME_MOVE_TIMER.getCountDownTimerElapsedAndRestart())
 			{
 				HACKTIME_ADDRESS++;
-				HACKTIME_MOVE_TIMER.start();
 				address_changed = true;
 			}
 
@@ -2926,10 +2915,9 @@ void Apps::modeSequencer(bool init)
 				dialOnEdgeChangeInitTimerPercentage(&SEQUENCER_SPEED);
 			}
 
-			if (!SEQUENCER_SPEED.getTimeIsNegative())
+			if (SEQUENCER_SPEED.getCountDownTimerElapsedAndRestart())
 			{
 				step = 1;
-				SEQUENCER_SPEED.start();
 			}
 		}
 
@@ -2971,35 +2959,39 @@ void Apps::modeMetronome(bool init)
 	if (init)
 	{
 		TIMER_METRONOME.setInitTimeMillis(-83);  // 60bpm as default
-		TIMER_METRONOME.start();
+		// TIMER_METRONOME.start();
 		METRONOME_TICKER_1_POSITION = 0;
 		METRONOME_TICKER_2_POSITION = 0;
 		METRONOME_TICKER_3_POSITION = 0;
 
 		METRONOME_ENABLE_FLASH_AT_BEEP = false;
 	}
+	bool visualize_bpm = binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
-		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME);
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
 		// auto counting (metronome)
-		if (!TIMER_METRONOME.getTimeIsNegative())
+		if (TIMER_METRONOME.getCountDownTimerElapsedAndRestart())
 		{
-			TIMER_METRONOME.start();
 			update = true;
 		}
 
-		if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
+		if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_MOMENTARY_3)){
 			METRONOME_ENABLE_FLASH_AT_BEEP = !METRONOME_ENABLE_FLASH_AT_BEEP;
 		}
 
-	}else if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
-		// manual mode
-		update = encoder_dial->getDelta() != 0;
+	}else if (visualize_bpm){
+		
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
 
-	}else{
+	}else if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
 		buzzerChangeSpeedRatioWithEncoderDial();
 		buzzerOffAndAddNoteAtEncoderDialChange(C6_4);
+
+	}else{
+		// manual mode
+		update = encoder_dial->getDelta() != 0;
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -3017,7 +3009,7 @@ void Apps::modeMetronome(bool init)
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_INDEXED_MOMENTARY_3, true, C7_8, update);
 	
 	// display
-	if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
+	if (visualize_bpm){
 		// bpm --> full 12 step circles per minute.   timing is per step. so: 60bpm == 1 circle / second = timer: 1000/12 = 83.333ms/step
 		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) ( 1 / (12* (float)TIMER_METRONOME.getInitTimeMillis()/60000 ))); // millis/step to fullcirclesp/minute (bpm)
 
