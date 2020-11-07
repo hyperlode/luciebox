@@ -2970,11 +2970,13 @@ void Apps::modeMetronome(bool init)
 
 	if (init)
 	{
-		TIMER_METRONOME.setInitTimeMillis(-166);
+		TIMER_METRONOME.setInitTimeMillis(-83);  // 60bpm as default
 		TIMER_METRONOME.start();
 		METRONOME_TICKER_1_POSITION = 0;
 		METRONOME_TICKER_2_POSITION = 0;
 		METRONOME_TICKER_3_POSITION = 0;
+
+		METRONOME_ENABLE_FLASH_AT_BEEP = false;
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -2985,6 +2987,10 @@ void Apps::modeMetronome(bool init)
 		{
 			TIMER_METRONOME.start();
 			update = true;
+		}
+
+		if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
+			METRONOME_ENABLE_FLASH_AT_BEEP = !METRONOME_ENABLE_FLASH_AT_BEEP;
 		}
 
 	}else if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
@@ -3038,7 +3044,13 @@ void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_
 			addNoteToBuzzer(sound_at_zero_pass);
 		}
 	}
-	flashPictureToDisplayAllSegments( disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + *ticker_counter * 4);
+	if (METRONOME_ENABLE_FLASH_AT_BEEP && *ticker_counter == 0){
+		this->displayAllSegments = 0xFFFFFFFF;
+
+	}else{
+		flashPictureToDisplayAllSegments( disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + *ticker_counter * 4);
+
+	}
 }
 
 #ifdef ENABLE_SIMON_APP

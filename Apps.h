@@ -227,6 +227,7 @@
 #define STOPWATCH_PAUSED_1 general_boolean
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 #define MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT general_boolean
+#define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
 #define HACKTIME_VALUE_TO_SOUND general_boolean2
@@ -337,7 +338,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
 #define MAX_FRAMES_MOVIES_FLASH 70
 #define MOVIE_INDEX_EMPTY 255
-#define ANIMATE_CIRCLE_OFFSET 0
+#define ANIMATE_CIRCLE_OFFSET 4
 
 const uint8_t disp_4digits_animations[] PROGMEM = {
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
