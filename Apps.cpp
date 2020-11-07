@@ -186,9 +186,12 @@ void Apps::appSelector(bool init, uint8_t selector)
 			this->modeReactionGame(initOnBigLatchInitToo);
 #endif
 			break;
+		
+		case APP_SELECTOR_SCREEN_SAVER:
+			this->modeScreenSaver(initOnBigLatchInitToo);
+			break;
 
 #ifdef ENABLE_TILT_SWITCHES
-		case APP_SELECTOR_TILT_ADVANCED:
 		case APP_SELECTOR_TILT:
 			this->tiltSwitchTest(initOnBigLatchInitToo);
 			break;
@@ -296,6 +299,63 @@ bool Apps::init_app(bool init, uint8_t selector)
 		return true;
 	}
 	return false;
+}
+
+void Apps::modeScreenSaver(bool init)
+{
+
+	// fade in and out of all segments on screen.
+
+	if (init)
+	{
+		this->TIMER_SCREEN_SAVER.setInitTimeMillis(-500);
+		this->TIMER_SCREEN_SAVER.start();
+		MODE_SCREEN_SAVER_STEP = 0;
+		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = true;
+
+	}
+
+	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))){
+
+		if (!this->TIMER_SCREEN_SAVER.getTimeIsNegative())
+		{
+			this->TIMER_SCREEN_SAVER.start();
+			MODE_SCREEN_SAVER_STEP++;
+		
+		}
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_SCREEN_SAVER);
+
+	}else{
+		modifyValueUpDownWithMomentary2And3(&MODE_SCREEN_SAVER_STEP, 1);
+		MODE_SCREEN_SAVER_STEP += encoder_dial->getDelta();
+	}
+
+	// if (MODE_SCREEN_SAVER_STEP ==32 || MODE_SCREEN_SAVER_STEP ==0){
+	// 	// MODE_SCREEN_SAVER_STEP = 0;
+	// 	MODE_SCREEN_SAVER_STEP = MODE_SCREEN_SAVER_STEP+31 - 2*MODE_SCREEN_SAVER_STEP;
+		
+	// 	MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
+	// 	randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
+	// }
+
+	if (MODE_SCREEN_SAVER_STEP > 31){
+		MODE_SCREEN_SAVER_STEP = 0;
+		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
+		randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
+
+	} else if (MODE_SCREEN_SAVER_STEP < 0){
+		MODE_SCREEN_SAVER_STEP = 31;
+		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
+		randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
+	}
+
+	uint32_t tmp = fadeInList(MODE_SCREEN_SAVER_STEP, 32, 0, MODE_SCREEN_SAVE_RANDOM_LIST);
+
+	if (!MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT){
+		tmp = ~tmp;
+	}
+	ledDisp->setBinaryToDisplay(tmp);
+
 }
 
 void Apps::quiz(bool init)

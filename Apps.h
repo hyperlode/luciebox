@@ -51,7 +51,7 @@
 #define APP_SELECTOR_REACTION_GAME 18
 #define APP_SELECTOR_GUITAR_HERO 19
 #define APP_SELECTOR_TILT 20
-#define APP_SELECTOR_TILT_ADVANCED 21
+#define APP_SELECTOR_SCREEN_SAVER 21
 #define APP_SELECTOR_MULTITIMER_SETTING 22
 #define APP_SELECTOR_MULTITIMER_PLAYING 23
 
@@ -124,6 +124,7 @@
 #define SEQUENCER_SPEED generalTimer
 #define TILT_TIMER generalTimer
 #define MOVIE_MODE_FRAME_INTERVAL_TIMER generalTimer
+#define TIMER_SCREEN_SAVER generalTimer
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
 #define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
@@ -150,6 +151,7 @@
 #define TILT_EXPECTED_SWITCH_INDEX general_int16_t_1
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
 #define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
+#define MODE_SCREEN_SAVER_STEP general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define REACTION_GAME_TIMER_STEP general_int16_t_2
@@ -187,7 +189,8 @@
 #define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
 #define DRAW_CURSOR_DIGIT general_uint8_t_1
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
-// #define MODE_SOUND_SONG_INDEX general_uint8_t_1
+
+
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -223,6 +226,7 @@
 #define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
 #define STOPWATCH_PAUSED_1 general_boolean
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
+#define MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
 #define HACKTIME_VALUE_TO_SOUND general_boolean2
@@ -246,6 +250,7 @@
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 #define MOVIE_MODE_STOPS bytes_list
 #define MODE_SOUND_SONG_BUFFER bytes_list
+#define MODE_SCREEN_SAVE_RANDOM_LIST bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -578,6 +583,7 @@ public:
     void modeSimon(bool init);
     void modeReactionGame(bool init);
     void tiltSwitchTest(bool init);
+    void modeScreenSaver(bool init);
     void modeButtonDebug(bool init);
     void miniMultiTimer(bool init);
     void modeRandomWorld(bool init);
