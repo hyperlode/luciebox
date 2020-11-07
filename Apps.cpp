@@ -239,7 +239,7 @@ void Apps::updateEveryAppCycleBefore()
 
 void Apps::setDefaultMode()
 {
-	allLights->setBrightness(0, false);
+	// allLights->setBrightness(0, false); // disable because it annoys me:)
 
 	//buzzer
 	buzzer->setSpeedRatio(2);
@@ -1103,7 +1103,7 @@ void Apps::modeSimpleButtonsAndLights(bool init)
 			}
 		}
 
-		allLights->setBrightness((byte)(50 - encoder_dial->getValueLimited(50,false)), false);
+		// allLights->setBrightness((byte)(50 - encoder_dial->getValueLimited(50,false)), false); // always annoyed me more than it brought happiness. Gaining a few bytes of memory, THAT's real happiness!
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
@@ -1280,9 +1280,8 @@ void Apps::modeSoundSong(bool init)
 	if (init)
 	{
 		loadBuzzerTrack(SONG_DRYER_HAPPY);
+		// MODE_SOUND_SONG_INDEX = 0;
 	}
-
-	// setBlankDisplay();
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
@@ -1293,29 +1292,17 @@ void Apps::modeSoundSong(bool init)
 		buzzerChangeSpeedRatioWithEncoderDial();
 	}
 
-	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
+	uint8_t shift = (4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) > 0));
+	uint8_t shift_eeprom = (8 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) > 0));
 
 	for (uint8_t index = 0; index < MOMENTARY_BUTTONS_COUNT; index++)
 	{
-
-		if (binaryInputs[buttons_indexed[index]].getEdgeUp())
+		if (binaryInputsEdgeUp & (1<< index))
 		{
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
-			{
-#ifdef ENABLE_EEPROM
-				saveLoadFromEepromSlot(MODE_SOUND_SONG_BUFFER, index + shift, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
-#endif
-				for (uint8_t i = 0; i < EEPROM_SEQUENCER_SONG_LENGTH; i++)
-				{
-					addNoteToBuzzer(MODE_SOUND_SONG_BUFFER[i]);
-				}
-			}
-			else
-			{
-				loadBuzzerTrack(index + shift);
-			}
+				loadBuzzerTrack(index + shift + shift_eeprom);
 		}
 	}
+
 	buzzer->lastPlayedNoteToDisplay(textHandle, decimalDotsHandle);
 }
 
@@ -1353,7 +1340,6 @@ void Apps::modeComposeSong(bool init)
 				COMPOSER_SONG_LENGTH = i + 1;
 				if (COMPOSER_SONG[i] != BUZZER_ROLL_SONG_STOPVALUE)
 				{
-
 					break;
 				}
 			}
@@ -1370,17 +1356,21 @@ void Apps::modeComposeSong(bool init)
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				//delete current position
+				if (COMPOSER_SONG_LENGTH <= 0){
+					// empty songs stay empty.
+				}else{
 
-				// move all notes one position down.
-				for (uint8_t i = COMPOSER_STEP; i < bytes_list_bufsize - 1; i++)
-				{
-					COMPOSER_SONG[i] = COMPOSER_SONG[i + 1];
+					// move all notes one position down.
+					for (uint8_t i = COMPOSER_STEP; i < bytes_list_bufsize - 1; i++)
+					{
+						COMPOSER_SONG[i] = COMPOSER_SONG[i + 1];
+					}
+					// deleted space should be a song stop note.
+					COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_ROLL_SONG_STOPVALUE;
+
+					//adjust length
+					COMPOSER_SONG_LENGTH--;
 				}
-				// deleted space should be a song stop note.
-				COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_ROLL_SONG_STOPVALUE;
-
-				//adjust length
-				COMPOSER_SONG_LENGTH--;
 			}
 
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
@@ -1815,14 +1805,8 @@ void Apps::modeMovie(bool init)
 	// soundtrack
 	if (reload_soundtrack && sound_on){
 	
-		buzzerOff();
-		if (MOVIE_MODE_SOUNDTRACK_INDEX < SONGS_COUNT){
-			loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
-			
-		}else{
-			// eeprom custom songs
-
-		}
+		// buzzerOff();
+		loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
 	}
 
 	// graphics
@@ -2793,9 +2777,6 @@ void Apps::modeSequencer(bool init)
 		// 	this->SEQUENCER_SONG[i] = C7_8;
 		// }
 	}
-
-	// erase screen at start.
-	// setBlankDisplay();
 
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
@@ -3986,7 +3967,7 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 
 	// load/save data
 
-	uint8_t slot_number = encoder_dial->getValueLimited(slotCount*16, false) / 16;
+	uint8_t slot_number = encoder_dial->getValueLimited((slotCount-1)*16, false) / 16;
 	
 	if (SAVE_LOAD_MENU_BLINK_TIMER.getInFirstGivenHundredsPartOfSecond(500))
 	{
@@ -4011,7 +3992,7 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	{
 		bool loadElseSave = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA));
 
-		saveLoadFromEepromSlot(data, slot_number - 1, eepromSlotLength, eepromStartAddress, loadElseSave);
+		saveLoadFromEepromSlot(data, slot_number, eepromSlotLength, eepromStartAddress, loadElseSave);
 
 		return loadElseSave;
 	}
@@ -4110,6 +4091,7 @@ void Apps::buzzerOff(){
 
 void Apps::buzzerChangeSpeedRatioWithEncoderDial(){
 	buzzer->changeSpeedRatio(encoder_dial->getDelta());
+	
 }
 
 unsigned int Apps::indexToTimeSeconds(int16_t index){
@@ -4144,15 +4126,39 @@ void Apps::loadBuzzerTrack(uint8_t songIndex){
 	uint8_t length=0;
 	uint8_t song_start_index = 0;
 
-	// start index is all lenghts from previous songs counted up 
-	for(uint8_t i=0;i<=songIndex;i++){
-		song_start_index += length; 
-		length = pgm_read_byte_near(song_lengths + i);
+	buzzerOff();
+
+	if (songIndex < SONGS_FLASH_COUNT){
+		// Flash memory 
+
+		// start index is all lenghts from previous songs counted up 
+		for(uint8_t i=0;i<=songIndex;i++){
+			song_start_index += length; 
+			length = pgm_read_byte_near(song_lengths + i);
+		}
+		progmemToBuffer(songs + song_start_index , length);
+
+	}else if (songIndex - SONGS_FLASH_COUNT < 4){
+		// eeprom composer
+		saveLoadFromEepromSlot(this->bytes_list, songIndex - SONGS_FLASH_COUNT, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS, true);
+		length = 20;
+	
+	}else if (songIndex - SONGS_FLASH_COUNT - EEPROM_COMPOSER_SONG_COUNT < 9) {
+		// eeprom sequencer
+		saveLoadFromEepromSlot(this->bytes_list, songIndex - SONGS_FLASH_COUNT- EEPROM_COMPOSER_SONG_COUNT, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
+
+		length = EEPROM_SEQUENCER_SONG_LENGTH * 2;
+
+		int8_t i = EEPROM_SEQUENCER_SONG_LENGTH - 1;
+
+		while(i>=0){
+			this->bytes_list[i*2] = this->bytes_list[i];
+			this->bytes_list[i*2 -1] = rest_2 ;
+			i--;
+		}
 	}
 
-	progmemToBuffer(songs + song_start_index , length);
-
-	for (uint8_t i=0;i<length;i++){ //length-1 because stop is included
+	for (uint8_t i=0;i<length;i++){ 
 		buzzer->programBuzzerRoll(this->bytes_list[i]);
 	}
 }

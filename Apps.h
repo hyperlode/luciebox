@@ -187,6 +187,7 @@
 #define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
 #define DRAW_CURSOR_POTENTIO_INDEX general_uint8_t_1
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
+// #define MODE_SOUND_SONG_INDEX general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -425,7 +426,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_RETREAT 14
 #define LEN_SONG_ALPHABET 100
 
-#define SONGS_COUNT 8
+#define SONGS_FLASH_COUNT 8
 
 const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_DRYER_HAPPY,
@@ -629,6 +630,7 @@ private:
     void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
     void noteToDisplay(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
+    // void loadBuzzerTrackFromEeprom(uint8_t songIndex);
     void setBlankDisplay();
     void setLedArray(byte lights);
     void setStandardTextToTextBuf(uint8_t textPosition);

@@ -136,7 +136,7 @@ void Buzzer::doBuzzerRoll()
 
 void Buzzer::changeSpeedRatio(int8_t delta){
     // provide -1, 0 or 1 for best results
-    this->speedScale *= 1 + 0.01 * (float)delta;
+    this->speedScale *= 1 - 0.01 * (float)delta;
 }
 
 void Buzzer::setSpeedRatio(float speedMultiplier)

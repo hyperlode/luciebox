@@ -172,18 +172,22 @@
 #define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 24
 #define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 36
 #define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 48 // 6 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_GUITAR_HERO_BREAKS 24    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET 36    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET 48    // special limited time mode of reaction game (does not exist for guitar hero)
+#define EEPROM_REACTION_GAME_GUITAR_HERO_BREAKS         24    // special limited time mode of reaction game (does not exist for guitar hero)
+#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET      36    // special limited time mode of reaction game (does not exist for guitar hero)
+#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET      48    // special limited time mode of reaction game (does not exist for guitar hero)
 #define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + 106
 #define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET
 #define EEPROM_SEQUENCER_SONGS_START_ADDRESS            EEPROM_SETTINGS_OFFSET + 10
-#define EEPROM_SEQUENCER_SONG_LENGTH 32
-#define EEPROM_COMPOSER_SONGS_START_ADDRESS             EEPROM_SEQUENCER_SONGS_START_ADDRESS + 288
-#define EEPROM_COMPOSER_SONG_LENGTH 100 // let's make four songs available.
-#define EEPROM_PICTURES_START_ADDRESS                   EEPROM_COMPOSER_SONGS_START_ADDRESS + 400
-#define EEPROM_PICTURES_LENGTH 300
-#define EEPROM_NUMBER_OF_DRAWINGS 75 // 300/4
-// #define EEPROM_PICTURES_LENGTH 20
-// #define EEPROM_NUMBER_OF_DRAWINGS 5 // 300/4
+#define EEPROM_SEQUENCER_SONGS_COUNT                    9
+#define EEPROM_SEQUENCER_SONG_LENGTH                    32
+
+#define EEPROM_COMPOSER_SONGS_START_ADDRESS             EEPROM_SEQUENCER_SONGS_START_ADDRESS + EEPROM_SEQUENCER_SONGS_COUNT * EEPROM_SEQUENCER_SONG_LENGTH
+#define EEPROM_COMPOSER_SONG_LENGTH                     100
+#define EEPROM_COMPOSER_SONG_COUNT                      4  // let's make four songs available.
+
+#define EEPROM_PICTURES_START_ADDRESS                   EEPROM_COMPOSER_SONGS_START_ADDRESS + EEPROM_COMPOSER_SONG_LENGTH * EEPROM_COMPOSER_SONG_COUNT
+#define EEPROM_NUMBER_OF_DRAWINGS                       75 // 300/4
+#define EEPROM_PICTURES_LENGTH                          300
+#define EEPROM_PICTURE_LENGTH                           4
+
 #endif
