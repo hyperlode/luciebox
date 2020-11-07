@@ -188,8 +188,8 @@ void Apps::appSelector(bool init, uint8_t selector)
 			break;
 
 #ifdef ENABLE_TILT_SWITCHES
-		case APP_SELECTOR_TILT:
 		case APP_SELECTOR_TILT_ADVANCED:
+		case APP_SELECTOR_TILT:
 			this->tiltSwitchTest(initOnBigLatchInitToo);
 			break;
 #endif
@@ -2116,9 +2116,6 @@ void Apps::modeHackTime(bool init)
 		HACKTIME_MOVE_TIMER.start();
 	}
 
-	
-	// setBlankDisplay();
-
 	// write to mem if possible
 	if (!init && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) 
 		)
@@ -2638,6 +2635,13 @@ void Apps::tiltSwitchTest(bool init)
 }
 #endif
 
+void Apps::dialSetCheckDisplay(int16_t* pVariable, uint8_t multiplier, int16_t maxValue){
+	// assume zero as min value
+	*pVariable += encoder_dial->getDelta() * multiplier;
+	checkBoundaries(pVariable, 0, maxValue, false);
+	ledDisp->setNumberToDisplayAsDecimal(*pVariable);
+}
+
 void Apps::modeGeiger(bool init)
 {
 
@@ -2663,33 +2667,25 @@ void Apps::modeGeiger(bool init)
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
 		// note mode
-		int8_t delta = encoder_dial->getDelta();
-
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
-			//lower
-			GEIGER_TONE_FREQUENY_LOWEST +=  delta * 10;
-			checkBoundaries(&GEIGER_TONE_FREQUENY_LOWEST, 0, 5000, false);
-			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENY_LOWEST);
+			// //lower
+			dialSetCheckDisplay(&GEIGER_TONE_FREQUENY_LOWEST, 10, 5000);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			//upper
-			GEIGER_TONE_FREQUENCY_HEIGHEST += delta * 10;
-			checkBoundaries(&GEIGER_TONE_FREQUENCY_HEIGHEST, 0, 5000, false);
-			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_FREQUENCY_HEIGHEST);
+			dialSetCheckDisplay(&GEIGER_TONE_FREQUENCY_HEIGHEST, 10, 5000);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			//length
-			GEIGER_TONE_LENGTH += delta;
-			checkBoundaries(&GEIGER_TONE_LENGTH, 1, 255, false);
-			ledDisp->setNumberToDisplayAsDecimal(GEIGER_TONE_LENGTH);
+			dialSetCheckDisplay(&GEIGER_TONE_LENGTH, 1, 255);
 			
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
-			if (delta)
+			if (encoder_dial->getDelta())
 			{
 				this->geigerToneHelper();
 			}
@@ -3332,8 +3328,6 @@ void Apps::modeReactionGame(bool init)
 		this->shuffle(REACTION_GAME_TEMP_SELECTED_NOTES, 12);
 		
 	}
-
-	// setBlankDisplay();
 
 	// at any time, leave game when depressing play button.
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))

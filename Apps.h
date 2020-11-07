@@ -637,6 +637,7 @@ private:
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
+    void dialSetCheckDisplay(int16_t* pVariable, uint8_t multiplier, int16_t maxValue);
     
     void loadNextMovie();
     bool loadScreenFromMemory(int16_t address);
