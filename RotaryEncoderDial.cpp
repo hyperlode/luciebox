@@ -91,7 +91,7 @@ void RotaryEncoderDial::setSensitivity(uint8_t sensitivity){
   // 1 is no extra steps added.
   // 96 is full turn per step.
   this->sensitivity = sensitivity-1;
-  this->sensitivity_counter = 0;
+  // this->sensitivity_counter = 0;
 }
 
 // void RotaryEncoderDial::setIncrement(uint8_t increment){
@@ -144,7 +144,7 @@ void RotaryEncoderDial::checkState(){
   if (this->A_set == this->A_waitfor && this->B_set == this->B_waitfor){
     // next step
 
-    if (this->sensitivity_counter == this->sensitivity){
+    if (this->sensitivity_counter >= this->sensitivity){
       if (ccwElseCw){
         this->delta--;
       }else{

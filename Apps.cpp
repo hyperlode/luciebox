@@ -1925,56 +1925,47 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 
 	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
 
-	// scroll through segments
-	if (encoder_dial->getDelta())
-	{
-		DRAW_CURSOR_INDEX = encoder_dial->getValueLimited(71,true) / 2; // 36 positions, but, make dial less sensitive
-	}
-
+	encoder_dial->setSensitivity(2);
+	DRAW_CURSOR_SEGMENT += encoder_dial->getDelta();
+	
 	// check for global display change
 	this->displayChangeGlobal(&displayAllSegments, false);
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
-		*display_buffer ^= (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9) * 8;
+		*display_buffer ^= (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
 		this->displayChangeGlobal(display_buffer, true);
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
 		// move inside digit
-		DRAW_CURSOR_INDEX++;
-		if ((DRAW_CURSOR_INDEX) % 9 == 0)
-		{
-			DRAW_CURSOR_INDEX -= 9;
+		DRAW_CURSOR_SEGMENT++;
+		if (DRAW_CURSOR_SEGMENT > 8){
+			DRAW_CURSOR_SEGMENT = 0;
 		}
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
 		// move digit
-		DRAW_CURSOR_INDEX += 9;
-		// if (DRAW_CURSOR_INDEX > 35){
-		// 	DRAW_CURSOR_INDEX -= 35;
-		// }
-		DRAW_CURSOR_INDEX %= 36;
+		DRAW_CURSOR_DIGIT++;
 	}
 
 	// set limits on cursor position
-	// if (DRAW_CURSOR_INDEX < 0)
-	// {
-	// 	DRAW_CURSOR_INDEX = 31;
-	// }
+	if (DRAW_CURSOR_SEGMENT > 8){
+		DRAW_CURSOR_SEGMENT = 0;
+		DRAW_CURSOR_DIGIT++;
+	}
 
-	// if (DRAW_CURSOR_INDEX > 35)
-	// {
-	// 	DRAW_CURSOR_INDEX = 0;
-	// }
-
+	if (DRAW_CURSOR_DIGIT > 3){
+		DRAW_CURSOR_DIGIT = 0;
+	}
+	
 	//add blinking cursor. (depending on time, we set the active segment)
 	if (millis() % 250 > 125)
 	{
-		return (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_INDEX % 9]) << (DRAW_CURSOR_INDEX / 9) * 8;
+		return (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
 	}
 	else
 	{
