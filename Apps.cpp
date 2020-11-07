@@ -1954,18 +1954,22 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	{
 		// move digit
 		DRAW_CURSOR_INDEX += 9;
+		// if (DRAW_CURSOR_INDEX > 35){
+		// 	DRAW_CURSOR_INDEX -= 35;
+		// }
+		DRAW_CURSOR_INDEX %= 36;
 	}
 
 	// set limits on cursor position
-	if (DRAW_CURSOR_INDEX < 0)
-	{
-		DRAW_CURSOR_INDEX = 31;
-	}
+	// if (DRAW_CURSOR_INDEX < 0)
+	// {
+	// 	DRAW_CURSOR_INDEX = 31;
+	// }
 
-	if (DRAW_CURSOR_INDEX > 35)
-	{
-		DRAW_CURSOR_INDEX = 0;
-	}
+	// if (DRAW_CURSOR_INDEX > 35)
+	// {
+	// 	DRAW_CURSOR_INDEX = 0;
+	// }
 
 	//add blinking cursor. (depending on time, we set the active segment)
 	if (millis() % 250 > 125)

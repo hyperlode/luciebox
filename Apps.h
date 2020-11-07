@@ -185,7 +185,7 @@
 #define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
 #define COMPOSER_SONG_LENGTH general_uint8_t_1
 #define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
-#define DRAW_CURSOR_POTENTIO_INDEX general_uint8_t_1
+#define DRAW_CURSOR_DIGIT general_uint8_t_1
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
 // #define MODE_SOUND_SONG_INDEX general_uint8_t_1
 
@@ -196,6 +196,7 @@
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
 
+#define DRAW_CURSOR_SEGMENT general_uint8_t_3
 #define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
 #define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
