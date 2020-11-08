@@ -108,7 +108,7 @@ void refresh()
         //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states.
 
         //check if first iteration at new selector value.
-        bool init = selectorDial.getValueChangedEdge();
+        // bool init = selectorDial.getValueChangedEdge();
 
 #ifdef DEBUG_SELECTOR_KNOB
     if (selectorDial.getValueChangedEdge()){       
@@ -121,7 +121,7 @@ void refresh()
 
 
 #ifdef ENABLE_APPS
-    pretbak_apps.appSelector(init, selectorDial.getSelectorValue() - 1); // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
+    pretbak_apps.appSelector(); 
 #endif
 
         buzzer.doBuzzerRoll();
@@ -246,7 +246,7 @@ void setup()
 #endif
 
 #ifdef ENABLE_APPS
-    pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &allVisuals, &buzzer);
+    pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &allVisuals, &buzzer, &selectorDial);
     pretbak_apps.setDefaultMode();
 #endif
 

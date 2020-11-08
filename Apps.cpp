@@ -1,220 +1,164 @@
 #include "Apps.h"
-//#include "Arduino.h"
 #include "PretbakSettings.h"
 
 Apps::Apps(){};
 
-void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer)
+void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer, PotentioSelector* selectorDial)
 {
 	this->buzzer = buzzer;
 	this->binaryInputs = binaryInputs;
 	this->encoder_dial = encoder_dial;
 	this->ledDisp = ledDisp;
 	this->allLights = allLights;
+	this->selectorDial = selectorDial;
 
 	textHandle = ledDisp->getDisplayTextBufHandle();
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
 	lightsHandle = ledDisp->getLedArrayHandle();
-	// displaySegmentsHandle = ledDisp->getBinaryHandle();
 }
 
-void Apps::appSelector(bool init, uint8_t selector)
+void Apps::appSelector()
 {
-
 	updateEveryAppCycleBefore();
 
-	if (init)
-	{
-		// title mode (title screen will be displayed before real app starts)
-		this->app_init_mode = true;
+	bool selector_changed = selectorDial->getValueChangedEdge();
+	bool shift_changed = binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged(); // latching button acts as a "shift button" to have two apps per selector location
 
+	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
+	uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0);
+
+	bool init_app_init = selector_changed || ( shift_changed && (selector_dial_value != 11) && (selector_dial_value != 7)); // settings and multitimer app mode have no dual app available. So, don't init if shift button is toggled.
+	bool app_init = false;
+
+	if (init_app_init)
+	{
 #ifdef ENABLE_SERIAL
-		Serial.println("select knob:");
-		Serial.println(selector);
+		Serial.println("app select:");
+		Serial.println(selected_app);
 #endif
+		// set to init state before a new app starts
+		APP_SELECTOR_INIT_MODE = true;
 	}
 
-	if (this->app_init_mode)
+	if (APP_SELECTOR_INIT_MODE)
 	{
-		if (this->init_app(init, selector))
-		{
-			// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
-			this->app_init_mode = false;
-			init = true;
+		// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
+		APP_SELECTOR_INIT_MODE = this->init_app(init_app_init, selector_dial_value);
+		if(!APP_SELECTOR_INIT_MODE){
+			this->setDefaultMode();
+			app_init = true;
 		}
 	}
 
 	// not as else statement, to have the init properly transferred after app beginning screen.
-	if (!this->app_init_mode)
+	if (!APP_SELECTOR_INIT_MODE)
 	{
 
-		uint8_t appSelector = selector * 2 +
-							  ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_BIG_RED)) > 0);
+		//#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
 
-		bool initOnBigLatchInitToo = init || binaryInputs[BUTTON_LATCHING_BIG_RED].getValueChanged();
-
-		if (init ||
-			(initOnBigLatchInitToo && (appSelector != APP_SELECTOR_MULTITIMER_PLAYING)) // it's a bit messy, but for now, the multitimer app is the only one without a double app per selector position
-		)
-		{
-#ifdef ENABLE_SERIAL
-			Serial.println("app select:");
-			Serial.println(appSelector);
-#endif
-			// set to init state before a new app starts
-			this->setDefaultMode();
-		}
-
-#ifdef FUNCTION_POINTER_APP_SELECTION
-		// problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
-
-		//https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_74/rzarg/cplr034.htm
-		/////function pointer: working, but with weird audio beeps intermixed. What's going on there?!
-		//// this->appPointer = &Apps::modeSimon;
-		//// (this->*appPointer)(initOnBigLatchInitToo);
-
-		//modeCountingLettersAndChars(initOnBigLatchInitToo);
-
-		fptr allAppsIndexed[24] = {
-			&Apps::modeCountingLettersAndChars,
-			&Apps::modeSimon,
-			&Apps::modeSoundNotes,
-			&Apps::modeComposeSong,
-			&Apps::stopwatch,
-			&Apps::pomodoroTimer,
-			&Apps::modeRandomWorld,
-			&Apps::modeRandomWorld,
-			&Apps::modeGeiger,
-			&Apps::modeHackTime,
-			&Apps::modeSoundSong,
-			&Apps::modeMovie,
-			&Apps::draw,
-			&Apps::drawGame,
-			&Apps::modeSimpleButtonsAndLights,
-			&Apps::modeSimpleButtonsAndLights,
-			&Apps::modeMetronome,
-			&Apps::modeSequencer,
-			&Apps::modeReactionGame,
-			&Apps::modeReactionGame,
-			&Apps::tiltSwitchTest,
-			&Apps::tiltSwitchTest,
-			&Apps::miniMultiTimer,
-			&Apps::miniMultiTimer};
-
-		(this->*(allAppsIndexed[appSelector]))(initOnBigLatchInitToo);
-
-#else
-
-		switch (appSelector)
+		switch (selected_app)
 		{
 
 		case APP_SELECTOR_LETTERS_AND_CHARS:
-			this->modeCountingLettersAndChars(initOnBigLatchInitToo);
+			this->modeCountingLettersAndChars(app_init);
 			break;
 
 		case APP_SELECTOR_SIMON:
 
 #ifdef ENABLE_SIMON_APP
-			this->modeSimon(initOnBigLatchInitToo);
+			this->modeSimon(app_init);
 #endif
 			break;
 
 		case APP_SELECTOR_SOUND_NOTES:
-			this->modeSoundNotes(initOnBigLatchInitToo);
+			this->modeSoundNotes(app_init);
 			break;
 
 		case APP_SELECTOR_SOUND_COMPOSER:
-			this->modeComposeSong(initOnBigLatchInitToo);
+			this->modeComposeSong(app_init);
 			break;
 
 		case APP_SELECTOR_STOPWATCH:
-			stopwatch(initOnBigLatchInitToo);
+			stopwatch(app_init);
 			break;
 
 		case APP_SELECTOR_POMODORO:
-			pomodoroTimer(initOnBigLatchInitToo);
+			pomodoroTimer(app_init);
 			break;
 
 		case APP_SELECTOR_RANDOMWORLD:
-			this->modeRandomWorld(initOnBigLatchInitToo);
+			this->modeRandomWorld(app_init);
 			break;
 
 		case APP_SELECTOR_QUIZ:
-			this->quiz(initOnBigLatchInitToo);
+			this->quiz(app_init);
 			break;
 
 		case APP_SELECTOR_GEIGER:
-			this->modeGeiger(initOnBigLatchInitToo);
+			this->modeGeiger(app_init);
 			break;
 
 		case APP_SELECTOR_HACK_TIME:
-			this->modeHackTime(initOnBigLatchInitToo);
+			this->modeHackTime(app_init);
 			break;
 
 		case APP_SELECTOR_SOUND_SONG:
-			this->modeSoundSong(initOnBigLatchInitToo);
+			this->modeSoundSong(app_init);
 			break;
 
 		case APP_SELECTOR_DRAW:
-			this->draw(initOnBigLatchInitToo);
+			this->draw(app_init);
 			break;
 
 		case APP_SELECTOR_DRAW_GAME:
-			this->drawGame(initOnBigLatchInitToo);
+			this->drawGame(app_init);
 			break;
 
 		case APP_SELECTOR_MOVIE_MODE:
-			this->modeMovie(initOnBigLatchInitToo);
+			this->modeMovie(app_init);
 			break;
 
 		case APP_SELECTOR_SETTING:
 		case APP_SELECTOR_SETTING_TOO:
-			this->modeSimpleButtonsAndLights(init);
+			this->modeSimpleButtonsAndLights(app_init);
 			break;
 
 		case APP_SELECTOR_SOUND_METRONOME:
-			this->modeMetronome(initOnBigLatchInitToo);
+			this->modeMetronome(app_init);
 			break;
 
 		case APP_SELECTOR_SOUND_SEQUENCER:
-			this->modeSequencer(initOnBigLatchInitToo);
+			this->modeSequencer(app_init);
 			break;
 
 		case APP_SELECTOR_REACTION_GAME:
 		case APP_SELECTOR_GUITAR_HERO:
 #ifdef ENABLE_REACTION_APP
-			this->modeReactionGame(initOnBigLatchInitToo);
+			this->modeReactionGame(app_init);
 #endif
 			break;
 		
 		case APP_SELECTOR_SCREEN_SAVER:
-			this->modeScreenSaver(initOnBigLatchInitToo);
+			this->modeScreenSaver(app_init);
 			break;
 
 #ifdef ENABLE_TILT_SWITCHES
 		case APP_SELECTOR_TILT:
-			this->tiltSwitchTest(initOnBigLatchInitToo);
+			this->tiltSwitchTest(app_init);
 			break;
 #endif
 
 		case APP_SELECTOR_MULTITIMER_SETTING:
 		case APP_SELECTOR_MULTITIMER_PLAYING:
 #ifdef ENABLE_MULTITIMER
-			this->miniMultiTimer(init);
+			this->miniMultiTimer(app_init);
 #endif
 			break;
-
-			// #ifdef ENABLE_ANALOG_PIN_DEBUG
-			// 	case 12:
-			//   //this is the debug mode
-			//   this->modeButtonDebug(init);
-			//   break;
-			// #endif
 
 		default:
 			break;
 		}
-#endif
+
 	}
 }
 
@@ -252,58 +196,65 @@ void Apps::setDefaultMode()
 	//encoder
 	encoder_dial->setRange(1023,true); // allow overflow. (this makes it different from the limited potentio.)
 	encoder_dial->setValue(0);
+
+	randomSeed(millis());
 }
 
 bool Apps::init_app(bool init, uint8_t selector)
 {
-	// shows animated introduction splash screen
+	// shows animated introduction splash screen at each main app startup
+	// returns true as long as it is busy
 
 	if (init)
 	{
 		// init of the init_app..
 		this->displayAllSegments = 0;
-
 		flashPictureToDisplayAllSegments(app_splash_screens + selector * 4);
 
 		// initialize list
 		randomSequence(FADE_IN_RANDOM_LIST, 32);
 
-		INIT_SPLASH_ANIMATION_STEP = 27; 
+		INIT_SPLASH_ANIMATION_STEP = 0; 
+		
 		this->TIMER_INIT_APP.setInitTimeMillis(-20);
 		this->TIMER_INIT_APP.start();
-
-		randomSeed(millis());
 	}
 
 	// advance one frame
 	if (this->TIMER_INIT_APP.getCountDownTimerElapsedAndRestart())
 	{
-		
 		INIT_SPLASH_ANIMATION_STEP++;
+		
+		// hold down momentary button to freeze app splash screen
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3) ){
+			INIT_SPLASH_ANIMATION_STEP = 6;
+		}
 	}
 
-	if (INIT_SPLASH_ANIMATION_STEP < 32)
+	if (INIT_SPLASH_ANIMATION_STEP < 5)
 	{
+		// all lights on
 		ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.
 	}
-	else if (INIT_SPLASH_ANIMATION_STEP < 50)
+	else if (INIT_SPLASH_ANIMATION_STEP < 23)
 	{
+		// show app splash screen
 		ledDisp->setBinaryToDisplay(this->displayAllSegments);
 	}
-	else if (INIT_SPLASH_ANIMATION_STEP < 82)
+	else if (INIT_SPLASH_ANIMATION_STEP < 55)
 	{
-		ledDisp->setBinaryToDisplay(~this->fadeInList(INIT_SPLASH_ANIMATION_STEP - 51, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
+		// fade out
+		ledDisp->setBinaryToDisplay(~this->fadeInList(INIT_SPLASH_ANIMATION_STEP - 24, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
 	}
 	else
 	{
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void Apps::modeScreenSaver(bool init)
 {
-
 	// fade in and out of all segments on screen.
 
 	if (init)
@@ -312,8 +263,9 @@ void Apps::modeScreenSaver(bool init)
 		this->TIMER_SCREEN_SAVER.start();
 		MODE_SCREEN_SAVER_STEP = 0;
 		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = true;
-
 	}
+
+	bool allow_note_offset_change = true;
 
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))){
 
@@ -321,20 +273,14 @@ void Apps::modeScreenSaver(bool init)
 		{
 			MODE_SCREEN_SAVER_STEP++;
 		}
+
 		dialOnEdgeChangeInitTimerPercentage(&TIMER_SCREEN_SAVER);
+		allow_note_offset_change = false;
 
 	}else{
 		modifyValueUpDownWithMomentary2And3(&MODE_SCREEN_SAVER_STEP, 1);
 		MODE_SCREEN_SAVER_STEP += encoder_dial->getDelta();
 	}
-
-	// if (MODE_SCREEN_SAVER_STEP ==32 || MODE_SCREEN_SAVER_STEP ==0){
-	// 	// MODE_SCREEN_SAVER_STEP = 0;
-	// 	MODE_SCREEN_SAVER_STEP = MODE_SCREEN_SAVER_STEP+31 - 2*MODE_SCREEN_SAVER_STEP;
-		
-	// 	MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
-	// 	randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
-	// }
 
 	if (MODE_SCREEN_SAVER_STEP > 31){
 		MODE_SCREEN_SAVER_STEP = 0;
@@ -346,14 +292,26 @@ void Apps::modeScreenSaver(bool init)
 		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
 		randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
 	}
+	
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) {
+	
+		if(MODE_SCREEN_SAVER_STEP_MEMORY != MODE_SCREEN_SAVER_STEP){
+			buzzerOffAndAddNote(MODE_SCREEN_SAVE_RANDOM_LIST[MODE_SCREEN_SAVER_STEP] + MODE_SCREEN_SAVER_NOTE_OFFSET);  //60
+		}
 
+		if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT) && allow_note_offset_change){
+			MODE_SCREEN_SAVER_NOTE_OFFSET += encoder_dial->getDelta();
+		}
+	}
+	
 	uint32_t tmp = fadeInList(MODE_SCREEN_SAVER_STEP, 32, 0, MODE_SCREEN_SAVE_RANDOM_LIST);
-
+	
+	MODE_SCREEN_SAVER_STEP_MEMORY = MODE_SCREEN_SAVER_STEP;
+	
 	if (!MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT){
 		tmp = ~tmp;
 	}
 	ledDisp->setBinaryToDisplay(tmp);
-
 }
 
 void Apps::quiz(bool init)
@@ -1838,7 +1796,7 @@ void Apps::modeMovie(bool init)
 		MOVIE_MODE_FLASH_FRAME_INDEX = MOVIE_MODE_MOVIE_FRAME_INDEX_START;
 		movie_restart = true;
 		
-	}else if (MOVIE_MODE_FLASH_FRAME_INDEX <  MOVIE_MODE_MOVIE_FRAME_INDEX_START){
+	}else if (MOVIE_MODE_FLASH_FRAME_INDEX <  (int16_t) MOVIE_MODE_MOVIE_FRAME_INDEX_START){
 		MOVIE_MODE_FLASH_FRAME_INDEX =  MOVIE_MODE_MOVIE_FRAME_INDEX_END;
 		movie_restart = true;
 	}
@@ -2333,13 +2291,11 @@ bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 
 	int16_t value_memory = *value;
 
-	//if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_2))
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
 		*value -= amount;
 	}
 
-	// if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_MOMENTARY_3))
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
 		*value += amount;
@@ -3912,17 +3868,15 @@ void Apps::modeReactionGame(bool init)
 }
 
 
-bool Apps::nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide){
-	int16_t original_value;
+void Apps::nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide){
 	*counter += -1 + (2 * countUpElseDown);
-
+	countUpElseDown++;
 	checkBoundaries(counter, minValue, maxValue, overflowToOtherSide);
-	return original_value != *counter;
 }
 
-bool Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
+void Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
 {
-	return nextStep(counter, countUpElseDown, minValue, maxValue, true);
+	nextStep(counter, countUpElseDown, minValue, maxValue, true);
 }
 
 void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
@@ -4204,9 +4158,9 @@ void Apps::loadBuzzerTrack(uint8_t songIndex){
 
 		int8_t i = EEPROM_SEQUENCER_SONG_LENGTH - 1;
 
-		while(i>=0){
+		while(i > 0){
 			this->bytes_list[i*2] = this->bytes_list[i];
-			this->bytes_list[i*2 -1] = rest_2 ;
+			this->bytes_list[i*2 -1] = rest_2;
 			i--;
 		}
 	}

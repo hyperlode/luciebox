@@ -11,8 +11,8 @@ bool BinaryInput::getValue()
 {
     return this->value;
 }
-
 bool BinaryInput::getValueChanged()
+
 {
     return this->value != this->previousValue;
 }

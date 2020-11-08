@@ -3,7 +3,6 @@
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 //#define DBUG_REFACTOR_DISP
-
 // #define PROTOTYPE
 #define ENABLE_APPS 
 
@@ -172,9 +171,6 @@
 #define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 24
 #define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 36
 #define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 48 // 6 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_GUITAR_HERO_BREAKS         24    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET      36    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET      48    // special limited time mode of reaction game (does not exist for guitar hero)
 #define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + 106
 #define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET
 #define EEPROM_SEQUENCER_SONGS_START_ADDRESS            EEPROM_SETTINGS_OFFSET + 10

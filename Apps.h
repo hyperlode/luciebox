@@ -164,6 +164,8 @@
 #define SOUND_NOTES_SCALE_INDEX general_int16_t_2
 #define METRONOME_TICKER_2_POSITION general_int16_t_2
 #define TILT_CYCLE_COUNTER general_int16_t_2
+#define MODE_SCREEN_SAVER_STEP_MEMORY general_int16_t_2
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -189,8 +191,7 @@
 #define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
 #define DRAW_CURSOR_DIGIT general_uint8_t_1
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
-
-
+#define MODE_SCREEN_SAVER_NOTE_OFFSET general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -206,7 +207,7 @@
 
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
 #define COUNTER_GEIGER general_uint16_t_2
-#define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_uint16_t_2
+
 
 #define SOUND_NOTES_NOTE_INDEX general_int16_t_3
 #define GEIGER_TONE_LENGTH general_int16_t_3
@@ -218,6 +219,7 @@
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
 
+#define APP_SELECTOR_INIT_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
@@ -560,13 +562,14 @@ public:
     Buzzer *buzzer;
     RotaryEncoderDial *encoder_dial;
     LedMultiplexer5x8* allLights;
+    PotentioSelector* selectorDial;
 
-    void setPeripherals(BinaryInput *binaryInput, RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer);
+    void setPeripherals(BinaryInput *binaryInput, RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer, PotentioSelector* selectorDial);
 
     void setDefaultMode();
-    bool init_app(bool init, uint8_t selector);
-    void appSelector(bool init, uint8_t selector);
+    void appSelector();
 
+    bool init_app(bool init, uint8_t selector);
     void modeSimpleButtonsAndLights(bool init);
     void modeCountingLettersAndChars(bool init);
     void modeSoundSong(bool init);
@@ -608,16 +611,11 @@ public:
     void geigerToneHelper();
 private:
 
-#ifdef FUNCTION_POINTER_APP_SELECTION
-    typedef void (Apps::*fptr)(bool init);
-    fptr appPointer;
-#endif
-
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
 #endif
-    bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    bool nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
+    void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    void nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
     void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
 
