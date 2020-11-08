@@ -682,7 +682,6 @@ private:
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
 
-    
     enum
     {
         bytes_list_bufsize = 100,
@@ -765,8 +764,6 @@ private:
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* lightsHandle;
     uint8_t lights;
-    
-    bool app_init_mode;
 };
 
 #endif

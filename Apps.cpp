@@ -158,7 +158,6 @@ void Apps::appSelector()
 		default:
 			break;
 		}
-
 	}
 }
 
@@ -216,8 +215,8 @@ bool Apps::init_app(bool init, uint8_t selector)
 
 		INIT_SPLASH_ANIMATION_STEP = 0; 
 		
-		this->TIMER_INIT_APP.setInitTimeMillis(-20);
-		this->TIMER_INIT_APP.start();
+		this->TIMER_INIT_APP.start(-20);
+		// this->TIMER_INIT_APP.start();
 	}
 
 	// advance one frame
@@ -259,8 +258,8 @@ void Apps::modeScreenSaver(bool init)
 
 	if (init)
 	{
-		this->TIMER_SCREEN_SAVER.setInitTimeMillis(-500);
-		this->TIMER_SCREEN_SAVER.start();
+		this->TIMER_SCREEN_SAVER.start(-500);
+		// this->TIMER_SCREEN_SAVER.start();
 		MODE_SCREEN_SAVER_STEP = 0;
 		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = true;
 	}
@@ -347,8 +346,8 @@ void Apps::quiz(bool init)
 
 		{
 			quizState = quizWaitRandomTime;
-			QUIZ_RANDOM_WAIT_TIME.setInitTimeMillis(random(-3000, -500));
-			QUIZ_RANDOM_WAIT_TIME.start();
+			QUIZ_RANDOM_WAIT_TIME.start(random(-3000, -500));
+			// QUIZ_RANDOM_WAIT_TIME.start();
 		}
 	}
 	break;
@@ -787,8 +786,8 @@ void Apps::modeRandomWorld(bool init)
 				randomWorldState = randomWorldRolling;
 
 				// set up animation
-				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30 - (((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) * 1970)); // special case for upper limit setting for random number.
-				RANDOMWORLD_ROLL_SPEED.start();
+				RANDOMWORLD_ROLL_SPEED.start(-30 - (((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) * 1970)); // special case for upper limit setting for random number.
+				// RANDOMWORLD_ROLL_SPEED.start();
 			}
 		}
 	}
@@ -911,8 +910,8 @@ void Apps::modeRandomWorld(bool init)
 		if (!RANDOMWORLD_AUTODRAW_DELAY.getTimeIsNegative())
 		{
 			// set up animation
-			RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(-30);
-			RANDOMWORLD_ROLL_SPEED.start();
+			RANDOMWORLD_ROLL_SPEED.start(-30);
+			// RANDOMWORLD_ROLL_SPEED.start();
 
 			randomWorldState = randomWorldRolling;
 		}
@@ -1512,8 +1511,8 @@ void Apps::modeSoundNotes(bool init)
 	if (init)
 	{
 		SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
-		SOUND_NOTE_AUTO_TIMER.setInitTimeMillis(-500);
-		SOUND_NOTE_AUTO_TIMER.start();
+		SOUND_NOTE_AUTO_TIMER.start(-500);
+		// SOUND_NOTE_AUTO_TIMER.start();
 		SOUND_NOTES_SCALE_ROOT = C4_4;
 		modeSoundNotesInitScale();
 
@@ -1707,8 +1706,8 @@ void Apps::modeMovie(bool init)
 	if (init)
 	{
 		MOVIE_MODE_SHOW_NEGATIVE = false;
-		MOVIE_MODE_FRAME_INTERVAL_TIMER.setInitTimeMillis(-500);
-		MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
+		MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
+		// MOVIE_MODE_FRAME_INTERVAL_TIMER.start();
 		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
 		loadNextMovie();
 		MOVIE_MODE_SOUNDTRACK_INDEX = 0;
@@ -2120,8 +2119,8 @@ void Apps::modeHackTime(bool init)
 	{
 		// HACKTIME_ADDRESS = 0;
 		// HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
-		HACKTIME_MOVE_TIMER.setInitTimeMillis(-500);
-		HACKTIME_MOVE_TIMER.start();
+		HACKTIME_MOVE_TIMER.start(-500);
+		// HACKTIME_MOVE_TIMER.start();
 	}
 
 	// write to mem if possible
@@ -2761,11 +2760,11 @@ void Apps::modeSequencer(bool init)
 		SEQUENCER_STEP_COUNTER = 0;
 		SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
 
-		SEQUENCER_SPEED.setInitTimeMillis(-1000);
-		SEQUENCER_SPEED.start();
+		SEQUENCER_SPEED.start(-1000);
+		// SEQUENCER_SPEED.start();
 
-		SEQUENCER_EEPROM_MODE_BLINK.setInitTimeMillis(-1000);
-		SEQUENCER_EEPROM_MODE_BLINK.start();
+		SEQUENCER_EEPROM_MODE_BLINK.start(-1000);
+		// SEQUENCER_EEPROM_MODE_BLINK.start();
 
 		// //resets song.
 		// for (uint8_t i = 0; i < 32; i++)
@@ -2914,7 +2913,7 @@ void Apps::modeMetronome(bool init)
 
 	if (init)
 	{
-		TIMER_METRONOME.setInitTimeMillis(-83);  // 60bpm as default
+		TIMER_METRONOME.start(-83);  // 60bpm as default
 		// TIMER_METRONOME.start();
 		METRONOME_TICKER_1_POSITION = 0;
 		METRONOME_TICKER_2_POSITION = 0;
@@ -3336,8 +3335,8 @@ void Apps::modeReactionGame(bool init)
 	{
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x0;
-		TIMER_REACTION_GAME_RESTART_DELAY.setInitTimeMillis(0);  // 1 better than 0?  blinking does not look nice otherwise.
-		TIMER_REACTION_GAME_RESTART_DELAY.start();
+		TIMER_REACTION_GAME_RESTART_DELAY.start(0);  // 1 better than 0?  blinking does not look nice otherwise.
+		// TIMER_REACTION_GAME_RESTART_DELAY.start();
 
 		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
 		// never twice the same sound. Only first notes of array will be used.
@@ -3458,8 +3457,8 @@ void Apps::modeReactionGame(bool init)
 			}
 		}
 
-		TIMER_REACTION_GAME_SPEED.setInitTimeMillis(REACTION_GAME_STEP_TIME_MILLIS);
-		TIMER_REACTION_GAME_SPEED.start();
+		TIMER_REACTION_GAME_SPEED.start(REACTION_GAME_STEP_TIME_MILLIS);
+		// TIMER_REACTION_GAME_SPEED.start();
 		break;
 	}
 
@@ -3831,8 +3830,8 @@ void Apps::modeReactionGame(bool init)
 
 		// prepare next game delay.
 
-		TIMER_REACTION_END_OF_GAME_DELAY.setInitTimeMillis(-2000);
-		TIMER_REACTION_END_OF_GAME_DELAY.start();
+		TIMER_REACTION_END_OF_GAME_DELAY.start(-2000);
+		// TIMER_REACTION_END_OF_GAME_DELAY.start();
 
 		reactionGameState = reactionFinished;
 
@@ -3968,8 +3967,8 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	//kind of an init
 	if (!SAVE_LOAD_MENU_BLINK_TIMER.getIsStarted())
 	{
-		SAVE_LOAD_MENU_BLINK_TIMER.setInitTimeMillis(-1000);
-		SAVE_LOAD_MENU_BLINK_TIMER.start();
+		SAVE_LOAD_MENU_BLINK_TIMER.start(-1000);
+		// SAVE_LOAD_MENU_BLINK_TIMER.start();
 	}
 
 	// load/save data
