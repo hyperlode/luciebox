@@ -37,21 +37,21 @@ void Apps::appSelector()
 		Serial.println(selected_app);
 #endif
 		// set to init state before a new app starts
-		APP_SELECTOR_INIT_MODE = true;
+		init_app_playing = true;
 	}
 
-	if (APP_SELECTOR_INIT_MODE)
+	if (init_app_playing)
 	{
 		// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
-		APP_SELECTOR_INIT_MODE = this->init_app(init_app_init, selector_dial_value);
-		if(!APP_SELECTOR_INIT_MODE){
+		init_app_playing = this->init_app(init_app_init, selector_dial_value);
+		if(!init_app_playing){
 			this->setDefaultMode();
 			app_init = true;
 		}
 	}
 
 	// not as else statement, to have the init properly transferred after app beginning screen.
-	if (!APP_SELECTOR_INIT_MODE)
+	if (!init_app_playing)
 	{
 
 		//#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
@@ -1606,6 +1606,7 @@ void Apps::modeSoundNotes(bool init)
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3));
 			update_note = true;
 		}
+		// update_note = update_note || modifyValueUpDownWithMomentary2And3(&SOUND_NOTE_AUTO_UP_ELSE_DOWN, 1);
 	}
 
 	if (update_note)

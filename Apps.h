@@ -219,7 +219,7 @@
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
 
-#define APP_SELECTOR_INIT_MODE general_boolean
+// #define APP_SELECTOR_INIT_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
@@ -764,6 +764,8 @@ private:
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* lightsHandle;
     uint8_t lights;
+
+    bool init_app_playing;
 };
 
 #endif
