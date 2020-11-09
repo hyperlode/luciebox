@@ -1266,12 +1266,19 @@ void Apps::modeTallyKeeper(){
 		//*tally_counters[i]++; // THIS WONT WORK LUCIE! DU-UH SAYS DADDY BRECHT YOU'RE PLUS PLUSSING GOD KNOWS WHAT!
 		// *(*tally_counters+i) = (*(*tally_counters+i)) + 1;  // uncle lodie was having a pointer fight right here! In memoriam.
 
-		int16_t v = (*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) + TALLY_KEEPER_DELTA_SIGNED;
-		if (v < 0){
-			v = 0;
+		for (uint8_t i=0;i<4;i++){
+			// affect all counters if requested.
+			if (i == TALLY_KEEPER_DISPLAYED_COUNTER || (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) ){
+
+				int16_t v = (*tally_counters[i]) + TALLY_KEEPER_DELTA_SIGNED;
+				if (v < 0){
+					v = 0;
+				}
+
+				(*tally_counters[i]) = v;
+			}
 		}
 
-		(*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) = v;
 
 		// (*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) += TALLY_KEEPER_DELTA_SIGNED;
 		// checkBoundaries((tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]),0,9999,false );
