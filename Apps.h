@@ -5,7 +5,7 @@
 #define ENABLE_MULTITIMER
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-// #define ENABLE_TILT_SWITCHES
+#define ENABLE_TILT_SWITCHES
 #define ENABLE_TALLY_KEEPER
 
 
@@ -580,34 +580,34 @@ public:
     void appSelector();
 
     bool init_app(bool init, uint8_t selector);
-    void modeSimpleButtonsAndLights(bool init);
+    void modeSimpleButtonsAndLights();
     #ifdef ENABLE_TALLY_KEEPER
-    void modeTallyKeeper(bool init);
+    void modeTallyKeeper();
     #else
-    void modeCountingLettersAndChars(bool init);
+    void modeCountingLettersAndChars();
     #endif
 
-    void modeSoundSong(bool init);
-    void modeComposeSong(bool init);
+    void modeSoundSong();
+    void modeComposeSong();
     void modeSoundNotesInitScale();
-    void modeSoundNotes(bool init);
-    void draw(bool init);
-    void drawGame(bool init);
-    void modeMovie(bool init);
-    void pomodoroTimer(bool init);
-    void stopwatch(bool init);
-    void modeGeiger(bool init);
-    void modeSequencer(bool init);
-    void modeMetronome(bool init);
-    void modeSimon(bool init);
-    void modeReactionGame(bool init);
-    void tiltSwitchTest(bool init);
-    void modeDreamtime(bool init);
-    void modeButtonDebug(bool init);
-    void miniMultiTimer(bool init);
-    void modeRandomWorld(bool init);
-    void modeHackTime(bool init);
-    void quiz(bool init);
+    void modeSoundNotes();
+    void draw();
+    void drawGame();
+    void modeMovie();
+    void pomodoroTimer();
+    void stopwatch();
+    void modeGeiger();
+    void modeSequencer();
+    void modeMetronome();
+    void modeSimon();
+    void modeReactionGame();
+    void tiltSwitchTest();
+    void modeDreamtime();
+    void modeButtonDebug();
+    void miniMultiTimer();
+    void modeRandomWorld();
+    void modeHackTime();
+    void quiz();
 
     void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
@@ -653,7 +653,7 @@ private:
     void loadBuzzerTrack(uint8_t songIndex);
     // void loadBuzzerTrackFromEeprom(uint8_t songIndex);
     void setBlankDisplay();
-    void setLedArray(byte lights);
+    void setLedArray();
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
@@ -785,7 +785,8 @@ private:
     byte* lightsHandle;
     uint8_t lights;
 
-    bool init_app_playing;
+    bool splash_screen_playing; // actuall flash screen app.
+    bool app_init_edge; // one cycle
 };
 
 #endif
