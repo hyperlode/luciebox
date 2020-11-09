@@ -61,11 +61,7 @@ void Apps::appSelector()
 
 		case APP_SELECTOR_LETTERS_AND_CHARS:
 
-#ifdef ENABLE_TALLY_KEEPER
-			this->modeTallyKeeper();
-#else
 			this->modeCountingLettersAndChars();
-#endif
 			break;
 
 		case APP_SELECTOR_SIMON:
@@ -96,7 +92,11 @@ void Apps::appSelector()
 			break;
 
 		case APP_SELECTOR_QUIZ:
+#ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
+			this->modeTallyKeeper();
+#else
 			this->quiz();
+#endif
 			break;
 
 		case APP_SELECTOR_GEIGER:
@@ -307,108 +307,6 @@ void Apps::modeDreamtime()
 		tmp = ~tmp;
 	}
 	ledDisp->setBinaryToDisplay(tmp);
-}
-
-void Apps::quiz()
-{
-
-	// quiz app
-	uint8_t lights = 0;
-
-	if (this->app_init_edge)
-	{
-		quizState = quizInit;
-	}
-
-	switch (quizState)
-	{
-	case quizInit:
-	{
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		{
-			QUIZ_SCORE[i] = 0;
-		}
-		quizState = quizWaitForQuizMaster;
-		lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
-	}
-	break;
-	case quizWaitForQuizMaster:
-	{
-		lights |= 1 << LIGHT_LATCHING_EXTRA;
-
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-		// if (binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_EXTRA) ||
-		// 	binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
-
-		{
-			quizState = quizWaitRandomTime;
-			QUIZ_RANDOM_WAIT_TIME.start(random(-3000, -500));
-		}
-	}
-	break;
-	case quizWaitRandomTime:
-	{
-		lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
-		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
-		{
-			quizState = quizWaitPlayerPress;
-		}
-
-		// check here, any player pressing his button = score to zero.
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		{
-			if (binaryInputsEdgeUp & 1 << i)
-			{
-				QUIZ_SCORE[i] = 0;
-			}
-		}
-	}
-	break;
-	case quizWaitPlayerPress:
-	{
-		lights = 0xFF;
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		{
-			if (binaryInputsEdgeUp & 1 << i)
-			{
-				// add to score.
-				QUIZ_SCORE[i]++;
-				// go to next state
-
-				quizState = quizPlayerPressed;
-			}
-		}
-	}
-	break;
-	case quizPlayerPressed:
-	{
-		lights |= 1 << LIGHT_LATCHING_EXTRA;
-		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
-		{
-			quizState = quizWaitForQuizMaster;
-		}
-	}
-	break;
-	}
-
-	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
-	{
-		quizState = quizInit;
-	}
-
-	int16_t scoreToDisplay = 0;
-	int16_t multiplier = 1000;
-
-	for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-	{
-		scoreToDisplay += multiplier * QUIZ_SCORE[i];
-		multiplier /= 10;
-	}
-	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
-
-	// lights |= 1 << lights_indexed[i];
-	setLedArray();
 }
 
 void Apps::pomodoroTimer()
@@ -1209,7 +1107,7 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 	textBuf[3] = letterValueAlphabet + 65; // show letters alphabet.
 }
 
-#ifdef ENABLE_TALLY_KEEPER
+#ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
 void Apps::modeTallyKeeper(){
 	
 	int16_t* tally_counters [] = {&TALLY_KEEPER_0,&TALLY_KEEPER_1,&TALLY_KEEPER_2,&TALLY_KEEPER_3};
@@ -1292,6 +1190,109 @@ void Apps::modeTallyKeeper(){
 }
 
 #else
+void Apps::quiz()
+{
+
+	// quiz app
+	uint8_t lights = 0;
+
+	if (this->app_init_edge)
+	{
+		quizState = quizInit;
+	}
+
+	switch (quizState)
+	{
+	case quizInit:
+	{
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			QUIZ_SCORE[i] = 0;
+		}
+		quizState = quizWaitForQuizMaster;
+		lights |= 1 << LIGHT_LATCHING_SMALL_LEFT;
+	}
+	break;
+	case quizWaitForQuizMaster:
+	{
+		lights |= 1 << LIGHT_LATCHING_EXTRA;
+
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+		// if (binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_EXTRA) ||
+		// 	binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+
+		{
+			quizState = quizWaitRandomTime;
+			QUIZ_RANDOM_WAIT_TIME.start(random(-3000, -500));
+		}
+	}
+	break;
+	case quizWaitRandomTime:
+	{
+		lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT;
+		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
+		{
+			quizState = quizWaitPlayerPress;
+		}
+
+		// check here, any player pressing his button = score to zero.
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			if (binaryInputsEdgeUp & 1 << i)
+			{
+				QUIZ_SCORE[i] = 0;
+			}
+		}
+	}
+	break;
+	case quizWaitPlayerPress:
+	{
+		lights = 0xFF;
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			if (binaryInputsEdgeUp & 1 << i)
+			{
+				// add to score.
+				QUIZ_SCORE[i]++;
+				// go to next state
+
+				quizState = quizPlayerPressed;
+			}
+		}
+	}
+	break;
+	case quizPlayerPressed:
+	{
+		lights |= 1 << LIGHT_LATCHING_EXTRA;
+		if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown() || binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue())
+		{
+			quizState = quizWaitForQuizMaster;
+		}
+	}
+	break;
+	}
+
+	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
+	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue())
+	{
+		quizState = quizInit;
+	}
+
+	int16_t scoreToDisplay = 0;
+	int16_t multiplier = 1000;
+
+	for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+	{
+		scoreToDisplay += multiplier * QUIZ_SCORE[i];
+		multiplier /= 10;
+	}
+	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
+
+	// lights |= 1 << lights_indexed[i];
+	setLedArray();
+}
+
+#endif
 
 void Apps::modeCountingLettersAndChars()
 {
@@ -1361,9 +1362,6 @@ void Apps::modeCountingLettersAndChars()
 	//only do the characters of the alphabet in lettermode.
 	checkBoundaries(&LETTERS_AND_CHARS_COUNTER, 0, 25 + (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 76), true);
 }
-
-#endif
-
 
 void Apps::modeSoundSong()
 {

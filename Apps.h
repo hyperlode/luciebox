@@ -6,7 +6,7 @@
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 #define ENABLE_TILT_SWITCHES
-#define ENABLE_TALLY_KEEPER
+#define ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
 
 
 #include "Arduino.h"
@@ -581,12 +581,13 @@ public:
 
     bool init_app(bool init, uint8_t selector);
     void modeSimpleButtonsAndLights();
-    #ifdef ENABLE_TALLY_KEEPER
+    #ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
     void modeTallyKeeper();
     #else
-    void modeCountingLettersAndChars();
+    void quiz();
     #endif
 
+    void modeCountingLettersAndChars();
     void modeSoundSong();
     void modeComposeSong();
     void modeSoundNotesInitScale();
@@ -607,7 +608,6 @@ public:
     void miniMultiTimer();
     void modeRandomWorld();
     void modeHackTime();
-    void quiz();
 
     void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
