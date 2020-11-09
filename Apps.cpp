@@ -1303,7 +1303,7 @@ void Apps::modeCountingLettersAndChars()
 	if (this->app_init_edge)
 	{
 		LETTERS_AND_CHARS_COUNTER = 0;
-		COUNTING_LETTERS_AND_CHARS_TIMER.setInitTimeMillis(-1000);
+		COUNTING_LETTERS_AND_CHARS_TIMER.start(-1000);
 		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = true;
 	}
 
@@ -1319,17 +1319,12 @@ void Apps::modeCountingLettersAndChars()
 		displayLetterAndPositionInAlphabet(textHandle, LETTERS_AND_CHARS_COUNTER);
 	}
 
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
-	{
-		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = !NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN;
-	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		LETTERS_AND_CHARS_COUNTER = 0;
 	}
 	
-	modifyValueUpDownWithMomentary2And3(&LETTERS_AND_CHARS_COUNTER, 1);
 
  	// auto count
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA) )
@@ -1338,11 +1333,22 @@ void Apps::modeCountingLettersAndChars()
 			buzzer->setSpeedRatio(4);
 			loadBuzzerTrack(SONG_ALPHABET);
 		}
-		COUNTING_LETTERS_AND_CHARS_TIMER.start();
+
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
+
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
+		{
+			NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = true;
+		}
+		
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+		{
+			NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = false;
+		}
+
 		// auto mode next item
 		if (COUNTING_LETTERS_AND_CHARS_TIMER.getCountDownTimerElapsedAndRestart())
 		{
@@ -1352,11 +1358,12 @@ void Apps::modeCountingLettersAndChars()
 		// set timer speed
 		dialOnEdgeChangeInitTimerPercentage(&COUNTING_LETTERS_AND_CHARS_TIMER);
 	}
-	else // if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+	else 
 	{
 		// show number right away depending on potentio value
 		//LETTERS_AND_CHARS_COUNTER = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
 		LETTERS_AND_CHARS_COUNTER += encoder_dial->getDelta();
+		modifyValueUpDownWithMomentary2And3(&LETTERS_AND_CHARS_COUNTER, 1);
 	}
 
 	//only do the characters of the alphabet in lettermode.
@@ -1815,17 +1822,9 @@ void Apps::modeMovie()
 			// manual mode
 			MOVIE_MODE_FLASH_FRAME_INDEX += encoder_dial->getDelta();
 
-			// one step forward
-			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
-			{
-				MOVIE_MODE_FLASH_FRAME_INDEX++;
-			}
+			// step mode
+			modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_FLASH_FRAME_INDEX, 1);
 
-			// one step backward
-			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-			{
-				MOVIE_MODE_FLASH_FRAME_INDEX--;
-			}
 		}
 		else
 		{
@@ -2502,11 +2501,7 @@ void Apps::draw()
 	{
 		// load drawing from memory only if index changed
 		displayAllSegments = 0;
-		// for (uint8_t i = 0; i < 4; i++)
-		// {
-			// displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i))) << (i * 8);
-			eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, DRAW_ACTIVE_DRAWING_INDEX);
-		// }
+		eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, DRAW_ACTIVE_DRAWING_INDEX);
 
 		this->displayChangeGlobal(&displayAllSegments, true);
 	}
@@ -2515,7 +2510,6 @@ void Apps::draw()
 	DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = DRAW_ACTIVE_DRAWING_INDEX;
 
 	// OUTPUT to display
-	// setBlankDisplay();
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
 	{
 		// number: always show index of active drawing if activated.
@@ -2654,10 +2648,6 @@ void Apps::tiltSwitchTest()
 		displayAllSegments ^= 1<< (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX]%10);
 		displayAllSegments &= ~(1UL<<7); 
 		
-		// if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)){
-		// 	TILT_EXPECTED_SWITCH_INDEX+=4;
-
-		// }else 
 		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
 			TILT_EXPECTED_SWITCH_INDEX+=2;
 
@@ -2951,7 +2941,7 @@ void Apps::modeSequencer()
 		}
 
 		// handle step change
-		if (step != 0 || init)
+		if (step != 0 || this->app_init_edge)
 		{
 			nextStepRotate(&SEQUENCER_STEP_COUNTER,true,0,32);
 
@@ -3066,10 +3056,8 @@ void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_
 	}
 	if (METRONOME_ENABLE_FLASH_AT_BEEP && *ticker_counter == 0){
 		this->displayAllSegments = 0xFFFFFFFF;
-
 	}else{
 		flashPictureToDisplayAllSegments( disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + *ticker_counter * 4);
-
 	}
 }
 
