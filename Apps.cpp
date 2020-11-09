@@ -60,7 +60,12 @@ void Apps::appSelector()
 		{
 
 		case APP_SELECTOR_LETTERS_AND_CHARS:
+
+#ifdef ENABLE_TALLY_KEEPER
+			this->modeTallyKeeper(app_init);
+#else
 			this->modeCountingLettersAndChars(app_init);
+#endif
 			break;
 
 		case APP_SELECTOR_SIMON:
@@ -1208,6 +1213,78 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 	textBuf[3] = letterValueAlphabet + 65; // show letters alphabet.
 }
 
+#ifdef ENABLE_TALLY_KEEPER
+void Apps::modeTallyKeeper(bool init){
+	
+	int16_t* tally_counters [] = {&TALLY_KEEPER_0,&TALLY_KEEPER_1,&TALLY_KEEPER_2,&TALLY_KEEPER_3};
+	// int16_t tempCounter=0;
+	if (init)
+	{
+		for (uint8_t i = 0;i<4;i++){
+			*tally_counters[i] = 0;
+		}
+		TALLY_KEEPER_DISPLAYED_COUNTER = 0;
+	}
+	
+	byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+
+	// Check for momentary keypress initiated
+	for (uint8_t i = 0;i<4;i++){
+		if (binaryInputsEdgeUp & (1<<i)){
+			TALLY_KEEPER_DISPLAYED_COUNTER = i;
+			TALLY_KEEPER_DELTA = 1;
+			buzzerOffAndAddNote(C5_2);
+		}
+	}
+	TALLY_KEEPER_DELTA_SIGNED = TALLY_KEEPER_DELTA;
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)){
+		TALLY_KEEPER_DELTA_SIGNED = -TALLY_KEEPER_DELTA; 
+	}
+
+	if ((binaryInputsValue & momentary_buttons_mask) != 0) // a button hold
+	{
+		TALLY_KEEPER_DELTA+=encoder_dial->getDelta();
+		if (TALLY_KEEPER_DELTA < 0){
+			TALLY_KEEPER_DELTA = 0;
+		}
+
+		if (TALLY_KEEPER_DELTA > 1){
+			ledDisp->setNumberToDisplayAsDecimal((int16_t)TALLY_KEEPER_DELTA);
+		}
+		else{
+			ledDisp->setNumberToDisplayAsDecimal((*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) + (int16_t) TALLY_KEEPER_DELTA  );
+
+		}
+
+		int16_t display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] + TALLY_KEEPER_DELTA_SIGNED; 
+
+		if ( TALLY_KEEPER_DELTA > 1){
+			display_value = TALLY_KEEPER_DELTA;
+		}
+
+		ledDisp->setNumberToDisplayAsDecimal(display_value);
+		
+	}
+	else if ((binaryInputsEdgeDown & momentary_buttons_mask) != 0) // a button unpressed
+	{
+		// --- Story time ---
+		// (*tally_counters[i])++;
+		//*tally_counters[i]++; // THIS WONT WORK LUCIE! DU-UH SAYS DADDY BRECHT YOU'RE PLUS PLUSSING GOD KNOWS WHAT!
+		// *(*tally_counters+i) = (*(*tally_counters+i)) + 1;  // uncle lodie was having a pointer fight right here! In memoriam.
+
+		(*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) += TALLY_KEEPER_DELTA_SIGNED;
+	
+	}else{
+		ledDisp->setNumberToDisplayAsDecimal(*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]);
+
+	}
+	
+	
+
+}
+
+#else
+
 void Apps::modeCountingLettersAndChars(bool init)
 {
 	//counting mode: numbers and letters. 
@@ -1276,6 +1353,9 @@ void Apps::modeCountingLettersAndChars(bool init)
 	//only do the characters of the alphabet in lettermode.
 	checkBoundaries(&LETTERS_AND_CHARS_COUNTER, 0, 25 + (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 76), true);
 }
+
+#endif
+
 
 void Apps::modeSoundSong(bool init)
 {

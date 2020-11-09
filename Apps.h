@@ -3,9 +3,11 @@
 
 #define ENABLE_EEPROM
 #define ENABLE_MULTITIMER
-#define ENABLE_SIMON_APP
-#define ENABLE_REACTION_APP
+// #define ENABLE_SIMON_APP
+// #define ENABLE_REACTION_APP
 #define ENABLE_TILT_SWITCHES
+#define ENABLE_TALLY_KEEPER
+
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -152,6 +154,7 @@
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
 #define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
 #define MODE_DREAMTIME_STEP general_int16_t_1
+#define TALLY_KEEPER_0 general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define REACTION_GAME_TIMER_STEP general_int16_t_2
@@ -166,6 +169,50 @@
 #define TILT_CYCLE_COUNTER general_int16_t_2
 #define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
+#define TALLY_KEEPER_1 general_int16_t_2
+
+#define SOUND_NOTES_NOTE_INDEX general_int16_t_3
+#define GEIGER_TONE_LENGTH general_int16_t_3
+#define METRONOME_TICKER_1_POSITION general_int16_t_3
+#define HACKTIME_MEMORY_SELECT general_int16_t_3  // was 5
+#define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
+#define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
+#define TALLY_KEEPER_2 general_int16_t_3
+
+#define TALLY_KEEPER_3 general_int16_t_4
+
+#define REACTION_GAME_TARGET general_uint16_t_1
+#define GEIGER_INCREASE_CHANCE general_uint16_t_1
+#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
+#define SIMON_ACTIVE_LIGHT general_uint16_t_1
+#define SOUND_MODE_SCALE_RANGE_LENGTH general_uint16_t_1
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_START general_uint16_t_1
+
+#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
+#define COUNTER_GEIGER general_uint16_t_2
+
+#define REACTION_GAME_LEVEL general_uint8_t_1
+#define SEQUENCER_TEMP_NOTE general_uint8_t_1
+#define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
+#define COMPOSER_SONG_LENGTH general_uint8_t_1
+#define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
+#define DRAW_CURSOR_DIGIT general_uint8_t_1
+#define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
+#define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
+#define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
+
+#define SIMON_PLAYERS_COUNT general_uint8_t_2
+#define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
+#define DRAW_SHOW_MODE general_uint8_t_2
+#define HACKTIME_SOUND general_uint8_t_2
+#define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
+#define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
+
+#define TALLY_KEEPER_TEST general_uint8_t_3
+#define DRAW_CURSOR_SEGMENT general_uint8_t_3
+#define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
+#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
+#define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -176,48 +223,11 @@
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
 #define POMODORO_STATS_WORKING_BAD general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
-
-#define REACTION_GAME_TARGET general_uint16_t_1
-#define GEIGER_INCREASE_CHANCE general_uint16_t_1
-#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
-#define SIMON_ACTIVE_LIGHT general_uint16_t_1
-#define SOUND_MODE_SCALE_RANGE_LENGTH general_uint16_t_1
-#define MOVIE_MODE_MOVIE_FRAME_INDEX_START general_uint16_t_1
-
-#define REACTION_GAME_LEVEL general_uint8_t_1
-#define SEQUENCER_TEMP_NOTE general_uint8_t_1
-#define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
-#define COMPOSER_SONG_LENGTH general_uint8_t_1
-#define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
-#define DRAW_CURSOR_DIGIT general_uint8_t_1
-#define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
-#define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
-
-#define SIMON_PLAYERS_COUNT general_uint8_t_2
-#define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
-#define DRAW_SHOW_MODE general_uint8_t_2
-#define HACKTIME_SOUND general_uint8_t_2
-#define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
-#define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
-
-#define DRAW_CURSOR_SEGMENT general_uint8_t_3
-#define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
-#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
-#define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
-
-#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
-#define COUNTER_GEIGER general_uint16_t_2
-
-
-#define SOUND_NOTES_NOTE_INDEX general_int16_t_3
-#define GEIGER_TONE_LENGTH general_int16_t_3
-#define METRONOME_TICKER_1_POSITION general_int16_t_3
-#define HACKTIME_MEMORY_SELECT general_int16_t_3  // was 5
-#define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
-#define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
+#define TALLY_KEEPER_DELTA general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
+#define TALLY_KEEPER_DELTA_SIGNED general_long_2
 
 // #define APP_SELECTOR_INIT_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
@@ -571,7 +581,12 @@ public:
 
     bool init_app(bool init, uint8_t selector);
     void modeSimpleButtonsAndLights(bool init);
+    #ifdef ENABLE_TALLY_KEEPER
+    void modeTallyKeeper(bool init);
+    #else
     void modeCountingLettersAndChars(bool init);
+    #endif
+
     void modeSoundSong(bool init);
     void modeComposeSong(bool init);
     void modeSoundNotesInitScale();
@@ -666,15 +681,20 @@ private:
     bool general_boolean2;
     bool general_boolean3;
     bool general_boolean4;
+    
     int16_t general_int16_t_1;
     int16_t general_int16_t_2;
-    long general_long_1;
+    int16_t general_int16_t_3;
+    int16_t general_int16_t_4;
+
     uint16_t general_uint16_t_1;
+    uint16_t general_uint16_t_2;
+
     uint8_t general_uint8_t_1;
     uint8_t general_uint8_t_2;
     uint8_t general_uint8_t_3;
-    uint16_t general_uint16_t_2;
-    int16_t general_int16_t_3;
+
+    long general_long_1;
     long general_long_2;
     long* pLongValue;
 
