@@ -51,7 +51,7 @@
 #define APP_SELECTOR_REACTION_GAME 18
 #define APP_SELECTOR_GUITAR_HERO 19
 #define APP_SELECTOR_TILT 20
-#define APP_SELECTOR_SCREEN_SAVER 21
+#define APP_SELECTOR_DREAMTIME 21
 #define APP_SELECTOR_MULTITIMER_SETTING 22
 #define APP_SELECTOR_MULTITIMER_PLAYING 23
 
@@ -124,7 +124,7 @@
 #define SEQUENCER_SPEED generalTimer
 #define TILT_TIMER generalTimer
 #define MOVIE_MODE_FRAME_INTERVAL_TIMER generalTimer
-#define TIMER_SCREEN_SAVER generalTimer
+#define TIMER_DREAMTIME generalTimer
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
 #define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
@@ -151,7 +151,7 @@
 #define TILT_EXPECTED_SWITCH_INDEX general_int16_t_1
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
 #define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
-#define MODE_SCREEN_SAVER_STEP general_int16_t_1
+#define MODE_DREAMTIME_STEP general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define REACTION_GAME_TIMER_STEP general_int16_t_2
@@ -164,7 +164,7 @@
 #define SOUND_NOTES_SCALE_INDEX general_int16_t_2
 #define METRONOME_TICKER_2_POSITION general_int16_t_2
 #define TILT_CYCLE_COUNTER general_int16_t_2
-#define MODE_SCREEN_SAVER_STEP_MEMORY general_int16_t_2
+#define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
 
 #define DRAW_CURSOR_INDEX general_long_1
@@ -191,7 +191,7 @@
 #define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
 #define DRAW_CURSOR_DIGIT general_uint8_t_1
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
-#define MODE_SCREEN_SAVER_NOTE_OFFSET general_uint8_t_1
+#define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -228,7 +228,7 @@
 #define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
 #define STOPWATCH_PAUSED_1 general_boolean
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
-#define MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT general_boolean
+#define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
@@ -253,7 +253,7 @@
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 #define MOVIE_MODE_STOPS bytes_list
 #define MODE_SOUND_SONG_BUFFER bytes_list
-#define MODE_SCREEN_SAVE_RANDOM_LIST bytes_list
+#define MODE_DREAMTIME_RANDOM_LIST bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -587,7 +587,7 @@ public:
     void modeSimon(bool init);
     void modeReactionGame(bool init);
     void tiltSwitchTest(bool init);
-    void modeScreenSaver(bool init);
+    void modeDreamtime(bool init);
     void modeButtonDebug(bool init);
     void miniMultiTimer(bool init);
     void modeRandomWorld(bool init);
@@ -616,7 +616,7 @@ private:
 #endif
     void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
-    void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
+    bool checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);

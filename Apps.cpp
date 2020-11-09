@@ -138,8 +138,8 @@ void Apps::appSelector()
 #endif
 			break;
 		
-		case APP_SELECTOR_SCREEN_SAVER:
-			this->modeScreenSaver(app_init);
+		case APP_SELECTOR_DREAMTIME:
+			this->modeDreamtime(app_init);
 			break;
 
 #ifdef ENABLE_TILT_SWITCHES
@@ -252,62 +252,54 @@ bool Apps::init_app(bool init, uint8_t selector)
 	return true;
 }
 
-void Apps::modeScreenSaver(bool init)
+void Apps::modeDreamtime(bool init)
 {
 	// fade in and out of all segments on screen.
 
 	if (init)
 	{
-		this->TIMER_SCREEN_SAVER.start(-500);
-		// this->TIMER_SCREEN_SAVER.start();
-		MODE_SCREEN_SAVER_STEP = 0;
-		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = true;
+		this->TIMER_DREAMTIME.start(-500);
+		MODE_DREAMTIME_STEP = 0;
+		MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT = true;
 	}
 
 	bool allow_note_offset_change = true;
 
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))){
 
-		if (this->TIMER_SCREEN_SAVER.getCountDownTimerElapsedAndRestart())
+		if (this->TIMER_DREAMTIME.getCountDownTimerElapsedAndRestart())
 		{
-			MODE_SCREEN_SAVER_STEP++;
+			MODE_DREAMTIME_STEP++;
 		}
 
-		dialOnEdgeChangeInitTimerPercentage(&TIMER_SCREEN_SAVER);
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_DREAMTIME);
 		allow_note_offset_change = false;
 
 	}else{
-		modifyValueUpDownWithMomentary2And3(&MODE_SCREEN_SAVER_STEP, 1);
-		MODE_SCREEN_SAVER_STEP += encoder_dial->getDelta();
+		modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP, 1);
+		MODE_DREAMTIME_STEP += encoder_dial->getDelta();
 	}
 
-	if (MODE_SCREEN_SAVER_STEP > 31){
-		MODE_SCREEN_SAVER_STEP = 0;
-		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
-		randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
-
-	} else if (MODE_SCREEN_SAVER_STEP < 0){
-		MODE_SCREEN_SAVER_STEP = 31;
-		MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT = !MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT;
-		randomSequence(MODE_SCREEN_SAVE_RANDOM_LIST, 32);
+	if (!checkBoundaries(&MODE_DREAMTIME_STEP,0,31,true)){
+		MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT = !MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT;
+		randomSequence(MODE_DREAMTIME_RANDOM_LIST, 32);
 	}
-	
+
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)) {
-	
-		if(MODE_SCREEN_SAVER_STEP_MEMORY != MODE_SCREEN_SAVER_STEP){
-			buzzerOffAndAddNote(MODE_SCREEN_SAVE_RANDOM_LIST[MODE_SCREEN_SAVER_STEP] + MODE_SCREEN_SAVER_NOTE_OFFSET);  //60
+			if(MODE_DREAMTIME_STEP_MEMORY != MODE_DREAMTIME_STEP){
+			buzzerOffAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP] + MODE_DREAMTIME_NOTE_OFFSET);  //60
 		}
 
 		if (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT) && allow_note_offset_change){
-			MODE_SCREEN_SAVER_NOTE_OFFSET += encoder_dial->getDelta();
+			MODE_DREAMTIME_NOTE_OFFSET += encoder_dial->getDelta();
 		}
 	}
 	
-	uint32_t tmp = fadeInList(MODE_SCREEN_SAVER_STEP, 32, 0, MODE_SCREEN_SAVE_RANDOM_LIST);
+	uint32_t tmp = fadeInList(MODE_DREAMTIME_STEP, 32, 0, MODE_DREAMTIME_RANDOM_LIST);
 	
-	MODE_SCREEN_SAVER_STEP_MEMORY = MODE_SCREEN_SAVER_STEP;
+	MODE_DREAMTIME_STEP_MEMORY = MODE_DREAMTIME_STEP;
 	
-	if (!MODE_SCREEN_SAVER_FADE_IN_ELSE_FADE_OUT){
+	if (!MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT){
 		tmp = ~tmp;
 	}
 	ledDisp->setBinaryToDisplay(tmp);
@@ -3879,7 +3871,7 @@ void Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minVal
 	nextStep(counter, countUpElseDown, minValue, maxValue, true);
 }
 
-void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
+bool Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
 {
 	if (*counter > maxValue)
 	{
@@ -3891,6 +3883,7 @@ void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue,
 		{
 			*counter = maxValue;
 		}
+		return false;
 	}
 	else if (*counter < minValue)
 	{
@@ -3902,7 +3895,9 @@ void Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue,
 		{
 			*counter = minValue;
 		}
+		return false;
 	}
+	return true;
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
