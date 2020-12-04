@@ -289,6 +289,23 @@ X S 3 100 -200 100 U 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# R_Small
+#
+DEF R_Small R 0 10 N N 1 F N
+F0 "R" 30 20 50 H V L CNN
+F1 "R_Small" 30 -40 50 H V L CNN
+F2 "Luciebox:1206_0805" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ R_*
+$ENDFPLIST
+DRAW
+S -30 70 30 -70 0 1 8 N
+X ~ 1 0 100 30 D 50 50 1 1 P
+X ~ 2 0 -100 30 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
 # Screw_Terminal_01x07
 #
 DEF Screw_Terminal_01x07 J 0 40 Y N 1 F N
@@ -451,11 +468,11 @@ X VCC_minimalCurrent 1 0 0 0 U 50 50 1 1 W N
 ENDDRAW
 ENDDEF
 #
-# laz16-11
+# button_laz16-11
 #
-DEF laz16-11 S 0 40 Y Y 1 F N
+DEF button_laz16-11 S 0 40 Y Y 1 F N
 F0 "S" -50 250 50 H V C CNN
-F1 "laz16-11" -50 250 50 H V C CNN
+F1 "button_laz16-11" -50 250 50 H V C CNN
 F2 "Luciebox:button_LAZ16-11" -50 250 50 H I C CNN
 F3 "" -50 250 50 H I C CNN
 DRAW

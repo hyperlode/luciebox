@@ -855,6 +855,14 @@ D Power flag, VCC
 K power-flag
 $ENDCMP
 #
+$CMP button_laz16-11
+D button momentary or latching with LED
+$ENDCMP
+#
+$CMP laz16-11
+D button momentary or latching with LED
+$ENDCMP
+#
 $CMP rotary_encoder
 D Model EN16 Series   TT electronics
 K rotary encoder dial    Lees electronics: part 1246

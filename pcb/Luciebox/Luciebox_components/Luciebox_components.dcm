@@ -802,6 +802,12 @@ K NexFET Power MOSFET N-MOS
 F https://www.onsemi.com/pub/Collateral/FQP30N06L-D.pdf
 $ENDCMP
 #
+$CMP R_Small
+D Resistor, small symbol
+K R resistor
+F ~
+$ENDCMP
+#
 $CMP Screw_Terminal_01x07
 D Generic screw terminal, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)
 K screw terminal
@@ -855,7 +861,7 @@ D Power flag, VCC
 K power-flag
 $ENDCMP
 #
-$CMP laz16-11
+$CMP button_laz16-11
 D button momentary or latching with LED
 $ENDCMP
 #
