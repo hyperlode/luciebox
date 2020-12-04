@@ -231,7 +231,7 @@
 
 // #define APP_SELECTOR_INIT_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
-#define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
+#define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
 #define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean

@@ -3,7 +3,9 @@
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 //#define DBUG_REFACTOR_DISP
-// #define PROTOTYPE
+
+#define V2_PCB_CORONA
+
 #define ENABLE_APPS 
 
 #ifdef ENABLE_SERIAL
@@ -50,17 +52,6 @@
 
 #endif
 
-
-#ifdef PROTOTYPE
-#define LIGHT_MOMENTARY_0 1 // RED
-#define LIGHT_MOMENTARY_1 6 // GREEN
-#define LIGHT_MOMENTARY_2 7 // BLUE
-#define LIGHT_MOMENTARY_3 2
-#define LIGHT_LATCHING_EXTRA 0       // LATCHING YELLOW
-#define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
-#define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
-#define LIGHT_LATCHING_BIG 5         // big latch
-#else
 #define LIGHT_MOMENTARY_0 1          // momentary 0
 #define LIGHT_MOMENTARY_1 6          // momentary 1
 #define LIGHT_MOMENTARY_2 2          // momentary 2
@@ -69,7 +60,7 @@
 #define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
 #define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
 #define LIGHT_LATCHING_BIG 7         // big latch
-#endif
+
 
 #define LIGHT_INDEXED_MOMENTARY_0 0
 #define LIGHT_INDEXED_MOMENTARY_1 1
@@ -97,41 +88,49 @@
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
-#define BUTTONS_1_COUNT 5
-#define BUTTONS_1_VALUES      \
-    {                         \
-        500, 257, 128, 62, 30 \
-    }
 
-#define BUTTONS_2_COUNT 3
-#define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0
+#ifdef V2_PCB_CORONA
+    #define BUTTONS_1_COUNT 4
+    #define BUTTONS_1_VALUES      \
+        {                         \
+            512, 256, 128, 64 \
+        }
 
-#ifdef PROTOTYPE
-#define BUTTONS_2_VALUES \
-    {                    \
-        512, 256, 128    \
-    }
-#else
-#define BUTTONS_2_VALUES \
-    {                    \
-        513, 254, 125    \
-    }
-#endif
+    #define BUTTONS_2_COUNT 4
+    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 4  // was set to zero. bug??
+    #define BUTTONS_2_VALUES \
+        {                    \
+            512, 256, 128, 64    \
+        }
 
-#define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
+    #define MERCURY_SWITCHES_VALUES \
+        {                           \
+            450, 262, 128, 64       \
+        }
 
-#ifdef PROTOTYPE
-#define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
-#define MERCURY_SWITCHES_VALUES \
-    {                           \
-        512, 256, 128, 64       \
-    }
-#else
-#define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
-#define MERCURY_SWITCHES_VALUES \
-    {                           \
-        450, 262, 128, 64       \
-    }
+
+#else  // v1 pcb
+    #define BUTTONS_1_COUNT 5
+    #define BUTTONS_1_VALUES      \
+        {                         \
+            500, 257, 128, 62, 30 \
+        }
+
+    #define BUTTONS_2_COUNT 3
+    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0
+    #define BUTTONS_2_VALUES \
+        {                    \
+            513, 254, 125    \
+        }
+
+    #define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
+    #define MERCURY_SWITCHES_VALUES \
+        {                           \
+            450, 262, 128, 64       \
+        }
 #endif
 
 // postion of buttons in the indexed array.
@@ -145,17 +144,32 @@
 #define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT 6  // latching 2
 #define BUTTON_INDEXED_LATCHING_EXTRA 7  // latching 3
 
-// binary input indeces per button
-#define BUTTON_LATCHING_SMALL_RED_RIGHT 0
-#define BUTTON_LATCHING_SMALL_RED_LEFT 1
-#define BUTTON_LATCHING_BIG_RED 2
+#ifdef V2_PCB_CORONA
+    // binary input indeces per button
+    #define BUTTON_LATCHING_BIG_RED 0
+    #define BUTTON_LATCHING_SMALL_RED_LEFT 1
+    #define BUTTON_LATCHING_SMALL_RED_RIGHT 2
+    #define BUTTON_LATCHING_EXTRA 3 
 
-#define BUTTON_LATCHING_EXTRA 7 // Latching yellow
+    #define BUTTON_MOMENTARY_0 4 // most left
+    #define BUTTON_MOMENTARY_1 5 // second most left
+    #define BUTTON_MOMENTARY_2 6 // seconds most right
+    #define BUTTON_MOMENTARY_3 7 // most right
 
-#define BUTTON_MOMENTARY_0 6 // most left (Red)
-#define BUTTON_MOMENTARY_1 5 // Green (second most left)
-#define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
-#define BUTTON_MOMENTARY_3 3 // most right (Yellow)
+#else
+    // binary input indeces per button
+    #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
+    #define BUTTON_LATCHING_SMALL_RED_LEFT 1
+    #define BUTTON_LATCHING_BIG_RED 2
+
+    #define BUTTON_LATCHING_EXTRA 7 // Latching yellow
+
+    #define BUTTON_MOMENTARY_0 6 // most left (Red)
+    #define BUTTON_MOMENTARY_1 5 // Green (second most left)
+    #define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
+    #define BUTTON_MOMENTARY_3 3 // most right (Yellow)
+
+#endif
 
 #define SWITCH_TILT_FORWARD 11
 #define SWITCH_TILT_BACKWARD 9

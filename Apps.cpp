@@ -202,6 +202,24 @@ void Apps::setDefaultMode()
 	encoder_dial->setValue(0);
 
 	randomSeed(millis());
+
+	// all shared variables to zero or false
+
+	general_boolean = 0;
+    general_boolean2 = 0;
+    general_boolean3 = 0;
+    general_boolean4 = 0;
+    general_int16_t_1 = 0;
+    general_int16_t_2 = 0;
+    general_int16_t_3 = 0;
+    general_int16_t_4 = 0;
+    general_uint16_t_1 = 0;
+    general_uint16_t_2 = 0;
+    general_uint8_t_1 = 0;
+    general_uint8_t_2 = 0;
+    general_uint8_t_3 = 0;
+    general_long_1 = 0;
+    general_long_2 = 0;
 }
 
 bool Apps::init_app(bool init, uint8_t selector)
@@ -263,7 +281,7 @@ void Apps::modeDreamtime()
 	if (this->app_init_edge)
 	{
 		this->TIMER_DREAMTIME.start(-500);
-		MODE_DREAMTIME_STEP = 0;
+		// MODE_DREAMTIME_STEP = 0;
 		MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT = true;
 	}
 
@@ -318,8 +336,8 @@ void Apps::pomodoroTimer()
 	{
 		POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
 		POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
-		POMODORO_STATS_WORKING_GOOD = 0;
-		POMODORO_STATS_WORKING_BAD = 0;
+		// POMODORO_STATS_WORKING_GOOD = 0;
+		// POMODORO_STATS_WORKING_BAD = 0;
 		POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
 	}
 	
@@ -561,8 +579,7 @@ void Apps::stopwatch()
 
 	if (this->app_init_edge)
 	{
-		STOPWATCH_LAP_MEMORY_1 = 0;
-		STOPWATCH_LAP_MEMORY_2 = 0;
+		// STOPWATCH_LAP_MEMORY_2 = 0;
 
 		resetStopwatch(&STOPWATCH_CHRONO_1);
 		resetStopwatch(&STOPWATCH_CHRONO_2);
@@ -632,9 +649,9 @@ void Apps::modeRandomWorld()
 {
 	if (this->app_init_edge)
 	{
-		RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
+		// RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
 		randomWorldState = randomWorldIdle;
-		RANDOMWORLD_RANDOM_TYPE = 0;
+		// RANDOMWORLD_RANDOM_TYPE = 0;
 		randomModeTrigger(false);
 		// decimalPoints = 0;
 
@@ -947,7 +964,7 @@ void Apps::modeSimpleButtonsAndLights()
 
 	if (this->app_init_edge)
 	{
-		SETTINGS_MODE_SELECTOR = 0;
+		//SETTINGS_MODE_SELECTOR = 0;
 	}
 
 	// // back and forth motion required of the potentio to count up modes
@@ -1115,11 +1132,11 @@ void Apps::modeTallyKeeper(){
 
 	if (this->app_init_edge)
 	{
-		for (uint8_t i = 0;i<4;i++){
-			*tally_counters[i] = 0;
-		}
-		TALLY_KEEPER_DISPLAYED_COUNTER = 0;
-		TALLY_KEEPER_DELTA= 0;
+		// for (uint8_t i = 0;i<4;i++){
+		// 	*tally_counters[i] = 0;
+		// }
+		// TALLY_KEEPER_DISPLAYED_COUNTER = 0;
+		// TALLY_KEEPER_DELTA= 0;
 	}
 	
 	byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
@@ -1302,29 +1319,15 @@ void Apps::modeCountingLettersAndChars()
 
 	if (this->app_init_edge)
 	{
-		LETTERS_AND_CHARS_COUNTER = 0;
+		// LETTERS_AND_CHARS_COUNTER = 0;
 		COUNTING_LETTERS_AND_CHARS_TIMER.start(-1000);
-		NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = true;
+		// NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP = true;
 	}
-
-	// when potentio setting init time, it overrules the updateScreen and displays its value. updateScreen erases potentio value display..
-
-	// setBlankDisplay();
-	if (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
-	{
-		ledDisp->setNumberToDisplayAsDecimal(LETTERS_AND_CHARS_COUNTER);
-	}
-	else
-	{
-		displayLetterAndPositionInAlphabet(textHandle, LETTERS_AND_CHARS_COUNTER);
-	}
-
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		LETTERS_AND_CHARS_COUNTER = 0;
 	}
-	
 
  	// auto count
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA) )
@@ -1333,7 +1336,6 @@ void Apps::modeCountingLettersAndChars()
 			buzzer->setSpeedRatio(4);
 			loadBuzzerTrack(SONG_ALPHABET);
 		}
-
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -1341,18 +1343,18 @@ void Apps::modeCountingLettersAndChars()
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
-			NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = true;
+			NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP = false;
 		}
 		
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN = false;
+			NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP = true;
 		}
 
 		// auto mode next item
 		if (COUNTING_LETTERS_AND_CHARS_TIMER.getCountDownTimerElapsedAndRestart())
 		{
-			LETTERS_AND_CHARS_COUNTER += -1 + (2 * NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN);
+			LETTERS_AND_CHARS_COUNTER += 1 - (2 * NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP);
 		}
 
 		// set timer speed
@@ -1367,7 +1369,21 @@ void Apps::modeCountingLettersAndChars()
 	}
 
 	//only do the characters of the alphabet in lettermode.
-	checkBoundaries(&LETTERS_AND_CHARS_COUNTER, 0, 25 + (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 76), true);
+	int16_t maxValue = 9999; 
+	if (!NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE){
+		maxValue = 25;
+	}
+	checkBoundaries(&LETTERS_AND_CHARS_COUNTER, 0, maxValue, true);
+
+	if (NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
+	{
+		ledDisp->setNumberToDisplay(LETTERS_AND_CHARS_COUNTER, (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)));
+	}
+	else
+	{
+		displayLetterAndPositionInAlphabet(textHandle, LETTERS_AND_CHARS_COUNTER);
+	}
+
 }
 
 void Apps::modeSoundSong()
@@ -1415,7 +1431,7 @@ void Apps::modeComposeSong()
 		}
 		COMPOSER_SONG_LENGTH = 1;
 		COMPOSER_SONG[0] = rest_1; //default note
-		COMPOSER_STEP = 0;
+		// COMPOSER_STEP = 0;
 		COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
 	}
 
@@ -1600,7 +1616,7 @@ void Apps::modeSoundNotes()
 		SOUND_NOTES_SCALE_ROOT = C4_4;
 		modeSoundNotesInitScale();
 
-		SOUND_NOTES_SCALE_INDEX = 0;
+		// SOUND_NOTES_SCALE_INDEX = 0;
 
 		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
 	}
@@ -1722,7 +1738,7 @@ void Apps::modeSoundNotes()
 
 		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC)
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = random(0, 2);
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (bool)random(0, 2);
 			note_jumps = random(0, 3);
 		}
 
@@ -1790,11 +1806,11 @@ void Apps::modeMovie()
 	//reset saved led disp state.
 	if (this->app_init_edge)
 	{
-		MOVIE_MODE_SHOW_NEGATIVE = false;
+		// MOVIE_MODE_SHOW_NEGATIVE = false;
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
-		MOVIE_MODE_FLASH_FRAME_INDEX = 0;
+		// MOVIE_MODE_FLASH_FRAME_INDEX = 0;
 		loadNextMovie();
-		MOVIE_MODE_SOUNDTRACK_INDEX = 0;
+		// MOVIE_MODE_SOUNDTRACK_INDEX = 0;
 		MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START = true;
 	}
 
@@ -2072,8 +2088,6 @@ void Apps::drawGame()
 
 	case drawGameWaitForStart:
 	{
-		// setBlankDisplay();
-
 		drawGameState = drawGameShowPicture;
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
@@ -2199,7 +2213,7 @@ void Apps::modeHackTime()
 	}
 
 	// write to mem if possible
-	if (!init && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) 
+	if (!this->app_init_edge && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT)) 
 		)
 	{ 
 
@@ -2275,16 +2289,13 @@ void Apps::modeHackTime()
 				// button address change.
 				address_changed = address_changed || modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
 			}
-			
 		}
-
 
 		// ok ok, let's do one little check.
 		if (HACKTIME_ADDRESS <= 0)
 		{
 			HACKTIME_ADDRESS = 0;
 		}
-		
 		
 		// get value from memory address and memory type
 		for (uint8_t i = 0; i < 4; i++)
@@ -2407,7 +2418,7 @@ void Apps::draw()
 
 	if (this->app_init_edge)
 	{
-		DRAW_ACTIVE_DRAWING_INDEX = 0;
+		// DRAW_ACTIVE_DRAWING_INDEX = 0;
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 	}
 
@@ -2635,8 +2646,8 @@ void Apps::tiltSwitchTest()
 	{
 		setStandardTextToTextBuf(TEXT_TILT);
 
-		TILT_EXPECTED_SWITCH_INDEX = 0;
-		TILT_CYCLE_COUNTER = 0;
+		// TILT_EXPECTED_SWITCH_INDEX = 0;
+		// TILT_CYCLE_COUNTER = 0;
 		displayAllSegments = 0;
 	}
 
@@ -2718,12 +2729,12 @@ void Apps::modeGeiger()
 	if (this->app_init_edge)
 	{
 		//textBuf[3]=' ';
-		COUNTER_GEIGER = 0;
+		// COUNTER_GEIGER = 0;
 		GEIGER_TONE_FREQUENY_LOWEST = 2000;
 		GEIGER_TONE_FREQUENCY_HEIGHEST = 4000;
 		GEIGER_TONE_LENGTH = 10;
 		GEIGER_PROBABILITY_THRESHOLD = 950000;
-		GEIGER_INCREASE_CHANCE = 0;
+		// GEIGER_INCREASE_CHANCE = 0;
 	}
 
 	//play tick.
@@ -2823,11 +2834,10 @@ void Apps::modeSequencer()
 
 	if (this->app_init_edge)
 	{
-		SEQUENCER_STEP_COUNTER = 0;
-		SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
+		// SEQUENCER_STEP_COUNTER = 0;
+		// SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
 
 		SEQUENCER_SPEED.start(-1000);
-
 		SEQUENCER_EEPROM_MODE_BLINK.start(-1000);
 
 		// //resets song.
@@ -2978,12 +2988,13 @@ void Apps::modeMetronome()
 	if (this->app_init_edge)
 	{
 		TIMER_METRONOME.start(-83);  // 60bpm as default
-		METRONOME_TICKER_1_POSITION = 0;
-		METRONOME_TICKER_2_POSITION = 0;
-		METRONOME_TICKER_3_POSITION = 0;
+		// METRONOME_TICKER_1_POSITION = 0;
+		// METRONOME_TICKER_2_POSITION = 0;
+		// METRONOME_TICKER_3_POSITION = 0;
 
-		METRONOME_ENABLE_FLASH_AT_BEEP = false;
+		// METRONOME_ENABLE_FLASH_AT_BEEP = false;
 	}
+
 	bool visualize_bpm = binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT);
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
@@ -3558,7 +3569,6 @@ void Apps::modeReactionGame()
 		{
 			reactionGameState = reactionHexPlaying;
 		}
-
 
 		textBufToDisplay();
 		break;
