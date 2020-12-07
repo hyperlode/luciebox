@@ -518,6 +518,21 @@ X A 2 150 0 100 L 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# Luciebox_components_MountingHole
+#
+DEF Luciebox_components_MountingHole H 0 40 Y Y 1 F N
+F0 "H" 0 200 50 H V C CNN
+F1 "Luciebox_components_MountingHole" 0 125 50 H V C CNN
+F2 "Luciebox:MountingHole_4.3mm_M4" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ MountingHole*
+$ENDFPLIST
+DRAW
+C 0 0 50 0 1 50 N
+ENDDRAW
+ENDDEF
+#
 # Luciebox_components_N-Channel_Mosfet
 #
 DEF Luciebox_components_N-Channel_Mosfet Q 0 20 Y N 1 F N
@@ -660,21 +675,6 @@ X 5 5 -50 400 100 R 50 50 0 0 I
 X 6 6 -50 500 100 R 50 50 0 0 I
 X 7 7 -50 600 100 R 50 50 0 0 I
 X 8 8 -50 700 100 R 50 50 0 0 I
-ENDDRAW
-ENDDEF
-#
-# Mechanical_MountingHole
-#
-DEF Mechanical_MountingHole H 0 40 Y Y 1 F N
-F0 "H" 0 200 50 H V C CNN
-F1 "Mechanical_MountingHole" 0 125 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-$FPLIST
- MountingHole*
-$ENDFPLIST
-DRAW
-C 0 0 50 0 1 50 N
 ENDDRAW
 ENDDEF
 #

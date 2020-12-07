@@ -796,6 +796,12 @@ K dual-cool-powertrench MOSFET fairchild
 F https://www.fairchildsemi.com/datasheets/FD/FDMT80080DC.pdf
 $ENDCMP
 #
+$CMP MountingHole
+D Mounting Hole without connection
+K mounting hole
+F ~
+$ENDCMP
+#
 $CMP N-Channel_Mosfet
 D N-channel 60V 32A
 K NexFET Power MOSFET N-MOS

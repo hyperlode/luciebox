@@ -253,6 +253,21 @@ X A 2 150 0 100 L 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# MountingHole
+#
+DEF MountingHole H 0 40 Y Y 1 F N
+F0 "H" 0 200 50 H V C CNN
+F1 "MountingHole" 0 125 50 H V C CNN
+F2 "Luciebox:MountingHole_4.3mm_M4" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ MountingHole*
+$ENDFPLIST
+DRAW
+C 0 0 50 0 1 50 N
+ENDDRAW
+ENDDEF
+#
 # N-Channel_Mosfet
 #
 DEF N-Channel_Mosfet Q 0 20 Y N 1 F N
