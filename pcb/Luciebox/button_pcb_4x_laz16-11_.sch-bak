@@ -202,11 +202,9 @@ F 3 "" H 950 4100 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	4650 2600 4650 1800
-Wire Wire Line
 	4750 1700 4750 1850
 Wire Wire Line
-	4850 2600 4850 1900
+	4850 2600 4850 2550
 Wire Wire Line
 	4950 1700 4950 1950
 Wire Wire Line
@@ -564,7 +562,7 @@ Wire Wire Line
 	6700 1350 6700 1850
 Connection ~ 4750 1850
 Wire Wire Line
-	4750 1850 4750 2600
+	4750 1850 4750 2550
 Wire Wire Line
 	4850 1900 7100 1900
 Wire Wire Line
@@ -578,7 +576,7 @@ Wire Wire Line
 	7500 1350 7500 1950
 Connection ~ 4950 1950
 Wire Wire Line
-	4950 1950 4950 2600
+	4950 1950 4950 2550
 Wire Wire Line
 	5050 2050 7900 2050
 Wire Wire Line
@@ -788,8 +786,6 @@ $EndComp
 Wire Wire Line
 	5100 5500 5100 4950
 Connection ~ 5100 4950
-Wire Wire Line
-	5200 5100 5200 5500
 Connection ~ 5200 5100
 Wire Wire Line
 	5300 5250 5300 5500
@@ -864,13 +860,7 @@ Connection ~ 2550 4800
 Wire Wire Line
 	2550 4800 3200 4800
 Wire Wire Line
-	4700 4600 4700 5500
-Wire Wire Line
-	4800 4600 4800 5500
-Wire Wire Line
-	4900 4600 4900 5500
-Wire Wire Line
-	5000 4600 5000 5500
+	4800 4600 4800 5450
 Text Label 5500 4600 3    50   ~ 0
 ANALOG_2
 Text Label 1250 5850 1    50   ~ 0
@@ -889,133 +879,360 @@ $EndComp
 $Comp
 L Luciebox_components:terminal_8x1 T5
 U 1 1 5FDDA753
-P 7350 5450
-F 0 "T5" V 7421 6278 50  0000 L CNN
-F 1 "terminal_8x1" V 7512 6278 50  0000 L CNN
-F 2 "Luciebox:Terminal_8x1_100mil" H 7150 5350 50  0001 C CNN
-F 3 "" H 7300 6550 50  0001 C CNN
-	1    7350 5450
+P 9800 5100
+F 0 "T5" V 9871 5928 50  0000 L CNN
+F 1 "terminal_8x1" V 9962 5928 50  0000 L CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 9600 5000 50  0001 C CNN
+F 3 "" H 9750 6200 50  0001 C CNN
+	1    9800 5100
 	0    1    1    0   
 $EndComp
 $Comp
 L Luciebox_components:terminal_8x1 T6
 U 1 1 5FDDAE5B
-P 8900 5450
-F 0 "T6" V 8971 6278 50  0000 L CNN
-F 1 "terminal_8x1" V 9062 6278 50  0000 L CNN
-F 2 "Luciebox:Terminal_8x1_100mil" H 8700 5350 50  0001 C CNN
-F 3 "" H 8850 6550 50  0001 C CNN
-	1    8900 5450
+P 6350 4850
+F 0 "T6" V 6421 5678 50  0000 L CNN
+F 1 "terminal_8x1" V 6512 5678 50  0000 L CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 6150 4750 50  0001 C CNN
+F 3 "" H 6300 5950 50  0001 C CNN
+	1    6350 4850
 	0    1    1    0   
 $EndComp
 $Comp
 L Luciebox_components:MountingHole H1
-U 1 1 5FE50956
-P 1000 6450
-F 0 "H1" H 1100 6496 50  0000 L CNN
-F 1 "MountingHole" H 1100 6405 50  0000 L CNN
-F 2 "" H 1000 6450 50  0001 C CNN
-F 3 "~" H 1000 6450 50  0001 C CNN
-	1    1000 6450
+U 1 1 5FF140D9
+P 1100 6650
+F 0 "H1" H 1200 6696 50  0000 L CNN
+F 1 "MountingHole" H 1200 6605 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1100 6650 50  0001 C CNN
+F 3 "~" H 1100 6650 50  0001 C CNN
+	1    1100 6650
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:MountingHole H4
-U 1 1 5FE5172B
-P 1200 6450
-F 0 "H4" H 1300 6496 50  0000 L CNN
-F 1 "MountingHole" H 1300 6405 50  0000 L CNN
-F 2 "" H 1200 6450 50  0001 C CNN
-F 3 "~" H 1200 6450 50  0001 C CNN
-	1    1200 6450
+U 1 1 5FF146C0
+P 1350 6650
+F 0 "H4" H 1450 6696 50  0000 L CNN
+F 1 "MountingHole" H 1450 6605 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1350 6650 50  0001 C CNN
+F 3 "~" H 1350 6650 50  0001 C CNN
+	1    1350 6650
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:MountingHole H7
-U 1 1 5FE519EB
-P 1400 6450
-F 0 "H7" H 1500 6496 50  0000 L CNN
-F 1 "MountingHole" H 1500 6405 50  0000 L CNN
-F 2 "" H 1400 6450 50  0001 C CNN
-F 3 "~" H 1400 6450 50  0001 C CNN
-	1    1400 6450
-	1    0    0    -1  
-$EndComp
-$Comp
-L Luciebox_components:MountingHole H9
-U 1 1 5FE51BB3
-P 1600 6450
-F 0 "H9" H 1700 6496 50  0000 L CNN
-F 1 "MountingHole" H 1700 6405 50  0000 L CNN
-F 2 "" H 1600 6450 50  0001 C CNN
-F 3 "~" H 1600 6450 50  0001 C CNN
-	1    1600 6450
-	1    0    0    -1  
-$EndComp
-$Comp
-L Luciebox_components:MountingHole H2
-U 1 1 5FE51D5D
-P 1000 6650
-F 0 "H2" H 1100 6696 50  0000 L CNN
-F 1 "MountingHole" H 1100 6605 50  0000 L CNN
-F 2 "" H 1000 6650 50  0001 C CNN
-F 3 "~" H 1000 6650 50  0001 C CNN
-	1    1000 6650
-	1    0    0    -1  
-$EndComp
-$Comp
-L Luciebox_components:MountingHole H5
-U 1 1 5FE5232B
-P 1200 6650
-F 0 "H5" H 1300 6696 50  0000 L CNN
-F 1 "MountingHole" H 1300 6605 50  0000 L CNN
-F 2 "" H 1200 6650 50  0001 C CNN
-F 3 "~" H 1200 6650 50  0001 C CNN
-	1    1200 6650
-	1    0    0    -1  
-$EndComp
-$Comp
-L Luciebox_components:MountingHole H8
-U 1 1 5FE524AE
-P 1400 6650
-F 0 "H8" H 1500 6696 50  0000 L CNN
-F 1 "MountingHole" H 1500 6605 50  0000 L CNN
-F 2 "" H 1400 6650 50  0001 C CNN
-F 3 "~" H 1400 6650 50  0001 C CNN
-	1    1400 6650
+U 1 1 5FF14E02
+P 1550 6650
+F 0 "H7" H 1650 6696 50  0000 L CNN
+F 1 "MountingHole" H 1650 6605 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1550 6650 50  0001 C CNN
+F 3 "~" H 1550 6650 50  0001 C CNN
+	1    1550 6650
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:MountingHole H10
-U 1 1 5FE5264F
-P 1600 6650
-F 0 "H10" H 1700 6696 50  0000 L CNN
-F 1 "MountingHole" H 1700 6605 50  0000 L CNN
-F 2 "" H 1600 6650 50  0001 C CNN
-F 3 "~" H 1600 6650 50  0001 C CNN
-	1    1600 6650
+U 1 1 5FF14FFD
+P 1750 6650
+F 0 "H10" H 1850 6696 50  0000 L CNN
+F 1 "MountingHole" H 1850 6605 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1750 6650 50  0001 C CNN
+F 3 "~" H 1750 6650 50  0001 C CNN
+	1    1750 6650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H2
+U 1 1 5FF16676
+P 1100 6900
+F 0 "H2" H 1200 6946 50  0000 L CNN
+F 1 "MountingHole" H 1200 6855 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1100 6900 50  0001 C CNN
+F 3 "~" H 1100 6900 50  0001 C CNN
+	1    1100 6900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H5
+U 1 1 5FF16680
+P 1350 6900
+F 0 "H5" H 1450 6946 50  0000 L CNN
+F 1 "MountingHole" H 1450 6855 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1350 6900 50  0001 C CNN
+F 3 "~" H 1350 6900 50  0001 C CNN
+	1    1350 6900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H8
+U 1 1 5FF1668A
+P 1550 6900
+F 0 "H8" H 1650 6946 50  0000 L CNN
+F 1 "MountingHole" H 1650 6855 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1550 6900 50  0001 C CNN
+F 3 "~" H 1550 6900 50  0001 C CNN
+	1    1550 6900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H11
+U 1 1 5FF16694
+P 1750 6900
+F 0 "H11" H 1850 6946 50  0000 L CNN
+F 1 "MountingHole" H 1850 6855 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1750 6900 50  0001 C CNN
+F 3 "~" H 1750 6900 50  0001 C CNN
+	1    1750 6900
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:MountingHole H3
-U 1 1 5FE52853
-P 1000 6850
-F 0 "H3" H 1100 6896 50  0000 L CNN
-F 1 "MountingHole" H 1100 6805 50  0000 L CNN
-F 2 "" H 1000 6850 50  0001 C CNN
-F 3 "~" H 1000 6850 50  0001 C CNN
-	1    1000 6850
+U 1 1 5FF21649
+P 1100 7150
+F 0 "H3" H 1200 7196 50  0000 L CNN
+F 1 "MountingHole" H 1200 7105 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1100 7150 50  0001 C CNN
+F 3 "~" H 1100 7150 50  0001 C CNN
+	1    1100 7150
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:MountingHole H6
-U 1 1 5FE52C0F
-P 1200 6850
-F 0 "H6" H 1300 6896 50  0000 L CNN
-F 1 "MountingHole" H 1300 6805 50  0000 L CNN
-F 2 "" H 1200 6850 50  0001 C CNN
-F 3 "~" H 1200 6850 50  0001 C CNN
-	1    1200 6850
+U 1 1 5FF21653
+P 1350 7150
+F 0 "H6" H 1450 7196 50  0000 L CNN
+F 1 "MountingHole" H 1450 7105 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1350 7150 50  0001 C CNN
+F 3 "~" H 1350 7150 50  0001 C CNN
+	1    1350 7150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H9
+U 1 1 5FF2165D
+P 1550 7150
+F 0 "H9" H 1650 7196 50  0000 L CNN
+F 1 "MountingHole" H 1650 7105 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1550 7150 50  0001 C CNN
+F 3 "~" H 1550 7150 50  0001 C CNN
+	1    1550 7150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H12
+U 1 1 5FF21667
+P 1750 7150
+F 0 "H12" H 1850 7196 50  0000 L CNN
+F 1 "MountingHole" H 1850 7105 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1750 7150 50  0001 C CNN
+F 3 "~" H 1750 7150 50  0001 C CNN
+	1    1750 7150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4000 1900 4000 3000
+Wire Wire Line
+	4000 3000 4400 3000
+Wire Wire Line
+	4400 3000 4400 4800
+Wire Wire Line
+	4400 4800 4050 4800
+Connection ~ 4000 1900
+Connection ~ 4050 4800
+Wire Wire Line
+	7350 4200 6450 4200
+Wire Wire Line
+	6450 4200 6450 4800
+Wire Wire Line
+	7350 4100 6550 4100
+Wire Wire Line
+	6550 4100 6550 4800
+Wire Wire Line
+	7350 4500 6650 4500
+Wire Wire Line
+	6650 4500 6650 4800
+Wire Wire Line
+	7350 4000 6750 4000
+Wire Wire Line
+	6750 4000 6750 4800
+Wire Wire Line
+	7350 4400 6850 4400
+Wire Wire Line
+	6850 4400 6850 4800
+Wire Wire Line
+	9550 4500 9550 4750
+Wire Wire Line
+	9550 4750 6950 4750
+Wire Wire Line
+	6950 4750 6950 4800
+Wire Wire Line
+	9550 4200 9900 4200
+Wire Wire Line
+	9900 4200 9900 5050
+Wire Wire Line
+	10000 5050 10000 3350
+Wire Wire Line
+	10000 3350 7050 3350
+Wire Wire Line
+	7050 3350 7050 3800
+Wire Wire Line
+	7050 3800 7350 3800
+Wire Wire Line
+	10100 5050 10100 3200
+Wire Wire Line
+	10100 3200 6900 3200
+Wire Wire Line
+	6900 4300 7350 4300
+Wire Wire Line
+	6900 3200 6900 4300
+Wire Wire Line
+	10200 5050 10200 4300
+Wire Wire Line
+	10200 4300 9550 4300
+Wire Wire Line
+	10300 5050 10300 4400
+Wire Wire Line
+	10300 4400 9550 4400
+Wire Wire Line
+	10400 5050 10400 3050
+Wire Wire Line
+	10400 3050 6750 3050
+Wire Wire Line
+	6750 3050 6750 3900
+Wire Wire Line
+	6750 3900 7350 3900
+Text Label 7050 3550 0    50   ~ 0
+A
+Text Label 7050 3200 0    50   ~ 0
+F
+Text Label 7200 3050 0    50   ~ 0
+B
+Text Label 7050 4000 0    50   ~ 0
+C
+Text Label 6650 4100 0    50   ~ 0
+D
+Text Label 6450 4200 2    50   ~ 0
+E
+Text Label 6850 4400 2    50   ~ 0
+G
+Text Label 7050 4500 0    50   ~ 0
+DP
+Text Label 9600 4200 0    50   ~ 0
+Digit1
+Text Label 9600 4300 0    50   ~ 0
+Digit2
+Text Label 9600 4400 0    50   ~ 0
+Digit3
+Text Label 9100 4750 0    50   ~ 0
+Digit4
+$Comp
+L power:GND #PWR0101
+U 1 1 5FEF5CB7
+P 4450 5650
+F 0 "#PWR0101" H 4450 5400 50  0001 C CNN
+F 1 "GND" H 4455 5477 50  0000 C CNN
+F 2 "" H 4450 5650 50  0001 C CNN
+F 3 "" H 4450 5650 50  0001 C CNN
+	1    4450 5650
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 5FEF6BAB
+P 4400 2600
+F 0 "#PWR0102" H 4400 2350 50  0001 C CNN
+F 1 "GND" H 4405 2427 50  0000 C CNN
+F 2 "" H 4400 2600 50  0001 C CNN
+F 3 "" H 4400 2600 50  0001 C CNN
+	1    4400 2600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5200 5100 5200 5500
+Wire Wire Line
+	4900 4600 4900 5450
+Wire Wire Line
+	5000 4600 5000 5450
+Wire Wire Line
+	4450 5650 4450 5450
+Wire Wire Line
+	4450 5450 4700 5450
+Wire Wire Line
+	4700 4600 4700 5450
+Wire Wire Line
+	4700 5450 4700 5500
+Connection ~ 4700 5450
+Wire Wire Line
+	4800 5450 4700 5450
+Connection ~ 4800 5450
+Wire Wire Line
+	4800 5450 4800 5500
+Wire Wire Line
+	4800 5450 4900 5450
+Connection ~ 4900 5450
+Wire Wire Line
+	4900 5450 4900 5500
+Wire Wire Line
+	4900 5450 5000 5450
+Connection ~ 5000 5450
+Wire Wire Line
+	5000 5450 5000 5500
+Wire Wire Line
+	4650 2600 4650 2550
+Wire Wire Line
+	4400 2600 4400 2550
+Wire Wire Line
+	4400 2550 4650 2550
+Connection ~ 4650 2550
+Wire Wire Line
+	4650 2550 4650 1800
+Wire Wire Line
+	4650 2550 4750 2550
+Connection ~ 4750 2550
+Wire Wire Line
+	4750 2550 4750 2600
+Wire Wire Line
+	4750 2550 4850 2550
+Connection ~ 4850 2550
+Wire Wire Line
+	4850 2550 4850 1900
+Wire Wire Line
+	4850 2550 4950 2550
+Connection ~ 4950 2550
+Wire Wire Line
+	4950 2550 4950 2600
+$Comp
+L Luciebox_components:MountingHole H13
+U 1 1 5FFBD226
+P 1800 7400
+F 0 "H13" H 1900 7446 50  0000 L CNN
+F 1 "MountingHole" H 1900 7355 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 1800 7400 50  0001 C CNN
+F 3 "~" H 1800 7400 50  0001 C CNN
+	1    1800 7400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H14
+U 1 1 5FFBD56F
+P 2100 7400
+F 0 "H14" H 2200 7446 50  0000 L CNN
+F 1 "MountingHole" H 2200 7355 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 2100 7400 50  0001 C CNN
+F 3 "~" H 2100 7400 50  0001 C CNN
+	1    2100 7400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:MountingHole H15
+U 1 1 5FFC62A6
+P 2500 7400
+F 0 "H15" H 2600 7446 50  0000 L CNN
+F 1 "MountingHole" H 2600 7355 50  0000 L CNN
+F 2 "Luciebox:MountingHole_4.3mm_M4" H 2500 7400 50  0001 C CNN
+F 3 "~" H 2500 7400 50  0001 C CNN
+	1    2500 7400
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
