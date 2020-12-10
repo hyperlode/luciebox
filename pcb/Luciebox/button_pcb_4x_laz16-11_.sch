@@ -1236,10 +1236,10 @@ F 3 "~" H 2500 7400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Luciebox_components:MountingHole H?
+L Luciebox_components:MountingHole H16
 U 1 1 5FFEBD74
 P 1800 7650
-F 0 "H?" H 1900 7696 50  0000 L CNN
+F 0 "H16" H 1900 7696 50  0000 L CNN
 F 1 "MountingHole" H 1900 7605 50  0000 L CNN
 F 2 "Luciebox:MountingHole_4.3mm_M4" H 1800 7650 50  0001 C CNN
 F 3 "~" H 1800 7650 50  0001 C CNN
@@ -1247,10 +1247,10 @@ F 3 "~" H 1800 7650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Luciebox_components:MountingHole H?
+L Luciebox_components:MountingHole H17
 U 1 1 5FFEC049
 P 2050 7650
-F 0 "H?" H 2150 7696 50  0000 L CNN
+F 0 "H17" H 2150 7696 50  0000 L CNN
 F 1 "MountingHole" H 2150 7605 50  0000 L CNN
 F 2 "Luciebox:MountingHole_4.3mm_M4" H 2050 7650 50  0001 C CNN
 F 3 "~" H 2050 7650 50  0001 C CNN

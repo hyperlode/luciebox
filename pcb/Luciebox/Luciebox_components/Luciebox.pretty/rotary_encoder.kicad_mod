@@ -1,4 +1,4 @@
-(module rotary_encoder (layer F.Cu) (tedit 5FC97FF2)
+(module rotary_encoder (layer F.Cu) (tedit 5FD284A9)
   (descr EN16-H)
   (tags https://www.ttelectronics.com/TTElectronics/media/ProductFiles/Encoders/Datasheets/EN16.pdf)
   (fp_text reference REF** (at 0.5 -4) (layer F.SilkS)
@@ -23,4 +23,5 @@
   (pad 3 thru_hole circle (at 5 0 345) (size 3 3) (drill 1.2) (layers *.Cu *.Mask))
   (pad "" np_thru_hole rect (at -7.8 -10.5) (size 2 2.1) (drill 1.2) (layers *.Cu *.Mask))
   (pad "" np_thru_hole rect (at 7.8 -10.5) (size 2 2.1) (drill 1.2) (layers *.Cu *.Mask))
+  (pad "" np_thru_hole circle (at 0 -10.5) (size 2 2) (drill 2) (layers *.Cu *.Mask))
 )

@@ -1,4 +1,4 @@
-(module Rotary_Switch (layer F.Cu) (tedit 5FC97007)
+(module Rotary_Switch (layer F.Cu) (tedit 5FD284B8)
   (descr "Rotary Switch Selector Knob 1P/12T")
   (tags "lees electronics part 3268")
   (fp_text reference REF** (at 0 -13.545) (layer F.SilkS)
@@ -34,4 +34,5 @@
   (pad 11 thru_hole rect (at -7.071067 -7.071067 45) (size 3 4.3) (drill oval 2.5 1 (offset 0 1)) (layers *.Cu *.Mask))
   (pad 12 thru_hole rect (at -2.58819 -9.659258 15) (size 3 4.3) (drill oval 2.5 1 (offset 0 -1)) (layers *.Cu *.Mask))
   (pad 13 thru_hole rect (at 0 -6) (size 3 4.3) (drill oval 2.5 1 (offset 0 1)) (layers *.Cu *.Mask))
+  (pad "" np_thru_hole circle (at 0 0) (size 2 2) (drill 2) (layers *.Cu *.Mask))
 )
