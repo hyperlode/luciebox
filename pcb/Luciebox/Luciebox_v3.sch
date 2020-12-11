@@ -206,8 +206,6 @@ Wire Notes Line
 Wire Notes Line
 	10700 1000 10700 500 
 Wire Wire Line
-	6050 1600 7000 1600
-Wire Wire Line
 	7000 1600 7000 2300
 Wire Wire Line
 	6050 1500 7250 1500
@@ -238,10 +236,10 @@ Text Label 3350 1500 2    50   ~ 0
 Text Label 3350 1700 2    50   ~ 0
 0(Rx)
 Wire Wire Line
-	3350 1000 3800 1000
+	3350 1000 3750 1000
 Connection ~ 3800 1000
 Wire Wire Line
-	3350 1100 3750 1100
+	3350 1100 3650 1100
 Connection ~ 3750 1100
 Wire Wire Line
 	3350 1200 3700 1200
@@ -1272,17 +1270,6 @@ F 3 "~" H 4050 6000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:USB_B_Mini J7
-U 1 1 5E641E20
-P 4700 5800
-F 0 "J7" H 4470 5697 50  0000 R CNN
-F 1 "USB_B_Mini" H 4470 5788 50  0000 R CNN
-F 2 "Luciebox:usb_mini_Molex-0548190519" H 4850 5750 50  0001 C CNN
-F 3 "~" H 4850 5750 50  0001 C CNN
-	1    4700 5800
-	-1   0    0    1   
-$EndComp
-$Comp
 L Device:R_Small R49
 U 1 1 5E1772EF
 P 1450 2400
@@ -1894,4 +1881,88 @@ Wire Wire Line
 	3700 1200 3700 3350
 Text Label 4200 3700 2    50   ~ 0
 13(SCK)
+$Comp
+L Luciebox_components:terminal_3x1 T10
+U 1 1 606256A8
+P 2600 1200
+F 0 "T10" H 2692 985 50  0000 C CNN
+F 1 "terminal_3x1" H 2692 1076 50  0000 C CNN
+F 2 "Luciebox:Terminal_3x1_100mil" H 2400 1100 50  0001 C CNN
+F 3 "" H 2550 1600 50  0001 C CNN
+	1    2600 1200
+	-1   0    0    1   
+$EndComp
+$Comp
+L Luciebox_components:terminal_3x1 T7
+U 1 1 606246AE
+P 2600 750
+F 0 "T7" H 2692 535 50  0000 C CNN
+F 1 "terminal_3x1" H 2692 626 50  0000 C CNN
+F 2 "Luciebox:Terminal_3x1_100mil" H 2400 650 50  0001 C CNN
+F 3 "" H 2550 1150 50  0001 C CNN
+	1    2600 750 
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7500 600  2850 600 
+Wire Wire Line
+	2850 600  2850 750 
+Wire Wire Line
+	2850 750  2650 750 
+Wire Wire Line
+	7500 600  7500 1400
+Connection ~ 7500 1400
+Wire Wire Line
+	3750 850  2650 850 
+Wire Wire Line
+	3550 1500 3550 950 
+Wire Wire Line
+	3550 950  2650 950 
+Wire Wire Line
+	7250 1500 7250 650 
+Wire Wire Line
+	7250 650  2900 650 
+Wire Wire Line
+	2900 650  2900 1200
+Wire Wire Line
+	2900 1200 2650 1200
+Connection ~ 7250 1500
+Wire Wire Line
+	6050 1600 7000 1600
+Wire Wire Line
+	7000 1600 7000 700 
+Wire Wire Line
+	7000 700  2950 700 
+Wire Wire Line
+	2950 700  2950 1300
+Wire Wire Line
+	2950 1300 2650 1300
+Connection ~ 7000 1600
+Wire Wire Line
+	3750 850  3750 1000
+Connection ~ 3750 1000
+Wire Wire Line
+	3750 1000 3800 1000
+Wire Wire Line
+	3650 1100 3650 750 
+Wire Wire Line
+	3650 750  3000 750 
+Wire Wire Line
+	3000 750  3000 1400
+Wire Wire Line
+	3000 1400 2650 1400
+Connection ~ 3650 1100
+Wire Wire Line
+	3650 1100 3750 1100
+$Comp
+L Luciebox_components:USB_B_Mini J1
+U 1 1 608A892E
+P 4700 5800
+F 0 "J1" H 4470 5697 50  0000 R CNN
+F 1 "USB_B_Mini" H 4470 5788 50  0000 R CNN
+F 2 "Luciebox:usb_mini_Molex-0548190519" H 4850 5750 50  0001 C CNN
+F 3 "~" H 4850 5750 50  0001 C CNN
+	1    4700 5800
+	-1   0    0    1   
+$EndComp
 $EndSCHEMATC
