@@ -637,84 +637,71 @@ Connection ~ 9250 5250
 Wire Wire Line
 	9250 5250 8500 5250
 Wire Wire Line
-	3350 6700 3350 6900
-Connection ~ 3350 6900
-Text Label 3350 6500 0    50   ~ 0
+	3100 6700 3100 6900
+Connection ~ 3100 6900
+Text Label 3100 6500 0    50   ~ 0
 A4(SDA)
 $Comp
 L power:GND #PWR0101
 U 1 1 5D70EC69
-P 4200 6400
-F 0 "#PWR0101" H 4200 6150 50  0001 C CNN
-F 1 "GND" H 4205 6227 50  0000 C CNN
-F 2 "" H 4200 6400 50  0001 C CNN
-F 3 "" H 4200 6400 50  0001 C CNN
-	1    4200 6400
+P 3950 6400
+F 0 "#PWR0101" H 3950 6150 50  0001 C CNN
+F 1 "GND" H 3955 6227 50  0000 C CNN
+F 2 "" H 3950 6400 50  0001 C CNN
+F 3 "" H 3950 6400 50  0001 C CNN
+	1    3950 6400
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4050 7100 3350 7100
+	3800 7100 3100 7100
 Wire Wire Line
-	4200 6400 4050 6400
+	3950 6400 3800 6400
 Wire Wire Line
-	4050 6400 4050 6650
+	3800 6400 3800 6650
 Wire Wire Line
-	4050 7100 4050 7550
-Connection ~ 4050 7100
+	3800 7100 3800 7550
+Connection ~ 3800 7100
 Wire Wire Line
-	5150 6650 4050 6650
+	4900 6650 3800 6650
 Wire Wire Line
-	4050 6650 4050 6700
+	3800 6650 3800 6700
 Wire Wire Line
-	5950 6950 5150 6950
+	5700 6950 5350 6950
 Wire Wire Line
-	5150 6950 5150 6650
+	4900 6950 4900 6650
 Wire Wire Line
-	5950 7050 5150 7050
+	5700 7050 5250 7050
 Wire Wire Line
-	5150 7550 4050 7550
+	4900 7550 3800 7550
 Wire Wire Line
-	5150 7050 5150 7150
-Wire Wire Line
-	5950 7150 5150 7150
-Connection ~ 5150 7150
-Wire Wire Line
-	5150 7150 5150 7550
-Wire Wire Line
-	5950 7250 5400 7250
+	5700 7250 5150 7250
 $Comp
 L power:VCC #PWR0102
 U 1 1 5D7FF3DB
-P 5750 7450
-F 0 "#PWR0102" H 5750 7300 50  0001 C CNN
-F 1 "VCC" H 5768 7623 50  0000 C CNN
-F 2 "" H 5750 7450 50  0001 C CNN
-F 3 "" H 5750 7450 50  0001 C CNN
-	1    5750 7450
+P 5000 7150
+F 0 "#PWR0102" H 5000 7000 50  0001 C CNN
+F 1 "VCC" H 5018 7323 50  0000 C CNN
+F 2 "" H 5000 7150 50  0001 C CNN
+F 3 "" H 5000 7150 50  0001 C CNN
+	1    5000 7150
 	-1   0    0    1   
 $EndComp
-Text Notes 6250 7500 0    50   ~ 0
+Text Notes 6050 7450 0    50   ~ 0
 BAT+
-Text Notes 6250 7400 0    50   ~ 0
+Text Notes 6050 7350 0    50   ~ 0
 BAT-
-Text Notes 6250 7200 0    50   ~ 0
-MASTER-ON
-Text Notes 6250 7300 0    50   ~ 0
-MASTER-ON
-Text Notes 6250 7000 0    50   ~ 0
-TOUCH-ON
-Text Notes 6250 7100 0    50   ~ 0
-TOUCH-ON
-Wire Wire Line
-	5400 7350 5400 7250
-Wire Wire Line
-	5400 7350 5950 7350
-Wire Wire Line
-	5950 7450 5750 7450
-Text Notes 3300 6350 0    50   ~ 0
+Text Notes 6050 7150 0    50   ~ 0
+SWITCH_BATTERY_POWER
+Text Notes 6050 7250 0    50   ~ 0
+SWITCH_BATTERY_POWER
+Text Notes 6050 6950 0    50   ~ 0
+GND-EXTERNAL
+Text Notes 6050 7050 0    50   ~ 0
+GND-SWITCHED
+Text Notes 3050 6350 0    50   ~ 0
 Touch ON and Auto power OFF 
 Wire Wire Line
-	3350 6900 3800 6900
+	3100 6900 3550 6900
 Wire Wire Line
 	5400 4000 5400 4100
 Wire Wire Line
@@ -881,35 +868,11 @@ Wire Wire Line
 	1350 2400 950  2400
 Wire Wire Line
 	950  2400 950  2350
-Connection ~ 4050 6650
+Connection ~ 3800 6650
 Wire Wire Line
 	4400 6000 4200 6000
-$Comp
-L power:VCC #PWR0104
-U 1 1 5E6FDF29
-P 3700 6000
-F 0 "#PWR0104" H 3700 5850 50  0001 C CNN
-F 1 "VCC" H 3717 6173 50  0000 C CNN
-F 2 "" H 3700 6000 50  0001 C CNN
-F 3 "" H 3700 6000 50  0001 C CNN
-	1    3700 6000
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	3700 6000 3900 6000
-$Comp
-L power:GND #PWR0105
-U 1 1 5E716C2D
-P 5150 5350
-F 0 "#PWR0105" H 5150 5100 50  0001 C CNN
-F 1 "GND" H 5155 5177 50  0000 C CNN
-F 2 "" H 5150 5350 50  0001 C CNN
-F 3 "" H 5150 5350 50  0001 C CNN
-	1    5150 5350
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5150 5350 4800 5350
 Wire Wire Line
 	4800 5350 4800 5400
 Wire Wire Line
@@ -1369,65 +1332,43 @@ F 3 "~" H 5750 5600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Screw_Terminal_01x07 J5
-U 1 1 5D74D272
-P 6150 7250
-F 0 "J5" H 6100 7850 50  0000 L CNN
-F 1 "Screw_Terminal_01x07" H 5800 7750 50  0000 L CNN
-F 2 "Luciebox:Terminal_7x1_100mil" H 6150 7250 50  0001 C CNN
-F 3 "~" H 6150 7250 50  0001 C CNN
-	1    6150 7250
-	1    0    0    -1  
-$EndComp
-$Comp
 L Device:R_Small R48
 U 1 1 5D6C3ACD
-P 3350 7000
-F 0 "R48" H 3409 7046 50  0000 L CNN
-F 1 "100K" H 3409 6955 50  0000 L CNN
-F 2 "Luciebox:1206_0805" H 3350 7000 50  0001 C CNN
-F 3 "~" H 3350 7000 50  0001 C CNN
-	1    3350 7000
+P 3100 7000
+F 0 "R48" H 3159 7046 50  0000 L CNN
+F 1 "100K" H 3159 6955 50  0000 L CNN
+F 2 "Luciebox:1206_0805" H 3100 7000 50  0001 C CNN
+F 3 "~" H 3100 7000 50  0001 C CNN
+	1    3100 7000
 	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R_Small R47
 U 1 1 5D6C3437
-P 3350 6600
-F 0 "R47" H 3409 6646 50  0000 L CNN
-F 1 "100K" H 3409 6555 50  0000 L CNN
-F 2 "Luciebox:1206_0805" H 3350 6600 50  0001 C CNN
-F 3 "~" H 3350 6600 50  0001 C CNN
-	1    3350 6600
+P 3100 6600
+F 0 "R47" H 3159 6646 50  0000 L CNN
+F 1 "10K" H 3159 6555 50  0000 L CNN
+F 2 "Luciebox:1206_0805" H 3100 6600 50  0001 C CNN
+F 3 "~" H 3100 6600 50  0001 C CNN
+	1    3100 6600
 	1    0    0    -1  
 $EndComp
 $Comp
 L Luciebox_components:N-Channel_Mosfet Q2
 U 1 1 5D6BDEDC
-P 3950 6900
-F 0 "Q2" H 4156 6991 50  0000 L CNN
-F 1 "N-Channel_Mosfet" H 4156 6900 50  0000 L CNN
-F 2 "Luciebox:TO-220-3" H 4156 6809 50  0000 L CIN
-F 3 "https://www.onsemi.com/pub/Collateral/FQP30N06L-D.pdf" V 3950 6900 50  0001 L CNN
-	1    3950 6900
+P 3700 6900
+F 0 "Q2" H 3906 6991 50  0000 L CNN
+F 1 "N-Channel_Mosfet" H 3906 6900 50  0000 L CNN
+F 2 "Luciebox:TO-220-3" H 3906 6809 50  0000 L CIN
+F 3 "https://www.onsemi.com/pub/Collateral/FQP30N06L-D.pdf" V 3700 6900 50  0001 L CNN
+	1    3700 6900
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Screw_Terminal_01x07 J4
-U 1 1 5DA6F0A0
-P 10900 5550
-F 0 "J4" H 10980 5592 50  0000 L CNN
-F 1 "Screw_Terminal_01x07" H 10980 5501 50  0000 L CNN
-F 2 "Luciebox:Terminal_7x1_100mil" H 10900 5550 50  0001 C CNN
-F 3 "~" H 10900 5550 50  0001 C CNN
-	1    10900 5550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Small R19
+L Device:R_Small R_reset_pullup
 U 1 1 5DA45BE6
 P 9500 5250
-F 0 "R19" H 9559 5296 50  0000 L CNN
+F 0 "R_reset_pullup" H 9559 5296 50  0000 L CNN
 F 1 "30000" H 9559 5205 50  0000 L CNN
 F 2 "Luciebox:1206_0805" H 9500 5250 50  0001 C CNN
 F 3 "~" H 9500 5250 50  0001 C CNN
@@ -1820,9 +1761,6 @@ Wire Wire Line
 	5000 2050 5000 2300
 Wire Wire Line
 	2450 2150 3450 2150
-Connection ~ 3450 2150
-Wire Wire Line
-	3450 2150 3450 4000
 Wire Wire Line
 	2450 1750 3150 1750
 Wire Wire Line
@@ -1955,14 +1893,114 @@ Connection ~ 3650 1100
 Wire Wire Line
 	3650 1100 3750 1100
 $Comp
-L Luciebox_components:USB_B_Mini J?
+L Luciebox_components:USB_B_Mini J1
 U 1 1 608A892E
 P 4700 5800
-F 0 "J?" H 4470 5697 50  0000 R CNN
+F 0 "J1" H 4470 5697 50  0000 R CNN
 F 1 "USB_B_Mini" H 4470 5788 50  0000 R CNN
 F 2 "Luciebox:usb_mini_Molex-0548190519" H 4850 5750 50  0001 C CNN
 F 3 "~" H 4850 5750 50  0001 C CNN
 	1    4700 5800
 	-1   0    0    1   
+$EndComp
+$Comp
+L Luciebox_components:terminal_8x1 T11
+U 1 1 5FD5E541
+P 5750 7650
+F 0 "T11" H 5850 8550 50  0000 L CNN
+F 1 "terminal_8x1" H 5750 8500 50  0000 L CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 5550 7550 50  0001 C CNN
+F 3 "" H 5700 8750 50  0001 C CNN
+	1    5750 7650
+	1    0    0    -1  
+$EndComp
+Text Notes 6050 7550 0    50   ~ 0
+SWITCH_USB_POWER
+Text Notes 6050 7650 0    50   ~ 0
+SWITCH_USB_POWER
+Wire Wire Line
+	4900 7050 4900 7550
+Wire Wire Line
+	5000 7150 5100 7150
+Wire Wire Line
+	5700 7350 5350 7350
+Wire Wire Line
+	5350 7350 5350 6950
+Connection ~ 5350 6950
+Wire Wire Line
+	5350 6950 5050 6950
+Wire Wire Line
+	5350 5350 5350 6950
+Wire Wire Line
+	4800 5350 5350 5350
+$Comp
+L Device:R_Small R_0_if_no_touch1
+U 1 1 5FE57FC5
+P 5150 6500
+F 0 "R_0_if_no_touch1" V 5050 5850 50  0000 L CNN
+F 1 "0" V 5209 6455 50  0000 L CNN
+F 2 "Luciebox:1206_0805" H 5150 6500 50  0001 C CNN
+F 3 "~" H 5150 6500 50  0001 C CNN
+	1    5150 6500
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5050 6500 5050 6950
+Connection ~ 5050 6950
+Wire Wire Line
+	5050 6950 4900 6950
+Wire Wire Line
+	5250 6500 5250 7050
+Connection ~ 5250 7050
+Wire Wire Line
+	5250 7050 4900 7050
+Wire Wire Line
+	5150 7250 5150 7450
+Wire Wire Line
+	5150 7450 5700 7450
+Wire Wire Line
+	3700 6150 5450 6150
+Wire Wire Line
+	5450 6150 5450 7550
+Wire Wire Line
+	5450 7550 5700 7550
+Wire Wire Line
+	3700 6000 3700 6150
+Wire Wire Line
+	5700 7650 5100 7650
+Wire Wire Line
+	5100 7650 5100 7550
+Connection ~ 5100 7150
+Wire Wire Line
+	5100 7150 5700 7150
+$Comp
+L Device:R_Small R_0_if_no_usb_switch1
+U 1 1 5FF3108A
+P 5250 7550
+F 0 "R_0_if_no_usb_switch1" V 5400 7200 50  0000 L CNN
+F 1 "0" V 5309 7505 50  0000 L CNN
+F 2 "Luciebox:1206_0805" H 5250 7550 50  0001 C CNN
+F 3 "~" H 5250 7550 50  0001 C CNN
+	1    5250 7550
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5350 7550 5450 7550
+Connection ~ 5450 7550
+Wire Wire Line
+	5150 7550 5100 7550
+Connection ~ 5100 7550
+Wire Wire Line
+	5100 7550 5100 7150
+$Comp
+L Luciebox_components:terminal_8x1 T12
+U 1 1 5FF871B6
+P 10750 5950
+F 0 "T12" H 10850 6850 50  0000 L CNN
+F 1 "terminal_8x1" H 10750 6800 50  0000 L CNN
+F 2 "Luciebox:Terminal_8x1_100mil" H 10550 5850 50  0001 C CNN
+F 3 "" H 10700 7050 50  0001 C CNN
+	1    10750 5950
+	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
