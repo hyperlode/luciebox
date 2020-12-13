@@ -2,7 +2,7 @@
 // #define DBUG_REFACTOR_DISP
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
-//#define DBUG_REFACTOR_DISP
+// #define DBUG_REFACTOR_DISP
 
 #define V2_PCB_CORONA
 
@@ -84,12 +84,12 @@
 
 #define BINARY_INPUTS_COUNT 12
 
-#define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
 
 #ifdef V2_PCB_CORONA
+    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
     #define BUTTONS_1_COUNT 4
     #define BUTTONS_1_VALUES      \
         {                         \
@@ -97,7 +97,7 @@
         }
 
     #define BUTTONS_2_COUNT 4
-    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 4  // was set to zero. bug??
+    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0  
     #define BUTTONS_2_VALUES \
         {                    \
             512, 256, 128, 64    \
@@ -112,6 +112,7 @@
 
 
 #else  // v1 pcb
+    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
     #define BUTTONS_1_COUNT 5
     #define BUTTONS_1_VALUES      \
         {                         \

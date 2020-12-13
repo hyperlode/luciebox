@@ -209,6 +209,7 @@ void setup()
     Serial.begin(9600);
 #endif
 
+    
     // put your setup code here, to run once
 
     selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS);
@@ -275,6 +276,7 @@ void loop()
         visualsManager.setCharToDisplay('0',2);
         visualsManager.setCharToDisplay('-',1);
         visualsManager.setCharToDisplay('H',0);
+         Serial.println("button 3");
     }
     if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
     {

@@ -93,7 +93,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory "Gerber_button_board_v1.0/"))
+      (outputdirectory "Gerber_button_board_v1.1/"))
   )
 
   (net 0 "")

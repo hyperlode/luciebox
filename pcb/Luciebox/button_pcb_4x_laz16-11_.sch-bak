@@ -243,25 +243,13 @@ Connection ~ 1450 1900
 Wire Wire Line
 	1400 2950 1400 2650
 Wire Wire Line
-	1400 2650 1600 2650
-Wire Wire Line
-	1600 2650 1600 1300
-Wire Wire Line
 	2450 1300 2450 2700
-Wire Wire Line
-	2450 2700 1500 2700
 Wire Wire Line
 	1500 2700 1500 2950
 Wire Wire Line
 	1600 2950 1600 2750
 Wire Wire Line
-	1600 2750 3300 2750
-Wire Wire Line
 	3300 2750 3300 1300
-Wire Wire Line
-	1700 2950 1700 2800
-Wire Wire Line
-	1700 2800 4150 2800
 Wire Wire Line
 	4150 2800 4150 1300
 $Comp
@@ -758,8 +746,6 @@ Wire Wire Line
 Wire Wire Line
 	5400 4600 5400 5400
 Wire Wire Line
-	5400 5400 1350 5400
-Wire Wire Line
 	1350 4200 1350 5400
 $Comp
 L Luciebox_components:terminal_8x1 T4
@@ -813,25 +799,15 @@ Connection ~ 1500 4800
 Wire Wire Line
 	1450 5850 1450 5550
 Wire Wire Line
-	1450 5550 1650 5550
-Wire Wire Line
-	1650 5550 1650 4200
-Wire Wire Line
 	2500 4200 2500 5600
-Wire Wire Line
-	2500 5600 1550 5600
 Wire Wire Line
 	1550 5600 1550 5850
 Wire Wire Line
 	1650 5850 1650 5650
 Wire Wire Line
-	1650 5650 3350 5650
-Wire Wire Line
 	3350 5650 3350 4200
 Wire Wire Line
 	1750 5850 1750 5700
-Wire Wire Line
-	1750 5700 4200 5700
 Wire Wire Line
 	4200 5700 4200 4200
 $Comp
@@ -1236,10 +1212,10 @@ F 3 "~" H 2500 7400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Luciebox_components:MountingHole H?
+L Luciebox_components:MountingHole H16
 U 1 1 5FFEBD74
 P 1800 7650
-F 0 "H?" H 1900 7696 50  0000 L CNN
+F 0 "H16" H 1900 7696 50  0000 L CNN
 F 1 "MountingHole" H 1900 7605 50  0000 L CNN
 F 2 "Luciebox:MountingHole_4.3mm_M4" H 1800 7650 50  0001 C CNN
 F 3 "~" H 1800 7650 50  0001 C CNN
@@ -1247,14 +1223,142 @@ F 3 "~" H 1800 7650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Luciebox_components:MountingHole H?
+L Luciebox_components:MountingHole H17
 U 1 1 5FFEC049
 P 2050 7650
-F 0 "H?" H 2150 7696 50  0000 L CNN
+F 0 "H17" H 2150 7696 50  0000 L CNN
 F 1 "MountingHole" H 2150 7605 50  0000 L CNN
 F 2 "Luciebox:MountingHole_4.3mm_M4" H 2050 7650 50  0001 C CNN
 F 3 "~" H 2050 7650 50  0001 C CNN
 	1    2050 7650
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	5400 5400 1350 5400
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FD61148
+P 1800 5300
+F 0 "D?" H 1800 5084 50  0000 C CNN
+F 1 "D_Schottky" H 1800 5175 50  0000 C CNN
+F 2 "" H 1800 5300 50  0001 C CNN
+F 3 "~" H 1800 5300 50  0001 C CNN
+	1    1800 5300
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1650 5300 1650 4200
+Wire Wire Line
+	1950 5300 1950 5550
+Wire Wire Line
+	1950 5550 1450 5550
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FD746FD
+P 2200 5600
+F 0 "D?" H 2200 5816 50  0000 C CNN
+F 1 "D_Schottky" H 2200 5725 50  0000 C CNN
+F 2 "" H 2200 5600 50  0001 C CNN
+F 3 "~" H 2200 5600 50  0001 C CNN
+	1    2200 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FD74C08
+P 2950 5650
+F 0 "D?" H 2950 5866 50  0000 C CNN
+F 1 "D_Schottky" H 2950 5775 50  0000 C CNN
+F 2 "" H 2950 5650 50  0001 C CNN
+F 3 "~" H 2950 5650 50  0001 C CNN
+	1    2950 5650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FD750FF
+P 3850 5700
+F 0 "D?" H 3850 5916 50  0000 C CNN
+F 1 "D_Schottky" H 3850 5825 50  0000 C CNN
+F 2 "" H 3850 5700 50  0001 C CNN
+F 3 "~" H 3850 5700 50  0001 C CNN
+	1    3850 5700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4000 5700 4200 5700
+Wire Wire Line
+	3700 5700 1750 5700
+Wire Wire Line
+	1650 5650 2800 5650
+Wire Wire Line
+	3100 5650 3350 5650
+Wire Wire Line
+	2500 5600 2350 5600
+Wire Wire Line
+	2050 5600 1550 5600
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FDF346C
+P 2150 2700
+F 0 "D?" H 2150 2916 50  0000 C CNN
+F 1 "D_Schottky" H 2150 2825 50  0000 C CNN
+F 2 "" H 2150 2700 50  0001 C CNN
+F 3 "~" H 2150 2700 50  0001 C CNN
+	1    2150 2700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FDF3476
+P 2900 2750
+F 0 "D?" H 2900 2966 50  0000 C CNN
+F 1 "D_Schottky" H 2900 2875 50  0000 C CNN
+F 2 "" H 2900 2750 50  0001 C CNN
+F 3 "~" H 2900 2750 50  0001 C CNN
+	1    2900 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FDF3480
+P 3800 2800
+F 0 "D?" H 3800 3016 50  0000 C CNN
+F 1 "D_Schottky" H 3800 2925 50  0000 C CNN
+F 2 "" H 3800 2800 50  0001 C CNN
+F 3 "~" H 3800 2800 50  0001 C CNN
+	1    3800 2800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3950 2800 4150 2800
+Wire Wire Line
+	3650 2800 1700 2800
+Wire Wire Line
+	1600 2750 2750 2750
+Wire Wire Line
+	3050 2750 3300 2750
+Wire Wire Line
+	2450 2700 2300 2700
+Wire Wire Line
+	2000 2700 1500 2700
+Wire Wire Line
+	1700 2950 1700 2800
+$Comp
+L Luciebox_components:D_Schottky D?
+U 1 1 5FE2A627
+P 1750 2400
+F 0 "D?" H 1750 2184 50  0000 C CNN
+F 1 "D_Schottky" H 1750 2275 50  0000 C CNN
+F 2 "" H 1750 2400 50  0001 C CNN
+F 3 "~" H 1750 2400 50  0001 C CNN
+	1    1750 2400
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1600 2400 1600 1300
+Wire Wire Line
+	1900 2400 1900 2650
+Wire Wire Line
+	1900 2650 1400 2650
 $EndSCHEMATC
