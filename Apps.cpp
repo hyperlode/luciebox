@@ -44,6 +44,7 @@ void Apps::appSelector()
 #endif
 		// set to init state before a new app starts
 		splash_screen_playing = true;
+		// this->setDefaultMode();
 	}
 
 	if (splash_screen_playing)
@@ -189,6 +190,7 @@ void Apps::updateEveryAppCycleBefore()
 	}
 
 	// it's important to realize the display is reset before every cycle. Do not forget to update it all the time.
+	lights = 0x0;
 	setBlankDisplay();
 }
 
@@ -246,31 +248,24 @@ bool Apps::init_app(bool init, uint8_t selector)
 		randomSequence(FADE_IN_RANDOM_LIST, 32);
 
 		INIT_SPLASH_ANIMATION_STEP = 0; 
+		INIT_SPLASH_LIGHTS_STEP = 0;
 		
 		this->TIMER_INIT_APP.start(-20);
 	}
 	
-	lights = 0;
 	// advance one frame
 	if (this->TIMER_INIT_APP.getCountDownTimerElapsedAndRestart())
 	{
+		INIT_SPLASH_LIGHTS_STEP ++;
 		INIT_SPLASH_ANIMATION_STEP++;
-		// INIT_SPLASH_LIGHTS_STEP ++;
-		
-		// hold down momentary button to freeze app splash screen (easier to rotate knob to search for desired app)
-		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
-		if ((binaryInputsValue & momentary_buttons_mask) > 0){
-			INIT_SPLASH_ANIMATION_STEP = 6;
-			// lights	|= 0x1 << lights_indexed_as_installed[(INIT_SPLASH_LIGHTS_STEP %32)/4];
-			// lights	|= 0x1 << lights_indexed_as_installed[((INIT_SPLASH_LIGHTS_STEP+16) %32)/4];
-		}
 	}
 
 	if (INIT_SPLASH_ANIMATION_STEP < 5)
 	{
+		lights = 0xff;
 		// all lights on
 		ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.
-		lights = 0xff;
+		
 	}
 	else if (INIT_SPLASH_ANIMATION_STEP < 23)
 	{
@@ -286,16 +281,21 @@ bool Apps::init_app(bool init, uint8_t selector)
 		for (uint8_t i=0; i<=INIT_APP_LIGHTS_COUNTER; i++ ){
 			lights	|= 0x1 << lights_indexed_as_installed[i];
 		}
-		
-		// INIT_APP_LIGHTS_COUNTER  = (( 32 - (INIT_SPLASH_ANIMATION_STEP - 22)) / 4);
-		// lights	|= 0x1 << lights_indexed_as_installed[INIT_APP_LIGHTS_COUNTER];
-
-
 	}
 	else
 	{
 		return false;
 	}
+
+	// hold down momentary button to freeze app splash screen (easier to rotate knob to search for desired app)
+	byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+	if ((binaryInputsValue & momentary_buttons_mask) > 0){
+		INIT_SPLASH_ANIMATION_STEP = 6;
+		lights = 0x0;
+		lights	|= 0x1 << lights_indexed_as_installed[(INIT_SPLASH_LIGHTS_STEP %32)/4];
+		// lights	|= 0x1 << lights_indexed_as_installed[((INIT_SPLASH_LIGHTS_STEP+16) %32)/4];
+	}
+
 	return true;
 }
 
@@ -591,7 +591,7 @@ void Apps::pomodoroTimer()
 	}
 
 	textBufToDisplay();
-	setLedArray();
+	// setLedArray();
 }
 
 void Apps::resetStopwatch(SuperTimer* pTimer){
@@ -641,8 +641,11 @@ void Apps::stopwatch()
 		pSsuperTimer->paused(!paused);
 	}
 
+	// byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 ;
+	// if ((binaryInputsValue & momentary_buttons_mask) > 0)
+
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
-		(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+	 	(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 	{
 		// show saved laptime at press
 		time_millis = *pLongValue;
@@ -1140,7 +1143,7 @@ void Apps::modeSimpleButtonsAndLights()
 		}
 	}
 
-	setLedArray();
+	// setLedArray();
 }
 
 void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet)
@@ -1232,7 +1235,7 @@ void Apps::modeTallyKeeper(){
 	ledDisp->setNumberToDisplayAsDecimal(display_value);
 	
 	lights = 1 << lights_indexed[TALLY_KEEPER_DISPLAYED_COUNTER];
-	setLedArray();
+	// setLedArray();
 }
 
 #else
@@ -1335,7 +1338,7 @@ void Apps::quiz()
 	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
 
 	// lights |= 1 << lights_indexed[i];
-	setLedArray();
+	// setLedArray();
 }
 
 #endif
@@ -2661,7 +2664,7 @@ void Apps::miniMultiTimer()
 	(LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
 	(LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
 
-	setLedArray();
+	// setLedArray();
 	setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
 #endif
@@ -3419,7 +3422,7 @@ void Apps::modeSimon()
 	break;
 	}
 
-	setLedArray();
+	// setLedArray();
 	textBufToDisplay();
 }
 #endif  //ENABLE_SIMON_APP
