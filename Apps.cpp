@@ -1,6 +1,12 @@
 #include "Apps.h"
 #include "PretbakSettings.h"
 
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
+//		INIT AND ADMINISTRATION
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
+
 Apps::Apps(){};
 
 void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer, PotentioSelector* selectorDial)
@@ -164,6 +170,8 @@ void Apps::appSelector()
 			break;
 		}
 	}
+
+	updateEveryAppCycleAfter();
 }
 
 void Apps::updateEveryAppCycleBefore()
@@ -184,9 +192,10 @@ void Apps::updateEveryAppCycleBefore()
 	setBlankDisplay();
 }
 
-// void Apps::updateEveryAppCycleAfter()
-// {
-// }
+void Apps::updateEveryAppCycleAfter()
+{
+	setLedArray();
+}
 
 void Apps::setDefaultMode()
 {
@@ -240,15 +249,20 @@ bool Apps::init_app(bool init, uint8_t selector)
 		
 		this->TIMER_INIT_APP.start(-20);
 	}
-
+	
+	lights = 0;
 	// advance one frame
 	if (this->TIMER_INIT_APP.getCountDownTimerElapsedAndRestart())
 	{
 		INIT_SPLASH_ANIMATION_STEP++;
+		// INIT_SPLASH_LIGHTS_STEP ++;
 		
-		// hold down momentary button to freeze app splash screen
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3) ){
+		// hold down momentary button to freeze app splash screen (easier to rotate knob to search for desired app)
+		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+		if ((binaryInputsValue & momentary_buttons_mask) > 0){
 			INIT_SPLASH_ANIMATION_STEP = 6;
+			// lights	|= 0x1 << lights_indexed_as_installed[(INIT_SPLASH_LIGHTS_STEP %32)/4];
+			// lights	|= 0x1 << lights_indexed_as_installed[((INIT_SPLASH_LIGHTS_STEP+16) %32)/4];
 		}
 	}
 
@@ -256,16 +270,27 @@ bool Apps::init_app(bool init, uint8_t selector)
 	{
 		// all lights on
 		ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.
+		lights = 0xff;
 	}
 	else if (INIT_SPLASH_ANIMATION_STEP < 23)
 	{
 		// show app splash screen
 		ledDisp->setBinaryToDisplay(this->displayAllSegments);
+		lights = 0xff;
 	}
 	else if (INIT_SPLASH_ANIMATION_STEP < 55)
 	{
 		// fade out
 		ledDisp->setBinaryToDisplay(~this->fadeInList(INIT_SPLASH_ANIMATION_STEP - 24, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
+		INIT_APP_LIGHTS_COUNTER  = (( 32 - (INIT_SPLASH_ANIMATION_STEP - 22)) / 4);
+		for (uint8_t i=0; i<=INIT_APP_LIGHTS_COUNTER; i++ ){
+			lights	|= 0x1 << lights_indexed_as_installed[i];
+		}
+		
+		// INIT_APP_LIGHTS_COUNTER  = (( 32 - (INIT_SPLASH_ANIMATION_STEP - 22)) / 4);
+		// lights	|= 0x1 << lights_indexed_as_installed[INIT_APP_LIGHTS_COUNTER];
+
+
 	}
 	else
 	{
@@ -273,6 +298,10 @@ bool Apps::init_app(bool init, uint8_t selector)
 	}
 	return true;
 }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
+//		ACTUAL APPS
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void Apps::modeDreamtime()
 {

@@ -157,6 +157,7 @@
 #define TALLY_KEEPER_0 general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
+#define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
 #define REACTION_GAME_TIMER_STEP general_int16_t_2
 #define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
 #define SIMON_INDEX general_int16_t_2
@@ -200,6 +201,7 @@
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
 #define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
 #define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
+#define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -556,6 +558,9 @@ const uint8_t songs [] PROGMEM = {
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
                                     LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
 
+const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_BIG, LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_MOMENTARY_0,
+ LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,LIGHT_LATCHING_EXTRA};
+
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
                                     BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
 
@@ -623,6 +628,7 @@ public:
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
     void updateEveryAppCycleBefore();
+    void updateEveryAppCycleAfter();
     void geigerToneHelper();
 private:
 
