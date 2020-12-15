@@ -506,7 +506,7 @@ void Apps::pomodoroTimer()
 	case POMODORO_DISPLAY_TIMER:
 	{
 		POMODORO_TIMER.getTimeString(textBuf);
-		if (POMODORO_IN_BREAK && millis() % 1000 > 650){
+		if (POMODORO_IN_BREAK && millis_blink_650ms()){
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
 	}
@@ -515,7 +515,7 @@ void Apps::pomodoroTimer()
 	case POMODORO_DISPLAY_PAUSE_INIT_SECS:
 	{
 		timeSecondsToClockString(textBuf, indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
-		if (millis() % 1000 > 650)
+		if (millis_blink_650ms())
 		{
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
@@ -525,7 +525,7 @@ void Apps::pomodoroTimer()
 	case POMODORO_DISPLAY_BEEP_PROBABILITY:
 	{
 		timeSecondsToClockString(textBuf, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX));
-		if (millis() % 1000 > 650)
+		if (millis_blink_650ms())
 		{
 			// rnd beep time....
 			setStandardTextToTextBuf(TEXT_RANDOM_BEEP);
@@ -535,7 +535,7 @@ void Apps::pomodoroTimer()
 
 	case POMODORO_DISPLAY_SHOW_GOOD:
 	{
-		if (millis() % 1000 > 650)
+		if (millis_blink_650ms())
 		{
 			setStandardTextToTextBuf(TEXT_YES);
 		}
@@ -548,7 +548,7 @@ void Apps::pomodoroTimer()
 
 	case POMODORO_DISPLAY_SHOW_BAD:
 	{
-		if (millis() % 1000 > 650)
+		if (millis_blink_650ms())
 		{
 			setStandardTextToTextBuf(TEXT_NO);
 		}
@@ -565,7 +565,7 @@ void Apps::pomodoroTimer()
 
 	if (in_menu)
 	{
-		if (millis() % 500 < 250)
+		if (millis_half_second_period())
 		{
 			lights |= 1 << lights_indexed[LIGHT_INDEXED_LATCHING_EXTRA];
 		}
@@ -1081,7 +1081,7 @@ void Apps::modeSimpleButtonsAndLights()
 			}
 		}
 
-		if (millis() % 1000 < 500)
+		if (millis_half_second_period())
 		{
 			setStandardTextToTextBuf(TEXT_BEEP);
 		}
@@ -1140,7 +1140,7 @@ void Apps::modeSimpleButtonsAndLights()
 	{
 		// show values one seconds, menu items half a second
 		// in real settings mode
-		if (millis() % 1000 < 500)
+		if (millis_half_second_period())
 		{
 			textBufToDisplay();
 		}
@@ -2015,7 +2015,7 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
 	// global picture operations
 	if (saveStateToBuffer)
 	{
-		DRAW_SHOW_MODE = 3; // prepare for next button press to save buffer and show inversion.
+		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -2057,7 +2057,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	// return blinking segment.
 	// no need to initialize DRAW_CURSOR_INDEX, it get's within boundaries in one cycle. And we don't care about starting position.
 
-	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing.
+	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing, or want to show it to your mother
 
 	encoder_dial->setSensitivity(2);
 	DRAW_CURSOR_SEGMENT += encoder_dial->getDelta();
@@ -2073,7 +2073,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
-		// move inside digit
+		// move segment inside digit
 		DRAW_CURSOR_SEGMENT++;
 		if (DRAW_CURSOR_SEGMENT > 8){
 			DRAW_CURSOR_SEGMENT = 0;
@@ -2097,7 +2097,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	}
 	
 	//add blinking cursor. (depending on time, we set the active segment)
-	if (millis() % 250 > 125)
+	if (millis_quarter_second_period())
 	{
 		return (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
 	}
@@ -2461,8 +2461,8 @@ void Apps::draw()
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)) &&
 		!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT)))
 	{
-		//   // modify drawing on display in draw mode.
-		//   // if in save to eeprom mode, always only scroll through drawings.
+		// modify drawing on display in draw mode.
+		// if in save to eeprom mode, always only scroll through drawings.
 
 		cursorBlinker = this->modeSingleSegmentManipulation(&displayAllSegments);
 	}
@@ -2489,10 +2489,29 @@ void Apps::draw()
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
 	{
 		// eeprom save mode
+		if (millis_half_second_period()){
+			lights|= 1<<LIGHT_MOMENTARY_0;
+			lights|= 1<<LIGHT_MOMENTARY_1;
+		}
 
+		// SHIFT button to insert or delete drawing slots from eeprom
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
-			// SHIFT button to insert or delete drawing slots from eeprom
+			
+			// DELETE
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+			{
+				// delete slot. (and shift all drawings.)
+				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX+1) * 4;
+					 i < EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
+					 i++)
+				{
+					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
+					eeprom_write_byte((uint8_t *)(i), tmp);
+				}
+			}
+
+			// INSERT
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 			{
 				//insert slot after current index (and move to it)
@@ -2514,31 +2533,21 @@ void Apps::draw()
 				}
 			}
 
-			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-			{
-				// delete slot. (and shift all drawings.)
-				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX+1) * 4;
-					 i < EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
-					 i++)
-				{
-					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
-					eeprom_write_byte((uint8_t *)(i), tmp);
-				}
-				// DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY ++; // hack to make it refersh the drawing.
+			if (millis_half_second_period()){
+				lights|= 1<<LIGHT_MOMENTARY_2;
+				lights|= 1<<LIGHT_MOMENTARY_3;
 			}
-		}
-		else
+		}else
+		
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+			// save active drawing on display to eeprom.
+			for (uint8_t i = 0; i < 4; i++)
 			{
-				// save active drawing on display to eeprom.
-				for (uint8_t i = 0; i < 4; i++)
-				{
-					eeprom_write_byte(
-						(uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
-						(uint8_t)((displayAllSegments >> (i * 8)) & 0xFF)
-						);
-				}
+				eeprom_write_byte(
+					(uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
+					(uint8_t)((displayAllSegments >> (i * 8)) & 0xFF)
+					);
 			}
 		}
 	}
@@ -3165,7 +3174,7 @@ void Apps::modeSimon()
 		}
 
 		// play button light blinking invitingly.
-		if (millis() % 250 > 125)
+		if (millis_quarter_second_period())
 		{
 			lights |= 1 << LIGHT_LATCHING_EXTRA;
 		}
@@ -3261,7 +3270,7 @@ void Apps::modeSimon()
 		if (SIMON_END_OF_GAME)
 		{
 
-			if (millis() % 1000 > 650)
+			if (millis_blink_650ms())
 			{
 				numberToBufAsDecimal(SIMON_LENGTH);
 				textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
@@ -4157,6 +4166,18 @@ void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureInde
 	for (uint8_t i = 0; i < 4; i++){
 		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(offset + pictureIndex * 4 + i))) << (i * 8);
 	}
+}
+
+bool Apps::millis_quarter_second_period(){
+	return millis() % 250 > 125;
+}
+
+bool Apps::millis_half_second_period(){
+	return millis() % 500 > 250;
+}
+
+bool Apps::millis_blink_650ms(){
+	return millis() % 1000 > 650;
 }
 
 void Apps::textBufToDisplay(){

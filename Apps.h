@@ -640,6 +640,10 @@ private:
     bool checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
 
+    bool millis_half_second_period();
+    bool millis_quarter_second_period();
+    bool millis_blink_650ms();
+
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
     
