@@ -181,16 +181,20 @@ void Apps::updateEveryAppCycleBefore()
 	binaryInputsEdgeDown = 0;
 	binaryInputsValue = 0;
 
+	// it's important to realize the display is reset before every cycle. Do not forget to update it all the time.
+	lights = 0x0;
+
 	// load quick access bytes.
 	for (uint8_t i = 0; i < 8; i++)
 	{
 		binaryInputsEdgeUp |= binaryInputs[buttons_indexed[i]].getEdgeUp() << i;
 		binaryInputsEdgeDown |= binaryInputs[buttons_indexed[i]].getEdgeDown() << i;
 		binaryInputsValue |= binaryInputs[buttons_indexed[i]].getValue() << i;
+
+		// by default: button lights on if activated
+		lights |= binaryInputs[buttons_indexed[i]].getValue() << lights_indexed[i];
 	}
 
-	// it's important to realize the display is reset before every cycle. Do not forget to update it all the time.
-	lights = 0x0;
 	setBlankDisplay();
 }
 
