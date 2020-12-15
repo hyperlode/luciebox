@@ -20,7 +20,6 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 
 	textHandle = ledDisp->getDisplayTextBufHandle();
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
-	lightsHandle = ledDisp->getLedArrayHandle();
 }
 
 void Apps::appSelector()
@@ -3455,6 +3454,9 @@ void Apps::modeReactionGame()
 		
 	}
 
+
+
+
 	// at any time, leave game when depressing play button.
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
@@ -3488,6 +3490,7 @@ void Apps::modeReactionGame()
 		}
 		else
 		{
+			lights |= 1<< LIGHT_LATCHING_EXTRA;
 			ledDisp->setNumberToDisplayAsDecimal(
 				eeprom_read_word(
 					(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
@@ -3807,6 +3810,9 @@ void Apps::modeReactionGame()
 		}
 
 		reactionGameState = reactionPlaying;
+
+
+
 		break;
 	}
 
@@ -3861,7 +3867,7 @@ void Apps::modeReactionGame()
 			// show decimal point for digit corresponding with button
 			setDecimalPoint(true, REACTION_GAME_TARGET);
 			// set appropriate led per button
-			*lightsHandle = 1 << lights_indexed[REACTION_GAME_TARGET];
+			lights |= 1 << lights_indexed[REACTION_GAME_TARGET];
 		}
 
 		// check player pressed a button.
@@ -3934,11 +3940,8 @@ void Apps::modeReactionGame()
 #endif
 
 		// prepare next game delay.
-
 		TIMER_REACTION_END_OF_GAME_DELAY.start(-2000);
-
 		reactionGameState = reactionFinished;
-
 		break;
 	}
 
@@ -3965,9 +3968,10 @@ void Apps::modeReactionGame()
 	}
 #endif
 
-	*lightsHandle |= EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO << LIGHT_LATCHING_SMALL_LEFT;
-	*lightsHandle |= OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE << LIGHT_LATCHING_SMALL_RIGHT;
-	*lightsHandle |= REACTION_GUITAR_HERO_MODE << LIGHT_LATCHING_BIG;
+	// option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
+	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
+	lights ^= (-EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO ^ lights) & (1UL << LIGHT_LATCHING_SMALL_LEFT);
+	lights ^= (-OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE ^ lights) & (1UL << LIGHT_LATCHING_SMALL_RIGHT);
 }
 
 

@@ -788,7 +788,6 @@ private:
     char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
-    byte* lightsHandle;
     uint8_t lights;
 
     bool splash_screen_playing; // actuall flash screen app.
