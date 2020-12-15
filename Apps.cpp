@@ -3102,6 +3102,7 @@ void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_
 	}
 	if (METRONOME_ENABLE_FLASH_AT_BEEP && *ticker_counter == 0){
 		this->displayAllSegments = 0xFFFFFFFF;
+		lights = 0xff;
 	}else{
 		flashPictureToDisplayAllSegments( disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + *ticker_counter * 4);
 	}
