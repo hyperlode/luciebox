@@ -2711,7 +2711,6 @@ void Apps::miniMultiTimer()
 	}
 
 	// TIMER BUTTONS
-
 	for (uint8_t i = 0; i < MAX_TIMERS_COUNT; i++)
 	{
 		if (binaryInputs[buttons_indexed[i]].getEdgeUp())
@@ -2796,7 +2795,7 @@ void Apps::miniMultiTimer()
 	(LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_BIG : false;
 	(LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
 	(LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
-
+	this->lights = lights;
 	// setLedArray();
 	setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
