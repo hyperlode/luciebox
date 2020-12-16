@@ -2,8 +2,8 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
-// #define ENABLE_MULTITMER_INTEGRATED
+// #define ENABLE_MULTITIMER
+#define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 #define ENABLE_TILT_SWITCHES
@@ -280,6 +280,36 @@
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
+
+
+
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+    const uint16_t timeDialDiscreteSeconds[] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        10, 15, 20, 25, 30, 45, 60, 75, 90, 120,
+        150, 180, 210, 240, 270, 300, 330, 360, 390, 420,
+        450, 480, 510, 540, 570, 600, 660, 720, 780, 840,
+        900, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380, 1440,
+        1500, 1560, 1620, 1680, 1740, 1800, 2100, 2400, 2700, 3000,
+        3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400, 6000, 6600,
+        7200, 7800, 8400, 9000, 9600, 10200, 10800, 12600, 14400, 16200,
+        18000, 19800, 21600, 23400, 25200, 27000, 28800, 30600, 32400, 34200,
+        36000};
+
+    #define MULTITIMER_MAX_TIMERS_COUNT 4
+    #define MULTITIMER_DEFAULT_INIT_TIME_SECS 600 //600
+    #define MULTITIMER_DEFAULT_FISCHER_TIMER_SECS 0
+    #define MULTITIMER_DEFAULT_TIMERS_COUNT 2
+    #define MULTITIMER_LIGHT_PAUSE 0x01
+    #define MULTITIMER_LIGHT_PLAYING 0x02
+    #define MULTITIMER_LIGHT_FISCHER 0x04
+    #define MULTITIMER_LIGHT_SET_TIMERS_COUNT 0x08
+    #define MULTITIMER_LIGHT_SECONDS_BLINKER 0b00010000
+
+#endif
+
+
+
 
 const char dice_eyes_display[] PROGMEM = {
     SPACE_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,
@@ -640,6 +670,41 @@ public:
     void updateEveryAppCycleBefore();
     void updateEveryAppCycleAfter();
     void geigerToneHelper();
+
+
+
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+
+    void multitimer_integrated();
+
+	void multitimer_setDefaults();
+	uint16_t multitimer_getIndexedTime(uint8_t index);
+	void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
+	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
+	void multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *settingsLights);
+	bool multitimer_getTimerFinished(uint8_t timerIndex);
+	bool multitimer_checkAllTimersFinished();
+	void multitimer_playerButtonPressEdgeUp(uint8_t index);
+	void multitimer_playerButtonPressEdgeDown(uint8_t index);
+	void multitimer_setTimersCount(uint8_t timers_count);
+	void multitimer_setFischerTimer(uint16_t seconds);
+	void multitimer_setStateTimersCount(bool set);
+	void multitimer_setStateFischerTimer(bool set);
+	void multitimer_setStatePause(bool set);
+	void multitimer_refresh();
+	void multitimer_buzzerRefresh(bool alarm);
+	void multitimer_next();
+	//state getState();
+
+	void multitimer_init();
+	void multitimer_start();
+	void multitimer_pause();
+	void multitimer_continu();
+	void multitimer_reset();
+
+#endif
+
+
 private:
 
 #ifdef ENABLE_MULTITIMER
@@ -812,6 +877,39 @@ private:
 
     bool splash_screen_playing; // actuall flash screen app.
     bool app_init_edge; // one cycle
+
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+
+
+	enum multitimer_state : uint8_t
+	{
+		// enum state{
+		initialized = 0,
+		playing,
+		finished,
+		paused,
+		setTimers,
+		setFischer
+	};
+
+    // Buzzer *buzzer;
+	SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
+	multitimer_state multitimer_state;
+	uint8_t multitimer_activeTimer;
+	uint8_t multitimer_timerDisplayed;
+	bool multitimer_randomStarter;
+	bool multitimer_fisherTimer;
+
+	uint16_t multitimer_initTimeSecs;
+	uint8_t multitimer_timers_count;
+
+	uint16_t multitimer_fischerSecs;
+    #endif
+
 };
 
 #endif
+
+
+
+	
