@@ -57,6 +57,12 @@
 #define APP_SELECTOR_MULTITIMER_SETTING 22
 #define APP_SELECTOR_MULTITIMER_PLAYING 23
 
+#define DRAW_GAME_RANDOM 0
+#define DRAW_GAME_CLOCK 3
+#define DRAW_GAME_NUMBER 2
+#define DRAW_GAME_WORD 1
+
+
 #define TILT_FORWARD 0
 #define TILT_BACKWARD 1
 #define TILT_LEFT 2
@@ -206,6 +212,7 @@
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
 #define DRAW_SHOW_MODE general_uint8_t_2
+
 #define HACKTIME_SOUND general_uint8_t_2
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
@@ -215,6 +222,8 @@
 #define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
 #define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
+
+#define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -231,7 +240,6 @@
 #define POMODORO_STATS_WORKING_GOOD general_long_2
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
 
-// #define APP_SELECTOR_INIT_MODE general_boolean
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
@@ -639,7 +647,9 @@ private:
     void nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
     bool checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
+    void textBufToDisplayAllSegments();
 
+    // bool millis_second_period();
     bool millis_half_second_period();
     bool millis_quarter_second_period();
     bool millis_blink_650ms();
@@ -648,6 +658,8 @@ private:
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
     
     unsigned int indexToTimeSeconds(int16_t index);
+
+    void setButtonLight(uint8_t light_index, bool onElseOff);
 
     void textBufToDisplay();
     void decimalPointTimingOn();
@@ -703,6 +715,7 @@ private:
     uint8_t general_uint8_t_1;
     uint8_t general_uint8_t_2;
     uint8_t general_uint8_t_3;
+    uint8_t general_uint8_t_4;
 
     long general_long_1;
     long general_long_2;

@@ -232,6 +232,7 @@ void Apps::setDefaultMode()
     general_uint8_t_1 = 0;
     general_uint8_t_2 = 0;
     general_uint8_t_3 = 0;
+    general_uint8_t_4 = 0;
     general_long_1 = 0;
     general_long_2 = 0;
 }
@@ -2125,28 +2126,79 @@ void Apps::drawGame()
 	{
 		drawGameState = drawGameShowPicture;
 
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		DRAW_GAME_PICTURE_TYPE = 
+			(( (uint8_t)( (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT) )>0)) <<1)
+		 	+ ( (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))  >0);
+
+		// if (DRAW_GAME_PICTURE_TYPE == 1){
+		// 	addNoteToBuzzer(104 );
+		// }
+		
+		// if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)){
+			// Serial.println(DRAW_GAME_PICTURE_TYPE);
+		// }
+
+		// switch(DRAW_GAME_PICTURE_TYPE)
+		// {
+		// 	case DRAW_GAME_RANDOM:
+		// 	{
+		// 		// random segments
+		// 		displayAllSegments = 0UL;
+		// 		for (uint8_t i = 0; i < 32; i++)
+		// 		{
+		// 			displayAllSegments |= random(0, 2) << i;
+		// 		}
+		// 		break;
+		// 	}
+		// 	case DRAW_GAME_NUMBER:
+		// 	{
+		// 		// random number
+		// 		long r = random(0, 10000);
+		// 		numberToBufAsDecimal((int16_t)r);
+		// 		textBufToDisplayAllSegments();
+		// 		break;
+		// 	}
+		// 	case DRAW_GAME_WORD:
+		// 	{
+		// 		// random text
+		// 		for (uint8_t i = 0; i < 4; i++)
+		// 		{
+		// 			long r = random(0, 25);
+		// 			textBuf[i] = (char)r + 65;
+		// 		}
+		// 		textBufToDisplayAllSegments();
+		// 		break;
+		// 	}
+		// 	case DRAW_GAME_CLOCK:
+		// 	{
+		// 		// learn how to read the clock
+		// 		ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
+		// 		textBufToDisplayAllSegments();
+
+		// 		// add hour:minute divider.
+		// 		displayAllSegments |= 1UL << 15;
+		// 	}
+		// }
+
+		if (DRAW_GAME_PICTURE_TYPE == 3)
 		{
+			// learn how to read the clock
 
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
-			{
-				// learn how to read the clock
+			ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
+			textBufToDisplayAllSegments();
 
-				ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
-				ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-
-				// add hour:minute divider.
-				displayAllSegments |= 1UL << 15;
-			}
-			else
-			{
-				// random number
-				long r = random(0, 10000);
-				numberToBufAsDecimal((int16_t)r);
-				ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-			}
+			// add hour:minute divider.
+			displayAllSegments |= 1UL << 15;
 		}
-		else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		else if (DRAW_GAME_PICTURE_TYPE == 2)
+		{
+			// random number
+			long r = random(0, 10000);
+			numberToBufAsDecimal((int16_t)r);
+			textBufToDisplayAllSegments();
+		}
+		
+		else if (DRAW_GAME_PICTURE_TYPE == 1)
 		{
 			// random text
 			for (uint8_t i = 0; i < 4; i++)
@@ -2154,7 +2206,7 @@ void Apps::drawGame()
 				long r = random(0, 25);
 				textBuf[i] = (char)r + 65;
 			}
-			ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+			textBufToDisplayAllSegments();
 		}
 		else
 		{
@@ -2166,11 +2218,56 @@ void Apps::drawGame()
 			}
 		}
 
+		// if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT))
+		// {
+
+		// 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		// 	{
+		// 		// learn how to read the clock
+
+		// 		ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
+		// 		ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+
+		// 		// add hour:minute divider.
+		// 		displayAllSegments |= 1UL << 15;
+		// 	}
+		// 	else
+		// 	{
+		// 		// random number
+		// 		long r = random(0, 10000);
+		// 		numberToBufAsDecimal((int16_t)r);
+		// 		ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+		// 	}
+		// }
+		// else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT))
+		// {
+		// 	// random text
+		// 	for (uint8_t i = 0; i < 4; i++)
+		// 	{
+		// 		long r = random(0, 25);
+		// 		textBuf[i] = (char)r + 65;
+		// 	}
+		// 	ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+		// }
+		// else
+		// {
+		// 	// random segments
+		// 	displayAllSegments = 0UL;
+		// 	for (uint8_t i = 0; i < 32; i++)
+		// 	{
+		// 		displayAllSegments |= random(0, 2) << i;
+		// 	}
+		// }
 		break;
 	}
 
 	case drawGameShowPicture:
 	{
+		// start game button blinking
+		if(millis_half_second_period()){
+			lights |= 1<< LIGHT_LATCHING_EXTRA;
+		}
+
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 		{
 			drawGameState = drawGameDraw;
@@ -2215,6 +2312,9 @@ void Apps::drawGame()
 		{
 			drawGameState = drawGameWaitForStart;
 		}
+		if (millis_half_second_period()){
+			lights |= 1<< LIGHT_MOMENTARY_0;
+		}
 
 		// show difference result with original drawing
 		if (DRAW_GAME_DISPLAY_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, true))
@@ -2230,6 +2330,12 @@ void Apps::drawGame()
 	default:
 		break;
 	}
+
+	// lights ^= (- (DRAW_GAME_PICTURE_TYPE / 2) ^ lights) & (1UL << LIGHT_LATCHING_SMALL_LEFT);
+	//lights ^= (-(DRAW_GAME_PICTURE_TYPE % 2) ^ lights) & (1UL << LIGHT_LATCHING_SMALL_RIGHT);
+	setButtonLight(LIGHT_LATCHING_SMALL_LEFT, DRAW_GAME_PICTURE_TYPE / 2);
+	setButtonLight(LIGHT_LATCHING_SMALL_RIGHT, DRAW_GAME_PICTURE_TYPE % 2);
+
 	ledDisp->setBinaryToDisplay(displayAllSegments ^ cursorBlinker);
 }
 
@@ -3464,9 +3570,6 @@ void Apps::modeReactionGame()
 		
 	}
 
-
-
-
 	// at any time, leave game when depressing play button.
 	if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_EXTRA))
 	{
@@ -3980,8 +4083,11 @@ void Apps::modeReactionGame()
 
 	// option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
 	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
-	lights ^= (-EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO ^ lights) & (1UL << LIGHT_LATCHING_SMALL_LEFT);
-	lights ^= (-OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE ^ lights) & (1UL << LIGHT_LATCHING_SMALL_RIGHT);
+	// lights ^= (-EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO ^ lights) & (1UL << LIGHT_LATCHING_SMALL_LEFT);
+	// lights ^= (-OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE ^ lights) & (1UL << LIGHT_LATCHING_SMALL_RIGHT);
+
+	setButtonLight(LIGHT_LATCHING_SMALL_LEFT, EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO);
+	setButtonLight(LIGHT_LATCHING_SMALL_RIGHT, OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE);
 }
 
 
@@ -4047,7 +4153,7 @@ uint8_t Apps::tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t len
 	}
 
 	// draw card off deck
-	return sequenceList[--(*indexVariable)]; //
+	return sequenceList[--(*indexVariable)]; 
 }
 
 void Apps::randomSequence(uint8_t *sequenceList, uint8_t length)
@@ -4168,6 +4274,10 @@ void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureInde
 	}
 }
 
+// bool Apps::millis_second_period(){
+// 	return millis() % 1000 > 500;
+// }
+
 bool Apps::millis_quarter_second_period(){
 	return millis() % 250 > 125;
 }
@@ -4212,6 +4322,12 @@ void Apps::setDecimalPoint(bool onElseOff, uint8_t digit){
 	ledDisp->setDecimalPointToDisplay(onElseOff,digit);
 }
 
+void Apps::setButtonLight(uint8_t button_light, bool onElseOff){
+	// light = button light i.e. LIGHT_LATCHING_SMALL_RIGHT
+	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
+	lights ^= (-onElseOff ^ lights) & (1UL << button_light);
+}
+
 void Apps::decimalPointTimingOn(){
 	setDecimalPoint(true,1);
 }
@@ -4222,14 +4338,15 @@ void Apps::setBlankDisplay(){
 void Apps::setLedArray(){
 	ledDisp->setLedArray(lights);
 }
-
+void Apps::textBufToDisplayAllSegments(){
+	ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
+}
 void Apps::buzzerOff(){
 	buzzer->buzzerOff(); // stop all sounds that were playing in an app.
 }
 
 void Apps::buzzerChangeSpeedRatioWithEncoderDial(){
 	buzzer->changeSpeedRatio(encoder_dial->getDelta());
-	
 }
 
 unsigned int Apps::indexToTimeSeconds(int16_t index){
