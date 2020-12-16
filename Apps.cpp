@@ -2011,13 +2011,18 @@ void Apps::loadNextMovie(){
 	}
 }
 
-void Apps::displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer)
+
+void Apps::displayChangeGlobal(uint32_t *display_buffer)
 {
 	// global picture operations
-	if (saveStateToBuffer)
-	{
-		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
-	}
+
+
+	// WARNING, nonkel Lode took this out this function to save some measly bytes. But, just so you know, if you ever add stuff here, look for DRAW_SHOW_MODE everywhere in the code and change it accordingly.
+	// if (saveStateToBuffer)
+	// {
+	// 	DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
+
+	// }
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
@@ -2064,12 +2069,13 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	DRAW_CURSOR_SEGMENT += encoder_dial->getDelta();
 	
 	// check for global display change
-	this->displayChangeGlobal(&displayAllSegments, false);
+	this->displayChangeGlobal(&displayAllSegments);
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		*display_buffer ^= (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
-		this->displayChangeGlobal(display_buffer, true);
+		// this->displayChangeGlobal(display_buffer, true);
+		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -2581,7 +2587,8 @@ void Apps::draw()
 		{ // shift function for saving drawings to eeprom.
 
 			//check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
-			this->displayChangeGlobal(&displayAllSegments, false);
+			this->displayChangeGlobal(&displayAllSegments);
+			
 
 			//scroll through drawings.
 			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX, 1);
@@ -2664,7 +2671,7 @@ void Apps::draw()
 		displayAllSegments = 0;
 		eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, DRAW_ACTIVE_DRAWING_INDEX);
 
-		this->displayChangeGlobal(&displayAllSegments, true);
+		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
 	}
 #endif
 

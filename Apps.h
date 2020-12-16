@@ -626,7 +626,8 @@ public:
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
     bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
-    void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
+    // void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
+    void displayChangeGlobal(uint32_t *display_buffer);
     void displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
