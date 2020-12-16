@@ -379,7 +379,7 @@ void Apps::pomodoroTimer()
 
 	bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA) );
 
-	if (binaryInputsEdgeUp & (1<<BUTTON_LATCHING_EXTRA)){
+	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_LATCHING_EXTRA)){
 		POMODORO_TIMER.start();
 	}
 	
@@ -1183,7 +1183,7 @@ void Apps::modeTallyKeeper(){
 	for (uint8_t i = 0;i<4;i++){
 		if (binaryInputsEdgeUp & (1<<i)){
 			TALLY_KEEPER_DISPLAYED_COUNTER = i;
-			if (binaryInputsValue & (1 << BUTTON_LATCHING_EXTRA)){
+			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_EXTRA)){
 				TALLY_KEEPER_DELTA = 1;
 			}
 			else
@@ -1229,7 +1229,6 @@ void Apps::modeTallyKeeper(){
 				(*tally_counters[i]) = v;
 			}
 		}
-
 
 		// (*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) += TALLY_KEEPER_DELTA_SIGNED;
 		// checkBoundaries((tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]),0,9999,false );
@@ -2836,7 +2835,7 @@ void Apps::tiltSwitchTest()
 		TILT_CYCLE_COUNTER = 0;
 	}
 
-	if (binaryInputsEdgeUp & (1 << BUTTON_LATCHING_EXTRA)){
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_EXTRA)){
 		// start timer
 		TILT_TIMER.start();
 		TILT_CYCLE_COUNTER = 0;
@@ -2854,7 +2853,7 @@ void Apps::tiltSwitchTest()
 	}
 
 	// normal vs timed mode.
-	if (binaryInputsValue & 1 << BUTTON_LATCHING_EXTRA){
+	if (binaryInputsValue & 1 << BUTTON_INDEXED_LATCHING_EXTRA){
 		
 		if (!TILT_TIMER.getTimeIsNegative()){
 			loadBuzzerTrack(SONG_DRYER_UNHAPPY);
