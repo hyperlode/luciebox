@@ -66,9 +66,9 @@ private:
 	volatile int8_t delta;
 	int8_t delta_memory;
 	boolean overflowToOtherSide;
+	int16_t value_changed;
 
 	int16_t value;
-	int16_t value_changed;
 	int16_t value_memory;   // 
 
 	// volatile int encoderPos;  //raw dial counter

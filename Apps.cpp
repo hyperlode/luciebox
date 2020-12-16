@@ -1161,6 +1161,7 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 }
 
 #ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
+
 void Apps::modeTallyKeeper(){
 	
 	int16_t* tally_counters [] = {&TALLY_KEEPER_0,&TALLY_KEEPER_1,&TALLY_KEEPER_2,&TALLY_KEEPER_3};
@@ -1191,6 +1192,9 @@ void Apps::modeTallyKeeper(){
 				buzzerOffAndAddNote(C5_2);
 			}
 		}
+		if (binaryInputsValue & (1<<i)){
+			lights |= 1 << LIGHT_LATCHING_EXTRA;
+		}
 	}
 
 	TALLY_KEEPER_DELTA_SIGNED = TALLY_KEEPER_DELTA;
@@ -1198,17 +1202,18 @@ void Apps::modeTallyKeeper(){
 		TALLY_KEEPER_DELTA_SIGNED = -TALLY_KEEPER_DELTA; 
 	}
 
-	if ((binaryInputsValue & momentary_buttons_mask) != 0) // a button hold
+	if ((binaryInputsValue & momentary_buttons_mask) != 0) // a button is being held
 	{
-		if (TALLY_KEEPER_DELTA > 0){ // little trick to do checking of limit AND latching_extra
-
-			TALLY_KEEPER_DELTA+=encoder_dial->getDelta();
+		if (TALLY_KEEPER_DELTA >= 1){ // little trick to do checking of limit AND latching_extra
+			TALLY_KEEPER_DELTA+= encoder_dial->getDelta();
 		} 
 
 		display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] + TALLY_KEEPER_DELTA_SIGNED; 
+		// display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] ; 
 		if ( TALLY_KEEPER_DELTA > 1){
 			display_value = TALLY_KEEPER_DELTA;
 		}
+		
 	}
 	else if ((binaryInputsEdgeDown & momentary_buttons_mask) != 0) // a button unpressed
 	{
@@ -1236,9 +1241,7 @@ void Apps::modeTallyKeeper(){
 	}
 
 	ledDisp->setNumberToDisplayAsDecimal(display_value);
-	
-	lights = 1 << lights_indexed[TALLY_KEEPER_DISPLAYED_COUNTER];
-	// setLedArray();
+	lights |= 1 << lights_indexed[TALLY_KEEPER_DISPLAYED_COUNTER];
 }
 
 #else
@@ -1418,7 +1421,6 @@ void Apps::modeCountingLettersAndChars()
 	{
 		displayLetterAndPositionInAlphabet(textHandle, LETTERS_AND_CHARS_COUNTER);
 	}
-
 }
 
 void Apps::modeSoundSong()
@@ -1773,8 +1775,15 @@ void Apps::modeSoundNotes()
 
 		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC)
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (bool)random(0, 2);
-			note_jumps = random(0, 3);
+			// this is the more clear version, but takes 12bytes of memory more:
+			// SOUND_NOTE_AUTO_UP_ELSE_DOWN = (bool)random(0, 2);
+			// note_jumps = random(0, 3);
+
+			// less memory intensive:
+			uint8_t tmp = random(0, 7);
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = tmp>2;
+			note_jumps = tmp/2;
+
 		}
 
 		// every jump is one step on the scale.
@@ -3285,7 +3294,7 @@ void Apps::modeSimon()
 			simonState = simonNewGame;
 		}
 
-		// play button light blinking invitingly.
+		// latching_3_blink();
 		if (millis_quarter_second_period())
 		{
 			lights |= 1 << LIGHT_LATCHING_EXTRA;
@@ -4280,6 +4289,13 @@ void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureInde
 	}
 }
 
+// void Apps::latching_3_blink(){
+// 	// play button light blinking invitingly.
+// 		if (millis_quarter_second_period())
+// 		{
+// 			lights |= 1 << LIGHT_LATCHING_EXTRA;
+// 		}
+// }
 // bool Apps::millis_second_period(){
 // 	return millis() % 1000 > 500;
 // }

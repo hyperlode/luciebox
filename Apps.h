@@ -651,6 +651,7 @@ private:
     void textBufToDisplayAllSegments();
 
     // bool millis_second_period();
+    void latching_3_blink();
     bool millis_half_second_period();
     bool millis_quarter_second_period();
     bool millis_blink_650ms();
