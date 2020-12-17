@@ -1115,6 +1115,14 @@ void Apps::modeSimpleButtonsAndLights()
 
 	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
+		// show luciebox firmware version number
+
+		ledDisp->setNumberToDisplayAsDecimal(SOFTWARE_VERSION);
+		textHandle[0] = 'F'; // v doesn't work. So, F from Firmware version it is.
+		
+	}
+	else if (SETTINGS_MODE_SELECTOR < 20)
+	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
@@ -1149,8 +1157,6 @@ void Apps::modeSimpleButtonsAndLights()
 			textBufToDisplay();
 		}
 	}
-
-	// setLedArray();
 }
 
 void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet)
@@ -4810,16 +4816,9 @@ void Apps::multitimer_refresh()
 void Apps::multitimer_getDisplay()
 {
 	//what should be showing on the display right now?
-	// *playerLights = 0b00000000;   //lsb is timer 0, 2nd bit is timer 1, ....
 
-	uint8_t playerLights = 0;
-	uint8_t settingsLights = 0b00000000; //settings lights are other lights then timer button lights.
-
-	// char disp [4];
-	// disp[0] = ' ';
-	// disp[1] = ' ';
-	// disp[2] = ' ';
-	// disp[3] = ' ';
+	uint8_t playerLights = 0; //lsb is timer 0, 2nd bit is timer 1, ....
+	uint8_t settingsLights = 0b00000000; //I tried optimizing this away, but memory size increased... Settings lights are other lights then timer button lights.
 
 	if (this->multitimer_state == initialized)
 	{
@@ -4892,12 +4891,6 @@ void Apps::multitimer_getDisplay()
 			}
 		}
 
-		// //decimal point blinker
-
-		// if (this->multitimer_timers[this->multitimer_activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
-
-		// }
-
 		settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
 	}
 	else if (this->multitimer_state == finished)
@@ -4912,11 +4905,6 @@ void Apps::multitimer_getDisplay()
 		}
 		else
 		{
-
-			// disp[0] = ' ';
-			// disp[1] = 'E';
-			// disp[2] = 'N';
-			// disp[3] = 'D';
 			setStandardTextToTextHANDLE(TEXT_END);
 		}
 		//fast blink last surviving timer light.
@@ -4934,11 +4922,6 @@ void Apps::multitimer_getDisplay()
 		}
 		else
 		{
-			// disp[0] = 'P';
-			// disp[1] = 'A';
-			// disp[2] = 'U';
-			// disp[3] = 'S';
-			// textHandle[0] = 'P';
 			setStandardTextToTextHANDLE(TEXT_PAUS);
 		}
 
@@ -4981,10 +4964,6 @@ void Apps::multitimer_getDisplay()
 	{
 		if (millis() % 1000 > 650)
 		{
-			// disp[0] = 'F';
-			// disp[1] = 'I';
-			// disp[2] = 'S';
-			// disp[3] = 'H';
 			setStandardTextToTextHANDLE(TEXT_FISH);
 		}
 		else
@@ -5001,10 +4980,6 @@ void Apps::multitimer_getDisplay()
 		// Serial.println("setStateTimersCount");
 		if (millis() % 1000 > 650)
 		{
-			// disp[0] = 'Q';
-			// disp[1] = 'T';
-			// disp[2] = 'Y';
-			// //disp[3] = ' ';
 			setStandardTextToTextHANDLE(TEXT_QUANTITY);
 		}
 		else
@@ -5040,7 +5015,7 @@ void Apps::multitimer_getDisplay()
 		}
 	}
 
-	// settings light to real lights
+	// settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
 	(MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_EXTRA : false;
 	(MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_BIG : false;
 	(MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;

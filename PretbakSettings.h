@@ -1,4 +1,5 @@
 
+#define SOFTWARE_VERSION 200 // started at v2.00
 // #define DBUG_REFACTOR_DISP
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
