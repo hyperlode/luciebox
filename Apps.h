@@ -681,7 +681,7 @@ public:
 	uint16_t multitimer_getIndexedTime(uint8_t index);
 	void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
 	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
-	void multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *settingsLights);
+	void multitimer_getDisplay();
 	bool multitimer_getTimerFinished(uint8_t timerIndex);
 	bool multitimer_checkAllTimersFinished();
 	void multitimer_playerButtonPressEdgeUp(uint8_t index);
@@ -694,8 +694,6 @@ public:
 	void multitimer_refresh();
 	void multitimer_buzzerRefresh(bool alarm);
 	void multitimer_next();
-	//state getState();
-
 	void multitimer_init();
 	void multitimer_start();
 	void multitimer_pause();

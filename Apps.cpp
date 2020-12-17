@@ -4497,11 +4497,11 @@ void Apps::multitimer_integrated()
 	}
 
 	// START STOP Button
-	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp())
+	if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_LATCHING_BIG_RED))
 	{
 		this->multitimer_start();
 	}
-	if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown())
+	if (binaryInputsEdgeDown & (1<< BUTTON_INDEXED_LATCHING_BIG_RED))
 	{
 		this->multitimer_init();
 	}
@@ -4547,30 +4547,8 @@ void Apps::multitimer_integrated()
 	// UPDATE CYCLIC
 	this->multitimer_refresh();
 
-	uint8_t buttonLights;
-
-	uint8_t settingsLights;
-
-	this->multitimer_getDisplay(textHandle, &buttonLights, &settingsLights);
-
-	uint8_t lights = 0b00000000;
-	// timer buttons lights to real lights
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		if (1 << i & buttonLights)
-		{
-			lights |= 1 << lights_indexed[i];
-		}
-	}
-
-	// settings light to real lights
-	(MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_EXTRA : false;
-	(MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_BIG : false;
-	(MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
-	(MULTITIMER_LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
-	this->lights = lights;
-	// setLedArray();
-	setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1);
+	// this->multitimer_getDisplay(textHandle);
+	this->multitimer_getDisplay();
 }
 
 void Apps::multitimer_setDefaults()
@@ -4829,20 +4807,23 @@ void Apps::multitimer_refresh()
 	// }
 }
 
-void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *settingsLights)
+void Apps::multitimer_getDisplay()
 {
 	//what should be showing on the display right now?
-	*playerLights = 0b00000000;   //lsb is timer 0, 2nd bit is timer 1, ....
-	*settingsLights = 0b00000000; //settings lights are other lights then timer button lights.
+	// *playerLights = 0b00000000;   //lsb is timer 0, 2nd bit is timer 1, ....
 
-	disp[0] = ' ';
-	disp[1] = ' ';
-	disp[2] = ' ';
-	disp[3] = ' ';
+	uint8_t playerLights = 0;
+	uint8_t settingsLights = 0b00000000; //settings lights are other lights then timer button lights.
+
+	// char disp [4];
+	// disp[0] = ' ';
+	// disp[1] = ' ';
+	// disp[2] = ' ';
+	// disp[3] = ' ';
 
 	if (this->multitimer_state == initialized)
 	{
-		this->multitimer_timers[this->multitimer_activeTimer].getTimeString(disp);
+		this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
 
 		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
 		{
@@ -4851,13 +4832,13 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 				if (millis_quarter_second_period())
 				{
 					// at random starter, all lights blinking
-					*playerLights |= 1 << i;
+					playerLights |= 1 << i;
 				}
 			}
 			else if (i != this->multitimer_activeTimer || millis_quarter_second_period())
 			{
 				// active timer is blinking. others are solid on.
-				*playerLights |= 1 << i;
+				playerLights |= 1 << i;
 			}
 		}
 
@@ -4867,16 +4848,16 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 			// pause light blinking.
 			if (millis_quarter_second_period())
 			{
-				*settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
+				settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
 			}
 		}
-		*settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+		settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
 	}
 	else if (this->multitimer_state == playing)
 	{
 
 		// displayed timer is not always the active timer (i.e. non active player wants to check his time).
-		this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(disp);
+		this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
 
 		// run through all timers to set lights
 		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
@@ -4887,10 +4868,10 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 				// active timer seconds blink
 				if (this->multitimer_timers[this->multitimer_activeTimer].getInFirstGivenHundredsPartOfSecond(500))
 				{
-					*playerLights |= 1 << i;
+					playerLights |= 1 << i;
 
 					// blinking behaviour of decimal point
-					*settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+					settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
 				}
 			}
 			else if (i == this->multitimer_timerDisplayed)
@@ -4898,16 +4879,16 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 				// displayed timer is not always the active timer (i.e. non active player wants to check his time).
 				if (millis_quarter_second_period())
 				{
-					*playerLights |= 1 << i;
+					playerLights |= 1 << i;
 				}
 
 				// solid seconds blinker when displaying other timer
-				*settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+				settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
 			}
 			else if (i != this->multitimer_activeTimer && !this->multitimer_getTimerFinished(i))
 			{
 				//other lights solid on if still alive.
-				*playerLights |= 1 << i;
+				playerLights |= 1 << i;
 			}
 		}
 
@@ -4917,7 +4898,7 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 
 		// }
 
-		*settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
+		settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
 	}
 	else if (this->multitimer_state == finished)
 	{
@@ -4926,21 +4907,22 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 
 		if (this->multitimer_timers[this->multitimer_activeTimer].getInFirstGivenHundredsPartOfSecond(500))
 		{
-			this->multitimer_timers[this->multitimer_activeTimer].getTimeString(disp);
-			*settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+			this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
+			settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
 		}
 		else
 		{
 
 			// disp[0] = ' ';
-			disp[1] = 'E';
-			disp[2] = 'N';
-			disp[3] = 'D';
+			// disp[1] = 'E';
+			// disp[2] = 'N';
+			// disp[3] = 'D';
+			setStandardTextToTextHANDLE(TEXT_END);
 		}
 		//fast blink last surviving timer light.
 		if (millis_quarter_second_period())
 		{
-			*playerLights |= 1 << this->multitimer_activeTimer;
+			playerLights |= 1 << this->multitimer_activeTimer;
 		}
 	}
 	else if (this->multitimer_state == paused)
@@ -4948,14 +4930,16 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 		if (millis() % 1000 > 500 || this->multitimer_timerDisplayed != this->multitimer_activeTimer)
 		{
 			// if other timer than the active timer, show always.
-			this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(disp);
+			this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
 		}
 		else
 		{
-			disp[0] = 'P';
-			disp[1] = 'A';
-			disp[2] = 'U';
-			disp[3] = 'S';
+			// disp[0] = 'P';
+			// disp[1] = 'A';
+			// disp[2] = 'U';
+			// disp[3] = 'S';
+			// textHandle[0] = 'P';
+			setStandardTextToTextHANDLE(TEXT_PAUS);
 		}
 
 		// timer lights
@@ -4966,7 +4950,7 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 			{
 				if (millis_quarter_second_period())
 				{
-					*playerLights |= 1 << i;
+					playerLights |= 1 << i;
 				}
 			}
 			else if (i == this->multitimer_timerDisplayed)
@@ -4974,41 +4958,42 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 				// displayed timer is not always the active timer (i.e. non active player wants to check his time).
 				if (millis_quarter_second_period())
 				{
-					*playerLights |= 1 << i;
+					playerLights |= 1 << i;
 				}
 			}
 			else if (!this->multitimer_getTimerFinished(i))
 			{
-				*playerLights |= 1 << i;
+				playerLights |= 1 << i;
 			}
 		}
 		// settings lights
 		// pause light blinking.
 		if (millis_quarter_second_period())
 		{
-			*settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
+			settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
 		}
 		// playing light on.
-		*settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
+		settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
 
-		*settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+		settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
 	}
 	else if (this->multitimer_state == setFischer)
 	{
 		if (millis() % 1000 > 650)
 		{
-			disp[0] = 'F';
-			disp[1] = 'I';
-			disp[2] = 'S';
-			disp[3] = 'H';
+			// disp[0] = 'F';
+			// disp[1] = 'I';
+			// disp[2] = 'S';
+			// disp[3] = 'H';
+			setStandardTextToTextHANDLE(TEXT_FISH);
 		}
 		else
 		{
-			intToDigitsString(disp, (unsigned int)this->multitimer_fischerSecs, false); // utilities lode
+			intToDigitsString(textHandle, (unsigned int)this->multitimer_fischerSecs, false); // utilities lode
 		}
 		if (millis_quarter_second_period())
 		{
-			*settingsLights |= MULTITIMER_LIGHT_FISCHER;
+			settingsLights |= MULTITIMER_LIGHT_FISCHER;
 		}
 	}
 	else if (this->multitimer_state == setTimers)
@@ -5016,25 +5001,26 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 		// Serial.println("setStateTimersCount");
 		if (millis() % 1000 > 650)
 		{
-			disp[0] = 'Q';
-			disp[1] = 'T';
-			disp[2] = 'Y';
-			//disp[3] = ' ';
+			// disp[0] = 'Q';
+			// disp[1] = 'T';
+			// disp[2] = 'Y';
+			// //disp[3] = ' ';
+			setStandardTextToTextHANDLE(TEXT_QUANTITY);
 		}
 		else
 		{
-			intToDigitsString(disp, (unsigned int)this->multitimer_timers_count, false); // utilities lode
+			intToDigitsString(textHandle, (unsigned int)this->multitimer_timers_count, false); // utilities lode
 		}
 
 		// all active timers lights on
 		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
 		{
-			*playerLights |= 1 << i;
+			playerLights |= 1 << i;
 		}
 
 		if (millis_quarter_second_period())
 		{
-			*settingsLights |= MULTITIMER_LIGHT_SET_TIMERS_COUNT;
+			settingsLights |= MULTITIMER_LIGHT_SET_TIMERS_COUNT;
 		}
 	}
 
@@ -5042,9 +5028,25 @@ void Apps::multitimer_getDisplay(char *disp, uint8_t *playerLights, uint8_t *set
 	if (this->multitimer_state != setFischer && this->multitimer_fischerSecs != 0)
 	{
 		// fischer light always solid on when not zero seconds added. (except during setting, then blinking).
-		*settingsLights |= MULTITIMER_LIGHT_FISCHER;
+		settingsLights |= MULTITIMER_LIGHT_FISCHER;
 	}
 
+	// timer buttons lights to real lights
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		if (1 << i & playerLights)
+		{
+			lights |= 1 << lights_indexed[i];
+		}
+	}
+
+	// settings light to real lights
+	(MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_EXTRA : false;
+	(MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_BIG : false;
+	(MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_RIGHT : false;
+	(MULTITIMER_LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_SMALL_LEFT : false;
+
+	setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1);
 	//hour:seconds divider
 }
 
