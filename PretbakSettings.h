@@ -1,11 +1,15 @@
 
-#define SOFTWARE_VERSION 200 // started at v2.00
+#define SOFTWARE_VERSION 300 
+// started at v2.00: 200
+// v300 : pcb v3 burst implemented. change in button sequence...
+
 // #define DBUG_REFACTOR_DISP
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 // #define DBUG_REFACTOR_DISP
 
-#define V2_PCB_CORONA
+// #define V2_PCB_CORONA
+#define V3_PCB_BURST
 
 #define ENABLE_APPS 
 
@@ -63,14 +67,7 @@
 #define LIGHT_LATCHING_BIG 7         // big latch
 
 
-#define LIGHT_INDEXED_MOMENTARY_0 0
-#define LIGHT_INDEXED_MOMENTARY_1 1
-#define LIGHT_INDEXED_MOMENTARY_2 2
-#define LIGHT_INDEXED_MOMENTARY_3 3
-#define LIGHT_INDEXED_LATCHING_BIG 4
-#define LIGHT_INDEXED_LATCHING_SMALL_LEFT 5
-#define LIGHT_INDEXED_LATCHING_SMALL_RIGHT 6
-#define LIGHT_INDEXED_LATCHING_EXTRA 7
+
 
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
@@ -89,7 +86,16 @@
 #define MOMENTARY_BUTTONS_COUNT 4
 
 
-#ifdef V2_PCB_CORONA
+#if (defined V2_PCB_CORONA || defined V3_PCB_BURST)
+    #define LIGHT_INDEXED_MOMENTARY_0 0
+    #define LIGHT_INDEXED_MOMENTARY_1 1
+    #define LIGHT_INDEXED_MOMENTARY_2 2
+    #define LIGHT_INDEXED_MOMENTARY_3 3
+    #define LIGHT_INDEXED_LATCHING_BIG 4
+    #define LIGHT_INDEXED_LATCHING_SMALL_LEFT 5
+    #define LIGHT_INDEXED_LATCHING_SMALL_RIGHT 6
+    #define LIGHT_INDEXED_LATCHING_EXTRA 7
+
     #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
     #define BUTTONS_1_COUNT 4
     #define BUTTONS_1_VALUES      \
@@ -110,7 +116,6 @@
         {                           \
             450, 262, 128, 64       \
         }
-
 
 #else  // v1 pcb
     #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
@@ -146,7 +151,19 @@
 #define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT 6  // latching 2
 #define BUTTON_INDEXED_LATCHING_EXTRA 7  // latching 3
 
+
 #ifdef V2_PCB_CORONA
+    #define BUTTON_LATCHING_BIG_RED 0
+    #define BUTTON_LATCHING_SMALL_RED_LEFT 1
+    #define BUTTON_LATCHING_SMALL_RED_RIGHT 2
+    #define BUTTON_LATCHING_EXTRA 3 
+
+    #define BUTTON_MOMENTARY_0 4 // most left
+    #define BUTTON_MOMENTARY_1 5 // second most left
+    #define BUTTON_MOMENTARY_2 6 // seconds most right
+    #define BUTTON_MOMENTARY_3 7 // most right
+
+#elif defined V3_PCB_BURST
     // binary input indeces per button
     #define BUTTON_LATCHING_BIG_RED 0
     #define BUTTON_LATCHING_SMALL_RED_LEFT 1
