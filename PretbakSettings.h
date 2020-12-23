@@ -57,14 +57,14 @@
 
 #endif
 
-#define LIGHT_MOMENTARY_0 1          // momentary 0
-#define LIGHT_MOMENTARY_1 6          // momentary 1
-#define LIGHT_MOMENTARY_2 2          // momentary 2
-#define LIGHT_MOMENTARY_3 5          // momentary 3
-#define LIGHT_LATCHING_EXTRA 0       // extra latch
-#define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
-#define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
-#define LIGHT_LATCHING_BIG 7         // big latch
+#define LIGHT_MOMENTARY_0 1          // old: momentary 0
+#define LIGHT_MOMENTARY_1 6          // old: momentary 1
+#define LIGHT_MOMENTARY_2 2          // old: momentary 2
+#define LIGHT_MOMENTARY_3 5          // old: momentary 3
+#define LIGHT_LATCHING_3 0           // old: extra latch
+#define LIGHT_LATCHING_1 3           // old: small latch left
+#define LIGHT_LATCHING_2 4           // old: small latch right
+#define LIGHT_LATCHING_0 7           // old: big latch
 
 
 
@@ -72,7 +72,6 @@
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
 #define PIN_BUTTONS_2 A2
-// #define PIN_POTENTIO A3
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_B 3
 
@@ -87,15 +86,6 @@
 
 
 #if (defined V2_PCB_CORONA || defined V3_PCB_BURST)
-    #define LIGHT_INDEXED_MOMENTARY_0 0
-    #define LIGHT_INDEXED_MOMENTARY_1 1
-    #define LIGHT_INDEXED_MOMENTARY_2 2
-    #define LIGHT_INDEXED_MOMENTARY_3 3
-    #define LIGHT_INDEXED_LATCHING_BIG 4
-    #define LIGHT_INDEXED_LATCHING_SMALL_LEFT 5
-    #define LIGHT_INDEXED_LATCHING_SMALL_RIGHT 6
-    #define LIGHT_INDEXED_LATCHING_EXTRA 7
-
     #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
     #define BUTTONS_1_COUNT 4
     #define BUTTONS_1_VALUES      \
@@ -146,17 +136,16 @@
 #define BUTTON_INDEXED_MOMENTARY_1 1
 #define BUTTON_INDEXED_MOMENTARY_2 2
 #define BUTTON_INDEXED_MOMENTARY_3 3
-#define BUTTON_INDEXED_LATCHING_BIG_RED 4  // latching 0
-#define BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT 5 // latching 1 
-#define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT 6  // latching 2
-#define BUTTON_INDEXED_LATCHING_EXTRA 7  // latching 3
-
+#define BUTTON_INDEXED_LATCHING_0 4  // old: big latch
+#define BUTTON_INDEXED_LATCHING_1 5  // old: small latch left
+#define BUTTON_INDEXED_LATCHING_2 6  // old: small latch right
+#define BUTTON_INDEXED_LATCHING_3 7  // old: extra latch
 
 #ifdef V2_PCB_CORONA
-    #define BUTTON_LATCHING_BIG_RED 0
-    #define BUTTON_LATCHING_SMALL_RED_LEFT 1
-    #define BUTTON_LATCHING_SMALL_RED_RIGHT 2
-    #define BUTTON_LATCHING_EXTRA 3 
+    #define BUTTON_LATCHING_0 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_2 2
+    #define BUTTON_LATCHING_3 3 
 
     #define BUTTON_MOMENTARY_0 4 // most left
     #define BUTTON_MOMENTARY_1 5 // second most left
@@ -165,10 +154,10 @@
 
 #elif defined V3_PCB_BURST
     // binary input indeces per button
-    #define BUTTON_LATCHING_BIG_RED 0
-    #define BUTTON_LATCHING_SMALL_RED_LEFT 1
-    #define BUTTON_LATCHING_SMALL_RED_RIGHT 2
-    #define BUTTON_LATCHING_EXTRA 3 
+    #define BUTTON_LATCHING_0 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_2 2
+    #define BUTTON_LATCHING_3 3 
 
     #define BUTTON_MOMENTARY_0 4 // most left
     #define BUTTON_MOMENTARY_1 5 // second most left
@@ -177,11 +166,11 @@
 
 #else
     // binary input indeces per button
-    #define BUTTON_LATCHING_SMALL_RED_RIGHT 0
-    #define BUTTON_LATCHING_SMALL_RED_LEFT 1
-    #define BUTTON_LATCHING_BIG_RED 2
+    #define BUTTON_LATCHING_2 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_0 2
 
-    #define BUTTON_LATCHING_EXTRA 7 // Latching yellow
+    #define BUTTON_LATCHING_3 7 // Latching yellow
 
     #define BUTTON_MOMENTARY_0 6 // most left (Red)
     #define BUTTON_MOMENTARY_1 5 // Green (second most left)

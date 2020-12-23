@@ -291,18 +291,18 @@ void loop()
         Serial.println("button 0");
         visualsManager.setLedArray(0);
     }
-    if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp()){
+    if (binaryInputs[BUTTON_LATCHING_3].getEdgeUp()){
         Serial.println("button ext");
 
     }
-    if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){
-        Serial.println("BUTTON_LATCHING_BIG_RED");
+    if (binaryInputs[BUTTON_LATCHING_0].getEdgeUp()){
+        Serial.println("BUTTON_LATCHING_0");
     }
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getEdgeUp()){
-        Serial.println("button BUTTON_LATCHING_SMALL_RED_RIGHT");
+    if (binaryInputs[BUTTON_LATCHING_2].getEdgeUp()){
+        Serial.println("button BUTTON_LATCHING_2");
     }
-    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeUp()){
-        Serial.println("BUTTON_LATCHING_SMALL_RED_LEFT" );
+    if (binaryInputs[BUTTON_LATCHING_1].getEdgeUp()){
+        Serial.println("BUTTON_LATCHING_1" );
     }
 
     // if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())

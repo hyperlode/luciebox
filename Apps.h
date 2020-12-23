@@ -595,20 +595,20 @@ const uint8_t songs [] PROGMEM = {
 };
 
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
-                                    LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
+                                    LIGHT_LATCHING_0,  LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3};
 
 #ifdef V2_PCB_CORONA
-    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_BIG, LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_MOMENTARY_0,
-        LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,LIGHT_LATCHING_EXTRA};
+    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_MOMENTARY_0,
+        LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,LIGHT_LATCHING_3};
 
 #elif defined V3_PCB_BURST
-    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_BIG, LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_3,
+    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
         LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
         
 #endif
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
-                                    BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
+                                    BUTTON_LATCHING_0, BUTTON_LATCHING_1, BUTTON_LATCHING_2, BUTTON_LATCHING_3};
 
 const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD,SWITCH_TILT_LEFT,SWITCH_TILT_BACKWARD,SWITCH_TILT_RIGHT};
 
@@ -715,6 +715,8 @@ private:
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
 #endif
+    
+    uint16_t dialGetIndexedtime();
     void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
     bool checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
