@@ -1648,6 +1648,7 @@ void Apps::modeSoundNotesInitScale()
 void Apps::modeSoundNotes()
 {
 	bool update_note = false;
+	SOUND_NOTE_MUTE = false;
 
 	if (this->app_init_edge)
 	{
@@ -1655,8 +1656,6 @@ void Apps::modeSoundNotes()
 		SOUND_NOTE_AUTO_TIMER.start(-500);
 		SOUND_NOTES_SCALE_ROOT = C4_4;
 		modeSoundNotesInitScale();
-
-		// SOUND_NOTES_SCALE_INDEX = 0;
 
 		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
 	}
@@ -1668,25 +1667,21 @@ void Apps::modeSoundNotes()
 		{
 			update_note = true;
 		}
-
 		dialOnEdgeChangeInitTimerPercentage(&SOUND_NOTE_AUTO_TIMER);
 	}
 	else
 	{
-		// change note with potentio
-		if (encoder_dial->getDelta())
+		int8_t encoder_delta = encoder_dial->getDelta();
+		// change note with dial
+		if (encoder_delta)
 		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = encoder_dial->getDelta()>0;
+			SOUND_NOTE_AUTO_UP_ELSE_DOWN = encoder_delta>0;
 			update_note = true;
 		}
+	
 	}
 
-	// change note length,available in all modes.
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-	{
-		buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
-		SOUND_NOTE_PLAY_NOTE = true;
-	}
+
 
 	// advanced vs manual controls
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
@@ -1697,8 +1692,10 @@ void Apps::modeSoundNotes()
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
 			nextStepRotate(&SOUND_NOTES_SCALE_INDEX, 1, 0, SCALES_COUNT);
-			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX * 4;
 			modeSoundNotesInitScale();
+		}
+		if (binaryInputsValue  & (1 << BUTTON_INDEXED_MOMENTARY_2)){
+			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX * 4;
 		}
 
 		// change key
@@ -1719,22 +1716,38 @@ void Apps::modeSoundNotes()
 		}
 
 		// change progression mode
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
 			SOUND_NOTES_PROGRESSION_MODE++;
 			if (SOUND_NOTES_PROGRESSION_MODE > 5)
 			{
 				SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
 			}
+		}
+
+		if (binaryInputsValue  & (1 << BUTTON_INDEXED_MOMENTARY_1)){
 			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
 		}
+
+		// change note length
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		{
+			buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
+			SOUND_NOTE_PLAY_NOTE = true;
+		}
+
 	}
 	else
 	{
 		// easy
 
+		// mute button to silently change notes.
+		if (binaryInputsValue& (1 << BUTTON_INDEXED_MOMENTARY_0)){
+			SOUND_NOTE_MUTE = true;
+		}
+
 		// just play the active note
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
 			SOUND_NOTE_PLAY_NOTE = true;
 		}
@@ -1822,7 +1835,7 @@ void Apps::modeSoundNotes()
 		SOUND_NOTE_PLAY_NOTE = true;
 	}
 
-	if (SOUND_NOTE_PLAY_NOTE)
+	if (SOUND_NOTE_PLAY_NOTE && !SOUND_NOTE_MUTE)
 	{
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
@@ -3449,14 +3462,15 @@ void Apps::modeSimon()
 	}
 	break;
 	}
-
-	// setLedArray();
+	this->lights |= lights;
+		
 	textBufToDisplay();
 }
 #endif  //ENABLE_SIMON_APP
 
 void Apps::modeReactionGame()
 {
+
 #ifdef ENABLE_REACTION_APP
 	//yellow button active at start: yellow button is also a guess button
 	// big red active: timed game
@@ -3994,7 +4008,6 @@ void Apps::modeReactionGame()
 	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
 	// lights ^= (-EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO ^ lights) & (1UL << LIGHT_LATCHING_1);
 	// lights ^= (-OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE ^ lights) & (1UL << LIGHT_LATCHING_2);
-
 	setButtonLight(LIGHT_LATCHING_1, EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO);
 	setButtonLight(LIGHT_LATCHING_2, OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE);
 }

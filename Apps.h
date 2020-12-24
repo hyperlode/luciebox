@@ -263,6 +263,7 @@
 
 #define EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
+#define SOUND_NOTE_MUTE general_boolean3
 
 #define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
