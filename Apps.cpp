@@ -184,7 +184,7 @@ void Apps::updateEveryAppCycleBefore()
 	binaryInputsValue = 0;
 
 	// it's important to realize the display is reset before every cycle. Do not forget to update it all the time.
-	lights = 0x0;
+	lights = 0x00;
 
 	// load quick access bytes.
 	for (uint8_t i = 0; i < 8; i++)
@@ -298,7 +298,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 	byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 	if ((binaryInputsValue & momentary_buttons_mask) > 0){
 		INIT_SPLASH_ANIMATION_STEP = 6;
-		lights = 0x0;
+		lights = 0x00;
 		lights	|= 0x1 << lights_indexed_as_installed[(INIT_SPLASH_LIGHTS_STEP %32)/4];
 		// lights	|= 0x1 << lights_indexed_as_installed[((INIT_SPLASH_LIGHTS_STEP+16) %32)/4];
 	}
@@ -2098,7 +2098,6 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		*display_buffer ^= (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
-		// this->displayChangeGlobal(display_buffer, true);
 		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
 	}
 
@@ -3480,7 +3479,7 @@ void Apps::modeReactionGame()
 	if (this->app_init_edge)
 	{
 		reactionGameState = reactionWaitForStart;
-		displayAllSegments = 0x0;
+		displayAllSegments = 0x00;
 		TIMER_REACTION_GAME_RESTART_DELAY.start(0);  // 1 better than 0?  blinking does not look nice otherwise.
 
 		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
