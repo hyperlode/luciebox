@@ -33,14 +33,15 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis)
 	//if offset is negative, time goes down. if positive, time goes up.
 	if (getIsStarted())
 	{
-		if (getIsPaused())
-		{
-			this->startedMillis = this->startedMillis - offsetMillis;
-		}
-		else
-		{
-			this->startedMillis = this->startedMillis - offsetMillis; //-// we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
-		}
+		// if (getIsPaused())
+		// {
+		// 	this->startedMillis = this->startedMillis - offsetMillis;
+		// }
+		// else
+		// {
+		// 	this->startedMillis = this->startedMillis - offsetMillis; //-// we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
+		// }
+		this->startedMillis = this->startedMillis - offsetMillis;
 	}
 	else
 	{

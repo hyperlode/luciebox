@@ -162,6 +162,7 @@
 #define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
 #define MODE_DREAMTIME_STEP general_int16_t_1
 #define TALLY_KEEPER_0 general_int16_t_1
+#define MULTITIMER_TIMERS_COUNT general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
@@ -694,7 +695,7 @@ public:
 	bool multitimer_checkAllTimersFinished();
 	void multitimer_playerButtonPressEdgeUp(uint8_t index);
 	void multitimer_playerButtonPressEdgeDown(uint8_t index);
-	void multitimer_setTimersCount(uint8_t timers_count);
+	void multitimer_setTimersCount(int8_t delta);
 	void multitimer_setFischerTimer(uint16_t seconds);
 	void multitimer_setStateTimersCount(bool set);
 	void multitimer_setStateFischerTimer(bool set);
@@ -909,7 +910,7 @@ private:
 	bool multitimer_fisherTimer;
 
 	uint16_t multitimer_initTimeSecs;
-	uint8_t multitimer_timers_count;
+	// uint8_t multitimer_timers_count;
 
 	uint16_t multitimer_fischerSecs;
     #endif

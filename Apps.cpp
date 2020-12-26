@@ -4520,23 +4520,23 @@ void Apps::multitimer_integrated()
 	}
 
 	// START STOP Button
-	if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_LATCHING_0))
+	if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_LATCHING_3))
 	{
 		this->multitimer_start();
 	}
-	if (binaryInputsEdgeDown & (1<< BUTTON_INDEXED_LATCHING_0))
+	if (binaryInputsEdgeDown & (1<< BUTTON_INDEXED_LATCHING_3))
 	{
 		this->multitimer_init();
 	}
 
 	// PAUSE Switch
-	this->multitimer_setStatePause(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)); // do not only work on edge here, as latching switch can  be in any state.
+	this->multitimer_setStatePause(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// # set number of timers SWITCH
-	this->multitimer_setStateTimersCount(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
+	// this->multitimer_setStateTimersCount(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// set fischer timer SWITCH
-	this->multitimer_setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)); // do not only work on edge here, as latching switch can  be in any state.
+	this->multitimer_setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// THE DIAL
 	if (encoder_dial->getDelta())
@@ -4544,25 +4544,31 @@ void Apps::multitimer_integrated()
 		// number of timers
 		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
 
-		this->multitimer_setTimersCount((uint8_t) ((float)encoder_mapped / 25) + 1); 
-		// convert value to predefined amount of seconds.
 		uint16_t seconds = this->multitimer_getIndexedTime(encoder_mapped); // 0 seconds to an hour
+		// this->multitimer_setTimersCount((uint8_t) ((float)encoder_mapped / 25) + 1); 
+		// convert value to predefined amount of seconds.
 
 		// pass through to multitimer app, it has to decide about validity.
-		bool individualTimerSet = false;
+		// bool individualTimerSet = false;
 		for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
 		{
 			if (binaryInputs[buttons_indexed[i]].getValue())
 			{
 				this->multitimer_setTimerInitCountTimeSecs(i, seconds);
-				individualTimerSet = true;
+				// individualTimerSet = true;
 			}
 		}
 
-		if (!individualTimerSet)
-		{
-			this->multitimer_setAllInitCountDownTimeSecs(seconds);
+		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+		if ((binaryInputsValue & momentary_buttons_mask) == 0){
+			this->multitimer_setTimersCount(this->encoder_dial->getDelta()); 
+
 		}
+		
+		// if (!individualTimerSet)
+		// {
+		// 	this->multitimer_setAllInitCountDownTimeSecs(seconds);
+		// }
 
 		this->multitimer_setFischerTimer(seconds);
 	}
@@ -4578,7 +4584,7 @@ void Apps::multitimer_setDefaults()
 {
 	// general init
 	this->multitimer_fischerSecs = MULTITIMER_DEFAULT_FISCHER_TIMER_SECS;
-	this->multitimer_timers_count = MULTITIMER_DEFAULT_TIMERS_COUNT;
+	MULTITIMER_TIMERS_COUNT = MULTITIMER_DEFAULT_TIMERS_COUNT;
 	this->multitimer_setAllInitCountDownTimeSecs(MULTITIMER_DEFAULT_INIT_TIME_SECS);
 
 	this->multitimer_state = initialized;
@@ -4588,27 +4594,28 @@ void Apps::multitimer_setDefaults()
 
 
 
-void Apps::multitimer_setTimersCount(uint8_t timers_count)
+void Apps::multitimer_setTimersCount(int8_t delta)
 {
-	if (this->multitimer_state == setTimers)
+	// if (this->multitimer_state == setTimers)
+	if (this->multitimer_state == initialized)
 	{
-		this->multitimer_timers_count = timers_count;
+		nextStepRotate(&MULTITIMER_TIMERS_COUNT, delta>0, 1, MULTITIMER_MAX_TIMERS_COUNT);
 		this->multitimer_activeTimer = 0;
 		this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 	}
 }
 
-void Apps::multitimer_setStateTimersCount(bool set)
-{
-	if (!set && this->multitimer_state == setTimers)
-	{
-		this->multitimer_state = initialized;
-	}
-	else if (set && this->multitimer_state == initialized)
-	{
-		this->multitimer_state = setTimers;
-	}
-}
+// void Apps::multitimer_setStateTimersCount(bool set)
+// {
+// 	if (!set && this->multitimer_state == setTimers)
+// 	{
+// 		this->multitimer_state = initialized;
+// 	}
+// 	else if (set && this->multitimer_state == initialized)
+// 	{
+// 		this->multitimer_state = setTimers;
+// 	}
+// }
 
 void Apps::multitimer_setFischerTimer(uint16_t seconds)
 {
@@ -4680,7 +4687,7 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 
 	if (this->multitimer_state == initialized)
 	{
-		if ((index + 1) <= this->multitimer_timers_count)
+		if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
 		{
 			this->multitimer_activeTimer = index;
 			this->multitimer_timerDisplayed = this->multitimer_activeTimer;
@@ -4693,7 +4700,7 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 			this->multitimer_next();
 			buzzerOffAndAddNote(35);
 		}
-		else if ((index + 1) <= this->multitimer_timers_count)
+		else if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
 		{
 			buzzerOffAndAddNote(129);
 			this->multitimer_timerDisplayed = index; //display time of pressed timer button
@@ -4728,7 +4735,7 @@ void Apps::multitimer_start()
 {
 
 	//start and pause all timers.
-	for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
+	for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
 	{
 		this->multitimer_timers[i].start();
 		this->multitimer_timers[i].pause();
@@ -4738,7 +4745,7 @@ void Apps::multitimer_start()
 	if (this->multitimer_randomStarter)
 	{
 		randomSeed(millis());
-		this->multitimer_activeTimer = (uint8_t)random(0, (long)this->multitimer_timers_count);
+		this->multitimer_activeTimer = (uint8_t)random(0, (long)MULTITIMER_TIMERS_COUNT);
 	}
 
 	// activate the starting timer
@@ -4815,15 +4822,16 @@ void Apps::multitimer_refresh()
 			}
 		}
 	}
-	// else if (this->multitimer_state == initialized)
-	// {
-	// }
+	else if (this->multitimer_state == initialized)
+	{
+		
+	}
 	// else if (this->multitimer_state == paused)
 	// {
 	// }
 	else if (this->multitimer_state == finished)
 	{
-		multitimer_buzzerRefresh(this->multitimer_timers_count == 1); // alarm will sound if it was only one player.
+		multitimer_buzzerRefresh(MULTITIMER_TIMERS_COUNT == 1); // alarm will sound if it was only one player.
 	}
 	// else if (this->multitimer_state == setTimers)
 	// {
@@ -4841,7 +4849,7 @@ void Apps::multitimer_getDisplay()
 	{
 		this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
 
-		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
+		for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
 		{
 			if (this->multitimer_randomStarter)
 			{
@@ -4858,6 +4866,9 @@ void Apps::multitimer_getDisplay()
 			}
 		}
 
+		if (millis_half_second_period()){
+			settingsLights |= MULTITIMER_LIGHT_PLAYING;
+		}
 		if (this->multitimer_randomStarter)
 		{
 
@@ -4876,7 +4887,7 @@ void Apps::multitimer_getDisplay()
 		this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
 
 		// run through all timers to set lights
-		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
+		for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
 		{
 
 			if (i == this->multitimer_activeTimer)
@@ -4908,7 +4919,8 @@ void Apps::multitimer_getDisplay()
 			}
 		}
 
-		settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
+		// settingsLights |= MULTITIMER_LIGHT_PLAYING; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on. 
+		settingsLights |= MULTITIMER_LIGHT_PAUSE; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on. 
 	}
 	else if (this->multitimer_state == finished)
 	{
@@ -4943,7 +4955,7 @@ void Apps::multitimer_getDisplay()
 		}
 
 		// timer lights
-		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
+		for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
 		{
 			//other lights solid on if still alive.
 			if (i == this->multitimer_activeTimer)
@@ -4973,7 +4985,7 @@ void Apps::multitimer_getDisplay()
 			settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
 		}
 		// playing light on.
-		settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
+		// settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
 
 		settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
 	}
@@ -4987,34 +4999,35 @@ void Apps::multitimer_getDisplay()
 		{
 			intToDigitsString(textHandle, (unsigned int)this->multitimer_fischerSecs, false); // utilities lode
 		}
+
 		if (millis_quarter_second_period())
 		{
 			settingsLights |= MULTITIMER_LIGHT_FISCHER;
 		}
 	}
-	else if (this->multitimer_state == setTimers)
-	{
-		// Serial.println("setStateTimersCount");
-		if (millis() % 1000 > 650)
-		{
-			setStandardTextToTextHANDLE(TEXT_QUANTITY);
-		}
-		else
-		{
-			intToDigitsString(textHandle, (unsigned int)this->multitimer_timers_count, false); // utilities lode
-		}
+	// else if (this->multitimer_state == setTimers)
+	// {
+	// 	// Serial.println("setStateTimersCount");
+	// 	if (millis() % 1000 > 650)
+	// 	{
+	// 		setStandardTextToTextHANDLE(TEXT_QUANTITY);
+	// 	}
+	// 	else
+	// 	{
+	// 		intToDigitsString(textHandle, (unsigned int)MULTITIMER_TIMERS_COUNT, false); // utilities lode
+	// 	}
 
-		// all active timers lights on
-		for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
-		{
-			playerLights |= 1 << i;
-		}
+	// 	// all active timers lights on
+	// 	for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
+	// 	{
+	// 		playerLights |= 1 << i;
+	// 	}
 
-		if (millis_quarter_second_period())
-		{
-			settingsLights |= MULTITIMER_LIGHT_SET_TIMERS_COUNT;
-		}
-	}
+	// 	if (millis_quarter_second_period())
+	// 	{
+	// 		settingsLights |= MULTITIMER_LIGHT_SET_TIMERS_COUNT;
+	// 	}
+	// }
 
 	// settings lights exceptions
 	if (this->multitimer_state != setFischer && this->multitimer_fischerSecs != 0)
@@ -5023,6 +5036,7 @@ void Apps::multitimer_getDisplay()
 		settingsLights |= MULTITIMER_LIGHT_FISCHER;
 	}
 
+	this->lights = 0x0;
 	// timer buttons lights to real lights
 	for (uint8_t i = 0; i < 4; i++)
 	{
@@ -5032,11 +5046,16 @@ void Apps::multitimer_getDisplay()
 		}
 	}
 
+	// settingsLights = 0xff;
+	// if (millis_quarter_second_period()){
+	// 	settingsLights = 0x0;
+	// }
+
 	// settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
-	(MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
-	(MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_0 : false;
-	(MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
-	(MULTITIMER_LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
+	(MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
+	(MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
+	(MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
+	// (MULTITIMER_LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 
 	setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1);
 	//hour:seconds divider
@@ -5050,12 +5069,12 @@ bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)
 bool Apps::multitimer_checkAllTimersFinished()
 {
 	uint8_t count = 0;
-	for (uint8_t i = 0; i < this->multitimer_timers_count; i++)
+	for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
 	{
 		this->multitimer_getTimerFinished(i) ? count++ : count += 0;
 	}
 
-	return count == this->multitimer_timers_count;
+	return count == MULTITIMER_TIMERS_COUNT;
 }
 
 void Apps::multitimer_next()
@@ -5069,9 +5088,14 @@ void Apps::multitimer_next()
 		// add fischer timer (disabled just means: zero seconds).
 		this->multitimer_timers[this->multitimer_activeTimer].setOffsetInitTimeMillis(-1000 * long(this->multitimer_fischerSecs));
 
+		// if time bigger than initial time, just reset timer. It should not be bigger. I got this from boardgamearena.com. I kindof liked it.
+		if (this->multitimer_timers[this->multitimer_activeTimer].getInitTimeMillis() >= this->multitimer_timers[this->multitimer_activeTimer].getTimeMillis()){
+			this->multitimer_timers[this->multitimer_activeTimer].startPaused(true);
+		}
+
 		do
 		{
-			this->multitimer_activeTimer >= (this->multitimer_timers_count - 1) ? this->multitimer_activeTimer = 0 : this->multitimer_activeTimer++;
+			this->multitimer_activeTimer >= (MULTITIMER_TIMERS_COUNT - 1) ? this->multitimer_activeTimer = 0 : this->multitimer_activeTimer++;
 		} while (this->multitimer_getTimerFinished(this->multitimer_activeTimer) //if finished go to next timer.
 		);
 
