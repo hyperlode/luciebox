@@ -6,7 +6,7 @@
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-#define ENABLE_TILT_SWITCHES
+// #define ENABLE_TILT_SWITCHES``````````````````````````````````````````
 #define ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
 
 
@@ -687,7 +687,7 @@ public:
     void multitimer_integrated();
 
 	void multitimer_setDefaults();
-	uint16_t multitimer_getIndexedTime(uint8_t index);
+	// uint16_t multitimer_getIndexedTime(uint8_t index);
 	void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
 	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
 	void multitimer_getDisplay();

@@ -286,6 +286,7 @@ void SuperTimer::getTimeString(char *textBuf)
 	//will always return a string with a positive time value ...
 	timeMillisToClockString(textBuf, getTimeMillis());
 }
+
 bool SuperTimer::getSecondsBlinker(){
 	//ON when paused or at on time during blinking
 	//OFF at off time during blinking

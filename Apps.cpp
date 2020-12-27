@@ -4279,13 +4279,14 @@ void Apps::buzzerChangeSpeedRatioWithEncoderDial(){
 
 uint16_t Apps::dialGetIndexedtime(){
 #ifdef ENABLE_MULTITIMER
-		uint16_t tmpSeconds = this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
+		return this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90,false));
 #elif defined ENABLE_MULTITIMER_INTEGRATED
 
-		uint16_t tmpSeconds = indexToTimeSeconds(encoder_dial->getValueLimited(90,false));
+		return indexToTimeSeconds(encoder_dial->getValueLimited(90,false));
 #else
-		uint16_t tmpSeconds = encoder_dial->getValueLimited(60,false) * 30;
+		return encoder_dial->getValueLimited(60,false) * 30;
 #endif
+	
 
 }
 
@@ -4544,32 +4545,27 @@ void Apps::multitimer_integrated()
 		// number of timers
 		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
 
-		uint16_t seconds = this->multitimer_getIndexedTime(encoder_mapped); // 0 seconds to an hour
-		// this->multitimer_setTimersCount((uint8_t) ((float)encoder_mapped / 25) + 1); 
 		// convert value to predefined amount of seconds.
+		// uint16_t seconds = this->multitimer_getIndexedTime(encoder_mapped); // 0 seconds to an hour
+		uint16_t seconds = timeDialDiscreteSeconds[encoder_mapped];
 
-		// pass through to multitimer app, it has to decide about validity.
-		// bool individualTimerSet = false;
+		// set time for each timerbutton pressed
 		for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
 		{
 			if (binaryInputs[buttons_indexed[i]].getValue())
 			{
 				this->multitimer_setTimerInitCountTimeSecs(i, seconds);
-				// individualTimerSet = true;
 			}
 		}
 
+		// number of timers
 		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 		if ((binaryInputsValue & momentary_buttons_mask) == 0){
 			this->multitimer_setTimersCount(this->encoder_dial->getDelta()); 
 
 		}
-		
-		// if (!individualTimerSet)
-		// {
-		// 	this->multitimer_setAllInitCountDownTimeSecs(seconds);
-		// }
 
+		// fischer timer
 		this->multitimer_setFischerTimer(seconds);
 	}
 
@@ -4577,7 +4573,7 @@ void Apps::multitimer_integrated()
 	this->multitimer_refresh();
 
 	// this->multitimer_getDisplay(textHandle);
-	this->multitimer_getDisplay();
+	// this->multitimer_getDisplay();
 }
 
 void Apps::multitimer_setDefaults()
@@ -4592,8 +4588,6 @@ void Apps::multitimer_setDefaults()
 	this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 }
 
-
-
 void Apps::multitimer_setTimersCount(int8_t delta)
 {
 	// if (this->multitimer_state == setTimers)
@@ -4604,18 +4598,6 @@ void Apps::multitimer_setTimersCount(int8_t delta)
 		this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 	}
 }
-
-// void Apps::multitimer_setStateTimersCount(bool set)
-// {
-// 	if (!set && this->multitimer_state == setTimers)
-// 	{
-// 		this->multitimer_state = initialized;
-// 	}
-// 	else if (set && this->multitimer_state == initialized)
-// 	{
-// 		this->multitimer_state = setTimers;
-// 	}
-// }
 
 void Apps::multitimer_setFischerTimer(uint16_t seconds)
 {
@@ -4637,11 +4619,11 @@ void Apps::multitimer_setStateFischerTimer(bool set)
 	}
 }
 
-uint16_t Apps::multitimer_getIndexedTime(uint8_t index)
-{
-	// instead of all seconds, only
-	return timeDialDiscreteSeconds[index];
-}
+// uint16_t Apps::multitimer_getIndexedTime(uint8_t index)
+// {
+// 	// instead of all seconds, only
+// 	return timeDialDiscreteSeconds[index];
+// }
 
 void Apps::multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs)
 {
@@ -4786,59 +4768,43 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() < 11 && this->multitimer_timers[this->multitimer_activeTimer].getTimeIsNegative())
 		{
 			// check for last ten seconds of countdown timer
-			buzzerOffAndAddNote(34 + this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute());
+			addNoteToBuzzer(34 + this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute());
 			// buzzerOffAndAddNote(63);
 		}
 
 		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() % 60 == 0)
 		{
-			buzzerOffAndAddNote(44);
+			addNoteToBuzzer(44);
 			// buzzerOffAndAddNote(63);
 		}
 	}
 }
 
-void Apps::multitimer_refresh()
-{
+// void Apps::multitimer_refresh()
+// {
 
-	if (this->multitimer_state == playing)
-	{
+// 	if (this->multitimer_state == playing)
+// 	{
 
-		//check all timers elapsed
-		if (this->multitimer_checkAllTimersFinished())
-		{
+	
+// 	}
+// 	else if (this->multitimer_state == initialized)
+// 	{
 
-			this->multitimer_state = finished;
-		}
-		else
-		{
-
-			multitimer_buzzerRefresh(false);
-
-			//check active timer time elapsed
-			if (this->multitimer_getTimerFinished(this->multitimer_activeTimer))
-			{
-				this->multitimer_next();
-			}
-		}
-	}
-	else if (this->multitimer_state == initialized)
-	{
+// 	}
+// 	// else if (this->multitimer_state == paused)
+// 	// {
+// 	// }
+// 	else if (this->multitimer_state == finished)
+// 	{
 		
-	}
-	// else if (this->multitimer_state == paused)
-	// {
-	// }
-	else if (this->multitimer_state == finished)
-	{
-		multitimer_buzzerRefresh(MULTITIMER_TIMERS_COUNT == 1); // alarm will sound if it was only one player.
-	}
-	// else if (this->multitimer_state == setTimers)
-	// {
-	// }
-}
+// 	}
+// 	// else if (this->multitimer_state == setTimers)
+// 	// {
+// 	// }
+// }
 
-void Apps::multitimer_getDisplay()
+void Apps::multitimer_refresh()
 {
 	//what should be showing on the display right now?
 
@@ -4882,6 +4848,24 @@ void Apps::multitimer_getDisplay()
 	}
 	else if (this->multitimer_state == playing)
 	{
+		//check all timers elapsed
+		if (this->multitimer_checkAllTimersFinished())
+		{
+
+			this->multitimer_state = finished;
+		}
+		else
+		{
+
+			multitimer_buzzerRefresh(false);
+
+			//check active timer time elapsed
+			if (this->multitimer_getTimerFinished(this->multitimer_activeTimer))
+			{
+				this->multitimer_next();
+			}
+		}
+
 
 		// displayed timer is not always the active timer (i.e. non active player wants to check his time).
 		this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
@@ -4925,8 +4909,9 @@ void Apps::multitimer_getDisplay()
 	else if (this->multitimer_state == finished)
 	{
 
-		// last surviving timer is now a chrono for displaying time since end.
+		multitimer_buzzerRefresh(MULTITIMER_TIMERS_COUNT == 1); // alarm will sound if it was only one player.
 
+		// last surviving timer is now a chrono for displaying time since end.
 		if (this->multitimer_timers[this->multitimer_activeTimer].getInFirstGivenHundredsPartOfSecond(500))
 		{
 			this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
@@ -4997,13 +4982,15 @@ void Apps::multitimer_getDisplay()
 		}
 		else
 		{
-			intToDigitsString(textHandle, (unsigned int)this->multitimer_fischerSecs, false); // utilities lode
+			// intToDigitsString(textHandle, (unsigned int)this->multitimer_fischerSecs, false); // utilities lode
+			timeMillisToClockString(textHandle, 1000 * (long) this->multitimer_fischerSecs);
 		}
 
 		if (millis_quarter_second_period())
 		{
 			settingsLights |= MULTITIMER_LIGHT_FISCHER;
 		}
+		settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;	
 	}
 	// else if (this->multitimer_state == setTimers)
 	// {
