@@ -6,8 +6,9 @@
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-#define ENABLE_TILT_SWITCHES
-#define ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
+// #define ENABLE_TILT_SWITCHES
+#define ENABLE_QUIZ_MASTER
+#define ENABLE_TALLY_KEEPER
 
 
 #include "Arduino.h"
@@ -40,7 +41,7 @@
 #define APP_SELECTOR_STOPWATCH 4
 #define APP_SELECTOR_POMODORO 5
 #define APP_SELECTOR_RANDOMWORLD 6
-#define APP_SELECTOR_QUIZ 7
+#define APP_SELECTOR_TALLY_KEEPER 7
 #define APP_SELECTOR_GEIGER 8
 #define APP_SELECTOR_HACK_TIME 9
 #define APP_SELECTOR_SOUND_SONG 10
@@ -55,8 +56,8 @@
 #define APP_SELECTOR_GUITAR_HERO 19
 #define APP_SELECTOR_TILT 20
 #define APP_SELECTOR_DREAMTIME 21
-#define APP_SELECTOR_MULTITIMER_SETTING 22
-#define APP_SELECTOR_MULTITIMER_PLAYING 23
+#define APP_SELECTOR_MULTITIMER 22
+#define APP_SELECTOR_QUIZ_MASTER 23
 
 #define DRAW_GAME_RANDOM 0
 #define DRAW_GAME_CLOCK 3
@@ -118,7 +119,7 @@
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_INIT_APP generalTimer
-#define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
+// #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define RANDOMWORLD_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer
@@ -237,10 +238,12 @@
 #define POMODORO_STATS_WORKING_BAD general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1
+#define MULTITIMER_FISCHER_BLINK_NO_TEXT general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
+#define REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT general_long_2
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
@@ -636,9 +639,10 @@ public:
 
     bool init_app(bool init, uint8_t selector);
     void modeSimpleButtonsAndLights();
-    #ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
+    #ifdef ENABLE_TALLY_KEEPER
     void modeTallyKeeper();
-    #else
+    #endif
+    #ifdef ENABLE_QUIZ_MASTER
     void quiz();
     #endif
 
@@ -700,7 +704,7 @@ public:
 	void multitimer_setTimersCount(int8_t delta);
 	// void multitimer_setFischerTimer(uint16_t seconds);
 	void multitimer_setStateTimersCount(bool set);
-	void multitimer_setStateFischerTimer(bool set);
+	// void multitimer_setStateFischerTimer(bool set);
 	void multitimer_setStatePause(bool set);
 	void multitimer_refresh();
 	void multitimer_buzzerRefresh(bool alarm);

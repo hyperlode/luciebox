@@ -70,6 +70,7 @@ void DisplayManagement::setBinaryToDisplay(uint32_t value) //updateDisplayAllBit
 // }
 
 void DisplayManagement::setDecimalPointsToDisplay(byte decimalPoints){
+	// 0x00001111 four decimal points.
 	this->decimalPoints = decimalPoints;
 }
 

@@ -71,7 +71,6 @@ void Apps::appSelector()
 			break;
 
 		case APP_SELECTOR_SIMON:
-
 #ifdef ENABLE_SIMON_APP
 			this->modeSimon();
 #endif
@@ -97,11 +96,9 @@ void Apps::appSelector()
 			this->modeRandomWorld();
 			break;
 
-		case APP_SELECTOR_QUIZ:
-#ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
+		case APP_SELECTOR_TALLY_KEEPER:
+#ifdef ENABLE_TALLY_KEEPER
 			this->modeTallyKeeper();
-#else
-			this->quiz();
 #endif
 			break;
 
@@ -159,11 +156,13 @@ void Apps::appSelector()
 			break;
 #endif
 
-		case APP_SELECTOR_MULTITIMER_PLAYING:
-			// FREE SLOT
+#ifdef ENABLE_QUIZ_MASTER
+		case APP_SELECTOR_QUIZ_MASTER:
+			this->quiz();
 			break;
+#endif
 
-		case APP_SELECTOR_MULTITIMER_SETTING:
+		case APP_SELECTOR_MULTITIMER:
 #ifdef ENABLE_MULTITIMER
 			this->miniMultiTimer();
 #elif defined ENABLE_MULTITIMER_INTEGRATED
@@ -1165,7 +1164,7 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 	textBuf[3] = letterValueAlphabet + 65; // show letters alphabet.
 }
 
-#ifdef ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
+#ifdef ENABLE_TALLY_KEEPER
 
 void Apps::modeTallyKeeper(){
 	
@@ -1174,11 +1173,6 @@ void Apps::modeTallyKeeper(){
 
 	if (this->app_init_edge)
 	{
-		// for (uint8_t i = 0;i<4;i++){
-		// 	*tally_counters[i] = 0;
-		// }
-		// TALLY_KEEPER_DISPLAYED_COUNTER = 0;
-		// TALLY_KEEPER_DELTA= 0;
 	}
 	
 	byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
@@ -1189,16 +1183,13 @@ void Apps::modeTallyKeeper(){
 	for (uint8_t i = 0;i<4;i++){
 		if (binaryInputsEdgeUp & (1<<i)){
 			TALLY_KEEPER_DISPLAYED_COUNTER = i;
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)){
+			if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))){
 				TALLY_KEEPER_DELTA = 1;
 			}
 			else
 			{
 				buzzerOffAndAddNote(C5_2);
 			}
-		}
-		if (binaryInputsValue & (1<<i)){
-			lights |= 1 << LIGHT_LATCHING_3;
 		}
 	}
 
@@ -1214,7 +1205,6 @@ void Apps::modeTallyKeeper(){
 		} 
 
 		display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] + TALLY_KEEPER_DELTA_SIGNED; 
-		// display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] ; 
 		if ( TALLY_KEEPER_DELTA > 1){
 			display_value = TALLY_KEEPER_DELTA;
 		}
@@ -1240,25 +1230,25 @@ void Apps::modeTallyKeeper(){
 			}
 		}
 
-		// (*tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]) += TALLY_KEEPER_DELTA_SIGNED;
-		// checkBoundaries((tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER]),0,9999,false );
 		TALLY_KEEPER_DELTA = 0;
 	}
 
 	ledDisp->setNumberToDisplayAsDecimal(display_value);
 	lights |= 1 << lights_indexed[TALLY_KEEPER_DISPLAYED_COUNTER];
 }
+#endif 
 
-#else
+#ifdef ENABLE_QUIZ_MASTER
 void Apps::quiz()
 {
 
 	// quiz app
-	uint8_t lights = 0;
+	// uint8_t lights = 0;
 
 	if (this->app_init_edge)
 	{
 		quizState = quizInit;
+		
 	}
 
 	switch (quizState)
@@ -1270,26 +1260,30 @@ void Apps::quiz()
 			QUIZ_SCORE[i] = 0;
 		}
 		quizState = quizWaitForQuizMaster;
-		lights |= 1 << LIGHT_LATCHING_1;
+		// lights |= 1 << LIGHT_LATCHING_1;
 	}
 	break;
+
 	case quizWaitForQuizMaster:
 	{
-		lights |= 1 << LIGHT_LATCHING_3;
+		if(this->millis_half_second_period()){
+			lights |= 1 << LIGHT_LATCHING_3;
+		}else{
+			lights &= ~(1 << LIGHT_LATCHING_3);
+		}
 
-		if (binaryInputs[BUTTON_LATCHING_3].getEdgeUp() || binaryInputs[BUTTON_LATCHING_2].getValue())
-		// if (binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_3) ||
-		// 	binaryInputsEdgeUp && (1 << BUTTON_INDEXED_LATCHING_2))
-
+		if (binaryInputs[BUTTON_LATCHING_3].getValueChanged() || 
+			(binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2)))
 		{
 			quizState = quizWaitRandomTime;
 			QUIZ_RANDOM_WAIT_TIME.start(random(-3000, -500));
 		}
 	}
 	break;
+
 	case quizWaitRandomTime:
 	{
-		lights |= 1 << LIGHT_LATCHING_2;
+		// lights |= 1 << LIGHT_LATCHING_2;
 		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
 		{
 			quizState = quizWaitPlayerPress;
@@ -1301,35 +1295,40 @@ void Apps::quiz()
 			if (binaryInputsEdgeUp & 1 << i)
 			{
 				QUIZ_SCORE[i] = 0;
+				addNoteToBuzzer(C4_1);
 			}
 		}
 	}
 	break;
+
 	case quizWaitPlayerPress:
 	{
-		lights = 0xFF;
+		byte momentary_buttons_lights = 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_1 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
+		lights |= momentary_buttons_lights;
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 			if (binaryInputsEdgeUp & 1 << i)
 			{
 				// add to score.
 				QUIZ_SCORE[i]++;
+				
 				// go to next state
-
-				quizState = quizPlayerPressed;
+				quizState = quizWaitForQuizMaster;
 			}
 		}
 	}
 	break;
-	case quizPlayerPressed:
-	{
-		lights |= 1 << LIGHT_LATCHING_3;
-		if (binaryInputs[BUTTON_LATCHING_3].getEdgeDown() || binaryInputs[BUTTON_LATCHING_2].getValue())
-		{
-			quizState = quizWaitForQuizMaster;
-		}
-	}
-	break;
+
+	// case quizPlayerPressed:
+	// {
+	// 	lights |= 1 << LIGHT_LATCHING_3;
+	// 	if (binaryInputs[BUTTON_LATCHING_3].getEdgeDown() || binaryInputs[BUTTON_LATCHING_2].getValue())
+	// 	{
+	// 		quizState = quizWaitForQuizMaster;
+	// 	}
+	// }
+	// break;
+
 	}
 
 	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
@@ -1346,10 +1345,9 @@ void Apps::quiz()
 		scoreToDisplay += multiplier * QUIZ_SCORE[i];
 		multiplier /= 10;
 	}
-	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
+	ledDisp->setNumberToDisplayAsDecimal(10000+scoreToDisplay);
 
-	// lights |= 1 << lights_indexed[i];
-	// setLedArray();
+	ledDisp->setDecimalPointsToDisplay(B00001111);
 }
 
 #endif
@@ -1844,8 +1842,8 @@ void Apps::modeSoundNotes()
 			buzzerOff();
 		}
 		addNoteToBuzzer(SOUND_NOTES_NOTE_INDEX);
-		SOUND_NOTE_PLAY_NOTE = false;
 	}
+	SOUND_NOTE_PLAY_NOTE = false;
 
 	// index to actual note on the scale
 	// USE A TIMER to end display of settings. hmmm not sure if it will be that much better...
@@ -3482,7 +3480,6 @@ void Apps::modeReactionGame()
 	{
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x00;
-		TIMER_REACTION_GAME_RESTART_DELAY.start(0);  // 1 better than 0?  blinking does not look nice otherwise.
 
 		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
 		// never twice the same sound. Only first notes of array will be used.
@@ -3509,7 +3506,7 @@ void Apps::modeReactionGame()
 		REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(64,false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
 		if (encoder_dial->getDelta())
 		{
-			TIMER_REACTION_GAME_RESTART_DELAY.start();
+			REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT = millis() % 1000;
 		}
 
 		// check options
@@ -3519,13 +3516,7 @@ void Apps::modeReactionGame()
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
-		if (TIMER_REACTION_GAME_RESTART_DELAY.getInFirstGivenHundredsPartOfSecond(500))
-		{
-			intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
-			textBuf[0] = 'L';
-			textBufToDisplay();
-		}
-		else
+		if((millis() - REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT) % 1000 > 500)
 		{
 			lights |= 1<< LIGHT_LATCHING_3;
 			ledDisp->setNumberToDisplayAsDecimal(
@@ -3536,6 +3527,12 @@ void Apps::modeReactionGame()
 								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
 								REACTION_GAME_LEVEL
 								 ));
+		}
+		else
+		{
+			intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
+			textBuf[0] = 'L';
+			textBufToDisplay();
 
 		}
 #else
@@ -4388,9 +4385,6 @@ void Apps::progmemToBuffer(const uint8_t* offset, uint8_t length){
 	}
 }
 
-
-
-
 #ifdef ENABLE_MULTITIMER
 void Apps::miniMultiTimer()
 {
@@ -4539,7 +4533,7 @@ void Apps::multitimer_integrated()
 	// this->multitimer_setStateTimersCount(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// set fischer timer SWITCH
-	this->multitimer_setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
+	// this->multitimer_setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
 
 	// // THE DIAL
 	// if (encoder_dial->getDelta())
@@ -4609,50 +4603,21 @@ void Apps::multitimer_setTimersCount(int8_t delta)
 	}
 }
 
-// void Apps::multitimer_setFischerTimer(uint16_t seconds)
+// void Apps::multitimer_setStateFischerTimer(bool set)
 // {
-// 	if (this->multitimer_state == setFischer)
+// 	if (!set && this->multitimer_state == setFischer)
 // 	{
-// 		this->multitimer_fischerSecs = seconds;
+// 		this->multitimer_state = initialized;
 // 	}
-// }
-
-void Apps::multitimer_setStateFischerTimer(bool set)
-{
-	if (!set && this->multitimer_state == setFischer)
-	{
-		this->multitimer_state = initialized;
-	}
-	else if (set && this->multitimer_state == initialized)
-	{
-		this->multitimer_state = setFischer;
-	}
-}
-
-// uint16_t Apps::multitimer_getIndexedTime(uint8_t index)
-// {
-// 	// instead of all seconds, only
-// 	return timeDialDiscreteSeconds[index];
-// }
-
-// void Apps::multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs)
-// {
-// 	if (this->multitimer_state == initialized)
+// 	else if (set && this->multitimer_state == initialized)
 // 	{
-// 		this->multitimer_initTimeSecs = initTimeSecs;
-// 		for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
-// 		{
-// 			this->multitimer_setTimerInitCountTimeSecs(i, this->multitimer_initTimeSecs);
-// 		}
+// 		this->multitimer_state = setFischer;
 // 	}
 // }
 
 void Apps::multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs)
 {
-	// if (this->multitimer_state == initialized)
-	// {
 		this->multitimer_timers[timer].setInitCountDownTimeSecs(initTimeSecs);
-	// }
 }
 
 void Apps::multitimer_init()
@@ -4811,6 +4776,10 @@ void Apps::multitimer_refresh()
 
 	if (this->multitimer_state == initialized)
 	{
+		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_1)){
+			this->multitimer_state = setFischer;
+		}
+
 		if (MULTITIMER_DIAL_EDGE){
 			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 			if ((binaryInputsValue & momentary_buttons_mask) == 0){
@@ -4987,12 +4956,18 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == setFischer)
 	{
+		// addNoteToBuzzer(C4_4);
+		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_1))){
+			this->multitimer_state = initialized;
+		}
+
 		// fischer timer
 		if (MULTITIMER_DIAL_EDGE){
 			this->multitimer_fischerSecs = dial_seconds;
+			MULTITIMER_FISCHER_BLINK_NO_TEXT = millis() % 1000;
 		}
 
-		if (millis() % 1000 > 650)
+		if ((millis() - MULTITIMER_FISCHER_BLINK_NO_TEXT) % 1000 > 650)
 		{
 			setStandardTextToTextHANDLE(TEXT_FISH);
 		}
