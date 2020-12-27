@@ -4539,35 +4539,35 @@ void Apps::multitimer_integrated()
 	// set fischer timer SWITCH
 	this->multitimer_setStateFischerTimer(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)); // do not only work on edge here, as latching switch can  be in any state.
 
-	// THE DIAL
-	if (encoder_dial->getDelta())
-	{
-		// number of timers
-		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
+	// // THE DIAL
+	// if (encoder_dial->getDelta())
+	// {
+	// 	// number of timers
+	// 	int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
 
-		// convert value to predefined amount of seconds.
-		// uint16_t seconds = this->multitimer_getIndexedTime(encoder_mapped); // 0 seconds to an hour
-		uint16_t seconds = timeDialDiscreteSeconds[encoder_mapped];
+	// 	// convert value to predefined amount of seconds.
+	// 	// uint16_t seconds = this->multitimer_getIndexedTime(encoder_mapped); // 0 seconds to an hour
+	// 	uint16_t seconds = timeDialDiscreteSeconds[encoder_mapped];
 
-		// set time for each timerbutton pressed
-		for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
-		{
-			if (binaryInputs[buttons_indexed[i]].getValue())
-			{
-				this->multitimer_setTimerInitCountTimeSecs(i, seconds);
-			}
-		}
+	// 	// set time for each timerbutton pressed
+	// 	for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
+	// 	{
+	// 		if (binaryInputs[buttons_indexed[i]].getValue())
+	// 		{
+	// 			this->multitimer_setTimerInitCountTimeSecs(i, seconds);
+	// 		}
+	// 	}
 
-		// number of timers
-		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
-		if ((binaryInputsValue & momentary_buttons_mask) == 0){
-			this->multitimer_setTimersCount(this->encoder_dial->getDelta()); 
+	// 	// number of timers
+	// 	byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+	// 	if ((binaryInputsValue & momentary_buttons_mask) == 0){
+	// 		this->multitimer_setTimersCount(this->encoder_dial->getDelta()); 
 
-		}
+	// 	}
 
-		// fischer timer
-		this->multitimer_setFischerTimer(seconds);
-	}
+	// 	// fischer timer
+	// 	this->multitimer_setFischerTimer(seconds);
+	// }
 
 	// UPDATE CYCLIC
 	this->multitimer_refresh();
@@ -4581,7 +4581,15 @@ void Apps::multitimer_setDefaults()
 	// general init
 	this->multitimer_fischerSecs = MULTITIMER_DEFAULT_FISCHER_TIMER_SECS;
 	MULTITIMER_TIMERS_COUNT = MULTITIMER_DEFAULT_TIMERS_COUNT;
-	this->multitimer_setAllInitCountDownTimeSecs(MULTITIMER_DEFAULT_INIT_TIME_SECS);
+	// this->multitimer_setAllInitCountDownTimeSecs(MULTITIMER_DEFAULT_INIT_TIME_SECS);
+
+	this->multitimer_initTimeSecs = MULTITIMER_DEFAULT_INIT_TIME_SECS;
+	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
+	{
+		this->multitimer_setTimerInitCountTimeSecs(i, this->multitimer_initTimeSecs);
+		// this->multitimer_timers[timer].setInitCountDownTimeSecs(initTimeSecs);
+	}
+	
 
 	this->multitimer_state = initialized;
 	this->multitimer_activeTimer = 0;
@@ -4599,13 +4607,13 @@ void Apps::multitimer_setTimersCount(int8_t delta)
 	}
 }
 
-void Apps::multitimer_setFischerTimer(uint16_t seconds)
-{
-	if (this->multitimer_state == setFischer)
-	{
-		this->multitimer_fischerSecs = seconds;
-	}
-}
+// void Apps::multitimer_setFischerTimer(uint16_t seconds)
+// {
+// 	if (this->multitimer_state == setFischer)
+// 	{
+// 		this->multitimer_fischerSecs = seconds;
+// 	}
+// }
 
 void Apps::multitimer_setStateFischerTimer(bool set)
 {
@@ -4625,24 +4633,24 @@ void Apps::multitimer_setStateFischerTimer(bool set)
 // 	return timeDialDiscreteSeconds[index];
 // }
 
-void Apps::multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs)
-{
-	if (this->multitimer_state == initialized)
-	{
-		this->multitimer_initTimeSecs = initTimeSecs;
-		for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
-		{
-			this->multitimer_setTimerInitCountTimeSecs(i, this->multitimer_initTimeSecs);
-		}
-	}
-}
+// void Apps::multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs)
+// {
+// 	if (this->multitimer_state == initialized)
+// 	{
+// 		this->multitimer_initTimeSecs = initTimeSecs;
+// 		for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
+// 		{
+// 			this->multitimer_setTimerInitCountTimeSecs(i, this->multitimer_initTimeSecs);
+// 		}
+// 	}
+// }
 
 void Apps::multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs)
 {
-	if (this->multitimer_state == initialized)
-	{
+	// if (this->multitimer_state == initialized)
+	// {
 		this->multitimer_timers[timer].setInitCountDownTimeSecs(initTimeSecs);
-	}
+	// }
 }
 
 void Apps::multitimer_init()
@@ -4754,13 +4762,12 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 	{
 		if (alarm)
 		{
-
 			uint8_t tmp = random(20, 50);
 			for (uint8_t i = 0; i < 5; i++)
 			{
-				buzzerOffAndAddNote(tmp);
+				addNoteToBuzzer(tmp);
 
-				buzzerOffAndAddNote(rest_4);
+				addNoteToBuzzer(rest_4);
 			}
 			//(*this->buzzer).addRandomSoundToRoll(20,80 );
 		}
@@ -4769,40 +4776,14 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 		{
 			// check for last ten seconds of countdown timer
 			addNoteToBuzzer(34 + this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute());
-			// buzzerOffAndAddNote(63);
 		}
 
 		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() % 60 == 0)
 		{
 			addNoteToBuzzer(44);
-			// buzzerOffAndAddNote(63);
 		}
 	}
 }
-
-// void Apps::multitimer_refresh()
-// {
-
-// 	if (this->multitimer_state == playing)
-// 	{
-
-	
-// 	}
-// 	else if (this->multitimer_state == initialized)
-// 	{
-
-// 	}
-// 	// else if (this->multitimer_state == paused)
-// 	// {
-// 	// }
-// 	else if (this->multitimer_state == finished)
-// 	{
-		
-// 	}
-// 	// else if (this->multitimer_state == setTimers)
-// 	// {
-// 	// }
-// }
 
 void Apps::multitimer_refresh()
 {
@@ -4811,8 +4792,41 @@ void Apps::multitimer_refresh()
 	uint8_t playerLights = 0; //lsb is timer 0, 2nd bit is timer 1, ....
 	uint8_t settingsLights = 0b00000000; //I tried optimizing this away, but memory size increased... Settings lights are other lights then timer button lights.
 
+	uint16_t dial_seconds;
+
+	if (encoder_dial->getDelta())
+	{
+		// number of timers
+		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
+
+		// convert value to predefined amount of seconds.
+		dial_seconds = timeDialDiscreteSeconds[encoder_mapped];
+		MULTITIMER_DIAL_EDGE = true;
+
+	}else{
+		MULTITIMER_DIAL_EDGE = false;
+	}
+
 	if (this->multitimer_state == initialized)
 	{
+		if (MULTITIMER_DIAL_EDGE){
+			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+			if ((binaryInputsValue & momentary_buttons_mask) == 0){
+				// set number of timers
+				this->multitimer_setTimersCount(this->encoder_dial->getDelta()); 
+
+			}else{
+				// set time for each timerbutton pressed
+				for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
+				{
+					if (binaryInputs[buttons_indexed[i]].getValue())
+					{
+						this->multitimer_setTimerInitCountTimeSecs(i, dial_seconds);
+					}
+				}
+			}
+		}
+
 		this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
 
 		for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
@@ -4837,7 +4851,6 @@ void Apps::multitimer_refresh()
 		}
 		if (this->multitimer_randomStarter)
 		{
-
 			// pause light blinking.
 			if (millis_quarter_second_period())
 			{
@@ -4851,12 +4864,10 @@ void Apps::multitimer_refresh()
 		//check all timers elapsed
 		if (this->multitimer_checkAllTimersFinished())
 		{
-
 			this->multitimer_state = finished;
 		}
 		else
 		{
-
 			multitimer_buzzerRefresh(false);
 
 			//check active timer time elapsed
@@ -4865,7 +4876,6 @@ void Apps::multitimer_refresh()
 				this->multitimer_next();
 			}
 		}
-
 
 		// displayed timer is not always the active timer (i.e. non active player wants to check his time).
 		this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
@@ -4908,7 +4918,6 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == finished)
 	{
-
 		multitimer_buzzerRefresh(MULTITIMER_TIMERS_COUNT == 1); // alarm will sound if it was only one player.
 
 		// last surviving timer is now a chrono for displaying time since end.
@@ -4976,13 +4985,17 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == setFischer)
 	{
+		// fischer timer
+		if (MULTITIMER_DIAL_EDGE){
+			this->multitimer_fischerSecs = dial_seconds;
+		}
+
 		if (millis() % 1000 > 650)
 		{
 			setStandardTextToTextHANDLE(TEXT_FISH);
 		}
 		else
 		{
-			// intToDigitsString(textHandle, (unsigned int)this->multitimer_fischerSecs, false); // utilities lode
 			timeMillisToClockString(textHandle, 1000 * (long) this->multitimer_fischerSecs);
 		}
 
@@ -4992,30 +5005,7 @@ void Apps::multitimer_refresh()
 		}
 		settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;	
 	}
-	// else if (this->multitimer_state == setTimers)
-	// {
-	// 	// Serial.println("setStateTimersCount");
-	// 	if (millis() % 1000 > 650)
-	// 	{
-	// 		setStandardTextToTextHANDLE(TEXT_QUANTITY);
-	// 	}
-	// 	else
-	// 	{
-	// 		intToDigitsString(textHandle, (unsigned int)MULTITIMER_TIMERS_COUNT, false); // utilities lode
-	// 	}
-
-	// 	// all active timers lights on
-	// 	for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
-	// 	{
-	// 		playerLights |= 1 << i;
-	// 	}
-
-	// 	if (millis_quarter_second_period())
-	// 	{
-	// 		settingsLights |= MULTITIMER_LIGHT_SET_TIMERS_COUNT;
-	// 	}
-	// }
-
+	
 	// settings lights exceptions
 	if (this->multitimer_state != setFischer && this->multitimer_fischerSecs != 0)
 	{
@@ -5033,19 +5023,12 @@ void Apps::multitimer_refresh()
 		}
 	}
 
-	// settingsLights = 0xff;
-	// if (millis_quarter_second_period()){
-	// 	settingsLights = 0x0;
-	// }
-
 	// settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
 	(MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
 	(MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
 	(MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
-	// (MULTITIMER_LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 
-	setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1);
-	//hour:seconds divider
+	setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1); // "hour:seconds" divider
 }
 
 bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)

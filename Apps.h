@@ -6,7 +6,7 @@
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-// #define ENABLE_TILT_SWITCHES``````````````````````````````````````````
+#define ENABLE_TILT_SWITCHES``````````````````````````````````````````
 #define ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
 
 
@@ -252,6 +252,8 @@
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 #define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
+#define MULTITIMER_DIAL_EDGE general_boolean
+
 
 #define STOPWATCH_PAUSED_2 general_boolean2
 #define HACKTIME_VALUE_TO_SOUND general_boolean2
@@ -688,7 +690,7 @@ public:
 
 	void multitimer_setDefaults();
 	// uint16_t multitimer_getIndexedTime(uint8_t index);
-	void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
+	// void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
 	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
 	void multitimer_getDisplay();
 	bool multitimer_getTimerFinished(uint8_t timerIndex);
@@ -696,7 +698,7 @@ public:
 	void multitimer_playerButtonPressEdgeUp(uint8_t index);
 	void multitimer_playerButtonPressEdgeDown(uint8_t index);
 	void multitimer_setTimersCount(int8_t delta);
-	void multitimer_setFischerTimer(uint16_t seconds);
+	// void multitimer_setFischerTimer(uint16_t seconds);
 	void multitimer_setStateTimersCount(bool set);
 	void multitimer_setStateFischerTimer(bool set);
 	void multitimer_setStatePause(bool set);
