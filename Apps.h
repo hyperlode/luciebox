@@ -6,7 +6,7 @@
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-#define ENABLE_TILT_SWITCHES``````````````````````````````````````````
+#define ENABLE_TILT_SWITCHES
 #define ENABLE_TALLY_KEEPER_ELSE_QUIZ_MASTER
 
 

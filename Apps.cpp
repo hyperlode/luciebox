@@ -32,7 +32,7 @@ void Apps::appSelector()
 	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 	uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 
-	bool init_app_init = selector_changed || ( shift_changed && (selector_dial_value != 11) && (selector_dial_value != 7)); // settings and multitimer app mode have no dual app available. So, don't init if shift button is toggled.
+	bool init_app_init = selector_changed || ( shift_changed  && (selector_dial_value != 7)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app 
 	this->app_init_edge = false;
 
 	if (init_app_init)
@@ -159,13 +159,15 @@ void Apps::appSelector()
 			break;
 #endif
 
-		case APP_SELECTOR_MULTITIMER_SETTING:
 		case APP_SELECTOR_MULTITIMER_PLAYING:
+			// FREE SLOT
+			break;
+
+		case APP_SELECTOR_MULTITIMER_SETTING:
 #ifdef ENABLE_MULTITIMER
 			this->miniMultiTimer();
 #elif defined ENABLE_MULTITIMER_INTEGRATED
-	this->multitimer_integrated();
-
+			this->multitimer_integrated();
 #endif
 			break;
 
