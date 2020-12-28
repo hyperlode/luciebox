@@ -150,7 +150,7 @@ void Apps::appSelector()
 			this->modeDreamtime();
 			break;
 
-#ifdef ENABLE_TILT_SWITCHES
+#ifdef ENABLE_TILT_APP
 		case APP_SELECTOR_TILT:
 			this->tiltSwitchTest();
 			break;
@@ -1311,7 +1311,7 @@ void Apps::quiz()
 			{
 				// add to score.
 				QUIZ_SCORE[i]++;
-				
+
 				// go to next state
 				quizState = quizWaitForQuizMaster;
 			}
@@ -2714,7 +2714,7 @@ void Apps::draw()
 }
 
 
-#ifdef ENABLE_TILT_SWITCHES
+#ifdef ENABLE_TILT_APP
 void Apps::tiltSwitchTest()
 {
 	// four tilt switches are positioned as such that they are "ON" in rest position.

@@ -4,6 +4,7 @@
 // v300 : pcb v3 burst implemented. change in button sequence...
 
 // #define DBUG_REFACTOR_DISP
+// #define ENABLE_TILT_SWITCHES
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 // #define DBUG_REFACTOR_DISP
@@ -79,8 +80,19 @@
 
 #define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 
-#define BINARY_INPUTS_COUNT 12
 
+#ifdef ENABLE_TILT_SWITCHES
+    
+    #define SWITCH_TILT_FORWARD 11
+    #define SWITCH_TILT_BACKWARD 9
+    #define SWITCH_TILT_LEFT 8
+    #define SWITCH_TILT_RIGHT 10
+
+    #define BINARY_INPUTS_COUNT 12
+#else
+    #define BINARY_INPUTS_COUNT 8
+
+#endif
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
@@ -178,11 +190,6 @@
     #define BUTTON_MOMENTARY_3 3 // most right (Yellow)
 
 #endif
-
-#define SWITCH_TILT_FORWARD 11
-#define SWITCH_TILT_BACKWARD 9
-#define SWITCH_TILT_LEFT 8
-#define SWITCH_TILT_RIGHT 10
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 

@@ -20,7 +20,10 @@
 
 uint16_t setValues_1[BUTTONS_1_COUNT] = BUTTONS_1_VALUES;
 uint16_t setValues_2[BUTTONS_2_COUNT] = BUTTONS_2_VALUES;
+
+#ifdef ENABLE_TILT_SWITCHES
 uint16_t setValues_mercury[MERCURY_SWITCHES_COUNT] = MERCURY_SWITCHES_VALUES;
+#endif
 
 //pretbak
 #ifdef ENABLE_APPS
@@ -32,7 +35,9 @@ BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 ButtonsDacR2r buttons_1;
 ButtonsDacR2r buttons_2;       // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+#ifdef ENABLE_TILT_SWITCHES
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
+#endif
 RotaryEncoderDial encoder_dial;
 
 // OUTPUT
@@ -152,7 +157,9 @@ void input_process()
     selectorDial.refresh();
     buttons_1.refresh();
     buttons_2.refresh();
+#ifdef ENABLE_TILT_SWITCHES
     mercurySwitches.refresh();
+#endif
     encoder_dial.refresh();
 
     if (buttons_2.getValueChangedEdge())
@@ -171,6 +178,7 @@ void input_process()
         }
     }
 
+#ifdef ENABLE_TILT_SWITCHES
     if (mercurySwitches.getValueChangedEdge())
     {
 #ifdef DEBUG_MERCURY
@@ -189,6 +197,8 @@ void input_process()
             binaryInputs[MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET + i].setValue(mercurySwitches.getButtonValueByIndex(i));
         }
     }
+#endif
+
 }
 
 void outputProcess(){
@@ -218,8 +228,10 @@ void setup()
 
     buttons_2.setPin(PIN_BUTTONS_2, BUTTONS_2_COUNT, setValues_2);
 
+#ifdef ENABLE_TILT_SWITCHES
     mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
     mercurySwitches.setDebounceMillis(30);
+#endif
 
     encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
 
