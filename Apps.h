@@ -2,13 +2,13 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-// #define ENABLE_MULTITIMER
+// #define ENABLE_MULTITIMER // app as a class
 #define ENABLE_MULTITIMER_INTEGRATED
-// #define ENABLE_SIMON_APP
+#define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 
 #ifdef ENABLE_TILT_SWITCHES
-// #define ENABLE_TILT_APP
+#define ENABLE_TILT_APP
 #endif
 
 #define ENABLE_QUIZ_MASTER
@@ -168,6 +168,7 @@
 #define MODE_DREAMTIME_STEP general_int16_t_1
 #define TALLY_KEEPER_0 general_int16_t_1
 #define MULTITIMER_TIMERS_COUNT general_int16_t_1
+// #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
@@ -192,7 +193,9 @@
 #define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
 #define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
 #define TALLY_KEEPER_2 general_int16_t_3
+#define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 
+#define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
 
 #define REACTION_GAME_TARGET general_uint16_t_1
@@ -215,6 +218,7 @@
 #define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
 #define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
+#define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -223,6 +227,7 @@
 #define HACKTIME_SOUND general_uint8_t_2
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
+#define DRAW_ACTIVE_SEGMENT general_uint8_t_2
 
 #define TALLY_KEEPER_TEST general_uint8_t_3
 #define DRAW_CURSOR_SEGMENT general_uint8_t_3
@@ -644,7 +649,7 @@ public:
     void appSelector();
 
     bool init_app(bool init, uint8_t selector);
-    void modeSimpleButtonsAndLights();
+    void modeSettings();
     #ifdef ENABLE_TALLY_KEEPER
     void modeTallyKeeper();
     #endif

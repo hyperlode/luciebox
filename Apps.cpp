@@ -128,7 +128,7 @@ void Apps::appSelector()
 
 		case APP_SELECTOR_SETTING:
 		case APP_SELECTOR_SETTING_TOO:
-			this->modeSimpleButtonsAndLights();
+			this->modeSettings();
 			break;
 
 		case APP_SELECTOR_SOUND_METRONOME:
@@ -991,9 +991,9 @@ void Apps::randomModeTrigger(bool forReal)
 
 }
 
-void Apps::modeSimpleButtonsAndLights()
+void Apps::modeSettings()
 {
-	lights = 0b00000000; //reset before switch enquiry
+	// lights = 0b00000000; //reset before switch enquiry
 	const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_MERCURY_SWITCHES};
 
 	if (this->app_init_edge)
@@ -1023,22 +1023,15 @@ void Apps::modeSimpleButtonsAndLights()
 		// no buzzer
 		// display lights up a segment for each button.
 
-		//delete all content from screen.
-		// setBlankDisplay();
-
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		for (uint8_t i = 0; i < 4; i++)
 		{
 			// every momentary button has a matching latching button assigned
-			if (binaryInputs[buttons_indexed[i + 4]].getValue())
-			{
-				
+			if (binaryInputsValue & (1<<(i+4)))
+			{				
 				// momentary button pressed while its matching latching button is ON?
-
-				lights |= 1 << lights_indexed[i + 4];
 
 				if (binaryInputs[buttons_indexed[i]].getValue())
 				{
-					lights |= 1 << lights_indexed[i];
 					textHandle[i] = '8';
 				}
 				else
@@ -1046,17 +1039,19 @@ void Apps::modeSimpleButtonsAndLights()
 					textHandle[i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII;
 				}
 			}
-			else if (binaryInputs[buttons_indexed[i]].getValue())
+			else if (binaryInputsValue & (1<<i))
 			{
 				textHandle[i] = '0';
 			}
-			else
-			{
-				textHandle[i] = ' ';
-			}
 		}
 
-		// allLights->setBrightness((byte)(50 - encoder_dial->getValueLimited(50,false)), false); // always annoyed me more than it brought happiness. Gaining a few bytes of memory, THAT's real happiness!
+		if (millis_quarter_second_period()){ // BAD PRACTICE GIVES FUN RESULTS. Will go through this loop continuously when true (no edge detection). And then half a second static. I kind of like the effect
+		MODE_SETTINGS_DECIMAL_POINT_COUNTER++;
+		if (MODE_SETTINGS_DECIMAL_POINT_COUNTER > 15){
+			MODE_SETTINGS_DECIMAL_POINT_COUNTER = 0;
+		}
+	}
+	ledDisp->setDecimalPointsToDisplay(MODE_SETTINGS_DECIMAL_POINT_COUNTER);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
@@ -1152,6 +1147,10 @@ void Apps::modeSimpleButtonsAndLights()
 			textBufToDisplay();
 		}
 	}
+
+
+
+	
 }
 
 void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet)
@@ -2084,52 +2083,47 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer)
 
 uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 {
-	// return blinking segment.
+	// return blinking cursor segment.
 	// no need to initialize DRAW_CURSOR_INDEX, it get's within boundaries in one cycle. And we don't care about starting position.
 
 	uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing, or want to show it to your mother
+	uint32_t cursor_position_on_display;
 
 	encoder_dial->setSensitivity(2);
-	DRAW_CURSOR_SEGMENT += encoder_dial->getDelta();
-	
-	// check for global display change
-	this->displayChangeGlobal(&displayAllSegments);
 
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-	{
-		*display_buffer ^= (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
-		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
+	int16_t cursor_position = DRAW_CURSOR_ACTIVE_DIGIT*9 + DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT; 
+	if (encoder_dial->getDelta()){
+		nextStepRotate(&cursor_position, encoder_dial->getDelta()>0,0,35);
 	}
+	DRAW_CURSOR_ACTIVE_DIGIT = cursor_position/9;
+	DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = cursor_position%9;
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
 		// move segment inside digit
-		DRAW_CURSOR_SEGMENT++;
-		if (DRAW_CURSOR_SEGMENT > 8){
-			DRAW_CURSOR_SEGMENT = 0;
-		}
+		nextStepRotate(&DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT,true,0,8);
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
 		// move digit
-		DRAW_CURSOR_DIGIT++;
+		nextStepRotate(&DRAW_CURSOR_ACTIVE_DIGIT,true,0,3);
 	}
 
-	// set limits on cursor position
-	if (DRAW_CURSOR_SEGMENT > 8){
-		DRAW_CURSOR_SEGMENT = 0;
-		DRAW_CURSOR_DIGIT++;
+	cursor_position_on_display = (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT]) << (DRAW_CURSOR_ACTIVE_DIGIT) * 8;
+
+	// check for global display change
+	this->displayChangeGlobal(&displayAllSegments);
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+	{
+		// drawing or erasing the segment by xor'ing it with the drawing
+		*display_buffer ^= cursor_position_on_display;
+		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion at next global change button press.
 	}
 
-	if (DRAW_CURSOR_DIGIT > 3){
-		DRAW_CURSOR_DIGIT = 0;
-	}
-	
-	//add blinking cursor. (depending on time, we set the active segment)
 	if (millis_quarter_second_period())
 	{
-		return (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_SEGMENT]) << (DRAW_CURSOR_DIGIT) * 8;
+		return cursor_position_on_display;
 	}
 	else
 	{
@@ -2592,31 +2586,6 @@ void Apps::draw()
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 	}
 
-	// VIEW / MODIFY drawing
-	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)) &&
-		!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
-	{
-		// modify drawing on display in draw mode.
-		// if in save to eeprom mode, always only scroll through drawings.
-
-		cursorBlinker = this->modeSingleSegmentManipulation(&displayAllSegments);
-	}
-	else
-	{
-		// scroll through drawings
-		DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getDelta();
-		
-		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
-		{ // shift function for saving drawings to eeprom.
-
-			//check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
-			this->displayChangeGlobal(&displayAllSegments);
-			
-
-			//scroll through drawings.
-			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX, 1);
-		}
-	}
 
 	// SAVE / LOAD drawings from memory
 #ifdef ENABLE_EEPROM
@@ -2686,8 +2655,36 @@ void Apps::draw()
 					);
 			}
 		}
+	}else
+#endif
+	// VIEW / MODIFY drawing
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)) &&
+		!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
+	{
+		// modify drawing on display in draw mode.
+		// if in save to eeprom mode, always only scroll through drawings.
+
+		cursorBlinker = this->modeSingleSegmentManipulation(&displayAllSegments);
 	}
-	
+	else
+	{
+		// scroll through drawings
+		DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getDelta();
+		
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
+		{ // shift function for saving drawings to eeprom.
+
+			//check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
+			this->displayChangeGlobal(&displayAllSegments);
+			
+
+			//scroll through drawings.
+			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX, 1);
+		}
+	}
+
+
+#ifdef ENABLE_EEPROM
 	if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY)
 	{
 		// load drawing from memory only if index changed
