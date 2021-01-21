@@ -33,14 +33,15 @@ void SuperTimer::setOffsetInitTimeMillis(long offsetMillis)
 	//if offset is negative, time goes down. if positive, time goes up.
 	if (getIsStarted())
 	{
-		if (getIsPaused())
-		{
-			this->startedMillis = this->startedMillis - offsetMillis;
-		}
-		else
-		{
-			this->startedMillis = this->startedMillis - offsetMillis; //-// we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
-		}
+		// if (getIsPaused())
+		// {
+		// 	this->startedMillis = this->startedMillis - offsetMillis;
+		// }
+		// else
+		// {
+		// 	this->startedMillis = this->startedMillis - offsetMillis; //-// we have after a pause a new starting point, but, from that new starting point, we subtract the already exceeded time.
+		// }
+		this->startedMillis = this->startedMillis - offsetMillis;
 	}
 	else
 	{
@@ -226,6 +227,14 @@ long SuperTimer::getTimeMillis()
 	}
 }
 
+bool SuperTimer::getCountDownTimerElapsedAndRestart(){
+	if (!this->getTimeIsNegative()){
+		this->start();
+		return true;
+	}else{
+		return false;
+	}
+}
 bool SuperTimer::getTimeIsNegative()
 {
 	// as long as time is negative, timer is counting down. Else, counting up.
@@ -276,6 +285,19 @@ void SuperTimer::getTimeString(char *textBuf)
 {
 	//will always return a string with a positive time value ...
 	timeMillisToClockString(textBuf, getTimeMillis());
+}
+
+bool SuperTimer::getSecondsBlinker(){
+	//ON when paused or at on time during blinking
+	//OFF at off time during blinking
+	
+	if (getIsStarted()){
+		return getInFirstGivenHundredsPartOfSecond(500);
+
+	}else{
+		return true;
+	}
+
 }
 
 //ADMINISTRATION

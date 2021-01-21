@@ -1,12 +1,21 @@
 
+#define SOFTWARE_VERSION 300 
+// started at v2.00: 200
+// v300 : pcb v3 burst implemented. change in button sequence...
+
 // #define DBUG_REFACTOR_DISP
+#define ENABLE_TILT_SWITCHES
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
-//#define DBUG_REFACTOR_DISP
+// #define DBUG_REFACTOR_DISP
 
-// #define PROTOTYPE
+// #define V2_PCB_CORONA
+#define V3_PCB_BURST
+
+#define ENABLE_APPS 
 
 #ifdef ENABLE_SERIAL
+#define DEBUG_ENCODER_DIAL
 //#define DEBUG_ANALOG_IN
 //#define DEBUG_MERCURY
 //#define DEBUG_POTENTIO
@@ -29,92 +38,108 @@
 #define PIN_DISPLAY_DIGIT_BUTTON_LIGHTS 6
 
 #define PIN_DISPLAY_SEGMENT_A 7
-#define PIN_DISPLAY_SEGMENT_B 2
+#define PIN_DISPLAY_SEGMENT_B A3 // was 2
 #define PIN_DISPLAY_SEGMENT_C 4
 #define PIN_DISPLAY_SEGMENT_D 8
 #define PIN_DISPLAY_SEGMENT_E 12
 #define PIN_DISPLAY_SEGMENT_F 13
-#define PIN_DISPLAY_SEGMENT_G 3
-
-#ifndef ENABLE_SERIAL
-#define PIN_DISPLAY_SEGMENT_DP 0
-#else
-#define PIN_DISPLAY_SEGMENT_DP PIN_DUMMY_2
-#endif
-
-#define PIN_BUZZER A5
-// #define PIN_BUZZER PIN_DUMMY_3
+ 
 #define PIN_BUZZER_FAKE 68
 
-#ifdef PROTOTYPE
-#define LIGHT_MOMENTARY_0 1 // RED
-#define LIGHT_MOMENTARY_1 6 // GREEN
-#define LIGHT_MOMENTARY_2 7 // BLUE
-#define LIGHT_MOMENTARY_3 2
-#define LIGHT_LATCHING_EXTRA 0       // LATCHING YELLOW
-#define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
-#define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
-#define LIGHT_LATCHING_BIG 5         // big latch
+#define PIN_BUZZER A5 
+
+#ifdef ENABLE_SERIAL
+#define PIN_DISPLAY_SEGMENT_DP PIN_DUMMY_2
+#define PIN_DISPLAY_SEGMENT_G PIN_DUMMY_2 // was 3
+
 #else
-#define LIGHT_MOMENTARY_0 1          // momentary 0
-#define LIGHT_MOMENTARY_1 6          // momentary 1
-#define LIGHT_MOMENTARY_2 2          // momentary 2
-#define LIGHT_MOMENTARY_3 5          // momentary 3
-#define LIGHT_LATCHING_EXTRA 0       // extra latch
-#define LIGHT_LATCHING_SMALL_LEFT 3  // small latch left
-#define LIGHT_LATCHING_SMALL_RIGHT 4 // small latch right
-#define LIGHT_LATCHING_BIG 7         // big latch
+#define PIN_DISPLAY_SEGMENT_DP 0
+#define PIN_DISPLAY_SEGMENT_G 1 // was 3
+
 #endif
+
+#define LIGHT_MOMENTARY_0 1          // old: momentary 0
+#define LIGHT_MOMENTARY_1 6          // old: momentary 1
+#define LIGHT_MOMENTARY_2 2          // old: momentary 2
+#define LIGHT_MOMENTARY_3 5          // old: momentary 3
+#define LIGHT_LATCHING_3 0           // old: extra latch
+#define LIGHT_LATCHING_1 3           // old: small latch left
+#define LIGHT_LATCHING_2 4           // old: small latch right
+#define LIGHT_LATCHING_0 7           // old: big latch
+
+
+
 
 #define PIN_SELECTOR_DIAL A0
 #define PIN_BUTTONS_1 A1
 #define PIN_BUTTONS_2 A2
-#define PIN_POTENTIO A3
+#define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
+#define PIN_ROTARY_ENCODER_DIAL_CHANNEL_B 3
+
 #define PIN_MERCURY_SWITCHES A4
 
 #define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 
-#define BINARY_INPUTS_COUNT 12
 
-#define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
+#ifdef ENABLE_TILT_SWITCHES
+    
+    #define SWITCH_TILT_FORWARD 11
+    #define SWITCH_TILT_BACKWARD 9
+    #define SWITCH_TILT_LEFT 8
+    #define SWITCH_TILT_RIGHT 10
+
+    #define BINARY_INPUTS_COUNT 12
+#else
+    #define BINARY_INPUTS_COUNT 8
+
+#endif
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
-#define BUTTONS_1_COUNT 5
-#define BUTTONS_1_VALUES      \
-    {                         \
-        500, 257, 128, 62, 30 \
-    }
 
-#define BUTTONS_2_COUNT 3
-#define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0
+#if (defined V2_PCB_CORONA || defined V3_PCB_BURST)
+    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
+    #define BUTTONS_1_COUNT 4
+    #define BUTTONS_1_VALUES      \
+        {                         \
+            512, 256, 128, 64 \
+        }
 
-#ifdef PROTOTYPE
-#define BUTTONS_2_VALUES \
-    {                    \
-        512, 256, 128    \
-    }
-#else
-#define BUTTONS_2_VALUES \
-    {                    \
-        513, 254, 125    \
-    }
-#endif
+    #define BUTTONS_2_COUNT 4
+    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0  
+    #define BUTTONS_2_VALUES \
+        {                    \
+            512, 256, 128, 64    \
+        }
 
-#define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
+    #define MERCURY_SWITCHES_VALUES \
+        {                           \
+            450, 262, 128, 64       \
+        }
 
-#ifdef PROTOTYPE
-#define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
-#define MERCURY_SWITCHES_VALUES \
-    {                           \
-        512, 256, 128, 64       \
-    }
-#else
-#define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
-#define MERCURY_SWITCHES_VALUES \
-    {                           \
-        512, 256, 128, 64       \
-    }
+#else  // v1 pcb
+    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
+    #define BUTTONS_1_COUNT 5
+    #define BUTTONS_1_VALUES      \
+        {                         \
+            500, 257, 128, 62, 30 \
+        }
+
+    #define BUTTONS_2_COUNT 3
+    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0
+    #define BUTTONS_2_VALUES \
+        {                    \
+            513, 254, 125    \
+        }
+
+    #define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
+    #define MERCURY_SWITCHES_VALUES \
+        {                           \
+            450, 262, 128, 64       \
+        }
 #endif
 
 // postion of buttons in the indexed array.
@@ -123,49 +148,82 @@
 #define BUTTON_INDEXED_MOMENTARY_1 1
 #define BUTTON_INDEXED_MOMENTARY_2 2
 #define BUTTON_INDEXED_MOMENTARY_3 3
-#define BUTTON_INDEXED_LATCHING_BIG_RED 4  // latching 0
-#define BUTTON_INDEXED_LATCHING_SMALL_RED_LEFT 5 // latching 1 
-#define BUTTON_INDEXED_LATCHING_SMALL_RED_RIGHT 6  // latching 2
-#define BUTTON_INDEXED_LATCHING_EXTRA 7  // latching 3
+#define BUTTON_INDEXED_LATCHING_0 4  // old: big latch
+#define BUTTON_INDEXED_LATCHING_1 5  // old: small latch left
+#define BUTTON_INDEXED_LATCHING_2 6  // old: small latch right
+#define BUTTON_INDEXED_LATCHING_3 7  // old: extra latch
 
-// binary input indeces per button
-#define BUTTON_LATCHING_SMALL_RED_RIGHT 0
-#define BUTTON_LATCHING_SMALL_RED_LEFT 1
-#define BUTTON_LATCHING_BIG_RED 2
+#ifdef V2_PCB_CORONA
+    #define BUTTON_LATCHING_0 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_2 2
+    #define BUTTON_LATCHING_3 3 
 
-#define BUTTON_LATCHING_EXTRA 7 // Latching yellow
+    #define BUTTON_MOMENTARY_0 4 // most left
+    #define BUTTON_MOMENTARY_1 5 // second most left
+    #define BUTTON_MOMENTARY_2 6 // seconds most right
+    #define BUTTON_MOMENTARY_3 7 // most right
 
-#define BUTTON_MOMENTARY_0 6 // most left (Red)
-#define BUTTON_MOMENTARY_1 5 // Green (second most left)
-#define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
-#define BUTTON_MOMENTARY_3 3 // most right (Yellow)
+#elif defined V3_PCB_BURST
+    // binary input indeces per button
+    #define BUTTON_LATCHING_0 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_2 2
+    #define BUTTON_LATCHING_3 3 
 
-#define SWITCH_TILT_FORWARD 11
-#define SWITCH_TILT_BACKWARD 9
-#define SWITCH_TILT_LEFT 8
-#define SWITCH_TILT_RIGHT 10
+    #define BUTTON_MOMENTARY_0 4 // most left
+    #define BUTTON_MOMENTARY_1 5 // second most left
+    #define BUTTON_MOMENTARY_2 6 // seconds most right
+    #define BUTTON_MOMENTARY_3 7 // most right
+
+#else
+    // binary input indeces per button
+    #define BUTTON_LATCHING_2 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_0 2
+
+    #define BUTTON_LATCHING_3 7 // Latching yellow
+
+    #define BUTTON_MOMENTARY_0 6 // most left (Red)
+    #define BUTTON_MOMENTARY_1 5 // Green (second most left)
+    #define BUTTON_MOMENTARY_2 4 // Blue (seconds most right)
+    #define BUTTON_MOMENTARY_3 3 // most right (Yellow)
+
+#endif
 
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
 #ifdef ENABLE_EEPROM
 #define EEPROM_REACTION_GAME_OFFSET                     0
-#define EEPROM_REACTION_GAME_WHACK_A_MOLE               EEPROM_REACTION_GAME_OFFSET + 0
-#define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         EEPROM_REACTION_GAME_OFFSET + 12
-#define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 24
-#define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 36
-#define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 48 // 6 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_GUITAR_HERO_BREAKS 24    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET 36    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_REACTION_GAME_COUNTDOWN_MODE_OFFSET 48    // special limited time mode of reaction game (does not exist for guitar hero)
-#define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + 106
-#define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET
-#define EEPROM_SEQUENCER_SONGS_START_ADDRESS            EEPROM_SETTINGS_OFFSET + 10
-#define EEPROM_SEQUENCER_SONG_LENGTH 32
-#define EEPROM_COMPOSER_SONGS_START_ADDRESS             EEPROM_SEQUENCER_SONGS_START_ADDRESS + 288
-#define EEPROM_COMPOSER_SONG_LENGTH 100 // let's make four songs available.
-#define EEPROM_PICTURES_START_ADDRESS                   EEPROM_COMPOSER_SONGS_START_ADDRESS + 400
-#define EEPROM_PICTURES_LENGTH 300
-#define EEPROM_NUMBER_OF_DRAWINGS 75 // 300/4
-// #define EEPROM_PICTURES_LENGTH 20
-// #define EEPROM_NUMBER_OF_DRAWINGS 5 // 300/4
+
+
+wrong... see code. built up differently...
+// #define EEPROM_REACTION_GAME_WHACK_A_MOLE               EEPROM_REACTION_GAME_OFFSET + 0 // 10 levels, each 2 bytes.
+// #define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         EEPROM_REACTION_GAME_OFFSET + 18 // 10 levels, each 2 bytes.
+// #define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 34 // 10 levels, each 2 bytes.
+// #define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 54 // 10 levels, each 2 bytes.
+// #define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 72 // 10 levels, each 2 bytes.
+#define EEPROM_REACTION_GAME_TOTAL_LENGTH               96  // in game 8 games types * 6 levels * 2 bytes
+
+#define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + EEPROM_REACTION_GAME_TOTAL_LENGTH
+#define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET + 0
+#define EEPROM_SETTINGS_TOTAL_LENGTH                    2
+
+
+#define EEPROM_SEQUENCER_SONGS_START_ADDRESS            EEPROM_SETTINGS_OFFSET + EEPROM_SETTINGS_TOTAL_LENGTH
+#define EEPROM_SEQUENCER_SONGS_COUNT                    5
+#define EEPROM_SEQUENCER_SONG_LENGTH                    32
+#define EEPROM_SEQUENCER_TOTAL_LENGTH                   EEPROM_SEQUENCER_SONGS_COUNT * EEPROM_SEQUENCER_SONG_LENGTH //5*32 = 160
+
+#define EEPROM_COMPOSER_SONGS_START_ADDRESS             EEPROM_SEQUENCER_SONGS_START_ADDRESS + EEPROM_SEQUENCER_TOTAL_LENGTH
+#define EEPROM_COMPOSER_SONG_LENGTH                     100
+#define EEPROM_COMPOSER_SONG_COUNT                      4  // let's make four songs available.
+#define EEPROM_COMPOSER_TOTAL_LENGTH                    EEPROM_COMPOSER_SONG_LENGTH * EEPROM_COMPOSER_SONG_COUNT //4*100 = 400
+
+#define EEPROM_PICTURES_START_ADDRESS                   EEPROM_COMPOSER_SONGS_START_ADDRESS + EEPROM_COMPOSER_TOTAL_LENGTH
+#define EEPROM_NUMBER_OF_DRAWINGS                       90 // 
+#define EEPROM_PICTURE_LENGTH                           4
+#define EEPROM_PICTURES_TOTAL_LENGTH                    EEPROM_NUMBER_OF_DRAWINGS * EEPROM_PICTURE_LENGTH  // 90 * 4 = 360
+
+
 #endif

@@ -2,9 +2,18 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-#define ENABLE_MULTITIMER
+// #define ENABLE_MULTITIMER // app as a class
+#define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
+
+#ifdef ENABLE_TILT_SWITCHES
+#define ENABLE_TILT_APP
+#endif
+
+#define ENABLE_QUIZ_MASTER
+#define ENABLE_TALLY_KEEPER
+
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -18,7 +27,6 @@
 
 #ifdef ENABLE_EEPROM
 #include <avr/eeprom.h>
-// #include <EEPROM.h>
 #endif
 
 #ifdef ENABLE_MULTITIMER
@@ -26,11 +34,9 @@
 #endif
 
 #include "DataPlayer.h"
-
-//#include "SevSeg5Digits.h" //sevseb -->this should not be included here, but only in DisplayDigitsHandler.h, as it only gets used there (but ARDUINO needs this here!) DEBUG
 #include "DisplayDigitsHandler5Digits.h"
+#include "RotaryEncoderDial.h"
 #include "PretbakSettings.h"
-#include "Potentio.h"
 
 #define APP_SELECTOR_LETTERS_AND_CHARS 0
 #define APP_SELECTOR_SIMON 1
@@ -39,7 +45,7 @@
 #define APP_SELECTOR_STOPWATCH 4
 #define APP_SELECTOR_POMODORO 5
 #define APP_SELECTOR_RANDOMWORLD 6
-#define APP_SELECTOR_QUIZ 7
+#define APP_SELECTOR_TALLY_KEEPER 7
 #define APP_SELECTOR_GEIGER 8
 #define APP_SELECTOR_HACK_TIME 9
 #define APP_SELECTOR_SOUND_SONG 10
@@ -53,46 +59,28 @@
 #define APP_SELECTOR_REACTION_GAME 18
 #define APP_SELECTOR_GUITAR_HERO 19
 #define APP_SELECTOR_TILT 20
-#define APP_SELECTOR_TILT_ADVANCED 21
-#define APP_SELECTOR_MULTITIMER_SETTING 22
-#define APP_SELECTOR_MULTITIMER_PLAYING 23
+#define APP_SELECTOR_DREAMTIME 21
+#define APP_SELECTOR_MULTITIMER 22
+#define APP_SELECTOR_QUIZ_MASTER 23
+
+#define DRAW_GAME_RANDOM 0
+#define DRAW_GAME_CLOCK 3
+#define DRAW_GAME_NUMBER 2
+#define DRAW_GAME_WORD 1
 
 
-
-// #define TILT_FORWARD 	0x00000001
-// #define TILT_BACKWARD 	0x00000010
-// #define TILT_LEFT 		0x00000100
-// #define TILT_RIGHT 		0x00001000
 #define TILT_FORWARD 0
 #define TILT_BACKWARD 1
 #define TILT_LEFT 2
 #define TILT_RIGHT 3
 
-// #define DO_NOTHING		0
-// #define TOGGLE_SEGMENT	1
-// #define MOVE_RIGHT		2
-// #define MOVE_LEFT		3
-// #define MOVE_DOWN		4
-// #define MOVE_UP	  	    5
-#define ANIMATION_STOP_CODE 0x00
-// enum RandomWorldMode:uint8_t{
-//   rollOneDice,
-//   rollFourDice,
-//   takeRandomCard,
-//   takeRandomCardFromDeck,
-//   randomNumber,
-//   randomLetter,
-//   headsOrTails,
-//   yesOrNo,
-// };
-// RandomWorldMode randomWorldMode;
-
-
-
+#define ANIMATION_STOP_CODE_PART_0 0x6D
+#define ANIMATION_STOP_CODE_PART_1 0x70
+#define ANIMATION_STOP_CODE_PART_2 0x5C
+#define ANIMATION_STOP_CODE_PART_3 0xF3
 
 #define RANDOMWORLD_ROLLONEDICE 0
 #define RANDOMWORLD_ROLLFOURDICE 4
-// #define RANDOMWORLD_TAKERANDOMCARD 1
 #define RANDOMWORLD_RANDOMLETTER 1
 #define RANDOMWORLD_TAKERANDOMCARDFROMDECK 5
 #define RANDOMWORLD_RANDOMNUMBER 2
@@ -104,27 +92,26 @@
 #define SIMON_DEAD_PLAYER 666
 #define SIMON_MAX_PLAYERS 8
 #define SIMON_NO_BUTTON_PRESSED 111
-#define POMODORO_INIT_DEFAULT_SECS 1500
-#define POMODORO_PAUSE_DEFAULT_SECS 600
+
+#define POMODORO_INIT_DEFAULT_TIME_INDEX 50 //1500s
+#define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25 //300s
+#define POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX 16 //60s
 #define POMODORO_DISPLAY_TIMER 0
 #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
 #define POMODORO_DISPLAY_SHOW_GOOD 2
 #define POMODORO_DISPLAY_SHOW_BAD 3
 #define POMODORO_DISPLAY_BEEP_PROBABILITY 4
-#define POMODORO_NONSENSE_TIME 60000
+#define POMODORO_NONSENSE_TIME 60001
 
 #define HACKTIME_MEMORY_FLASH 0
 #define HACKTIME_MEMORY_RAM 1
 #define HACKTIME_MEMORY_EEPROM 2
-
-#define HACKTIME_DISPLAY_ADDRESS 0
-#define HACKTIME_DISPLAY_CHARS 1
-#define HACKTIME_DISPLAY_BYTES 2
-#define HACKTIME_DISPLAY_DECIMAL 3
-#define HACKTIME_DISPLAY_HEX 4
+#define HACKTIME_DISPLAY_CHARS 0
+#define HACKTIME_DISPLAY_BYTES 1
+#define HACKTIME_DISPLAY_DECIMAL 2
+#define HACKTIME_DISPLAY_HEX 3
 
 #define SOUND_NOTE_DISPLAY_NOTE 0 
-
 #define SOUND_NOTE_MODE_MANUAL 0 
 #define SOUND_NOTE_MODE_ARPEGGIO_UP 1
 #define SOUND_NOTE_MODE_ARPEGGIO_DOWN 2
@@ -136,113 +123,163 @@
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_INIT_APP generalTimer
-#define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
+// #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define RANDOMWORLD_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer
 #define SIMON_STEP_TIMER generalTimer
-#define STOPWATCH_CHRONO generalTimer
+#define STOPWATCH_CHRONO_1 generalTimer
 #define POMODORO_TIMER generalTimer
 #define DRAW_GAME_DISPLAY_TIMER generalTimer
 #define HACKTIME_MOVE_TIMER generalTimer
 #define COUNTING_LETTERS_AND_CHARS_TIMER generalTimer
 #define SOUND_NOTE_AUTO_TIMER generalTimer
 #define QUIZ_RANDOM_WAIT_TIME generalTimer
+#define SEQUENCER_SPEED generalTimer
+#define TILT_TIMER generalTimer
+#define MOVIE_MODE_FRAME_INTERVAL_TIMER generalTimer
+#define TIMER_DREAMTIME generalTimer
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
 #define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
-#define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
+// #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
 #define SIMON_BLINK_TIMER generalTimer2
+#define STOPWATCH_CHRONO_2 generalTimer2
 
-#define SOUND_FUN_NOTE_INDEX counter
-#define REACTION_GAME_SCORE counter
-#define GEIGER_TONE_FREQUENY_LOWEST counter
-#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY counter
-#define SIMON_LENGTH counter
-#define RANDOMWORLD_RANDOM_NUMBER counter
-#define SEQUENCER_STEP_COUNTER counter
-#define COMPOSER_STEP counter
-#define POMODORO_STATS_WORKING_GOOD counter
-#define HACKTIME_ADDRESS counter
-#define SOUND_NOTES_NOTE_ON_SCALE_INDEX counter
-#define QUIZ_ROUNDS_INIT counter
+#define LETTERS_AND_CHARS_COUNTER general_int16_t_1
+#define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
+#define SOUND_FUN_NOTE_INDEX general_int16_t_1
+#define REACTION_GAME_SCORE general_int16_t_1
+#define GEIGER_TONE_FREQUENY_LOWEST general_int16_t_1
+#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
+#define SIMON_LENGTH general_int16_t_1
+#define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
+#define SEQUENCER_STEP_COUNTER general_int16_t_1
+#define COMPOSER_STEP general_int16_t_1
+#define HACKTIME_ADDRESS general_int16_t_1
+#define SOUND_NOTES_NOTE_ON_SCALE_INDEX general_int16_t_1
+#define QUIZ_ROUNDS_INIT general_int16_t_1
+#define METRONOME_TICKER_3_POSITION general_int16_t_1
+#define TILT_EXPECTED_SWITCH_INDEX general_int16_t_1
+#define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
+#define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
+#define MODE_DREAMTIME_STEP general_int16_t_1
+#define TALLY_KEEPER_0 general_int16_t_1
+#define MULTITIMER_TIMERS_COUNT general_int16_t_1
+// #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_int16_t_1
 
+#define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
+#define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
+#define REACTION_GAME_TIMER_STEP general_int16_t_2
+#define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
+#define SIMON_INDEX general_int16_t_2
+#define DEBUGMODE_ACTIVATED general_int16_t_2
+#define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW general_int16_t_2
+#define POMODORO_MAIN_CLOCK_TIME_INDEX general_int16_t_2
+#define HACKTIME_DISPLAY_MODE general_int16_t_2
+#define SOUND_NOTES_SCALE_INDEX general_int16_t_2
+#define METRONOME_TICKER_2_POSITION general_int16_t_2
+#define TILT_CYCLE_COUNTER general_int16_t_2
+#define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
+#define TALLY_KEEPER_1 general_int16_t_2
 
-#define GEIGER_TONE_FREQUENCY_HEIGHEST counter2
-#define REACTION_GAME_TIMER_STEP counter2
-#define DRAW_ACTIVE_DRAWING_INDEX counter2
-#define SIMON_INDEX counter2
-#define DEBUGMODE_ACTIVATED counter2
-#define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW counter2
-#define POMODORO_INIT_TIME_SECONDS counter2
-#define HACKTIME_DISPLAY_MODE counter2
-#define SOUND_NOTES_SCALE_INDEX counter2
+#define SOUND_NOTES_NOTE_INDEX general_int16_t_3
+#define GEIGER_TONE_LENGTH general_int16_t_3
+#define METRONOME_TICKER_1_POSITION general_int16_t_3
+#define HACKTIME_MEMORY_SELECT general_int16_t_3  // was 5
+#define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
+#define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
+#define TALLY_KEEPER_2 general_int16_t_3
+#define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 
-//#define DRAW_Y_POS counter3
-#define DRAW_CURSOR_INDEX counter3
-#define GEIGER_INCREASE_CHANCE counter3
-#define GEIGER_PROBABILITY_THRESHOLD counter3
-#define REACTION_GAME_STEP_TIME_MILLIS counter3
-#define SETTINGS_MODE_SELECTOR counter3
-#define RANDOMWORLD_ANIMATION_DELAY counter3
-#define SIMON_RANDOM_PLAYER_SEQUENCE counter3
-#define STOPWATCH_LAP_MEMORY counter3
-#define POMODORO_STATS_WORKING_BAD counter3
-#define SOUND_NOTES_SCALE_ROOT counter3
+#define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
+#define TALLY_KEEPER_3 general_int16_t_4
 
-#define REACTION_GAME_TARGET counter4
-#define COUNTER_GEIGER counter4
-#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET counter4
-#define SIMON_ACTIVE_LIGHT counter4
-#define POMODORO_PAUSE_TIME_SECONDS counter4
-#define SOUND_MODE_SCALE_RANGE_LENGTH counter4
+#define REACTION_GAME_TARGET general_uint16_t_1
+#define GEIGER_INCREASE_CHANCE general_uint16_t_1
+#define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
+#define SIMON_ACTIVE_LIGHT general_uint16_t_1
+#define SOUND_MODE_SCALE_RANGE_LENGTH general_uint16_t_1
+#define MOVIE_MODE_MOVIE_FRAME_INDEX_START general_uint16_t_1
 
-#define REACTION_GAME_LEVEL counter5
-#define GEIGER_TONE_LENGTH counter5
-#define SEQUENCER_TEMP_NOTE counter5
-#define RANDOMWORLD_RANDOM_TYPE counter5
-#define COMPOSER_SONG_LENGTH counter5
-#define SIMON_PLAYERS_ALIVE_COUNT counter5
-#define HACKTIME_MEMORY_SELECT counter5
-#define DRAW_CURSOR_POTENTIO_INDEX counter5
-#define METRONOME_TICKER_1_POSITION counter5
-#define SOUND_NOTES_PROGRESSION_MODE counter5
+#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
+#define COUNTER_GEIGER general_uint16_t_2
+#define SAVE_LOAD_MENU_BLINKING_OFFSET general_uint16_t_2
 
+#define REACTION_GAME_LEVEL general_uint8_t_1
+#define SEQUENCER_TEMP_NOTE general_uint8_t_1
+#define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
+#define COMPOSER_SONG_LENGTH general_uint8_t_1
+#define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
+#define DRAW_CURSOR_DIGIT general_uint8_t_1
+#define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
+#define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
+#define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
+#define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
+#define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
 
-#define SIMON_PLAYERS_COUNT counter6
-#define POMODORO_AUTO_RESTART_ENABLED counter6
-#define DRAW_SHOW_MODE counter6
-#define METRONOME_TICKER_2_POSITION counter6
-#define HACKTIME_SOUND counter6
-#define RANDOMWORLD_CARD_FROM_DECK_INDEX counter6
-#define REACTION_GAME_HEX_ACTIVE_DIGIT counter6
+#define SIMON_PLAYERS_COUNT general_uint8_t_2
+#define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
+#define DRAW_SHOW_MODE general_uint8_t_2
 
-#define SIMON_PLAYER_PLAYING_INDEX counter7
-#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED counter7
-#define METRONOME_TICKER_3_POSITION counter7
-#define REACTION_GAME_HEX_VALUE_TO_FIND counter7
+#define HACKTIME_SOUND general_uint8_t_2
+#define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
+#define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
+#define DRAW_ACTIVE_SEGMENT general_uint8_t_2
 
-#define POMODORO_PROBABILITY_BEEP_EVERY_SECONDS counter8
-#define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY counter8
+#define TALLY_KEEPER_TEST general_uint8_t_3
+#define DRAW_CURSOR_SEGMENT general_uint8_t_3
+#define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
+#define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
+#define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
 
-#define SOUND_NOTES_NOTE_INDEX counter9
+#define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
+
+#define DRAW_CURSOR_INDEX general_long_1
+#define GEIGER_PROBABILITY_THRESHOLD general_long_1
+#define REACTION_GAME_STEP_TIME_MILLIS general_long_1
+#define SETTINGS_MODE_SELECTOR general_long_1
+#define RANDOMWORLD_ANIMATION_DELAY general_long_1
+#define SIMON_RANDOM_PLAYER_SEQUENCE general_long_1
+#define STOPWATCH_LAP_MEMORY_1 general_long_1
+#define POMODORO_STATS_WORKING_BAD general_long_1
+#define SOUND_NOTES_SCALE_ROOT general_long_1
+#define TALLY_KEEPER_DELTA general_long_1
+#define MULTITIMER_FISCHER_BLINK_NO_TEXT general_long_1
+
+#define STOPWATCH_LAP_MEMORY_2 general_long_2
+#define POMODORO_STATS_WORKING_GOOD general_long_2
+#define TALLY_KEEPER_DELTA_SIGNED general_long_2
+#define REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT general_long_2
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
-#define NUMBERS_AND_LETTERS_COUNT_UP_ELSE_DOWN general_boolean
+#define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
 #define SIMON_CUSTOM_BUILD_UP general_boolean
 #define POMODORO_IN_BREAK general_boolean
 #define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
 #define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
+#define STOPWATCH_PAUSED_1 general_boolean
+#define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
+#define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
+#define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
+#define MULTITIMER_DIAL_EDGE general_boolean
 
+
+#define STOPWATCH_PAUSED_2 general_boolean2
+#define HACKTIME_VALUE_TO_SOUND general_boolean2
+#define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean2
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
-#define POMODORO_SHOW_MENU_EDGE general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
+#define POMODORO_ENABLE_INTERVAL_BEEP general_boolean2
 
-#define REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+#define EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+#define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
+#define SOUND_NOTE_MUTE general_boolean3
 
 #define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
 
@@ -252,6 +289,9 @@
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
+#define MOVIE_MODE_STOPS bytes_list
+#define MODE_SOUND_SONG_BUFFER bytes_list
+#define MODE_DREAMTIME_RANDOM_LIST bytes_list
 
 #define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -260,11 +300,33 @@
 
 
 
-// #define ONLY_TOP_SEGMENT_FAKE_ASCII 58
-// #define ONLY_MIDDLE_SEGMENT_FAKE_ASCII 59
-// #define ONLY_BOTTOM_SEGMENT_FAKE_ASCII 60
-// #define ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII 61
-// #define SPACE_FAKE_ASCII 62
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+    const uint16_t timeDialDiscreteSeconds[] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        10, 15, 20, 25, 30, 45, 60, 75, 90, 120,
+        150, 180, 210, 240, 270, 300, 330, 360, 390, 420,
+        450, 480, 510, 540, 570, 600, 660, 720, 780, 840,
+        900, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380, 1440,
+        1500, 1560, 1620, 1680, 1740, 1800, 2100, 2400, 2700, 3000,
+        3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400, 6000, 6600,
+        7200, 7800, 8400, 9000, 9600, 10200, 10800, 12600, 14400, 16200,
+        18000, 19800, 21600, 23400, 25200, 27000, 28800, 30600, 32400, 34200,
+        36000};
+
+    #define MULTITIMER_MAX_TIMERS_COUNT 4
+    #define MULTITIMER_DEFAULT_INIT_TIME_SECS 600 //600
+    #define MULTITIMER_DEFAULT_FISCHER_TIMER_SECS 0
+    #define MULTITIMER_DEFAULT_TIMERS_COUNT 2
+    #define MULTITIMER_LIGHT_PAUSE 0x01
+    #define MULTITIMER_LIGHT_PLAYING 0x02
+    #define MULTITIMER_LIGHT_FISCHER 0x04
+    #define MULTITIMER_LIGHT_SET_TIMERS_COUNT 0x08
+    #define MULTITIMER_LIGHT_SECONDS_BLINKER 0b00010000
+
+#endif
+
+
+
 
 const char dice_eyes_display[] PROGMEM = {
     SPACE_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,
@@ -304,7 +366,7 @@ const uint8_t scale_lengths [] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BL
  
 const uint8_t scales [] PROGMEM = {
     2,2,1,2,2,2,1,  
-    2,1,2,2,1,2,2,1 ,
+    2,1,2,2,1,2,2,1,
     3,2,2,3,2,
     3,2,1,1,3,2,
     1,1,1,1,1,1,1,1,1,1,1,1
@@ -315,7 +377,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
     // 0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
     0xc4, 0x88, 0x50, 0x00, // student koala    
-    //0xD8, 0xE9, 0xCB, 0xC4, // abstract drol or tank
+    //0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
     0x5e, 0x01, 0x5f, 0x00, // music notes
     0x00, 0xd0, 0xab, 0x44, // stopwatch
     // 0x39, 0x09, 0x09, 0x0F, // abstractbig circle
@@ -342,12 +404,28 @@ const uint8_t app_splash_screens[] PROGMEM = {
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
     0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
     0x5F, 0x79, 0x1C, 0x3D  // DBUG
-
 };
 
+#define MAX_FRAMES_MOVIES_FLASH 70
+#define MOVIE_INDEX_EMPTY 255
+#define ANIMATE_CIRCLE_OFFSET 4
+
 const uint8_t disp_4digits_animations[] PROGMEM = {
-    0x35,                   // first byte = length of animation in bytes  (here 53, including the length byte)
-                            // const uint32_t disp_4digits_swoosh [] PROGMEM = {
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    0x01, 0x00, 0x00, 0x00,  // animate circle (KEEP IT FIRST, some apps depend on it.)
+    0x00, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x01, 0x00,
+    0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x02,
+    0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x08,
+    0x00, 0x00, 0x08, 0x00,
+    0x00, 0x08, 0x00, 0x00,
+    0x08, 0x00, 0x00, 0x00,
+    0x10, 0x00, 0x00, 0x00,
+    0x20, 0x00, 0x00, 0x00,
+    
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // horizontal right to left sweep.
     0x00, 0x00, 0x00, 0x06,
     0x00, 0x00, 0x00, 0x49,
@@ -361,17 +439,17 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x06, 0x00, 0x00, 0x00,
     0x49, 0x00, 0x00, 0x00,
     0x30, 0x00, 0x00, 0x00, //last byte is byte 52.
-    0x19,                   //length of next animation (25 including the length)  byte53
+
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // vertical swoop
     0x01, 0x01, 0x01, 0x01,
     0x22, 0x22, 0x22, 0x22,
     0x40, 0x40, 0x40, 0x40,
     0x14, 0x14, 0x14, 0x14,
     0x08, 0x08, 0x08, 0x08, // byte 77,
-    0x81,                   // ( length of following animation, including the length byte)
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 
     0x00, 0x00, 0x00, 0x00,
-
     0x21, 0x00, 0x00, 0x00, // sweep in
     0x71, 0x00, 0x00, 0x00,
     0x7B, 0x00, 0x00, 0x00,
@@ -404,35 +482,53 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x00, 0xDE,
     0x00, 0x00, 0x00, 0x8E,
     0x00, 0x00, 0x00, 0x84,
-
-    ANIMATION_STOP_CODE //length 0 byte is stop byte.
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 };
 
-#define ALL_DATA_SIZE 1
-//PGM_P const allData[ALL_DATA_SIZE] PROGMEM = {disp_4digits_animations};
-
 #define SONG_DRYER_HAPPY 0
-// #define SONG_LANG_ZAL_ZE_LEVEN 1
+#define SONG_LANG_ZAL_ZE_LEVEN 1
 #define SONG_ATTACK 2
-
+#define SONG_EMPTY 3
 #define SONG_DRYER_UNHAPPY 4
 #define SONG_KINDEKE_DOUWEN 5
 #define SONG_RETREAT 6
 #define SONG_ALPHABET 7
 
+#define LEN_SONG_DRYER_HAPPY 18
+#define LEN_LANG_ZAL_ZE_LEVEN 84
+#define LEN_SONG_ATTACK 14
+#define LEN_SONG_EMPTY 0
+#define LEN_SONG_DRYER_UNHAPPY 13
+#define LEN_SONG_KINDEKE_DOUWEN 49
+#define LEN_SONG_RETREAT 14
+#define LEN_SONG_ALPHABET 100
+
+#define SONGS_FLASH_COUNT 8
+
+const uint8_t song_lengths [] PROGMEM = {
+    LEN_SONG_DRYER_HAPPY,
+    LEN_LANG_ZAL_ZE_LEVEN,
+    LEN_SONG_ATTACK,
+    LEN_SONG_EMPTY,
+    LEN_SONG_DRYER_UNHAPPY,
+    LEN_SONG_KINDEKE_DOUWEN,
+    LEN_SONG_RETREAT,
+    LEN_SONG_ALPHABET,
+};
+ 
 // one big library. length of song as byte at start. lenght of song INCLUDES the length byte. There is no need then to keep a separate array with start indeces. 
 const uint8_t songs [] PROGMEM = {
     //happy dryer
-    19, A6_2, rest_4, rest_2,
+    A6_2, rest_4, rest_2,
     Cs7_2, rest_4, rest_2,
     E7_4, rest_8, rest_4,
     Cs7_4, rest_8, rest_4,
     E7_4, rest_8, rest_4,
     A7_1, A7_1,
     rest_2 ,
-    // 1,  // empty slot instead of lang zal ze leven
+    
     // lang zal ze leven
-    85, C7_4, rest_4, rest_2,
+    C7_4, rest_4, rest_2,
     C7_4, rest_2, C7_8, rest_8,
     C7_4, rest_4, rest_2,
     G6_2, G6_4, rest_2,
@@ -468,15 +564,15 @@ const uint8_t songs [] PROGMEM = {
     E7_1, E7_2, rest_2,
     D7_1, D7_2, rest_2,
     C7_1, C7_1,
+    
     // aaanvallueeeeee!
-    15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
-    // empty slot test
-    1,
-
- // unhappy dryer
-    14, A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
+     Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
+    
+    // unhappy dryer
+    A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
+    
     // kindeke douwen
-    50, B7_4, rest_4, rest_2,       // wie
+    B7_4, rest_4, rest_2,       // wie
     B7_1,                       //zal
     rest_2, A7_4, rest_4,       //er
     G6_4, rest_4, rest_2,       //ons
@@ -497,69 +593,43 @@ const uint8_t songs [] PROGMEM = {
     E7_1,
     E7_4, rest_4, E7_4, rest_4,
     A7_4, rest_4, rest_2,
+    
     // retreat song
-    15, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
-
+    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
+    
     // alphabet song
-    21, C7_4, rest_4, rest_2, 
+    C7_4, rest_4, rest_2, 
     C7_4, rest_4, rest_2, 
     G7_4, rest_4, rest_2, 
     G7_4, rest_4, rest_2, 
     A7_4, rest_4, rest_2, 
     A7_4, rest_4, rest_2, 
     G7_1, rest_1,
-    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
-    // G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
-    // C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
-    // F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
-   
+    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
+    G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
+    C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
+    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
 };
 
-// const uint8_t scale_major[] PROGMEM = {C7_2, rest_4, D7_2, rest_4, E7_2, rest_4, F7_2, rest_4, G7_2, rest_4, A7_2, rest_4, B7_2, rest_4, C8_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
-// const uint8_t scale_major_reversed[] PROGMEM = {C8_2, rest_4, B7_2, rest_4, A7_2, rest_4, G7_2, rest_4, F7_2, rest_4, E7_2, rest_4, D7_2, rest_4, C7_2, rest_4, BUZZER_ROLL_SONG_STOPVALUE};
-
-// const uint8_t scale_pentatonic[] PROGMEM = {C6_2, D6_2, F6_2, G6_2, A7_2, BUZZER_ROLL_SONG_STOPVALUE};
-
-// #if MOMENTARY_BUTTONS_COUNT == 3
-// const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2};
-// const uint8_t lights_indexed[] = {LIGHT_LATCHING_EXTRA, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2,
-//                              LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_BIG};
-// #else
 const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
-                                    LIGHT_LATCHING_BIG,  LIGHT_LATCHING_SMALL_LEFT, LIGHT_LATCHING_SMALL_RIGHT, LIGHT_LATCHING_EXTRA};
+                                    LIGHT_LATCHING_0,  LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3};
+
+#ifdef V2_PCB_CORONA
+    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_MOMENTARY_0,
+        LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,LIGHT_LATCHING_3};
+
+#elif defined V3_PCB_BURST
+    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
+        LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
+        
+#endif
 
 const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
-                                    BUTTON_LATCHING_BIG_RED, BUTTON_LATCHING_SMALL_RED_LEFT, BUTTON_LATCHING_SMALL_RED_RIGHT, BUTTON_LATCHING_EXTRA};
+                                    BUTTON_LATCHING_0, BUTTON_LATCHING_1, BUTTON_LATCHING_2, BUTTON_LATCHING_3};
 
-// #endif
-
-const uint8_t tilt_forward[] PROGMEM = {
-    0x08, 0x08, 0x08, 0x08};
-const uint8_t tilt_backward[] PROGMEM = {
-    0x01, 0x01, 0x01, 0x01};
-const uint8_t tilt_left[] PROGMEM = {
-    0x30, 0x30, 0x30, 0x30};
-const uint8_t tilt_right[] PROGMEM = {
-    0x06, 0x06, 0x06, 0x06};
-
-const uint8_t disp_4digits_animate[] PROGMEM = {
-    0x00, 0xFF, 0xF0, 0x0F,
-    0xFF, 0x00, 0x00, 0x01,
-    0x01, 0x02, 0x04, 0x08};
-
-const uint8_t disp_4digits_animate_circle[] PROGMEM = {
-    0x01, 0x00, 0x00, 0x00,
-    0x00, 0x01, 0x00, 0x00,
-    0x00, 0x00, 0x01, 0x00,
-    0x00, 0x00, 0x00, 0x01,
-    0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00, 0x00, 0x04,
-    0x00, 0x00, 0x00, 0x08,
-    0x00, 0x00, 0x08, 0x00,
-    0x00, 0x08, 0x00, 0x00,
-    0x08, 0x00, 0x00, 0x00,
-    0x10, 0x00, 0x00, 0x00,
-    0x20, 0x00, 0x00, 0x00};
+#ifdef ENABLE_TILT_SWITCHES
+const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD,SWITCH_TILT_LEFT,SWITCH_TILT_BACKWARD,SWITCH_TILT_RIGHT};
+#endif
 
 class Apps
 {
@@ -570,45 +640,52 @@ public:
     BinaryInput *binaryInputs;
     DisplayManagement *ledDisp;
     Buzzer *buzzer;
-    Potentio *potentio;
+    RotaryEncoderDial *encoder_dial;
     LedMultiplexer5x8* allLights;
+    PotentioSelector* selectorDial;
 
-    void setPeripherals(BinaryInput *binaryInput, Potentio *potentio, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer);
-    // void setBuffers(char* textBuf, char*  scrollBuf);
-    //void setBuffers(char* textBuf);
-    // void test();
+    void setPeripherals(BinaryInput *binaryInput, RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer, PotentioSelector* selectorDial);
 
     void setDefaultMode();
-    void appSelector(bool init, uint8_t selector);
-    bool init_app(bool init, uint8_t selector);
-    void modeSimpleButtonsAndLights(bool init);
-    void modeCountingLettersAndChars(bool init);
-    void modeSoundSong(bool init);
-    void modeComposeSong(bool init);
-    void modeSoundNotesInitScale();
-    void modeSoundNotes(bool init);
-    void draw(bool init);
-    void drawGame(bool init);
-    void movieAnimationMode(bool init);
-    void pomodoroTimer(bool init);
-    void stopwatch(bool init);
-    void modeGeiger(bool init);
-    void modeSequencer(bool init);
-    void modeMetronome(bool init);
-    void modeMetronomeTickerUpdate(uint8_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
-    void modeSimon(bool init);
-    void modeReactionGame(bool init);
-    void tiltSwitchTest(bool init);
-    void modeButtonDebug(bool init);
-    void miniMultiTimer(bool init);
-    void modeRandomWorld(bool init);
-    void modeHackTime(bool init);
-    void quiz(bool init);
+    void appSelector();
 
-    void listenToPotentioToIncrementTimerInit(SuperTimer* aTimer, int8_t increment_millis);
-    bool listenToMomentary2and3ModifyValue(int16_t* value, uint8_t amount);
+    bool init_app(bool init, uint8_t selector);
+    void modeSettings();
+    #ifdef ENABLE_TALLY_KEEPER
+    void modeTallyKeeper();
+    #endif
+    #ifdef ENABLE_QUIZ_MASTER
+    void quiz();
+    #endif
+
+    void modeCountingLettersAndChars();
+    void modeSoundSong();
+    void modeComposeSong();
+    void modeSoundNotesInitScale();
+    void modeSoundNotes();
+    void draw();
+    void drawGame();
+    void modeMovie();
+    void pomodoroTimer();
+    void stopwatch();
+    void modeGeiger();
+    void modeSequencer();
+    void modeMetronome();
+    void modeSimon();
+    void modeReactionGame();
+    void tiltSwitchTest();
+    void modeDreamtime();
+    void modeButtonDebug();
+    void miniMultiTimer();
+    void modeRandomWorld();
+    void modeHackTime();
+
+    void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
+    void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
+    bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
-    void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
+    // void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
+    void displayChangeGlobal(uint32_t *display_buffer);
     void displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
@@ -618,40 +695,101 @@ public:
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
     void updateEveryAppCycleBefore();
-private:
+    void updateEveryAppCycleAfter();
+    void geigerToneHelper();
 
-#ifdef FUNCTION_POINTER_APP_SELECTION
-    typedef void (Apps::*fptr)(bool init);
-    fptr appPointer;
+
+
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+
+    void multitimer_integrated();
+
+	void multitimer_setDefaults();
+	// uint16_t multitimer_getIndexedTime(uint8_t index);
+	// void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
+	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
+	void multitimer_getDisplay();
+	bool multitimer_getTimerFinished(uint8_t timerIndex);
+	bool multitimer_checkAllTimersFinished();
+	void multitimer_playerButtonPressEdgeUp(uint8_t index);
+	void multitimer_playerButtonPressEdgeDown(uint8_t index);
+	void multitimer_setTimersCount(int8_t delta);
+	// void multitimer_setFischerTimer(uint16_t seconds);
+	void multitimer_setStateTimersCount(bool set);
+	// void multitimer_setStateFischerTimer(bool set);
+	void multitimer_setStatePause(bool set);
+	void multitimer_refresh();
+	void multitimer_buzzerRefresh(bool alarm);
+	void multitimer_next();
+	void multitimer_init();
+	void multitimer_start();
+	void multitimer_pause();
+	void multitimer_continu();
+	void multitimer_reset();
+
 #endif
 
-    DataPlayer dataPlayer;
+
+private:
 
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
 #endif
+    
+    uint16_t dialGetIndexedtime();
+    void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    void nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
+    bool checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
+    void randomModeTrigger(bool forReal);
+    void textBufToDisplayAllSegments();
 
-    bool nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    void checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
-    void randomModeDisplay(bool forReal);
+    // bool millis_second_period();
+    void latching_3_blink();
+    bool millis_half_second_period();
+    bool millis_quarter_second_period();
+    bool millis_blink_650ms();
 
-    // functions for compression the memory size
+    void progmemToBuffer(const uint8_t *offset, uint8_t length);
+    uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
+    
+    unsigned int indexToTimeSeconds(int16_t index);
+
+    void setButtonLight(uint8_t light_index, bool onElseOff);
+
     void textBufToDisplay();
+    void decimalPointTimingOn();
+    void setDecimalPoint(bool onElseOff, uint8_t digit);
+    void displayAllSegmentsToScreen();
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
     void buzzerOff();
+    void buzzerOffAndAddNote(uint8_t note);
+    void buzzerChangeSpeedRatioWithEncoderDial();
+    void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
+    void noteToDisplay(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
+    // void loadBuzzerTrackFromEeprom(uint8_t songIndex);
     void setBlankDisplay();
-    void setLedArray(byte lights);
+    void setLedArray();
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
+    void dialSetCheckDisplay(int16_t* pVariable, uint8_t multiplier, int16_t maxValue);
+    
+    void loadNextMovie();
+    bool loadScreenFromMemory(int16_t address);
+
+    void eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex);
+    void flashPictureToDisplayAllSegments(const uint8_t* progmemAddress);
+
+    void resetStopwatch(SuperTimer* pTimer);
     
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
     SuperTimer generalTimer;
     SuperTimer generalTimer2;
+    SuperTimer* pSsuperTimer;
     uint32_t displayAllSegments;
     uint32_t displayAllSegmentsBuffer;
 
@@ -660,22 +798,28 @@ private:
     bool general_boolean2;
     bool general_boolean3;
     bool general_boolean4;
-    int16_t counter;
-    int16_t counter2;
-    long counter3;
-    uint16_t counter4;
-    uint8_t counter5;
-    uint8_t counter6;
-    uint8_t counter7;
+    
+    int16_t general_int16_t_1;
+    int16_t general_int16_t_2;
+    int16_t general_int16_t_3;
+    int16_t general_int16_t_4;
 
-    uint16_t counter8;
-    int16_t counter9;
+    uint16_t general_uint16_t_1;
+    uint16_t general_uint16_t_2;
+
+    uint8_t general_uint8_t_1;
+    uint8_t general_uint8_t_2;
+    uint8_t general_uint8_t_3;
+    uint8_t general_uint8_t_4;
+
+    long general_long_1;
+    long general_long_2;
+    long* pLongValue;
 
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
 
-    
     enum
     {
         bytes_list_bufsize = 100,
@@ -734,17 +878,10 @@ private:
     };
     RandomWorldState randomWorldState;
 
-// enum SettingsState:uint8_t{
-//   settingNormal,
-//   settingSound,
-//   settingButtons,
-//   settingEepromReset
-// };
 #ifdef ENABLE_SIMON_APP
     // simon
     enum SimonState : uint8_t
     {
-        // enum SimonState{
         simonWaitForNewGame,
         simonNewGame,
         simonNewLevel,
@@ -763,11 +900,43 @@ private:
     char* textHandle;  // contains the text for the display. (4 chars)
     uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
     byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
-    //uint32_t* displaySegmentsHandle;
-    byte* lightsHandle;
     uint8_t lights;
-    
-    bool app_init_mode;
+
+    bool splash_screen_playing; // actuall flash screen app.
+    bool app_init_edge; // one cycle
+
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+
+
+	enum multitimer_state : uint8_t
+	{
+		// enum state{
+		initialized = 0,
+		playing,
+		finished,
+		paused,
+		setTimers,
+		setFischer
+	};
+
+    // Buzzer *buzzer;
+	SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
+	multitimer_state multitimer_state;
+	uint8_t multitimer_activeTimer;
+	uint8_t multitimer_timerDisplayed;
+	bool multitimer_randomStarter;
+	bool multitimer_fisherTimer;
+
+	uint16_t multitimer_initTimeSecs;
+	// uint8_t multitimer_timers_count;
+
+	uint16_t multitimer_fischerSecs;
+    #endif
+
 };
 
 #endif
+
+
+
+	

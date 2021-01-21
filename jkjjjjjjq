@@ -125,7 +125,7 @@
 [32m+[m[32m          break;[m
 [32m+[m[41m           [m
 [32m+[m[32m        case 7:[m
-       this->modeSimpleButtonsAndLights(init);    [m
+       this->modeSettings(init);    [m
 [31m-		  break;[m
 [31m-		  [m
 [31m-		case 8:[m
@@ -368,7 +368,7 @@
    }[m
 [31m-[m
 [32m+[m[41m [m
-   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+   if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [31m-[m
 [32m+[m[41m [m
      generalTimer.setInitTimeMillis((long)(1* potentio->getValueMapped(-1000, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms[m
@@ -485,7 +485,7 @@
 [31m-	  [m
 [31m-// 	this->fadeInList(displaySequence, 32, 0);[m
 [31m-// 	counter = 0;[m
-[31m-// 	counter2= false;[m
+[31m-// 	general_int16_t_2= false;[m
 [31m-	[m
 [31m-// 	generalTimer.setInitTimeMillis(-200);[m
 [31m-// 	generalTimer.start();[m
@@ -493,12 +493,12 @@
 [32m+[m[41m       [m
 [32m+[m[32m//  this->fadeInList(displaySequence, 32, 0);[m
 [32m+[m[32m//  counter = 0;[m
-[32m+[m[32m//  counter2= false;[m
+[32m+[m[32m//  general_int16_t_2= false;[m
 [32m+[m[41m     [m
 [32m+[m[32m//  generalTimer.setInitTimeMillis(-200);[m
 [32m+[m[32m//  generalTimer.start();[m
  //   }[m
- //   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+ //   if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [31m-// 		  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){[m
 [31m-// 			counter++;[m
 [31m-			[m
@@ -511,7 +511,7 @@
 [31m-// 		  if (counter>31){[m
 [31m-// 				counter = 0;[m
 [31m-// 				this->fadeInList(displaySequence, 32, 0);[m
-[31m-// 				counter2  = !counter2;[m
+[31m-// 				general_int16_t_2  = !general_int16_t_2;[m
 [31m-// 			}[m
 [31m-			[m
 [31m-// 		  if (potentio->getValueStableChangedEdge()){[m
@@ -519,7 +519,7 @@
 [31m-// 		  }[m
 [31m-		  [m
 [31m-// 		  displayAllSegments = displaySequence[counter];[m
-[31m-// 		  if (counter2){[m
+[31m-// 		  if (general_int16_t_2){[m
 [31m-// 			  // negative ==> which makes it fade out.[m
 [31m-// 			  displayAllSegments = ~displayAllSegments;[m
 [31m-// 		  }[m
@@ -532,7 +532,7 @@
 [31m-// 			ledDisp->doScroll();[m
 [31m-// 		  }[m
 [31m-[m
-[31m-// 		  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+[31m-// 		  if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [31m-// 			ledDisp->setScrollSpeed((long)potentio->getValueStable());[m
 [31m-// 		  }else{[m
 [31m-// 			ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);[m
@@ -551,7 +551,7 @@
 [32m+[m[32m//        if (counter>31){[m
 [32m+[m[32m//              counter = 0;[m
 [32m+[m[32m//              this->fadeInList(displaySequence, 32, 0);[m
-[32m+[m[32m//              counter2  = !counter2;[m
+[32m+[m[32m//              general_int16_t_2  = !general_int16_t_2;[m
 [32m+[m[32m//          }[m
 [32m+[m[41m             [m
 [32m+[m[32m//        if (potentio->getValueStableChangedEdge()){[m
@@ -559,7 +559,7 @@
 [32m+[m[32m//        }[m
 [32m+[m[41m           [m
 [32m+[m[32m//        displayAllSegments = displaySequence[counter];[m
-[32m+[m[32m//        if (counter2){[m
+[32m+[m[32m//        if (general_int16_t_2){[m
 [32m+[m[32m//            // negative ==> which makes it fade out.[m
 [32m+[m[32m//            displayAllSegments = ~displayAllSegments;[m
 [32m+[m[32m//        }[m
@@ -572,7 +572,7 @@
 [32m+[m[32m//          ledDisp->doScroll();[m
 [32m+[m[32m//        }[m
 [32m+[m[41m [m
-[32m+[m[32m//        if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+[32m+[m[32m//        if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [32m+[m[32m//          ledDisp->setScrollSpeed((long)potentio->getValueStable());[m
 [32m+[m[32m//        }else{[m
 [32m+[m[32m//          ledDisp->setBrightness((byte)(potentio->getValueMapped(0,50)),false);[m
@@ -582,7 +582,7 @@
  // }[m
 [31m-[m
 [32m+[m[41m [m
- void Apps::modeSimpleButtonsAndLights(bool init){[m
+ void Apps::modeSettings(bool init){[m
    lights = 0b00000000; //reset before switch enquiry[m
 [31m-[m
 [32m+[m[41m [m
@@ -593,7 +593,7 @@
      if(  analogRead(PIN_BUTTONS_1) == 0 &&[m
            analogRead(PIN_BUTTONS_2) == 0 &&[m
            analogRead(PIN_POTENTIO) == 0){[m
-[36m@@ -459,35 +459,35 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -459,35 +459,35 @@[m [mvoid Apps::modeSettings(bool init){[m
            SETTINGS_MODE_DISPLAY_VALUES_BLINK.start();[m
      }  [m
    }[m
@@ -638,7 +638,7 @@
        if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){[m
          lights|= 1<<LIGHT_MOMENTARY_0;[m
          updateScreen = true;[m
-[36m@@ -503,7 +503,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -503,7 +503,7 @@[m [mvoid Apps::modeSettings(bool init){[m
          updateScreen = true;[m
          SETTINGS_MODE_SELECTOR = 0;[m
        }[m
@@ -647,7 +647,7 @@
        #if MOMENTARY_BUTTONS_COUNT == 4[m
        if (binaryInputs[BUTTON_MOMENTARY_3].getValue()){[m
          lights|= 1<<LIGHT_MOMENTARY_3;[m
-[36m@@ -511,7 +511,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -511,7 +511,7 @@[m [mvoid Apps::modeSettings(bool init){[m
          SETTINGS_MODE_SELECTOR = 0;[m
        }[m
        #endif[m
@@ -656,16 +656,16 @@
        if (updateScreen){[m
          textBuf[1]='8';[m
          textBuf[2]='8';[m
-[36m@@ -524,7 +524,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -524,7 +524,7 @@[m [mvoid Apps::modeSettings(bool init){[m
          textBuf[3]='-';[m
          textBuf[4]='-';[m
        }[m
 [31m-[m
 [32m+[m[41m [m
-       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
-         lights|= 1<<LIGHT_LATCHING_SMALL_LEFT;[m
+       if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
+         lights|= 1<<LIGHT_LATCHING_1;[m
        }else{[m
-[36m@@ -547,40 +547,40 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -547,40 +547,40 @@[m [mvoid Apps::modeSettings(bool init){[m
        }else{[m
          textBuf[4]=' ';[m
        }[m
@@ -714,7 +714,7 @@
          if (buzzer->getPin() == PIN_BUZZER){[m
            //ON [m
            //textBuf[1]=' '; [m
-[36m@@ -588,7 +588,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -588,7 +588,7 @@[m [mvoid Apps::modeSettings(bool init){[m
            // textBuf[4]=' ';[m
          }else{[m
            // OFF[m
@@ -723,7 +723,7 @@
            // textBuf[1]=' '; [m
            // textBuf[2]='O'; [m
            textBuf[3]='F'; [m
-[36m@@ -596,39 +596,39 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -596,39 +596,39 @@[m [mvoid Apps::modeSettings(bool init){[m
          } [m
          ledDisp->setTextBufToDisplay(textBuf);[m
        }[m
@@ -770,7 +770,7 @@
        }else{[m
          textBuf[1]='R'; [m
          textBuf[2]='S'; [m
-[36m@@ -639,7 +639,7 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -639,7 +639,7 @@[m [mvoid Apps::modeSettings(bool init){[m
      }else if (SETTINGS_MODE_SELECTOR < 22){[m
        lights|= 1<<LIGHT_MOMENTARY_0;[m
       if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){[m
@@ -779,7 +779,7 @@
          #ifdef ENABLE_EEPROM[m
          for(uint16_t i = 0;i<100;i=i+2){[m
            eeprom_update_word([m
-[36m@@ -653,66 +653,66 @@[m [mvoid Apps::modeSimpleButtonsAndLights(bool init){[m
+[36m@@ -653,66 +653,66 @@[m [mvoid Apps::modeSettings(bool init){[m
          textBuf[2]='O'; [m
          textBuf[3]='N'; [m
          textBuf[4]='E'; [m
@@ -860,12 +860,12 @@
        }[m
 [31m-      [m
 [32m+[m[41m       [m
-       const bool numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_EXTRA].getValue();[m
+       const bool numberElseAlphabethMode = !binaryInputs[BUTTON_LATCHING_3].getValue();[m
 [31m-	  [m
 [31m-  [m
 [32m+[m[41m       [m
 [32m+[m[41m   [m
-       if (binaryInputs[BUTTON_LATCHING_EXTRA].getValueChanged()){[m
+       if (binaryInputs[BUTTON_LATCHING_3].getValueChanged()){[m
          updateScreen = true;[m
          if (!numberElseAlphabethMode){[m
 [36m@@ -723,12 +723,12 @@[m [mvoid Apps::modeCountingLettersAndChars(bool init){[m
@@ -891,19 +891,19 @@
 [31m-	  // auto count[m
 [32m+[m[41m       [m
 [32m+[m[32m      // auto count[m
-       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){[m
+       if (binaryInputs[BUTTON_LATCHING_0].getEdgeUp()){[m
          generalTimer.start();[m
        }  [m
 [31m-      [m
-[31m-	  if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){[m
+[31m-	  if (binaryInputs[BUTTON_LATCHING_0].getEdgeDown()){[m
 [32m+[m[41m       [m
-[32m+[m[32m      if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){[m
+[32m+[m[32m      if (binaryInputs[BUTTON_LATCHING_0].getEdgeDown()){[m
          generalTimer.pause();        [m
        }  [m
 [31m-	  [m
 [32m+[m[41m       [m
-       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue() && !generalTimer.getTimeIsNegative()){[m
-         if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+       if (binaryInputs[BUTTON_LATCHING_0].getValue() && !generalTimer.getTimeIsNegative()){[m
+         if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
            counter++;  [m
 [36m@@ -760,17 +760,17 @@[m [mvoid Apps::modeCountingLettersAndChars(bool init){[m
          generalTimer.start();[m
@@ -912,7 +912,7 @@
 [31m-      [m
 [32m+[m[41m       [m
        //potentio behaviour[m
-       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+       if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [31m-		if (potentio->getValueStableChangedEdge()){[m
 [31m-			[m
 [31m-			generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms[m
@@ -920,7 +920,7 @@
 [31m-			ledDisp->setNumberToDisplayAsDecimal( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));[m
 [31m-			[m
 [31m-		}[m
-[31m-	  }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){[m
+[31m-	  }else if (binaryInputs[BUTTON_LATCHING_2].getValue()){[m
 [32m+[m[32m        if (potentio->getValueStableChangedEdge()){[m
 [32m+[m[41m             [m
 [32m+[m[32m            generalTimer.setInitTimeMillis((long)(100 * potentio->getValueMapped(-100, 0))); //divided by ten, this way, we can set the timer very accurately as displayed on screen when big red is pressed. *100ms[m
@@ -928,7 +928,7 @@
 [32m+[m[32m            ledDisp->setNumberToDisplayAsDecimal( (int16_t)100 * (100 - potentio->getValueMapped(0,100)));[m
 [32m+[m[41m             [m
 [32m+[m[32m        }[m
-[32m+[m[32m      }else if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){[m
+[32m+[m[32m      }else if (binaryInputs[BUTTON_LATCHING_2].getValue()){[m
          if (numberElseAlphabethMode){[m
            counter = (int16_t)(potentio->getValueMapped(0,100));[m
          }else{[m
@@ -965,7 +965,7 @@
 [32m+[m[32m    }[m
 [32m+[m[41m [m
    if (potentio->getValueStableChangedEdge()){[m
-     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+     if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
        buzzer->setTranspose((int8_t)(potentio->getValueMapped(-12,12)));[m
 [36m@@ -817,7 +817,7 @@[m [mvoid Apps::modeSoundSong(bool init){[m
        buzzer->setSpeedRatio((float)(potentio->getValue()) / 256 );[m
@@ -973,9 +973,9 @@
    }[m
 [31m-  [m
 [32m+[m[41m   [m
-   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+   if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
      // advanced mode scales[m
-     if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+     if (binaryInputs[BUTTON_LATCHING_3].getValue()){[m
 [36m@@ -830,10 +830,12 @@[m [mvoid Apps::modeSoundSong(bool init){[m
        if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){[m
          buzzer->loadBuzzerTrack(scale_major);[m
@@ -1018,10 +1018,10 @@
    //buzzer with buzzer roll (notes).[m
 [31m-      [m
 [32m+[m[41m       [m
-   if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+   if (!binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [31m-    [m
 [32m+[m[41m     [m
-     // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){  [m
+     // if (binaryInputs[BUTTON_LATCHING_1].getValue()){  [m
        // if (potentio->getValueStableChangedEdge()){[m
 [31m-      [m
 [32m+[m[41m       [m
@@ -1031,7 +1031,7 @@
 [36m@@ -891,7 +894,7 @@[m [mvoid Apps::modeSoundNotes(){[m
        // }[m
      // }else  [m
-     if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){[m
+     if (binaryInputs[BUTTON_LATCHING_2].getValue()){[m
 [31m-      [m
 [32m+[m[41m       [m
        if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){[m
@@ -1072,27 +1072,27 @@
 [32m+[m[41m [m
  void Apps::draw(bool init){[m
 [31m-	[m
-[31m-	if(binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){[m
-[31m-		this->movieAnimationMode(true);[m
+[31m-	if(binaryInputs[BUTTON_LATCHING_0].getEdgeUp()){[m
+[31m-		this->modeMovie(true);[m
 [31m-		[m
-[31m-	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){[m
+[31m-	}else if (binaryInputs[BUTTON_LATCHING_0].getEdgeDown()){[m
 [31m-		this->modeSingleSegmentManipulation(false);[m
 [31m-		[m
-[31m-	}else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
-[31m-		this->movieAnimationMode(init);[m
+[31m-	}else if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
+[31m-		this->modeMovie(init);[m
 [31m-		[m
 [31m-	}else{[m
 [31m-		this->modeSingleSegmentManipulation(init);[m
 [31m-	}[m
 [32m+[m[41m     [m
-[32m+[m[32m    if(binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){[m
-[32m+[m[32m        this->movieAnimationMode(true);[m
+[32m+[m[32m    if(binaryInputs[BUTTON_LATCHING_0].getEdgeUp()){[m
+[32m+[m[32m        this->modeMovie(true);[m
 [32m+[m[41m         [m
-[32m+[m[32m    }else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){[m
+[32m+[m[32m    }else if (binaryInputs[BUTTON_LATCHING_0].getEdgeDown()){[m
 [32m+[m[32m        this->modeSingleSegmentManipulation(false);[m
 [32m+[m[41m         [m
-[32m+[m[32m    }else if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
-[32m+[m[32m        this->movieAnimationMode(init);[m
+[32m+[m[32m    }else if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
+[32m+[m[32m        this->modeMovie(init);[m
 [32m+[m[41m         [m
 [32m+[m[32m    }else{[m
 [32m+[m[32m        this->modeSingleSegmentManipulation(init);[m
@@ -1100,7 +1100,7 @@
  }[m
 [31m-[m
 [32m+[m[41m [m
- void Apps::movieAnimationMode(bool init){[m
+ void Apps::modeMovie(bool init){[m
 [31m-	//bool nextStep = 0;[m
 [31m-	 //reset saved led disp state.[m
 [31m-	if (init){[m
@@ -1110,7 +1110,7 @@
 [31m-		this->dataPlayer.setAutoSteps(4);[m
 [31m-	}[m
 [31m-[m
-[31m-	if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+[31m-	if (binaryInputs[BUTTON_LATCHING_3].getValue()){[m
 [31m-		// manual mode[m
 [31m-		if (potentio->getValueStableChangedEdge()){[m
 [31m-			if (potentio->getLastStableValueChangedUp()){[m
@@ -1151,7 +1151,7 @@
 [31m-			this->dataPlayer.setSetIndexDirection(2);[m
 [31m-		}[m
 [31m-		  [m
-[31m-		  // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+[31m-		  // if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [31m-			// if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){	[m
 [31m-			 // animation_step = (uint16_t)(counter/4) - 1; // last step[m
 [31m-			// }[m
@@ -1175,7 +1175,7 @@
 [31m-	displayAllSegments = this->dataPlayer.getActive32bit();[m
 [31m-	[m
 [31m-	//invert all data in picture [m
-[31m-	if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+[31m-	if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [31m-	  // negative .[m
 [31m-	  displayAllSegments = ~displayAllSegments ;[m
 [31m-	}[m
@@ -1191,7 +1191,7 @@
 [32m+[m[32m        this->dataPlayer.setAutoSteps(4);[m
 [32m+[m[32m    }[m
 [32m+[m[41m [m
-[32m+[m[32m    if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+[32m+[m[32m    if (binaryInputs[BUTTON_LATCHING_3].getValue()){[m
 [32m+[m[32m        // manual mode[m
 [32m+[m[32m        if (potentio->getValueStableChangedEdge()){[m
 [32m+[m[32m            if (potentio->getLastStableValueChangedUp()){[m
@@ -1232,7 +1232,7 @@
 [32m+[m[32m            this->dataPlayer.setSetIndexDirection(2);[m
 [32m+[m[32m        }[m
 [32m+[m[41m           [m
-[32m+[m[32m          // if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+[32m+[m[32m          // if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [32m+[m[32m            // if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){[m[41m   [m
 [32m+[m[32m             // animation_step = (uint16_t)(counter/4) - 1; // last step[m
 [32m+[m[32m            // }[m
@@ -1256,7 +1256,7 @@
 [32m+[m[32m    displayAllSegments = this->dataPlayer.getActive32bit();[m
 [32m+[m[41m     [m
 [32m+[m[32m    //invert all data in picture[m[41m [m
-[32m+[m[32m    if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+[32m+[m[32m    if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [32m+[m[32m      // negative .[m
 [32m+[m[32m      displayAllSegments = ~displayAllSegments ;[m
 [32m+[m[32m    }[m
@@ -1278,7 +1278,7 @@
      //bottom left is origin[m
      DRAW_X_POS = 0;[m
      DRAW_Y_POS = 0;[m
-     DRAW_ACTIVE_SEGMENT = 0; // segment active[m
+     DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = 0; // segment active[m
 [31m-    [m
 [32m+[m[41m     [m
      //reset saved led disp state.[m
@@ -1297,21 +1297,21 @@
 [31m-		  uint16_t val;[m
 [31m-		  val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments. [m
 [31m-		  val = val % 48;   // 48 positions for 3x4 matrix * 4 digits[m
-[31m-		  DRAW_ACTIVE_SEGMENT = val/12; // get digit[m
+[31m-		  DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = val/12; // get digit[m
 [31m-		  val = val%12; [m
 [31m-		  DRAW_X_POS = val/4; // get xpos[m
 [31m-		  DRAW_Y_POS = val%4; // get ypos[m
 [32m+[m[32m          uint16_t val;[m
 [32m+[m[32m          val = (uint16_t)potentio->getValueMapped(0,102); // 1024/10 causes no skips of segments.[m[41m [m
 [32m+[m[32m          val = val % 48;   // 48 positions for 3x4 matrix * 4 digits[m
-[32m+[m[32m          DRAW_ACTIVE_SEGMENT = val/12; // get digit[m
+[32m+[m[32m          DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = val/12; // get digit[m
 [32m+[m[32m          val = val%12;[m[41m [m
 [32m+[m[32m          DRAW_X_POS = val/4; // get xpos[m
 [32m+[m[32m          DRAW_Y_POS = val%4; // get ypos[m
    }[m
 [31m-  [m
 [32m+[m[41m   [m
-   if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+   if (binaryInputs[BUTTON_LATCHING_3].getValue()){[m
 [31m-	  if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp()){[m
 [31m-		  moveDir = MOVE_RIGHT;[m
 [31m-	  }[m
@@ -1360,9 +1360,9 @@
 [31m-	  //move right[m
 [31m-	  DRAW_X_POS++;[m
 [31m-	  if (DRAW_X_POS > 2){[m
-[31m-		  DRAW_ACTIVE_SEGMENT++; // next digit[m
-[31m-		  if (DRAW_ACTIVE_SEGMENT> 3){ [m
-[31m-			  DRAW_ACTIVE_SEGMENT = 0;[m
+[31m-		  DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT++; // next digit[m
+[31m-		  if (DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT> 3){ [m
+[31m-			  DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = 0;[m
 [31m-		  }[m
 [31m-		  DRAW_X_POS = 0;[m
 [31m-	  }[m
@@ -1411,9 +1411,9 @@
 [32m+[m[32m      //move right[m
 [32m+[m[32m      DRAW_X_POS++;[m
 [32m+[m[32m      if (DRAW_X_POS > 2){[m
-[32m+[m[32m          DRAW_ACTIVE_SEGMENT++; // next digit[m
-[32m+[m[32m          if (DRAW_ACTIVE_SEGMENT> 3){[m[41m [m
-[32m+[m[32m              DRAW_ACTIVE_SEGMENT = 0;[m
+[32m+[m[32m          DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT++; // next digit[m
+[32m+[m[32m          if (DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT> 3){[m[41m [m
+[32m+[m[32m              DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = 0;[m
 [32m+[m[32m          }[m
 [32m+[m[32m          DRAW_X_POS = 0;[m
 [32m+[m[32m      }[m
@@ -1465,7 +1465,7 @@
      { [m
 [31m-	  //move left[m
 [31m-	  if (DRAW_X_POS == 0){[m
-[31m-		DRAW_ACTIVE_SEGMENT = (DRAW_ACTIVE_SEGMENT == 0)?3:(DRAW_ACTIVE_SEGMENT-1); // previous digit[m
+[31m-		DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = (DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT == 0)?3:(DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT-1); // previous digit[m
 [31m-		DRAW_X_POS = 2;[m
 [31m-	  }else{[m
 [31m-		DRAW_X_POS--;[m
@@ -1476,7 +1476,7 @@
 [31m-	default:[m
 [32m+[m[32m      //move left[m
 [32m+[m[32m      if (DRAW_X_POS == 0){[m
-[32m+[m[32m        DRAW_ACTIVE_SEGMENT = (DRAW_ACTIVE_SEGMENT == 0)?3:(DRAW_ACTIVE_SEGMENT-1); // previous digit[m
+[32m+[m[32m        DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = (DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT == 0)?3:(DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT-1); // previous digit[m
 [32m+[m[32m        DRAW_X_POS = 2;[m
 [32m+[m[32m      }else{[m
 [32m+[m[32m        DRAW_X_POS--;[m
@@ -1559,16 +1559,16 @@
 [31m-	    // toggle segment with xor old^toggleval=new  [m
 [31m-		//	toggleval==0: 0^0=0, 1^0=1 , [m
 [31m-		//  toggleval==1: 1^1=0, 0^1=1[m
-[31m-		DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT]  ^= seg; [m
+[31m-		DRAW_DISP_STATE[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT]  ^= seg; [m
 [32m+[m[32m        // toggle segment with xor old^toggleval=new[m[41m  [m
 [32m+[m[32m        //  toggleval==0: 0^0=0, 1^0=1 ,[m[41m [m
 [32m+[m[32m        //  toggleval==1: 1^1=0, 0^1=1[m
-[32m+[m[32m        DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT]  ^= seg;[m[41m [m
+[32m+[m[32m        DRAW_DISP_STATE[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT]  ^= seg;[m[41m [m
    }[m
 [31m-  [m
 [32m+[m[41m   [m
    //invert all data in picture [m
-   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValueChanged()){[m
+   if (binaryInputs[BUTTON_LATCHING_1].getValueChanged()){[m
      //i can typ whatever i want mlem mlem mlem[m
 [31m-	  // negative .[m
 [31m-	  for (uint8_t i=0;i<4;i++){[m
@@ -1591,16 +1591,16 @@
 [31m-[m
 [32m+[m[41m [m
    //show active segment on display[m
-   // if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
-   if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
-[31m-	ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1); // XOR the seg with the segment saved value, so it shows negatively.  [m
-[32m+[m[32m    ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1); // XOR the seg with the segment saved value, so it shows negatively.[m[41m  [m
+   // if (generalTimer.getInFirstGivenHundredsPartOfSecond(500) || !binaryInputs[BUTTON_LATCHING_3].getValue()){[m
+   if (millis()%250 > 125 || !binaryInputs[BUTTON_LATCHING_3].getValue()){[m
+[31m-	ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT],DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT+1); // XOR the seg with the segment saved value, so it shows negatively.  [m
+[32m+[m[32m    ledDisp->SetSingleDigit(seg^DRAW_DISP_STATE[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT],DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT+1); // XOR the seg with the segment saved value, so it shows negatively.[m[41m  [m
    }[m
    // else{[m
 [31m-	  // //only show the saved state, no blinking of active segment. [m
-[31m-	  // ledDisp->SetSingleDigit(DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1);[m
+[31m-	  // ledDisp->SetSingleDigit(DRAW_DISP_STATE[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT],DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT+1);[m
 [32m+[m[32m      // //only show the saved state, no blinking of active segment.[m[41m [m
-[32m+[m[32m      // ledDisp->SetSingleDigit(DRAW_DISP_STATE[DRAW_ACTIVE_SEGMENT],DRAW_ACTIVE_SEGMENT+1);[m
+[32m+[m[32m      // ledDisp->SetSingleDigit(DRAW_DISP_STATE[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT],DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT+1);[m
    // }[m
 [31m-  [m
 [32m+[m[41m   [m
@@ -1645,28 +1645,28 @@
 [31m-[m
 [32m+[m[41m [m
    // START STOP Button[m
-   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeUp()){[m
+   if (binaryInputs[BUTTON_LATCHING_0].getEdgeUp()){[m
 [31m-	  this->multiTimer.start();[m
 [32m+[m[32m      this->multiTimer.start();[m
    }[m
-   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getEdgeDown()){[m
+   if (binaryInputs[BUTTON_LATCHING_0].getEdgeDown()){[m
 [31m-	  this->multiTimer.init();[m
 [32m+[m[32m      this->multiTimer.init();[m
    }[m
 [31m-  [m
 [32m+[m[41m   [m
    // PAUSE Switch[m
-   this->multiTimer.setStatePause(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()); // do not only work on edge here, as latching switch can  be in any state.[m
+   this->multiTimer.setStatePause(binaryInputs[BUTTON_LATCHING_3].getValue()); // do not only work on edge here, as latching switch can  be in any state.[m
 [31m-  [m
 [31m-  // # set number of timers SWITCH	[m
 [32m+[m[41m   [m
 [32m+[m[32m  // # set number of timers SWITCH[m[41m  [m
-   this->multiTimer.setStateTimersCount(binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()); // do not only work on edge here, as latching switch can  be in any state.[m
+   this->multiTimer.setStateTimersCount(binaryInputs[BUTTON_LATCHING_1].getValue()); // do not only work on edge here, as latching switch can  be in any state.[m
 [31m-  [m
 [31m-  // set fischer timer SWITCH	[m
 [32m+[m[41m   [m
 [32m+[m[32m  // set fischer timer SWITCH[m[41m   [m
-   this->multiTimer.setStateFischerTimer(binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()); // do not only work on edge here, as latching switch can  be in any state.[m
+   this->multiTimer.setStateFischerTimer(binaryInputs[BUTTON_LATCHING_2].getValue()); // do not only work on edge here, as latching switch can  be in any state.[m
 [31m-  [m
 [32m+[m[41m   [m
    // THE DIAL[m
@@ -1721,10 +1721,10 @@
 [31m-  [m
 [32m+[m[41m   [m
    // settings light to real lights[m
-   (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_LATCHING_EXTRA:false;[m
-   (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LATCHING_BIG:false;[m
-   (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_RIGHT:false;[m
-   (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LATCHING_SMALL_LEFT:false;[m
+   (LIGHT_PAUSE & settingsLights)? lights|= 1<<LIGHT_LATCHING_3:false;[m
+   (LIGHT_PLAYING & settingsLights)? lights|= 1<<LIGHT_LATCHING_0:false;[m
+   (LIGHT_FISCHER & settingsLights)? lights|= 1<<LIGHT_LATCHING_2:false;[m
+   (LIGHT_SET_TIMERS_COUNT & settingsLights)? lights|= 1<<LIGHT_LATCHING_1:false;[m
 [31m-[m
 [32m+[m[41m [m
    ledDisp->setTextBufToDisplay(textBuf);[m
@@ -1745,7 +1745,7 @@
 [31m-	  textBuf[3]='L'; [m
 [31m-	  textBuf[4]='T'; [m
 [31m-	  counter = 0;[m
-[31m-	  counter2 = 0; // counts progress in movement.[m
+[31m-	  general_int16_t_2 = 0; // counts progress in movement.[m
 [31m-	  buzzer->setSpeedRatio(2.0);[m
 [31m-	  [m
 [31m-	  this->dataPlayer.loadAllData(disp_4digits_animations);[m
@@ -1758,7 +1758,7 @@
 [32m+[m[32m      textBuf[3]='L';[m[41m [m
 [32m+[m[32m      textBuf[4]='T';[m[41m [m
 [32m+[m[32m      counter = 0;[m
-[32m+[m[32m      counter2 = 0; // counts progress in movement.[m
+[32m+[m[32m      general_int16_t_2 = 0; // counts progress in movement.[m
 [32m+[m[32m      buzzer->setSpeedRatio(2.0);[m
 [32m+[m[41m       [m
 [32m+[m[32m      this->dataPlayer.loadAllData(disp_4digits_animations);[m
@@ -1769,7 +1769,7 @@
    }[m
 [31m-  [m
 [32m+[m[41m   [m
-   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+   if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [31m-	  // movie for each gesture[m
 [31m-	  [m
 [32m+[m[32m      // movie for each gesture[m
@@ -1818,75 +1818,75 @@
    }else{[m
 [31m-		if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){[m
 [31m-			buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[31m-			counter2|=0x01<<TILT_FORWARD;[m
+[31m-			general_int16_t_2|=0x01<<TILT_FORWARD;[m
 [31m-		}[m
 [31m-[m
 [31m-		if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){[m
 [31m-			buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[31m-			counter2|=0x01<<TILT_BACKWARD;[m
+[31m-			general_int16_t_2|=0x01<<TILT_BACKWARD;[m
 [31m-		}[m
 [31m-[m
 [31m-		if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){[m
 [31m-			buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[31m-			counter2|=0x01<<TILT_LEFT;[m
+[31m-			general_int16_t_2|=0x01<<TILT_LEFT;[m
 [31m-		}[m
 [31m-[m
 [31m-		if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){[m
 [31m-			buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[31m-			counter2|=0x01<<TILT_RIGHT;[m
+[31m-			general_int16_t_2|=0x01<<TILT_RIGHT;[m
 [31m-		}[m
 [31m-[m
-[31m-		if(counter2>0 || counter > 0){  [m
+[31m-		if(general_int16_t_2>0 || counter > 0){  [m
 [31m-	  [m
 [31m-		  for (uint8_t i=0;i<=counter;i++){[m
 [31m-			  [m
-[31m-			  if (1<<TILT_FORWARD & counter2 || i<counter){[m
+[31m-			  if (1<<TILT_FORWARD & general_int16_t_2 || i<counter){[m
 [31m-				screen |= (uint32_t)pgm_read_byte_near(tilt_forward + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [31m-			  }[m
-[31m-			  if (1<<TILT_BACKWARD & counter2 || i<counter){[m
+[31m-			  if (1<<TILT_BACKWARD & general_int16_t_2 || i<counter){[m
 [31m-				screen |= (uint32_t)pgm_read_byte_near(tilt_backward + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [31m-			  }[m
-[31m-			  if (1<<TILT_LEFT & counter2 || i<counter){[m
+[31m-			  if (1<<TILT_LEFT & general_int16_t_2 || i<counter){[m
 [31m-				screen |= (uint32_t)pgm_read_byte_near(tilt_left + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [31m-			  }[m
-[31m-			  if (1<<TILT_RIGHT & counter2 || i<counter){[m
+[31m-			  if (1<<TILT_RIGHT & general_int16_t_2 || i<counter){[m
 [31m-				screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [31m-			  }[m
 [31m-		  }	[m
 [32m+[m[32m        if (binaryInputs[SWITCH_TILT_FORWARD].getEdgeDown()){[m
 [32m+[m[32m            buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[32m+[m[32m            counter2|=0x01<<TILT_FORWARD;[m
+[32m+[m[32m            general_int16_t_2|=0x01<<TILT_FORWARD;[m
 [32m+[m[32m        }[m
 [32m+[m[41m [m
 [32m+[m[32m        if (binaryInputs[SWITCH_TILT_BACKWARD].getEdgeDown()){[m
 [32m+[m[32m            buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[32m+[m[32m            counter2|=0x01<<TILT_BACKWARD;[m
+[32m+[m[32m            general_int16_t_2|=0x01<<TILT_BACKWARD;[m
 [32m+[m[32m        }[m
 [32m+[m[41m [m
 [32m+[m[32m        if (binaryInputs[SWITCH_TILT_LEFT].getEdgeDown()){[m
 [32m+[m[32m            buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[32m+[m[32m            counter2|=0x01<<TILT_LEFT;[m
+[32m+[m[32m            general_int16_t_2|=0x01<<TILT_LEFT;[m
 [32m+[m[32m        }[m
 [32m+[m[41m [m
 [32m+[m[32m        if (binaryInputs[SWITCH_TILT_RIGHT].getEdgeDown()){[m
 [32m+[m[32m            buzzer->programBuzzerRoll(1); //not beep but "puck"[m
-[32m+[m[32m            counter2|=0x01<<TILT_RIGHT;[m
+[32m+[m[32m            general_int16_t_2|=0x01<<TILT_RIGHT;[m
 [32m+[m[32m        }[m
 [32m+[m[41m [m
-[32m+[m[32m        if(counter2>0 || counter > 0){[m[41m  [m
+[32m+[m[32m        if(general_int16_t_2>0 || counter > 0){[m[41m  [m
 [32m+[m[41m       [m
 [32m+[m[32m          for (uint8_t i=0;i<=counter;i++){[m
 [32m+[m[41m               [m
-[32m+[m[32m              if (1<<TILT_FORWARD & counter2 || i<counter){[m
+[32m+[m[32m              if (1<<TILT_FORWARD & general_int16_t_2 || i<counter){[m
 [32m+[m[32m                screen |= (uint32_t)pgm_read_byte_near(tilt_forward + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [32m+[m[32m              }[m
-[32m+[m[32m              if (1<<TILT_BACKWARD & counter2 || i<counter){[m
+[32m+[m[32m              if (1<<TILT_BACKWARD & general_int16_t_2 || i<counter){[m
 [32m+[m[32m                screen |= (uint32_t)pgm_read_byte_near(tilt_backward + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [32m+[m[32m              }[m
-[32m+[m[32m              if (1<<TILT_LEFT & counter2 || i<counter){[m
+[32m+[m[32m              if (1<<TILT_LEFT & general_int16_t_2 || i<counter){[m
 [32m+[m[32m                screen |= (uint32_t)pgm_read_byte_near(tilt_left + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [32m+[m[32m              }[m
-[32m+[m[32m              if (1<<TILT_RIGHT & counter2 || i<counter){[m
+[32m+[m[32m              if (1<<TILT_RIGHT & general_int16_t_2 || i<counter){[m
 [32m+[m[32m                screen |= (uint32_t)pgm_read_byte_near(tilt_right + i)<< (8*i); //* 4 --> 4 bytes per dword[m
 [32m+[m[32m              }[m
 [32m+[m[32m          }[m[41m [m
@@ -1900,10 +1900,10 @@
 [31m-  [m
 [32m+[m[41m   [m
    // keep track of progress[m
-   if (counter2 == 0x0F){ //if a digit is complete[m
+   if (general_int16_t_2 == 0x0F){ //if a digit is complete[m
      counter++;[m
 [36m@@ -1434,79 +1437,80 @@[m [mvoid Apps::tiltSwitchTest(bool init){[m
-     counter2 = 0;[m
+     general_int16_t_2 = 0;[m
    }[m
  }[m
 [31m-[m
@@ -1931,7 +1931,7 @@
    //r = r*r;[m
 [31m-[m
 [32m+[m[41m [m
-   if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+   if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [31m-[m
 [32m+[m[41m [m
      if (binaryInputs[BUTTON_MOMENTARY_0].getValue()){[m
@@ -1964,7 +1964,7 @@
        if (potentio->getValueStableChangedEdge()){[m
          buzzer->playTone([m
              potentio->getValueMapped(0,500), [m
-             binaryInputs[BUTTON_LATCHING_EXTRA].getValue()?0:GEIGER_TONE_LENGTH[m
+             binaryInputs[BUTTON_LATCHING_3].getValue()?0:GEIGER_TONE_LENGTH[m
            );[m
        }[m
 [31m-[m
@@ -1976,7 +1976,7 @@
          long tmp  =  random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST+1);[m
          buzzer->playTone([m
            tmp , [m
-           binaryInputs[BUTTON_LATCHING_EXTRA].getValue()?0:GEIGER_TONE_LENGTH[m
+           binaryInputs[BUTTON_LATCHING_3].getValue()?0:GEIGER_TONE_LENGTH[m
            );[m
 [31m-[m
 [32m+[m[41m [m
@@ -1985,7 +1985,7 @@
        }[m
 [31m-[m
 [32m+[m[41m [m
-       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+       if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
          ledDisp->setNumberToDisplayAsDecimal(COUNTER_GEIGER);[m
        }[m
 [31m-      [m
@@ -2038,7 +2038,7 @@
 [31m-[m
 [32m+[m[32m    int8_t step = 0;[m
 [32m+[m[41m [m
-   if (!binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){ [m
+   if (!binaryInputs[BUTTON_LATCHING_0].getValue()){ [m
      // metrone function is the "easy mode here"[m
      this->modeMetronome(init);[m
      return;[m
@@ -2063,12 +2063,12 @@
    }[m
 [31m-  [m
 [32m+[m[41m   [m
-   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getEdgeDown()){[m
+   if (binaryInputs[BUTTON_LATCHING_1].getEdgeDown()){[m
      init = true; // make sure we display the sequencer when returning from save/load mode[m
    }[m
 [31m-[m
 [32m+[m[41m [m
-   if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){ [m
+   if (binaryInputs[BUTTON_LATCHING_1].getValue()){ [m
      // load/save songs to the sequencer[m
      //blink alternatively song number and "load" or "save"[m
      uint8_t song_number  = potentio->getValueMapped(1,9);[m
@@ -2079,7 +2079,7 @@
      }else{[m
 [31m-      [m
 [32m+[m[41m       [m
-       if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+       if(binaryInputs[BUTTON_LATCHING_3].getValue()){[m
          textBuf[1] = 'S';[m
          textBuf[2] = 'A';[m
          textBuf[3] = 'V';[m
@@ -2109,7 +2109,7 @@
                );[m
 [31m-[m
 [32m+[m[41m [m
-         if(binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+         if(binaryInputs[BUTTON_LATCHING_3].getValue()){[m
            //save[m
            eeprom_write_byte(eeprom_address, this->SEQUENCER_SONG[i]);[m
 [31m-[m
@@ -2200,7 +2200,7 @@
        buzzer->programBuzzerRoll(note);[m
 [31m-[m
 [32m+[m[41m [m
-       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue()){ [m
+       if (binaryInputs[BUTTON_LATCHING_2].getValue()){ [m
          //copy to all measures[m
          for (uint8_t i=0;i<4;i++){[m
 [36m@@ -1679,55 +1683,59 @@[m [mvoid Apps::modeSequencer(bool init){[m
@@ -2225,7 +2225,7 @@
 [32m+[m[32m#endif[m
 [32m+[m[41m [m
      // autoplay[m
-     if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+     if (binaryInputs[BUTTON_LATCHING_3].getValue()){[m
        // change speed is default behaviour of potentio.[m
          if (!binaryInputs[BUTTON_MOMENTARY_0].getValue() && [m
              !binaryInputs[BUTTON_MOMENTARY_1].getValue() &&[m
@@ -2303,7 +2303,7 @@
    }[m
 [31m-  [m
 [32m+[m[41m   [m
-   if (binaryInputs[BUTTON_LATCHING_EXTRA].getValue()){[m
+   if (binaryInputs[BUTTON_LATCHING_3].getValue()){[m
 [31m-[m
 [32m+[m[41m [m
      if (potentio->getValueStableChangedEdge()){[m
@@ -2375,7 +2375,7 @@
 [32m+[m[41m [m
        METRONOME_TICKER_2_POSITION = this->nextStepRotate([m
          METRONOME_TICKER_2_POSITION, [m
-         !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue(), [m
+         !binaryInputs[BUTTON_LATCHING_1].getValue(), [m
 [36m@@ -1830,21 +1840,21 @@[m [mvoid Apps::modeMetronome(bool init){[m
          0, [m
          11);[m
@@ -2418,13 +2418,13 @@
  void Apps::modeSimon(bool init)[m
  {[m
    const int numButtons = 4;[m
-   const int buttons[numButtons] = { BUTTON_LATCHING_EXTRA, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2 };[m
-   const byte lights[numButtons] = { 1 << LIGHT_LATCHING_EXTRA, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2 };[m
+   const int buttons[numButtons] = { BUTTON_LATCHING_3, BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2 };[m
+   const byte lights[numButtons] = { 1 << LIGHT_LATCHING_3, 1 << LIGHT_MOMENTARY_0, 1 << LIGHT_MOMENTARY_1, 1 << LIGHT_MOMENTARY_2 };[m
    const uint8_t sounds[numButtons] = { C4_1, F4_1, A4_1, C5_1};[m
 [31m-[m
 [32m+[m[41m [m
-   const bool hasSound = binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue();[m
-   const bool hasLight = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue() || !hasSound;[m
+   const bool hasSound = binaryInputs[BUTTON_LATCHING_1].getValue();[m
+   const bool hasLight = binaryInputs[BUTTON_LATCHING_2].getValue() || !hasSound;[m
 [31m-[m
 [32m+[m[41m [m
    if (init) {[m
@@ -2439,7 +2439,7 @@
 [32m+[m[41m [m
    uint8_t buttonsChanged = 0;[m
    for (int k = 0; k < numButtons; ++k) {[m
-     const bool changed = (buttons[k] == BUTTON_LATCHING_EXTRA)[m
+     const bool changed = (buttons[k] == BUTTON_LATCHING_3)[m
 [36m@@ -1885,7 +1895,7 @@[m [mvoid Apps::modeSimon(bool init)[m
        buttonsChanged |= (1 << k);[m
      }[m
@@ -2534,7 +2534,7 @@
 [31m-[m
 [32m+[m[41m [m
    // at any time, leave game when depressing play button.[m
-   if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeDown() ){[m
+   if (binaryInputs[BUTTON_LATCHING_3].getEdgeDown() ){[m
      reactionGameState = reactionWaitForStart;[m
    }[m
 [31m- [m
@@ -2553,8 +2553,8 @@
 [31m-[m
 [32m+[m[41m [m
        // special mode for the reaction game: limited total time during which as many points should be collected. [m
-       OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = binaryInputs[BUTTON_LATCHING_SMALL_RED_RIGHT].getValue();[m
-       REACTION_GUITAR_HERO_MODE = binaryInputs[BUTTON_LATCHING_BIG_RED].getValue();[m
+       OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = binaryInputs[BUTTON_LATCHING_2].getValue();[m
+       REACTION_GUITAR_HERO_MODE = binaryInputs[BUTTON_LATCHING_0].getValue();[m
 [31m-[m
 [32m+[m[41m [m
        // guitar hero and countdown mode should never occure at the same time![m
@@ -2587,11 +2587,11 @@
 [32m+[m[41m [m
 [32m+[m[41m         [m
        // play game button pressed[m
-       if (binaryInputs[BUTTON_LATCHING_EXTRA].getEdgeUp() ){[m
+       if (binaryInputs[BUTTON_LATCHING_3].getEdgeUp() ){[m
          reactionGameState = reactionNewGame;[m
 [31m-[m
 [32m+[m[41m [m
-         if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+         if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
            //play by sound[m
            for (uint8_t i=0;i<MOMENTARY_BUTTONS_COUNT;i++){[m
 [31m-            [m
@@ -2620,7 +2620,7 @@
        REACTION_GAME_SCORE = 0;[m
 [31m-[m
 [32m+[m[41m [m
-       if (binaryInputs[BUTTON_LATCHING_BIG_RED].getValue()){[m
+       if (binaryInputs[BUTTON_LATCHING_0].getValue()){[m
 [31m-[m
 [32m+[m[41m [m
          reactionGameState = reactionGuitarHeroNewTurn;[m
@@ -2631,7 +2631,7 @@
 [31m-        [m
 [32m+[m[41m         [m
        }else{[m
-         if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+         if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
            // let them all play so the player gets a feel for them.[m
 [36m@@ -2108,58 +2118,58 @@[m [mvoid Apps::modeReactionGame(bool init){[m
              buzzer->programBuzzerRoll(REACTION_GAME_SELECTED_SOUNDS[i]);[m
@@ -2816,7 +2816,7 @@
 [32m+[m[41m       [m
 [32m+[m[41m       [m
 [32m+[m[41m [m
-       if (binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue()){[m
+       if (binaryInputs[BUTTON_LATCHING_1].getValue()){[m
 [31m-        [m
 [32m+[m[41m         [m
          //play by sounds[m
@@ -2902,7 +2902,7 @@
        // set decimal point as "button lights" helper, in bright daylight button lights might not be visible.[m
 [31m-[m
 [32m+[m[41m [m
-       if ( !binaryInputs[BUTTON_LATCHING_SMALL_RED_LEFT].getValue() ){[m
+       if ( !binaryInputs[BUTTON_LATCHING_1].getValue() ){[m
          //always show unless in soundmode[m
          ledDisp->setDecimalPointToDisplay(true, REACTION_GAME_TARGET+1);[m
        }[m

@@ -41,12 +41,14 @@ public:
 	void setOffsetInitTimeMillis(long offsetMillis);
 
 	long getTimeMillis();
+	bool getCountDownTimerElapsedAndRestart();
 	bool getTimeIsNegative();
 	long getTimeSeconds();
 	unsigned int getTimeSecondsAbsolute();
 	unsigned int getTimeSecondsCountDownTimer();
 	long getTimeMillisCountDownTimer();
 	void getTimeString(char *textBuf);
+	bool getSecondsBlinker();
 
 #ifdef ENABLE_CALLIBRATION
 	void setCallibrationMillis(float *callibrationRatio);
