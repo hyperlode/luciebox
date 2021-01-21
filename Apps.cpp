@@ -2608,7 +2608,7 @@ void Apps::draw()
 			{
 				// delete slot. (and shift all drawings.)
 				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX+1) * 4;
-					 i < EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 3);
+					 i < EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_TOTAL_LENGTH - 3);
 					 i++)
 				{
 					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
@@ -2627,7 +2627,7 @@ void Apps::draw()
 				else
 				{
 					// work with eeprom addresses, not with picture indexes.
-					for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_LENGTH - 1);
+					for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_TOTAL_LENGTH - 1);
 						 i >= EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX-1) * 4;
 						 i--)
 					{
@@ -3503,6 +3503,7 @@ void Apps::modeReactionGame()
 		REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(64,false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
 		if (encoder_dial->getDelta())
 		{
+			// for a more pleasant experience (no blinking during knob turning)
 			REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT = millis() % 1000;
 		}
 
@@ -4108,23 +4109,18 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	//-length of data to save.  (=eeprom data length)
 	// eeprom start address
 
-	//kind of an init
-	if (!SAVE_LOAD_MENU_BLINK_TIMER.getIsStarted())
-	{
-		SAVE_LOAD_MENU_BLINK_TIMER.start(-1000);
-	}
-
 	// load/save data
-
 	uint8_t slot_number = encoder_dial->getValueLimited((slotCount-1)*16, false) / 16;
-	
-	if (SAVE_LOAD_MENU_BLINK_TIMER.getInFirstGivenHundredsPartOfSecond(500))
-	{
-		//blink alternatively song number and "load" or "save"
-		ledDisp->setNumberToDisplayAsDecimal(slot_number);
+
+	if (this->encoder_dial->getDelta()){
+		SAVE_LOAD_MENU_BLINKING_OFFSET = millis() % 1000;
 	}
-	else
+
+	//blink alternatively song number and "load" or "save"
+	if ((millis()-SAVE_LOAD_MENU_BLINKING_OFFSET) % 1000 > 500)
 	{
+		lights |= 1 << LIGHT_MOMENTARY_0;
+		lights |= 1 << LIGHT_LATCHING_3;
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
 			setStandardTextToTextBuf(TEXT_SAVE);
@@ -4133,22 +4129,18 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 		{
 			setStandardTextToTextBuf(TEXT_LOAD);
 		}
-
 		textBufToDisplay();
+	}
+	else
+	{
+		ledDisp->setNumberToDisplayAsDecimal(slot_number);
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		bool loadElseSave = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3));
-
 		saveLoadFromEepromSlot(data, slot_number, eepromSlotLength, eepromStartAddress, loadElseSave);
-
 		return loadElseSave;
-	}
-
-	if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
-	{
-		SAVE_LOAD_MENU_BLINK_TIMER.start();
 	}
 	return false;
 }

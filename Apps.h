@@ -142,7 +142,7 @@
 
 #define TIMER_REACTION_GAME_SPEED generalTimer2
 #define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
-#define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
+// #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
 #define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
 #define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
 #define SIMON_BLINK_TIMER generalTimer2
@@ -207,6 +207,7 @@
 
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
 #define COUNTER_GEIGER general_uint16_t_2
+#define SAVE_LOAD_MENU_BLINKING_OFFSET general_uint16_t_2
 
 #define REACTION_GAME_LEVEL general_uint8_t_1
 #define SEQUENCER_TEMP_NOTE general_uint8_t_1
