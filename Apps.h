@@ -853,7 +853,8 @@ private:
         reactionGuitarHeroPlaying,
         reactionHexNextStep,
         reactionHexWaitForButtonsRelease,
-        reactionHexPlaying
+        reactionHexPlaying,
+        reactionSoundInit
 
     };
     ReactionGameState reactionGameState;

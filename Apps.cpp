@@ -3478,14 +3478,14 @@ void Apps::modeReactionGame()
 		reactionGameState = reactionWaitForStart;
 		displayAllSegments = 0x00;
 
-		// //play by sound, only initiate pattern at start of app. They way, players can get used to it. To change pattern, leave and come back to app.
+		// play by sound, only initiate pattern at start of app. This way, players can get used to it. To change pattern, leave and come back to app.
+		// fun fact: when box started in this app, it will always have the same pattern. There is a lesson to be learned about random seeding dear Lucie!
 		// never twice the same sound. Only first notes of array will be used.
 		for (uint8_t i = 0; i < 12; i++)
 		{
 			REACTION_GAME_TEMP_SELECTED_NOTES[i] =  234 + i ;//234, 245
 		}
 		this->shuffle(REACTION_GAME_TEMP_SELECTED_NOTES, 12);
-		
 	}
 
 	// at any time, leave game when depressing play button.
@@ -3509,8 +3509,8 @@ void Apps::modeReactionGame()
 
 		// check options
 		REACTION_GUITAR_HERO_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
-		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
 		EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
+		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
@@ -3544,25 +3544,35 @@ void Apps::modeReactionGame()
 		{
 			if (!REACTION_GUITAR_HERO_MODE && EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
-				// sound mode let them all play so the player gets a feel for them.
-				for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-				{
-					addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[i]);
-					this->addNoteToBuzzerRepeated(rest_1, 2);
-				}
-				addNoteToBuzzerRepeated(rest_1, 4);
+				reactionGameState = reactionSoundInit;
+
+			}else{
+				reactionGameState = reactionNewGame;
 			}
-			reactionGameState = reactionNewGame;
 		}
 		break;
+	}
+	case reactionSoundInit:
+	{
+		// play all soundsn so the player gets a feel for them.
+		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		{
+			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[i]);
+			this->addNoteToBuzzerRepeated(rest_1, 2);
+		}
+		addNoteToBuzzerRepeated(rest_1, 4);
+		reactionGameState = reactionNewGame;
 	}
 
 	case reactionNewGame:
 	{
 		REACTION_GAME_SCORE = 0;
+		
 
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
+		if (REACTION_GUITAR_HERO_MODE)
 		{
+			// guitar hero mode 
+
 			REACTION_GAME_STEP_TIME_MILLIS = (5 - REACTION_GAME_LEVEL) * -200;
 			displayAllSegments = 0;
 
@@ -3583,6 +3593,9 @@ void Apps::modeReactionGame()
 		}
 		else
 		{
+			// whack a mole mode
+
+			
 
 			if (buzzer->getBuzzerRollEmpty()){ // in sound mode, wait till demo is done
 				reactionGameState = reactionNewTurn;
@@ -3657,7 +3670,7 @@ void Apps::modeReactionGame()
 			REACTION_GAME_HEX_ACTIVE_DIGIT--;
 		}
 		
-		// //attempt to optimization, but with a bug, and too tired. So, give it a shot! 
+		// //attempt to optimization, but with a bug, and too tired. So, Lucie, I invite you to give it a shot! 
 		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT];
 
 		// if (REACTION_GAME_HEX_VALUE_TO_FIND == ' ' || REACTION_GAME_HEX_VALUE_TO_FIND == SPACE_FAKE_ASCII){
@@ -3974,6 +3987,7 @@ void Apps::modeReactionGame()
 		// prepare next game delay.
 		TIMER_REACTION_END_OF_GAME_DELAY.start(-2000);
 		reactionGameState = reactionFinished;
+
 		break;
 	}
 
@@ -3982,7 +3996,12 @@ void Apps::modeReactionGame()
 		if (!TIMER_REACTION_END_OF_GAME_DELAY.getTimeIsNegative())
 		{
 			//end of display high score, next game
-			reactionGameState = reactionNewGame;
+			if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO){
+				reactionGameState = reactionSoundInit;
+
+			}else{
+				reactionGameState = reactionNewGame;
+			}
 		}
 		else
 		{
@@ -3998,7 +4017,6 @@ void Apps::modeReactionGame()
 		break;
 	}
 	}
-#endif
 
 	// option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
 	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
@@ -4006,6 +4024,7 @@ void Apps::modeReactionGame()
 	// lights ^= (-OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE ^ lights) & (1UL << LIGHT_LATCHING_2);
 	setButtonLight(LIGHT_LATCHING_1, EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO);
 	setButtonLight(LIGHT_LATCHING_2, OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE);
+#endif
 }
 
 
