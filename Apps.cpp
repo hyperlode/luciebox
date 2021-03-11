@@ -4583,6 +4583,7 @@ void Apps::multitimer_setDefaults()
 
 void Apps::multitimer_setTimersCount(int8_t delta)
 {
+	// delta > 0: increase, else decrease.
 	// if (this->multitimer_state == setTimers)
 	if (this->multitimer_state == initialized)
 	{
@@ -4773,8 +4774,11 @@ void Apps::multitimer_refresh()
 			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 			if ((binaryInputsValue & momentary_buttons_mask) == 0){
 				// set number of timers
-				this->multitimer_setTimersCount(this->encoder_dial->getDelta()); 
-
+				MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY++; // hack to decrease sensitivity of encoder dial for counter setting only.
+				if (MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY > 10){
+					this->multitimer_setTimersCount(this->encoder_dial->getDelta());
+					MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
+				}
 			}else{
 				// set time for each timerbutton pressed
 				for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
@@ -5029,10 +5033,13 @@ void Apps::multitimer_next()
 			this->multitimer_timers[this->multitimer_activeTimer].startPaused(true);
 		}
 
+		int test_infinite_loop = 0;
 		do
 		{
 			this->multitimer_activeTimer >= (MULTITIMER_TIMERS_COUNT - 1) ? this->multitimer_activeTimer = 0 : this->multitimer_activeTimer++;
+			test_infinite_loop++;
 		} while (this->multitimer_getTimerFinished(this->multitimer_activeTimer) //if finished go to next timer.
+			&& test_infinite_loop < 100
 		);
 
 		this->multitimer_timers[this->multitimer_activeTimer].continu();

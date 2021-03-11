@@ -520,10 +520,13 @@ void MiniMultiTimer::next()
 		// add fischer timer (disabled just means: zero seconds).
 		this->timers[this->activeTimer].setOffsetInitTimeMillis(-1000 * long(this->fischerSecs));
 
+		int tmp = 0;
 		do
 		{
 			this->activeTimer >= (this->timers_count - 1) ? this->activeTimer = 0 : this->activeTimer++;
+			tmp++;
 		} while (this->getTimerFinished(this->activeTimer) //if finished go to next timer.
+			|| tmp > 100
 		);
 
 		this->timers[this->activeTimer].continu();

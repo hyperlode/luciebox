@@ -4,8 +4,8 @@
 // v300 : pcb v3 burst implemented. change in button sequence...
 
 // #define DBUG_REFACTOR_DISP
-#define ENABLE_TILT_SWITCHES
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_TILT_SWITCHES
+#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 // #define DBUG_REFACTOR_DISP
 
@@ -197,12 +197,12 @@
 #define EEPROM_REACTION_GAME_OFFSET                     0
 
 
-wrong... see code. built up differently...
-// #define EEPROM_REACTION_GAME_WHACK_A_MOLE               EEPROM_REACTION_GAME_OFFSET + 0 // 10 levels, each 2 bytes.
-// #define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         EEPROM_REACTION_GAME_OFFSET + 18 // 10 levels, each 2 bytes.
-// #define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 34 // 10 levels, each 2 bytes.
-// #define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 54 // 10 levels, each 2 bytes.
-// #define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 72 // 10 levels, each 2 bytes.
+// wrong... see code. built up differently...
+#define EEPROM_REACTION_GAME_WHACK_A_MOLE               EEPROM_REACTION_GAME_OFFSET + 0 // 10 levels, each 2 bytes.
+#define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         EEPROM_REACTION_GAME_OFFSET + 18 // 10 levels, each 2 bytes.
+#define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 34 // 10 levels, each 2 bytes.
+#define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 54 // 10 levels, each 2 bytes.
+#define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 72 // 10 levels, each 2 bytes.
 #define EEPROM_REACTION_GAME_TOTAL_LENGTH               96  // in game 8 games types * 6 levels * 2 bytes
 
 #define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + EEPROM_REACTION_GAME_TOTAL_LENGTH

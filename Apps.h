@@ -2,9 +2,9 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-// #define ENABLE_MULTITIMER // app as a class
-#define ENABLE_MULTITIMER_INTEGRATED
-#define ENABLE_SIMON_APP
+// #define ENABLE_MULTITIMER // DO NOT USE app as a class (most elegant, but takes most memory)
+// #define ENABLE_MULTITIMER_INTEGRATED
+// #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 
 #ifdef ENABLE_TILT_SWITCHES
@@ -220,6 +220,7 @@
 #define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
+#define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
