@@ -3500,7 +3500,7 @@ void Apps::modeReactionGame()
 	case reactionWaitForStart:
 	{
 		// change level
-		REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(64,false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+		REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(80,false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
 		if (encoder_dial->getDelta())
 		{
 			// for a more pleasant experience (no blinking during knob turning)
@@ -3573,7 +3573,8 @@ void Apps::modeReactionGame()
 		{
 			// guitar hero mode 
 
-			REACTION_GAME_STEP_TIME_MILLIS = (5 - REACTION_GAME_LEVEL) * -200;
+			REACTION_GAME_STEP_TIME_MILLIS = -10* pgm_read_byte_near(guitar_hero_level_speeds + REACTION_GAME_LEVEL);
+
 			displayAllSegments = 0;
 
 			if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
@@ -3594,20 +3595,19 @@ void Apps::modeReactionGame()
 		else
 		{
 			// whack a mole mode
-
-			
-
 			if (buzzer->getBuzzerRollEmpty()){ // in sound mode, wait till demo is done
 				reactionGameState = reactionNewTurn;
 
 				if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 				{
 					// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
+					// REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
+					REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level 12 steps in total cycle
 				}
 				else
 				{
-					REACTION_GAME_STEP_TIME_MILLIS = (1UL << (5 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+					// REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
+					REACTION_GAME_STEP_TIME_MILLIS = -3 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 12 steps in total cycle
 				}
 			}
 		}

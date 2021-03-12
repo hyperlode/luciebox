@@ -5,7 +5,7 @@
 
 // #define DBUG_REFACTOR_DISP
 //#define ENABLE_TILT_SWITCHES
-#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 // #define DBUG_REFACTOR_DISP
 
@@ -58,21 +58,20 @@
 
 #endif
 
-#define LIGHT_MOMENTARY_0 1          // old: momentary 0
-#define LIGHT_MOMENTARY_1 6          // old: momentary 1
-#define LIGHT_MOMENTARY_2 2          // old: momentary 2
-#define LIGHT_MOMENTARY_3 5          // old: momentary 3
-#define LIGHT_LATCHING_3 0           // old: extra latch
-#define LIGHT_LATCHING_1 3           // old: small latch left
-#define LIGHT_LATCHING_2 4           // old: small latch right
-#define LIGHT_LATCHING_0 7           // old: big latch
+// #define LIGHT_MOMENTARY_0 1          // old: momentary 0
+// #define LIGHT_MOMENTARY_1 6          // old: momentary 1
+// #define LIGHT_MOMENTARY_2 2          // old: momentary 2
+// #define LIGHT_MOMENTARY_3 5          // old: momentary 3
+// #define LIGHT_LATCHING_3 0           // old: extra latch
+// #define LIGHT_LATCHING_1 3           // old: small latch left
+// #define LIGHT_LATCHING_2 4           // old: small latch right
+// #define LIGHT_LATCHING_0 7           // old: big latch
 
 
 
 
 #define PIN_SELECTOR_DIAL A0
-#define PIN_BUTTONS_1 A1
-#define PIN_BUTTONS_2 A2
+
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_B 3
 
@@ -97,7 +96,56 @@
 #define MOMENTARY_BUTTONS_COUNT 4
 
 
-#if (defined V2_PCB_CORONA || defined V3_PCB_BURST)
+
+#if defined V3_PCB_BURST
+    #define PIN_BUTTONS_1 A2
+    #define PIN_BUTTONS_2 A1
+    #define LIGHT_MOMENTARY_0 5          // old: momentary 0
+    #define LIGHT_MOMENTARY_1 2          // old: momentary 1
+    #define LIGHT_MOMENTARY_2 6          // old: momentary 2
+    #define LIGHT_MOMENTARY_3 1          // old: momentary 3
+    #define LIGHT_LATCHING_3 7           // old: extra latch
+    #define LIGHT_LATCHING_1 4           // old: small latch left
+    #define LIGHT_LATCHING_2 3           // old: small latch right
+    #define LIGHT_LATCHING_0 0           // old: big latch
+    // #define LIGHT_LATCHING_3 7           // old: extra latch
+    // #define LIGHT_LATCHING_1 4           // old: small latch left
+    // #define LIGHT_LATCHING_2 3           // old: small latch right
+    // #define LIGHT_LATCHING_0 0           // old: big latch
+
+      #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
+    #define BUTTONS_1_COUNT 4
+    #define BUTTONS_1_VALUES      \
+        {                         \
+            512, 256, 128, 64 \
+        }
+
+    #define BUTTONS_2_COUNT 4
+    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0  
+    #define BUTTONS_2_VALUES \
+        {                    \
+            512, 256, 128, 64    \
+        }
+
+    #define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
+    #define MERCURY_SWITCHES_VALUES \
+        {                           \
+            450, 262, 128, 64       \
+        }
+        
+
+#elif (defined V2_PCB_CORONA)
+    #define PIN_BUTTONS_1 A1
+    #define PIN_BUTTONS_2 A2
+    #define LIGHT_MOMENTARY_0 1          // old: momentary 0
+    #define LIGHT_MOMENTARY_1 6          // old: momentary 1
+    #define LIGHT_MOMENTARY_2 2          // old: momentary 2
+    #define LIGHT_MOMENTARY_3 5          // old: momentary 3
+    #define LIGHT_LATCHING_3 0           // old: extra latch
+    #define LIGHT_LATCHING_1 3           // old: small latch left
+    #define LIGHT_LATCHING_2 4           // old: small latch right
+    #define LIGHT_LATCHING_0 7           // old: big latch
     #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
     #define BUTTONS_1_COUNT 4
     #define BUTTONS_1_VALUES      \
@@ -120,6 +168,16 @@
         }
 
 #else  // v1 pcb
+    #define PIN_BUTTONS_1 A1
+    #define PIN_BUTTONS_2 A2
+    #define LIGHT_MOMENTARY_0 1          // old: momentary 0
+    #define LIGHT_MOMENTARY_1 6          // old: momentary 1
+    #define LIGHT_MOMENTARY_2 2          // old: momentary 2
+    #define LIGHT_MOMENTARY_3 5          // old: momentary 3
+    #define LIGHT_LATCHING_3 0           // old: extra latch
+    #define LIGHT_LATCHING_1 3           // old: small latch left
+    #define LIGHT_LATCHING_2 4           // old: small latch right
+    #define LIGHT_LATCHING_0 7           // old: big latch
     #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
     #define BUTTONS_1_COUNT 5
     #define BUTTONS_1_VALUES      \
@@ -197,13 +255,17 @@
 #define EEPROM_REACTION_GAME_OFFSET                     0
 
 
-// wrong... see code. built up differently...
-#define EEPROM_REACTION_GAME_WHACK_A_MOLE               EEPROM_REACTION_GAME_OFFSET + 0 // 10 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         EEPROM_REACTION_GAME_OFFSET + 18 // 10 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_WHACK_A_BIRD               EEPROM_REACTION_GAME_OFFSET + 34 // 10 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         EEPROM_REACTION_GAME_OFFSET + 54 // 10 levels, each 2 bytes.
-#define EEPROM_REACTION_GAME_GUITAR_HERO                EEPROM_REACTION_GAME_OFFSET + 72 // 10 levels, each 2 bytes.
+//  eeprom space for reaction game = 96 bits
+#define EEPROM_REACTION_GAME_WHACK_A_MOLE               // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_WHACK_A_BIRD               // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_WHACK_A_BIRD_TIMED         // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_GUITAR_HERO                // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_GUITAR_HERO_WITH_PAUSES    // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_HEX_HERO                   // 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_HEX_HERO_WITH_PAUSES // NOT IMPLEMENTED// 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_TOTAL_LENGTH               96  // in game 8 games types * 6 levels * 2 bytes
+
 
 #define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + EEPROM_REACTION_GAME_TOTAL_LENGTH
 #define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET + 0
