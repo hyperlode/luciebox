@@ -3481,11 +3481,17 @@ void Apps::modeReactionGame()
 		// play by sound, only initiate pattern at start of app. This way, players can get used to it. To change pattern, leave and come back to app.
 		// fun fact: when box started in this app, it will always have the same pattern. There is a lesson to be learned about random seeding dear Lucie!
 		// never twice the same sound. Only first notes of array will be used.
+		uint8_t random_range_selector = random(219, 233); // choose notes from a random chosen interval of 12 notes
 		for (uint8_t i = 0; i < 12; i++)
 		{
-			REACTION_GAME_TEMP_SELECTED_NOTES[i] =  234 + i ;//234, 245
+			REACTION_GAME_TEMP_SELECTED_NOTES[i] =  random_range_selector + i;
 		}
 		this->shuffle(REACTION_GAME_TEMP_SELECTED_NOTES, 12);
+
+		for (uint8_t i = 0; i < 4; i++)
+		{
+			REACTION_GAME_SELECTED_NOTES[i] = REACTION_GAME_TEMP_SELECTED_NOTES[i];
+		}
 	}
 
 	// at any time, leave game when depressing play button.
@@ -3557,7 +3563,7 @@ void Apps::modeReactionGame()
 		// play all soundsn so the player gets a feel for them.
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[i]);
+			addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[i]);
 			this->addNoteToBuzzerRepeated(rest_1, 2);
 		}
 		addNoteToBuzzerRepeated(rest_1, 4);
@@ -3851,12 +3857,10 @@ void Apps::modeReactionGame()
 
 		if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 		{
-			addNoteToBuzzer(REACTION_GAME_TEMP_SELECTED_NOTES[REACTION_GAME_TARGET]);
+			addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_GAME_TARGET]);
 		}
 
 		reactionGameState = reactionPlaying;
-
-
 
 		break;
 	}

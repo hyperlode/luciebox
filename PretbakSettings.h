@@ -113,7 +113,7 @@
     // #define LIGHT_LATCHING_2 3           // old: small latch right
     // #define LIGHT_LATCHING_0 0           // old: big latch
 
-      #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
+    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
     #define BUTTONS_1_COUNT 4
     #define BUTTONS_1_VALUES      \
         {                         \

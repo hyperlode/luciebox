@@ -289,12 +289,12 @@
 #define FADE_IN_RANDOM_LIST bytes_list
 #define CARDS_DECK bytes_list
 #define COMPOSER_SONG bytes_list
-#define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 #define MOVIE_MODE_STOPS bytes_list
 #define MODE_SOUND_SONG_BUFFER bytes_list
 #define MODE_DREAMTIME_RANDOM_LIST bytes_list
+#define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
 
-#define REACTION_GAME_SELECTED_SOUNDS array_8_bytes
+#define REACTION_GAME_SELECTED_NOTES array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
