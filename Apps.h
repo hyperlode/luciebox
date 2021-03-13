@@ -409,7 +409,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
 
 const uint8_t guitar_hero_level_speeds[] PROGMEM = {101,75,50,40,30,20};
 const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {255,128,60,20,10,8};
-const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {201, 100, 50, 33, 16, 8}; //{2min, 1min, 30s, 20s, 10s, 5s} // will have a *50 multiplier per step. and *12 for total countdowntime
+const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50, 33, 16, 8}; //{2min, 1min, 30s, 20s, 10s, 5s} // will have a *50 multiplier per step. and *12 for total countdowntime
 
 #define MAX_FRAMES_MOVIES_FLASH 70
 #define MOVIE_INDEX_EMPTY 255

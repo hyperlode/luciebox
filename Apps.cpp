@@ -3609,6 +3609,7 @@ void Apps::modeReactionGame()
 					// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
 					// REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
 					REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level 12 steps in total cycle
+					REACTION_GAME_TIMER_STEP = 0;	   
 				}
 				else
 				{
@@ -3617,7 +3618,6 @@ void Apps::modeReactionGame()
 				}
 			}
 		}
-
 		TIMER_REACTION_GAME_SPEED.start(REACTION_GAME_STEP_TIME_MILLIS);
 		break;
 	}
@@ -3867,40 +3867,55 @@ void Apps::modeReactionGame()
 
 	case reactionPlaying:
 	{
-		if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
 		{
-			// if timer out, always dead.
-			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+			this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
+			if (REACTION_GAME_TIMER_STEP == 12)
 			{
+				REACTION_GAME_TIMER_STEP = 0;
+				displayAllSegments = 0;
+
 				reactionGameState = reactionJustDied;
-			}
-			// show number of segments:
-			REACTION_GAME_TIMER_STEP = 10 - (uint16_t)((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
-		}
-		else
-		{
-			// animation next step
-
-			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
-			{
-				// game timing animation update.
-
-				this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
-
-				// check game status 'dead'
-				if (REACTION_GAME_TIMER_STEP == 12)
-				{
-					REACTION_GAME_TIMER_STEP = 0;
-					displayAllSegments = 0;
-
-					reactionGameState = reactionJustDied;
-				}
-				else
-				{
-					TIMER_REACTION_GAME_SPEED.start();
-				}
+			}else{
+				TIMER_REACTION_GAME_SPEED.start();
 			}
 		}
+
+
+		// if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+		// {
+		// 	// if timer out, always dead.
+		// 	if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+		// 	{
+		// 		reactionGameState = reactionJustDied;
+		// 	}
+		// 	// show number of segments:
+		// 	REACTION_GAME_TIMER_STEP = 10 - (uint16_t)((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
+		// }
+		// else
+		// {
+		// 	// animation next step
+
+		// 	// if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+		// 	// {
+		// 		// game timing animation update.
+
+		// 		// this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
+
+		// 		// check game status 'dead'
+		// 		// if (REACTION_GAME_TIMER_STEP == 12)
+		// 		// {
+		// 			// REACTION_GAME_TIMER_STEP = 0;
+		// 			// displayAllSegments = 0;
+
+		// 			// reactionGameState = reactionJustDied;
+		// 		// }
+		// 		// else
+		// 		// {
+		// 		// 	TIMER_REACTION_GAME_SPEED.start();
+		// 		// }
+		// 	// }
+		// }
 
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)

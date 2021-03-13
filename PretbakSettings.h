@@ -58,18 +58,6 @@
 
 #endif
 
-// #define LIGHT_MOMENTARY_0 1          // old: momentary 0
-// #define LIGHT_MOMENTARY_1 6          // old: momentary 1
-// #define LIGHT_MOMENTARY_2 2          // old: momentary 2
-// #define LIGHT_MOMENTARY_3 5          // old: momentary 3
-// #define LIGHT_LATCHING_3 0           // old: extra latch
-// #define LIGHT_LATCHING_1 3           // old: small latch left
-// #define LIGHT_LATCHING_2 4           // old: small latch right
-// #define LIGHT_LATCHING_0 7           // old: big latch
-
-
-
-
 #define PIN_SELECTOR_DIAL A0
 
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
@@ -95,8 +83,6 @@
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
-
-
 #if defined V3_PCB_BURST
     #define PIN_BUTTONS_1 A2
     #define PIN_BUTTONS_2 A1
@@ -108,10 +94,6 @@
     #define LIGHT_LATCHING_1 4           // old: small latch left
     #define LIGHT_LATCHING_2 3           // old: small latch right
     #define LIGHT_LATCHING_0 0           // old: big latch
-    // #define LIGHT_LATCHING_3 7           // old: extra latch
-    // #define LIGHT_LATCHING_1 4           // old: small latch left
-    // #define LIGHT_LATCHING_2 3           // old: small latch right
-    // #define LIGHT_LATCHING_0 0           // old: big latch
 
     #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
     #define BUTTONS_1_COUNT 4
@@ -133,7 +115,6 @@
         {                           \
             450, 262, 128, 64       \
         }
-        
 
 #elif (defined V2_PCB_CORONA)
     #define PIN_BUTTONS_1 A1
