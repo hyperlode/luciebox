@@ -58,7 +58,11 @@
 #define APP_SELECTOR_SOUND_SEQUENCER 17
 #define APP_SELECTOR_REACTION_GAME 18
 #define APP_SELECTOR_GUITAR_HERO 19
-#define APP_SELECTOR_TILT 20
+#ifdef ENABLE_TILT_APP
+    #define APP_SELECTOR_TILT 20
+#else
+    #define APP_SELECTOR_ZEN 20
+#endif 
 #define APP_SELECTOR_DREAMTIME 21
 #define APP_SELECTOR_MULTITIMER 22
 #define APP_SELECTOR_QUIZ_MASTER 23
@@ -414,6 +418,8 @@ const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50
 #define MAX_FRAMES_MOVIES_FLASH 70
 #define MOVIE_INDEX_EMPTY 255
 #define ANIMATE_CIRCLE_OFFSET 4
+#define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 56
+#define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 92
 
 const uint8_t disp_4digits_animations[] PROGMEM = {
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
@@ -430,6 +436,23 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x10, 0x00, 0x00, 0x00,
     0x20, 0x00, 0x00, 0x00,
     
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    0x01, 0x00, 0x00, 0x00,  // top circle (for sequencer)
+    0x00, 0x01, 0x00, 0x00,
+    0x00, 0x00, 0x01, 0x00,
+    0x00, 0x00, 0x00, 0x01,
+
+    0x00, 0x00, 0x00, 0x40,
+    0x00, 0x00, 0x40, 0x00,
+    0x00, 0x40, 0x00, 0x00,
+    0x40, 0x00, 0x00, 0x00,
+    
+    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    0x08, 0x00, 0x00, 0x00, // bottom bar (for sequencer)
+    0x00, 0x08, 0x00, 0x00,
+    0x00, 0x00, 0x08, 0x00,
+    0x00, 0x00, 0x00, 0x08,
+
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // horizontal right to left sweep.
     0x00, 0x00, 0x00, 0x06,
@@ -487,6 +510,8 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x00, 0xDE,
     0x00, 0x00, 0x00, 0x8E,
     0x00, 0x00, 0x00, 0x84,
+
+
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 };
 
@@ -663,6 +688,7 @@ public:
     void quiz();
     #endif
 
+    void modeZen();
     void modeCountingLettersAndChars();
     void modeSoundSong();
     void modeComposeSong();
