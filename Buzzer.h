@@ -331,9 +331,11 @@ public:
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
     void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
     
+    // uint8_t numberOfEightNotesToFillToFullNote(uint8_t note);
     // void getOctave(uint8_t* note);
     uint8_t getLength(uint8_t note);
     // void nextOctave(uint8_t* note, bool upElseDown);
+    // uint8_t changeNoteToLength(uint8_t note, uint8_t desiredLength );
     void changeNoteToNextLength(int16_t* note);
     void nextNote(int16_t* note, bool upElseDown, bool stayInSameLength);
 

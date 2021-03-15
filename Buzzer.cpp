@@ -254,6 +254,11 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     textBuf[3] = this->getLength(note) + 48; // 2^(3 -x) --> note length is 8,4,2,1
 }
 
+// uint8_t Buzzer::numberOfEightNotesToFillToFullNote(uint8_t note){
+
+//     return  8 - 0x01 << (note / 64);
+// }
+
 uint8_t Buzzer::getLength(uint8_t note){
     return 0x01 << (3 - (note / 64)); // 2^(3 -x) --> note length is 8,4,2,1
 }
@@ -295,6 +300,19 @@ void Buzzer::nextNote(int16_t* note, bool upElseDown, bool stayInSameLength){
     }
 }
 
+
+
+// uint8_t Buzzer::changeNoteToLength(uint8_t note, uint8_t desiredLength ){
+//     // desired length 0,1,2,3 for 1,2,4,8th of a full note
+
+//     // while (note >= 64 ){
+//     //     note-=64;
+//     // }
+
+//     note %= 64;
+//     return note + desiredLength * 64;   
+
+// }
 void Buzzer::changeNoteToNextLength(int16_t* note){
 
     *note += 64;
