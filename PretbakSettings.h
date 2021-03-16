@@ -233,10 +233,17 @@
 #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
 #ifdef ENABLE_EEPROM
-#define EEPROM_REACTION_GAME_OFFSET                     0
 
+
+#define EEPROM_SETTINGS_OFFSET                          0
+#define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET + 0
+#define EEPROM_LUCIEBOX_POWER_CYCLES                    EEPROM_SETTINGS_OFFSET + 1
+#define EEPROM_LUCIEBOX_HOURS                           EEPROM_SETTINGS_OFFSET + 3
+#define EEPROM_SETTINGS_TOTAL_LENGTH                    8  // 8 bytes
+#define EEPROM_FIRST_ADDRESS_OF_USER_RANGE              EEPROM_SETTINGS_OFFSET + EEPROM_SETTINGS_TOTAL_LENGTH
 
 //  eeprom space for reaction game = 96 bits
+#define EEPROM_REACTION_GAME_OFFSET                     EEPROM_SETTINGS_OFFSET + EEPROM_SETTINGS_TOTAL_LENGTH
 #define EEPROM_REACTION_GAME_WHACK_A_MOLE               // 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         // 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_WHACK_A_BIRD               // 6 levels, each 2 bytes = 12bytes total
@@ -247,12 +254,9 @@
 #define EEPROM_REACTION_GAME_HEX_HERO_WITH_PAUSES       // NOT IMPLEMENTED// 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_TOTAL_LENGTH               96  // in game 8 games types * 6 levels * 2 bytes
 
+#define EEPROM_LAST_ADDRESS_OF_GAMES_ERASE_MEMORY       EEPROM_REACTION_GAME_OFFSET + EEPROM_REACTION_GAME_TOTAL_LENGTH - 1
 
-#define EEPROM_SETTINGS_OFFSET                          EEPROM_REACTION_GAME_OFFSET + EEPROM_REACTION_GAME_TOTAL_LENGTH
-#define EEPROM_SOUND_OFF_BY_DEFAULT                     EEPROM_SETTINGS_OFFSET + 0
-#define EEPROM_SETTINGS_TOTAL_LENGTH                    8  // 8 bytes
-
-#define EEPROM_MULTITIMER_START_ADDRESS                 EEPROM_SETTINGS_OFFSET + EEPROM_SETTINGS_TOTAL_LENGTH
+#define EEPROM_MULTITIMER_START_ADDRESS                 EEPROM_REACTION_GAME_OFFSET + EEPROM_REACTION_GAME_TOTAL_LENGTH
 #define EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS          EEPROM_MULTITIMER_START_ADDRESS + 0   // 1 byte
 #define EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS     EEPROM_MULTITIMER_START_ADDRESS + 1   // 4* 2 bytes
 #define EEPROM_MULTITIMER_FISHER_ADDRESS                EEPROM_MULTITIMER_START_ADDRESS + 8   // 2 bytes
@@ -273,6 +277,6 @@
 #define EEPROM_PICTURE_LENGTH                           4
 #define EEPROM_PICTURES_TOTAL_LENGTH                    EEPROM_NUMBER_OF_DRAWINGS * EEPROM_PICTURE_LENGTH  // 95 * 4 = 380
 
-
+#define EEPROM_LAST_ADDRESS                            1023
 
 #endif

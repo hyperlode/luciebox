@@ -1104,7 +1104,7 @@ void Apps::modeSettings()
 			setStandardTextToTextHANDLE(text);
 		}
 	}
-	else if (SETTINGS_MODE_SELECTOR < 16)
+	else if (SETTINGS_MODE_SELECTOR < 14)
 	{
 
 		// menu title
@@ -1116,7 +1116,7 @@ void Apps::modeSettings()
 		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
 	}
 
-	else if (SETTINGS_MODE_SELECTOR < 18)
+	else if (SETTINGS_MODE_SELECTOR < 16)
 	{
 		// show luciebox firmware version number
 
@@ -1124,27 +1124,29 @@ void Apps::modeSettings()
 		textHandle[0] = 'F'; // v doesn't work. So, F from Firmware version it is.
 		
 	}
-	else if (SETTINGS_MODE_SELECTOR < 20)
+	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-
-#ifdef ENABLE_EEPROM
-			for (uint16_t i = 0; i < 1024; i = i + 2)
-			{
-				eeprom_update_word(
-					(uint16_t *)i,
-					0);
+			//lights |= 1 << LIGHT_MOMENTARY_2; // will erase all memory. Purposly don't advertise
+			lights |= 1 << LIGHT_MOMENTARY_3; // erases only high scores in games. Which is nice if you want to have a fresh start for a nice gamenight of "Lucieboxes and booz"
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2)){
+				this->eraseEepromRangeLimited(EEPROM_LAST_ADDRESS);
 			}
-			loadBuzzerTrack(SONG_DRYER_HAPPY);
-			
-#endif
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3)){
+				this->eraseEepromRangeLimited(EEPROM_LAST_ADDRESS_OF_GAMES_ERASE_MEMORY);
+			}
 		}
 		else
 		{
 			setStandardTextToTextHANDLE(TEXT_RESET);
 		}
+	}
+	else if (SETTINGS_MODE_SELECTOR < 20)
+	{
+		ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLES));
+	// eeprom_update_byte((uint8_t*) EEPROM_LUCIEBOX_POWER_CYCLES, eeprom_read_byte((uint8_t*)EEPROM_LUCIEBOX_POWER_CYCLES)+1);
 	}
 	else
 	{
@@ -1160,10 +1162,22 @@ void Apps::modeSettings()
 			textBufToDisplay();
 		}
 	}
+}
 
+void Apps::eraseEepromRangeLimited(uint16_t lastAddressIndex){
+	// maxAddress is max 1024 for atmega328
 
-
-	
+	#ifdef ENABLE_EEPROM
+		
+			for (uint16_t i = EEPROM_FIRST_ADDRESS_OF_USER_RANGE; i <= lastAddressIndex; i++)
+			{
+				eeprom_update_byte(
+					(uint8_t *)i,
+					0);
+			}
+			loadBuzzerTrack(SONG_DRYER_HAPPY);
+			
+	#endif
 }
 
 void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet)

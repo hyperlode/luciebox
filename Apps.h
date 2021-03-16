@@ -781,6 +781,7 @@ private:
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
+    void eraseEepromRangeLimited(uint16_t lastAddressIndex);
     
     unsigned int indexToTimeSeconds(int16_t index);
 
@@ -813,7 +814,7 @@ private:
     void flashPictureToDisplayAllSegments(const uint8_t* progmemAddress);
 
     void resetStopwatch(SuperTimer* pTimer);
-    
+
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 

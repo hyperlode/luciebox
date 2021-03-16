@@ -238,14 +238,12 @@ void setup()
     allVisuals.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
     visualsManager.setMultiplexerBuffer(allVisuals.getDigits());
 
-// if no latching buttons pressed at startup, disable sound
-//(a "Lode listens to the parents"-initiative)
-// if (analogRead(PIN_BUTTONS_2) == 0){
-//   buzzer.setPin(PIN_BUZZER_FAKE);
-// }else{
-//   buzzer.setPin(PIN_BUZZER);
-// }
 #ifdef ENABLE_EEPROM
+    
+    // add 1 to power cycles tally keeper
+    eeprom_update_word((uint16_t*) EEPROM_LUCIEBOX_POWER_CYCLES, eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLES)+1);
+
+    // set sound
     if (eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT))
     {
         buzzer.setPin(PIN_BUZZER_FAKE);
@@ -254,6 +252,7 @@ void setup()
     {
         buzzer.setPin(PIN_BUZZER);
     }
+
 #else
     buzzer.setPin(PIN_BUZZER);
 #endif
