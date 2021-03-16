@@ -319,9 +319,6 @@
         36000};
 
     #define MULTITIMER_MAX_TIMERS_COUNT 4
-    #define MULTITIMER_DEFAULT_INIT_TIME_SECS 600 //600
-    #define MULTITIMER_DEFAULT_FISCHER_TIMER_SECS 0
-    #define MULTITIMER_DEFAULT_TIMERS_COUNT 2
     #define MULTITIMER_LIGHT_PAUSE 0x01
     #define MULTITIMER_LIGHT_PLAYING 0x02
     #define MULTITIMER_LIGHT_FISCHER 0x04
@@ -753,7 +750,7 @@ public:
 	void multitimer_setStatePause(bool set);
 	void multitimer_refresh();
 	void multitimer_buzzerRefresh(bool alarm);
-	void multitimer_next();
+	void multitimer_next(bool activePlayerDied);
 	void multitimer_init();
 	void multitimer_start();
 	void multitimer_pause();
