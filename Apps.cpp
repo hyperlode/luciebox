@@ -1074,8 +1074,8 @@ void Apps::modeSettings()
 #ifdef ENABLE_EEPROM
 
 			eeprom_update_byte(
-				(uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT,
-				!eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT));
+				(uint8_t *)EEPROM_SOUND_DISABLED,
+				!eeprom_read_byte((uint8_t *)EEPROM_SOUND_DISABLED));
 #endif
 
 			if (buzzer->getPin() == PIN_BUZZER)
@@ -1132,10 +1132,10 @@ void Apps::modeSettings()
 			//lights |= 1 << LIGHT_MOMENTARY_2; // will erase all memory. Purposly don't advertise
 			lights |= 1 << LIGHT_MOMENTARY_3; // erases only high scores in games. Which is nice if you want to have a fresh start for a nice gamenight of "Lucieboxes and booz"
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2)){
-				this->eraseEepromRangeLimited(EEPROM_LAST_ADDRESS);
+				this->eraseEepromRangeLimited(EEPROM_USER_RESET);
 			}
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3)){
-				this->eraseEepromRangeLimited(EEPROM_LAST_ADDRESS_OF_GAMES_ERASE_MEMORY);
+				this->eraseEepromRangeLimited(EEPROM_HIGH_SCORES_RESET);
 			}
 		}
 		else
@@ -1145,8 +1145,7 @@ void Apps::modeSettings()
 	}
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
-		ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLES));
-	// eeprom_update_byte((uint8_t*) EEPROM_LUCIEBOX_POWER_CYCLES, eeprom_read_byte((uint8_t*)EEPROM_LUCIEBOX_POWER_CYCLES)+1);
+		ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER));
 	}
 	else
 	{
@@ -1164,12 +1163,22 @@ void Apps::modeSettings()
 	}
 }
 
-void Apps::eraseEepromRangeLimited(uint16_t lastAddressIndex){
+void Apps::eraseEepromRangeLimited(uint8_t setting){
+
+	uint16_t first = EEPROM_FIRST_ADDRESS_OF_USER_RANGE;
+	uint16_t last = EEPROM_LAST_ADDRESS_OF_GAMES_ERASE_MEMORY;
+	if (setting == EEPROM_TOTAL_RESET){
+		first=0;
+		last = 1023;
+	}else if (setting == EEPROM_USER_RESET){
+		first=EEPROM_FIRST_ADDRESS_OF_USER_RANGE;
+		last = 1023;
+	}
 	// maxAddress is max 1024 for atmega328
 
 	#ifdef ENABLE_EEPROM
 		
-			for (uint16_t i = EEPROM_FIRST_ADDRESS_OF_USER_RANGE; i <= lastAddressIndex; i++)
+			for (uint16_t i = first; i <= last; i++)
 			{
 				eeprom_update_byte(
 					(uint8_t *)i,

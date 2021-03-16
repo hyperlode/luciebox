@@ -759,6 +759,7 @@ public:
 
 #endif
 
+    void eraseEepromRangeLimited(uint8_t setting);
 
 private:
 
@@ -781,7 +782,6 @@ private:
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
-    void eraseEepromRangeLimited(uint16_t lastAddressIndex);
     
     unsigned int indexToTimeSeconds(int16_t index);
 

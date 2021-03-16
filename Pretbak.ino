@@ -240,18 +240,25 @@ void setup()
 
 #ifdef ENABLE_EEPROM
     
-    // add 1 to power cycles tally keeper
-    eeprom_update_word((uint16_t*) EEPROM_LUCIEBOX_POWER_CYCLES, eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLES)+1);
+    uint8_t soundDisabled = eeprom_read_byte((uint8_t *)EEPROM_SOUND_DISABLED);
 
     // set sound
-    if (eeprom_read_byte((uint8_t *)EEPROM_SOUND_OFF_BY_DEFAULT))
+    int buzzer_pin = PIN_BUZZER;
+    if (soundDisabled == 1)
     {
-        buzzer.setPin(PIN_BUZZER_FAKE);
+        buzzer_pin = PIN_BUZZER_FAKE;
     }
-    else
-    {
-        buzzer.setPin(PIN_BUZZER);
+    buzzer.setPin(buzzer_pin);
+
+    if (soundDisabled == 0xFF){
+        //first power on ever.
+        // do total reset
+        // confirmation song will not play because we are not yet in our refresh loop at setup
+        pretbak_apps.eraseEepromRangeLimited(EEPROM_TOTAL_RESET);
     }
+
+    // add 1 to power cycles tally keeper
+    eeprom_update_word((uint16_t*) EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER)+1);
 
 #else
     buzzer.setPin(PIN_BUZZER);
