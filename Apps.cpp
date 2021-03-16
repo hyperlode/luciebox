@@ -2410,7 +2410,7 @@ void Apps::modeHackTime()
 				break;
 
 			case HACKTIME_MEMORY_EEPROM:
-				eeprom_write_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
+				eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
 				addNoteToBuzzer(C5_8);
 				break;
 			}
@@ -2622,7 +2622,7 @@ void Apps::draw()
 					 i++)
 				{
 					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
-					eeprom_write_byte((uint8_t *)(i), tmp);
+					eeprom_update_byte((uint8_t *)(i), tmp);
 				}
 			}
 
@@ -2643,7 +2643,7 @@ void Apps::draw()
 					{
 						// move all pictures one up.
 						uint8_t tmp = eeprom_read_byte((uint8_t *)(i));
-						eeprom_write_byte((uint8_t *)(i + 4), tmp);
+						eeprom_update_byte((uint8_t *)(i + 4), tmp);
 					}
 				}
 			}
@@ -2659,7 +2659,7 @@ void Apps::draw()
 			// save active drawing on display to eeprom.
 			for (uint8_t i = 0; i < 4; i++)
 			{
-				eeprom_write_byte(
+				eeprom_update_byte(
 					(uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
 					(uint8_t)((displayAllSegments >> (i * 8)) & 0xFF)
 					);
@@ -4223,7 +4223,7 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
 		else
 		{
 			//save
-			eeprom_write_byte(eeprom_address, data[i]);
+			eeprom_update_byte(eeprom_address, data[i]);
 		}
 	}
 }
@@ -4562,7 +4562,8 @@ void Apps::multitimer_integrated()
 	}
 
 	// START STOP Button
-	if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_LATCHING_3))
+	if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_LATCHING_3) ||
+		 (app_init_edge && binaryInputsValue &(1<<BUTTON_INDEXED_LATCHING_3)))
 	{
 		this->multitimer_start();
 	}
@@ -4742,15 +4743,17 @@ void Apps::multitimer_setStatePause(bool set)
 	}
 }
 
+// void Apps::eeprom_write_word_if_different()
 void Apps::multitimer_start()
 {
-
+	
 	// store into eeprom
-	eeprom_write_word((uint16_t*)EEPROM_MULTITIMER_FISHER_ADDRESS, this->multitimer_fischerSecs);
-	eeprom_write_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS, (uint8_t)MULTITIMER_TIMERS_COUNT);
+	eeprom_update_word((uint16_t*)EEPROM_MULTITIMER_FISHER_ADDRESS, this->multitimer_fischerSecs);
+	eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS, (uint8_t)MULTITIMER_TIMERS_COUNT);
+
 	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
-		eeprom_write_word((uint16_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS + 2*i ,this->multitimer_getTimerInitCountTimeSecs(i) );
+		eeprom_update_word((uint16_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS + 2*i ,this->multitimer_getTimerInitCountTimeSecs(i) );
 	}
 
 	//start and pause all timers.
