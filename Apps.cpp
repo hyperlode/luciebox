@@ -41,6 +41,9 @@ void Apps::appSelector()
 		Serial.println("app select:");
 		Serial.println(selected_app);
 #endif
+		
+		buzzerOff();  // The moment we switch apps, the sound goes off immediatly.
+
 		// set to init state before a new app starts
 		splash_screen_playing = true;
 		// this->setDefaultMode();
@@ -214,9 +217,8 @@ void Apps::setDefaultMode()
 {
 	// allLights->setBrightness(0, false); // disable because it annoys me:)
 
-	//buzzer
+	//buzzer  (buzzer off at init of splash screen)
 	buzzer->setSpeedRatio(2);
-	buzzerOff(); // stop all sounds that were playing in an app.
 	buzzer->setTranspose(0);
 
 	//encoder
@@ -1009,7 +1011,7 @@ void Apps::modeSettings()
 
 	if (this->app_init_edge)
 	{
-		//SETTINGS_MODE_SELECTOR = 0;
+		
 	}
 
 	// // back and forth motion required of the potentio to count up modes
@@ -1129,15 +1131,15 @@ void Apps::modeSettings()
 		{
 
 #ifdef ENABLE_EEPROM
-			for (uint16_t i = 0; i < 100; i = i + 2)
+			for (uint16_t i = 0; i < 1024; i = i + 2)
 			{
 				eeprom_update_word(
 					(uint16_t *)i,
-					//i,
 					0);
 			}
-#endif
 			loadBuzzerTrack(SONG_DRYER_HAPPY);
+			
+#endif
 		}
 		else
 		{
@@ -1876,11 +1878,8 @@ void Apps::modeMovie()
 	//reset saved led disp state.
 	if (this->app_init_edge)
 	{
-		// MOVIE_MODE_SHOW_NEGATIVE = false;
 		MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
-		// MOVIE_MODE_FLASH_FRAME_INDEX = 0;
 		loadNextMovie();
-		// MOVIE_MODE_SOUNDTRACK_INDEX = 0;
 		MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START = true;
 	}
 
@@ -2018,27 +2017,27 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 
 void Apps::loadNextMovie(){
 
-	bool startFrameSet = false;
+	bool foundStartOfMovie = false;
 
-	// set new stop frame index
-	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !startFrameSet){
+	// iterate until a stop frame is found check for stop frame
+	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !foundStartOfMovie){
 
 		// check if over limit (last movie)
 		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS)){
-			startFrameSet = true;
+			foundStartOfMovie = true;
 			MOVIE_MODE_MOVIE_FRAME_INDEX_START = 1;
 			MOVIE_MODE_FLASH_FRAME_INDEX = 1;
 		}
 
-		// presume for next iteration to not come anymore.
-		if (!startFrameSet){
+		// set variables presuming that this could be the last iteration of the while loop. 
+		if (!foundStartOfMovie){
 			MOVIE_MODE_MOVIE_FRAME_INDEX_START = MOVIE_MODE_FLASH_FRAME_INDEX + 1;
 		}else{
 			MOVIE_MODE_MOVIE_FRAME_INDEX_END = MOVIE_MODE_FLASH_FRAME_INDEX ;
 		}
 		
 		if (!loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX)){
-			startFrameSet = true;
+			foundStartOfMovie = true;
 		}
 		
 		MOVIE_MODE_FLASH_FRAME_INDEX++;
@@ -2955,7 +2954,7 @@ void Apps::modeSequencer()
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
 	{
 #ifdef ENABLE_EEPROM
-		this->saveLoadMenu(this->SEQUENCER_SONG, 9, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS);
+		this->saveLoadMenu(this->SEQUENCER_SONG, EEPROM_SEQUENCER_SONGS_COUNT, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS);
 #endif
 	}
 	else
@@ -3640,7 +3639,7 @@ void Apps::modeReactionGame()
 				else
 				{
 					// REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
-					REACTION_GAME_STEP_TIME_MILLIS = -3 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 12 steps in total cycle
+					REACTION_GAME_STEP_TIME_MILLIS = -10 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 12 steps in total cycle
 				}
 			}
 		}
@@ -4395,7 +4394,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex){
 		saveLoadFromEepromSlot(this->bytes_list, songIndex - SONGS_FLASH_COUNT, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS, true);
 		length = 20;
 	
-	}else if (songIndex - SONGS_FLASH_COUNT - EEPROM_COMPOSER_SONG_COUNT < 9) {
+	}else if (songIndex - SONGS_FLASH_COUNT - EEPROM_COMPOSER_SONG_COUNT < EEPROM_SEQUENCER_SONGS_COUNT) {
 		// eeprom sequencer
 		saveLoadFromEepromSlot(this->bytes_list, songIndex - SONGS_FLASH_COUNT- EEPROM_COMPOSER_SONG_COUNT, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
 
@@ -4620,16 +4619,19 @@ void Apps::multitimer_integrated()
 
 void Apps::multitimer_setDefaults()
 {
+	this->multitimer_fischerSecs = eeprom_read_word((uint16_t*)EEPROM_MULTITIMER_FISHER_ADDRESS);
+
 	// general init
-	this->multitimer_fischerSecs = MULTITIMER_DEFAULT_FISCHER_TIMER_SECS;
-	MULTITIMER_TIMERS_COUNT = MULTITIMER_DEFAULT_TIMERS_COUNT;
+	// this->multitimer_fischerSecs = MULTITIMER_DEFAULT_FISCHER_TIMER_SECS;
+	MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS);
+	// MULTITIMER_TIMERS_COUNT = MULTITIMER_DEFAULT_TIMERS_COUNT;
 	// this->multitimer_setAllInitCountDownTimeSecs(MULTITIMER_DEFAULT_INIT_TIME_SECS);
 
-	this->multitimer_initTimeSecs = MULTITIMER_DEFAULT_INIT_TIME_SECS;
+	//for (uint8_t i = 0; i <  eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS) ; i++)
 	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
-		this->multitimer_setTimerInitCountTimeSecs(i, this->multitimer_initTimeSecs);
-		// this->multitimer_timers[timer].setInitCountDownTimeSecs(initTimeSecs);
+		this->multitimer_setTimerInitCountTimeSecs(i, eeprom_read_word((uint16_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS + 2*i) );
+		// this->multitimer_setTimerInitCountTimeSecs(i, MULTITIMER_DEFAULT_INIT_TIME_SECS);
 	}
 	
 
@@ -4661,6 +4663,11 @@ void Apps::multitimer_setTimersCount(int8_t delta)
 // 		this->multitimer_state = setFischer;
 // 	}
 // }
+
+// void Apps::multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs)
+uint16_t Apps::multitimer_getTimerInitCountTimeSecs(uint8_t timer){
+	return this->multitimer_timers[timer].getTimeSecondsCountDownTimer();  
+}
 
 void Apps::multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs)
 {
@@ -4737,6 +4744,14 @@ void Apps::multitimer_setStatePause(bool set)
 
 void Apps::multitimer_start()
 {
+
+	// store into eeprom
+	eeprom_write_word((uint16_t*)EEPROM_MULTITIMER_FISHER_ADDRESS, this->multitimer_fischerSecs);
+	eeprom_write_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS, (uint8_t)MULTITIMER_TIMERS_COUNT);
+	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
+	{
+		eeprom_write_word((uint16_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS + 2*i ,this->multitimer_getTimerInitCountTimeSecs(i) );
+	}
 
 	//start and pause all timers.
 	for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)

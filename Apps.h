@@ -411,16 +411,17 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x5F, 0x79, 0x1C, 0x3D  // DBUG
 };
 
-const uint8_t guitar_hero_level_speeds[] PROGMEM = {101,75,50,40,30,20};
-const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {255,128,60,20,10,8};
+const uint8_t guitar_hero_level_speeds[] PROGMEM = {101,75,50,40,30,20}; // time in ms per step
+const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {250,41,21,8,4,3};  // a x10 multiplier is applied. Time in ms per step, twelve steps for total time. 12x10xTIME_MS = total time for a round
 const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50, 33, 16, 8}; //{2min, 1min, 30s, 20s, 10s, 5s} // will have a *50 multiplier per step. and *12 for total countdowntime
 
-#define MAX_FRAMES_MOVIES_FLASH 70
 #define MOVIE_INDEX_EMPTY 255
 #define ANIMATE_CIRCLE_OFFSET 4
 #define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 56
 #define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 92
 
+
+#define MAX_FRAMES_MOVIES_FLASH 84  // important, set the number of total frames (including stop frames) 
 const uint8_t disp_4digits_animations[] PROGMEM = {
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x01, 0x00, 0x00, 0x00,  // animate circle (KEEP IT FIRST, some apps depend on it.)
@@ -739,6 +740,7 @@ public:
 	// uint16_t multitimer_getIndexedTime(uint8_t index);
 	// void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
 	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
+	uint16_t multitimer_getTimerInitCountTimeSecs(uint8_t timer);
 	void multitimer_getDisplay();
 	bool multitimer_getTimerFinished(uint8_t timerIndex);
 	bool multitimer_checkAllTimersFinished();
@@ -959,7 +961,7 @@ private:
 	bool multitimer_randomStarter;
 	bool multitimer_fisherTimer;
 
-	uint16_t multitimer_initTimeSecs;
+	//uint16_t multitimer_initTimeSecs;
 	// uint8_t multitimer_timers_count;
 
 	uint16_t multitimer_fischerSecs;
