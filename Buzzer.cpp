@@ -97,13 +97,16 @@ void Buzzer::doBuzzerRoll()
 
     if (millis() > this->soundFinishedTimeMillis)
     {
+        // Lucie, this code contains the remnants of an attempt to optimize the memory footprint for songs. As it seemed smart to have a specific value for filling notespaces i.e. instead of 1/8note + 1/8rest + 1/4rest + 1/2rest for a full note. Just do 1/8note + 7/8s(aka all the space needed to fill a full note duration). But, in reality, it's not worth it. AT ALL. 
         //erase previous slot
+        // uint8_t previous_note = this->buzzerRoll[this->playSlotCounter];
         this->buzzerRoll[this->playSlotCounter] = BUZZER_ROLL_EMPTY_SLOT;
 
         //move active slot
         this->playSlotCounter = getNextBuzzerRollSlot(false);
+        uint8_t current_note = this->buzzerRoll[this->playSlotCounter];
 
-        if (this->buzzerRoll[this->playSlotCounter] != BUZZER_ROLL_EMPTY_SLOT)
+        if (current_note != BUZZER_ROLL_EMPTY_SLOT)
         {
             //uint8_t noteNumber = buzzerRoll[this->playSlotCounter]%63;
             //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
@@ -111,7 +114,7 @@ void Buzzer::doBuzzerRoll()
 
             {
                 // convert note to freq
-                for (uint8_t i = 1; i < (buzzerRoll[this->playSlotCounter] % 64) + this->transpose; i++)
+                for (uint8_t i = 1; i < (current_note % 64) + this->transpose; i++)
                 {
                     //same result as: (but 2K less memory!!)
                     //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63);
@@ -119,17 +122,41 @@ void Buzzer::doBuzzerRoll()
                 }
             }
 
-            // check if no "rust"
-            if (buzzerRoll[this->playSlotCounter] % 64 != 0)
+            // check if no "rest"
+            // if (current_note % 64 != 0 && current_note != fill_rest_till_full_note)
+            if (current_note % 64 != 0)
             {
                 freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
             }
 
-            tone(this->pin, (unsigned int)freq,
-                 (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS *
-                                 (1 << buzzerRoll[this->playSlotCounter] / 63))); //duration, number is exponent of 2.
+            uint8_t eight_notes_length_multiplier = (1 << current_note / 64);
 
-            this->soundFinishedTimeMillis = millis() + (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * (1 << buzzerRoll[this->playSlotCounter] / 63));
+            unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier );
+
+            // uint8_t previous_note_length_multiplier = previous_note / 64;
+
+            // if (current_note == fill_rest_till_full_note){
+            //     freq = 1;
+            //     eight_notes_length_multiplier = 8 - (1<< previous_note_length_multiplier);
+            // }
+
+            // if (current_note == fill_rest_till_half_note){
+            //     freq = 1;
+
+            //     eight_notes_length_multiplier = 0;
+
+            //     if (previous_note_length_multiplier == 0){
+            //         eight_notes_length_multiplier = 3;
+            //     } 
+            //     if (previous_note_length_multiplier == 1){
+            //         eight_notes_length_multiplier = 2;
+            //     } 
+            // }
+
+
+            tone(this->pin, (unsigned int)freq, toneLength ); //duration, number is exponent of 2.
+
+            this->soundFinishedTimeMillis = millis() + toneLength;
         }
     }
 }
@@ -216,6 +243,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
 
     uint8_t noteVal = (note) % 64;
 
+    
     if (noteVal == 0)
     {
         // rest

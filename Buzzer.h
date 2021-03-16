@@ -67,6 +67,7 @@
 #define A8_8 61
 #define As8_8 62
 #define B8_8 63
+
 #define rest_4 64
 #define A3_4 65
 #define As3_4 66
@@ -131,6 +132,7 @@
 #define A8_4 125
 #define As8_4 126
 #define B8_4 127
+
 #define rest_2 128
 #define A3_2 129
 #define As3_2 130
@@ -195,6 +197,8 @@
 #define A8_2 189
 #define As8_2 190
 #define B8_2 191
+// #define fill_rest_till_half_note 191
+
 #define rest_1 192
 #define A3_1 193
 #define As3_1 194
@@ -258,6 +262,7 @@
 #define Gs8_1 252
 #define A8_1 253
 #define As8_1 254
+// #define fill_rest_till_full_note 254
 // #define rest_top_up_to_1 254 // adds silence to previous note until full note length; i.e. if 1/4 note, will add 3/4 silence.
 // #define B8_1 255  = BUZZER_ROLL_SONG_STOPVALUE
 #define BUZZER_ROLL_SONG_STOPVALUE 255
