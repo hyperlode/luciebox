@@ -189,6 +189,7 @@
 #define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
 #define TALLY_KEEPER_1 general_int16_t_2
+#define QUIZ_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
 
 #define SOUND_NOTES_NOTE_INDEX general_int16_t_3
 #define GEIGER_TONE_LENGTH general_int16_t_3
@@ -225,6 +226,7 @@
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
 #define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
+#define QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -254,6 +256,7 @@
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1
 #define MULTITIMER_FISCHER_BLINK_NO_TEXT general_long_1
+#define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
@@ -297,6 +300,7 @@
 #define MODE_SOUND_SONG_BUFFER bytes_list
 #define MODE_DREAMTIME_RANDOM_LIST bytes_list
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
+#define QUIZ_ANALOG_VALUES_CHECK bytes_list
 
 #define REACTION_GAME_SELECTED_NOTES array_8_bytes
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
@@ -672,7 +676,14 @@ public:
     LedMultiplexer5x8* allLights;
     PotentioSelector* selectorDial;
 
-    void setPeripherals(BinaryInput *binaryInput, RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8* allLights, Buzzer *buzzer, PotentioSelector* selectorDial);
+    void setPeripherals(
+        BinaryInput *binaryInput,
+        RotaryEncoderDial *encoder_dial, 
+        DisplayManagement *ledDisp, 
+        LedMultiplexer5x8* allLights, 
+        Buzzer *buzzer, 
+        PotentioSelector* selectorDial
+        );
 
     void setDefaultMode();
     void appSelector();
@@ -815,6 +826,9 @@ private:
 
     void resetStopwatch(SuperTimer* pTimer);
 
+    void playSongHappyDryer();
+    void fill8BytesArrayWithZero();
+
     // bool isNoMomentaryButtonOn(); // doesnt decrease memory footprint. I wonder why.
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
@@ -892,11 +906,13 @@ private:
 
     enum QuizState : uint8_t
     {
-        quizInit,
+        // quizInit,
         quizWaitForQuizMaster,
         quizWaitRandomTime,
         quizWaitPlayerPress,
-        quizPlayerPressed
+        quizPlayerPressed,
+        quizDefineRoundWinner,
+        quizWaitSomeTimeForNextRound
     };
     QuizState quizState;
 

@@ -77,8 +77,8 @@ void refresh()
 
             Serial.println("{{{-------PRESS:-------:");
             Serial.println(i);
-            Serial.println((analogRead(PIN_BUTTONS_1)));
-            Serial.println((analogRead(PIN_BUTTONS_2)));
+            Serial.println((analogRead(PIN_BUTTONS_MOMENTARY)));
+            Serial.println((analogRead(PIN_BUTTONS_LATCHING)));
             //Serial.println(buttons_1.getButtonsValueRaw(),BIN);
             //Serial.println(buttons_2.getButtonsValueRaw(),BIN);
             //Serial.println("-------PRESS:-------}}}");
@@ -88,7 +88,7 @@ void refresh()
         {
             Serial.println("-----RELEASE:");
             Serial.println(i);
-            //Serial.println( (analogRead(PIN_BUTTONS_1)));
+            //Serial.println( (analogRead(PIN_BUTTONS_MOMENTARY)));
             //Serial.println(buttons_1.getButtonsValueRaw(),BIN);
             //Serial.println("-----------");
         }
@@ -224,9 +224,9 @@ void setup()
 
     selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS);
 
-    buttons_1.setPin(PIN_BUTTONS_1, BUTTONS_1_COUNT, setValues_1);
+    buttons_1.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_1_COUNT, setValues_1);
 
-    buttons_2.setPin(PIN_BUTTONS_2, BUTTONS_2_COUNT, setValues_2);
+    buttons_2.setPin(PIN_BUTTONS_LATCHING, BUTTONS_2_COUNT, setValues_2);
 
 #ifdef ENABLE_TILT_SWITCHES
     mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
@@ -272,7 +272,7 @@ void setup()
 #ifdef ENABLE_ANALOG_PIN_DEBUG
     // if one of the push buttons is pressed at startup, activate debugmode.
     debugMode = false;
-    if (analogRead(PIN_BUTTONS_1) > 10 && analogRead(PIN_BUTTONS_1) < 200)
+    if (analogRead(PIN_BUTTONS_MOMENTARY) > 10 && analogRead(PIN_BUTTONS_MOMENTARY) < 200)
     {
         debugMode = true;
         pretbak_apps.appSelector(true, 12);

@@ -84,8 +84,8 @@
 #define MOMENTARY_BUTTONS_COUNT 4
 
 #if defined V3_PCB_BURST
-    #define PIN_BUTTONS_1 A2
-    #define PIN_BUTTONS_2 A1
+    #define PIN_BUTTONS_MOMENTARY A2
+    #define PIN_BUTTONS_LATCHING A1
     #define LIGHT_MOMENTARY_0 5          // old: momentary 0
     #define LIGHT_MOMENTARY_1 2          // old: momentary 1
     #define LIGHT_MOMENTARY_2 6          // old: momentary 2
@@ -117,8 +117,8 @@
         }
 
 #elif (defined V2_PCB_CORONA)
-    #define PIN_BUTTONS_1 A1
-    #define PIN_BUTTONS_2 A2
+    #define PIN_BUTTONS_MOMENTARY A1
+    #define PIN_BUTTONS_LATCHING A2
     #define LIGHT_MOMENTARY_0 1          // old: momentary 0
     #define LIGHT_MOMENTARY_1 6          // old: momentary 1
     #define LIGHT_MOMENTARY_2 2          // old: momentary 2
@@ -149,8 +149,8 @@
         }
 
 #else  // v1 pcb
-    #define PIN_BUTTONS_1 A1
-    #define PIN_BUTTONS_2 A2
+    #define PIN_BUTTONS_MOMENTARY A1
+    #define PIN_BUTTONS_LATCHING A2
     #define LIGHT_MOMENTARY_0 1          // old: momentary 0
     #define LIGHT_MOMENTARY_1 6          // old: momentary 1
     #define LIGHT_MOMENTARY_2 2          // old: momentary 2

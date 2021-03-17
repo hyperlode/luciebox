@@ -225,6 +225,8 @@ void Apps::setDefaultMode()
 	encoder_dial->setRange(1023,true); // allow overflow. (this makes it different from the limited potentio.)
 	encoder_dial->setValue(0);
 
+	fill8BytesArrayWithZero();
+
 	randomSeed(millis());
 
 	// all shared variables to zero or false
@@ -411,7 +413,7 @@ void Apps::pomodoroTimer()
 			if (POMODORO_IN_BREAK)
 			{
 				// finished main pomodoro
-				loadBuzzerTrack(SONG_DRYER_HAPPY);
+				playSongHappyDryer();
 
 				if (POMODORO_AUTO_RESTART_ENABLED)
 				{
@@ -1007,7 +1009,7 @@ void Apps::randomModeTrigger(bool forReal)
 void Apps::modeSettings()
 {
 	// lights = 0b00000000; //reset before switch enquiry
-	const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_1, PIN_BUTTONS_2, PIN_MERCURY_SWITCHES};
+	const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
 
 	if (this->app_init_edge)
 	{
@@ -1184,7 +1186,7 @@ void Apps::eraseEepromRangeLimited(uint8_t setting){
 					(uint8_t *)i,
 					0);
 			}
-			loadBuzzerTrack(SONG_DRYER_HAPPY);
+			playSongHappyDryer();
 			
 	#endif
 }
@@ -1276,28 +1278,14 @@ void Apps::modeTallyKeeper(){
 #ifdef ENABLE_QUIZ_MASTER
 void Apps::quiz()
 {
-
-	// quiz app
-	// uint8_t lights = 0;
-
 	if (this->app_init_edge)
 	{
-		quizState = quizInit;
-		
+		QUIZ_MAX_RANDOM_WAIT_TIME = -3000;
+		quizState = quizWaitForQuizMaster;
 	}
 
 	switch (quizState)
 	{
-	case quizInit:
-	{
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		{
-			QUIZ_SCORE[i] = 0;
-		}
-		quizState = quizWaitForQuizMaster;
-		// lights |= 1 << LIGHT_LATCHING_1;
-	}
-	break;
 
 	case quizWaitForQuizMaster:
 	{
@@ -1307,27 +1295,47 @@ void Apps::quiz()
 			lights &= ~(1 << LIGHT_LATCHING_3);
 		}
 
-		if (binaryInputs[BUTTON_LATCHING_3].getValueChanged() || 
-			(binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2)))
+		if(binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_1))
+		{
+		 	// QUIZ_MAX_RANDOM_WAIT_TIME = -1000 * dialGetIndexedtime();
+			QUIZ_MAX_RANDOM_WAIT_TIME = -20000;
+
+		}else{
+			QUIZ_MAX_RANDOM_WAIT_TIME = -3000;
+		}
+
+		if (binaryInputs[BUTTON_LATCHING_3].getValueChanged() 
+			|| ( (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2)
+				 && binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_3)
+				))
+			)
 		{
 			quizState = quizWaitRandomTime;
-			QUIZ_RANDOM_WAIT_TIME.start(random(-3000, -500));
+			QUIZ_RANDOM_WAIT_TIME.start(random(QUIZ_MAX_RANDOM_WAIT_TIME, -500));
 		}
 	}
 	break;
 
 	case quizWaitRandomTime:
 	{
-		// lights |= 1 << LIGHT_LATCHING_2;
 		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
 		{
+			// //TEST SHOW RAW ANALOG VALUES
+			// //empty analog input buffer
+			// for(uint8_t i=0;i<100;i++){
+			// 	QUIZ_ANALOG_VALUES_CHECK[i] = 0;
+			// }
+			// QUIZ_ANALOG_INPUT_SAMPLE_INDEX = 0;
+			// //ENDTEST
+
+			QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE = 0;
 			quizState = quizWaitPlayerPress;
 		}
 
 		// check here, any player pressing his button = score to zero.
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			if (binaryInputsEdgeUp & 1 << i)
+			if (binaryInputsEdgeUp & 1 << i) 
 			{
 				QUIZ_SCORE[i] = 0;
 				addNoteToBuzzer(C4_1);
@@ -1338,49 +1346,114 @@ void Apps::quiz()
 
 	case quizWaitPlayerPress:
 	{
+		// //TEST SHOW RAW ANALOG VALUES
+		// QUIZ_ANALOG_VALUES_CHECK[QUIZ_ANALOG_INPUT_SAMPLE_INDEX] = analogRead(PIN_BUTTONS_MOMENTARY)/4;
+		// nextStepRotate(&QUIZ_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
+		// //ENDTEST
+
+		// 16,32,64,128 are the stored values of the individual raw momentary buttons (analog / 4)
+		uint8_t momentaryAnalogRaw = analogRead(PIN_BUTTONS_MOMENTARY)/4;
+		if (momentaryAnalogRaw >3 && QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE==0){
+			QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE = momentaryAnalogRaw;
+		}
+
 		byte momentary_buttons_lights = 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_1 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
 		lights |= momentary_buttons_lights;
+
+		// uint8_t compare_values [4];
+
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 			if (binaryInputsEdgeUp & 1 << i)
 			{
-				// add to score.
-				QUIZ_SCORE[i]++;
+				QUIZ_ANALOG_VALUES_CHECK[i] = 0x10<<i; // button 0:16, 1:32, 2:64, 3:128
 
 				// go to next state
-				quizState = quizWaitForQuizMaster;
+				quizState = quizDefineRoundWinner;
+
+			}else{
+				QUIZ_ANALOG_VALUES_CHECK[i] = 255;  // unobtainable value. maximum.
 			}
 		}
+
+		// //TEST SHOW RAW ANALOG VALUES
+		// Serial.println("---");
+		// Serial.println(QUIZ_ANALOG_INPUT_SAMPLE_INDEX);
+		// //display recorded values
+		// uint8_t first_non_zero_value = 0;
+		// for(uint8_t i=0;i<100;i++){
+		// 	Serial.println(QUIZ_ANALOG_VALUES_CHECK[QUIZ_ANALOG_INPUT_SAMPLE_INDEX]);
+		// 	// if (first_non_zero_value == 0){
+		// 	// 	first_non_zero_value = QUIZ_ANALOG_VALUES_CHECK[QUIZ_ANALOG_INPUT_SAMPLE_INDEX];
+		// 	// } 
+		// 	nextStepRotate(&QUIZ_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
+		// }
+		// //ENDTEST
 	}
 	break;
 
-	// case quizPlayerPressed:
-	// {
-	// 	lights |= 1 << LIGHT_LATCHING_3;
-	// 	if (binaryInputs[BUTTON_LATCHING_3].getEdgeDown() || binaryInputs[BUTTON_LATCHING_2].getValue())
-	// 	{
-	// 		quizState = quizWaitForQuizMaster;
-	// 	}
-	// }
-	// break;
+	case quizDefineRoundWinner:
+	{
+		// Which theoretical button value is the closest to the first detected analog value? That's the winner. It looks pretty sound after some experimentation.
 
+		for(uint8_t i=0;i<4;i++){
+			QUIZ_ANALOG_VALUES_CHECK[4+i] = abs(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE - QUIZ_ANALOG_VALUES_CHECK[i]);
+		}
+
+		uint8_t winnerIndex = 0;
+		uint8_t smallestDiff = 255;
+
+		for(uint8_t i=0;i<4;i++){
+			if (QUIZ_ANALOG_VALUES_CHECK[4+i] < smallestDiff){
+				winnerIndex = i;
+				smallestDiff = QUIZ_ANALOG_VALUES_CHECK[4+i];
+			}
+		}
+
+		QUIZ_SCORE[winnerIndex]++;
+		// //TEST SHOW RAW ANALOG VALUES
+		// for(uint8_t i=0;i<8;i++){
+		// 	Serial.println(QUIZ_ANALOG_VALUES_CHECK[i]);
+		// }
+		// Serial.println(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE);
+		// Serial.println(winnerIndex);
+		// //ENDTEST
+		
+		QUIZ_RANDOM_WAIT_TIME.start(-500);
+	
+
+		if (QUIZ_SCORE[winnerIndex]>9){
+			QUIZ_SCORE[winnerIndex]= 0;
+			playSongHappyDryer();
+		}
+		quizState = quizWaitSomeTimeForNextRound;
+			
+	}
+	break;
+
+	case quizWaitSomeTimeForNextRound:
+	{
+		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative()){
+			quizState = quizWaitForQuizMaster;
+		}
+	}
+	break;
 	}
 
 	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
-	if (binaryInputs[BUTTON_LATCHING_1].getValue())
-	{
-		quizState = quizInit;
-	}
+	// if (binaryInputs[BUTTON_LATCHING_1].getValue())
+	// {
+	// 	quizState = quizInit;
+	// }
 
 	int16_t scoreToDisplay = 0;
 	int16_t multiplier = 1000;
-
 	for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 	{
-		scoreToDisplay += multiplier * QUIZ_SCORE[i];
-		multiplier /= 10;
+		scoreToDisplay += multiplier *  (QUIZ_SCORE[i]);
+		multiplier /=10;
 	}
-	ledDisp->setNumberToDisplayAsDecimal(10000+scoreToDisplay);
+	ledDisp->setNumberToDisplayAsDecimal(10000+scoreToDisplay);  // 10000 to make sure there will always be zero's for all digits
 
 	ledDisp->setDecimalPointsToDisplay(B00001111);
 }
@@ -1465,7 +1538,7 @@ void Apps::modeSoundSong()
 {
 	if (this->app_init_edge)
 	{
-		loadBuzzerTrack(SONG_DRYER_HAPPY);
+		playSongHappyDryer();
 		// MODE_SOUND_SONG_INDEX = 0;
 	}
 
@@ -2350,7 +2423,7 @@ void Apps::drawGame()
 
 			if (displayAllSegments == displayAllSegmentsBuffer)
 			{
-				loadBuzzerTrack(SONG_DRYER_HAPPY);
+				playSongHappyDryer();
 			}
 			else
 			{
@@ -3270,7 +3343,7 @@ void Apps::modeSimon()
 
 	case simonNewGame:
 	{
-		loadBuzzerTrack(SONG_DRYER_HAPPY);
+		playSongHappyDryer();
 		SIMON_END_OF_GAME = false;
 		SIMON_PLAYERS_ALIVE_COUNT = SIMON_PLAYERS_COUNT;
 
@@ -3313,7 +3386,7 @@ void Apps::modeSimon()
 		// let 'maximum length breach' be a happy crash. I can't afford the bytes!
 		//   if (SIMON_LENGTH >= bytes_list_bufsize) {
 		// 	  // reached maximum length
-		// 	  loadBuzzerTrack(SONG_DRYER_HAPPY);
+		// 	  playSongHappyDryer();
 		// 	  simonState = simonWaitForNewGame;
 		// 	  break;
 		//   }
@@ -3634,9 +3707,8 @@ void Apps::modeReactionGame()
 			if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
 			{
 				// hex geek mode
-				for (uint8_t i = 0;i<8;i++){
-					REACTION_GAME_HEX_MEMORY[i] = 0;
-				}
+				fill8BytesArrayWithZero();
+					
 				setStandardTextToTextBuf(TEXT_SPACES);
 				reactionGameState = reactionHexNextStep;
 			}
@@ -4150,7 +4222,7 @@ uint8_t Apps::tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t len
 	// will populate a list of certain length with unique numbers in random order. At every call, will take a next number until all numbers are depleted. It will then repopulate the list with a new random sequence
 	if (*indexVariable == 0)
 	{
-		loadBuzzerTrack(SONG_DRYER_HAPPY);
+		playSongHappyDryer();
 		randomSequence(sequenceList, length);
 		*indexVariable = length;
 	}
@@ -4395,6 +4467,10 @@ void Apps::numberToBufAsDecimal(int16_t number){
 	ledDisp->numberToBufAsDecimal(textBuf, number);
 }
 
+void Apps::playSongHappyDryer(){
+	loadBuzzerTrack(SONG_DRYER_HAPPY);
+}
+
 void Apps::loadBuzzerTrack(uint8_t songIndex){
 	
 	uint8_t length=0;
@@ -4456,6 +4532,13 @@ void Apps::progmemToBuffer(const uint8_t* offset, uint8_t length){
 	// move from progmem to universal bytes buffer in ram.
 	for (uint8_t i=0;i<length;i++){
 		this->bytes_list[i] = pgm_read_byte_near(offset + i); 
+	}
+}
+
+// void Apps::fillArrayWithZero(uint8_t* arr, uint8_t length){
+void Apps::fill8BytesArrayWithZero(){
+	for (uint8_t i = 0;i<8;i++){
+		array_8_bytes[i] = 0;
 	}
 }
 
@@ -4793,10 +4876,12 @@ void Apps::multitimer_refresh()
 	if (encoder_dial->getDelta())
 	{
 		// number of timers
-		int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
+		// int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
 
-		// convert value to predefined amount of seconds.
-		dial_seconds = timeDialDiscreteSeconds[encoder_mapped];
+		// // convert value to predefined amount of seconds.
+		// dial_seconds = timeDialDiscreteSeconds[encoder_mapped];
+
+		dial_seconds = dialGetIndexedtime();
 		MULTITIMER_DIAL_EDGE = true;
 
 	}else{
