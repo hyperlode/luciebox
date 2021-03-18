@@ -597,7 +597,7 @@ void Apps::pomodoroTimer()
 	// leds
 	if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
 	{
-		lights |= 1 << LIGHT_LATCHING_1;
+		lights |= 1 << LIGHT_MOMENTARY_1;
 	}
 	if (POMODORO_ENABLE_INTERVAL_BEEP)
 	{
@@ -2150,7 +2150,7 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer)
 
 	// }
 
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 	{
 		DRAW_SHOW_MODE >= 4 ? DRAW_SHOW_MODE = 0 : DRAW_SHOW_MODE++;
 
@@ -2217,7 +2217,9 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 
 	// check for global display change
 	this->displayChangeGlobal(&displayAllSegments);
-	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+
+	// toggle individual segment
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		// drawing or erasing the segment by xor'ing it with the drawing
 		*display_buffer ^= cursor_position_on_display;
@@ -2657,11 +2659,13 @@ bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 
 void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 {
-	// fixed to one percent for now.
+	// will change the init time millis with one percent up or down if encoder dial movement detected
+
 	// only works for countdown times (negative init value)!
 	if (encoder_dial->getDelta()){
 		long original = (aTimer->getInitTimeMillis());
-		long result = long((float)original* ( 1 - (float)(encoder_dial->getDelta()) * 0.01));
+		long result = long((float)original * ( 1 - (float)(encoder_dial->getDelta()) * 0.005));
+
 		// if value to small to make an absolute difference, force it! (make sure to stay negative)
 		if (original == result){
 			result -= encoder_dial->getDelta() * encoder_dial->getDelta();
@@ -3174,11 +3178,6 @@ void Apps::modeMetronome()
 	if (this->app_init_edge)
 	{
 		TIMER_METRONOME.start(-83);  // 60bpm as default
-		// METRONOME_TICKER_1_POSITION = 0;
-		// METRONOME_TICKER_2_POSITION = 0;
-		// METRONOME_TICKER_3_POSITION = 0;
-
-		// METRONOME_ENABLE_FLASH_AT_BEEP = false;
 	}
 
 	bool visualize_bpm = binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2);
@@ -3186,6 +3185,11 @@ void Apps::modeMetronome()
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 	{
 		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
+
+		// if (encoder_dial->getDelta() != 0){
+		// 	TIMER_METRONOME.setInitTimeMillis(-1000 * indexToTimeSeconds(encoder_dial->getValueLimited(36, false))); // start counting from player 0 to display
+		// }
+
 		// auto counting (metronome)
 		if (TIMER_METRONOME.getCountDownTimerElapsedAndRestart())
 		{

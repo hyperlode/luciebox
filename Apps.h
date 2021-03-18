@@ -38,34 +38,63 @@
 #include "RotaryEncoderDial.h"
 #include "PretbakSettings.h"
 
-#define APP_SELECTOR_LETTERS_AND_CHARS 0
-#define APP_SELECTOR_SIMON 1
-#define APP_SELECTOR_SOUND_NOTES 2
-#define APP_SELECTOR_SOUND_COMPOSER 3
+#define APP_SELECTOR_LETTERS_AND_CHARS 2
+#define APP_SELECTOR_SIMON 8
+#define APP_SELECTOR_SOUND_NOTES 18
+#define APP_SELECTOR_SOUND_COMPOSER 19
 #define APP_SELECTOR_STOPWATCH 4
-#define APP_SELECTOR_POMODORO 5
+#define APP_SELECTOR_POMODORO 3
 #define APP_SELECTOR_RANDOMWORLD 6
 #define APP_SELECTOR_TALLY_KEEPER 7
-#define APP_SELECTOR_GEIGER 8
-#define APP_SELECTOR_HACK_TIME 9
-#define APP_SELECTOR_SOUND_SONG 10
-#define APP_SELECTOR_MOVIE_MODE 11
+#define APP_SELECTOR_GEIGER 20
+#define APP_SELECTOR_HACK_TIME 21
+#define APP_SELECTOR_SOUND_SONG 14
+#define APP_SELECTOR_MOVIE_MODE 15
 #define APP_SELECTOR_DRAW 12
 #define APP_SELECTOR_DRAW_GAME 13
-#define APP_SELECTOR_SETTING 14
-#define APP_SELECTOR_SETTING_TOO 15
+#define APP_SELECTOR_SETTING 0
+#define APP_SELECTOR_SETTING_TOO 1
 #define APP_SELECTOR_SOUND_METRONOME 16
 #define APP_SELECTOR_SOUND_SEQUENCER 17
-#define APP_SELECTOR_REACTION_GAME 18
-#define APP_SELECTOR_GUITAR_HERO 19
+#define APP_SELECTOR_REACTION_GAME 10
+#define APP_SELECTOR_GUITAR_HERO 11
 #ifdef ENABLE_TILT_APP
-    #define APP_SELECTOR_TILT 20
+    #define APP_SELECTOR_TILT 22
 #else
-    #define APP_SELECTOR_DREAMTIME 20
+    #define APP_SELECTOR_DREAMTIME 22
 #endif 
-#define APP_SELECTOR_ZEN 21
-#define APP_SELECTOR_MULTITIMER 22
-#define APP_SELECTOR_QUIZ_MASTER 23
+#define APP_SELECTOR_ZEN 23
+#define APP_SELECTOR_MULTITIMER 5
+#define APP_SELECTOR_QUIZ_MASTER 9
+
+// #define APP_SELECTOR_LETTERS_AND_CHARS 0
+// #define APP_SELECTOR_SIMON 1
+// #define APP_SELECTOR_SOUND_NOTES 2
+// #define APP_SELECTOR_SOUND_COMPOSER 3
+// #define APP_SELECTOR_STOPWATCH 4
+// #define APP_SELECTOR_POMODORO 5
+// #define APP_SELECTOR_RANDOMWORLD 6
+// #define APP_SELECTOR_TALLY_KEEPER 7
+// #define APP_SELECTOR_GEIGER 8
+// #define APP_SELECTOR_HACK_TIME 9
+// #define APP_SELECTOR_SOUND_SONG 10
+// #define APP_SELECTOR_MOVIE_MODE 11
+// #define APP_SELECTOR_DRAW 12
+// #define APP_SELECTOR_DRAW_GAME 13
+// #define APP_SELECTOR_SETTING 14
+// #define APP_SELECTOR_SETTING_TOO 15
+// #define APP_SELECTOR_SOUND_METRONOME 16
+// #define APP_SELECTOR_SOUND_SEQUENCER 17
+// #define APP_SELECTOR_REACTION_GAME 18
+// #define APP_SELECTOR_GUITAR_HERO 19
+// #ifdef ENABLE_TILT_APP
+//     #define APP_SELECTOR_TILT 20
+// #else
+//     #define APP_SELECTOR_DREAMTIME 20
+// #endif 
+// #define APP_SELECTOR_ZEN 21
+// #define APP_SELECTOR_MULTITIMER 22
+// #define APP_SELECTOR_QUIZ_MASTER 23
 
 #define DRAW_GAME_RANDOM 0
 #define DRAW_GAME_CLOCK 3
@@ -380,35 +409,35 @@ const uint8_t scales [] PROGMEM = {
 
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
+    0x0F, 0x40, 0x40, 0x39, //wrench
+    0xc4, 0x88, 0x50, 0x00, // student koala    
+    0x00, 0xd0, 0xab, 0x44, // stopwatch
+    0x5C, 0x63, 0x5c, 0x63, // dice
+    0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
+    0x3d, 0x41, 0x43, 0x02, // gun 
+    0x40, 0x49, 0x49, 0x4F, //pencil
+    0x7F, 0x39, 0x0f, 0x7f, // media player. film roll
+    0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
+    0x5e, 0x01, 0x5f, 0x00, // music notes
+    0x00, 0x02, 0x6b, 0x20, // radioactive sign
+    0x61, 0xc5, 0x51, 0x43, // balancing beam .(tilt)
 
     // 0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
-    0xc4, 0x88, 0x50, 0x00, // student koala    
     //0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
-    0x5e, 0x01, 0x5f, 0x00, // music notes
-    0x00, 0xd0, 0xab, 0x44, // stopwatch
     // 0x39, 0x09, 0x09, 0x0F, // abstractbig circle
     //0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
-    0x5C, 0x63, 0x5c, 0x63, // dice
-    0x00, 0x02, 0x6b, 0x20, // radioactive sign
     // 0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
     //0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
    
-    0x7F, 0x39, 0x0f, 0x7f, // media player. film roll
     // 0x5e, 0x01, 0xdf, 0x5e, // music notes full
     // 0x32, 0x26, 0x34, 0x16, // vertical lines short and long
     //0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
     //0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
-    0x40, 0x49, 0x49, 0x4F, //pen
-    0x0F, 0x40, 0x40, 0x39, //wrench
     // 0x08, 0xCE, 0x78, 0x08, // abstract piramid
-    0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
     // 0x40, 0x4F, 0x79, 0x40, // abstract art deco
     // 0x60, 0x3a, 0x2e, 0x42, // body builder. gamer.
-    0x3d, 0x41, 0x43, 0x02, // gun 
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
-    0x61, 0xc5, 0x51, 0x43, // balancing beam .(tilt)
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
-    0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
     0x5F, 0x79, 0x1C, 0x3D  // DBUG
 };
 
@@ -722,6 +751,7 @@ public:
 
     void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
+
     bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     // void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
