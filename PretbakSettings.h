@@ -95,16 +95,16 @@
     #define LIGHT_LATCHING_2 3           // old: small latch right
     #define LIGHT_LATCHING_0 0           // old: big latch
 
-    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
-    #define BUTTONS_1_COUNT 4
-    #define BUTTONS_1_VALUES      \
+    #define BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET 4
+    #define BUTTONS_MOMENTARY_COUNT 4
+    #define BUTTONS_MOMENTARY_VALUES      \
         {                         \
             512, 256, 128, 64 \
         }
 
-    #define BUTTONS_2_COUNT 4
-    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0  
-    #define BUTTONS_2_VALUES \
+    #define BUTTONS_LATCHING_COUNT 4
+    #define BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET 0  
+    #define BUTTONS_LATCHING_VALUES \
         {                    \
             512, 256, 128, 64    \
         }
@@ -127,16 +127,16 @@
     #define LIGHT_LATCHING_1 3           // old: small latch left
     #define LIGHT_LATCHING_2 4           // old: small latch right
     #define LIGHT_LATCHING_0 7           // old: big latch
-    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 4
-    #define BUTTONS_1_COUNT 4
-    #define BUTTONS_1_VALUES      \
+    #define BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET 4
+    #define BUTTONS_MOMENTARY_COUNT 4
+    #define BUTTONS_MOMENTARY_VALUES      \
         {                         \
             512, 256, 128, 64 \
         }
 
-    #define BUTTONS_2_COUNT 4
-    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0  
-    #define BUTTONS_2_VALUES \
+    #define BUTTONS_LATCHING_COUNT 4
+    #define BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET 0  
+    #define BUTTONS_LATCHING_VALUES \
         {                    \
             512, 256, 128, 64    \
         }
@@ -159,16 +159,16 @@
     #define LIGHT_LATCHING_1 3           // old: small latch left
     #define LIGHT_LATCHING_2 4           // old: small latch right
     #define LIGHT_LATCHING_0 7           // old: big latch
-    #define BUTTONS_1_TO_BINARY_INPUT_OFFSET 3
-    #define BUTTONS_1_COUNT 5
-    #define BUTTONS_1_VALUES      \
+    #define BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET 3
+    #define BUTTONS_MOMENTARY_COUNT 5
+    #define BUTTONS_MOMENTARY_VALUES      \
         {                         \
             500, 257, 128, 62, 30 \
         }
 
-    #define BUTTONS_2_COUNT 3
-    #define BUTTONS_2_TO_BINARY_INPUT_OFFSET 0
-    #define BUTTONS_2_VALUES \
+    #define BUTTONS_LATCHING_COUNT 3
+    #define BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET 0
+    #define BUTTONS_LATCHING_VALUES \
         {                    \
             513, 254, 125    \
         }
