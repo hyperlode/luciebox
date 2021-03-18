@@ -387,11 +387,16 @@ void Apps::pomodoroTimer()
 
 	if (this->app_init_edge)
 	{
-		POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
-		POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
+		
+		POMODORO_MAIN_CLOCK_TIME_INDEX = eeprom_read_byte((uint8_t*)EEPROM_POMODORO_INIT_TIME_INDEX);
+		POMODORO_PAUSE_TIME_INDEX = eeprom_read_byte((uint8_t*)EEPROM_POMODORO_PAUSE_TIME_INDEX);
+		POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = eeprom_read_byte((uint8_t*)EEPROM_POMODORO_RND_BEEP_TIME_INDEX);
+
+		// POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
+		// POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
 		// POMODORO_STATS_WORKING_GOOD = 0;
 		// POMODORO_STATS_WORKING_BAD = 0;
-		POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
+		// POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
 	}
 	
 	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1);
@@ -401,6 +406,11 @@ void Apps::pomodoroTimer()
 
 	if (binaryInputsEdgeUp & (1<<BUTTON_INDEXED_LATCHING_3)){
 		POMODORO_TIMER.start();
+
+		eeprom_update_byte((uint8_t*)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
+		eeprom_update_byte((uint8_t*)EEPROM_POMODORO_PAUSE_TIME_INDEX, POMODORO_PAUSE_TIME_INDEX);
+		eeprom_update_byte((uint8_t*)EEPROM_POMODORO_RND_BEEP_TIME_INDEX, POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX);
+
 	}
 	
 	// in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
@@ -615,7 +625,6 @@ void Apps::pomodoroTimer()
 	}
 
 	textBufToDisplay();
-	// setLedArray();
 }
 
 void Apps::resetStopwatch(SuperTimer* pTimer){
