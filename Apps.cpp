@@ -27,7 +27,8 @@ void Apps::appSelector()
 	updateEveryAppCycleBefore();
 
 	bool selector_changed = selectorDial->getValueChangedEdge();
-	bool shift_changed = binaryInputs[BUTTON_LATCHING_0].getValueChanged(); // latching button acts as a "shift button" to have two apps per selector location
+	bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1<<BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
+
 
 	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 	uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
@@ -740,7 +741,7 @@ void Apps::modeRandomWorld()
 
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
+			if (binaryInputsEdgeUp & 1<<i)
 			{
 				RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
 				randomWorldState = randomWorldRolling;
@@ -1041,11 +1042,11 @@ void Apps::modeSettings()
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			// every momentary button has a matching latching button assigned
-			if (binaryInputsValue & (1<<(i+4)))
+			if (binaryInputsValue & (1<<(i+4)))  //latching
 			{				
 				// momentary button pressed while its matching latching button is ON?
 
-				if (binaryInputs[buttons_indexed[i]].getValue())
+				if (binaryInputsValue & (1<<i ))
 				{
 					textHandle[i] = '8';
 				}
@@ -1304,7 +1305,8 @@ void Apps::quiz()
 			QUIZ_MAX_RANDOM_WAIT_TIME = -3000;
 		}
 
-		if (binaryInputs[BUTTON_LATCHING_3].getValueChanged() 
+		bool quizmasterButtonChanged = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1<<BUTTON_INDEXED_LATCHING_3); 
+		if (quizmasterButtonChanged
 			|| ( (binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2)
 				 && binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_3)
 				))
@@ -1439,12 +1441,6 @@ void Apps::quiz()
 	}
 	break;
 	}
-
-	// as long as switched on, scores reset (i.e. needs to be set to zero to play. So, this makes it the big reset button.)
-	// if (binaryInputs[BUTTON_LATCHING_1].getValue())
-	// {
-	// 	quizState = quizInit;
-	// }
 
 	int16_t scoreToDisplay = 0;
 	int16_t multiplier = 1000;
@@ -2416,7 +2412,7 @@ void Apps::drawGame()
 		cursorBlinker = modeSingleSegmentManipulation(&displayAllSegments);
 		// bug: you can't use this because of same buffer reuse. displayChangeGlobal(&displayAllSegments, false);
 
-		if (binaryInputs[BUTTON_LATCHING_3].getValueChanged())
+		if ((binaryInputsEdgeUp | binaryInputsEdgeDown) & (1<<BUTTON_INDEXED_LATCHING_3))
 		{
 			drawGameState = drawGameEvaluate;
 			DRAW_GAME_DISPLAY_TIMER.start();
@@ -3488,13 +3484,7 @@ void Apps::modeSimon()
 
 	case simonUserRepeats:
 	{
-
-		for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
-		{
-
-			lights |= binaryInputs[buttons_indexed[k]].getValue() << lights_indexed[k];
-		}
-
+		// button lights are on when pressed because of default behaviour (light of button  on at button press)
 		textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
 		textBuf[1] = 'P';
 		if (pressed_momentary_button == SIMON_NO_BUTTON_PRESSED)
@@ -3817,7 +3807,7 @@ void Apps::modeReactionGame()
 		uint8_t build_up_value = 0;
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-			if (binaryInputs[buttons_indexed[i]].getValue())
+			if (binaryInputsValue & (1<<i))
 			{
 				if  (! ( REACTION_GAME_HEX_VALUE_TO_FIND & (1<<(3-i)) )){
 					reactionGameState = reactionJustDied;
@@ -3913,7 +3903,7 @@ void Apps::modeReactionGame()
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 
-			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
+			if (binaryInputsEdgeUp & (1<<i))
 			{
 				//if DP of this button was on, switch it off. else, die!
 				//check if DP of digit "i" is set
@@ -4058,7 +4048,7 @@ void Apps::modeReactionGame()
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
 			// button press
-			if (binaryInputs[buttons_indexed[i]].getEdgeUp())
+			if (binaryInputsEdgeUp & (1<<i))
 			{
 				if (i == REACTION_GAME_TARGET)
 				{
@@ -4657,11 +4647,11 @@ void Apps::multitimer_integrated()
 	// TIMER BUTTONS
 	for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
-		if (binaryInputs[buttons_indexed[i]].getEdgeUp())
+		if (binaryInputsEdgeUp & (1<<i))
 		{
 			this->multitimer_playerButtonPressEdgeUp(i);
 		}
-		if (binaryInputs[buttons_indexed[i]].getEdgeDown())
+		if (binaryInputsEdgeDown & (1<<i))
 		{
 			this->multitimer_playerButtonPressEdgeDown(i);
 		}
@@ -4907,7 +4897,7 @@ void Apps::multitimer_refresh()
 				// set time for each timerbutton pressed
 				for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
 				{
-					if (binaryInputs[buttons_indexed[i]].getValue())
+					if (binaryInputsValue & (1<<i))
 					{
 						this->multitimer_setTimerInitCountTimeSecs(i, dial_seconds);
 					}
