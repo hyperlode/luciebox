@@ -48,6 +48,7 @@ Buzzer buzzer;
 //debug mode
 bool debugMode;
 #endif
+bool aMomentaryButtonIsPressed = false;
 
 // hack to get interrupts nicely going without too much magic.
 // https://forum.arduino.cc/index.php?topic=41713.0
@@ -137,6 +138,12 @@ void processInput()
 
     if (buttonsMomentary.getValueChangedEdge())
     {
+        if (!aMomentaryButtonIsPressed){
+            // add 1 to power cycles tally keeper. It's done a key press to avoid gigantic number in case of multiple brown outs.
+            eeprom_update_word((uint16_t*) EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER)+1);
+            aMomentaryButtonIsPressed = true;
+        }
+
         for (uint8_t i = 0; i < BUTTONS_MOMENTARY_COUNT; i++)
         {
             binaryInputs[BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET + i].setValue(buttonsMomentary.getButtonValueByIndex(i));
@@ -213,9 +220,6 @@ void setup()
         // confirmation song will not play because we are not yet in our refresh loop at setup
         pretbak_apps.eraseEepromRangeLimited(EEPROM_TOTAL_RESET);
     }
-
-    // add 1 to power cycles tally keeper
-    eeprom_update_word((uint16_t*) EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER)+1);
 
 #else
     buzzer.setPin(PIN_BUZZER);
