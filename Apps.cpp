@@ -1062,15 +1062,17 @@ void Apps::modeSettings()
 		}
 
 		if (millis_quarter_second_period()){ // BAD PRACTICE GIVES FUN RESULTS. Will go through this loop continuously when true (no edge detection). And then half a second static. I kind of like the effect
-		MODE_SETTINGS_DECIMAL_POINT_COUNTER++;
-		if (MODE_SETTINGS_DECIMAL_POINT_COUNTER > 15){
-			MODE_SETTINGS_DECIMAL_POINT_COUNTER = 0;
+			MODE_SETTINGS_DECIMAL_POINT_COUNTER++;
+			if (MODE_SETTINGS_DECIMAL_POINT_COUNTER > 15){
+				MODE_SETTINGS_DECIMAL_POINT_COUNTER = 0;
+			}
 		}
-	}
-	ledDisp->setDecimalPointsToDisplay(MODE_SETTINGS_DECIMAL_POINT_COUNTER);
+		ledDisp->setDecimalPointsToDisplay(MODE_SETTINGS_DECIMAL_POINT_COUNTER);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 8)
 	{
+		// enable/disable sound 
+
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
@@ -1091,25 +1093,19 @@ void Apps::modeSettings()
 			}
 		}
 
-		if (millis_half_second_period())
-		{
-			setStandardTextToTextBuf(TEXT_BEEP);
-		}
-		else
-		{
+		// menu title
+		setStandardTextToTextBuf(TEXT_BEEP);
 
-			uint8_t text = TEXT_YES;
-			if (buzzer->getPin() == PIN_BUZZER)
-			{
-
-				text = TEXT_NO;
-			}
-			setStandardTextToTextHANDLE(text);
+		// value text
+		uint8_t text = TEXT_YES;
+		if (buzzer->getPin() == PIN_BUZZER)
+		{
+			text = TEXT_NO;
 		}
+		setStandardTextToTextHANDLE(text);
 	}
-	else if (SETTINGS_MODE_SELECTOR < 14)
+	else if (SETTINGS_MODE_SELECTOR < 18)
 	{
-
 		// menu title
 		textBuf[2] = 'A';
 		uint8_t index = (SETTINGS_MODE_SELECTOR - 8) / 2;
@@ -1118,16 +1114,25 @@ void Apps::modeSettings()
 		// Value
 		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
 	}
-
-	else if (SETTINGS_MODE_SELECTOR < 16)
+	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
 		// show luciebox firmware version number
+		// menu title
 
+		// value
 		ledDisp->setNumberToDisplayAsDecimal(SOFTWARE_VERSION);
 		textHandle[0] = 'F'; // v doesn't work. So, F from Firmware version it is.
 		
 	}
-	else if (SETTINGS_MODE_SELECTOR < 18)
+	else if (SETTINGS_MODE_SELECTOR < 22)
+	{
+		// display amount of times the luciebox was used
+		// menu value
+		ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER));
+		// menu title
+		setStandardTextToTextBuf(TEXT_QUANTITY);
+	}
+	else if (SETTINGS_MODE_SELECTOR < 24)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -1143,12 +1148,8 @@ void Apps::modeSettings()
 		}
 		else
 		{
-			setStandardTextToTextHANDLE(TEXT_RESET);
+			setStandardTextToTextBuf(TEXT_RESET);
 		}
-	}
-	else if (SETTINGS_MODE_SELECTOR < 20)
-	{
-		ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER));
 	}
 	else
 	{
