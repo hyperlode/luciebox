@@ -514,10 +514,12 @@ void Apps::pomodoroTimer()
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
 		}
 
-		// actually change the set up timer
-		if (encoder_dial->getDelta()){
-			nextStep(active_seconds_modifier,encoder_dial->getDelta()>0,0,90,false);
-		}
+		encoderDialRefreshTimeIndex(active_seconds_modifier);
+
+		// // actually change the set up timer
+		// if (encoder_dial->getDelta()){
+		// 	nextStep(active_seconds_modifier,encoder_dial->getDelta()>0,0,90,false);
+		// }
 
 		// show performance results
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
@@ -625,6 +627,13 @@ void Apps::pomodoroTimer()
 	}
 
 	textBufToDisplay();
+}
+
+void Apps::encoderDialRefreshTimeIndex(int16_t* indexHolder){
+    	// actually change the set up timer
+		if (encoder_dial->getDelta()){
+			nextStep(indexHolder,encoder_dial->getDelta()>0,0,90,false);
+		}
 }
 
 void Apps::resetStopwatch(SuperTimer* pTimer){
@@ -4694,13 +4703,12 @@ void Apps::multitimer_setDefaults()
 {
 	// no defaults, load eeprom values. at eeprom init, it's all zero...
 
-	this->multitimer_fischerSecs = eeprom_read_word((uint16_t*)EEPROM_MULTITIMER_FISHER_ADDRESS);
-
+	MULTITIMER_FISCHER_TIME_INDEX = eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_FISHER_TIME_INDEX);
 	// general init
 	MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS);
 	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
-		this->multitimer_setTimerInitCountTimeSecs(i, eeprom_read_word((uint16_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS + 2*i) );
+		this->multitimer_setTimerInitCountTimeByTimeIndex(i, eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i) );
 	}
 
 	this->multitimer_state = initialized;
@@ -4720,13 +4728,14 @@ void Apps::multitimer_setTimersCount(int8_t delta)
 	}
 }
 
-uint16_t Apps::multitimer_getTimerInitCountTimeSecs(uint8_t timer){
-	return this->multitimer_timers[timer].getTimeSecondsCountDownTimer();  
+uint8_t Apps::multitimer_getTimerInitTimeIndex(uint8_t timer){
+	return MULTITIMER_INIT_TIME_INDECES[timer];
 }
 
-void Apps::multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs)
+void Apps::multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t index)
 {
-		this->multitimer_timers[timer].setInitCountDownTimeSecs(initTimeSecs);
+	MULTITIMER_INIT_TIME_INDECES[timer] = index;
+	this->multitimer_timers[timer].setInitCountDownTimeSecs(indexToTimeSeconds(index));
 }
 
 void Apps::multitimer_init()
@@ -4800,11 +4809,11 @@ void Apps::multitimer_setStatePause(bool set)
 void Apps::multitimer_start()
 {
 	// it makes sense to store settings into eeprom at start
-	eeprom_update_word((uint16_t*)EEPROM_MULTITIMER_FISHER_ADDRESS, this->multitimer_fischerSecs);
+	eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
 	eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS, (uint8_t)MULTITIMER_TIMERS_COUNT);
 	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
-		eeprom_update_word((uint16_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_ADDRESS + 2*i ,this->multitimer_getTimerInitCountTimeSecs(i) );
+		eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i ,this->multitimer_getTimerInitTimeIndex(i) );
 	}
 
 	//start and pause all timers.
@@ -4875,30 +4884,14 @@ void Apps::multitimer_refresh()
 	uint8_t playerLights = 0; //lsb is timer 0, 2nd bit is timer 1, ....
 	uint8_t settingsLights = 0b00000000; //I tried optimizing this away, but memory size increased... Settings lights are other lights then timer button lights.
 
-	uint16_t dial_seconds;
-
-	if (encoder_dial->getDelta())
-	{
-		// number of timers
-		// int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
-
-		// // convert value to predefined amount of seconds.
-		// dial_seconds = timeDialDiscreteSeconds[encoder_mapped];
-
-		dial_seconds = dialGetIndexedtime();
-		MULTITIMER_DIAL_EDGE = true;
-
-	}else{
-		MULTITIMER_DIAL_EDGE = false;
-	}
-
 	if (this->multitimer_state == initialized)
 	{
 		if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_1)){
 			this->multitimer_state = setFischer;
 		}
 
-		if (MULTITIMER_DIAL_EDGE){
+		
+		if (encoder_dial->getDelta()!=0){
 			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 			if ((binaryInputsValue & momentary_buttons_mask) == 0){
 				// set number of timers
@@ -4909,11 +4902,13 @@ void Apps::multitimer_refresh()
 				}
 			}else{
 				// set time for each timerbutton pressed
+			
+				encoderDialRefreshTimeIndex(&MULTITIMER_DIAL_TIME_INDEX);
 				for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
 				{
 					if (binaryInputsValue & (1<<i))
 					{
-						this->multitimer_setTimerInitCountTimeSecs(i, dial_seconds);
+						this->multitimer_setTimerInitCountTimeByTimeIndex(i, MULTITIMER_DIAL_TIME_INDEX);
 					}
 				}
 			}
@@ -5083,8 +5078,8 @@ void Apps::multitimer_refresh()
 		}
 
 		// fischer timer
-		if (MULTITIMER_DIAL_EDGE){
-			this->multitimer_fischerSecs = dial_seconds;
+		if (encoder_dial->getDelta()!=0){
+			encoderDialRefreshTimeIndex(&MULTITIMER_FISCHER_TIME_INDEX);
 			MULTITIMER_FISCHER_BLINK_NO_TEXT = millis() % 1000;
 		}
 
@@ -5094,7 +5089,7 @@ void Apps::multitimer_refresh()
 		}
 		else
 		{
-			timeMillisToClockString(textHandle, 1000 * (long) this->multitimer_fischerSecs);
+			timeSecondsToClockString(textHandle, indexToTimeSeconds(MULTITIMER_FISCHER_TIME_INDEX));
 		}
 
 		if (millis_quarter_second_period())
@@ -5105,7 +5100,7 @@ void Apps::multitimer_refresh()
 	}
 	
 	// settings lights exceptions
-	if (this->multitimer_state != setFischer && this->multitimer_fischerSecs != 0)
+	if (this->multitimer_state != setFischer && MULTITIMER_FISCHER_TIME_INDEX != 0)
 	{
 		// fischer light always solid on when not zero seconds added. (except during setting, then blinking).
 		settingsLights |= MULTITIMER_LIGHT_FISCHER;
@@ -5155,7 +5150,7 @@ void Apps::multitimer_next(bool activePlayerDied)
 
 		if (!activePlayerDied){
 			// add fischer timer (disabled just means: zero seconds).
-			this->multitimer_timers[this->multitimer_activeTimer].setOffsetInitTimeMillis(-1000 * long(this->multitimer_fischerSecs));
+			this->multitimer_timers[this->multitimer_activeTimer].setOffsetInitTimeMillis(-1000 * (long)(indexToTimeSeconds(MULTITIMER_FISCHER_TIME_INDEX)));
 			// if time bigger than initial time, just reset timer. It should not be bigger. I got this from boardgamearena.com. I kindof liked it.
 			if (this->multitimer_timers[this->multitimer_activeTimer].getInitTimeMillis() >= this->multitimer_timers[this->multitimer_activeTimer].getTimeMillis()){
 				this->multitimer_timers[this->multitimer_activeTimer].startPaused(true);

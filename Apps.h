@@ -219,6 +219,7 @@
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
 #define TALLY_KEEPER_1 general_int16_t_2
 #define QUIZ_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
+#define MULTITIMER_FISCHER_TIME_INDEX general_int16_t_2
 
 #define SOUND_NOTES_NOTE_INDEX general_int16_t_3
 #define GEIGER_TONE_LENGTH general_int16_t_3
@@ -228,6 +229,7 @@
 #define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
 #define TALLY_KEEPER_2 general_int16_t_3
 #define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
+#define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
 
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
@@ -302,8 +304,6 @@
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 #define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
-#define MULTITIMER_DIAL_EDGE general_boolean
-
 
 #define STOPWATCH_PAUSED_2 general_boolean2
 #define HACKTIME_VALUE_TO_SOUND general_boolean2
@@ -335,6 +335,7 @@
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
+#define MULTITIMER_INIT_TIME_INDECES array_8_bytes
 
 
 
@@ -777,8 +778,8 @@ public:
 	void multitimer_setDefaults();
 	// uint16_t multitimer_getIndexedTime(uint8_t index);
 	// void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
-	void multitimer_setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs);
-	uint16_t multitimer_getTimerInitCountTimeSecs(uint8_t timer);
+	void multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t index);
+	uint8_t multitimer_getTimerInitTimeIndex(uint8_t timer);
 	void multitimer_getDisplay();
 	bool multitimer_getTimerFinished(uint8_t timerIndex);
 	bool multitimer_checkAllTimersFinished();
@@ -824,6 +825,9 @@ private:
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
     
+
+    void encoderDialRefreshTimeIndex(int16_t* indexHolder);
+
     unsigned int indexToTimeSeconds(int16_t index);
 
     void setButtonLight(uint8_t light_index, bool onElseOff);
@@ -1008,7 +1012,7 @@ private:
 	//uint16_t multitimer_initTimeSecs;
 	// uint8_t multitimer_timers_count;
 
-	uint16_t multitimer_fischerSecs;
+	//uint16_t multitimer_fischerSecs;
     #endif
 
 };
