@@ -550,7 +550,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define SONG_DRYER_HAPPY 0
 #define SONG_LANG_ZAL_ZE_LEVEN 1
 #define SONG_ATTACK 2
-#define SONG_EMPTY 3
+#define SONG_STARGOOSE 3
 #define SONG_DRYER_UNHAPPY 4
 #define SONG_KINDEKE_DOUWEN 5
 #define SONG_RETREAT 6
@@ -559,7 +559,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_DRYER_HAPPY 18
 #define LEN_LANG_ZAL_ZE_LEVEN 84
 #define LEN_SONG_ATTACK 14
-#define LEN_SONG_EMPTY 0
+#define LEN_SONG_STARGOOSE 52
 #define LEN_SONG_DRYER_UNHAPPY 13
 #define LEN_SONG_KINDEKE_DOUWEN 49
 #define LEN_SONG_RETREAT 14
@@ -571,14 +571,14 @@ const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_DRYER_HAPPY,
     LEN_LANG_ZAL_ZE_LEVEN,
     LEN_SONG_ATTACK,
-    LEN_SONG_EMPTY,
+    LEN_SONG_STARGOOSE,
     LEN_SONG_DRYER_UNHAPPY,
     LEN_SONG_KINDEKE_DOUWEN,
     LEN_SONG_RETREAT,
     LEN_SONG_ALPHABET,
 };
  
-// one big library. length of song as byte at start. lenght of song INCLUDES the length byte. There is no need then to keep a separate array with start indeces. 
+// one big library. song lengths in separate array. This is the easiest option.
 const uint8_t songs [] PROGMEM = {
     //happy dryer
     A6_2, rest_4, rest_2,
@@ -628,7 +628,34 @@ const uint8_t songs [] PROGMEM = {
     C7_1, C7_1,
     
     // aaanvallueeeeee!
-     Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
+    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
+    
+    // star goose
+    C6_2, rest_2,
+    E6_2, E6_4, rest_4,
+    C6_2, rest_2,
+    E6_2, E6_4, rest_4,
+    C6_2, rest_2,
+    E6_2, E6_4,  rest_4,
+    C6_2, rest_2,
+    E6_2, E6_4, rest_4,
+    
+    C6_2, rest_2,
+    A6_1, rest_2,
+    G6_4, rest_4, rest_2,
+    G6_1, rest_4,
+
+    C6_2, rest_2,
+    E6_2, E6_4, rest_4,
+    C6_2, rest_2,
+    E6_2, E6_4, rest_4,
+
+    C6_2, rest_2,
+    F6_2, F6_4, rest_4,
+    E6_2, rest_2,
+    C6_2, C6_4, rest_2,
+    D6_4,rest_4,
+    C6_1,
     
     // unhappy dryer
     A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
@@ -855,7 +882,7 @@ private:
     void loadNextMovie();
     bool loadScreenFromMemory(int16_t address);
 
-    void eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex);
+    void eepromPictureToDisplayAllSegments(int16_t pictureIndex);
     void flashPictureToDisplayAllSegments(const uint8_t* progmemAddress);
 
     void resetStopwatch(SuperTimer* pTimer);

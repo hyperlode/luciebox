@@ -514,12 +514,8 @@ void Apps::pomodoroTimer()
 			display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
 		}
 
+		// look for value change with encoder dial
 		encoderDialRefreshTimeIndex(active_seconds_modifier);
-
-		// // actually change the set up timer
-		// if (encoder_dial->getDelta()){
-		// 	nextStep(active_seconds_modifier,encoder_dial->getDelta()>0,0,90,false);
-		// }
 
 		// show performance results
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
@@ -2111,7 +2107,7 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 		flashPictureToDisplayAllSegments(disp_4digits_animations + frame_index*4);
 	}else{
 		//eeprom
-		eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, frame_index - MAX_FRAMES_MOVIES_FLASH);
+		eepromPictureToDisplayAllSegments(frame_index - MAX_FRAMES_MOVIES_FLASH);
 	}
 
 	// check for end of movie
@@ -2727,40 +2723,43 @@ void Apps::draw()
 		// SHIFT button to insert or delete drawing slots from eeprom
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
-			
+			int16_t lastPictureEepromAddress = EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_TOTAL_LENGTH - 2);
 			// DELETE
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 			{
 				// delete slot. (and shift all drawings.)
-				for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX+1) * 4;
-					 i < EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_TOTAL_LENGTH - 3);
+				uint16_t currentIndexPictureEepromAddress = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX) * 4;
+				for (int16_t i = currentIndexPictureEepromAddress;
+					 i <= lastPictureEepromAddress;
 					 i++)
 				{
 					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
 					eeprom_update_byte((uint8_t *)(i), tmp);
 				}
+				eepromPictureToDisplayAllSegments(DRAW_ACTIVE_DRAWING_INDEX);
 			}
 
 			// INSERT
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 			{
-				//insert slot after current index (and move to it)
-				if (DRAW_ACTIVE_DRAWING_INDEX >= EEPROM_NUMBER_OF_DRAWINGS - 1)
+				// copy drawing from current index to the next one and move to it (and move to it). 
+				// the drawing on the last address location is lost.
+
+				// one picture before the last one is the last position where you can still insert a drawing. 
+				// we got this covered by the main for loop. index++ is jumping to zero... But, let's suck it up for the sake of 18 saved bytes.
+
+				// work with eeprom addresses, not with picture indexes.
+				// each picture is four bytes
+				for (int16_t i = lastPictureEepromAddress;
+						i >= EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX) * 4;
+						i--)
 				{
-					// one picture before the last one is the last position where you can still insert a drawing.
+					// move all pictures one up.
+					uint8_t tmp = eeprom_read_byte((uint8_t *)(i));
+					eeprom_update_byte((uint8_t *)(i + 4), tmp);
 				}
-				else
-				{
-					// work with eeprom addresses, not with picture indexes.
-					for (int16_t i = EEPROM_PICTURES_START_ADDRESS + (EEPROM_PICTURES_TOTAL_LENGTH - 1);
-						 i >= EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX-1) * 4;
-						 i--)
-					{
-						// move all pictures one up.
-						uint8_t tmp = eeprom_read_byte((uint8_t *)(i));
-						eeprom_update_byte((uint8_t *)(i + 4), tmp);
-					}
-				}
+				DRAW_ACTIVE_DRAWING_INDEX++;
+
 			}
 
 			if (millis_half_second_period()){
@@ -2814,7 +2813,7 @@ void Apps::draw()
 	{
 		// load drawing from memory only if index changed
 		displayAllSegments = 0;
-		eepromPictureToDisplayAllSegments(EEPROM_PICTURES_START_ADDRESS, DRAW_ACTIVE_DRAWING_INDEX);
+		eepromPictureToDisplayAllSegments(DRAW_ACTIVE_DRAWING_INDEX);
 
 		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
 	}
@@ -4347,9 +4346,9 @@ void Apps::flashPictureToDisplayAllSegments(const uint8_t* progmemAddress){
 	}
 }
 
-void Apps::eepromPictureToDisplayAllSegments(int16_t offset, int16_t pictureIndex){
+void Apps::eepromPictureToDisplayAllSegments(int16_t pictureIndex){
 	for (uint8_t i = 0; i < 4; i++){
-		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(offset + pictureIndex * 4 + i))) << (i * 8);
+		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + pictureIndex * 4 + i))) << (i * 8);
 	}
 }
 
@@ -4705,7 +4704,7 @@ void Apps::multitimer_setDefaults()
 
 	MULTITIMER_FISCHER_TIME_INDEX = eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_FISHER_TIME_INDEX);
 	// general init
-	MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS);
+	MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT);
 	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
 		this->multitimer_setTimerInitCountTimeByTimeIndex(i, eeprom_read_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i) );
@@ -4810,7 +4809,7 @@ void Apps::multitimer_start()
 {
 	// it makes sense to store settings into eeprom at start
 	eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
-	eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT_ADDRESS, (uint8_t)MULTITIMER_TIMERS_COUNT);
+	eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);
 	for (uint8_t i = 0; i <  MULTITIMER_MAX_TIMERS_COUNT; i++)
 	{
 		eeprom_update_byte((uint8_t*)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i ,this->multitimer_getTimerInitTimeIndex(i) );
