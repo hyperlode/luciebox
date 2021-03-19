@@ -156,7 +156,6 @@
 
 #define TIMER_METRONOME generalTimer
 #define TIMER_INIT_APP generalTimer
-// #define TIMER_REACTION_GAME_RESTART_DELAY generalTimer
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK generalTimer
 #define RANDOMWORLD_ROLL_SPEED generalTimer
 #define COMPOSER_STEP_TIMER generalTimer

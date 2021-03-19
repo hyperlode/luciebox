@@ -2673,7 +2673,7 @@ bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 
 void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 {
-	// will change the init time millis with one percent up or down if encoder dial movement detected
+	// will change the init time millis with five percent up or down if encoder dial movement detected
 
 	// only works for countdown times (negative init value)!
 	if (encoder_dial->getDelta()){
@@ -2681,8 +2681,10 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 		long result = long((float)original * ( 1 - (float)(encoder_dial->getDelta()) * 0.005));
 
 		// if value to small to make an absolute difference, force it! (make sure to stay negative)
+		// the problem is that it can get stuck on a low value. In that case, we can make it more negative again by forcing at least one milli.
 		if (original == result){
-			result -= encoder_dial->getDelta() * encoder_dial->getDelta();
+			// result -= encoder_dial->getDelta() * encoder_dial->getDelta();
+			result -= 1;
 		}
 
 		aTimer->setInitTimeMillis(
@@ -2815,7 +2817,7 @@ void Apps::draw()
 		displayAllSegments = 0;
 		eepromPictureToDisplayAllSegments(DRAW_ACTIVE_DRAWING_INDEX);
 
-		DRAW_SHOW_MODE = 4; // prepare for next button press to save buffer and show inversion.
+		DRAW_SHOW_MODE = 4; // prepare for next button press to save current buffer when showing inverted picture
 	}
 #endif
 
@@ -3981,6 +3983,10 @@ void Apps::modeReactionGame()
 		if (!OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 		{
 			REACTION_GAME_TIMER_STEP = 0;	   //reset animation step
+			if (REACTION_GAME_SCORE % 7 == 0){
+				// after about hunderd steps, speed doubled in 14 steps.
+				TIMER_REACTION_GAME_SPEED.setInitTimeMillis((long)( (float)TIMER_REACTION_GAME_SPEED.getInitTimeMillis() *0.95));
+			}
 			TIMER_REACTION_GAME_SPEED.start(); // only restart if 12 steps time per turn
 		}
 		displayAllSegments = 0; //reset animation graphics screen
@@ -3993,7 +3999,6 @@ void Apps::modeReactionGame()
 		}
 
 		reactionGameState = reactionPlaying;
-
 		break;
 	}
 
@@ -4012,42 +4017,6 @@ void Apps::modeReactionGame()
 				TIMER_REACTION_GAME_SPEED.start();
 			}
 		}
-
-
-		// if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
-		// {
-		// 	// if timer out, always dead.
-		// 	if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
-		// 	{
-		// 		reactionGameState = reactionJustDied;
-		// 	}
-		// 	// show number of segments:
-		// 	REACTION_GAME_TIMER_STEP = 10 - (uint16_t)((float)TIMER_REACTION_GAME_SPEED.getTimeMillis() / TIMER_REACTION_GAME_SPEED.getInitTimeMillis() * 11);
-		// }
-		// else
-		// {
-		// 	// animation next step
-
-		// 	// if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
-		// 	// {
-		// 		// game timing animation update.
-
-		// 		// this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
-
-		// 		// check game status 'dead'
-		// 		// if (REACTION_GAME_TIMER_STEP == 12)
-		// 		// {
-		// 			// REACTION_GAME_TIMER_STEP = 0;
-		// 			// displayAllSegments = 0;
-
-		// 			// reactionGameState = reactionJustDied;
-		// 		// }
-		// 		// else
-		// 		// {
-		// 		// 	TIMER_REACTION_GAME_SPEED.start();
-		// 		// }
-		// 	// }
-		// }
 
 		// set graphics
 		for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
@@ -4860,7 +4829,6 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 
 				addNoteToBuzzer(rest_4);
 			}
-			//(*this->buzzer).addRandomSoundToRoll(20,80 );
 		}
 
 		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() < 11 && this->multitimer_timers[this->multitimer_activeTimer].getTimeIsNegative())
