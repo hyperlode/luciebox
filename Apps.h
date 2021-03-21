@@ -171,14 +171,13 @@
 #define TILT_TIMER generalTimer
 #define MOVIE_MODE_FRAME_INTERVAL_TIMER generalTimer
 #define TIMER_DREAMTIME generalTimer
+#define TIMER_REACTION_GAME_SPEED generalTimer
 
-#define TIMER_REACTION_GAME_SPEED generalTimer2
-#define TIMER_REACTION_END_OF_GAME_DELAY generalTimer2
-// #define SAVE_LOAD_MENU_BLINK_TIMER generalTimer2
-#define SEQUENCER_EEPROM_MODE_BLINK generalTimer2
-#define RANDOMWORLD_AUTODRAW_DELAY generalTimer2
-#define SIMON_BLINK_TIMER generalTimer2
-#define STOPWATCH_CHRONO_2 generalTimer2
+#define TIMER_REACTION_END_OF_GAME_DELAY general_timer_2
+#define SEQUENCER_EEPROM_MODE_BLINK general_timer_2
+#define RANDOMWORLD_AUTODRAW_DELAY general_timer_2
+#define SIMON_BLINK_TIMER general_timer_2
+#define STOPWATCH_CHRONO_2 general_timer_2
 
 #define LETTERS_AND_CHARS_COUNTER general_int16_t_1
 #define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
@@ -779,6 +778,8 @@ public:
     void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
 
+    void eepromCopyValues(uint16_t fromAddress, uint16_t toAddress);
+
     bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     // void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
@@ -893,7 +894,7 @@ private:
     //void _eepromWriteByteIfChanged(uint8_t* address , uint8_t value);
 
     SuperTimer generalTimer;
-    SuperTimer generalTimer2;
+    SuperTimer general_timer_2;
     SuperTimer* pSsuperTimer;
     uint32_t displayAllSegments;
     uint32_t displayAllSegmentsBuffer;

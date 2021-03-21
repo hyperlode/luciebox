@@ -2515,14 +2515,15 @@ void Apps::modeHackTime()
 
 			case HACKTIME_MEMORY_RAM:
 				*((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
-				addNoteToBuzzer(C5_8);
+				// addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
 				break;
 
 			case HACKTIME_MEMORY_EEPROM:
 				eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
-				addNoteToBuzzer(C5_8);
+				// addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
 				break;
 			}
+			
 		}
 	}
 	else
@@ -2693,6 +2694,13 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 	}
 }
 
+// TIMER_REACTION_GAME_SPEED.setInitTimeMillis((long)( (float)TIMER_REACTION_GAME_SPEED.getInitTimeMillis() *0.95));
+
+void Apps::eepromCopyValues(uint16_t fromAddress, uint16_t toAddress){
+	uint8_t tmp = eeprom_read_byte((uint8_t *)(fromAddress));
+	eeprom_update_byte((uint8_t *)(toAddress), tmp);
+}
+
 void Apps::draw()
 {
 
@@ -2705,7 +2713,6 @@ void Apps::draw()
 
 	if (this->app_init_edge)
 	{
-		// DRAW_ACTIVE_DRAWING_INDEX = 0;
 		DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY = 1; // make different than active drawing index to force loading of first drawing.
 	}
 
@@ -2735,10 +2742,9 @@ void Apps::draw()
 					 i <= lastPictureEepromAddress;
 					 i++)
 				{
-					uint8_t tmp = eeprom_read_byte((uint8_t *)(i + 4));
-					eeprom_update_byte((uint8_t *)(i), tmp);
+					eepromCopyValues(i+4, i);
 				}
-				eepromPictureToDisplayAllSegments(DRAW_ACTIVE_DRAWING_INDEX);
+				DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY++;
 			}
 
 			// INSERT
@@ -2757,8 +2763,7 @@ void Apps::draw()
 						i--)
 				{
 					// move all pictures one up.
-					uint8_t tmp = eeprom_read_byte((uint8_t *)(i));
-					eeprom_update_byte((uint8_t *)(i + 4), tmp);
+					eepromCopyValues(i, i+4);
 				}
 				DRAW_ACTIVE_DRAWING_INDEX++;
 
@@ -4115,7 +4120,7 @@ void Apps::modeReactionGame()
 	{
 		if (!TIMER_REACTION_END_OF_GAME_DELAY.getTimeIsNegative())
 		{
-			//end of display high score, next game
+			//end of display score, next game
 			if (!REACTION_GUITAR_HERO_MODE && EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO){
 				reactionGameState = reactionSoundInit;
 			}else{
@@ -4124,7 +4129,7 @@ void Apps::modeReactionGame()
 		}
 		else
 		{
-			//do nothing.  wait for display high score is finished.
+			//do nothing.  wait for display score is finished.
 			if (TIMER_REACTION_END_OF_GAME_DELAY.getInFirstGivenHundredsPartOfSecond(500))
 			{
 			}
