@@ -1,8 +1,9 @@
 
-#define SOFTWARE_VERSION 301 
+#define SOFTWARE_VERSION 302
 // started at v2.00: 200
 // v300 : pcb v3 burst implemented. change in button sequence...
-// v301 : sending out to Belgium 2021-03-18
+// v301 : sending out to Belgium 2021-03-19
+// v302 : development since 2021-03-19
 
 // #define DBUG_REFACTOR_DISP
 //#define ENABLE_TILT_SWITCHES
