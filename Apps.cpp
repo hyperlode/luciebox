@@ -2490,8 +2490,6 @@ void Apps::modeHackTime()
 
 	if (this->app_init_edge)
 	{
-		// HACKTIME_ADDRESS = 0;
-		// HACKTIME_DISPLAY_MODE = HACKTIME_DISPLAY_ADDRESS;
 		HACKTIME_MOVE_TIMER.start(-500);
 	}
 
@@ -2602,7 +2600,7 @@ void Apps::modeHackTime()
 		}
 	}
 
-	// convert memory to sounds... Be prepared for a post-modernistic masterpiece.
+	// convert memory to sounds... Be prepared for a post-modernist masterpiece.
 	if (address_changed && HACKTIME_VALUE_TO_SOUND)
 	{ 
 		buzzerOffAndAddNote(array_8_bytes[0]);
@@ -2635,23 +2633,20 @@ void Apps::modeHackTime()
 			// 	textHandle[i] = array_8_bytes[i];
 			// }
 		}
+		else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
+		{
+			displayAllSegments = 0;
+			for (uint8_t i = 0; i < 4; i++)
+			{
+				displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
+			}
+			displayAllSegmentsToScreen();
+		}		
 		else
 		{
-			if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
-			{
-				displayAllSegments = 0;
-				for (uint8_t i = 0; i < 4; i++)
-				{
-					displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
-				}
-				displayAllSegmentsToScreen();
-			}
-			
-			else
-			{
-				ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
-			}
+			ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
 		}
+		
 	}
 }
 
@@ -3204,15 +3199,10 @@ void Apps::modeMetronome()
 		TIMER_METRONOME.start(-83);  // 60bpm as default
 	}
 
-	bool visualize_bpm = binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2);
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 	{
-		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
-
-		// if (encoder_dial->getDelta() != 0){
-		// 	TIMER_METRONOME.setInitTimeMillis(-1000 * indexToTimeSeconds(encoder_dial->getValueLimited(36, false))); // start counting from player 0 to display
-		// }
+		// dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
 
 		// auto counting (metronome)
 		if (TIMER_METRONOME.getCountDownTimerElapsedAndRestart())
@@ -3223,10 +3213,6 @@ void Apps::modeMetronome()
 		if (binaryInputsEdgeUp & (1<< BUTTON_INDEXED_MOMENTARY_3)){
 			METRONOME_ENABLE_FLASH_AT_BEEP = !METRONOME_ENABLE_FLASH_AT_BEEP;
 		}
-
-	}else if (visualize_bpm){
-		
-		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
 
 	}else if (binaryInputsValue & (1<< BUTTON_INDEXED_MOMENTARY_3)){
 		buzzerChangeSpeedRatioWithEncoderDial();
@@ -3251,8 +3237,10 @@ void Apps::modeMetronome()
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_2_POSITION, BUTTON_INDEXED_MOMENTARY_2, true, C5_4, forceNextStep);
 	modeMetronomeTickerUpdate(&METRONOME_TICKER_1_POSITION, BUTTON_INDEXED_MOMENTARY_3, true, C7_8, update);
 	
-	// display
+	
+	bool visualize_bpm = binaryInputsValue & (1<< BUTTON_INDEXED_LATCHING_2);
 	if (visualize_bpm){
+		dialOnEdgeChangeInitTimerPercentage(&TIMER_METRONOME); // bpm change
 		// bpm --> full 12 step circles per minute.   timing is per step. so: 60bpm == 1 circle / second = timer: 1000/12 = 83.333ms/step
 		ledDisp->setNumberToDisplayAsDecimal(  (int16_t) ( 1 / (12* (float)TIMER_METRONOME.getInitTimeMillis()/60000 ))); // millis/step to fullcirclesp/minute (bpm)
 
@@ -4154,7 +4142,7 @@ void Apps::modeReactionGame()
 
 void Apps::nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide){
 	*counter += -1 + (2 * countUpElseDown);
-	countUpElseDown++;
+	// countUpElseDown++;
 	checkBoundaries(counter, minValue, maxValue, overflowToOtherSide);
 }
 
