@@ -535,7 +535,7 @@ void Apps::pomodoroTimer()
 	case POMODORO_DISPLAY_TIMER:
 	{
 		POMODORO_TIMER.getTimeString(textBuf);
-		if (POMODORO_IN_BREAK && millis_blink_650ms()){
+		if (POMODORO_IN_BREAK && millis_blink_750ms()){
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
 	}
@@ -544,7 +544,7 @@ void Apps::pomodoroTimer()
 	case POMODORO_DISPLAY_PAUSE_INIT_SECS:
 	{
 		timeSecondsToClockString(textBuf, indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
-		if (millis_blink_650ms())
+		if (millis_blink_750ms())
 		{
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
@@ -554,7 +554,7 @@ void Apps::pomodoroTimer()
 	case POMODORO_DISPLAY_BEEP_PROBABILITY:
 	{
 		timeSecondsToClockString(textBuf, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX));
-		if (millis_blink_650ms())
+		if (millis_blink_750ms())
 		{
 			// rnd beep time....
 			setStandardTextToTextBuf(TEXT_RANDOM_BEEP);
@@ -564,7 +564,7 @@ void Apps::pomodoroTimer()
 
 	case POMODORO_DISPLAY_SHOW_GOOD:
 	{
-		if (millis_blink_650ms())
+		if (millis_blink_750ms())
 		{
 			setStandardTextToTextBuf(TEXT_YES);
 		}
@@ -577,7 +577,7 @@ void Apps::pomodoroTimer()
 
 	case POMODORO_DISPLAY_SHOW_BAD:
 	{
-		if (millis_blink_650ms())
+		if (millis_blink_750ms())
 		{
 			setStandardTextToTextBuf(TEXT_NO);
 		}
@@ -719,13 +719,11 @@ void Apps::modeRandomWorld()
 {
 	if (this->app_init_edge)
 	{
-		// RANDOMWORLD_CARD_FROM_DECK_INDEX = 0;
 		randomWorldState = randomWorldIdle;
-		// RANDOMWORLD_RANDOM_TYPE = 0;
 		randomModeTrigger(false);
-		// decimalPoints = 0;
-
-		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 100;
+		// RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 10;
+		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = eeprom_read_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+			
 	}
 
 	// textbuf contains the actual random generated graphics. Set to display at start, because it might be overriden in this routine.
@@ -743,7 +741,7 @@ void Apps::modeRandomWorld()
 			// set autoroll time.
 			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
 
-			if (millis() % 1000 > 750)
+			if (millis_blink_750ms())
 			{
 				setStandardTextToTextHANDLE(TEXT_AUTO);
 			}
@@ -751,6 +749,10 @@ void Apps::modeRandomWorld()
 			{
 				ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
 			}
+		}else{
+			// if (encoder_dial->getDelta()){
+			// 	randomWorldState = randomWorldRollingEnd;
+			// }
 		}
 
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -767,12 +769,17 @@ void Apps::modeRandomWorld()
 	}
 	break;
 
+	case randomWorldInstantRoll:
+	{
+
+	}
+	break;
 	case randomWorldRolling:
 	{
 		// check state
 		bool roll_end = false;
 
-		//if autoroll
+		// //if autoroll
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
 			// autoroll no need for button
@@ -796,15 +803,7 @@ void Apps::modeRandomWorld()
 
 		if (roll_end)
 		{
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
-			{
-				randomWorldState = randomWorldRollingEnd;
-			}
-			else
-			{
-				randomWorldState = randomWorldShowResult;
-				addNoteToBuzzer(D4_8);
-			}
+			randomWorldState = randomWorldRollingEnd;
 		}
 
 		// display
@@ -831,7 +830,7 @@ void Apps::modeRandomWorld()
 
 				RANDOMWORLD_CARD_FROM_DECK_INDEX = 0; // reset the tombola.
 
-				if (millis() % 1000 < 200)
+				if (millis_blink_750ms())
 				{
 					setStandardTextToTextHANDLE(TEXT_SET);
 				}
@@ -846,24 +845,37 @@ void Apps::modeRandomWorld()
 
 	case randomWorldRollingEnd:
 	{
-		if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
-			addNoteToBuzzer(C7_8);
-			randomModeTrigger(false);
-
-			// roll slower and slower until threshold reached.
-			RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() * 1.4);
-			if (RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() < -600)
+			// randomWorldState = randomWorldRollingEnd;
+			if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
 			{
-				randomWorldState = randomWorldShowResult;
+				addNoteToBuzzer(C7_8);
+				randomModeTrigger(false);
+
+				// roll slower and slower until threshold reached.
+				RANDOMWORLD_ROLL_SPEED.setInitTimeMillis(RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() * 1.4);
+				if (RANDOMWORLD_ROLL_SPEED.getInitTimeMillis() < -600)
+				{
+					randomWorldState = randomWorldShowResult;
+				}
 			}
 		}
+		else
+		{
+			// save to eeprom
+			eeprom_update_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+
+			randomWorldState = randomWorldShowResult;
+			buzzerOffAndAddNote(D4_8);
+		}
+
+	
 	}
 	break;
 
 	case randomWorldShowResult:
 	{
-
 		randomModeTrigger(true);
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
@@ -2513,15 +2525,13 @@ void Apps::modeHackTime()
 
 			case HACKTIME_MEMORY_RAM:
 				*((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
-				// addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
 				break;
 
 			case HACKTIME_MEMORY_EEPROM:
 				eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
-				// addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
 				break;
 			}
-			
+			addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
 		}
 	}
 	else
@@ -2566,6 +2576,7 @@ void Apps::modeHackTime()
 						//+ 4095 *((binaryInputsValue & 1<<BUTTON_INDEXED_MOMENTARY_1)>0) // saving memory here. but, it's not really needed. with 32000 address locations, going time 255 is fast enough. (takes about 125 steps)
 				 	)
 				  	;  
+				set_blink_offset();
 			}else{
 
 				// button address change.
@@ -2611,17 +2622,17 @@ void Apps::modeHackTime()
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
 		// display address location
 
-		if (millis() % 1000 > 200)
-		{
-			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
-		}
-		else
+		if (millis_blink_750ms())
 		{
 			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
 			// ledDisp->setBlankDisplay();
 			textHandle[1] = SPACE_FAKE_ASCII;
 			textHandle[2] = SPACE_FAKE_ASCII;
 			textHandle[3] = SPACE_FAKE_ASCII;
+		}
+		else
+		{
+			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
 		}
 
 	}else{
@@ -3428,7 +3439,7 @@ void Apps::modeSimon()
 		if (SIMON_END_OF_GAME)
 		{
 
-			if (millis_blink_650ms())
+			if (millis_blink_750ms())
 			{
 				numberToBufAsDecimal(SIMON_LENGTH);
 				textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
@@ -3638,7 +3649,7 @@ void Apps::modeReactionGame()
 		if (encoder_dial->getDelta())
 		{
 			// for a more pleasant experience (no blinking during knob turning)
-			REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT = millis() % 1000;
+			set_blink_offset();
 		}
 
 		// check options
@@ -3648,12 +3659,12 @@ void Apps::modeReactionGame()
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
-		if((millis() - REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT) % 1000 > 500)
+		if(millis_blink_750ms())
 		{
 			lights |= 1<< LIGHT_LATCHING_3;
 			ledDisp->setNumberToDisplayAsDecimal(
 				eeprom_read_word(
-					(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+					(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS + 
 								REACTION_GUITAR_HERO_MODE * 48 +
 								EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
 								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
@@ -4075,7 +4086,7 @@ void Apps::modeReactionGame()
 		//start high score end timer
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
-									(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+									(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS + 
 								REACTION_GUITAR_HERO_MODE * 48 +
 								EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
 								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
@@ -4085,7 +4096,7 @@ void Apps::modeReactionGame()
 
 			eeprom_update_word(
 			
-				(uint16_t *)EEPROM_REACTION_GAME_OFFSET + 
+				(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS + 
 								REACTION_GUITAR_HERO_MODE * 48 +
 								EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
 								OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
@@ -4244,11 +4255,11 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	uint8_t slot_number = encoder_dial->getValueLimited((slotCount-1)*16, false) / 16;
 
 	if (this->encoder_dial->getDelta()){
-		SAVE_LOAD_MENU_BLINKING_OFFSET = millis() % 1000;
+		set_blink_offset();
 	}
 
 	//blink alternatively song number and "load" or "save"
-	if ((millis()-SAVE_LOAD_MENU_BLINKING_OFFSET) % 1000 > 500)
+	if (millis_blink_750ms())
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		lights |= 1 << LIGHT_LATCHING_3;
@@ -4333,8 +4344,14 @@ bool Apps::millis_half_second_period(){
 	return millis() % 500 > 250;
 }
 
-bool Apps::millis_blink_650ms(){
-	return millis() % 1000 > 650;
+bool Apps::millis_blink_750ms(){
+	// true for shorter part of the second
+	return (millis() - blink_offset) % 1000 > 750;
+}
+
+void Apps::set_blink_offset(){
+	// keeps blink return to the same value. e.g. menu blinking between value and text. while dial rotates, we want to only see the value.
+	blink_offset = millis() % 1000;
 }
 
 void Apps::textBufToDisplay(){
@@ -4405,8 +4422,6 @@ uint16_t Apps::dialGetIndexedtime(){
 #else
 		return encoder_dial->getValueLimited(60,false) * 30;
 #endif
-	
-
 }
 
 unsigned int Apps::indexToTimeSeconds(int16_t index){
@@ -4419,7 +4434,6 @@ unsigned int Apps::indexToTimeSeconds(int16_t index){
 	return index * index; // untested
 #endif
 }
-
 
 void Apps::setStandardTextToTextBuf(uint8_t textPosition){
 	ledDisp->setStandardTextToTextBuf(textBuf, textPosition);
@@ -4985,7 +4999,7 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == paused)
 	{
-		if (millis() % 1000 > 500 || this->multitimer_timerDisplayed != this->multitimer_activeTimer)
+		if (millis_half_second_period() || this->multitimer_timerDisplayed != this->multitimer_activeTimer)
 		{
 			// if other timer than the active timer, show always.
 			this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
@@ -5040,10 +5054,10 @@ void Apps::multitimer_refresh()
 		// fischer timer
 		if (encoder_dial->getDelta()!=0){
 			encoderDialRefreshTimeIndex(&MULTITIMER_FISCHER_TIME_INDEX);
-			MULTITIMER_FISCHER_BLINK_NO_TEXT = millis() % 1000;
+			set_blink_offset();
 		}
 
-		if ((millis() - MULTITIMER_FISCHER_BLINK_NO_TEXT) % 1000 > 650)
+		if(millis_blink_750ms())
 		{
 			setStandardTextToTextHANDLE(TEXT_FISH);
 		}

@@ -241,7 +241,7 @@
 
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
 #define COUNTER_GEIGER general_uint16_t_2
-#define SAVE_LOAD_MENU_BLINKING_OFFSET general_uint16_t_2
+// #define SAVE_LOAD_MENU_BLINKING_OFFSET general_uint16_t_2
 
 #define REACTION_GAME_LEVEL general_uint8_t_1
 #define SEQUENCER_TEMP_NOTE general_uint8_t_1
@@ -284,13 +284,13 @@
 #define POMODORO_STATS_WORKING_BAD general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1
-#define MULTITIMER_FISCHER_BLINK_NO_TEXT general_long_1
+// #define MULTITIMER_FISCHER_BLINK_NO_TEXT general_long_1
 #define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
-#define REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT general_long_2
+// #define REACTION_GAME_LEVEL_CHOOSE_BLINK_NO_TEXT general_long_2
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
@@ -847,7 +847,9 @@ private:
     void latching_3_blink();
     bool millis_half_second_period();
     bool millis_quarter_second_period();
-    bool millis_blink_650ms();
+    bool millis_blink_750ms();
+    void set_blink_offset();
+    long blink_offset;
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
@@ -898,6 +900,7 @@ private:
     SuperTimer* pSsuperTimer;
     uint32_t displayAllSegments;
     uint32_t displayAllSegmentsBuffer;
+    
 
     //reused variables per app
     bool general_boolean;
@@ -982,6 +985,7 @@ private:
         randomWorldIdle,
         randomWorldShowResult,
         randomWorldRolling,
+        randomWorldInstantRoll,
         randomWorldRollingEnd,
         randomWorldAutoRollDelay,
     };
@@ -1013,6 +1017,7 @@ private:
 
     bool splash_screen_playing; // actuall flash screen app.
     bool app_init_edge; // one cycle
+    
 
 #ifdef ENABLE_MULTITIMER_INTEGRATED
 
