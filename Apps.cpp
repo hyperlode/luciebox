@@ -395,9 +395,9 @@ void Apps::pomodoroTimer()
 			POMODORO_PAUSE_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX);
 			POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX);
 		#else
-			POMODORO_MAIN_CLOCK_TIME_INDEX = 35;
-			POMODORO_PAUSE_TIME_INDEX = 25;
-			POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = 0;
+			POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
+			POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
+			POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
 		#endif
 	}
 
@@ -1003,34 +1003,9 @@ void Apps::randomModeTrigger(bool forReal)
 	break;
 
 	case RANDOMWORLD_HEADSORTAILS:
-	//{
-	// if (RANDOMWORLD_RANDOM_NUMBER)
-	// {
-	// 	textBuf[0] = 'H';
-	// 	textBuf[1] = 'E';
-	// 	textBuf[2] = 'A';
-	// 	textBuf[3] = 'D';
-	// }
-	// else
-	// {
-	// 	textBuf[0] = 'T';
-	// 	textBuf[1] = 'A';
-	// 	textBuf[2] = 'I';
-	// 	textBuf[3] = 'L';
-	// }
-	//setStandardTextToTextBuf(60 + RANDOMWORLD_RANDOM_NUMBER*4);
-	// }
-	// break;
+	// no break, we will overflow to yes no, but change the text. DAngereous I know. But, we need the extra bytes.
 	case RANDOMWORLD_YESORNO:
 	{
-		// if (RANDOMWORLD_RANDOM_NUMBER)
-		// {
-		// 	setStandardTextToTextBuf(TEXT_YES);
-		// }
-		// else
-		// {
-		// 	setStandardTextToTextBuf(TEXT_NO);
-		// }
 		setStandardTextToTextBuf(60 + RANDOMWORLD_RANDOM_NUMBER * 4 + (RANDOMWORLD_RANDOM_TYPE - 3) * 2);
 	}
 	break;
@@ -1631,7 +1606,6 @@ void Apps::modeComposeSong()
 		}
 		COMPOSER_SONG_LENGTH = 1;
 		COMPOSER_SONG[0] = rest_1; //default note
-		// COMPOSER_STEP = 0;
 		COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
 	}
 
