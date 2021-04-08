@@ -2,7 +2,7 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-// #define ENABLE_MULTITIMER // DO NOT USE app as a class (most elegant, but takes most memory)
+// #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
@@ -28,7 +28,7 @@
 #include <avr/eeprom.h>
 #endif
 
-#ifdef ENABLE_MULTITIMER
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
 #include "MiniMultiTimer.h"
 #endif
 
@@ -96,9 +96,9 @@
 // #define APP_SELECTOR_QUIZ_MASTER 23
 
 #define DRAW_GAME_RANDOM 0
-#define DRAW_GAME_CLOCK 3
-#define DRAW_GAME_NUMBER 2
 #define DRAW_GAME_WORD 1
+#define DRAW_GAME_NUMBER 2
+#define DRAW_GAME_CLOCK 3
 
 #define TILT_FORWARD 0
 #define TILT_BACKWARD 1
@@ -1316,7 +1316,7 @@ public:
     void eraseEepromRangeLimited(uint8_t setting);
 
 private:
-#ifdef ENABLE_MULTITIMER
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
     MiniMultiTimer multiTimer;
 #endif
 

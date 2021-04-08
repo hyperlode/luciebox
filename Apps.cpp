@@ -61,12 +61,10 @@ void Apps::appSelector()
 	// not as else statement, to have the init properly transferred after app beginning screen.
 	if (!splash_screen_playing)
 	{
-
 		//#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
 
 		switch (selected_app)
 		{
-
 		case APP_SELECTOR_LETTERS_AND_CHARS:
 
 			this->modeCountingLettersAndChars();
@@ -169,7 +167,7 @@ void Apps::appSelector()
 #endif
 
 		case APP_SELECTOR_MULTITIMER:
-#ifdef ENABLE_MULTITIMER
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
 			this->miniMultiTimer();
 #elif defined ENABLE_MULTITIMER_INTEGRATED
 			this->multitimer_integrated();
@@ -341,7 +339,6 @@ void Apps::modeDreamtime()
 
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
 	{
-
 		if (this->TIMER_DREAMTIME.getCountDownTimerElapsedAndRestart())
 		{
 			MODE_DREAMTIME_STEP++;
@@ -393,16 +390,15 @@ void Apps::pomodoroTimer()
 
 	if (this->app_init_edge)
 	{
-
-		POMODORO_MAIN_CLOCK_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX);
-		POMODORO_PAUSE_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX);
-		POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX);
-
-		// POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
-		// POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
-		// POMODORO_STATS_WORKING_GOOD = 0;
-		// POMODORO_STATS_WORKING_BAD = 0;
-		// POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
+		#ifdef ENABLE_EEPROM
+			POMODORO_MAIN_CLOCK_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX);
+			POMODORO_PAUSE_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX);
+			POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX);
+		#else
+			POMODORO_MAIN_CLOCK_TIME_INDEX = 35;
+			POMODORO_PAUSE_TIME_INDEX = 25;
+			POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = 0;
+		#endif
 	}
 
 	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1);
@@ -414,9 +410,11 @@ void Apps::pomodoroTimer()
 	{
 		POMODORO_TIMER.start();
 
-		eeprom_update_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
-		eeprom_update_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX, POMODORO_PAUSE_TIME_INDEX);
-		eeprom_update_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX, POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX);
+		#ifdef ENABLE_EEPROM
+			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
+			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX, POMODORO_PAUSE_TIME_INDEX);
+			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX, POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX);
+		#endif
 	}
 
 	// in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
@@ -537,7 +535,6 @@ void Apps::pomodoroTimer()
 	// display
 	switch (display_mode)
 	{
-
 	case POMODORO_DISPLAY_TIMER:
 	{
 		POMODORO_TIMER.getTimeString(textBuf);
@@ -730,8 +727,11 @@ void Apps::modeRandomWorld()
 	{
 		randomWorldState = randomWorldIdle;
 		randomModeTrigger(false);
-		// RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 10;
-		RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = eeprom_read_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+		#ifdef ENABLE_EEPROM
+			RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = eeprom_read_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+		#else
+			RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 10;
+		#endif
 	}
 
 	// textbuf contains the actual random generated graphics. Set to display at start, because it might be overriden in this routine.
@@ -739,10 +739,8 @@ void Apps::modeRandomWorld()
 
 	switch (randomWorldState)
 	{
-
 	case randomWorldIdle:
 	{
-
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
 			uint16_t delay_seconds = dialGetIndexedtime();
@@ -874,8 +872,10 @@ void Apps::modeRandomWorld()
 		}
 		else
 		{
-			// save to eeprom
-			eeprom_update_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+			#ifdef ENABLE_EEPROM
+				// save to eeprom
+				eeprom_update_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+			#endif
 
 			randomWorldState = randomWorldShowResult;
 			buzzerOffAndAddNote(D4_8);
@@ -932,10 +932,8 @@ void Apps::randomModeTrigger(bool forReal)
 
 	switch (RANDOMWORLD_RANDOM_TYPE)
 	{
-
 	case RANDOMWORLD_ROLLONEDICE:
 	{
-
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			textBuf[i] = pgm_read_byte_near(dice_eyes_display + RANDOMWORLD_RANDOM_NUMBER * 4 + (i)); //* 4 --> 4 bytes per dword
@@ -962,7 +960,6 @@ void Apps::randomModeTrigger(bool forReal)
 
 	case RANDOMWORLD_TAKERANDOMCARDFROMDECK:
 	{
-
 		if (!forReal)
 		{
 			// don't draw a card if it's not for real. We will not even display a card, as that would be confusing. Just show blanks.
@@ -1161,7 +1158,11 @@ void Apps::modeSettings()
 	{
 		// display amount of times the luciebox was used
 		// menu value
-		ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER));
+		#ifdef ENABLE_EEPROM
+			ledDisp->setNumberToDisplayAsDecimal(eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER));
+		#else
+			ledDisp->setNumberToDisplayAsDecimal(666);
+		#endif
 		// menu title
 		setStandardTextToTextBuf(TEXT_QUANTITY);
 	}
@@ -1170,6 +1171,7 @@ void Apps::modeSettings()
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
+			#ifdef ENABLE_EEPROM
 			//lights |= 1 << LIGHT_MOMENTARY_2; // will erase all memory. Purposly don't advertise
 			lights |= 1 << LIGHT_MOMENTARY_3; // erases only high scores in games. Which is nice if you want to have a fresh start for a nice gamenight of "Lucieboxes and booz"
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -1180,6 +1182,7 @@ void Apps::modeSettings()
 			{
 				this->eraseEepromRangeLimited(EEPROM_HIGH_SCORES_RESET);
 			}
+			#endif
 		}
 		else
 		{
@@ -1204,6 +1207,7 @@ void Apps::modeSettings()
 
 void Apps::eraseEepromRangeLimited(uint8_t setting)
 {
+#ifdef ENABLE_EEPROM
 	uint16_t first = 0;
 	uint16_t last = 0;
 	if (setting == EEPROM_TOTAL_RESET)
@@ -1221,7 +1225,6 @@ void Apps::eraseEepromRangeLimited(uint8_t setting)
 		last = EEPROM_LAST_ADDRESS_OF_EEPROM_SOFT_ERASE;
 	}
 	
-#ifdef ENABLE_EEPROM
 
 	for (uint16_t i = first; i <= last; i++)
 	{
@@ -1307,7 +1310,6 @@ void Apps::modeTallyKeeper()
 			// affect all counters if requested.
 			if (i == TALLY_KEEPER_DISPLAYED_COUNTER || (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
 			{
-
 				int16_t v = (*tally_counters[i]) + TALLY_KEEPER_DELTA_SIGNED;
 				if (v < 0)
 				{
@@ -1337,7 +1339,6 @@ void Apps::quiz()
 
 	switch (quizState)
 	{
-
 	case quizWaitForQuizMaster:
 	{
 		if (this->millis_half_second_period())
@@ -1541,7 +1542,6 @@ void Apps::modeCountingLettersAndChars()
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 	{
-
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
 			NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP = false;
@@ -1620,7 +1620,6 @@ void Apps::modeSoundSong()
 
 void Apps::modeComposeSong()
 {
-
 	bool defaultDisplay = true;
 	int16_t step = 0;
 
@@ -1660,7 +1659,6 @@ void Apps::modeComposeSong()
 	}
 	else
 	{
-
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
 			// display song notes by their position (index) in song (enable insert delete position)
@@ -1674,7 +1672,6 @@ void Apps::modeComposeSong()
 				}
 				else
 				{
-
 					// move all notes one position down.
 					for (uint8_t i = COMPOSER_STEP; i < bytes_list_bufsize - 1; i++)
 					{
@@ -1759,7 +1756,6 @@ void Apps::modeComposeSong()
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
-
 			if (COMPOSER_STEP_TIMER.getCountDownTimerElapsedAndRestart())
 			{
 				step = 1;
@@ -2054,7 +2050,6 @@ void Apps::modeMovie()
 	}
 	else
 	{
-
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
 			// manual mode
@@ -2127,7 +2122,6 @@ void Apps::modeMovie()
 	// soundtrack
 	if (reload_soundtrack && sound_on)
 	{
-
 		// buzzerOff();
 		loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
 	}
@@ -2176,15 +2170,18 @@ bool Apps::loadScreenFromMemory(int16_t frame_index)
 
 void Apps::loadNextMovie()
 {
-
 	bool foundStartOfMovie = false;
 
 	// iterate until a stop frame is found check for stop frame
 	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !foundStartOfMovie)
 	{
-
 		// check if over limit (last movie)
-		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH + EEPROM_NUMBER_OF_DRAWINGS))
+		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH
+		#ifdef ENABLE_EEPROM
+		 + EEPROM_NUMBER_OF_DRAWINGS
+		#endif 
+		 ))
+		
 		{
 			foundStartOfMovie = true;
 			MOVIE_MODE_MOVIE_FRAME_INDEX_START = 1;
@@ -2321,7 +2318,6 @@ void Apps::drawGame()
 
 	switch (drawGameState)
 	{
-
 	case drawGameWaitForStart:
 	{
 		drawGameState = drawGameShowPicture;
@@ -2329,57 +2325,7 @@ void Apps::drawGame()
 		DRAW_GAME_PICTURE_TYPE =
 			(((uint8_t)((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0)) << 1) + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0);
 
-		// if (DRAW_GAME_PICTURE_TYPE == 1){
-		// 	addNoteToBuzzer(104 );
-		// }
-
-		// if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)){
-		// Serial.println(DRAW_GAME_PICTURE_TYPE);
-		// }
-
-		// switch(DRAW_GAME_PICTURE_TYPE)
-		// {
-		// 	case DRAW_GAME_RANDOM:
-		// 	{
-		// 		// random segments
-		// 		displayAllSegments = 0UL;
-		// 		for (uint8_t i = 0; i < 32; i++)
-		// 		{
-		// 			displayAllSegments |= random(0, 2) << i;
-		// 		}
-		// 		break;
-		// 	}
-		// 	case DRAW_GAME_NUMBER:
-		// 	{
-		// 		// random number
-		// 		long r = random(0, 10000);
-		// 		numberToBufAsDecimal((int16_t)r);
-		// 		textBufToDisplayAllSegments();
-		// 		break;
-		// 	}
-		// 	case DRAW_GAME_WORD:
-		// 	{
-		// 		// random text
-		// 		for (uint8_t i = 0; i < 4; i++)
-		// 		{
-		// 			long r = random(0, 25);
-		// 			textBuf[i] = (char)r + 65;
-		// 		}
-		// 		textBufToDisplayAllSegments();
-		// 		break;
-		// 	}
-		// 	case DRAW_GAME_CLOCK:
-		// 	{
-		// 		// learn how to read the clock
-		// 		ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
-		// 		textBufToDisplayAllSegments();
-
-		// 		// add hour:minute divider.
-		// 		displayAllSegments |= 1UL << 15;
-		// 	}
-		// }
-
-		if (DRAW_GAME_PICTURE_TYPE == 3)
+		if (DRAW_GAME_PICTURE_TYPE == DRAW_GAME_CLOCK)
 		{
 			// learn how to read the clock
 
@@ -2389,7 +2335,7 @@ void Apps::drawGame()
 			// add hour:minute divider.
 			displayAllSegments |= 1UL << 15;
 		}
-		else if (DRAW_GAME_PICTURE_TYPE == 2)
+		else if (DRAW_GAME_PICTURE_TYPE == DRAW_GAME_NUMBER)
 		{
 			// random number
 			long r = random(0, 10000);
@@ -2397,7 +2343,7 @@ void Apps::drawGame()
 			textBufToDisplayAllSegments();
 		}
 
-		else if (DRAW_GAME_PICTURE_TYPE == 1)
+		else if (DRAW_GAME_PICTURE_TYPE == DRAW_GAME_WORD)
 		{
 			// random text
 			for (uint8_t i = 0; i < 4; i++)
@@ -2416,47 +2362,6 @@ void Apps::drawGame()
 				displayAllSegments |= random(0, 2) << i;
 			}
 		}
-
-		// if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
-		// {
-
-		// 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
-		// 	{
-		// 		// learn how to read the clock
-
-		// 		ledDisp->minutesToMinutesHoursString(textBuf, (uint16_t)random(0, 1440));
-		// 		ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-
-		// 		// add hour:minute divider.
-		// 		displayAllSegments |= 1UL << 15;
-		// 	}
-		// 	else
-		// 	{
-		// 		// random number
-		// 		long r = random(0, 10000);
-		// 		numberToBufAsDecimal((int16_t)r);
-		// 		ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-		// 	}
-		// }
-		// else if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
-		// {
-		// 	// random text
-		// 	for (uint8_t i = 0; i < 4; i++)
-		// 	{
-		// 		long r = random(0, 25);
-		// 		textBuf[i] = (char)r + 65;
-		// 	}
-		// 	ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
-		// }
-		// else
-		// {
-		// 	// random segments
-		// 	displayAllSegments = 0UL;
-		// 	for (uint8_t i = 0; i < 32; i++)
-		// 	{
-		// 		displayAllSegments |= random(0, 2) << i;
-		// 	}
-		// }
 		break;
 	}
 
@@ -2555,14 +2460,12 @@ void Apps::modeHackTime()
 	// write to mem if possible
 	if (!this->app_init_edge && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
 	{
-
 		// change value in address location (left char on display)
 		// will not work for flash memory
 		array_8_bytes[0] += encoder_dial->getDelta();
 
 		if (encoder_dial->getDelta())
 		{
-
 			// store value.
 			switch (HACKTIME_MEMORY_SELECT)
 			{
@@ -2575,7 +2478,9 @@ void Apps::modeHackTime()
 				break;
 
 			case HACKTIME_MEMORY_EEPROM:
+				#ifdef ENABLE_EEPROM
 				eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
+				#endif
 				break;
 			}
 			addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
@@ -2628,7 +2533,6 @@ void Apps::modeHackTime()
 			}
 			else
 			{
-
 				// button address change.
 				address_changed = address_changed || modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
 			}
@@ -2654,7 +2558,11 @@ void Apps::modeHackTime()
 				break;
 
 			case HACKTIME_MEMORY_EEPROM:
-				textHandle[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
+				#ifdef ENABLE_EEPROM
+					textHandle[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
+				#else
+					textHandle[i] = 111;
+				#endif
 				break;
 			}
 			array_8_bytes[i] = textHandle[i];
@@ -2710,7 +2618,6 @@ void Apps::modeHackTime()
 
 bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
 {
-
 	int16_t value_memory = *value;
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -2735,7 +2642,7 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 		long original = (aTimer->getInitTimeMillis());
 		long result = long((float)original * (1 - (float)(encoder_dial->getDelta()) * 0.005));
 
-		// if value to small to make an absolute difference, force it! (make sure to stay negative)
+		// if value too small to make an absolute difference, force it! (make sure to stay negative)
 		// the problem is that it can get stuck on a low value. In that case, we can make it more negative again by forcing at least one milli.
 		if (original == result)
 		{
@@ -2748,17 +2655,16 @@ void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
 	}
 }
 
-// TIMER_REACTION_GAME_SPEED.setInitTimeMillis((long)( (float)TIMER_REACTION_GAME_SPEED.getInitTimeMillis() *0.95));
-
 void Apps::eepromCopyValues(uint16_t fromAddress, uint16_t toAddress)
 {
+#ifdef ENABLE_EEPROM
 	uint8_t tmp = eeprom_read_byte((uint8_t *)(fromAddress));
 	eeprom_update_byte((uint8_t *)(toAddress), tmp);
+#endif
 }
 
 void Apps::draw()
 {
-
 	// scroll through drawings from eeprom memories
 	// change drawings with a fancy painting app
 	// save drawings too eeprom
@@ -2836,9 +2742,11 @@ void Apps::draw()
 			// save active drawing on display to eeprom.
 			for (uint8_t i = 0; i < 4; i++)
 			{
-				eeprom_update_byte(
-					(uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
-					(uint8_t)((displayAllSegments >> (i * 8)) & 0xFF));
+				#ifdef ENABLE_EEPROM
+					eeprom_update_byte(
+						(uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
+						(uint8_t)((displayAllSegments >> (i * 8)) & 0xFF));
+				#endif
 			}
 		}
 	}
@@ -2913,7 +2821,6 @@ void Apps::tiltSwitchTest()
 
 	if (binaryInputs[mercury_switches_indexed[TILT_EXPECTED_SWITCH_INDEX]].getEdgeUp())
 	{
-
 		displayAllSegments ^= 1 << (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX] / 10);
 		displayAllSegments ^= 1 << (segments_to_fill[TILT_EXPECTED_SWITCH_INDEX] % 10);
 		displayAllSegments &= ~(1UL << 7);
@@ -2965,7 +2872,6 @@ void Apps::tiltSwitchTest()
 	// normal vs timed mode.
 	if (binaryInputsValue & 1 << BUTTON_INDEXED_LATCHING_3)
 	{
-
 		if (!TILT_TIMER.getTimeIsNegative())
 		{
 			loadBuzzerTrack(SONG_DRYER_UNHAPPY);
@@ -2990,25 +2896,17 @@ void Apps::dialSetCheckDisplay(int16_t *pVariable, uint8_t multiplier, int16_t m
 
 void Apps::modeGeiger()
 {
-
 	if (this->app_init_edge)
 	{
-		//textBuf[3]=' ';
-		// COUNTER_GEIGER = 0;
 		GEIGER_TONE_FREQUENY_LOWEST = 2000;
 		GEIGER_TONE_FREQUENCY_HEIGHEST = 4000;
 		GEIGER_TONE_LENGTH = 10;
 		GEIGER_PROBABILITY_THRESHOLD = 950000;
-		// GEIGER_INCREASE_CHANCE = 0;
 	}
 
 	//play tick.
 	//wait random time.
-	//X = - log(1 - Y)/ K   with Y a random value ( 0<Y<1) and K a constant ?
 	long r = random(0, 1024) * random(0, 1024);
-	//long r = random(0, 1024);
-	//r = r*r;
-	// setBlankDisplay();
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
 	{
@@ -3131,7 +3029,6 @@ void Apps::modeSequencer()
 			}
 			else
 			{
-
 				if (!random(0, 3))
 				{
 					// high notes
@@ -3512,7 +3409,6 @@ void Apps::modeSimon()
 	{
 		if (SIMON_END_OF_GAME)
 		{
-
 			if (millis_blink_750ms())
 			{
 				numberToBufAsDecimal(SIMON_LENGTH);
@@ -3604,7 +3500,6 @@ void Apps::modeSimon()
 			}
 			else
 			{
-
 				// player made mistake, player dies
 				this->addNoteToBuzzerRepeated(C4_1, 4);
 				simonState = simonPlayerDead;
@@ -3682,7 +3577,6 @@ void Apps::modeSimon()
 
 void Apps::modeReactionGame()
 {
-
 #ifdef ENABLE_REACTION_APP
 	//yellow button active at start: yellow button is also a guess button
 	// big red active: timed game
@@ -3718,7 +3612,6 @@ void Apps::modeReactionGame()
 
 	switch (reactionGameState)
 	{
-
 	case reactionWaitForStart:
 	{
 		// change level
@@ -3925,7 +3818,6 @@ void Apps::modeReactionGame()
 
 		if (!(reactionGameState == reactionJustDied))
 		{
-
 			// check of button press pattern is the sought pattern
 			if (build_up_value == (0x0F & REACTION_GAME_HEX_VALUE_TO_FIND))
 			{
@@ -3961,7 +3853,6 @@ void Apps::modeReactionGame()
 
 		if (random(0, 10) || !OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
 		{
-
 			uint8_t new_segment;
 			uint32_t tmp_segments;
 			tmp_segments = 0;
@@ -4008,10 +3899,8 @@ void Apps::modeReactionGame()
 
 	case reactionGuitarHeroPlaying:
 	{
-
 		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 		{
-
 			if (binaryInputsEdgeUp & (1 << i))
 			{
 				//if DP of this button was on, switch it off. else, die!
@@ -4045,7 +3934,6 @@ void Apps::modeReactionGame()
 			}
 			else
 			{
-
 				// success!
 				reactionGameState = reactionGuitarHeroNewTurn;
 				//REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
@@ -4165,13 +4053,10 @@ void Apps::modeReactionGame()
 
 	case reactionJustDied:
 	{
-
-#ifdef ENABLE_EEPROM
-
 		// play death song
 		addNoteToBuzzerRepeated(F4_1, 3);
-
-		//start high score end timer
+#ifdef ENABLE_EEPROM
+		//check for new high score and save
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
 										  (uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
@@ -4180,7 +4065,6 @@ void Apps::modeReactionGame()
 										  OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
 										  REACTION_GAME_LEVEL))
 		{
-
 			eeprom_update_word(
 
 				(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
@@ -4385,16 +4269,25 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
 	{
 		uint8_t *eeprom_address = (uint8_t *)(eepromStartAddress +
 											  slotIndex * eepromSlotLength + i);
-		if (loadElseSave)
-		{
-			//load
-			data[i] = eeprom_read_byte(eeprom_address);
-		}
-		else
-		{
-			//save
-			eeprom_update_byte(eeprom_address, data[i]);
-		}
+		
+		#ifdef ENABLE_EEPROM
+			if (loadElseSave)
+			{
+				//load
+				data[i] = eeprom_read_byte(eeprom_address);
+			}
+			else
+			{
+				//save
+				eeprom_update_byte(eeprom_address, data[i]);
+			}
+		#else
+			if (loadElseSave)
+			{
+					data[i] = 111;
+			}
+
+		#endif
 	}
 }
 
@@ -4415,7 +4308,11 @@ void Apps::eepromPictureToDisplayAllSegments(int16_t pictureIndex)
 {
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + pictureIndex * 4 + i))) << (i * 8);
+		#ifdef ENABLE_EEPROM
+			this->displayAllSegments |= (uint32_t)(eeprom_read_byte((uint8_t *)(EEPROM_PICTURES_START_ADDRESS + pictureIndex * 4 + i))) << (i * 8);
+		#else
+			this->displayAllSegments |= (uint32_t)(111) << (i * 8);
+		#endif
 	}
 }
 
@@ -4529,7 +4426,7 @@ void Apps::buzzerChangeSpeedRatioWithEncoderDial()
 
 uint16_t Apps::dialGetIndexedtime()
 {
-#ifdef ENABLE_MULTITIMER
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
 	return this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90, false));
 #elif defined ENABLE_MULTITIMER_INTEGRATED
 
@@ -4541,7 +4438,7 @@ uint16_t Apps::dialGetIndexedtime()
 
 unsigned int Apps::indexToTimeSeconds(int16_t index)
 {
-#ifdef ENABLE_MULTITIMER
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
 	return this->multiTimer.getIndexedTime(index);
 
 #elif defined ENABLE_MULTITIMER_INTEGRATED
@@ -4581,7 +4478,6 @@ void Apps::playSongHappyDryer()
 
 void Apps::loadBuzzerTrack(uint8_t songIndex)
 {
-
 	uint8_t length = 0;
 	uint8_t song_start_index = 0;
 
@@ -4599,6 +4495,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 		}
 		progmemToBuffer(songs + song_start_index, length);
 	}
+	#ifdef ENABLE_EEPROM
 	else if (songIndex - SONGS_FLASH_COUNT < 4)
 	{
 		// eeprom composer
@@ -4621,6 +4518,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 			i--;
 		}
 	}
+	#endif
 
 	for (uint8_t i = 0; i < length; i++)
 	{
@@ -4663,7 +4561,7 @@ void Apps::fill8BytesArrayWithZero()
 	}
 }
 
-#ifdef ENABLE_MULTITIMER
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
 void Apps::miniMultiTimer()
 {
 	// every player: init time, time left, alive?
@@ -4807,15 +4705,24 @@ void Apps::multitimer_integrated()
 
 void Apps::multitimer_setDefaults()
 {
-	// no defaults, load eeprom values. at eeprom init, it's all zero...
-
-	MULTITIMER_FISCHER_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX);
-	// general init
-	MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT);
-	for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
-	{
-		this->multitimer_setTimerInitCountTimeByTimeIndex(i, eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i));
-	}
+	#ifdef ENABLE_EEPROM
+		// no defaults, load eeprom values. at eeprom init, it's all zero...
+		MULTITIMER_FISCHER_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX);
+		// general init
+		MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT);
+		for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
+		{
+			this->multitimer_setTimerInitCountTimeByTimeIndex(i, eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i));
+		}
+	#else
+		MULTITIMER_FISCHER_TIME_INDEX = 0;
+		// general init
+		MULTITIMER_TIMERS_COUNT = 2;
+		for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
+		{
+			this->multitimer_setTimerInitCountTimeByTimeIndex(i, 35);
+		}
+	#endif 
 
 	this->multitimer_state = initialized;
 	this->multitimer_activeTimer = 0;
@@ -4825,7 +4732,6 @@ void Apps::multitimer_setDefaults()
 void Apps::multitimer_setTimersCount(int8_t delta)
 {
 	// delta > 0: increase, else decrease.
-	// if (this->multitimer_state == setTimers)
 	if (this->multitimer_state == initialized)
 	{
 		nextStepRotate(&MULTITIMER_TIMERS_COUNT, delta > 0, 1, MULTITIMER_MAX_TIMERS_COUNT);
@@ -4915,13 +4821,15 @@ void Apps::multitimer_setStatePause(bool set)
 
 void Apps::multitimer_start()
 {
-	// it makes sense to store settings into eeprom at start
-	eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
-	eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);
-	for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
-	{
-		eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i, this->multitimer_getTimerInitTimeIndex(i));
-	}
+	#ifdef ENABLE_EEPROM
+		// it makes sense to store settings into eeprom at start
+		eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
+		eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);
+		for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
+		{
+			eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i, this->multitimer_getTimerInitTimeIndex(i));
+		}
+	#endif
 
 	//start and pause all timers.
 	for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
@@ -5082,7 +4990,6 @@ void Apps::multitimer_refresh()
 		// run through all timers to set lights
 		for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
 		{
-
 			if (i == this->multitimer_activeTimer)
 			{
 				// active timer seconds blink

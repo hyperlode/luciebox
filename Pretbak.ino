@@ -44,7 +44,9 @@ DisplayManagement visualsManager;
 LedMultiplexer5x8 ledDisplay;
 Buzzer buzzer;
 
+#ifdef ENABLE_EEPROM
 bool aMomentaryButtonIsPressed = false;
+#endif
 
 // hack to get interrupts nicely going without too much magic.
 // https://forum.arduino.cc/index.php?topic=41713.0
@@ -132,12 +134,14 @@ void processInput()
 
     if (buttonsMomentary.getValueChangedEdge())
     {
+        #ifdef ENABLE_EEPROM
         if (!aMomentaryButtonIsPressed)
         {
             // add 1 to power cycles tally keeper. It's done a key press to avoid gigantic number in case of multiple brown outs.
             eeprom_update_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER) + 1);
             aMomentaryButtonIsPressed = true;
         }
+        #endif 
 
         for (uint8_t i = 0; i < BUTTONS_MOMENTARY_COUNT; i++)
         {
