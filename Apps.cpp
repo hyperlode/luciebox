@@ -632,10 +632,8 @@ void Apps::pomodoroTimer()
 void Apps::encoderDialRefreshTimeIndex(int16_t *indexHolder)
 {
 	// actually change the set up timer
-	if (encoder_dial->getDelta())
-	{
-		nextStep(indexHolder, encoder_dial->getDelta() > 0, 0, 90, false);
-	}
+
+	stepChange(indexHolder, encoder_dial->getDelta(), 0, 90, false);
 }
 
 void Apps::resetStopwatch(SuperTimer *pTimer)
@@ -1021,7 +1019,7 @@ void Apps::modeSettings()
 	{
 	}
 
-	// // back and forth motion required of the potentio to count up modes
+	// back and forth motion required of the potentio to count up modes
 	if (encoder_dial->getDelta() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0)
 	{
 		SETTINGS_MODE_SELECTOR++;
@@ -1030,6 +1028,9 @@ void Apps::modeSettings()
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
+
+	// bool change = encoder_dial->getDelta()!= 0 &&  ((-1 * (encoder_dial->getDelta() - 1)) /2) ^ SETTINGS_MODE_SELECTOR % 2;
+	// stepChange(&SETTINGS_MODE_SELECTOR,change,0,255,true);
 
 	setStandardTextToTextBuf(TEXT_SPACES);
 
@@ -1595,7 +1596,7 @@ void Apps::modeSoundSong()
 
 void Apps::modeComposeSong()
 {
-	bool defaultDisplay = true;
+	bool displayStagedNote = false;
 	int16_t step = 0;
 
 	if (this->app_init_edge)
@@ -1635,7 +1636,7 @@ void Apps::modeComposeSong()
 	{
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
-			// display song notes by their position (index) in song (enable insert delete position)
+			// display song notes indeces + enable insert delete position
 
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
@@ -1682,46 +1683,38 @@ void Apps::modeComposeSong()
 		}
 		else
 		{
-			// display song by note (enable programming and listening to notes)
+			// display song notes + enable programming and listening to notes
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+			{
+				displayStagedNote = true;
+
+				bool change = false;
+				change = stepChange(&COMPOSER_STAGED_NOTE,encoder_dial->getDelta(),0,255,true);
+				if (change)
+				{
+					buzzerOffAndAddNote((uint8_t)COMPOSER_STAGED_NOTE);
+				}
+
+				// program note in song when the combination of the two buttons is pressed.
+				if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0) )
+				{
+					COMPOSER_SONG[COMPOSER_STEP] = (uint8_t)COMPOSER_STAGED_NOTE;
+					// buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
+
+					// if note added to end, expand song length and add default note
+					if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
+					{
+						COMPOSER_SONG_LENGTH++;
+						COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = rest_1; //default note
+					}
+				}
+			}
+
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				// just listen to note on index in song
+				// will also sound when just being programmed
 				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
-			}
-
-			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
-			{
-				// just play notes selected with dial
-				if (encoder_dial->getDelta())
-				{
-					uint8_t note = (uint8_t)encoder_dial->getValueLimited(255, false);
-					buzzerOffAndAddNote(note);
-					noteToDisplay(note);
-				}
-				defaultDisplay = false;
-			}
-
-			// program note in song
-			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-			{
-				COMPOSER_SONG[COMPOSER_STEP] = (uint8_t)encoder_dial->getValueLimited(255, true);
-				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
-
-				// if note added to end, expand song length and add default note
-				if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
-				{
-					COMPOSER_SONG_LENGTH++;
-					COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = rest_1; //default note
-				}
-			}
-
-			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
-			{
-				if (encoder_dial->getDelta())
-				{
-					COMPOSER_SONG[COMPOSER_STEP] = (uint8_t)encoder_dial->getValueLimited(255, true);
-					buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
-				}
 			}
 		}
 
@@ -1743,7 +1736,8 @@ void Apps::modeComposeSong()
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 			{
 				// change speed if default behaviour of potentio.
-				COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + encoder_dial->getDelta() * 10); //step +1 or -1
+				// COMPOSER_STEP_TIMER.setInitTimeMillis(COMPOSER_STEP_TIMER.getInitTimeMillis() + encoder_dial->getDelta() * 10); //step +1 or -1
+				dialOnEdgeChangeInitTimerPercentage(&COMPOSER_STEP_TIMER);
 			}
 			else
 			{
@@ -1754,20 +1748,22 @@ void Apps::modeComposeSong()
 		if (step != 0)
 		{
 			nextStepRotate(&COMPOSER_STEP, (step + 1) / 2, 0, COMPOSER_SONG_LENGTH - 1);
+			// stepChange(&COMPOSER_STEP, step, 0, COMPOSER_SONG_LENGTH - 1, true);
 			addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 		}
 
-		//sometimes overrule screen if potentio looking for a note.
-		if (defaultDisplay)
+	
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
-			{
-				ledDisp->setNumberToDisplayAsDecimal(COMPOSER_STEP);
-			}
-			else
-			{
-				noteToDisplay(COMPOSER_SONG[COMPOSER_STEP]);
-			}
+			ledDisp->setNumberToDisplayAsDecimal(COMPOSER_STEP);
+		}
+		else if (displayStagedNote){
+			noteToDisplay((uint8_t)COMPOSER_STAGED_NOTE);
+
+		}
+		else
+		{
+			noteToDisplay(COMPOSER_SONG[COMPOSER_STEP]);
 		}
 	}
 }
@@ -2101,7 +2097,7 @@ void Apps::modeMovie()
 	}
 
 	// graphics
-	loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX);
+	loadMovieFrame(MOVIE_MODE_FLASH_FRAME_INDEX);
 
 	// invert all data in picture
 	if (MOVIE_MODE_SHOW_NEGATIVE)
@@ -2114,7 +2110,7 @@ void Apps::modeMovie()
 	displayAllSegmentsToScreen();
 }
 
-bool Apps::loadScreenFromMemory(int16_t frame_index)
+bool Apps::loadMovieFrame(int16_t frame_index)
 {
 	this->displayAllSegments = 0;
 
@@ -2147,7 +2143,7 @@ void Apps::loadNextMovie()
 	bool foundStartOfMovie = false;
 
 	// iterate until a stop frame is found check for stop frame
-	while (loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX) || !foundStartOfMovie)
+	while (loadMovieFrame(MOVIE_MODE_FLASH_FRAME_INDEX) || !foundStartOfMovie)
 	{
 		// check if over limit (last movie)
 		if (MOVIE_MODE_FLASH_FRAME_INDEX >= (MAX_FRAMES_MOVIES_FLASH
@@ -2172,7 +2168,7 @@ void Apps::loadNextMovie()
 			MOVIE_MODE_MOVIE_FRAME_INDEX_END = MOVIE_MODE_FLASH_FRAME_INDEX;
 		}
 
-		if (!loadScreenFromMemory(MOVIE_MODE_FLASH_FRAME_INDEX))
+		if (!loadMovieFrame(MOVIE_MODE_FLASH_FRAME_INDEX))
 		{
 			foundStartOfMovie = true;
 		}
@@ -2237,10 +2233,9 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
 	encoder_dial->setSensitivity(2);
 
 	int16_t cursor_position = DRAW_CURSOR_ACTIVE_DIGIT * 9 + DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT;
-	if (encoder_dial->getDelta())
-	{
-		nextStepRotate(&cursor_position, encoder_dial->getDelta() > 0, 0, 35);
-	}
+	
+	stepChange(&cursor_position, encoder_dial->getDelta(), 0, 35,true);
+
 	DRAW_CURSOR_ACTIVE_DIGIT = cursor_position / 9;
 	DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT = cursor_position % 9;
 
@@ -2860,7 +2855,7 @@ void Apps::tiltSwitchTest()
 }
 #endif
 
-void Apps::dialSetCheckDisplay(int16_t *pVariable, uint8_t multiplier, int16_t maxValue)
+void Apps::dialMultiplyValueAndDisplay(int16_t *pVariable, uint8_t multiplier, int16_t maxValue)
 {
 	// assume zero as min value
 	*pVariable += encoder_dial->getDelta() * multiplier;
@@ -2888,17 +2883,17 @@ void Apps::modeGeiger()
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			// //lower
-			dialSetCheckDisplay(&GEIGER_TONE_FREQUENY_LOWEST, 10, 5000);
+			dialMultiplyValueAndDisplay(&GEIGER_TONE_FREQUENY_LOWEST, 10, 5000);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			//upper
-			dialSetCheckDisplay(&GEIGER_TONE_FREQUENCY_HEIGHEST, 10, 5000);
+			dialMultiplyValueAndDisplay(&GEIGER_TONE_FREQUENCY_HEIGHEST, 10, 5000);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
 		{
 			//length
-			dialSetCheckDisplay(&GEIGER_TONE_LENGTH, 1, 255);
+			dialMultiplyValueAndDisplay(&GEIGER_TONE_LENGTH, 1, 255);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
 		{
@@ -4097,11 +4092,21 @@ void Apps::modeReactionGame()
 #endif
 }
 
-void Apps::nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide)
+bool Apps::stepChange(int16_t *counter, int8_t increment, int16_t minValue, int16_t maxValue, bool wrapAround)
 {
-	*counter += -1 + (2 * countUpElseDown);
+	*counter += increment;
+	checkBoundaries(counter, minValue, maxValue, wrapAround);
+	return increment != 0;
+}
+
+
+void Apps::nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool wrapAround)
+{
+	// *counter += -1 + (2 * countUpElseDown);
+	int8_t increment = -1 + (2 * countUpElseDown);
+	stepChange(counter, increment, minValue, maxValue, wrapAround);
 	// countUpElseDown++;
-	checkBoundaries(counter, minValue, maxValue, overflowToOtherSide);
+	// checkBoundaries(counter, minValue, maxValue, wrapAround);
 }
 
 void Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue)
@@ -4371,7 +4376,7 @@ void Apps::setButtonLight(uint8_t button_light, bool onElseOff)
 	lights ^= (-onElseOff ^ lights) & (1UL << button_light);
 }
 
-void Apps::decimalPointTimingOn()
+void Apps::decimalPointClockPositionOn()
 {
 	setDecimalPoint(true, 1);
 }

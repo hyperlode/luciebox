@@ -11,7 +11,7 @@ RotaryEncoderDial::RotaryEncoderDial()
   this->sensitivity = 0;
   this->sensitivity_counter = 0;
   this->maxValue = 32767;
-  this->overflowToOtherSide = false;
+  this->wrapAround = false;
 }
 
 int8_t RotaryEncoderDial::getDelta()
@@ -20,19 +20,19 @@ int8_t RotaryEncoderDial::getDelta()
   return this->delta_memory;
 }
 
-void RotaryEncoderDial::setRange(int16_t maxValue, boolean overflowToOtherSide)
+void RotaryEncoderDial::setRange(int16_t maxValue, boolean wrapAround)
 {
   this->maxValue = maxValue;
-  this->overflowToOtherSide = overflowToOtherSide;
+  this->wrapAround = wrapAround;
   if (this->value > this->maxValue)
   {
     this->value = this->maxValue;
   }
 }
 
-int16_t RotaryEncoderDial::getValueLimited(int16_t maxValue, boolean jumpAtEnd)
+int16_t RotaryEncoderDial::getValueLimited(int16_t maxValue, boolean wrapAround)
 {
-  this->setRange(maxValue, jumpAtEnd);
+  this->setRange(maxValue, wrapAround);
   return this->getValue();
 }
 
@@ -55,7 +55,7 @@ void RotaryEncoderDial::refresh()
 
   if (this->value < 0)
   {
-    if (this->overflowToOtherSide)
+    if (this->wrapAround)
     {
       this->value = this->maxValue;
     }
@@ -66,7 +66,7 @@ void RotaryEncoderDial::refresh()
   }
   else if (this->value > this->maxValue)
   {
-    if (this->overflowToOtherSide)
+    if (this->wrapAround)
     {
       this->value = 0;
     }

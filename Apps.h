@@ -148,6 +148,7 @@
 #define SIMON_BLINK_TIMER general_timer_2
 #define STOPWATCH_CHRONO_2 general_timer_2
 
+#define SETTINGS_MODE_SELECTOR general_int16_t_1
 #define LETTERS_AND_CHARS_COUNTER general_int16_t_1
 #define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
 #define SOUND_FUN_NOTE_INDEX general_int16_t_1
@@ -185,6 +186,7 @@
 #define TALLY_KEEPER_1 general_int16_t_2
 #define QUIZ_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
 #define MULTITIMER_FISCHER_TIME_INDEX general_int16_t_2
+#define COMPOSER_STAGED_NOTE general_int16_t_2
 
 #define SOUND_NOTES_NOTE_INDEX general_int16_t_3
 #define GEIGER_TONE_LENGTH general_int16_t_3
@@ -243,7 +245,6 @@
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
 #define REACTION_GAME_STEP_TIME_MILLIS general_long_1
-#define SETTINGS_MODE_SELECTOR general_long_1
 #define RANDOMWORLD_ANIMATION_DELAY general_long_1
 #define SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL general_long_1
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
@@ -781,7 +782,8 @@ private:
     void fill8BytesArrayWithZero();
     
     void nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    void nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
+    void nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool wrapAround);
+    bool stepChange(int16_t *counter, int8_t increment, int16_t minValue, int16_t maxValue, bool wrapAround);
     bool checkBoundaries(int16_t *counter, int16_t maxValue, int16_t minValue, bool rotate);
     
     void latching_3_blink();

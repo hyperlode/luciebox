@@ -42,11 +42,11 @@ public:
 
 	// void setIncrement(uint8_t increment);
 	void setSensitivity(uint8_t sensitivity);
-	void setRange(int16_t maxValue, boolean overflowToOtherSide);
+	void setRange(int16_t maxValue, boolean wrapAround);
 	void refresh();
 
 	// int16_t getValueMapped(int16_t minValue, int16_t maxValue);
-	int16_t getValueLimited(int16_t maxValue, boolean jumpAtEnd);
+	int16_t getValueLimited(int16_t maxValue, boolean wrapAround);
 
 	void interruptChannelA();
 	void interruptChannelB();
@@ -64,7 +64,7 @@ private:
 	int16_t maxValue;
 	volatile int8_t delta;
 	int8_t delta_memory;
-	boolean overflowToOtherSide;
+	boolean wrapAround;
 	int16_t value_changed;
 
 	int16_t value;
