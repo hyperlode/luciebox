@@ -19,7 +19,7 @@ public:
 	void setInitTimeMillis(long milliSeconds);
 	void setInitTimeSecs(long seconds);
 	long getInitTimeMillis();
-	int  getInitTimeSecs();
+	int getInitTimeSecs();
 	void setInitCountDownTimeSecs(uint16_t countDownSeconds);
 	void setInitCountDownTimeMillis(long countDownMillis);
 

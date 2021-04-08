@@ -33,7 +33,7 @@ Apps pretbak_apps;
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 ButtonsDacR2r buttonsMomentary;
-ButtonsDacR2r buttonsLatching;       // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+ButtonsDacR2r buttonsLatching; // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 #ifdef ENABLE_TILT_SWITCHES
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
 #endif
@@ -44,19 +44,17 @@ DisplayManagement visualsManager;
 LedMultiplexer5x8 ledDisplay;
 Buzzer buzzer;
 
-#ifdef ENABLE_ANALOG_PIN_DEBUG
-//debug mode
-bool debugMode;
-#endif
 bool aMomentaryButtonIsPressed = false;
 
 // hack to get interrupts nicely going without too much magic.
 // https://forum.arduino.cc/index.php?topic=41713.0
 // interrupts are use for the encoder dial
-void isr0(){
+void isr0()
+{
     encoder_dial.interruptChannelA();
 }
-void isr1(){
+void isr1()
+{
     encoder_dial.interruptChannelB();
 }
 
@@ -90,15 +88,11 @@ void lucieboxLoop()
 
     //Serial.println("papa help "); // display this PAPA - HELP - PAPA - ... on screen when errors.
 
-#ifdef ENABLE_ANALOG_PIN_DEBUG
-    if (!debugMode)
-    {
-#endif
-
 #ifdef DEBUG_SELECTOR_KNOB
     //rotary 12 positions selector knob is taken as base for mode selecion. so there are 12 states.
-    if (selectorDial.getValueChangedEdge()){       
-         //Serial.println(SELECTOR_DIAL_POSITIONS);
+    if (selectorDial.getValueChangedEdge())
+    {
+        //Serial.println(SELECTOR_DIAL_POSITIONS);
         Serial.println("selector:");
         Serial.println(selectorDial.getSelectorValue());
         Serial.println(analogRead(PIN_SELECTOR_DIAL));
@@ -106,7 +100,7 @@ void lucieboxLoop()
 #endif
 
 #ifdef ENABLE_APPS
-    pretbak_apps.appSelector(); 
+    pretbak_apps.appSelector();
 #endif
 
     processOuput();
@@ -138,9 +132,10 @@ void processInput()
 
     if (buttonsMomentary.getValueChangedEdge())
     {
-        if (!aMomentaryButtonIsPressed){
+        if (!aMomentaryButtonIsPressed)
+        {
             // add 1 to power cycles tally keeper. It's done a key press to avoid gigantic number in case of multiple brown outs.
-            eeprom_update_word((uint16_t*) EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t*)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER)+1);
+            eeprom_update_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER) + 1);
             aMomentaryButtonIsPressed = true;
         }
 
@@ -172,7 +167,8 @@ void processInput()
 #endif
 }
 
-void processOuput(){
+void processOuput()
+{
     buzzer.doBuzzerRoll();
     visualsManager.refresh();
     ledDisplay.refresh();
@@ -180,7 +176,8 @@ void processOuput(){
 
 void setup()
 {
-    // trick to use the easy arduino libary instead of complicated native functions
+    // trick to use the easy arduino libary
+    // instead of complicated native functions
     attachInterrupt(0, isr0, CHANGE);
     attachInterrupt(1, isr1, CHANGE);
 
@@ -191,19 +188,16 @@ void setup()
     selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS);
     buttonsMomentary.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_MOMENTARY_COUNT, setValues_1);
     buttonsLatching.setPin(PIN_BUTTONS_LATCHING, BUTTONS_LATCHING_COUNT, setValues_2);
-
+    encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
+    ledDisplay.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
+    visualsManager.setMultiplexerBuffer(ledDisplay.getDigits());
 #ifdef ENABLE_TILT_SWITCHES
     mercurySwitches.setPin(PIN_MERCURY_SWITCHES, MERCURY_SWITCHES_COUNT, setValues_mercury);
     mercurySwitches.setDebounceMillis(30);
 #endif
 
-    encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
-
-    ledDisplay.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
-    visualsManager.setMultiplexerBuffer(ledDisplay.getDigits());
-
 #ifdef ENABLE_EEPROM
-    
+
     uint8_t soundDisabled = eeprom_read_byte((uint8_t *)EEPROM_SOUND_DISABLED);
 
     // set sound
@@ -214,7 +208,8 @@ void setup()
     }
     buzzer.setPin(buzzer_pin);
 
-    if (soundDisabled == 0xFF){
+    if (soundDisabled == 0xFF)
+    {
         //first power on ever.
         // do total reset
         // confirmation song will not play because we are not yet in our refresh loop at setup
@@ -229,63 +224,9 @@ void setup()
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
     pretbak_apps.setDefaultMode();
 #endif
-
-#ifdef ENABLE_ANALOG_PIN_DEBUG
-    // if one of the push buttons is pressed at startup, activate debugmode.
-    debugMode = false;
-    if (analogRead(PIN_BUTTONS_MOMENTARY) > 10 && analogRead(PIN_BUTTONS_MOMENTARY) < 200)
-    {
-        debugMode = true;
-        pretbak_apps.appSelector(true, 12);
-    }
-#endif
 }
 
 void loop()
 {
-
-#ifdef DBUG_REFACTOR_DISP
-    processInput();
-
-    if (binaryInputs[BUTTON_MOMENTARY_3].getEdgeUp()){
-        
-        visualsManager.setCharToDisplay('8',3);
-        visualsManager.setCharToDisplay('0',2);
-        visualsManager.setCharToDisplay('-',1);
-        visualsManager.setCharToDisplay('H',0);
-        Serial.println("M 3");
-    }
-    if (binaryInputs[BUTTON_MOMENTARY_2].getEdgeUp())
-    {
-        Serial.println("M 2");
-        visualsManager.setBlankDisplay();
-    }
-     if (binaryInputs[BUTTON_MOMENTARY_1].getEdgeUp()){
-        Serial.println("M 1");
-        visualsManager.setLedArray(0xFF);
-    }
-    if (binaryInputs[BUTTON_MOMENTARY_0].getEdgeUp()){
-        Serial.println("M 0");
-        visualsManager.setLedArray(0);
-    }
-    if (binaryInputs[BUTTON_LATCHING_3].getEdgeUp()){
-        Serial.println("L 3");
-
-    }
-    if (binaryInputs[BUTTON_LATCHING_2].getEdgeUp()){
-        Serial.println("L 2");
-    }
-    if (binaryInputs[BUTTON_LATCHING_1].getEdgeUp()){
-        Serial.println("L 1" );
-    }
-    if (binaryInputs[BUTTON_LATCHING_0].getEdgeUp()){
-        Serial.println("L 0");
-    }
-
-    ledDisplay.refresh();
-    processOuput();
-
-#else
     lucieboxLoop();
-#endif
 }

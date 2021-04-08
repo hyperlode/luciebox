@@ -6,10 +6,8 @@
 // v302 : development since 2021-03-19
 
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
-// #define DBUG_REFACTOR_DISP
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
-// #define DBUG_REFACTOR_DISP
 
 // #define V2_PCB_CORONA
 #define V3_PCB_BURST
@@ -17,7 +15,7 @@
 #define ENABLE_APPS 
 
 #ifdef ENABLE_SERIAL
-#define DEBUG_ENCODER_DIAL
+//#define DEBUG_ENCODER_DIAL
 //#define DEBUG_ANALOG_IN
 //#define DEBUG_MERCURY
 //#define DEBUG_POTENTIO
@@ -150,7 +148,7 @@
             450, 262, 128, 64       \
         }
 
-#else  // v1 pcb
+#else  // v1 clouds pcb
     #define PIN_BUTTONS_MOMENTARY A1
     #define PIN_BUTTONS_LATCHING A2
     #define LIGHT_MOMENTARY_0 1          // old: momentary 0
@@ -251,7 +249,6 @@
 #define EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW  EEPROM_RANDOM_WORLD_START_ADDRESS + 0
 #define EEPROM_RANDOM_WORLD_TOTAL_LENGTH                2
 
-//  eeprom space for reaction game = 96 bits
 #define EEPROM_REACTION_GAME_START_ADDRESS              EEPROM_RANDOM_WORLD_START_ADDRESS + EEPROM_RANDOM_WORLD_TOTAL_LENGTH
 #define EEPROM_REACTION_GAME_WHACK_A_MOLE               // 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_WHACK_A_MOLE_TIMED         // 6 levels, each 2 bytes = 12bytes total
@@ -263,7 +260,6 @@
 #define EEPROM_REACTION_GAME_HEX_HERO_WITH_PAUSES       // NOT IMPLEMENTED// 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_TOTAL_LENGTH               96  // in game 8 games types * 6 levels * 2 bytes
 
-#define EEPROM_LAST_ADDRESS_OF_GAMES_ERASE_MEMORY       EEPROM_REACTION_GAME_START_ADDRESS + EEPROM_REACTION_GAME_TOTAL_LENGTH - 1
 
 #define EEPROM_MULTITIMER_START_ADDRESS                 EEPROM_REACTION_GAME_START_ADDRESS + EEPROM_REACTION_GAME_TOTAL_LENGTH
 #define EEPROM_MULTITIMER_TIMERS_COUNT          EEPROM_MULTITIMER_START_ADDRESS + 0   // 1 byte
@@ -278,6 +274,8 @@
 #define EEPROM_POMODORO_RND_BEEP_TIME_INDEX             EEPROM_POMODORO_START_ADDRESS + 2
 #define EEPROM_POMODORO_TOTAL_LENGTH                    3
 
+#define EEPROM_LAST_ADDRESS_OF_EEPROM_SOFT_ERASE       EEPROM_POMODORO_START_ADDRESS + EEPROM_POMODORO_TOTAL_LENGTH - 1
+
 #define EEPROM_SEQUENCER_SONGS_START_ADDRESS            EEPROM_POMODORO_START_ADDRESS + EEPROM_POMODORO_TOTAL_LENGTH
 #define EEPROM_SEQUENCER_SONGS_COUNT                    4
 #define EEPROM_SEQUENCER_SONG_LENGTH                    32
@@ -289,7 +287,7 @@
 #define EEPROM_COMPOSER_TOTAL_LENGTH                    EEPROM_COMPOSER_SONG_LENGTH * EEPROM_COMPOSER_SONG_COUNT //4*100 = 400
 
 #define EEPROM_PICTURES_START_ADDRESS                   EEPROM_COMPOSER_SONGS_START_ADDRESS + EEPROM_COMPOSER_TOTAL_LENGTH
-#define EEPROM_NUMBER_OF_DRAWINGS                       95 // 
+#define EEPROM_NUMBER_OF_DRAWINGS                       95  
 #define EEPROM_PICTURE_LENGTH                           4
 #define EEPROM_PICTURES_TOTAL_LENGTH                    EEPROM_NUMBER_OF_DRAWINGS * EEPROM_PICTURE_LENGTH  // 95 * 4 = 380
 

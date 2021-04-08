@@ -13,11 +13,13 @@ SuperTimer::SuperTimer()
 
 //INIT TIME
 
-void SuperTimer::incrementInitTimeMillis(int16_t deltaMillis){
+void SuperTimer::incrementInitTimeMillis(int16_t deltaMillis)
+{
 	this->initTimeMillis += (long)deltaMillis;
 
 	// this mode is used in countdown timer.
-	if (getInitTimeMillis()>-5){
+	if (getInitTimeMillis() > -5)
+	{
 		this->initTimeMillis = -5;
 	}
 }
@@ -227,11 +229,15 @@ long SuperTimer::getTimeMillis()
 	}
 }
 
-bool SuperTimer::getCountDownTimerElapsedAndRestart(){
-	if (!this->getTimeIsNegative()){
+bool SuperTimer::getCountDownTimerElapsedAndRestart()
+{
+	if (!this->getTimeIsNegative())
+	{
 		this->start();
 		return true;
-	}else{
+	}
+	else
+	{
 		return false;
 	}
 }
@@ -287,17 +293,19 @@ void SuperTimer::getTimeString(char *textBuf)
 	timeMillisToClockString(textBuf, getTimeMillis());
 }
 
-bool SuperTimer::getSecondsBlinker(){
+bool SuperTimer::getSecondsBlinker()
+{
 	//ON when paused or at on time during blinking
 	//OFF at off time during blinking
-	
-	if (getIsStarted()){
-		return getInFirstGivenHundredsPartOfSecond(500);
 
-	}else{
+	if (getIsStarted())
+	{
+		return getInFirstGivenHundredsPartOfSecond(500);
+	}
+	else
+	{
 		return true;
 	}
-
 }
 
 //ADMINISTRATION

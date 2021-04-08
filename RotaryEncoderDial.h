@@ -3,7 +3,7 @@
 #include "Arduino.h"
 
 // ****** IMPLEMENTATION EXAMPLE ******
-// in .ino file: 
+// in .ino file:
 //
 // RotaryEncoderDial encoder_dial;
 
@@ -31,29 +31,28 @@
 class RotaryEncoderDial
 {
 public:
-
 #define POTENTIO_SENSITIVITY 5
 	RotaryEncoderDial();
 
 	void setPins(byte pinChannelA, byte pinChannelB);
-	
+
 	int8_t getDelta();
-    int16_t getValue();
+	int16_t getValue();
 	void setValue(int16_t value);
 
-    // void setIncrement(uint8_t increment);
+	// void setIncrement(uint8_t increment);
 	void setSensitivity(uint8_t sensitivity);
 	void setRange(int16_t maxValue, boolean overflowToOtherSide);
 	void refresh();
 
 	// int16_t getValueMapped(int16_t minValue, int16_t maxValue);
 	int16_t getValueLimited(int16_t maxValue, boolean jumpAtEnd);
-    
-    void interruptChannelA();
-    void interruptChannelB();
-    void initialize();
-    void checkState();
-    void setNewState();
+
+	void interruptChannelA();
+	void interruptChannelB();
+	void initialize();
+	void checkState();
+	void setNewState();
 
 private:
 	byte pinChannelA;
@@ -61,7 +60,7 @@ private:
 
 	// uint8_t increment;
 	uint8_t sensitivity; //rotary step per count.
-	uint8_t sensitivity_counter ;
+	uint8_t sensitivity_counter;
 	int16_t maxValue;
 	volatile int8_t delta;
 	int8_t delta_memory;
@@ -69,7 +68,7 @@ private:
 	int16_t value_changed;
 
 	int16_t value;
-	int16_t value_memory;   // 
+	int16_t value_memory; //
 
 	// volatile int encoderPos;  //raw dial counter
 
@@ -80,6 +79,6 @@ private:
 	volatile boolean B_waitfor = false;
 	volatile boolean A_changedir_waitfor = false;
 	volatile boolean B_changedir_waitfor = false;
-	volatile boolean ccwElseCw = false;  // rotation direction: counter-clockwise if true. clockwise if false.
+	volatile boolean ccwElseCw = false; // rotation direction: counter-clockwise if true. clockwise if false.
 };
 #endif

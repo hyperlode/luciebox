@@ -72,7 +72,7 @@
 #define A3_4 65
 #define As3_4 66
 #define B3_4 67
-#define C4_4 68  
+#define C4_4 68
 #define Cs4_4 69
 #define D4_4 70
 #define Ds4_4 71
@@ -323,26 +323,26 @@ public:
     uint8_t getNextBuzzerRollSlot(bool getNextEmptySlot);
     uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty();
-   
+
     void changeTranspose(int8_t delta);
     void setTranspose(int8_t offset);
     void changeSpeedRatio(int8_t delta);
     void setSpeedRatio(float speedMultiplier);
-   
+
     void cleanBuzzerRoll();
     // void buzzerOn(uint16_t freq);
     void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerOff();
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
     void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
-    
+
     // uint8_t numberOfEightNotesToFillToFullNote(uint8_t note);
     // void getOctave(uint8_t* note);
     uint8_t getLength(uint8_t note);
     // void nextOctave(uint8_t* note, bool upElseDown);
     // uint8_t changeNoteToLength(uint8_t note, uint8_t desiredLength );
-    void changeNoteToNextLength(int16_t* note);
-    void nextNote(int16_t* note, bool upElseDown, bool stayInSameLength);
+    void changeNoteToNextLength(int16_t *note);
+    void nextNote(int16_t *note, bool upElseDown, bool stayInSameLength);
 
 private:
     float speedScale;

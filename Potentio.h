@@ -24,7 +24,7 @@ public:
 	bool getValueStableChangedEdge();
 	bool getLastStableValueChangedUp();
 
-	bool increaseSubtractAtChange(int16_t* container, uint8_t amount);
+	bool increaseSubtractAtChange(int16_t *container, uint8_t amount);
 
 private:
 	byte analogPin;
@@ -32,6 +32,5 @@ private:
 	int16_t potentio_value_stable;
 	bool potentio_value_stable_changed;
 	bool potentio_value_last_change_up_else_down;
-	
 };
 #endif

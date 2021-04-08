@@ -31,8 +31,6 @@ public:
 	uint32_t getActive32bit();
 
 private:
-	//PGM_P allData;
-	// PROGMEM const uint8_t* allData;
 	const uint8_t *allData;
 
 	bool auto_step_enabled;
@@ -44,7 +42,6 @@ private:
 	uint8_t index; // index of counter in active data set.
 
 	bool set_move_forward_else_backward; // direction of index movement in active set.
-	// bool value;
 };
 
 #endif

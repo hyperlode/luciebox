@@ -48,11 +48,13 @@ bool Potentio::getLastStableValueChangedUp()
 	return this->potentio_value_last_change_up_else_down;
 }
 
-bool Potentio::increaseSubtractAtChange(int16_t* container, uint8_t amount){
+bool Potentio::increaseSubtractAtChange(int16_t *container, uint8_t amount)
+{
 	int16_t original_value = *container;
 
-	if (getValueStableChangedEdge()){
-		*container +=  (1 - (2 * getLastStableValueChangedUp())) * amount;
+	if (getValueStableChangedEdge())
+	{
+		*container += (1 - (2 * getLastStableValueChangedUp())) * amount;
 	}
 	return *container != original_value;
 }
@@ -65,8 +67,8 @@ void Potentio::refresh()
 
 	if (potentio_value > potentio_value_stable + POTENTIO_SENSITIVITY || potentio_value < potentio_value_stable - POTENTIO_SENSITIVITY)
 	{
-		this->potentio_value_stable_changed = true; //simple edge detection
-		this->potentio_value_last_change_up_else_down = this->potentio_value_stable > potentio_value; // < or > depending on desired rotation direction 
+		this->potentio_value_stable_changed = true;													  //simple edge detection
+		this->potentio_value_last_change_up_else_down = this->potentio_value_stable > potentio_value; // < or > depending on desired rotation direction
 		this->potentio_value_stable = potentio_value;
 #ifdef DEBUG_POTENTIO
 		Serial.println(potentio_value_stable);

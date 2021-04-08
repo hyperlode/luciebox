@@ -14,7 +14,6 @@
 #define ENABLE_QUIZ_MASTER
 #define ENABLE_TALLY_KEEPER
 
-
 #include "Arduino.h"
 #include "SuperTimer.h"
 #include "Buzzer.h"
@@ -59,10 +58,10 @@
 #define APP_SELECTOR_REACTION_GAME 10
 #define APP_SELECTOR_GUITAR_HERO 11
 #ifdef ENABLE_TILT_APP
-    #define APP_SELECTOR_TILT 22
+#define APP_SELECTOR_TILT 22
 #else
-    #define APP_SELECTOR_DREAMTIME 22
-#endif 
+#define APP_SELECTOR_DREAMTIME 22
+#endif
 #define APP_SELECTOR_ZEN 23
 #define APP_SELECTOR_MULTITIMER 5
 #define APP_SELECTOR_QUIZ_MASTER 9
@@ -91,7 +90,7 @@
 //     #define APP_SELECTOR_TILT 20
 // #else
 //     #define APP_SELECTOR_DREAMTIME 20
-// #endif 
+// #endif
 // #define APP_SELECTOR_ZEN 21
 // #define APP_SELECTOR_MULTITIMER 22
 // #define APP_SELECTOR_QUIZ_MASTER 23
@@ -100,7 +99,6 @@
 #define DRAW_GAME_CLOCK 3
 #define DRAW_GAME_NUMBER 2
 #define DRAW_GAME_WORD 1
-
 
 #define TILT_FORWARD 0
 #define TILT_BACKWARD 1
@@ -126,8 +124,8 @@
 #define SIMON_MAX_PLAYERS 8
 #define SIMON_NO_BUTTON_PRESSED 111
 
-#define POMODORO_INIT_DEFAULT_TIME_INDEX 50 //1500s
-#define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25 //300s
+#define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      //1500s
+#define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     //300s
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX 16 //60s
 #define POMODORO_DISPLAY_TIMER 0
 #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
@@ -144,8 +142,8 @@
 #define HACKTIME_DISPLAY_HEX 2
 #define HACKTIME_DISPLAY_BYTES 3
 
-#define SOUND_NOTE_DISPLAY_NOTE 0 
-#define SOUND_NOTE_MODE_MANUAL 0 
+#define SOUND_NOTE_DISPLAY_NOTE 0
+#define SOUND_NOTE_MODE_MANUAL 0
 #define SOUND_NOTE_MODE_ARPEGGIO_UP 1
 #define SOUND_NOTE_MODE_ARPEGGIO_DOWN 2
 #define SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH 3
@@ -206,7 +204,7 @@
 #define REACTION_GAME_TIMER_STEP general_int16_t_2
 #define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
 #define SIMON_INDEX general_int16_t_2
-#define DEBUGMODE_ACTIVATED general_int16_t_2
+// #define DEBUGMODE_ACTIVATED general_int16_t_2
 #define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW general_int16_t_2
 #define POMODORO_MAIN_CLOCK_TIME_INDEX general_int16_t_2
 #define HACKTIME_DISPLAY_MODE general_int16_t_2
@@ -222,7 +220,7 @@
 #define SOUND_NOTES_NOTE_INDEX general_int16_t_3
 #define GEIGER_TONE_LENGTH general_int16_t_3
 #define METRONOME_TICKER_1_POSITION general_int16_t_3
-#define HACKTIME_MEMORY_SELECT general_int16_t_3  // was 5
+#define HACKTIME_MEMORY_SELECT general_int16_t_3 // was 5
 #define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
 #define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
 #define TALLY_KEEPER_2 general_int16_t_3
@@ -335,41 +333,35 @@
 #define QUIZ_SCORE array_8_bytes
 #define MULTITIMER_INIT_TIME_INDECES array_8_bytes
 
-
-
 #ifdef ENABLE_MULTITIMER_INTEGRATED
-    const uint16_t timeDialDiscreteSeconds[] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        10, 15, 20, 25, 30, 45, 60, 75, 90, 120,
-        150, 180, 210, 240, 270, 300, 330, 360, 390, 420,
-        450, 480, 510, 540, 570, 600, 660, 720, 780, 840,
-        900, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380, 1440,
-        1500, 1560, 1620, 1680, 1740, 1800, 2100, 2400, 2700, 3000,
-        3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400, 6000, 6600,
-        7200, 7800, 8400, 9000, 9600, 10200, 10800, 12600, 14400, 16200,
-        18000, 19800, 21600, 23400, 25200, 27000, 28800, 30600, 32400, 34200,
-        36000};
+const uint16_t timeDialDiscreteSeconds[] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    10, 15, 20, 25, 30, 45, 60, 75, 90, 120,
+    150, 180, 210, 240, 270, 300, 330, 360, 390, 420,
+    450, 480, 510, 540, 570, 600, 660, 720, 780, 840,
+    900, 960, 1020, 1080, 1140, 1200, 1260, 1320, 1380, 1440,
+    1500, 1560, 1620, 1680, 1740, 1800, 2100, 2400, 2700, 3000,
+    3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400, 6000, 6600,
+    7200, 7800, 8400, 9000, 9600, 10200, 10800, 12600, 14400, 16200,
+    18000, 19800, 21600, 23400, 25200, 27000, 28800, 30600, 32400, 34200,
+    36000};
 
-    #define MULTITIMER_MAX_TIMERS_COUNT 4
-    #define MULTITIMER_LIGHT_PAUSE 0x01
-    #define MULTITIMER_LIGHT_PLAYING 0x02
-    #define MULTITIMER_LIGHT_FISCHER 0x04
-    #define MULTITIMER_LIGHT_SET_TIMERS_COUNT 0x08
-    #define MULTITIMER_LIGHT_SECONDS_BLINKER 0b00010000
+#define MULTITIMER_MAX_TIMERS_COUNT 4
+#define MULTITIMER_LIGHT_PAUSE 0x01
+#define MULTITIMER_LIGHT_PLAYING 0x02
+#define MULTITIMER_LIGHT_FISCHER 0x04
+#define MULTITIMER_LIGHT_SET_TIMERS_COUNT 0x08
+#define MULTITIMER_LIGHT_SECONDS_BLINKER 0b00010000
 
 #endif
 
-
-
-
 const char dice_eyes_display[] PROGMEM = {
-    SPACE_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,
-    ONLY_TOP_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,ONLY_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
-    ONLY_TOP_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
-    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
-    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,ONLY_MIDDLE_SEGMENT_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII,
-    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII,SPACE_FAKE_ASCII
-};
+    SPACE_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII,
+    ONLY_TOP_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII, ONLY_BOTTOM_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII,
+    ONLY_TOP_SEGMENT_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII, ONLY_BOTTOM_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII,
+    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII, ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII,
+    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, ONLY_MIDDLE_SEGMENT_FAKE_ASCII, ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII,
+    ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII, SPACE_FAKE_ASCII};
 
 // const char dice_eyes_display[] PROGMEM = {
 //     NO_SEGMENTS, ONLY_MIDDLE_SEGMENT,NO_SEGMENTS,NO_SEGMENTS,
@@ -380,40 +372,39 @@ const char dice_eyes_display[] PROGMEM = {
 //     ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,ONLY_TOP_AND_BOTTOM_SEGMENT,NO_SEGMENTS
 // };
 
-#define SCALES_COUNT 5-1
+#define SCALES_COUNT 5 - 1
 
-#define LEN_MAJ 7-1
-#define LEN_MIN 8-1
-#define LEN_PENT_MAJ 5-1
-#define LEN_BLUES_MAJ 6 -1
-#define LEN_HARM 12-1
+#define LEN_MAJ 7 - 1
+#define LEN_MIN 8 - 1
+#define LEN_PENT_MAJ 5 - 1
+#define LEN_BLUES_MAJ 6 - 1
+#define LEN_HARM 12 - 1
 
 #define MAJ 0
 #define MIN 7
-#define PENT 15 
+#define PENT 15
 #define BLUES_MAJ 20
 #define HARM 26
 
-const uint8_t scale_start_indeces [] PROGMEM = {MAJ, MIN ,PENT, BLUES_MAJ, HARM};
+const uint8_t scale_start_indeces[] PROGMEM = {MAJ, MIN, PENT, BLUES_MAJ, HARM};
 
-const uint8_t scale_lengths [] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BLUES_MAJ, LEN_HARM};
- 
-const uint8_t scales [] PROGMEM = {
-    2,2,1,2,2,2,1,  
-    2,1,2,2,1,2,2,1,
-    3,2,2,3,2,
-    3,2,1,1,3,2,
-    1,1,1,1,1,1,1,1,1,1,1,1
-};
+const uint8_t scale_lengths[] PROGMEM = {LEN_MAJ, LEN_MIN, LEN_PENT_MAJ, LEN_BLUES_MAJ, LEN_HARM};
+
+const uint8_t scales[] PROGMEM = {
+    2, 2, 1, 2, 2, 2, 1,
+    2, 1, 2, 2, 1, 2, 2, 1,
+    3, 2, 2, 3, 2,
+    3, 2, 1, 1, 3, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
     0x0F, 0x40, 0x40, 0x39, //wrench
-    0xc4, 0x88, 0x50, 0x00, // student koala    
+    0xc4, 0x88, 0x50, 0x00, // student koala
     0x00, 0xd0, 0xab, 0x44, // stopwatch
     0x5C, 0x63, 0x5c, 0x63, // dice
     0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
-    0x3d, 0x41, 0x43, 0x02, // gun 
+    0x3d, 0x41, 0x43, 0x02, // gun
     0x40, 0x49, 0x49, 0x4F, //pencil
     0x7F, 0x39, 0x0f, 0x7f, // media player. film roll
     0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
@@ -427,7 +418,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
     //0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
     // 0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
     //0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
-   
+
     // 0x5e, 0x01, 0xdf, 0x5e, // music notes full
     // 0x32, 0x26, 0x34, 0x16, // vertical lines short and long
     //0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
@@ -437,11 +428,11 @@ const uint8_t app_splash_screens[] PROGMEM = {
     // 0x60, 0x3a, 0x2e, 0x42, // body builder. gamer.
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
-    0x5F, 0x79, 0x1C, 0x3D  // DBUG
+    0x5F, 0x79, 0x1C, 0x3D // DBUG
 };
 
-const uint8_t guitar_hero_level_speeds[] PROGMEM = {101,75,50,40,30,20}; // time in ms per step
-const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {250,41,21,8,4,3};  // a x10 multiplier is applied. Time in ms per step, twelve steps for total time. 12x10xTIME_MS = total time for a round
+const uint8_t guitar_hero_level_speeds[] PROGMEM = {101, 75, 50, 40, 30, 20};                 // time in ms per step
+const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {250, 41, 21, 8, 4, 3};              // a x10 multiplier is applied. Time in ms per step, twelve steps for total time. 12x10xTIME_MS = total time for a round
 const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50, 33, 16, 8}; //{2min, 1min, 30s, 20s, 10s, 5s} // will have a *50 multiplier per step. and *12 for total countdowntime
 
 #define MOVIE_INDEX_EMPTY 255
@@ -449,100 +440,344 @@ const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50
 #define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 56
 #define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 92
 
-
-#define MAX_FRAMES_MOVIES_FLASH 84  // important, set the number of total frames (including stop frames) 
+#define MAX_FRAMES_MOVIES_FLASH 84 // important, set the number of total frames (including stop frames)
 const uint8_t disp_4digits_animations[] PROGMEM = {
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-    0x01, 0x00, 0x00, 0x00,  // animate circle (KEEP IT FIRST, some apps depend on it.)
-    0x00, 0x01, 0x00, 0x00,
-    0x00, 0x00, 0x01, 0x00,
-    0x00, 0x00, 0x00, 0x01,
-    0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00, 0x00, 0x04,
-    0x00, 0x00, 0x00, 0x08,
-    0x00, 0x00, 0x08, 0x00,
-    0x00, 0x08, 0x00, 0x00,
-    0x08, 0x00, 0x00, 0x00,
-    0x10, 0x00, 0x00, 0x00,
-    0x20, 0x00, 0x00, 0x00,
-    
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-    0x01, 0x00, 0x00, 0x00,  // top circle (for sequencer)
-    0x00, 0x01, 0x00, 0x00,
-    0x00, 0x00, 0x01, 0x00,
-    0x00, 0x00, 0x00, 0x01,
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
+    0x01,
+    0x00,
+    0x00,
+    0x00, // animate circle (KEEP IT FIRST, some apps depend on it.)
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x02,
+    0x00,
+    0x00,
+    0x00,
+    0x04,
+    0x00,
+    0x00,
+    0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x00,
+    0x10,
+    0x00,
+    0x00,
+    0x00,
+    0x20,
+    0x00,
+    0x00,
+    0x00,
 
-    0x00, 0x00, 0x00, 0x40,
-    0x00, 0x00, 0x40, 0x00,
-    0x00, 0x40, 0x00, 0x00,
-    0x40, 0x00, 0x00, 0x00,
-    
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-    0x08, 0x00, 0x00, 0x00, // bottom bar (for sequencer)
-    0x00, 0x08, 0x00, 0x00,
-    0x00, 0x00, 0x08, 0x00,
-    0x00, 0x00, 0x00, 0x08,
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
+    0x01,
+    0x00,
+    0x00,
+    0x00, // top circle (for sequencer)
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x01,
 
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-    0x00, 0x00, 0x00, 0x00, // horizontal right to left sweep.
-    0x00, 0x00, 0x00, 0x06,
-    0x00, 0x00, 0x00, 0x49,
-    0x00, 0x00, 0x00, 0x30,
-    0x00, 0x00, 0x06, 0x00,
-    0x00, 0x00, 0x49, 0x00,
-    0x00, 0x00, 0x30, 0x00,
-    0x00, 0x06, 0x00, 0x00,
-    0x00, 0x49, 0x00, 0x00,
-    0x00, 0x30, 0x00, 0x00,
-    0x06, 0x00, 0x00, 0x00,
-    0x49, 0x00, 0x00, 0x00,
-    0x30, 0x00, 0x00, 0x00, //last byte is byte 52.
+    0x00,
+    0x00,
+    0x00,
+    0x40,
+    0x00,
+    0x00,
+    0x40,
+    0x00,
+    0x00,
+    0x40,
+    0x00,
+    0x00,
+    0x40,
+    0x00,
+    0x00,
+    0x00,
 
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-    0x00, 0x00, 0x00, 0x00, // vertical swoop
-    0x01, 0x01, 0x01, 0x01,
-    0x22, 0x22, 0x22, 0x22,
-    0x40, 0x40, 0x40, 0x40,
-    0x14, 0x14, 0x14, 0x14,
-    0x08, 0x08, 0x08, 0x08, // byte 77,
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
+    0x08,
+    0x00,
+    0x00,
+    0x00, // bottom bar (for sequencer)
+    0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x08,
 
-    0x00, 0x00, 0x00, 0x00,
-    0x21, 0x00, 0x00, 0x00, // sweep in
-    0x71, 0x00, 0x00, 0x00,
-    0x7B, 0x00, 0x00, 0x00,
-    0xFF, 0x00, 0x00, 0x00,
-    0xFF, 0x21, 0x00, 0x00,
-    0xFF, 0x71, 0x00, 0x00,
-    0xFF, 0x7B, 0x00, 0x00,
-    0xFF, 0xFF, 0x00, 0x00,
-    0xFF, 0xFF, 0x21, 0x00,
-    0xFF, 0xFF, 0x71, 0x00,
-    0xFF, 0xFF, 0x7B, 0x00,
-    0xFF, 0xFF, 0xFF, 0x00,
-    0xFF, 0xFF, 0xFF, 0x21,
-    0xFF, 0xFF, 0xFF, 0x71,
-    0xFF, 0xFF, 0xFF, 0x7B,
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
+    0x00,
+    0x00,
+    0x00,
+    0x00, // horizontal right to left sweep.
+    0x00,
+    0x00,
+    0x00,
+    0x06,
+    0x00,
+    0x00,
+    0x00,
+    0x49,
+    0x00,
+    0x00,
+    0x00,
+    0x30,
+    0x00,
+    0x00,
+    0x06,
+    0x00,
+    0x00,
+    0x00,
+    0x49,
+    0x00,
+    0x00,
+    0x00,
+    0x30,
+    0x00,
+    0x00,
+    0x06,
+    0x00,
+    0x00,
+    0x00,
+    0x49,
+    0x00,
+    0x00,
+    0x00,
+    0x30,
+    0x00,
+    0x00,
+    0x06,
+    0x00,
+    0x00,
+    0x00,
+    0x49,
+    0x00,
+    0x00,
+    0x00,
+    0x30,
+    0x00,
+    0x00,
+    0x00, //last byte is byte 52.
 
-    0xFF, 0xFF, 0xFF, 0xFF, // horizonal sweep.sweep out
-    0xDE, 0xFF, 0xFF, 0xFF,
-    0x8E, 0xFF, 0xFF, 0xFF,
-    0x84, 0xFF, 0xFF, 0xFF,
-    0x00, 0xFF, 0xFF, 0xFF,
-    0x00, 0xDE, 0xFF, 0xFF,
-    0x00, 0x8E, 0xFF, 0xFF,
-    0x00, 0x84, 0xFF, 0xFF,
-    0x00, 0x00, 0xFF, 0xFF,
-    0x00, 0x00, 0xDE, 0xFF,
-    0x00, 0x00, 0x8E, 0xFF,
-    0x00, 0x00, 0x84, 0xFF,
-    0x00, 0x00, 0x00, 0xFF,
-    0x00, 0x00, 0x00, 0xDE,
-    0x00, 0x00, 0x00, 0x8E,
-    0x00, 0x00, 0x00, 0x84,
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
+    0x00,
+    0x00,
+    0x00,
+    0x00, // vertical swoop
+    0x01,
+    0x01,
+    0x01,
+    0x01,
+    0x22,
+    0x22,
+    0x22,
+    0x22,
+    0x40,
+    0x40,
+    0x40,
+    0x40,
+    0x14,
+    0x14,
+    0x14,
+    0x14,
+    0x08,
+    0x08,
+    0x08,
+    0x08, // byte 77,
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
 
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x21,
+    0x00,
+    0x00,
+    0x00, // sweep in
+    0x71,
+    0x00,
+    0x00,
+    0x00,
+    0x7B,
+    0x00,
+    0x00,
+    0x00,
+    0xFF,
+    0x00,
+    0x00,
+    0x00,
+    0xFF,
+    0x21,
+    0x00,
+    0x00,
+    0xFF,
+    0x71,
+    0x00,
+    0x00,
+    0xFF,
+    0x7B,
+    0x00,
+    0x00,
+    0xFF,
+    0xFF,
+    0x00,
+    0x00,
+    0xFF,
+    0xFF,
+    0x21,
+    0x00,
+    0xFF,
+    0xFF,
+    0x71,
+    0x00,
+    0xFF,
+    0xFF,
+    0x7B,
+    0x00,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x00,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x21,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x71,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x7B,
 
-    ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF, // horizonal sweep.sweep out
+    0xDE,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x8E,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x84,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x00,
+    0xFF,
+    0xFF,
+    0xFF,
+    0x00,
+    0xDE,
+    0xFF,
+    0xFF,
+    0x00,
+    0x8E,
+    0xFF,
+    0xFF,
+    0x00,
+    0x84,
+    0xFF,
+    0xFF,
+    0x00,
+    0x00,
+    0xFF,
+    0xFF,
+    0x00,
+    0x00,
+    0xDE,
+    0xFF,
+    0x00,
+    0x00,
+    0x8E,
+    0xFF,
+    0x00,
+    0x00,
+    0x84,
+    0xFF,
+    0x00,
+    0x00,
+    0x00,
+    0xFF,
+    0x00,
+    0x00,
+    0x00,
+    0xDE,
+    0x00,
+    0x00,
+    0x00,
+    0x8E,
+    0x00,
+    0x00,
+    0x00,
+    0x84,
+
+    ANIMATION_STOP_CODE_PART_0,
+    ANIMATION_STOP_CODE_PART_1,
+    ANIMATION_STOP_CODE_PART_2,
+    ANIMATION_STOP_CODE_PART_3,
 };
 
 #define SONG_DRYER_HAPPY 0
@@ -565,7 +800,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 
 #define SONGS_FLASH_COUNT 8
 
-const uint8_t song_lengths [] PROGMEM = {
+const uint8_t song_lengths[] PROGMEM = {
     LEN_SONG_DRYER_HAPPY,
     LEN_LANG_ZAL_ZE_LEVEN,
     LEN_SONG_ATTACK,
@@ -575,147 +810,400 @@ const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_RETREAT,
     LEN_SONG_ALPHABET,
 };
- 
+
 // one big library. song lengths in separate array. This is the easiest option.
-const uint8_t songs [] PROGMEM = {
+const uint8_t songs[] PROGMEM = {
     //happy dryer
-    A6_2, rest_4, rest_2,
-    Cs7_2, rest_4, rest_2,
-    E7_4, rest_8, rest_4,
-    Cs7_4, rest_8, rest_4,
-    E7_4, rest_8, rest_4,
-    A7_1, A7_1,
-    rest_2 ,
-    
-    // lang zal ze leven
-    C7_4, rest_4, rest_2,
-    C7_4, rest_2, C7_8, rest_8,
-    C7_4, rest_4, rest_2,
-    G6_2, G6_4, rest_2,
-
-    E7_4, rest_4, rest_2,
-    E7_4, rest_2, E7_8, rest_8,
-    E7_4, rest_4, rest_2,
-    C7_2, C7_4, rest_2,
-
-    G7_4, rest_4, rest_2,
-    G7_4, rest_2, G7_8, rest_8,
-
-    A7_8, rest_8, rest_4,
-    G7_8, rest_8, rest_4,
-
-    F7_8, rest_8, rest_4,
-    E7_8, rest_8, rest_4,
-
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
+    A6_2,
     rest_4,
-    G7_8, rest_8, rest_4,
-    F7_8, rest_8, rest_4,
+    rest_2,
+    Cs7_2,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_8,
+    rest_4,
+    Cs7_4,
+    rest_8,
+    rest_4,
+    E7_4,
+    rest_8,
+    rest_4,
+    A7_1,
+    A7_1,
+    rest_2,
 
-    E7_1, E7_2, rest_2,
-    F7_1, F7_2, rest_2,
+    // lang zal ze leven
+    C7_4,
+    rest_4,
+    rest_2,
+    C7_4,
+    rest_2,
+    C7_8,
+    rest_8,
+    C7_4,
+    rest_4,
+    rest_2,
+    G6_2,
+    G6_4,
+    rest_2,
 
-    G7_1, G7_2, rest_2,
-    A7_2, A7_4, rest_4,
-    F7_2, F7_4, rest_4,
+    E7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_2,
+    E7_8,
+    rest_8,
+    E7_4,
+    rest_4,
+    rest_2,
+    C7_2,
+    C7_4,
+    rest_2,
 
-    E7_1, E7_2, rest_2,
-    D7_1, D7_2, rest_2,
-    C7_1, C7_1,
-    
+    G7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_2,
+    G7_8,
+    rest_8,
+
+    A7_8,
+    rest_8,
+    rest_4,
+    G7_8,
+    rest_8,
+    rest_4,
+
+    F7_8,
+    rest_8,
+    rest_4,
+    E7_8,
+    rest_8,
+    rest_4,
+
+    D7_2,
+    D7_4,
+    rest_4,
+    D7_2,
+    D7_4,
+    rest_4,
+    D7_2,
+    D7_4,
+    rest_4,
+    rest_4,
+    G7_8,
+    rest_8,
+    rest_4,
+    F7_8,
+    rest_8,
+    rest_4,
+
+    E7_1,
+    E7_2,
+    rest_2,
+    F7_1,
+    F7_2,
+    rest_2,
+
+    G7_1,
+    G7_2,
+    rest_2,
+    A7_2,
+    A7_4,
+    rest_4,
+    F7_2,
+    F7_4,
+    rest_4,
+
+    E7_1,
+    E7_2,
+    rest_2,
+    D7_1,
+    D7_2,
+    rest_2,
+    C7_1,
+    C7_1,
+
     // aaanvallueeeeee!
-    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
-    
+    Gs6_2,
+    rest_4,
+    Gs6_2,
+    rest_4,
+    Gs6_2,
+    rest_4,
+    Cs7_2,
+    rest_2,
+    rest_2,
+    Gs6_2,
+    rest_4,
+    Cs7_1,
+    Cs7_1,
+    Cs7_1,
+
     // star goose
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4,  rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    
-    C6_2, rest_2,
-    A6_1, rest_2,
-    G6_4, rest_4, rest_2,
-    G6_1, rest_4,
+    C6_2,
+    rest_2,
+    E6_2,
+    E6_4,
+    rest_4,
+    C6_2,
+    rest_2,
+    E6_2,
+    E6_4,
+    rest_4,
+    C6_2,
+    rest_2,
+    E6_2,
+    E6_4,
+    rest_4,
+    C6_2,
+    rest_2,
+    E6_2,
+    E6_4,
+    rest_4,
 
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
+    C6_2,
+    rest_2,
+    A6_1,
+    rest_2,
+    G6_4,
+    rest_4,
+    rest_2,
+    G6_1,
+    rest_4,
 
-    C6_2, rest_2,
-    F6_2, F6_4, rest_4,
-    E6_2, rest_2,
-    C6_2, C6_4, rest_2,
-    D6_4,rest_4,
+    C6_2,
+    rest_2,
+    E6_2,
+    E6_4,
+    rest_4,
+    C6_2,
+    rest_2,
+    E6_2,
+    E6_4,
+    rest_4,
+
+    C6_2,
+    rest_2,
+    F6_2,
+    F6_4,
+    rest_4,
+    E6_2,
+    rest_2,
+    C6_2,
+    C6_4,
+    rest_2,
+    D6_4,
+    rest_4,
     C6_1,
-    
+
     // unhappy dryer
-    A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
-    
+    A6_1,
+    rest_2,
+    Cs7_1,
+    rest_2,
+    E7_2,
+    rest_4,
+    Cs7_2,
+    rest_4,
+    B6_2,
+    rest_4,
+    A6_1,
+    rest_2,
+    rest_2,
+
     // kindeke douwen
-    B7_4, rest_4, rest_2,       // wie
-    B7_1,                       //zal
-    rest_2, A7_4, rest_4,       //er
-    G6_4, rest_4, rest_2,       //ons
-    B7_1,                       //kind-
-    B7_4, rest_4, A7_4, rest_4, //-de
-    G6_4, rest_4, rest_2,       //-ke
-    A7_1,                       //dou
-    A7_4, rest_4, rest_2,
-    C7_4, rest_4, rest_2,
+    B7_4,
+    rest_4,
+    rest_2, // wie
+    B7_1,   //zal
+    rest_2,
+    A7_4,
+    rest_4, //er
+    G6_4,
+    rest_4,
+    rest_2, //ons
+    B7_1,   //kind-
+    B7_4,
+    rest_4,
+    A7_4,
+    rest_4, //-de
+    G6_4,
+    rest_4,
+    rest_2, //-ke
+    A7_1,   //dou
+    A7_4,
+    rest_4,
+    rest_2,
+    C7_4,
+    rest_4,
+    rest_2,
     C7_1, //wen
     rest_1,
-    C7_4, rest_4, rest_2, // dat
-    B7_1,                 // schaars
-    B7_4, rest_4, B7_4, rest_4,
-    B7_4, rest_4, rest_2,
+    C7_4,
+    rest_4,
+    rest_2, // dat
+    B7_1,   // schaars
+    B7_4,
+    rest_4,
+    B7_4,
+    rest_4,
+    B7_4,
+    rest_4,
+    rest_2,
 
-    E7_4, rest_4, rest_2, //
+    E7_4,
+    rest_4,
+    rest_2, //
     E7_1,
-    E7_4, rest_4, E7_4, rest_4,
-    A7_4, rest_4, rest_2,
-    
+    E7_4,
+    rest_4,
+    E7_4,
+    rest_4,
+    A7_4,
+    rest_4,
+    rest_2,
+
     // retreat song
-    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
-    
+    Gs6_2,
+    rest_4,
+    Gs6_2,
+    rest_4,
+    Gs6_2,
+    rest_4,
+    Gs6_2,
+    rest_2,
+    rest_2,
+    Gs6_2,
+    rest_4,
+    Cs6_1,
+    Cs6_1,
+    Cs6_1,
+
     // alphabet song
-    C7_4, rest_4, rest_2, 
-    C7_4, rest_4, rest_2, 
-    G7_4, rest_4, rest_2, 
-    G7_4, rest_4, rest_2, 
-    A7_4, rest_4, rest_2, 
-    A7_4, rest_4, rest_2, 
-    G7_1, rest_1,
-    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
-    G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
-    C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
-    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
+    C7_4,
+    rest_4,
+    rest_2,
+    C7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_4,
+    rest_2,
+    A7_4,
+    rest_4,
+    rest_2,
+    A7_4,
+    rest_4,
+    rest_2,
+    G7_1,
+    rest_1,
+    F7_4,
+    rest_4,
+    rest_2,
+    F7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_4,
+    rest_2,
+    D7_4,
+    rest_4,
+    D7_4,
+    rest_4,
+    D7_4,
+    rest_4,
+    D7_4,
+    rest_4,
+    C7_1,
+    rest_1,
+    G7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_4,
+    rest_2,
+    F7_4,
+    rest_4,
+    rest_2,
+    F7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_4,
+    rest_2,
+    D7_1,
+    rest_1,
+    C7_4,
+    rest_4,
+    rest_2,
+    C7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_4,
+    rest_2,
+    A7_1,
+    rest_1,
+    G7_4,
+    rest_4,
+    rest_2,
+    rest_1,
+    F7_4,
+    rest_4,
+    rest_2,
+    F7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_4,
+    rest_2,
+    E7_4,
+    rest_4,
+    rest_2,
+    D7_4,
+    rest_4,
+    rest_2,
+    G7_4,
+    rest_4,
+    rest_2,
+    C7_1,
+    C7_1,
 };
 
-const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, 
-                                    LIGHT_LATCHING_0,  LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3};
+const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,
+                                  LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3};
 
 #ifdef V2_PCB_CORONA
-    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_MOMENTARY_0,
-        LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,LIGHT_LATCHING_3};
+const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_MOMENTARY_0,
+                                               LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, LIGHT_LATCHING_3};
 
 #elif defined V3_PCB_BURST
-    const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
-        LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
-        
+const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
+                                               LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
+
 #endif
 
-const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3, 
-                                    BUTTON_LATCHING_0, BUTTON_LATCHING_1, BUTTON_LATCHING_2, BUTTON_LATCHING_3};
+const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3,
+                                   BUTTON_LATCHING_0, BUTTON_LATCHING_1, BUTTON_LATCHING_2, BUTTON_LATCHING_3};
 
 #ifdef ENABLE_TILT_SWITCHES
-const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD,SWITCH_TILT_LEFT,SWITCH_TILT_BACKWARD,SWITCH_TILT_RIGHT};
+const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD, SWITCH_TILT_LEFT, SWITCH_TILT_BACKWARD, SWITCH_TILT_RIGHT};
 #endif
 
 class Apps
@@ -728,29 +1216,28 @@ public:
     DisplayManagement *ledDisp;
     Buzzer *buzzer;
     RotaryEncoderDial *encoder_dial;
-    LedMultiplexer5x8* allLights;
-    PotentioSelector* selectorDial;
+    LedMultiplexer5x8 *allLights;
+    PotentioSelector *selectorDial;
 
     void setPeripherals(
         BinaryInput *binaryInput,
-        RotaryEncoderDial *encoder_dial, 
-        DisplayManagement *ledDisp, 
-        LedMultiplexer5x8* allLights, 
-        Buzzer *buzzer, 
-        PotentioSelector* selectorDial
-        );
+        RotaryEncoderDial *encoder_dial,
+        DisplayManagement *ledDisp,
+        LedMultiplexer5x8 *allLights,
+        Buzzer *buzzer,
+        PotentioSelector *selectorDial);
 
     void setDefaultMode();
     void appSelector();
 
     bool init_app(bool init, uint8_t selector);
     void modeSettings();
-    #ifdef ENABLE_TALLY_KEEPER
+#ifdef ENABLE_TALLY_KEEPER
     void modeTallyKeeper();
-    #endif
-    #ifdef ENABLE_QUIZ_MASTER
+#endif
+#ifdef ENABLE_QUIZ_MASTER
     void quiz();
-    #endif
+#endif
 
     void modeZen();
     void modeCountingLettersAndChars();
@@ -775,19 +1262,19 @@ public:
     void modeRandomWorld();
     void modeHackTime();
 
-    void modeMetronomeTickerUpdate(int16_t* ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
-    void dialOnEdgeChangeInitTimerPercentage(SuperTimer* aTimer);
+    void modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
+    void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
 
     void eepromCopyValues(uint16_t fromAddress, uint16_t toAddress);
 
-    bool modifyValueUpDownWithMomentary2And3(int16_t* value, uint8_t amount);
+    bool modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount);
     uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
     // void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
     void displayChangeGlobal(uint32_t *display_buffer);
-    void displayLetterAndPositionInAlphabet(char* textBuf, int16_t letterValueAlphabet);
+    void displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet);
     uint16_t _animationGetStartByte(uint8_t number);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
-    uint8_t tombola(uint8_t* indexVariable, uint8_t *sequenceList, uint8_t length);
+    uint8_t tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length);
     void randomSequence(uint8_t *sequenceList, uint8_t length);
     void shuffle(uint8_t *list, uint8_t length);
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
@@ -796,50 +1283,47 @@ public:
     void updateEveryAppCycleAfter();
     void geigerToneHelper();
 
-
-
 #ifdef ENABLE_MULTITIMER_INTEGRATED
 
     void multitimer_integrated();
 
-	void multitimer_setDefaults();
-	// uint16_t multitimer_getIndexedTime(uint8_t index);
-	// void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
-	void multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t index);
-	uint8_t multitimer_getTimerInitTimeIndex(uint8_t timer);
-	void multitimer_getDisplay();
-	bool multitimer_getTimerFinished(uint8_t timerIndex);
-	bool multitimer_checkAllTimersFinished();
-	void multitimer_playerButtonPressEdgeUp(uint8_t index);
-	void multitimer_playerButtonPressEdgeDown(uint8_t index);
-	void multitimer_setTimersCount(int8_t delta);
-	// void multitimer_setFischerTimer(uint16_t seconds);
-	void multitimer_setStateTimersCount(bool set);
-	// void multitimer_setStateFischerTimer(bool set);
-	void multitimer_setStatePause(bool set);
-	void multitimer_refresh();
-	void multitimer_buzzerRefresh(bool alarm);
-	void multitimer_next(bool activePlayerDied);
-	void multitimer_init();
-	void multitimer_start();
-	void multitimer_pause();
-	void multitimer_continu();
-	void multitimer_reset();
+    void multitimer_setDefaults();
+    // uint16_t multitimer_getIndexedTime(uint8_t index);
+    // void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
+    void multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t index);
+    uint8_t multitimer_getTimerInitTimeIndex(uint8_t timer);
+    void multitimer_getDisplay();
+    bool multitimer_getTimerFinished(uint8_t timerIndex);
+    bool multitimer_checkAllTimersFinished();
+    void multitimer_playerButtonPressEdgeUp(uint8_t index);
+    void multitimer_playerButtonPressEdgeDown(uint8_t index);
+    void multitimer_setTimersCount(int8_t delta);
+    // void multitimer_setFischerTimer(uint16_t seconds);
+    void multitimer_setStateTimersCount(bool set);
+    // void multitimer_setStateFischerTimer(bool set);
+    void multitimer_setStatePause(bool set);
+    void multitimer_refresh();
+    void multitimer_buzzerRefresh(bool alarm);
+    void multitimer_next(bool activePlayerDied);
+    void multitimer_init();
+    void multitimer_start();
+    void multitimer_pause();
+    void multitimer_continu();
+    void multitimer_reset();
 
 #endif
 
     void eraseEepromRangeLimited(uint8_t setting);
 
 private:
-
 #ifdef ENABLE_MULTITIMER
     MiniMultiTimer multiTimer;
 #endif
-    
+
     uint16_t dialGetIndexedtime();
-    void nextStepRotate(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
-    void nextStep(int16_t* counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
-    bool checkBoundaries(int16_t* counter, int16_t maxValue, int16_t minValue, bool rotate);
+    void nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
+    void nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
+    bool checkBoundaries(int16_t *counter, int16_t maxValue, int16_t minValue, bool rotate);
     void randomModeTrigger(bool forReal);
     void textBufToDisplayAllSegments();
 
@@ -853,9 +1337,8 @@ private:
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
-    
 
-    void encoderDialRefreshTimeIndex(int16_t* indexHolder);
+    void encoderDialRefreshTimeIndex(int16_t *indexHolder);
 
     unsigned int indexToTimeSeconds(int16_t index);
 
@@ -879,15 +1362,15 @@ private:
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
     void numberToBufAsDecimal(int16_t number);
-    void dialSetCheckDisplay(int16_t* pVariable, uint8_t multiplier, int16_t maxValue);
-    
+    void dialSetCheckDisplay(int16_t *pVariable, uint8_t multiplier, int16_t maxValue);
+
     void loadNextMovie();
     bool loadScreenFromMemory(int16_t address);
 
     void eepromPictureToDisplayAllSegments(int16_t pictureIndex);
-    void flashPictureToDisplayAllSegments(const uint8_t* progmemAddress);
+    void flashPictureToDisplayAllSegments(const uint8_t *progmemAddress);
 
-    void resetStopwatch(SuperTimer* pTimer);
+    void resetStopwatch(SuperTimer *pTimer);
 
     void playSongHappyDryer();
     void fill8BytesArrayWithZero();
@@ -897,17 +1380,16 @@ private:
 
     SuperTimer generalTimer;
     SuperTimer general_timer_2;
-    SuperTimer* pSsuperTimer;
+    SuperTimer *pSsuperTimer;
     uint32_t displayAllSegments;
     uint32_t displayAllSegmentsBuffer;
-    
 
     //reused variables per app
     bool general_boolean;
     bool general_boolean2;
     bool general_boolean3;
     bool general_boolean4;
-    
+
     int16_t general_int16_t_1;
     int16_t general_int16_t_2;
     int16_t general_int16_t_3;
@@ -923,7 +1405,7 @@ private:
 
     long general_long_1;
     long general_long_2;
-    long* pLongValue;
+    long *pLongValue;
 
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
@@ -1010,47 +1492,40 @@ private:
 #endif
 
     char textBuf[4];
-    char* textHandle;  // contains the text for the display. (4 chars)
-    uint8_t decimalPoints; // segment 4 = bit 3, ....   00043210 (segment number)
-    byte* decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
+    char *textHandle;        // contains the text for the display. (4 chars)
+    uint8_t decimalPoints;   // segment 4 = bit 3, ....   00043210 (segment number)
+    byte *decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
     uint8_t lights;
 
     bool splash_screen_playing; // actuall flash screen app.
-    bool app_init_edge; // one cycle
-    
+    bool app_init_edge;         // one cycle
 
 #ifdef ENABLE_MULTITIMER_INTEGRATED
 
-
-	enum multitimer_state : uint8_t
-	{
-		// enum state{
-		initialized = 0,
-		playing,
-		finished,
-		paused,
-		setTimers,
-		setFischer
-	};
+    enum multitimer_state : uint8_t
+    {
+        // enum state{
+        initialized = 0,
+        playing,
+        finished,
+        paused,
+        setTimers,
+        setFischer
+    };
 
     // Buzzer *buzzer;
-	SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
-	multitimer_state multitimer_state;
-	uint8_t multitimer_activeTimer;
-	uint8_t multitimer_timerDisplayed;
-	bool multitimer_randomStarter;
-	bool multitimer_fisherTimer;
+    SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
+    multitimer_state multitimer_state;
+    uint8_t multitimer_activeTimer;
+    uint8_t multitimer_timerDisplayed;
+    bool multitimer_randomStarter;
+    bool multitimer_fisherTimer;
 
-	//uint16_t multitimer_initTimeSecs;
-	// uint8_t multitimer_timers_count;
+//uint16_t multitimer_initTimeSecs;
+// uint8_t multitimer_timers_count;
 
-	//uint16_t multitimer_fischerSecs;
-    #endif
-
+//uint16_t multitimer_fischerSecs;
+#endif
 };
 
 #endif
-
-
-
-	

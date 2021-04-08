@@ -32,7 +32,6 @@
 #define ONLY_TOP_AND_BOTTOM_SEGMENT B00001001
 #define NO_SEGMENTS B00000000
 
-
 const byte selected_ascii_to_7seg_digit[] PROGMEM = {
     B00111111,                   //'0'
     B00000110,                   //'1'
@@ -80,8 +79,7 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 
 };
 
-
-#define TEXT_SPACES 0  
+#define TEXT_SPACES 0
 #define TEXT_PAUS 4
 #define TEXT_RANDOM_BEEP 8
 #define TEXT_BEEP 12
@@ -97,7 +95,7 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 #define TEXT_AUTO 52
 #define TEXT_SET 56
 #define TEXT_HEAD 60
-#define TEXT_TAIL 64 
+#define TEXT_TAIL 64
 #define TEXT_YES 68
 #define TEXT_NO 72
 #define MAJOR 76
@@ -116,38 +114,37 @@ const byte selected_ascii_to_7seg_digit[] PROGMEM = {
 
 const byte standard_text[] PROGMEM = {
     SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, SPACE_FAKE_ASCII,
-    'P','A','U','S',
-    'R','N','D','B',
-    'B','E','E','P',
-    'E','E','P','R',
-    'R','S','E','T',
-    'D','O','N','E',
-    'D','O','I','T',
-    'T','I','L','T',
-    '?','?','?','?',
-    'S','A','V','E',
-    'E','N','D', SPACE_FAKE_ASCII, 
-    'L','O','A','D',
-    'A','U','T','O',
-    'S','E','T',SPACE_FAKE_ASCII,
-    'H','E','A','D', //don't change position, indeces calculated, used in random 
-    'T','A','I','L', //don't change position, indeces calculated, used in random 
-    SPACE_FAKE_ASCII, 'N','O', SPACE_FAKE_ASCII,  //don't change position, indeces calculated, used in random 
-    SPACE_FAKE_ASCII,'Y','E','S', //don't change position, indeces calculated, used in random 
-    'A','J','O','R',
-    'I','N','O','R',
-    'P','E','N','T',
-    'B','L','U','E',
-    'C','H','R','O',
-    'M','A','N','U',
-    SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,'U','P',
-    SPACE_FAKE_ASCII,SPACE_FAKE_ASCII,'D','O',
-    'U','P','D','O',
-    SPACE_FAKE_ASCII,'R','N','D',
-    'C','R','A','Y',
-    'F','I','S','H',
-    'Q','T','Y',SPACE_FAKE_ASCII
-    };
+    'P', 'A', 'U', 'S',
+    'R', 'N', 'D', 'B',
+    'B', 'E', 'E', 'P',
+    'E', 'E', 'P', 'R',
+    'R', 'S', 'E', 'T',
+    'D', 'O', 'N', 'E',
+    'D', 'O', 'I', 'T',
+    'T', 'I', 'L', 'T',
+    '?', '?', '?', '?',
+    'S', 'A', 'V', 'E',
+    'E', 'N', 'D', SPACE_FAKE_ASCII,
+    'L', 'O', 'A', 'D',
+    'A', 'U', 'T', 'O',
+    'S', 'E', 'T', SPACE_FAKE_ASCII,
+    'H', 'E', 'A', 'D',                           //don't change position, indeces calculated, used in random
+    'T', 'A', 'I', 'L',                           //don't change position, indeces calculated, used in random
+    SPACE_FAKE_ASCII, 'N', 'O', SPACE_FAKE_ASCII, //don't change position, indeces calculated, used in random
+    SPACE_FAKE_ASCII, 'Y', 'E', 'S',              //don't change position, indeces calculated, used in random
+    'A', 'J', 'O', 'R',
+    'I', 'N', 'O', 'R',
+    'P', 'E', 'N', 'T',
+    'B', 'L', 'U', 'E',
+    'C', 'H', 'R', 'O',
+    'M', 'A', 'N', 'U',
+    SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, 'U', 'P',
+    SPACE_FAKE_ASCII, SPACE_FAKE_ASCII, 'D', 'O',
+    'U', 'P', 'D', 'O',
+    SPACE_FAKE_ASCII, 'R', 'N', 'D',
+    'C', 'R', 'A', 'Y',
+    'F', 'I', 'S', 'H',
+    'Q', 'T', 'Y', SPACE_FAKE_ASCII};
 
 class DisplayManagement
 {
@@ -161,28 +158,25 @@ public:
     // void setNumberToDisplayAsDecimalAsChars(int16_t number); //deprecated
     // void bufToScreenBits(char *textBuf, uint32_t *screenBits);
     // void SetSingleDigit(uint8_t value, int digit); //deprecated
-    
 
-   void setStandardTextToTextBuf(char* textBuf, uint8_t text_start_address);
-
+    void setStandardTextToTextBuf(char *textBuf, uint8_t text_start_address);
 
     void setTextBufToDisplay(char *inText); // updateDisplayChars
     void setCharToDisplay(char character, uint8_t digit);
-    char* getDisplayTextBufHandle();
-    
+    char *getDisplayTextBufHandle();
 
-    void setNumberToDisplayAsDecimal(int16_t number); //updateDisplayNumber
+    void setNumberToDisplayAsDecimal(int16_t number);               //updateDisplayNumber
     void setNumberToDisplay(int16_t number, boolean asHexadecimal); //updateDisplayNumber
-    
+
     void setBinaryToDisplay(uint32_t value); //  updateDisplayAllBits
-    
+
     void setDecimalPointsToDisplay(byte decimalPoints);
     void setDecimalPointToDisplay(boolean isOn, uint8_t digit); // updateDisplayDecimalPoint
-    byte* getDecimalPointsHandle();
+    byte *getDecimalPointsHandle();
 
-    void setLedArray(byte ledsAsBits);  //  updateLights
-    byte* getLedArrayHandle();
-    void minutesToMinutesHoursString(char* textBuf, uint16_t minutes);
+    void setLedArray(byte ledsAsBits); //  updateLights
+    byte *getLedArrayHandle();
+    void minutesToMinutesHoursString(char *textBuf, uint16_t minutes);
     // void progmemToDisplayBuffer(uint32_t* displayBuffer, const uint8_t* progmemAddress);
     void setBlankDisplay(); //eraseAll
 
@@ -190,23 +184,22 @@ public:
 
     void numberToBufAsDecimal(char *textBuf, int16_t number);
     void numberToBuf(char *textBuf, int16_t number, bool asHexadecimal);
-    void blanksToBuf(char* textBuf);
+    void blanksToBuf(char *textBuf);
 
-    void convert_text4Bytes_to_32bits(char* text, uint32_t* binary);
+    void convert_text4Bytes_to_32bits(char *text, uint32_t *binary);
 
     //void convert_4bytesArray_32bits(char* characters, uint32_t* displayAllSegments, boolean toArray);
 
-    void charsToSevenSegment (char* text, byte* digits);
-    void charToSevenSegment(char character, byte* digit);
+    void charsToSevenSegment(char *text, byte *digits);
+    void charToSevenSegment(char character, byte *digit);
 
-    void setMultiplexerBuffer(byte* multiplexerDigits);
+    void setMultiplexerBuffer(byte *multiplexerDigits);
 
     //void displaySetTextAndDecimalPoints(char *inText, uint8_t *decimalPoints);  //deprecated
 
     // void setBrightness(byte value, bool exponential); // should not be done here!
 
     // void getActiveSegmentAddress(byte **carrier);
-
 
 #ifdef ENABLE_SCROLL
 
@@ -228,14 +221,14 @@ public:
 private:
     //SevSeg5Digits sevseg;
     // byte brightness;
-    
+
     //update
     char text[4];
     byte lights;
     byte decimalPoints;
     uint32_t displayBinary;
 
-    byte* multiplexerData; // pointer to array containing the actual lights data.
+    byte *multiplexerData; // pointer to array containing the actual lights data.
 
     //byte *activeSegment;
 
