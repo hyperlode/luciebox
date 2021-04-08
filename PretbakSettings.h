@@ -5,9 +5,9 @@
 // v301 : sending out to Belgium 2021-03-19
 // v302 : development since 2021-03-19
 
+// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 // #define DBUG_REFACTOR_DISP
 //#define ENABLE_TILT_SWITCHES
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 // #define DBUG_REFACTOR_DISP
 

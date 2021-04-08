@@ -279,7 +279,7 @@
 #define REACTION_GAME_STEP_TIME_MILLIS general_long_1
 #define SETTINGS_MODE_SELECTOR general_long_1
 #define RANDOMWORLD_ANIMATION_DELAY general_long_1
-#define SIMON_RANDOM_PLAYER_SEQUENCE general_long_1
+#define SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL general_long_1
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
 #define POMODORO_STATS_WORKING_BAD general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
