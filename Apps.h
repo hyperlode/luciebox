@@ -672,12 +672,7 @@ class Apps
 public:
     Apps();
 
-    BinaryInput *binaryInputs;
-    DisplayManagement *ledDisp;
-    Buzzer *buzzer;
-    RotaryEncoderDial *encoder_dial;
-    LedMultiplexer5x8 *allLights;
-    PotentioSelector *selectorDial;
+   
 
     void setPeripherals(
         BinaryInput *binaryInput,
@@ -686,10 +681,14 @@ public:
         LedMultiplexer5x8 *allLights,
         Buzzer *buzzer,
         PotentioSelector *selectorDial);
+    void eraseEepromRangeLimited(uint8_t setting);
 
     void setDefaultMode();
     void appSelector();
 
+private:
+
+    // all applitcations
     bool init_app(bool init, uint8_t selector);
     void modeSettings();
 #ifdef ENABLE_TALLY_KEEPER
@@ -698,7 +697,6 @@ public:
 #ifdef ENABLE_QUIZ_MASTER
     void quiz();
 #endif
-
     void modeZen();
     void modeCountingLettersAndChars();
     void modeSoundSong();
@@ -718,38 +716,20 @@ public:
     void tiltSwitchTest();
     void modeDreamtime();
     void modeButtonDebug();
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
     void miniMultiTimer();
+#endif
     void modeRandomWorld();
     void modeHackTime();
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+    void multitimer_integrated();
+#endif
+
+    // application helper methods
 
     void modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
-    void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
-
-    void eepromCopyValues(uint16_t fromAddress, uint16_t toAddress);
-
-    bool modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount);
-    uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
-    // void displayChangeGlobal(uint32_t *display_buffer, bool saveStateToBuffer);
-    void displayChangeGlobal(uint32_t *display_buffer);
-    void displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet);
-    uint16_t _animationGetStartByte(uint8_t number);
-    uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
-    uint8_t tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length);
-    void randomSequence(uint8_t *sequenceList, uint8_t length);
-    void shuffle(uint8_t *list, uint8_t length);
-    bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
-    void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
-    void updateEveryAppCycleBefore();
-    void updateEveryAppCycleAfter();
-    void geigerToneHelper();
-
 #ifdef ENABLE_MULTITIMER_INTEGRATED
-
-    void multitimer_integrated();
-
     void multitimer_setDefaults();
-    // uint16_t multitimer_getIndexedTime(uint8_t index);
-    // void multitimer_setAllInitCountDownTimeSecs(uint16_t initTimeSecs);
     void multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t index);
     uint8_t multitimer_getTimerInitTimeIndex(uint8_t timer);
     void multitimer_getDisplay();
@@ -758,9 +738,7 @@ public:
     void multitimer_playerButtonPressEdgeUp(uint8_t index);
     void multitimer_playerButtonPressEdgeDown(uint8_t index);
     void multitimer_setTimersCount(int8_t delta);
-    // void multitimer_setFischerTimer(uint16_t seconds);
     void multitimer_setStateTimersCount(bool set);
-    // void multitimer_setStateFischerTimer(bool set);
     void multitimer_setStatePause(bool set);
     void multitimer_refresh();
     void multitimer_buzzerRefresh(bool alarm);
@@ -770,72 +748,76 @@ public:
     void multitimer_pause();
     void multitimer_continu();
     void multitimer_reset();
-
 #endif
 
-    void eraseEepromRangeLimited(uint8_t setting);
+    void updateEveryAppCycleBefore();
+    void updateEveryAppCycleAfter();
+    uint32_t modeSingleSegmentManipulation(uint32_t *display_buffer);
+    void displayChangeGlobal(uint32_t *display_buffer);
+    void randomModeTrigger(bool forReal);
+    void geigerToneHelper();
+    void loadNextMovie();
 
-private:
-#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
-    MiniMultiTimer multiTimer;
-#endif
+    void resetStopwatch(SuperTimer *pTimer);
+    unsigned int indexToTimeSeconds(int16_t index);
+    bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
+    void eepromPictureToDisplayAllSegments(int16_t pictureIndex);
+    void flashPictureToDisplayAllSegments(const uint8_t *progmemAddress);
+    bool loadMovieFrame(int16_t address);
+    void displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet);
+    bool modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount);
+    uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
 
+    // general methods
+
+    void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
+    void encoderDialRefreshTimeIndex(int16_t *indexHolder);
     uint16_t dialGetIndexedtime();
+    void dialMultiplyValueAndDisplay(int16_t *pVariable, uint8_t multiplier, int16_t maxValue);
+    
+    uint8_t tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length);
+    void randomSequence(uint8_t *sequenceList, uint8_t length);
+    void shuffle(uint8_t *list, uint8_t length);
+    void fill8BytesArrayWithZero();
+    
     void nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool overflowToOtherSide);
     bool checkBoundaries(int16_t *counter, int16_t maxValue, int16_t minValue, bool rotate);
-    void randomModeTrigger(bool forReal);
-    void textBufToDisplayAllSegments();
-
+    
     void latching_3_blink();
     bool millis_half_second_period();
     bool millis_quarter_second_period();
     bool millis_blink_750ms();
     void set_blink_offset();
-    long blink_offset;
+
+    void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
+    void eepromCopyValues(uint16_t fromAddress, uint16_t toAddress);
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
     uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
 
-    void encoderDialRefreshTimeIndex(int16_t *indexHolder);
-
-    unsigned int indexToTimeSeconds(int16_t index);
-
     void setButtonLight(uint8_t light_index, bool onElseOff);
-
     void textBufToDisplay();
-    void decimalPointTimingOn();
-    void setDecimalPoint(bool onElseOff, uint8_t digit);
+    void textBufToDisplayAllSegments();
     void displayAllSegmentsToScreen();
+    void setBlankDisplay();
+    void setLedArray();
+    void numberToBufAsDecimal(int16_t number);
+    void noteToDisplay(uint8_t note);
+    void setStandardTextToTextBuf(uint8_t textPosition);
+    void setStandardTextToTextHANDLE(uint8_t textPosition);
+
+    void decimalPointClockPositionOn();
+    void setDecimalPoint(bool onElseOff, uint8_t digit);
+
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
     void buzzerOff();
     void buzzerOffAndAddNote(uint8_t note);
     void buzzerChangeSpeedRatioWithEncoderDial();
     void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
-    void noteToDisplay(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
-    void setBlankDisplay();
-    void setLedArray();
-    void setStandardTextToTextBuf(uint8_t textPosition);
-    void setStandardTextToTextHANDLE(uint8_t textPosition);
-    void numberToBufAsDecimal(int16_t number);
-    void dialSetCheckDisplay(int16_t *pVariable, uint8_t multiplier, int16_t maxValue);
-
-    void loadNextMovie();
-    bool loadScreenFromMemory(int16_t address);
-
-    void eepromPictureToDisplayAllSegments(int16_t pictureIndex);
-    void flashPictureToDisplayAllSegments(const uint8_t *progmemAddress);
-
-    void resetStopwatch(SuperTimer *pTimer);
-
     void playSongHappyDryer();
-    void fill8BytesArrayWithZero();
-
-    SuperTimer *pSsuperTimer;
-    uint32_t displayAllSegments;
-    uint32_t displayAllSegmentsBuffer;
 
     //reused variables per app
     SuperTimer general_timer;
@@ -861,11 +843,51 @@ private:
 
     long general_long_1;
     long general_long_2;
-    long *pLongValue;
 
+    // specific      
+    BinaryInput *binaryInputs;
+    DisplayManagement *ledDisp;
+    Buzzer *buzzer;
+    RotaryEncoderDial *encoder_dial;
+    LedMultiplexer5x8 *allLights;
+    PotentioSelector *selectorDial;
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
+    MiniMultiTimer multiTimer;
+#endif
+
+    long* pLongValue;
+    long blink_offset;
+    SuperTimer* pSsuperTimer;
+    uint32_t displayAllSegments;
+    uint32_t displayAllSegmentsBuffer;
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
+    char textBuf[4];
+    char *textHandle;        // contains the text for the display. (4 chars)
+    uint8_t decimalPoints;   // segment 4 = bit 3, ....   00043210 (segment number)
+    byte *decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
+    uint8_t lights;
+    bool splash_screen_playing; // actual flash screen app
+    bool app_init_edge;         // one cycle
+#ifdef ENABLE_MULTITIMER_INTEGRATED
+    SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
+    uint8_t multitimer_activeTimer;
+    uint8_t multitimer_timerDisplayed;
+    bool multitimer_randomStarter;
+    bool multitimer_fisherTimer;
+    enum multitimer_state : uint8_t
+    {
+        // enum state{
+        initialized = 0,
+        playing,
+        finished,
+        paused,
+        setTimers,
+        setFischer
+    };
+    multitimer_state multitimer_state;
+#endif
 
     enum
     {
@@ -947,36 +969,7 @@ private:
 
 #endif
 
-    char textBuf[4];
-    char *textHandle;        // contains the text for the display. (4 chars)
-    uint8_t decimalPoints;   // segment 4 = bit 3, ....   00043210 (segment number)
-    byte *decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
-    uint8_t lights;
 
-    bool splash_screen_playing; // actual flash screen app
-    bool app_init_edge;         // one cycle
-
-#ifdef ENABLE_MULTITIMER_INTEGRATED
-
-    enum multitimer_state : uint8_t
-    {
-        // enum state{
-        initialized = 0,
-        playing,
-        finished,
-        paused,
-        setTimers,
-        setFischer
-    };
-    multitimer_state multitimer_state;
-
-    SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
-    uint8_t multitimer_activeTimer;
-    uint8_t multitimer_timerDisplayed;
-    bool multitimer_randomStarter;
-    bool multitimer_fisherTimer;
-
-#endif
 };
 
 #endif
