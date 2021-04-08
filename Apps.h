@@ -228,7 +228,7 @@
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
 #define DRAW_SHOW_MODE general_uint8_t_2
-
+#define QUIZ_MOST_RECENT_ROUND_WINNER_INDEX general_uint8_t_2
 #define HACKTIME_SOUND general_uint8_t_2
 #define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
@@ -239,6 +239,7 @@
 #define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
 #define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
+#define QUIZ_SCORE_MEMORY general_uint8_t_3
 
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 
@@ -938,7 +939,8 @@ private:
         quizWaitPlayerPress,
         quizPlayerPressed,
         quizDefineRoundWinner,
-        quizWaitSomeTimeForNextRound
+        quizWaitSomeTimeForNextRound,
+        quizRoundAfterMath
     };
     QuizState quizState;
 

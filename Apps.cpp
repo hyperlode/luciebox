@@ -1336,8 +1336,12 @@ void Apps::quiz()
 			QUIZ_MAX_RANDOM_WAIT_TIME = -3000;
 		}
 
-		bool quizmasterButtonChanged = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_3);
-		if (quizmasterButtonChanged || ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2) && binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))))
+		// bool quizmasterButtonChanged = (binaryInputsEdgeUp ) & (1 << BUTTON_INDEXED_LATCHING_3);
+		// bool quizmasterButtonChanged = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_3);
+		
+		// if (quizmasterButtonChanged || ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2) && binaryInputsValue &  (1 << BUTTON_INDEXED_LATCHING_3))))
+		if  (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)
+			 )
 		{
 			quizState = quizWaitRandomTime;
 			QUIZ_RANDOM_WAIT_TIME.start(random(QUIZ_MAX_RANDOM_WAIT_TIME, -500));
@@ -1432,35 +1436,62 @@ void Apps::quiz()
 			QUIZ_ANALOG_VALUES_CHECK[4 + i] = abs(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE - QUIZ_ANALOG_VALUES_CHECK[i]);
 		}
 
-		uint8_t winnerIndex = 0;
+		// uint8_t winnerIndex = 0;
+		QUIZ_MOST_RECENT_ROUND_WINNER_INDEX = 0;
 		uint8_t smallestDiff = 255;
 
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			if (QUIZ_ANALOG_VALUES_CHECK[4 + i] < smallestDiff)
 			{
-				winnerIndex = i;
+				QUIZ_MOST_RECENT_ROUND_WINNER_INDEX = i;
 				smallestDiff = QUIZ_ANALOG_VALUES_CHECK[4 + i];
 			}
 		}
 
-		QUIZ_SCORE[winnerIndex]++;
 		// //TEST SHOW RAW ANALOG VALUES
 		// for(uint8_t i=0;i<8;i++){
 		// 	Serial.println(QUIZ_ANALOG_VALUES_CHECK[i]);
 		// }
 		// Serial.println(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE);
-		// Serial.println(winnerIndex);
+		// Serial.println(QUIZ_MOST_RECENT_ROUND_WINNER_INDEX);
 		// //ENDTEST
+		QUIZ_SCORE_MEMORY = QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
+	
+		quizState = quizRoundAfterMath;
+	}
+	break;
 
-		QUIZ_RANDOM_WAIT_TIME.start(-500);
+	case quizRoundAfterMath:
+	{
+		int16_t scoreChange = 0;
+		encoder_dial->setSensitivity(2);
+		stepChange(&scoreChange, encoder_dial->getDelta(), -1 , 1, false);
 
-		if (QUIZ_SCORE[winnerIndex] > 9)
+		uint8_t new_score = QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] + scoreChange;
+		if (new_score < QUIZ_SCORE_MEMORY - 1)
 		{
-			QUIZ_SCORE[winnerIndex] = 0;
+		} else if (new_score > QUIZ_SCORE_MEMORY + 1)
+		{
+		}else{
+			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = new_score;
+		}
+
+		if (QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] > 9)
+		{
+			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
 			playSongHappyDryer();
 		}
-		quizState = quizWaitSomeTimeForNextRound;
+
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
+			QUIZ_RANDOM_WAIT_TIME.start(-500);
+			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX]++;
+			quizState = quizWaitSomeTimeForNextRound;
+		}
+		else if (! (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+		{
+			quizState = quizWaitForQuizMaster;
+		}
 	}
 	break;
 
@@ -1751,15 +1782,14 @@ void Apps::modeComposeSong()
 			// stepChange(&COMPOSER_STEP, step, 0, COMPOSER_SONG_LENGTH - 1, true);
 			addNoteToBuzzer(COMPOSER_SONG[COMPOSER_STEP]);
 		}
-
 	
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
 			ledDisp->setNumberToDisplayAsDecimal(COMPOSER_STEP);
 		}
-		else if (displayStagedNote){
+		else if (displayStagedNote)
+		{
 			noteToDisplay((uint8_t)COMPOSER_STAGED_NOTE);
-
 		}
 		else
 		{
