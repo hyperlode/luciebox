@@ -3623,8 +3623,8 @@ void Apps::modeReactionGame()
 
 		// check options
 		REACTION_GUITAR_HERO_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
-		EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
-		OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
+		REACTION_OPTION_WHACKABIRD_OR_HEXHERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
+		REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
@@ -3635,8 +3635,8 @@ void Apps::modeReactionGame()
 				eeprom_read_word(
 					(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
 					REACTION_GUITAR_HERO_MODE * 48 +
-					EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
-					OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
+					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
+					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
 					REACTION_GAME_LEVEL));
 		}
 		else
@@ -3654,7 +3654,7 @@ void Apps::modeReactionGame()
 		// play game button pressed
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
-			if (!REACTION_GUITAR_HERO_MODE && EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+			if (!REACTION_GUITAR_HERO_MODE && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 			{
 				reactionGameState = reactionSoundInit;
 			}
@@ -3689,11 +3689,10 @@ void Apps::modeReactionGame()
 
 			displayAllSegments = 0;
 
-			if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+			if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 			{
 				// hex geek mode
 				fill8BytesArrayWithZero();
-
 				setStandardTextToTextBuf(TEXT_SPACES);
 				reactionGameState = reactionHexNextStep;
 			}
@@ -3710,7 +3709,7 @@ void Apps::modeReactionGame()
 			{ // in sound mode, wait till demo is done
 				reactionGameState = reactionNewTurn;
 
-				if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+				if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
 				{
 					// if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
 					// REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
@@ -3738,13 +3737,19 @@ void Apps::modeReactionGame()
 		}
 
 		// add new hex char on left
-		textBuf[0] = random(49, 64);
-		REACTION_GAME_HEX_MEMORY[0] = textBuf[0] - 48;
+		REACTION_GAME_HEX_MEMORY[0] = random(1, 16); // do not include 0, it cannot be inputted with the buttons 
 
-		if (textBuf[0] > 57)
-		{
-			textBuf[0] += 7;
+		if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT){
+			REACTION_GAME_DECIMAL_POINTS = REACTION_GAME_DECIMAL_POINTS<<1; 
+			REACTION_GAME_DECIMAL_POINTS |= random(0, 2);
 		}
+
+		uint8_t value_to_hex_char = (REACTION_GAME_HEX_MEMORY[0]) + 48;
+
+		if ( value_to_hex_char > 57){
+			value_to_hex_char += 7; // there are 7 ascii positions between 9 and A
+		}
+		textBuf[0] = value_to_hex_char; // 0-9, A-F
 
 		// prepare next move
 		reactionGameState = reactionHexPlaying;
@@ -3756,18 +3761,14 @@ void Apps::modeReactionGame()
 	case reactionHexWaitForButtonsRelease:
 	{
 		// all buttons need to be release before we can check for a new press.
-		// if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) &&
-		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) &&
-		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) &&
-		// 	!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
-		// {
 		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
 		if ((binaryInputsValue & momentary_buttons_mask) == 0) // no buttons pressed
 		{
 			reactionGameState = reactionHexPlaying;
 		}
-
+		
 		textBufToDisplay();
+		ledDisp->setDecimalPointsToDisplay(REACTION_GAME_DECIMAL_POINTS);
 		break;
 	}
 
@@ -3780,66 +3781,54 @@ void Apps::modeReactionGame()
 		{
 			REACTION_GAME_HEX_ACTIVE_DIGIT--;
 		}
+		
+		uint8_t binary_pattern_to_find = REACTION_GAME_HEX_MEMORY[REACTION_GAME_HEX_ACTIVE_DIGIT];
+		if (REACTION_GAME_DECIMAL_POINTS & (1<<REACTION_GAME_HEX_ACTIVE_DIGIT)){
+			// if a decimal point is found, we will need to input the complement. 
+			
+			binary_pattern_to_find = 0x0F & ~binary_pattern_to_find;
+		}
+		byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+		uint8_t momentary_buttons_pressed_binary_pattern = momentary_buttons_mask & binaryInputsValue; // momentary buttons as binary pattern
+		
+		// reverse the pattern. 
+		uint8_t tmp = 0;
+		for (uint8_t i=0;i<4;i++){
+			bool bitIsSet= momentary_buttons_pressed_binary_pattern & 1<<i;
+			tmp |= bitIsSet << (3-i);
+		}
+		momentary_buttons_pressed_binary_pattern = tmp;
+		
+		uint8_t diff_between_needed_and_pressed = momentary_buttons_pressed_binary_pattern ^ binary_pattern_to_find; // if zero --> equal (which means "ok")
+		uint8_t check_for_wrong_key_presses = diff_between_needed_and_pressed & momentary_buttons_pressed_binary_pattern;  // if not zero --> wrong key pressed
 
-		// //attempt to optimization, but with a bug, and too tired. So, Lucie, I invite you to give it a shot!
-		// REACTION_GAME_HEX_VALUE_TO_FIND = (byte)textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT];
-
-		// if (REACTION_GAME_HEX_VALUE_TO_FIND == ' ' || REACTION_GAME_HEX_VALUE_TO_FIND == SPACE_FAKE_ASCII){
-		// 	REACTION_GAME_HEX_VALUE_TO_FIND = 0;
-
-		// }else{
-		// 	if (REACTION_GAME_HEX_VALUE_TO_FIND > 57){
-		// 		REACTION_GAME_HEX_VALUE_TO_FIND -=7;
-		// 	}
-		// 	REACTION_GAME_HEX_VALUE_TO_FIND -= 48;
-		// }
-
-		// #else
-
-		REACTION_GAME_HEX_VALUE_TO_FIND = REACTION_GAME_HEX_MEMORY[REACTION_GAME_HEX_ACTIVE_DIGIT];
-
-		// check for all buttons pressed in binary pattern or wrong button press
-		uint8_t build_up_value = 0;
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		if (check_for_wrong_key_presses != 0){
+			reactionGameState = reactionJustDied;
+		}
+		
+		// check of button press pattern is the sought pattern
+		if (!diff_between_needed_and_pressed)
 		{
-			if (binaryInputsValue & (1 << i))
-			{
-				if (!(REACTION_GAME_HEX_VALUE_TO_FIND & (1 << (3 - i))))
-				{
-					reactionGameState = reactionJustDied;
-				}
-				else
-				{
-					build_up_value |= (1 << (3 - i));
-				}
-			}
+			buzzerOffAndAddNote(C5_4);
+			reactionGameState = reactionHexWaitForButtonsRelease;
+			REACTION_HEX_GUESSED_CORRECTLY = true;
+			textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = ' ';
+			REACTION_GAME_SCORE++;
 		}
 
-		if (!(reactionGameState == reactionJustDied))
+		// end of move
+		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
 		{
-			// check of button press pattern is the sought pattern
-			if (build_up_value == (0x0F & REACTION_GAME_HEX_VALUE_TO_FIND))
+			reactionGameState = reactionHexNextStep;
+			if (REACTION_GAME_HEX_ACTIVE_DIGIT == 3)
 			{
-				reactionGameState = reactionHexWaitForButtonsRelease;
-				REACTION_HEX_GUESSED_CORRECTLY = true;
-				textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = ' ';
-				REACTION_GAME_SCORE++;
-			}
-
-			// end of move
-			if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
-			{
-				// check if correct combination was pressed at end of move
-				reactionGameState = reactionHexNextStep;
-				if (!REACTION_HEX_GUESSED_CORRECTLY && REACTION_GAME_HEX_ACTIVE_DIGIT == 3)
-				{
-					reactionGameState = reactionJustDied;
-				}
+				reactionGameState = reactionJustDied;
 			}
 		}
 
 		// update
 		textBufToDisplay();
+		ledDisp->setDecimalPointsToDisplay(REACTION_GAME_DECIMAL_POINTS);
 		break;
 	}
 
@@ -3850,7 +3839,7 @@ void Apps::modeReactionGame()
 		// three rows of four horizontal segments in 4 digits 7 segment display.
 		// choose top row random. any combination of 4 (including zero) ==> 16 combinations.
 
-		if (random(0, 10) || !OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+		if (random(0, 10) || !REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT) // if pause enabled, 1 chance in ten that there will be no row added.
 		{
 			uint8_t new_segment;
 			uint32_t tmp_segments;
@@ -3953,7 +3942,7 @@ void Apps::modeReactionGame()
 
 	case reactionNewTurn:
 	{
-		if (!OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+		if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
 		{
 			REACTION_GAME_TIMER_STEP = 0; //reset animation step
 			if (REACTION_GAME_SCORE % 7 == 0)
@@ -3967,7 +3956,7 @@ void Apps::modeReactionGame()
 
 		REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
-		if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+		if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 		{
 			addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_GAME_TARGET]);
 		}
@@ -4001,7 +3990,7 @@ void Apps::modeReactionGame()
 		}
 		displayAllSegmentsToScreen();
 
-		if (!EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO || REACTION_GAME_LEVEL == 0)
+		if (!REACTION_OPTION_WHACKABIRD_OR_HEXHERO || REACTION_GAME_LEVEL == 0)
 		{
 			// in the easy level of sound mode, we show the lights.
 
@@ -4022,7 +4011,7 @@ void Apps::modeReactionGame()
 					//right button
 					REACTION_GAME_SCORE++;
 
-					if (EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+					if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 					{
 						// a small pause must be implemented after the button press before the new turn as off not to confuse the player
 						addNoteToBuzzerRepeated(rest_1, 4);
@@ -4039,7 +4028,7 @@ void Apps::modeReactionGame()
 					reactionGameState = reactionJustDied;
 
 					// zero points if you fail during the timed challenge
-					if (OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE)
+					if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
 					{
 						REACTION_GAME_SCORE = 0;
 					}
@@ -4060,16 +4049,16 @@ void Apps::modeReactionGame()
 									  eeprom_read_word(
 										  (uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
 										  REACTION_GUITAR_HERO_MODE * 48 +
-										  EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
-										  OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
+										  REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
+										  REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
 										  REACTION_GAME_LEVEL))
 		{
 			eeprom_update_word(
 
 				(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
 					REACTION_GUITAR_HERO_MODE * 48 +
-					EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO * 24 +
-					OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE * 12 +
+					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
+					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
 					REACTION_GAME_LEVEL,
 				REACTION_GAME_SCORE);
 
@@ -4089,7 +4078,7 @@ void Apps::modeReactionGame()
 		if (!TIMER_REACTION_END_OF_GAME_DELAY.getTimeIsNegative())
 		{
 			//end of display score, next game
-			if (!REACTION_GUITAR_HERO_MODE && EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO)
+			if (!REACTION_GUITAR_HERO_MODE && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 			{
 				reactionGameState = reactionSoundInit;
 			}
@@ -4115,10 +4104,11 @@ void Apps::modeReactionGame()
 
 	// option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
 	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
-	// lights ^= (-EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO ^ lights) & (1UL << LIGHT_LATCHING_1);
-	// lights ^= (-OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE ^ lights) & (1UL << LIGHT_LATCHING_2);
-	setButtonLight(LIGHT_LATCHING_1, EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO);
-	setButtonLight(LIGHT_LATCHING_2, OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE);
+	// lights ^= (-REACTION_OPTION_WHACKABIRD_OR_HEXHERO ^ lights) & (1UL << LIGHT_LATCHING_1);
+	// lights ^= (-REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT ^ lights) & (1UL << LIGHT_LATCHING_2);
+	setButtonLight(LIGHT_LATCHING_1, REACTION_OPTION_WHACKABIRD_OR_HEXHERO);
+	setButtonLight(LIGHT_LATCHING_2, REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT);
+	
 #endif
 }
 

@@ -238,10 +238,10 @@
 #define DRAW_CURSOR_SEGMENT general_uint8_t_3
 #define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
-#define REACTION_GAME_HEX_VALUE_TO_FIND general_uint8_t_3
 #define QUIZ_SCORE_MEMORY general_uint8_t_3
 
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
+#define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -278,11 +278,11 @@
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 #define POMODORO_ENABLE_INTERVAL_BEEP general_boolean2
 
-#define EXTRA_OPTION_REACTION_SOUND_MODE_GUITAR_HEX_HERO general_boolean3
+#define REACTION_OPTION_WHACKABIRD_OR_HEXHERO general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
 
-#define OPTION_REACTION_COUNTDOWN_MODE_HERO_ADD_PAUSE_MODE general_boolean4
+#define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
@@ -293,6 +293,7 @@
 #define MODE_SOUND_SONG_BUFFER bytes_list
 #define MODE_DREAMTIME_RANDOM_LIST bytes_list
 #define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
+#define REACTION_GAME_HEX_COMPLEMENT_WANTED bytes_list
 #define QUIZ_ANALOG_VALUES_CHECK bytes_list
 
 #define REACTION_GAME_SELECTED_NOTES array_8_bytes
