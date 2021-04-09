@@ -360,6 +360,92 @@ const uint8_t scales[] PROGMEM = {
     3, 2, 1, 1, 3, 2,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
+// const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
+//     80, //a
+//     20, //b
+//     15,  //c
+//     50, //d
+//     140, //e
+//     15, //f
+//     25, //g
+//     50, //h
+//     65, //i
+//     6, //j
+//     10, //k
+//     35, //l
+//     25, //m
+//     85, //n
+//     66, //o
+//     18, //p
+//     1, //q
+//     60, //r
+//     40, //s
+//     80, //t
+//     23, //u
+//     16, //v
+//     19, //w
+//     1, //x
+//     2, //y
+//     8 //z
+// };
+// scrabble dutch 
+const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
+    6, //a
+    2, //b
+    2,  //c
+    5, //d
+    18, //e
+    2, //f
+    3, //g
+    2, //h
+    4, //i
+    2, //j
+    3, //k
+    3, //l
+    3, //m
+    10, //n
+    6, //o
+    2, //p
+    1, //q
+    5, //r
+    5, //s
+    5, //t
+    3, //u
+    2, //v
+    2, //w
+    1, //x
+    1, //y
+    2//z
+};
+// const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
+//     1, //a
+//     0, //b
+//     0,  //c
+//     0, //d
+//     0, //e
+//     0, //f
+//     10, //g
+//     0, //h
+//     0, //i
+//     0, //j
+//     0, //k
+//     0, //l
+//     0, //m
+//     0, //n
+//     0, //o
+//     0, //p
+//     0, //q
+//     0, //r
+//     0, //s
+//     0, //t
+//     0, //u
+//     1, //v
+//     0, //w
+//     0, //x
+//     0, //y
+//     0 //z
+// };
+
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
     0x0F, 0x40, 0x40, 0x39, //wrench
@@ -689,7 +775,7 @@ public:
         PotentioSelector *selectorDial);
     void eraseEepromRangeLimited(uint8_t setting);
 
-    void setDefaultMode();
+    void initializeAppDataToDefault();
     void appSelector();
 
 private:
@@ -785,6 +871,7 @@ private:
     void randomSequence(uint8_t *sequenceList, uint8_t length);
     void shuffle(uint8_t *list, uint8_t length);
     void fill8BytesArrayWithZero();
+    uint8_t weightedRandomLetter();
     
     void nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue);
     void nextStep(int16_t *counter, bool countUpElseDown, int16_t minValue, int16_t maxValue, bool wrapAround);
@@ -943,7 +1030,6 @@ private:
         quizWaitForQuizMaster,
         quizWaitRandomTime,
         quizWaitPlayerPress,
-        quizPlayerPressed,
         quizDefineRoundWinner,
         quizWaitSomeTimeForNextRound,
         quizRoundAfterMath

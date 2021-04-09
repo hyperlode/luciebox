@@ -46,7 +46,6 @@ void Apps::appSelector()
 
 		// set to init state before a new app starts
 		splash_screen_playing = true;
-		// this->setDefaultMode();
 	}
 
 	if (splash_screen_playing)
@@ -55,7 +54,7 @@ void Apps::appSelector()
 		splash_screen_playing = this->init_app(init_app_init, selector_dial_value);
 		if (!splash_screen_playing)
 		{
-			this->setDefaultMode();
+			this->initializeAppDataToDefault();
 			this->app_init_edge = true;
 		}
 	}
@@ -220,7 +219,7 @@ void Apps::updateEveryAppCycleAfter()
 	setLedArray();
 }
 
-void Apps::setDefaultMode()
+void Apps::initializeAppDataToDefault()
 {
 	// allLights->setBrightness(0, false); // disable because it annoys me:)
 
@@ -962,7 +961,10 @@ void Apps::randomModeTrigger(bool forReal)
 	case RANDOMWORLD_RANDOMLETTER:
 	{
 		// show letter alphabeth, plus its position.
-		displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
+		// displayLetterAndPositionInAlphabet(textBuf, RANDOMWORLD_RANDOM_NUMBER);
+
+		displayLetterAndPositionInAlphabet(textBuf, (int16_t)weightedRandomLetter());
+		// numberToBufAsDecimal((int16_t)weightedRandomLetter());
 	}
 	break;
 
@@ -1158,7 +1160,7 @@ void Apps::modeSettings()
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
 			#ifdef ENABLE_EEPROM
-			//lights |= 1 << LIGHT_MOMENTARY_2; // will erase all memory. Purposly don't advertise
+			//lights |= 1 << LIGHT_MOMENTARY_2; // will erase all user program memory. Purposly don't advertise
 			lights |= 1 << LIGHT_MOMENTARY_3; // erases only high scores in games. Which is nice if you want to have a fresh start for a nice gamenight of "Lucieboxes and booz"
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 			{
@@ -1210,7 +1212,6 @@ void Apps::eraseEepromRangeLimited(uint8_t setting)
 		first = EEPROM_FIRST_ADDRESS_OF_USER_RANGE;
 		last = EEPROM_LAST_ADDRESS_OF_EEPROM_SOFT_ERASE;
 	}
-	
 
 	for (uint16_t i = first; i <= last; i++)
 	{
@@ -3747,12 +3748,20 @@ void Apps::modeReactionGame()
 		}
 
 		// add new hex char on left
-		REACTION_GAME_HEX_MEMORY[0] = random(1, 16); // do not include 0, it cannot be inputted with the buttons 
+
+		bool complementRequired = 0;
 
 		if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT){
+			complementRequired = !random(0, 4);
 			REACTION_GAME_DECIMAL_POINTS = REACTION_GAME_DECIMAL_POINTS<<1; 
-			REACTION_GAME_DECIMAL_POINTS |= random(0, 2);
+			REACTION_GAME_DECIMAL_POINTS |= complementRequired;
+		}else{
+			// if changing settings from complemtary mode to normal mode no residual static dots are wanted
+			// although it was actually a great little game idea: the dot stays static on the display, so, whenver a value is hovering over that particular spot, the compliment has to be provided.
+			REACTION_GAME_DECIMAL_POINTS = 0;
 		}
+
+		REACTION_GAME_HEX_MEMORY[0] = random(1 - complementRequired, 16 - complementRequired); // do not include numbers that don't require button presses 
 
 		uint8_t value_to_hex_char = (REACTION_GAME_HEX_MEMORY[0]) + 48;
 
@@ -4171,6 +4180,36 @@ bool Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue,
 		return false;
 	}
 	return true;
+}
+
+uint8_t Apps::weightedRandomLetter(){
+	// make a sum of all weights
+	// get a random number between 0 and the sum
+	// check in which interval the random number is 
+	// return index of interval
+	uint16_t sum = 0;
+	for (uint8_t i=0;i<26;i++){
+		// sum += letter_frequency_table_english_dutch_ish[i];
+		sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
+	}
+	// Serial.println("------");
+	// Serial.println(sum);
+
+	uint16_t pick = random(0,sum);
+	// Serial.println(pick);
+	sum = 0;
+	uint8_t i = 0;
+	while (sum <= pick)
+	{
+		// sum += letter_frequency_table_english_dutch_ish[i];
+		sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
+		// Serial.println(sum);
+		i ++;
+	}
+	// Serial.println(i);
+	return i-1;
+	// return (uint8_t)pick;
+	
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
@@ -4850,7 +4889,7 @@ void Apps::multitimer_start()
 	// this is the moment we chose a random starting timer if enabled.
 	if (this->multitimer_randomStarter)
 	{
-		randomSeed(millis());
+		// randomSeed(millis());
 		this->multitimer_activeTimer = (uint8_t)random(0, (long)MULTITIMER_TIMERS_COUNT);
 	}
 

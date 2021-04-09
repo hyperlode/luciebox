@@ -226,7 +226,7 @@ void setup()
 
 #ifdef ENABLE_APPS
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
-    pretbak_apps.setDefaultMode();
+    // pretbak_apps.initializeAppDataToDefault();
 #endif
 }
 
