@@ -257,7 +257,7 @@
 #define EEPROM_REACTION_GAME_GUITAR_HERO                // 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_GUITAR_HERO_WITH_PAUSES    // 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_HEX_HERO                   // 6 levels, each 2 bytes = 12bytes total
-#define EEPROM_REACTION_GAME_HEX_HERO_WITH_PAUSES       // NOT IMPLEMENTED// 6 levels, each 2 bytes = 12bytes total
+#define EEPROM_REACTION_GAME_HEX_HERO_WITH_COMPLEMENTS  // 6 levels, each 2 bytes = 12bytes total
 #define EEPROM_REACTION_GAME_TOTAL_LENGTH               96  // in game 8 games types * 6 levels * 2 bytes
 
 

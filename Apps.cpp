@@ -18,6 +18,8 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 
 	textHandle = ledDisp->getDisplayTextBufHandle();
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
+	inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
+	inactivity_timer.start();
 }
 
 void Apps::appSelector()
@@ -179,6 +181,14 @@ void Apps::appSelector()
 		}
 	}
 
+	if (binaryInputsEdgeUp){
+		inactivity_timer.start();
+	}
+	if (inactivity_timer.getCountDownTimerElapsedAndRestart()){
+		if (selected_app != APP_SELECTOR_MULTITIMER && selected_app != APP_SELECTOR_POMODORO){
+			playSongHappyDryer();
+		}
+	}
 	updateEveryAppCycleAfter();
 }
 
@@ -320,7 +330,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 void Apps::modeZen()
 {
 	// a wiff of tranquility in the overstimulated Luciebox world
-	// will do nothing except for beep every half an hour
+	// will do nothing except for beeping the inactivity timer
 	lights = 0x00;
 }
 

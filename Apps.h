@@ -66,6 +66,8 @@
 #define APP_SELECTOR_ZEN 23
 #endif
 
+#define INACTIVITY_TIME_BEEP_INDEX 61  // this is just an index, needs to be converted to seconds with the lookup table
+
 #define DRAW_GAME_RANDOM 0
 #define DRAW_GAME_WORD 1
 #define DRAW_GAME_NUMBER 2
@@ -253,6 +255,7 @@
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1
 #define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
+#define ZEN_APP_NEXT_ALARM general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define POMODORO_STATS_WORKING_GOOD general_long_2
@@ -848,7 +851,9 @@ private:
     long general_long_1;
     long general_long_2;
 
-    // specific      
+    // specific 
+    SuperTimer inactivity_timer;
+    
     BinaryInput *binaryInputs;
     DisplayManagement *ledDisp;
     Buzzer *buzzer;
