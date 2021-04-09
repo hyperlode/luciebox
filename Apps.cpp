@@ -4182,33 +4182,57 @@ bool Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue,
 	return true;
 }
 
+// uint8_t Apps::weightedRandomLetter(){
+// 	// make a sum of all weights
+// 	// get a random number between 0 and the sum
+// 	// check in which interval the random number is 
+// 	// return index of interval
+// 	uint16_t sum = 0;
+// 	for (uint8_t i=0;i<26;i++){
+// 		sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
+// 	}
+
+// 	uint16_t pick = random(0,sum);
+// 	sum = 0;
+// 	uint8_t i = 0;
+// 	while (sum <= pick)
+// 	{
+// 		sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
+// 		// Serial.println(sum);
+// 		i ++;
+// 	}
+// 	return i-1;
+	
+// }
+
 uint8_t Apps::weightedRandomLetter(){
 	// make a sum of all weights
 	// get a random number between 0 and the sum
 	// check in which interval the random number is 
 	// return index of interval
-	uint16_t sum = 0;
-	for (uint8_t i=0;i<26;i++){
-		// sum += letter_frequency_table_english_dutch_ish[i];
-		sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
-	}
-	// Serial.println("------");
-	// Serial.println(sum);
+	uint16_t pick = 65535;
+	while (true){
 
-	uint16_t pick = random(0,sum);
-	// Serial.println(pick);
-	sum = 0;
-	uint8_t i = 0;
-	while (sum <= pick)
-	{
-		// sum += letter_frequency_table_english_dutch_ish[i];
-		sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
-		// Serial.println(sum);
-		i ++;
+		uint16_t sum = 0;
+		for (uint8_t i=0;i<26;i++){
+			sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
+			if (sum > pick ){
+				return i;
+			}
+		}
+		pick = random(0,sum);
+
 	}
-	// Serial.println(i);
-	return i-1;
-	// return (uint8_t)pick;
+
+	// sum = 0;
+	// uint8_t i = 0;
+	// while (sum <= pick)
+	// {
+	// 	sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
+	// 	// Serial.println(sum);
+	// 	i ++;
+	// }
+	// return i-1;
 	
 }
 

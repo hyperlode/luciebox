@@ -424,7 +424,7 @@ const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
 //     0, //d
 //     0, //e
 //     0, //f
-//     10, //g
+//     5, //g
 //     0, //h
 //     0, //i
 //     0, //j
@@ -439,11 +439,11 @@ const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
 //     0, //s
 //     0, //t
 //     0, //u
-//     1, //v
+//     0, //v
 //     0, //w
 //     0, //x
 //     0, //y
-//     0 //z
+//     1 //z
 // };
 
 const uint8_t app_splash_screens[] PROGMEM = {
@@ -477,7 +477,8 @@ const uint8_t app_splash_screens[] PROGMEM = {
     // 0x60, 0x3a, 0x2e, 0x42, // body builder. gamer.
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
-    0x5F, 0x79, 0x1C, 0x3D // DBUG
+
+    //0x5F, 0x79, 0x1C, 0x3D // DBUG
 };
 
 const uint8_t guitar_hero_level_speeds[] PROGMEM = {101, 75, 50, 40, 30, 20};                 // time in ms per step
