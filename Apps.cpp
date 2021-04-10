@@ -717,8 +717,8 @@ void Apps::stopwatch()
 			time_millis /= 10;
 		}
 
-		textBuf[0] = ' ';
-		textBuf[1] = ' ';
+		textBuf[0] = SPACE_FAKE_ASCII;
+		textBuf[1] = SPACE_FAKE_ASCII;
 
 		intToDigitsString(textBuf, time_millis, true);
 
@@ -2461,6 +2461,7 @@ void Apps::modeHackTime()
 
 	bool address_changed = false;
 	const char drive_letter[3] = {'F', 'R', 'E'};
+	int16_t memory_sizes [3] = {32255, 2047, 1023};
 
 	if (this->app_init_edge)
 	{
@@ -2468,7 +2469,8 @@ void Apps::modeHackTime()
 	}
 
 	// write to mem if possible
-	if (!this->app_init_edge && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
+	// if (!this->app_init_edge && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
+	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
 	{
 		// change value in address location (left char on display)
 		// will not work for flash memory
@@ -2502,6 +2504,8 @@ void Apps::modeHackTime()
 		{
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
 			{
+				// blink_offset = millis() % 1000 - 750 ; // will keep on showing the memory letter after key press
+
 				// which memory are we investigating?
 				nextStepRotate(&HACKTIME_MEMORY_SELECT, 1, 0, 2);
 			}
@@ -2536,9 +2540,11 @@ void Apps::modeHackTime()
 			if (encoder_dial->getDelta())
 			{
 				address_changed = true;
-				HACKTIME_ADDRESS += encoder_dial->getDelta() * (1 + 15 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_3) > 0) + 255 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_2) > 0)
-																//+ 4095 *((binaryInputsValue & 1<<BUTTON_INDEXED_MOMENTARY_1)>0) // saving memory here. but, it's not really needed. with 32000 address locations, going time 255 is fast enough. (takes about 125 steps)
-															   );
+				HACKTIME_ADDRESS += encoder_dial->getDelta() * 
+				(1 
+				+ 3 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_3) > 0) // advance four bytes. The display can show four bytes at once, so, we can advance 'one screen' per step
+				+ 255 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_2) > 0) // quick move
+				);
 				set_blink_offset();
 			}
 			else
@@ -2548,11 +2554,8 @@ void Apps::modeHackTime()
 			}
 		}
 
-		// ok ok, let's do one little check.
-		if (HACKTIME_ADDRESS <= 0)
-		{
-			HACKTIME_ADDRESS = 0;
-		}
+		// check memory boundary limits
+		checkBoundaries(&HACKTIME_ADDRESS, 0, memory_sizes[HACKTIME_MEMORY_SELECT], true);
 
 		// get value from memory address and memory type
 		for (uint8_t i = 0; i < 4; i++)
@@ -2560,22 +2563,22 @@ void Apps::modeHackTime()
 			switch (HACKTIME_MEMORY_SELECT)
 			{
 			case HACKTIME_MEMORY_FLASH:
-				textHandle[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
+				array_8_bytes[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
 				break;
 
 			case HACKTIME_MEMORY_RAM:
-				textHandle[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
+				array_8_bytes[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
 				break;
 
 			case HACKTIME_MEMORY_EEPROM:
 				#ifdef ENABLE_EEPROM
-					textHandle[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
+					array_8_bytes[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
 				#else
-					textHandle[i] = 111;
+					array_8_bytes[i] = 111;
 				#endif
 				break;
 			}
-			array_8_bytes[i] = textHandle[i];
+			// array_8_bytes[i] = textHandle[i];
 		}
 	}
 
@@ -2605,12 +2608,14 @@ void Apps::modeHackTime()
 		// compressed display mode (to save memory)
 		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS)
 		{
-			// // do nothing
-			// for(uint8_t i=0;i<4;i++){
-			// 	textHandle[i] = array_8_bytes[i];
-			// }
+			// do nothing
+			for(uint8_t i=0;i<4;i++){
+				textHandle[i] = array_8_bytes[i];
+			}
+			
 		}
-		else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
+		else 
+		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
 		{
 			displayAllSegments = 0;
 			for (uint8_t i = 0; i < 4; i++)
@@ -3330,9 +3335,7 @@ void Apps::modeSimon()
 		SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false) / 4 + 1); // start counting from player 0 to display
 
 		numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
-		//textBuf[0] = ' ';
 		textBuf[1] = 'P';
-		//textBuf[2] = ' ';
 
 		// Instead of computer, user choses the next light in simon sequence.
 		SIMON_CUSTOM_BUILD_UP = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1);
@@ -3796,7 +3799,8 @@ void Apps::modeReactionGame()
 		REACTION_GAME_HEX_ACTIVE_DIGIT = 3;
 		while (
 			REACTION_GAME_HEX_ACTIVE_DIGIT > 0 &&
-			(textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == ' ' || textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII))
+			(textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII
+			 || textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] == SPACE_FAKE_ASCII))
 		{
 			REACTION_GAME_HEX_ACTIVE_DIGIT--;
 		}
@@ -3831,7 +3835,7 @@ void Apps::modeReactionGame()
 			buzzerOffAndAddNote(C5_4);
 			reactionGameState = reactionHexWaitForButtonsRelease;
 			REACTION_HEX_GUESSED_CORRECTLY = true;
-			textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = ' ';
+			textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = SPACE_FAKE_ASCII;
 			REACTION_GAME_SCORE++;
 		}
 
@@ -4212,7 +4216,6 @@ uint8_t Apps::weightedRandomLetter(){
 	// return index of interval
 	uint16_t pick = 65535;
 	while (true){
-
 		uint16_t sum = 0;
 		for (uint8_t i=0;i<26;i++){
 			sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
@@ -4221,19 +4224,7 @@ uint8_t Apps::weightedRandomLetter(){
 			}
 		}
 		pick = random(0,sum);
-
 	}
-
-	// sum = 0;
-	// uint8_t i = 0;
-	// while (sum <= pick)
-	// {
-	// 	sum += pgm_read_byte_near(letter_frequency_table_english_dutch_ish + i);
-	// 	// Serial.println(sum);
-	// 	i ++;
-	// }
-	// return i-1;
-	
 }
 
 uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)

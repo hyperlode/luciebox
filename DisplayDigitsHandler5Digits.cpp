@@ -236,19 +236,18 @@ void DisplayManagement::charsToSevenSegment(char *text, byte *digits)
 void DisplayManagement::charToSevenSegment(char character, byte *digit)
 {
 
-	if (character == ' ')
-	{
-		character = SPACE_FAKE_ASCII;
-	}
+	// if (character == ' ')
+	// {
+	// 	character = SPACE_FAKE_ASCII;
+	// }
 
 	if (character == '?')
 	{
+		// toggles one segment of the digit
 		byte i = random(0, 7);
-
-		// toggles one segment of the digit ?!
 		setBit(digit, !getBit(digit, i), i); //random on or off...
 	}
-	else if (character < 91)
+	else if (character < 91 && character > 47)
 	{
 		*digit = pgm_read_byte_near(selected_ascii_to_7seg_digit + character - 48);
 	}

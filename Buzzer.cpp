@@ -276,7 +276,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         }
     }
 
-    textBuf[2] = ' '; // optimized: assume empty at start
+    textBuf[2] = 63; // SPACE_FAKE_ASCII = 63 optimized: assume empty at start
 
     // note length
     textBuf[3] = this->getLength(note) + 48; // 2^(3 -x) --> note length is 8,4,2,1
