@@ -214,6 +214,7 @@
 #define COUNTER_GEIGER general_uint16_t_2
 
 #define REACTION_GAME_LEVEL general_uint8_t_1
+#define HACK_TIME_ACTIVE_VALUE general_uint8_t_1
 #define SEQUENCER_TEMP_NOTE general_uint8_t_1
 #define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
 #define COMPOSER_SONG_LENGTH general_uint8_t_1
@@ -273,7 +274,7 @@
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
-#define HACKTIME_VALUE_TO_SOUND general_boolean2
+// #define HACKTIME_VALUE_TO_SOUND general_boolean2
 #define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean2
 #define REACTION_GUITAR_HERO_MODE general_boolean2
 #define SIMON_END_OF_GAME general_boolean2

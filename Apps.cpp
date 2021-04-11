@@ -2468,129 +2468,18 @@ void Apps::modeHackTime()
 		HACKTIME_MOVE_TIMER.start(-500);
 	}
 
-	// write to mem if possible
-	// if (!this->app_init_edge && (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
 	{
-		// change value in address location (left char on display)
-		// will not work for flash memory
-		array_8_bytes[0] += encoder_dial->getDelta();
-
-		if (encoder_dial->getDelta())
-		{
-			// store value.
-			switch (HACKTIME_MEMORY_SELECT)
-			{
-				// case HACKTIME_MEMORY_FLASH:
-				//it's not possible to write to flash
-				// break;
-
-			case HACKTIME_MEMORY_RAM:
-				*((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
-				break;
-
-			case HACKTIME_MEMORY_EEPROM:
-				#ifdef ENABLE_EEPROM
-				eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
-				#endif
-				break;
-			}
-			addNoteToBuzzer(C5_8); // sound is good, but, 6 bytes are saved by disabling it.
-		}
-	}
-	else
-	{
+		// set memory type
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
-			{
-				// blink_offset = millis() % 1000 - 750 ; // will keep on showing the memory letter after key press
-
-				// which memory are we investigating?
-				nextStepRotate(&HACKTIME_MEMORY_SELECT, 1, 0, 2);
-			}
-			else
-			{
-				// display mode change (how to represent the memory value?)
-				nextStepRotate(&HACKTIME_DISPLAY_MODE, 1, 0, 3);
-			}
+			blink_offset = ((signed long)millis() % 1000) - 750 ; // will keep on showing the memory letter after key press
+			// blink_offset = (millis() % 1000);
+			// blink_offset = (millis() % 1000) - 750;
+			// which memory are we investigating?
+			nextStepRotate(&HACKTIME_MEMORY_SELECT, 1, 0, 2);
 		}
 
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-		{
-			// sound mode.
-			HACKTIME_VALUE_TO_SOUND = !HACKTIME_VALUE_TO_SOUND;
-		}
-
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
-		{
-			// auto scroll mode
-			if (HACKTIME_MOVE_TIMER.getCountDownTimerElapsedAndRestart())
-			{
-				HACKTIME_ADDRESS++;
-				address_changed = true;
-			}
-
-			// set speed.
-			dialOnEdgeChangeInitTimerPercentage(&HACKTIME_MOVE_TIMER);
-		}
-		else
-		{
-			// manual scroll
-			if (encoder_dial->getDelta())
-			{
-				address_changed = true;
-				HACKTIME_ADDRESS += encoder_dial->getDelta() * 
-				(1 
-				+ 3 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_3) > 0) // advance four bytes. The display can show four bytes at once, so, we can advance 'one screen' per step
-				+ 255 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_2) > 0) // quick move
-				);
-				set_blink_offset();
-			}
-			else
-			{
-				// button address change.
-				address_changed = address_changed || modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
-			}
-		}
-
-		// check memory boundary limits
-		checkBoundaries(&HACKTIME_ADDRESS, 0, memory_sizes[HACKTIME_MEMORY_SELECT], true);
-
-		// get value from memory address and memory type
-		for (uint8_t i = 0; i < 4; i++)
-		{
-			switch (HACKTIME_MEMORY_SELECT)
-			{
-			case HACKTIME_MEMORY_FLASH:
-				array_8_bytes[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
-				break;
-
-			case HACKTIME_MEMORY_RAM:
-				array_8_bytes[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
-				break;
-
-			case HACKTIME_MEMORY_EEPROM:
-				#ifdef ENABLE_EEPROM
-					array_8_bytes[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
-				#else
-					array_8_bytes[i] = 111;
-				#endif
-				break;
-			}
-			// array_8_bytes[i] = textHandle[i];
-		}
-	}
-
-	// convert memory to sounds... Be prepared for a post-modernist masterpiece.
-	if (address_changed && HACKTIME_VALUE_TO_SOUND)
-	{
-		buzzerOffAndAddNote(array_8_bytes[0]);
-	}
-
-	// display
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
-	{
 		// display address location
 
 		if (millis_blink_750ms())
@@ -2602,20 +2491,50 @@ void Apps::modeHackTime()
 		{
 			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
 		}
-	}
-	else
-	{
-		// compressed display mode (to save memory)
+	
+	}else 	{
+		
+		// read and write
+
+
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1))
+		{
+			// change value in address location (left char on display)
+			// will not work for flash memory
+			
+			array_8_bytes[0] += encoder_dial->getDelta();
+
+			if (encoder_dial->getDelta() != 0){
+				// store value.
+				// change ram
+				if (HACKTIME_MEMORY_SELECT == HACKTIME_MEMORY_RAM){
+					*((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
+				}
+
+				if (HACKTIME_MEMORY_SELECT == HACKTIME_MEMORY_EEPROM)
+				{
+					#ifdef ENABLE_EEPROM
+					eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
+					#endif
+				}
+			}
+		}
+
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		{
+				// display mode change (how to represent the memory value?)
+				nextStepRotate(&HACKTIME_DISPLAY_MODE, 1, 0, 3);
+
+		}
+		
 		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_CHARS)
 		{
 			// do nothing
 			for(uint8_t i=0;i<4;i++){
 				textHandle[i] = array_8_bytes[i];
 			}
-			
 		}
-		else 
-		if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
+		else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
 		{
 			displayAllSegments = 0;
 			for (uint8_t i = 0; i < 4; i++)
@@ -2628,7 +2547,82 @@ void Apps::modeHackTime()
 		{
 			ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
 		}
+		
 	}
+	
+	// address changing
+	address_changed = modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
+
+	// read mode 
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
+	{
+		// auto scroll mode
+		if (HACKTIME_MOVE_TIMER.getCountDownTimerElapsedAndRestart())
+		{
+			HACKTIME_ADDRESS++;
+			address_changed = true;
+		}
+
+		// set speed.
+		dialOnEdgeChangeInitTimerPercentage(&HACKTIME_MOVE_TIMER);
+	}
+	else if (binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_1)){
+
+	}else
+	{
+		// manual scroll
+		if (encoder_dial->getDelta())
+		{
+			address_changed = true;
+			HACKTIME_ADDRESS += encoder_dial->getDelta() * 
+			(1 
+			+ 3 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_3) > 0) // advance four bytes. The display can show four bytes at once, so, we can advance 'one screen' per step
+			+ 255 * ((binaryInputsValue & 1 << BUTTON_INDEXED_MOMENTARY_2) > 0) // quick move
+			);
+		}			
+	}
+
+	// check memory boundary limits
+	checkBoundaries(&HACKTIME_ADDRESS, 0, memory_sizes[HACKTIME_MEMORY_SELECT], true);
+
+	// get value from memory address and memory type
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		switch (HACKTIME_MEMORY_SELECT)
+		{
+		case HACKTIME_MEMORY_FLASH:
+			array_8_bytes[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
+			break;
+
+		case HACKTIME_MEMORY_RAM:
+			array_8_bytes[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
+			break;
+
+		case HACKTIME_MEMORY_EEPROM:
+			#ifdef ENABLE_EEPROM
+				array_8_bytes[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
+			#else
+				array_8_bytes[i] = 111;
+			#endif
+			break;
+		}
+	}
+	
+	// convert memory to sounds... Be prepared for post-modernist masterpieces
+	if ( (address_changed ))
+	if ( (address_changed || (HACK_TIME_ACTIVE_VALUE != array_8_bytes[0])))
+	{
+		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
+		{
+			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_2)){
+				buzzerOffAndAddNote(array_8_bytes[0]);
+			}
+			set_blink_offset();
+		}
+	}
+
+	//edge for value just changed
+	HACK_TIME_ACTIVE_VALUE = array_8_bytes[0];
 }
 
 bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)

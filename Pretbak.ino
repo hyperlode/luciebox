@@ -180,6 +180,16 @@ void processOuput()
 
 void setup()
 {
+    // fill up the ram with a default value. This is fun to check in HACK mode.
+    // by checking how much of the original values are still there, we can see how much RAM is used at its peak
+    // test done 20210409 with i=600 at init: dial was not working. But, ram values constant from address: 1075->2047
+    // for (uint16_t i=1000;i<2048;i++){
+    // for (uint16_t i=500;i<2048;i++){ // works, but display is trembling, dial not working
+    // for (uint16_t i=750;i<2048;i++){ // works, but dial not working
+    for (uint16_t i=1000;i<2048;i++){ // works, but dial not working
+        *((uint8_t *)i) = 63; // 63 is the random value in lucieAscii
+    }
+
     // trick to use the easy arduino libary
     // instead of complicated native functions
     attachInterrupt(0, isr0, CHANGE);
@@ -226,7 +236,6 @@ void setup()
 
 #ifdef ENABLE_APPS
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
-    // pretbak_apps.initializeAppDataToDefault();
 #endif
 }
 
