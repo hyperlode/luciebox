@@ -903,7 +903,8 @@ private:
     void setStandardTextToTextBuf(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
 
-    void decimalPointClockPositionOn();
+    //void decimalPointClockPositionOn();
+    void setSecondsBlinker(SuperTimer* timerToBlink);
     void setDecimalPoint(bool onElseOff, uint8_t digit);
 
     void addNoteToBuzzer(uint8_t note);
@@ -942,6 +943,7 @@ private:
 
     // specific 
     SuperTimer inactivity_timer;
+    SuperTimer always_on_timer;
     
     BinaryInput *binaryInputs;
     DisplayManagement *ledDisp;

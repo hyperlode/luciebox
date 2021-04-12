@@ -20,6 +20,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
 	inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
 	inactivity_timer.start();
+	always_on_timer.start();
 }
 
 void Apps::appSelector()
@@ -331,6 +332,8 @@ void Apps::modeZen()
 	// a wiff of tranquility in the overstimulated Luciebox world
 	// will do nothing except for beeping the inactivity timer
 	lights = 0x00;
+	always_on_timer.getTimeString(textHandle);
+	setSecondsBlinker(&always_on_timer);
 }
 
 void Apps::modeDreamtime()
@@ -613,7 +616,8 @@ void Apps::pomodoroTimer()
 		}
 	}
 
-	setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(), 1);
+	// setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(), 1);
+	setSecondsBlinker(&POMODORO_TIMER);
 
 	// leds
 	if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
@@ -705,11 +709,14 @@ void Apps::stopwatch()
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 	{
+		// normal clock with minutes and seconds
 		pSsuperTimer->getTimeString(textBuf);
-		setDecimalPoint(pSsuperTimer->getSecondsBlinker(), 1);
+		// setDecimalPoint(pSsuperTimer->getSecondsBlinker(), 1);
+		setSecondsBlinker(pSsuperTimer);
 	}
 	else
 	{
+		// stopwatch. Accuracy depending on total time
 		timeDisplayShift = 0;
 		while (time_millis > 9999)
 		{
@@ -4442,6 +4449,10 @@ void Apps::noteToDisplay(uint8_t note)
 	buzzer->noteToDisplay(textHandle, decimalDotsHandle, note);
 }
 
+void Apps::setSecondsBlinker(SuperTimer* ptimerToBlink){
+	setDecimalPoint(ptimerToBlink->getSecondsBlinker(),1);
+}
+
 void Apps::setDecimalPoint(bool onElseOff, uint8_t digit)
 {
 	ledDisp->setDecimalPointToDisplay(onElseOff, digit);
@@ -4452,11 +4463,6 @@ void Apps::setButtonLight(uint8_t button_light, bool onElseOff)
 	// light = button light i.e. LIGHT_LATCHING_2
 	// https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
 	lights ^= (-onElseOff ^ lights) & (1UL << button_light);
-}
-
-void Apps::decimalPointClockPositionOn()
-{
-	setDecimalPoint(true, 1);
 }
 
 void Apps::setBlankDisplay()
