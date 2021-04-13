@@ -242,6 +242,7 @@
 #define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
 #define QUIZ_SCORE_MEMORY general_uint8_t_3
+#define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
 
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
@@ -904,8 +905,10 @@ private:
     void setStandardTextToTextHANDLE(uint8_t textPosition);
 
     //void decimalPointClockPositionOn();
-    void setSecondsBlinker(SuperTimer* timerToBlink);
+    void displayTimerSecondsBlinker(SuperTimer* timerToBlink);
     void setDecimalPoint(bool onElseOff, uint8_t digit);
+    bool getCountDownTimerHasElapsed(SuperTimer* timerToBlink);
+    void initiateCountDowntimerWith500Millis(SuperTimer* ptimer);
 
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);

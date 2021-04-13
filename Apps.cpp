@@ -333,7 +333,7 @@ void Apps::modeZen()
 	// will do nothing except for beeping the inactivity timer
 	lights = 0x00;
 	always_on_timer.getTimeString(textHandle);
-	setSecondsBlinker(&always_on_timer);
+	displayTimerSecondsBlinker(&always_on_timer);
 }
 
 void Apps::modeDreamtime()
@@ -342,8 +342,7 @@ void Apps::modeDreamtime()
 
 	if (this->app_init_edge)
 	{
-		this->TIMER_DREAMTIME.start(-500);
-		// MODE_DREAMTIME_STEP = 0;
+		// initiateCountDowntimerWith500Millis(&TIMER_DREAMTIME);
 		MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT = true;
 	}
 
@@ -434,7 +433,7 @@ void Apps::pomodoroTimer()
 	{
 		// pomodoro timer running
 
-		if (!POMODORO_TIMER.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&POMODORO_TIMER))
 		{
 			POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
 			if (POMODORO_IN_BREAK)
@@ -617,7 +616,7 @@ void Apps::pomodoroTimer()
 	}
 
 	// setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(), 1);
-	setSecondsBlinker(&POMODORO_TIMER);
+	displayTimerSecondsBlinker(&POMODORO_TIMER);
 
 	// leds
 	if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
@@ -712,7 +711,7 @@ void Apps::stopwatch()
 		// normal clock with minutes and seconds
 		pSsuperTimer->getTimeString(textBuf);
 		// setDecimalPoint(pSsuperTimer->getSecondsBlinker(), 1);
-		setSecondsBlinker(pSsuperTimer);
+		displayTimerSecondsBlinker(pSsuperTimer);
 	}
 	else
 	{
@@ -845,7 +844,7 @@ void Apps::modeRandomWorld()
 			ledDisp->setNumberToDisplayAsDecimal(8888);
 
 			// check for continued key press at random number generator to activate settings menu
-			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) && !RANDOMWORLD_ROLL_SPEED.getTimeIsNegative())
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) && (getCountDownTimerHasElapsed(&RANDOMWORLD_ROLL_SPEED)))
 			{
 				// hack to set upper limit for random number
 
@@ -915,7 +914,7 @@ void Apps::modeRandomWorld()
 
 	case randomWorldAutoRollDelay:
 	{
-		if (!RANDOMWORLD_AUTODRAW_DELAY.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&RANDOMWORLD_AUTODRAW_DELAY))
 		{
 			// set up animation
 			RANDOMWORLD_ROLL_SPEED.start(-30);
@@ -1369,7 +1368,7 @@ void Apps::quiz()
 
 	case quizWaitRandomTime:
 	{
-		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&QUIZ_RANDOM_WAIT_TIME))
 		{
 			// //TEST SHOW RAW ANALOG VALUES
 			// //empty analog input buffer
@@ -1502,7 +1501,8 @@ void Apps::quiz()
 		}
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
-			QUIZ_RANDOM_WAIT_TIME.start(-500);
+			// QUIZ_RANDOM_WAIT_TIME.start(-500);
+			initiateCountDowntimerWith500Millis(&QUIZ_RANDOM_WAIT_TIME);
 			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX]++;
 			quizState = quizWaitSomeTimeForNextRound;
 		}
@@ -1515,7 +1515,7 @@ void Apps::quiz()
 
 	case quizWaitSomeTimeForNextRound:
 	{
-		if (!QUIZ_RANDOM_WAIT_TIME.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&QUIZ_RANDOM_WAIT_TIME))
 		{
 			quizState = quizWaitForQuizMaster;
 		}
@@ -1831,7 +1831,8 @@ void Apps::modeSoundNotes()
 	if (this->app_init_edge)
 	{
 		SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
-		SOUND_NOTE_AUTO_TIMER.start(-500);
+		
+		// initiateCountDowntimerWith500Millis(&SOUND_NOTE_AUTO_TIMER);
 		SOUND_NOTES_SCALE_ROOT = C4_4;
 		modeSoundNotesInitScale();
 
@@ -2042,7 +2043,8 @@ void Apps::modeMovie()
 	//reset saved led disp state.
 	if (this->app_init_edge)
 	{
-		MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
+		// MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
+		initiateCountDowntimerWith500Millis(&MOVIE_MODE_FRAME_INTERVAL_TIMER);
 		loadNextMovie();
 		MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START = true;
 	}
@@ -2472,7 +2474,8 @@ void Apps::modeHackTime()
 
 	if (this->app_init_edge)
 	{
-		HACKTIME_MOVE_TIMER.start(-500);
+		// HACKTIME_MOVE_TIMER.start(-500);
+		initiateCountDowntimerWith500Millis(&HACKTIME_MOVE_TIMER);
 	}
 
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
@@ -3280,7 +3283,8 @@ void Apps::modeSimon()
 	if (this->app_init_edge)
 	{
 		SIMON_BLINK_TIMER.setInitTimeMillis(-250);
-		SIMON_STEP_TIMER.setInitTimeMillis(-500);
+		// SIMON_STEP_TIMER.setInitTimeMillis(-500);
+		initiateCountDowntimerWith500Millis(&SIMON_STEP_TIMER);
 
 		SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
 		SIMON_PLAYERS_COUNT = 1;
@@ -3442,13 +3446,13 @@ void Apps::modeSimon()
 		if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
 		{
 			lights |= 1 << lights_indexed[SIMON_ACTIVE_LIGHT];
-			if (!SIMON_BLINK_TIMER.getTimeIsNegative())
+			if (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER))
 			{
 				SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
 			}
 		}
 
-		if (SIMON_INDEX >= SIMON_LENGTH && !SIMON_BLINK_TIMER.getTimeIsNegative())
+		if (SIMON_INDEX >= SIMON_LENGTH && (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER)))
 		{
 			// after last step display, immediatly continue
 			if (SIMON_END_OF_GAME)
@@ -3463,7 +3467,7 @@ void Apps::modeSimon()
 			break;
 		}
 
-		if (SIMON_STEP_TIMER.getTimeIsNegative())
+		if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
 		{
 			// still in step.
 			break;
@@ -3592,11 +3596,7 @@ void Apps::modeSimon()
 void Apps::modeReactionGame()
 {
 #ifdef ENABLE_REACTION_APP
-	//yellow button active at start: yellow button is also a guess button
-	// big red active: timed game
-	// small red right active: time progressively shorter as game advances
-	// small red left active: play by sound.
-
+	
 	if (this->app_init_edge)
 	{
 		reactionGameState = reactionWaitForStart;
@@ -3672,6 +3672,8 @@ void Apps::modeReactionGame()
 			if (!REACTION_GUITAR_HERO_MODE && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 			{
 				reactionGameState = reactionSoundInit;
+				// initiateCountDowntimerWith500Millis(&TIMER_REACTION_END_OF_GAME_DELAY);
+				// TIMER_REACTION_END_OF_GAME_DELAY.start(-1000);
 			}
 			else
 			{
@@ -3679,18 +3681,33 @@ void Apps::modeReactionGame()
 			}
 		}
 		break;
+		
 	}
 	case reactionSoundInit:
 	{
-		// play all soundsn so the player gets a feel for them.
-		for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		{
-			addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[i]);
-			this->addNoteToBuzzerRepeated(rest_1, 2);
+		// IF YOU HAVE MEMORY: ENABLE!!		
+		// initiateCountDowntimerWith500Millis also set timer! don't forget				
+		// for whack a bird, show button light at tone sound
+		if (TIMER_REACTION_END_OF_GAME_DELAY.getCountDownTimerElapsedAndRestart()){
+			if (REACTION_WHACK_A_BIRD_SHOW_NOTES >=4 ){
+				reactionGameState = reactionNewGame;
+			}else{
+		 	 	addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_WHACK_A_BIRD_SHOW_NOTES]);
+				REACTION_WHACK_A_BIRD_SHOW_NOTES++;
+			}
 		}
-		addNoteToBuzzerRepeated(rest_1, 4);
-		reactionGameState = reactionNewGame;
+		lights |=   1<< lights_indexed[REACTION_WHACK_A_BIRD_SHOW_NOTES-1];
+		
+		// play all soundsn so the player gets a feel for them.
+		// for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+		// {
+		// 	addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[i]);
+		// 	this->addNoteToBuzzerRepeated(rest_1, 2);
+		// }
+		// addNoteToBuzzerRepeated(rest_1, 4);
+		// reactionGameState = reactionNewGame;
 	}
+	break;
 
 	case reactionNewGame:
 	{
@@ -3841,7 +3858,7 @@ void Apps::modeReactionGame()
 		}
 
 		// end of move
-		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
 		{
 			reactionGameState = reactionHexNextStep;
 			if (REACTION_GAME_HEX_ACTIVE_DIGIT == 3)
@@ -3934,7 +3951,7 @@ void Apps::modeReactionGame()
 			}
 		}
 
-		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
 		{
 			//   // if not all needed buttons pressed, player is dead.
 			//   // check dps!
@@ -3991,7 +4008,7 @@ void Apps::modeReactionGame()
 
 	case reactionPlaying:
 	{
-		if (!TIMER_REACTION_GAME_SPEED.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
 		{
 			this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
 			if (REACTION_GAME_TIMER_STEP == 12)
@@ -4099,7 +4116,7 @@ void Apps::modeReactionGame()
 
 	case reactionFinished:
 	{
-		if (!TIMER_REACTION_END_OF_GAME_DELAY.getTimeIsNegative())
+		if (getCountDownTimerHasElapsed(&TIMER_REACTION_END_OF_GAME_DELAY))
 		{
 			//end of display score, next game
 			if (!REACTION_GUITAR_HERO_MODE && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
@@ -4449,7 +4466,16 @@ void Apps::noteToDisplay(uint8_t note)
 	buzzer->noteToDisplay(textHandle, decimalDotsHandle, note);
 }
 
-void Apps::setSecondsBlinker(SuperTimer* ptimerToBlink){
+void Apps::initiateCountDowntimerWith500Millis(SuperTimer* pTimer){
+	pTimer->start(-500);
+}
+
+bool Apps::getCountDownTimerHasElapsed(SuperTimer* timerToBlink){
+	return !timerToBlink->getTimeIsNegative();
+
+}
+
+void Apps::displayTimerSecondsBlinker(SuperTimer* ptimerToBlink){
 	setDecimalPoint(ptimerToBlink->getSecondsBlinker(),1);
 }
 
@@ -4941,7 +4967,9 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 			}
 		}
 
-		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() < 11 && this->multitimer_timers[this->multitimer_activeTimer].getTimeIsNegative())
+		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() < 11 
+		&& (!getCountDownTimerHasElapsed( &(multitimer_timers[this->multitimer_activeTimer])  ) )   
+		)
 		{
 			// check for last ten seconds of countdown timer
 			addNoteToBuzzer(34 + this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute());
@@ -5210,7 +5238,8 @@ void Apps::multitimer_refresh()
 
 bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)
 {
-	return !this->multitimer_timers[timerIndex].getTimeIsNegative();
+	// return !this->multitimer_timers[timerIndex].getTimeIsNegative();
+	return getCountDownTimerHasElapsed(&multitimer_timers[timerIndex]);
 }
 
 bool Apps::multitimer_checkAllTimersFinished()
