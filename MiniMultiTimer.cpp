@@ -135,17 +135,17 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index)
 		if (this->activeTimer == index)
 		{
 			this->next();
-			(*this->buzzer).programBuzzerRoll(35);
+			(*this->buzzer).addNoteToRoll(35);
 		}
 		else if ((index + 1) <= this->timers_count)
 		{
-			(*this->buzzer).programBuzzerRoll(129);
+			(*this->buzzer).addNoteToRoll(129);
 			this->timerDisplayed = index; //display time of pressed timer button
 		}
 	}
 	else if (this->state == paused)
 	{
-		(*this->buzzer).programBuzzerRoll(230);
+		(*this->buzzer).addNoteToRoll(230);
 		this->timerDisplayed = index; //display time of pressed timer button
 	}
 }
@@ -213,9 +213,9 @@ void MiniMultiTimer::buzzerRefresh(bool alarm)
 			uint8_t tmp = random(20, 50);
 			for (uint8_t i = 0; i < 5; i++)
 			{
-				(*this->buzzer).programBuzzerRoll(tmp);
+				(*this->buzzer).addNoteToRoll(tmp);
 
-				(*this->buzzer).programBuzzerRoll(rest_4);
+				(*this->buzzer).addNoteToRoll(rest_4);
 			}
 			//(*this->buzzer).addRandomSoundToRoll(20,80 );
 		}
@@ -223,14 +223,14 @@ void MiniMultiTimer::buzzerRefresh(bool alarm)
 		if (this->timers[this->activeTimer].getTimeSecondsAbsolute() < 11 && this->timers[this->activeTimer].getTimeIsNegative())
 		{
 			// check for last ten seconds of countdown timer
-			(*this->buzzer).programBuzzerRoll(34 + this->timers[this->activeTimer].getTimeSecondsAbsolute());
-			// (*this->buzzer).programBuzzerRoll(63);
+			(*this->buzzer).addNoteToRoll(34 + this->timers[this->activeTimer].getTimeSecondsAbsolute());
+			// (*this->buzzer).addNoteToRoll(63);
 		}
 
 		if (this->timers[this->activeTimer].getTimeSecondsAbsolute() % 60 == 0)
 		{
-			(*this->buzzer).programBuzzerRoll(44);
-			// (*this->buzzer).programBuzzerRoll(63);
+			(*this->buzzer).addNoteToRoll(44);
+			// (*this->buzzer).addNoteToRoll(63);
 		}
 	}
 }

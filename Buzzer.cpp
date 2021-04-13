@@ -42,29 +42,9 @@ uint8_t Buzzer::getPin()
     return this->pin;
 }
 
-// void Buzzer::loadBuzzerTrack(const uint8_t *seq, uint8_t song_index)
-// {
-//     // list of songs is an array in flash, every song starts with a length byte of the song. (song cannot be more than 255 bytes)
-
-//     // fast forward to correct index.
-//     uint16_t song_start_index = 0;
-//     for (uint16_t song=0;song<song_index;song++){
-//         song_start_index += pgm_read_byte_near(seq +song_start_index); // add length of song to start index (to get to the start of the next song.)
-//     }
-
-//     for (uint16_t note_index=1;note_index < pgm_read_byte_near(seq + song_start_index); note_index++){
-
-//         uint8_t note = pgm_read_byte_near(seq + song_start_index + note_index);
-//         if (note == BUZZER_ROLL_SONG_STOPVALUE){
-//             break;
-//         }
-//         programBuzzerRoll(note);
-//     }
-// }
-
-void Buzzer::programBuzzerRoll(uint8_t sound)
+void Buzzer::addNoteToRoll(uint8_t note)
 {
-    //load one sound to next slot in roll
+    //load one note to next slot in roll
 
     //sound:
     //0 = empty slot
@@ -76,7 +56,7 @@ void Buzzer::programBuzzerRoll(uint8_t sound)
     //1/8 stop = 63
 
     this->programSlotCounter = getNextBuzzerRollSlot(true);
-    this->buzzerRoll[this->programSlotCounter] = sound;
+    this->buzzerRoll[this->programSlotCounter] = note;
 
     //http://members.efn.org/~qehn/global/building/cents.htm
     //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
@@ -85,14 +65,13 @@ void Buzzer::programBuzzerRoll(uint8_t sound)
 uint8_t Buzzer::addRandomSoundToRoll(uint8_t lowest, uint8_t highest)
 {
     uint8_t r = random(lowest, highest);
-    programBuzzerRoll(r);
+    addNoteToRoll(r);
     return r;
 }
 
 void Buzzer::doBuzzerRoll()
 {
-    //play all the sounds in the array.
-    //array of 16 bytes
+    //play all the sounds in the roll (buffer)
     //0 stands for free and programmable
     //one playSlotCounter
 
@@ -276,7 +255,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         }
     }
 
-    textBuf[2] = 63; // SPACE_FAKE_ASCII = 63 optimized: assume empty at start
+    textBuf[2] = 62; // SPACE_FAKE_ASCII = 62 optimized: assume empty at start
 
     // note length
     textBuf[3] = this->getLength(note) + 48; // 2^(3 -x) --> note length is 8,4,2,1
@@ -356,7 +335,6 @@ void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
 // }
 void Buzzer::changeNoteToNextLength(int16_t *note)
 {
-
     *note += 64;
 
     if (*note > 254)

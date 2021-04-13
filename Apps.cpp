@@ -4453,7 +4453,7 @@ void Apps::buzzerOffAndAddNote(uint8_t note)
 
 void Apps::addNoteToBuzzer(uint8_t note)
 {
-	buzzer->programBuzzerRoll(note);
+	buzzer->addNoteToRoll(note);
 }
 
 void Apps::addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater)
@@ -4613,7 +4613,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 
 	for (uint8_t i = 0; i < length; i++)
 	{
-		buzzer->programBuzzerRoll(this->bytes_list[i]);
+		buzzer->addNoteToRoll(this->bytes_list[i]);
 	}
 }
 
