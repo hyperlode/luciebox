@@ -224,6 +224,8 @@ void Apps::initializeAppDataToDefault()
 {
 	// allLights->setBrightness(0, false); // disable because it annoys me:)
 
+	initiateCountDowntimerWith500Millis(&general_timer);
+
 	//buzzer  (buzzer off at init of splash screen)
 	buzzer->setSpeedRatio(2);
 	buzzer->setTranspose(0);
@@ -2475,7 +2477,7 @@ void Apps::modeHackTime()
 	if (this->app_init_edge)
 	{
 		// HACKTIME_MOVE_TIMER.start(-500);
-		initiateCountDowntimerWith500Millis(&HACKTIME_MOVE_TIMER);
+		// initiateCountDowntimerWith500Millis(&HACKTIME_MOVE_TIMER);
 	}
 
 	if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
@@ -3284,7 +3286,7 @@ void Apps::modeSimon()
 	{
 		SIMON_BLINK_TIMER.setInitTimeMillis(-250);
 		// SIMON_STEP_TIMER.setInitTimeMillis(-500);
-		initiateCountDowntimerWith500Millis(&SIMON_STEP_TIMER);
+		// initiateCountDowntimerWith500Millis(&SIMON_STEP_TIMER);
 
 		SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
 		SIMON_PLAYERS_COUNT = 1;
@@ -3673,7 +3675,7 @@ void Apps::modeReactionGame()
 			{
 				reactionGameState = reactionSoundInit;
 				// initiateCountDowntimerWith500Millis(&TIMER_REACTION_END_OF_GAME_DELAY);
-				// TIMER_REACTION_END_OF_GAME_DELAY.start(-1000);
+				TIMER_REACTION_END_OF_GAME_DELAY.start(-1000);
 			}
 			else
 			{
@@ -5253,7 +5255,7 @@ bool Apps::multitimer_checkAllTimersFinished()
 	return count == MULTITIMER_TIMERS_COUNT;
 }
 
-void Apps::multitimer_next(bool activePlayerDied)
+void Apps::multitimer_next(bool activePlayerDied) 
 {
 	// don't check for everybody dead here, check at refresh where next is called.
 
