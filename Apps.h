@@ -3,9 +3,9 @@
 
 #define ENABLE_EEPROM
 // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
-#define ENABLE_MULTITIMER_INTEGRATED
-#define ENABLE_SIMON_APP
-#define ENABLE_REACTION_APP
+// #define ENABLE_MULTITIMER_INTEGRATED
+// #define ENABLE_SIMON_APP
+// #define ENABLE_REACTION_APP
 
 #ifdef ENABLE_TILT_SWITCHES
 #define ENABLE_TILT_APP
@@ -132,7 +132,7 @@
 #define COMPOSER_STEP_TIMER general_timer
 #define SIMON_STEP_TIMER general_timer
 #define STOPWATCH_CHRONO_1 general_timer
-#define POMODORO_TIMER general_timer
+#define POMODORO_MAIN_TIMER general_timer
 #define DRAW_GAME_DISPLAY_TIMER general_timer
 #define HACKTIME_MOVE_TIMER general_timer
 #define COUNTING_LETTERS_AND_CHARS_TIMER general_timer
@@ -149,6 +149,7 @@
 #define RANDOMWORLD_AUTODRAW_DELAY general_timer_2
 #define SIMON_BLINK_TIMER general_timer_2
 #define STOPWATCH_CHRONO_2 general_timer_2
+#define POMODORO_PAUSE_TIMER general_timer_2
 
 #define SETTINGS_MODE_SELECTOR general_int16_t_1
 #define LETTERS_AND_CHARS_COUNTER general_int16_t_1
@@ -233,7 +234,7 @@
 #define DRAW_SHOW_MODE general_uint8_t_2
 #define QUIZ_MOST_RECENT_ROUND_WINNER_INDEX general_uint8_t_2
 #define HACKTIME_SOUND general_uint8_t_2
-#define RANDOMWORLD_CARD_FROM_DECK_INDEX general_uint8_t_2
+#define RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
 #define DRAW_ACTIVE_SEGMENT general_uint8_t_2
 
@@ -277,11 +278,11 @@
 #define STOPWATCH_PAUSED_2 general_boolean2
 // #define HACKTIME_VALUE_TO_SOUND general_boolean2
 #define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean2
-#define REACTION_GUITAR_HERO_MODE general_boolean2
+#define REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
-#define POMODORO_ENABLE_INTERVAL_BEEP general_boolean2
+#define POMODORO_ENABLE_HOURGLASS_VISUALS general_boolean2
 
 #define REACTION_OPTION_WHACKABIRD_OR_HEXHERO general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
@@ -801,7 +802,10 @@ private:
     void draw();
     void drawGame();
     void modeMovie();
+#ifdef ENABLE_POMODORO
     void pomodoroTimer();
+#endif
+
     void stopwatch();
     void modeGeiger();
     void modeSequencer();
@@ -1053,6 +1057,19 @@ private:
         randomWorldAutoRollDelay,
     };
     RandomWorldState randomWorldState;
+
+    enum PomodoroState: uint8_t 
+    {
+        pomoSetMainTime,
+        pomoSetPauseTime,
+        pomoSetRandomBeepInterval,
+        pomoStartMain,
+        pomoMainTicking,
+        pomoStartPause,
+        pomoPauseTicking,
+        pomoEndOfCycle
+    };
+    PomodoroState pomodoroState;
 
 #ifdef ENABLE_SIMON_APP
     // simon

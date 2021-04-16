@@ -91,7 +91,9 @@ void Apps::appSelector()
 			break;
 
 		case APP_SELECTOR_POMODORO:
+#ifdef ENABLE_POMODORO
 			pomodoroTimer();
+#endif
 			break;
 
 		case APP_SELECTOR_RANDOMWORLD:
@@ -349,7 +351,7 @@ void Apps::modeDreamtime()
 	}
 
 	bool allow_note_offset_change = true;
-
+	
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
 	{
 		if (this->TIMER_DREAMTIME.getCountDownTimerElapsedAndRestart())
@@ -396,10 +398,16 @@ void Apps::modeDreamtime()
 	ledDisp->setBinaryToDisplay(tmp);
 }
 
+#ifdef ENABLE_POMODORO
 void Apps::pomodoroTimer()
 {
 	uint8_t display_mode = POMODORO_DISPLAY_TIMER;
 	lights = 0;
+	this->displayAllSegments=0;
+
+	if (encoder_dial->getDelta() != 0 ){
+		set_blink_offset();
+	}
 
 	if (this->app_init_edge)
 	{
@@ -415,13 +423,14 @@ void Apps::pomodoroTimer()
 	}
 
 	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1);
-	POMODORO_ENABLE_INTERVAL_BEEP = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2);
+	POMODORO_ENABLE_HOURGLASS_VISUALS = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2);
 
+	
 	bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3));
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
 	{
-		POMODORO_TIMER.start();
+		POMODORO_MAIN_TIMER.start();
 
 		#ifdef ENABLE_EEPROM
 			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
@@ -492,7 +501,7 @@ void Apps::pomodoroTimer()
 
 		if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 		{
-			if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0 && POMODORO_ENABLE_INTERVAL_BEEP)
+			if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
 			{
 				if (random(0, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX) * 2) <= 1 - (tick_twice_a_second))
 				{
@@ -555,6 +564,28 @@ void Apps::pomodoroTimer()
 		{
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
+		if (POMODORO_ENABLE_HOURGLASS_VISUALS){
+
+			if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, false)){
+				// Serial.println(((int)(32 * POMODORO_TIMER.getTimeSeconds())) / POMODORO_TIMER.getInitTimeSecs());
+				#ifdef ENABLE_SERIAL
+				Serial.println("yeepespe");
+				#endif
+			}
+				// limit the amout of calls. 
+				// for (uint8_t i=0;i< (uint8_t)(32.0 * 
+				// ((float)POMODORO_TIMER.getTimeSeconds() / (float)POMODORO_TIMER.getInitTimeSecs())
+				// );i++)
+				
+				
+				for (uint8_t i=0;i<(uint8_t)((32*500)/1000);i++)
+				{
+					this->displayAllSegments |= 1 << i;
+				}
+				
+			// }
+		}
+		
 	}
 	break;
 
@@ -625,7 +656,7 @@ void Apps::pomodoroTimer()
 	{
 		lights |= 1 << LIGHT_MOMENTARY_1;
 	}
-	if (POMODORO_ENABLE_INTERVAL_BEEP)
+	if (POMODORO_ENABLE_HOURGLASS_VISUALS)
 	{
 		lights |= 1 << LIGHT_LATCHING_2;
 	}
@@ -640,8 +671,14 @@ void Apps::pomodoroTimer()
 		lights |= 1 << LIGHT_MOMENTARY_3;
 	}
 
-	textBufToDisplay();
+	if (!in_menu && POMODORO_ENABLE_HOURGLASS_VISUALS){
+		displayAllSegmentsToScreen();
+		// ledDisp->setBinaryToDisplay(this->displayAllSegmentsBuffer);
+	}else{
+		textBufToDisplay();
+	}
 }
+#endif
 
 void Apps::encoderDialRefreshTimeIndex(int16_t *indexHolder)
 {
@@ -852,7 +889,13 @@ void Apps::modeRandomWorld()
 
 				RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = encoder_dial->getValueLimited(100, false);
 
-				RANDOMWORLD_CARD_FROM_DECK_INDEX = 0; // reset the tombola.
+				RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG = 0; // reset the tombola.
+
+				if (encoder_dial->getDelta())
+				{
+					// for a more pleasant experience (no blinking during knob turning)
+					set_blink_offset();
+				}
 
 				if (millis_blink_750ms())
 				{
@@ -984,7 +1027,7 @@ void Apps::randomModeTrigger(bool forReal)
 			break;
 		}
 
-		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, 52);
+		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG, CARDS_DECK, 52);
 
 		//show playing card
 		if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
@@ -1010,7 +1053,7 @@ void Apps::randomModeTrigger(bool forReal)
 			// dont draw if not for real
 			break;
 		}
-		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_CARD_FROM_DECK_INDEX, CARDS_DECK, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+		RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG, CARDS_DECK, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
 	}
 	// NO BREAK HERE we just changed the random number to a part of a raffle draw.
 	case RANDOMWORLD_RANDOMNUMBER:
@@ -2458,8 +2501,6 @@ void Apps::drawGame()
 		break;
 	}
 
-	// lights ^= (- (DRAW_GAME_PICTURE_TYPE / 2) ^ lights) & (1UL << LIGHT_LATCHING_1);
-	//lights ^= (-(DRAW_GAME_PICTURE_TYPE % 2) ^ lights) & (1UL << LIGHT_LATCHING_2);
 	setButtonLight(LIGHT_LATCHING_1, DRAW_GAME_PICTURE_TYPE / 2);
 	setButtonLight(LIGHT_LATCHING_2, DRAW_GAME_PICTURE_TYPE % 2);
 
@@ -3639,7 +3680,7 @@ void Apps::modeReactionGame()
 		}
 
 		// check options
-		REACTION_GUITAR_HERO_MODE = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
+		REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
 		REACTION_OPTION_WHACKABIRD_OR_HEXHERO = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
 		REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT = (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
 
@@ -3651,7 +3692,7 @@ void Apps::modeReactionGame()
 			ledDisp->setNumberToDisplayAsDecimal(
 				eeprom_read_word(
 					(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
-					REACTION_GUITAR_HERO_MODE * 48 +
+					REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
 					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
 					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
 					REACTION_GAME_LEVEL));
@@ -3671,11 +3712,11 @@ void Apps::modeReactionGame()
 		// play game button pressed
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
-			if (!REACTION_GUITAR_HERO_MODE && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
+			if (!REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 			{
 				reactionGameState = reactionSoundInit;
-				// initiateCountDowntimerWith500Millis(&TIMER_REACTION_END_OF_GAME_DELAY);
-				TIMER_REACTION_END_OF_GAME_DELAY.start(-1000);
+				initiateCountDowntimerWith500Millis(&TIMER_REACTION_END_OF_GAME_DELAY);
+				REACTION_WHACK_A_BIRD_SHOW_NOTES = 0;
 			}
 			else
 			{
@@ -3683,13 +3724,12 @@ void Apps::modeReactionGame()
 			}
 		}
 		break;
-		
 	}
+
 	case reactionSoundInit:
 	{
-		// IF YOU HAVE MEMORY: ENABLE!!		
-		// initiateCountDowntimerWith500Millis also set timer! don't forget				
-		// for whack a bird, show button light at tone sound
+		// play all soundsn so the player gets a feel for them.
+		// show button light at tone sound
 		if (TIMER_REACTION_END_OF_GAME_DELAY.getCountDownTimerElapsedAndRestart()){
 			if (REACTION_WHACK_A_BIRD_SHOW_NOTES >=4 ){
 				reactionGameState = reactionNewGame;
@@ -3699,26 +3739,16 @@ void Apps::modeReactionGame()
 			}
 		}
 		lights |=   1<< lights_indexed[REACTION_WHACK_A_BIRD_SHOW_NOTES-1];
-		
-		// play all soundsn so the player gets a feel for them.
-		// for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
-		// {
-		// 	addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[i]);
-		// 	this->addNoteToBuzzerRepeated(rest_1, 2);
-		// }
-		// addNoteToBuzzerRepeated(rest_1, 4);
-		// reactionGameState = reactionNewGame;
+		break;
 	}
-	break;
 
 	case reactionNewGame:
 	{
 		REACTION_GAME_SCORE = 0;
 
-		if (REACTION_GUITAR_HERO_MODE)
+		if (REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP)
 		{
 			// guitar hero mode
-
 			REACTION_GAME_STEP_TIME_MILLIS = -10 * pgm_read_byte_near(guitar_hero_level_speeds + REACTION_GAME_LEVEL);
 
 			displayAllSegments = 0;
@@ -4091,7 +4121,7 @@ void Apps::modeReactionGame()
 		if (REACTION_GAME_SCORE > (int16_t)
 									  eeprom_read_word(
 										  (uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
-										  REACTION_GUITAR_HERO_MODE * 48 +
+										  REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
 										  REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
 										  REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
 										  REACTION_GAME_LEVEL))
@@ -4099,7 +4129,7 @@ void Apps::modeReactionGame()
 			eeprom_update_word(
 
 				(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
-					REACTION_GUITAR_HERO_MODE * 48 +
+					REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
 					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
 					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
 					REACTION_GAME_LEVEL,
@@ -4112,23 +4142,15 @@ void Apps::modeReactionGame()
 		// prepare next game delay.
 		TIMER_REACTION_END_OF_GAME_DELAY.start(-2000);
 		reactionGameState = reactionFinished;
-
-		break;
 	}
+	break;
 
 	case reactionFinished:
 	{
 		if (getCountDownTimerHasElapsed(&TIMER_REACTION_END_OF_GAME_DELAY))
 		{
 			//end of display score, next game
-			if (!REACTION_GUITAR_HERO_MODE && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
-			{
-				reactionGameState = reactionSoundInit;
-			}
-			else
-			{
-				reactionGameState = reactionNewGame;
-			}
+			reactionGameState = reactionNewGame;
 		}
 		else
 		{
@@ -4141,8 +4163,8 @@ void Apps::modeReactionGame()
 				ledDisp->setNumberToDisplayAsDecimal(REACTION_GAME_SCORE); //score display. Leave at beginning, to display high score blinking.
 			}
 		}
-		break;
 	}
+	break;
 	}
 
 	// option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
@@ -4151,6 +4173,11 @@ void Apps::modeReactionGame()
 	// lights ^= (-REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT ^ lights) & (1UL << LIGHT_LATCHING_2);
 	setButtonLight(LIGHT_LATCHING_1, REACTION_OPTION_WHACKABIRD_OR_HEXHERO);
 	setButtonLight(LIGHT_LATCHING_2, REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT);
+	// lights &= ~(1<<lights_indexed[LIGHT_LATCHING_1] );
+	// lights &= ~(1<<lights_indexed[LIGHT_LATCHING_2] );
+	// lights |=  REACTION_OPTION_WHACKABIRD_OR_HEXHERO << lights_indexed[LIGHT_LATCHING_1];
+	// lights |=  REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT << lights_indexed[LIGHT_LATCHING_2];
+
 	
 #endif
 }
