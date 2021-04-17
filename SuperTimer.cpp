@@ -104,7 +104,6 @@ void SuperTimer::startComplete(bool startInPauseMode, unsigned long startedMilli
 {
 	//boolean argument: if true, start in paused mode, is better than first start and then pause (no lag at all!)
 	//unsigned long: provided time for correcting the start value (if timer has to connect seamlessly to another event, include the millis() of the event (i.e. the ending of another timer)
-	//Serial.println("superstarted:");
 
 	this->startedMillis = (long)startedMillisPassing - this->initTimeMillis; //if initTimeMillis is positive: chronooffset, if negative, countdowntimer (time will be negative until zero reached)
 	setIsStarted(true);

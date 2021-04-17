@@ -29,7 +29,7 @@
 #define DISPLAY_IS_COMMON_ANODE true //check led displays both displays should be of same type   //also set in SevSeg5Digits.h : MODEISCOMMONANODE
 
 #define PIN_DUMMY 66
-#define PIN_DUMMY_2 67
+#define PIN_DUMMY_2 22  // randomly chosen. I've had it set to 67, and at some point, multiple segments were lit up. This STILL is C hey, it's gonna chug on forever!
 
 #define PIN_DISPLAY_DIGIT_0 11
 #define PIN_DISPLAY_DIGIT_1 10

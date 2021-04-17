@@ -3,9 +3,10 @@
 
 #define ENABLE_EEPROM
 // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
-// #define ENABLE_MULTITIMER_INTEGRATED
+#define ENABLE_MULTITIMER_INTEGRATED
 // #define ENABLE_SIMON_APP
 // #define ENABLE_REACTION_APP
+#define ENABLE_POMODORO
 
 #ifdef ENABLE_TILT_SWITCHES
 #define ENABLE_TILT_APP
@@ -132,7 +133,8 @@
 #define COMPOSER_STEP_TIMER general_timer
 #define SIMON_STEP_TIMER general_timer
 #define STOPWATCH_CHRONO_1 general_timer
-#define POMODORO_MAIN_TIMER general_timer
+// #define POMODORO_MAIN_TIMER general_timer
+#define POMODORO_TIMER general_timer
 #define DRAW_GAME_DISPLAY_TIMER general_timer
 #define HACKTIME_MOVE_TIMER general_timer
 #define COUNTING_LETTERS_AND_CHARS_TIMER general_timer
@@ -214,6 +216,7 @@
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
 #define COUNTER_GEIGER general_uint16_t_2
 
+#define POMODORO_VISUAL_TIMER_PROGRESS general_uint8_t_1
 #define REACTION_GAME_LEVEL general_uint8_t_1
 #define HACK_TIME_ACTIVE_VALUE general_uint8_t_1
 #define SEQUENCER_TEMP_NOTE general_uint8_t_1

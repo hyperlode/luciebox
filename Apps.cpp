@@ -430,7 +430,8 @@ void Apps::pomodoroTimer()
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
 	{
-		POMODORO_MAIN_TIMER.start();
+		// this->displayAllSegmentsBuffer = 0;
+		POMODORO_TIMER.start();
 
 		#ifdef ENABLE_EEPROM
 			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
@@ -498,9 +499,15 @@ void Apps::pomodoroTimer()
 		uint8_t tick_duration = encoder_dial->getValueLimited(160, false) / 2; // was 40, but set to 80 for less sensitivity. do again divide by four to limit options.
 		bool tick_twice_a_second = tick_duration > 40;
 		tick_duration = tick_duration % 40;
-
+	
 		if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 		{
+			POMODORO_VISUAL_TIMER_PROGRESS = 32 - (uint8_t) ( ((int)(32 * POMODORO_TIMER.getTimeSeconds())) / POMODORO_TIMER.getInitTimeSecs() * -1);
+			#ifdef ENABLE_SERIAL
+			Serial.println(POMODORO_VISUAL_TIMER_PROGRESS);
+			Serial.println(this->displayAllSegments,BIN);
+			#endif
+
 			if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
 			{
 				if (random(0, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX) * 2) <= 1 - (tick_twice_a_second))
@@ -564,27 +571,13 @@ void Apps::pomodoroTimer()
 		{
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
-		if (POMODORO_ENABLE_HOURGLASS_VISUALS){
 
-			if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, false)){
-				// Serial.println(((int)(32 * POMODORO_TIMER.getTimeSeconds())) / POMODORO_TIMER.getInitTimeSecs());
-				#ifdef ENABLE_SERIAL
-				Serial.println("yeepespe");
-				#endif
-			}
-				// limit the amout of calls. 
-				// for (uint8_t i=0;i< (uint8_t)(32.0 * 
-				// ((float)POMODORO_TIMER.getTimeSeconds() / (float)POMODORO_TIMER.getInitTimeSecs())
-				// );i++)
-				
-				
-				for (uint8_t i=0;i<(uint8_t)((32*500)/1000);i++)
-				{
-					this->displayAllSegments |= 1 << i;
-				}
-				
-			// }
+		// always set to buffer. later on it's decided if it's displayed or not.		
+		for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
+		{
+			this->displayAllSegments |= 1UL << i;
 		}
+		this->displayAllSegments &= ~(1UL << 15); // keep seconds blinker spot clear
 		
 	}
 	break;
@@ -648,7 +641,6 @@ void Apps::pomodoroTimer()
 		}
 	}
 
-	// setDecimalPoint(POMODORO_TIMER.getSecondsBlinker(), 1);
 	displayTimerSecondsBlinker(&POMODORO_TIMER);
 
 	// leds
@@ -673,7 +665,7 @@ void Apps::pomodoroTimer()
 
 	if (!in_menu && POMODORO_ENABLE_HOURGLASS_VISUALS){
 		displayAllSegmentsToScreen();
-		// ledDisp->setBinaryToDisplay(this->displayAllSegmentsBuffer);
+		
 	}else{
 		textBufToDisplay();
 	}
