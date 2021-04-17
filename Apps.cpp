@@ -403,7 +403,9 @@ void Apps::pomodoroTimer()
 {
 	uint8_t display_mode = POMODORO_DISPLAY_TIMER;
 	lights = 0;
+#ifdef POMODORO_ENABLE_HOURGLASS	
 	this->displayAllSegments=0;
+#endif
 
 	if (encoder_dial->getDelta() != 0 ){
 		set_blink_offset();
@@ -430,9 +432,7 @@ void Apps::pomodoroTimer()
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
 	{
-		// this->displayAllSegmentsBuffer = 0;
 		POMODORO_TIMER.start();
-
 		#ifdef ENABLE_EEPROM
 			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
 			eeprom_update_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX, POMODORO_PAUSE_TIME_INDEX);
@@ -502,7 +502,18 @@ void Apps::pomodoroTimer()
 	
 		if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
 		{
-			POMODORO_VISUAL_TIMER_PROGRESS = 32 - (uint8_t) ( ((int)(32 * POMODORO_TIMER.getTimeSeconds())) / POMODORO_TIMER.getInitTimeSecs() * -1);
+#ifdef POMODORO_ENABLE_HOURGLASS	
+			POMODORO_VISUAL_TIMER_PROGRESS =
+			 	(uint8_t)
+				( 
+					(
+						(int)(32 * 
+						POMODORO_TIMER.getTimeSeconds())
+					)
+				 	/ POMODORO_TIMER.getInitTimeSecs()
+					* -1
+				);
+#endif
 			#ifdef ENABLE_SERIAL
 			Serial.println(POMODORO_VISUAL_TIMER_PROGRESS);
 			Serial.println(this->displayAllSegments,BIN);
@@ -571,13 +582,14 @@ void Apps::pomodoroTimer()
 		{
 			setStandardTextToTextBuf(TEXT_PAUS);
 		}
-
+#ifdef POMODORO_ENABLE_HOURGLASS	
 		// always set to buffer. later on it's decided if it's displayed or not.		
 		for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
 		{
 			this->displayAllSegments |= 1UL << i;
 		}
 		this->displayAllSegments &= ~(1UL << 15); // keep seconds blinker spot clear
+#endif
 		
 	}
 	break;
@@ -648,10 +660,12 @@ void Apps::pomodoroTimer()
 	{
 		lights |= 1 << LIGHT_MOMENTARY_1;
 	}
+#ifdef POMODORO_ENABLE_HOURGLASS	
 	if (POMODORO_ENABLE_HOURGLASS_VISUALS)
 	{
 		lights |= 1 << LIGHT_LATCHING_2;
 	}
+#endif
 	if (POMODORO_AUTO_RESTART_ENABLED)
 	{
 		lights |= 1 << LIGHT_LATCHING_1;
@@ -662,13 +676,17 @@ void Apps::pomodoroTimer()
 		lights |= 1 << LIGHT_MOMENTARY_2;
 		lights |= 1 << LIGHT_MOMENTARY_3;
 	}
-
+#ifdef POMODORO_ENABLE_HOURGLASS	
 	if (!in_menu && POMODORO_ENABLE_HOURGLASS_VISUALS){
 		displayAllSegmentsToScreen();
 		
 	}else{
 		textBufToDisplay();
 	}
+#else
+	textBufToDisplay();
+#endif
+
 }
 #endif
 
