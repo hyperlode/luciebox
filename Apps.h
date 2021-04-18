@@ -4,10 +4,10 @@
 #define ENABLE_EEPROM
 // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
-#define ENABLE_SIMON_APP
+// #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
-// #define POMODORO_ENABLE_HOURGLASS
+#define POMODORO_ENABLE_HOURGLASS
 
 #ifdef ENABLE_TILT_SWITCHES
 #define ENABLE_TILT_APP
@@ -107,6 +107,9 @@
 #define POMODORO_DISPLAY_SHOW_GOOD 2
 #define POMODORO_DISPLAY_SHOW_BAD 3
 #define POMODORO_DISPLAY_BEEP_PROBABILITY 4
+#define POMODORO_DISPLAY_TIMER_HOURGLASS 5
+#define POMODORO_DISPLAY_SHOW_TALLY 6
+
 #define POMODORO_NONSENSE_TIME 60001
 
 #define HACKTIME_MEMORY_FLASH 0
@@ -206,6 +209,7 @@
 
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
+#define POMODORO_SOUND general_int16_t_4
 
 #define REACTION_GAME_TARGET general_uint16_t_1
 #define GEIGER_INCREASE_CHANCE general_uint16_t_1
@@ -213,9 +217,11 @@
 #define SIMON_ACTIVE_LIGHT general_uint16_t_1
 #define SOUND_MODE_SCALE_RANGE_LENGTH general_uint16_t_1
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_START general_uint16_t_1
+#define POMODORO_STATS_WORKING_BAD general_uint16_t_1
 
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
 #define COUNTER_GEIGER general_uint16_t_2
+#define POMODORO_STATS_WORKING_GOOD general_uint16_t_2
 
 #define POMODORO_VISUAL_TIMER_PROGRESS general_uint8_t_1
 #define REACTION_GAME_LEVEL general_uint8_t_1
@@ -251,6 +257,7 @@
 
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
+#define POMODORO_TALLY_TYPE general_uint8_t_4
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -258,14 +265,12 @@
 #define RANDOMWORLD_ANIMATION_DELAY general_long_1
 #define SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL general_long_1
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
-#define POMODORO_STATS_WORKING_BAD general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1
 #define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
 #define ZEN_APP_NEXT_ALARM general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
-#define POMODORO_STATS_WORKING_GOOD general_long_2
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
@@ -291,6 +296,7 @@
 #define REACTION_OPTION_WHACKABIRD_OR_HEXHERO general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
+#define POMODORO_IN_MENU_EDGE_DETECTOR general_boolean3
 
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 
@@ -496,6 +502,8 @@ const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50
 #define ANIMATE_CIRCLE_OFFSET 4
 #define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 56
 #define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 92
+#define SWEEP_OFFSET 112
+#define FADE_IN_OFFSET 196
 
 #define MAX_FRAMES_MOVIES_FLASH 84 // important, set the number of total frames (including stop frames)
 const uint8_t disp_4digits_animations[] PROGMEM = {
@@ -512,24 +520,20 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x08, 0x00, 0x00, 0x00,
     0x10, 0x00, 0x00, 0x00,
     0x20, 0x00, 0x00, 0x00,
-    
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x01, 0x00, 0x00, 0x00,  // top circle (for sequencer)
     0x00, 0x01, 0x00, 0x00,
     0x00, 0x00, 0x01, 0x00,
     0x00, 0x00, 0x00, 0x01,
-
-    0x00, 0x00, 0x00, 0x40,
+    0x00, 0x00, 0x00, 0x40, 
     0x00, 0x00, 0x40, 0x00,
     0x00, 0x40, 0x00, 0x00,
     0x40, 0x00, 0x00, 0x00,
-    
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x08, 0x00, 0x00, 0x00, // bottom bar (for sequencer)
     0x00, 0x08, 0x00, 0x00,
     0x00, 0x00, 0x08, 0x00,
     0x00, 0x00, 0x00, 0x08,
-
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // horizontal right to left sweep.
     0x00, 0x00, 0x00, 0x06,
@@ -543,52 +547,47 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x30, 0x00, 0x00,
     0x06, 0x00, 0x00, 0x00,
     0x49, 0x00, 0x00, 0x00,
-    0x30, 0x00, 0x00, 0x00, //last byte is byte 52.
-
+    0x30, 0x00, 0x00, 0x00, 
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x00, 0x00, 0x00, 0x00, // vertical swoop
     0x01, 0x01, 0x01, 0x01,
     0x22, 0x22, 0x22, 0x22,
     0x40, 0x40, 0x40, 0x40,
     0x14, 0x14, 0x14, 0x14,
-    0x08, 0x08, 0x08, 0x08, // byte 77,
+    0x08, 0x08, 0x08, 0x08, 
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
-
-    0x00, 0x00, 0x00, 0x00,
-    0x21, 0x00, 0x00, 0x00, // sweep in
+    0x00, 0x00, 0x00, 0x00, // sweep in
+    0x21, 0x00, 0x00, 0x00,
     0x71, 0x00, 0x00, 0x00,
     0x7B, 0x00, 0x00, 0x00,
-    0xFF, 0x00, 0x00, 0x00,
-    0xFF, 0x21, 0x00, 0x00,
-    0xFF, 0x71, 0x00, 0x00,
-    0xFF, 0x7B, 0x00, 0x00,
-    0xFF, 0xFF, 0x00, 0x00,
-    0xFF, 0xFF, 0x21, 0x00,
-    0xFF, 0xFF, 0x71, 0x00,
-    0xFF, 0xFF, 0x7B, 0x00,
-    0xFF, 0xFF, 0xFF, 0x00,
-    0xFF, 0xFF, 0xFF, 0x21,
-    0xFF, 0xFF, 0xFF, 0x71,
-    0xFF, 0xFF, 0xFF, 0x7B,
-
-    0xFF, 0xFF, 0xFF, 0xFF, // horizonal sweep.sweep out
-    0xDE, 0xFF, 0xFF, 0xFF,
-    0x8E, 0xFF, 0xFF, 0xFF,
-    0x84, 0xFF, 0xFF, 0xFF,
-    0x00, 0xFF, 0xFF, 0xFF,
-    0x00, 0xDE, 0xFF, 0xFF,
-    0x00, 0x8E, 0xFF, 0xFF,
-    0x00, 0x84, 0xFF, 0xFF,
-    0x00, 0x00, 0xFF, 0xFF,
-    0x00, 0x00, 0xDE, 0xFF,
-    0x00, 0x00, 0x8E, 0xFF,
-    0x00, 0x00, 0x84, 0xFF,
-    0x00, 0x00, 0x00, 0xFF,
-    0x00, 0x00, 0x00, 0xDE,
-    0x00, 0x00, 0x00, 0x8E,
-    0x00, 0x00, 0x00, 0x84,
-
-
+    0x7F, 0x00, 0x00, 0x00,
+    0x7F, 0x21, 0x00, 0x00,
+    0x7F, 0x71, 0x00, 0x00,
+    0x7F, 0x7B, 0x00, 0x00,
+    0x7F, 0x7F, 0x00, 0x00,
+    0x7F, 0x7F, 0x21, 0x00,
+    0x7F, 0x7F, 0x71, 0x00,
+    0x7F, 0x7F, 0x7B, 0x00,
+    0x7F, 0x7F, 0x7F, 0x00,
+    0x7F, 0x7F, 0x7F, 0x21,
+    0x7F, 0x7F, 0x7F, 0x71,
+    0xFF, 0x7F, 0x7F, 0x7B,
+    0x7F, 0x7F, 0x7F, 0x7F, // horizonal sweep.sweep out
+    0x5E, 0x7F, 0x7F, 0x7F,
+    0x0E, 0x7F, 0x7F, 0x7F,
+    0x04, 0x7F, 0x7F, 0x7F,
+    0x00, 0x7F, 0x7F, 0x7F,
+    0x00, 0x5E, 0x7F, 0x7F,
+    0x00, 0x0E, 0x7F, 0x7F,
+    0x00, 0x04, 0x7F, 0x7F,
+    0x00, 0x00, 0x7F, 0x7F,
+    0x00, 0x00, 0x5E, 0x7F,
+    0x00, 0x00, 0x0E, 0x7F,
+    0x00, 0x00, 0x04, 0x7F,
+    0x00, 0x00, 0x00, 0x7F,
+    0x00, 0x00, 0x00, 0x5E,
+    0x00, 0x00, 0x00, 0x0E,
+    0x00, 0x00, 0x00, 0x04,
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
 };
 
@@ -829,7 +828,7 @@ private:
 #endif
 
     // application helper methods
-
+    // void pomodoroScoreValueManipulator(uint16_t* score, uint8_t buttonIndexIncrease, uint8_t buttonView);
     void modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
 #ifdef ENABLE_MULTITIMER_INTEGRATED
     void multitimer_setDefaults();
@@ -975,6 +974,7 @@ private:
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
     char textBuf[4];
+    // char textBuf2[4];
     char *textHandle;        // contains the text for the display. (4 chars)
     uint8_t decimalPoints;   // segment 4 = bit 3, ....   00043210 (segment number)
     byte *decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
@@ -1062,18 +1062,18 @@ private:
     };
     RandomWorldState randomWorldState;
 
-    enum PomodoroState: uint8_t 
-    {
-        pomoSetMainTime,
-        pomoSetPauseTime,
-        pomoSetRandomBeepInterval,
-        pomoStartMain,
-        pomoMainTicking,
-        pomoStartPause,
-        pomoPauseTicking,
-        pomoEndOfCycle
-    };
-    PomodoroState pomodoroState;
+    // enum PomodoroState: uint8_t 
+    // {
+    //     pomoSetMainTime,
+    //     pomoSetPauseTime,
+    //     pomoSetRandomBeepInterval,
+    //     pomoStartMain,
+    //     pomoMainTicking,
+    //     pomoStartPause,
+    //     pomoPauseTicking,
+    //     pomoEndOfCycle
+    // };
+    // PomodoroState pomodoroState;
 
 #ifdef ENABLE_SIMON_APP
     // simon
