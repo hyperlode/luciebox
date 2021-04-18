@@ -425,54 +425,17 @@ void Apps::pomodoroTimer()
 	}
 
 	POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1);
-	
 	bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3));
 
 	// in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
 
-	encoderDialRefreshTimeIndex(&MULTITIMER_DIAL_TIME_INDEX);
-	this->multitimer_setTimerInitCountTimeByTimeIndex(i, MULTITIMER_DIAL_TIME_INDEX);
-
-	if (getCountDownTimerHasElapsed(&POMODORO_TIMER))
-		{
-			POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
-			if (POMODORO_IN_BREAK)
-			{
-				// finished main pomodoro
-				playSongHappyDryer();
-
-				if (POMODORO_AUTO_RESTART_ENABLED)
-				{
-					POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
-					POMODORO_TIMER.start();
-				}
-				else
-				{
-					POMODORO_TIMER.reset();
-					POMODORO_IN_BREAK = false;
-				}
-			}
-			else
-			{
-				// coming out of break. Not executed at starting Pomodoro by switch.
-
-				loadBuzzerTrack(SONG_ATTACK);
-				POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
-				POMODORO_TIMER.start();
-			}
-		}
-	// if (!POMODORO_IN_BREAK){
-
-	// 	POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
-	// }else{
-
-	// }
-
-	if (!in_menu)
+	if (!in_menu && !app_init_edge)
 	{
 		// pomodoro timer running
 
-		if (POMODORO_IN_MENU_EDGE_DETECTOR){
+		if (!POMODORO_FIRST_TICKING_CYCLING_DONE){
+			POMODORO_FIRST_TICKING_CYCLING_DONE = true;
+			POMODORO_IN_BREAK = false;
 			// just started timing
 			POMODORO_TIMER.start();
 			#ifdef ENABLE_EEPROM
@@ -481,8 +444,6 @@ void Apps::pomodoroTimer()
 				eeprom_update_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX, POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX);
 			#endif
 		}
-
-		
 		
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
@@ -540,14 +501,41 @@ void Apps::pomodoroTimer()
 				};
 			}
 
-			// if (POMODORO_SOUND > 0)
-			// {
-				// no sound when zero
-				if (buzzer->getBuzzerRollEmpty()) // if end of clock signal sounds, no ticking! erase to optimize memory
+			// no sound when zero
+			if (buzzer->getBuzzerRollEmpty()) // if end of clock signal sounds, no ticking! erase to optimize memory
+			{
+				buzzer->playTone(500, 1+ (unsigned long)POMODORO_SOUND % 40); // works well
+			}
+		}
+
+		// timer
+		if (getCountDownTimerHasElapsed(&POMODORO_TIMER))
+		{
+			POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
+			if (POMODORO_IN_BREAK)
+			{
+				// finished main pomodoro
+
+				playSongHappyDryer();
+				if (POMODORO_AUTO_RESTART_ENABLED)
 				{
-					buzzer->playTone(500, 1+ (unsigned long)POMODORO_SOUND % 40); // works well
+					POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
+					POMODORO_TIMER.start();
 				}
-			// }
+				else
+				{
+					POMODORO_TIMER.reset();
+					POMODORO_IN_BREAK = false;
+				}
+			}
+			else
+			{
+				// coming out of break. Not executed at starting Pomodoro by switch.
+
+				loadBuzzerTrack(SONG_ATTACK);
+				POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
+				POMODORO_TIMER.start();
+			}
 		}
 
 		// inviting lights to press on the buttons
@@ -556,9 +544,10 @@ void Apps::pomodoroTimer()
 	}
 	else
 	{
+		POMODORO_FIRST_TICKING_CYCLING_DONE = false;
 		// in main menu
 		POMODORO_TIMER.reset();
-		
+		POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
 
 		// set timer up for change
 		int16_t *active_seconds_modifier = &POMODORO_MAIN_CLOCK_TIME_INDEX; // normal time setting is default option
@@ -590,14 +579,11 @@ void Apps::pomodoroTimer()
 		{
 			lights |= 1 << LIGHT_LATCHING_3;
 		}
-
 	}
 
 	if ( binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
 		display_mode = POMODORO_DISPLAY_TIMER_HOURGLASS;
 	}
-
-	POMODORO_IN_MENU_EDGE_DETECTOR = in_menu;
 
 	// display
 	switch (display_mode)
@@ -691,8 +677,6 @@ void Apps::pomodoroTimer()
 #else
 	if (millis_blink_750ms()){
 		textBufToDisplay();
-	}else{
-		ledDisp->setTextBufToDisplay(textBuf2);
 	}
 #endif
 

@@ -4,7 +4,7 @@
 #define ENABLE_EEPROM
 // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
-// #define ENABLE_SIMON_APP
+#define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define POMODORO_ENABLE_HOURGLASS
@@ -296,7 +296,7 @@
 #define REACTION_OPTION_WHACKABIRD_OR_HEXHERO general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
-#define POMODORO_IN_MENU_EDGE_DETECTOR general_boolean3
+#define POMODORO_FIRST_TICKING_CYCLING_DONE general_boolean3
 
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 
