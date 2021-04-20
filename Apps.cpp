@@ -219,7 +219,8 @@ void Apps::updateEveryAppCycleBefore()
 
 void Apps::updateEveryAppCycleAfter()
 {
-	setLedArray();
+	// setLedArray();
+	ledDisp->setLedArray(lights);
 }
 
 void Apps::initializeAppDataToDefault()
@@ -497,7 +498,8 @@ void Apps::pomodoroTimer()
 				{
 					// random has 0 included. as we have to take into account the double ticking,
 					// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
-					addNoteToBuzzer(C5_1);
+					// addNoteToBuzzer(C5_1);
+					buzzerPlayApproval();
 				};
 			}
 
@@ -669,13 +671,13 @@ void Apps::pomodoroTimer()
 		displayAllSegmentsToScreen();
 		
 	// }else{
-		if (millis_blink_750ms() ){
+		if (millis_blink_250_750ms() ){
 			textBufToDisplay();
 		}
 	// }
 
 #else
-	if (millis_blink_750ms()){
+	if (millis_blink_250_750ms()){
 		textBufToDisplay();
 	}
 #endif
@@ -827,7 +829,7 @@ void Apps::modeRandomWorld()
 			// set autoroll time.
 			RANDOMWORLD_AUTODRAW_DELAY.setInitTimeMillis(-1000 * (long)delay_seconds);
 
-			if (millis_blink_750ms())
+			if (millis_blink_250_750ms())
 			{
 				setStandardTextToTextHANDLE(TEXT_AUTO);
 			}
@@ -901,7 +903,8 @@ void Apps::modeRandomWorld()
 			// animated
 			if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
 			{
-				addNoteToBuzzer(C7_8);
+				// addNoteToBuzzer(C7_8);
+				buzzerPlayApproval();
 				randomModeTrigger(false);
 			}
 		}
@@ -925,7 +928,7 @@ void Apps::modeRandomWorld()
 					set_blink_offset();
 				}
 
-				if (millis_blink_750ms())
+				if (millis_blink_250_750ms())
 				{
 					setStandardTextToTextHANDLE(TEXT_SET);
 				}
@@ -945,7 +948,8 @@ void Apps::modeRandomWorld()
 			// randomWorldState = randomWorldRollingEnd;
 			if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
 			{
-				addNoteToBuzzer(C7_8);
+				// addNoteToBuzzer(C7_8);
+				buzzerPlayApproval();
 				randomModeTrigger(false);
 
 				// roll slower and slower until threshold reached.
@@ -964,7 +968,8 @@ void Apps::modeRandomWorld()
 			#endif
 
 			randomWorldState = randomWorldShowResult;
-			buzzerOffAndAddNote(D4_8);
+			// buzzerOffAndAddNote(D4_8);
+			buzzerPlayApproval();
 		}
 	}
 	break;
@@ -1340,7 +1345,8 @@ void Apps::modeTallyKeeper()
 			}
 			else
 			{
-				buzzerOffAndAddNote(C5_2);
+				// buzzerOffAndAddNote(C5_2);
+				buzzerPlayApproval();
 			}
 		}
 	}
@@ -1461,7 +1467,8 @@ void Apps::quiz()
 			if (binaryInputsEdgeUp & 1 << i)
 			{
 				QUIZ_SCORE[i] = 0;
-				addNoteToBuzzer(C4_1);
+				// addNoteToBuzzer(C4_1);
+				buzzerPlayDisappointment();
 			}
 		}
 	}
@@ -2554,16 +2561,12 @@ void Apps::modeHackTime()
 		// set memory type
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			blink_offset = ((signed long)millis() % 1000) - 750 ; // will keep on showing the memory letter after key press
-			// blink_offset = (millis() % 1000);
-			// blink_offset = (millis() % 1000) - 750;
-			// which memory are we investigating?
 			nextStepRotate(&HACKTIME_MEMORY_SELECT, 1, 0, 2);
 		}
 
 		// display address location
 
-		if (millis_blink_750ms())
+		if (millis_blink_250_750ms() || binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
 			ledDisp->setBlankDisplay();
 			textHandle[0] = drive_letter[HACKTIME_MEMORY_SELECT];
@@ -3498,7 +3501,7 @@ void Apps::modeSimon()
 	{
 		if (SIMON_END_OF_GAME)
 		{
-			if (millis_blink_750ms())
+			if (millis_blink_250_750ms())
 			{
 				numberToBufAsDecimal(SIMON_LENGTH);
 				textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
@@ -3714,7 +3717,7 @@ void Apps::modeReactionGame()
 
 		// display level and high score
 #ifdef ENABLE_EEPROM
-		if (millis_blink_750ms())
+		if (millis_blink_250_750ms())
 		{
 			lights |= 1 << LIGHT_LATCHING_3;
 			ledDisp->setNumberToDisplayAsDecimal(
@@ -3910,7 +3913,8 @@ void Apps::modeReactionGame()
 		// check of button press pattern is the sought pattern
 		if (!diff_between_needed_and_pressed)
 		{
-			buzzerOffAndAddNote(C5_4);
+			// buzzerOffAndAddNote(C5_4);
+			buzzerPlayApproval();
 			reactionGameState = reactionHexWaitForButtonsRelease;
 			REACTION_HEX_GUESSED_CORRECTLY = true;
 			textBuf[REACTION_GAME_HEX_ACTIVE_DIGIT] = SPACE_FAKE_ASCII;
@@ -4371,7 +4375,7 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 	}
 
 	//blink alternatively song number and "load" or "save"
-	if (millis_blink_750ms())
+	if (millis_blink_250_750ms())
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		lights |= 1 << LIGHT_LATCHING_3;
@@ -4475,7 +4479,7 @@ bool Apps::millis_half_second_period()
 	return millis() % 500 > 250;
 }
 
-bool Apps::millis_blink_750ms()
+bool Apps::millis_blink_250_750ms()
 {
 	// true for shorter part of the second
 	return (millis() - blink_offset) % 1000 > 750;
@@ -4490,6 +4494,14 @@ void Apps::set_blink_offset()
 void Apps::textBufToDisplay()
 {
 	ledDisp->setTextBufToDisplay(textBuf);
+}
+
+void Apps::buzzerPlayApproval(){
+	this->buzzerOffAndAddNote(C7_8);
+}
+
+void Apps::buzzerPlayDisappointment(){
+	this->buzzerOffAndAddNote(C4_1);
 }
 
 void Apps::buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note)
@@ -4552,10 +4564,10 @@ void Apps::setBlankDisplay()
 {
 	ledDisp->setBlankDisplay();
 }
-void Apps::setLedArray()
-{
-	ledDisp->setLedArray(lights);
-}
+// void Apps::setLedArray()
+// {
+	// ledDisp->setLedArray(lights);
+// }
 void Apps::textBufToDisplayAllSegments()
 {
 	ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
@@ -4805,7 +4817,6 @@ void Apps::miniMultiTimer()
 	(LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
 	(LIGHT_SET_TIMERS_COUNT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 	this->lights = lights;
-	// setLedArray();
 	setDecimalPoint(LIGHT_SECONDS_BLINKER & settingsLights, 1);
 }
 #endif
@@ -4828,7 +4839,9 @@ void Apps::multitimer_integrated()
 		}
 		if (binaryInputsEdgeDown & (1 << i))
 		{
-			this->multitimer_playerButtonPressEdgeDown(i);
+			// this->multitimer_playerButtonPressEdgeDown(i);
+			this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+
 		}
 	}
 
@@ -4843,7 +4856,22 @@ void Apps::multitimer_integrated()
 	}
 
 	// PAUSE Switch
-	this->multitimer_setStatePause(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)); // do not only work on edge here, as latching switch can  be in any state.
+	// this->multitimer_setStatePause(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)); // do not only work on edge here, as latching switch can  be in any state.
+
+	// if (this->multitimer_state == initialized)
+	// {
+	// 	this->multitimer_randomStarter = set;
+	// }
+	// else if (set && this->multitimer_state == playing)
+	// {
+	// 	this->multitimer_pause();
+	// }
+	// else if (!set && this->multitimer_state == paused)
+	// {
+		// this->multitimer_continu();binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2
+	// }
+
+
 
 	// UPDATE CYCLIC
 	this->multitimer_refresh();
@@ -4875,16 +4903,16 @@ void Apps::multitimer_setDefaults()
 	this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 }
 
-void Apps::multitimer_setTimersCount(int8_t delta)
-{
-	// delta > 0: increase, else decrease.
-	if (this->multitimer_state == initialized)
-	{
-		nextStepRotate(&MULTITIMER_TIMERS_COUNT, delta > 0, 1, MULTITIMER_MAX_TIMERS_COUNT);
-		this->multitimer_activeTimer = 0;
-		this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-	}
-}
+// void Apps::multitimer_setTimersCount(int8_t delta)
+// {
+// 	// delta > 0: increase, else decrease.
+// 	if (this->multitimer_state == initialized)
+// 	{
+// 		nextStepRotate(&MULTITIMER_TIMERS_COUNT, delta > 0, 1, MULTITIMER_MAX_TIMERS_COUNT);
+// 		this->multitimer_activeTimer = 0;
+// 		this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+// 	}
+// }
 
 uint8_t Apps::multitimer_getTimerInitTimeIndex(uint8_t timer)
 {
@@ -4909,11 +4937,11 @@ void Apps::multitimer_init()
 	this->multitimer_activeTimer = 0;
 }
 
-void Apps::multitimer_playerButtonPressEdgeDown(uint8_t index)
-{
-	// if button released, always display active Timer time.
-	this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-}
+// void Apps::multitimer_playerButtonPressEdgeDown(uint8_t index)
+// {
+// 	// if button released, always display active Timer time.
+// 	this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+// }
 
 void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 {
@@ -4932,11 +4960,13 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 		if (this->multitimer_activeTimer == index)
 		{
 			this->multitimer_next(false);
-			buzzerOffAndAddNote(35);
+			// buzzerOffAndAddNote(35);
+			buzzerPlayApproval();
 		}
 		else if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
 		{
-			buzzerOffAndAddNote(129);
+			// buzzerOffAndAddNote(129);
+			buzzerPlayDisappointment(); // althought, good to check time, it also acts as a warning that this is not your button to press
 			this->multitimer_timerDisplayed = index; //display time of pressed timer button
 		}
 	}
@@ -4947,23 +4977,23 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 	}
 }
 
-void Apps::multitimer_setStatePause(bool set)
-{
-	// pause button is latching
+// void Apps::multitimer_setStatePause(bool set)
+// {
+// 	// pause button is latching
 
-	if (this->multitimer_state == initialized)
-	{
-		this->multitimer_randomStarter = set;
-	}
-	else if (set && this->multitimer_state == playing)
-	{
-		this->multitimer_pause();
-	}
-	else if (!set && this->multitimer_state == paused)
-	{
-		this->multitimer_continu();
-	}
-}
+// 	if (this->multitimer_state == initialized)
+// 	{
+// 		this->multitimer_randomStarter = set;
+// 	}
+// 	else if (set && this->multitimer_state == playing)
+// 	{
+// 		this->multitimer_pause();
+// 	}
+// 	else if (!set && this->multitimer_state == paused)
+// 	{
+// 		this->multitimer_continu();
+// 	}
+// }
 
 void Apps::multitimer_start()
 {
@@ -5032,9 +5062,11 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 			addNoteToBuzzer(34 + this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute());
 		}
 
+		// at every minute a nice beep plays~
 		if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() % 60 == 0)
 		{
-			addNoteToBuzzer(44);
+			// addNoteToBuzzer(44);
+			buzzerPlayApproval();
 		}
 	}
 }
@@ -5048,6 +5080,8 @@ void Apps::multitimer_refresh()
 
 	if (this->multitimer_state == initialized)
 	{
+		this->multitimer_randomStarter = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2);
+
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
 		{
 			this->multitimer_state = setFischer;
@@ -5062,7 +5096,10 @@ void Apps::multitimer_refresh()
 				MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY++; // hack to decrease sensitivity of encoder dial for counter setting only.
 				if (MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY > 10)
 				{
-					this->multitimer_setTimersCount(this->encoder_dial->getDelta());
+					stepChange(&MULTITIMER_TIMERS_COUNT,this->encoder_dial->getDelta(),1,MULTITIMER_MAX_TIMERS_COUNT, false);
+					this->multitimer_activeTimer = 0;
+					this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+
 					MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
 				}
 			}
@@ -5116,6 +5153,10 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == playing)
 	{
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
+			this->multitimer_pause();
+		}
+
 		//check all timers elapsed
 		if (this->multitimer_checkAllTimersFinished())
 		{
@@ -5192,7 +5233,12 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == paused)
 	{
-		if (millis_blink_750ms() || this->multitimer_timerDisplayed != this->multitimer_activeTimer)
+
+		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))){
+			this->multitimer_continu();
+		}
+
+		if (millis_blink_250_750ms() || this->multitimer_timerDisplayed != this->multitimer_activeTimer)
 		{
 			// if other timer than the active timer, show always.
 			this->multitimer_timers[this->multitimer_timerDisplayed].getTimeString(textHandle);
@@ -5239,7 +5285,6 @@ void Apps::multitimer_refresh()
 	}
 	else if (this->multitimer_state == setFischer)
 	{
-		// addNoteToBuzzer(C4_4);
 		if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
 		{
 			this->multitimer_state = initialized;
@@ -5252,7 +5297,7 @@ void Apps::multitimer_refresh()
 			set_blink_offset();
 		}
 
-		if (millis_blink_750ms())
+		if (millis_blink_250_750ms())
 		{
 			setStandardTextToTextHANDLE(TEXT_FISH);
 		}

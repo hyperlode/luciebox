@@ -609,7 +609,27 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_RETREAT 14
 #define LEN_SONG_ALPHABET 100
 
+// #define INDEX_SONG_DRYER_HAPPY 0
+// #define INDEX_LANG_ZAL_ZE_LEVEN     LEN_SONG_DRYER_HAPPY
+// #define INDEX_SONG_ATTACK           INDEX_LANG_ZAL_ZE_LEVEN + LEN_LANG_ZAL_ZE_LEVEN
+// #define INDEX_SONG_STARGOOSE        INDEX_SONG_ATTACK + LEN_SONG_ATTACK
+// #define INDEX_SONG_DRYER_UNHAPPY    INDEX_SONG_STARGOOSE + LEN_SONG_STARGOOSE
+// #define INDEX_SONG_KINDEKE_DOUWEN   INDEX_SONG_DRYER_UNHAPPY + LEN_SONG_DRYER_UNHAPPY
+// #define INDEX_SONG_RETREAT          INDEX_SONG_KINDEKE_DOUWEN + LEN_SONG_KINDEKE_DOUWEN
+// #define INDEX_SONG_ALPHABET         INDEX_SONG_RETREAT + LEN_SONG_RETREAT
+
 #define SONGS_FLASH_COUNT 8
+
+// const uint8_t song_start_indeces [] PROGMEM = {
+//     INDEX_SONG_DRYER_HAPPY,
+//     INDEX_LANG_ZAL_ZE_LEVEN,
+//     INDEX_SONG_ATTACK,
+//     INDEX_SONG_STARGOOSE,
+//     INDEX_SONG_DRYER_UNHAPPY,
+//     INDEX_SONG_KINDEKE_DOUWEN,
+//     INDEX_SONG_RETREAT,
+//     INDEX_SONG_ALPHABET    
+// };
 
 const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_DRYER_HAPPY,
@@ -838,10 +858,10 @@ private:
     bool multitimer_getTimerFinished(uint8_t timerIndex);
     bool multitimer_checkAllTimersFinished();
     void multitimer_playerButtonPressEdgeUp(uint8_t index);
-    void multitimer_playerButtonPressEdgeDown(uint8_t index);
-    void multitimer_setTimersCount(int8_t delta);
-    void multitimer_setStateTimersCount(bool set);
-    void multitimer_setStatePause(bool set);
+    // void multitimer_playerButtonPressEdgeDown(uint8_t index);
+    // void multitimer_setTimersCount(int8_t delta);
+    // void multitimer_setStateTimersCount(bool set);
+    // void multitimer_setStatePause(bool set);
     void multitimer_refresh();
     void multitimer_buzzerRefresh(bool alarm);
     void multitimer_next(bool activePlayerDied);
@@ -891,7 +911,7 @@ private:
     void latching_3_blink();
     bool millis_half_second_period();
     bool millis_quarter_second_period();
-    bool millis_blink_750ms();
+    bool millis_blink_250_750ms();
     void set_blink_offset();
 
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
@@ -905,7 +925,7 @@ private:
     void textBufToDisplayAllSegments();
     void displayAllSegmentsToScreen();
     void setBlankDisplay();
-    void setLedArray();
+    // void setLedArray();
     void numberToBufAsDecimal(int16_t number);
     void noteToDisplay(uint8_t note);
     void setStandardTextToTextBuf(uint8_t textPosition);
@@ -917,6 +937,8 @@ private:
     bool getCountDownTimerHasElapsed(SuperTimer* timerToBlink);
     void initiateCountDowntimerWith500Millis(SuperTimer* ptimer);
 
+    void buzzerPlayApproval();
+    void buzzerPlayDisappointment();
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
     void buzzerOff();
