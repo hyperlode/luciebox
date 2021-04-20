@@ -33,7 +33,7 @@ void Apps::appSelector()
 	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 	uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 
-	bool init_app_init = selector_changed || (shift_changed && (selector_dial_value != 7)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
+	bool init_app_init = selector_changed || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
 	this->app_init_edge = false;
 
 	if (init_app_init)
@@ -5374,7 +5374,7 @@ void Apps::multitimer_next(bool activePlayerDied)
 			}
 		}
 
-		// Sometimes went into an infinte while loop,
+		// Sometimes went into an infinite while loop,
 		int test_infinite_loop = 0;
 		do
 		{
