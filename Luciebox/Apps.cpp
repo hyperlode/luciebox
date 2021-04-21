@@ -31,9 +31,9 @@ void Apps::appSelector()
 	bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
 
 	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
-	uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
+	// uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 
-	bool init_app_init = selector_changed || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
+	bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 8)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
 	this->app_init_edge = false;
 
 	if (init_app_init)
@@ -57,6 +57,7 @@ void Apps::appSelector()
 		{
 			this->initializeAppDataToDefault();
 			this->app_init_edge = true;
+			selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 		}
 	}
 
@@ -365,7 +366,7 @@ void Apps::modeDreamtime()
 	}
 	else
 	{
-		modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP, 1);
+		modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP);
 		MODE_DREAMTIME_STEP += encoder_dial->getDelta();
 	}
 
@@ -1116,7 +1117,7 @@ void Apps::modeSettings()
 	}
 
 	// back and forth motion required of the potentio to count up modes
-	if (encoder_dial->getDelta() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0)
+	if ((encoder_dial->getDelta() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0))
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
@@ -1212,7 +1213,11 @@ void Apps::modeSettings()
 		textBuf[3] = 48 + index;
 
 		// Value
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)analogRead(analog_input_pins[index]));
+		if (millis_half_second_period()){
+			// be stable when shown.
+			SETTINGS_MODE_ANALOG_VALUE = (int16_t)analogRead(analog_input_pins[index]);
+		}
+		ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
 	}
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
@@ -1268,6 +1273,7 @@ void Apps::modeSettings()
 		// show values one seconds, menu items half a second
 		// in real settings mode
 		if (millis_half_second_period())
+		// if ( millis_blink_250_750ms()) 
 		{
 			textBufToDisplay();
 		}
@@ -1668,7 +1674,7 @@ void Apps::modeCountingLettersAndChars()
 		// show number right away depending on potentio value
 		//LETTERS_AND_CHARS_COUNTER = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
 		LETTERS_AND_CHARS_COUNTER += encoder_dial->getDelta();
-		modifyValueUpDownWithMomentary2And3(&LETTERS_AND_CHARS_COUNTER, 1);
+		modifyValueUpDownWithMomentary2And3(&LETTERS_AND_CHARS_COUNTER);
 	}
 
 	//only do the characters of the alphabet in lettermode.
@@ -1844,7 +1850,7 @@ void Apps::modeComposeSong()
 			}
 		}
 
-		modifyValueUpDownWithMomentary2And3(&step, 1);
+		modifyValueUpDownWithMomentary2And3(&step);
 
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -2014,48 +2020,56 @@ void Apps::modeSoundNotes()
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3));
 			update_note = true;
 		}
-		// update_note = update_note || modifyValueUpDownWithMomentary2And3(&SOUND_NOTE_AUTO_UP_ELSE_DOWN, 1);
+		// update_note = update_note || modifyValueUpDownWithMomentary2And3(&SOUND_NOTE_AUTO_UP_ELSE_DOWN);
 	}
 
 	if (update_note)
 	{
 		uint8_t note_jumps = 1;
-		//number of notes to skip
-		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM)
-		{
-			note_jumps = random(0, 100);
-		}
 
-		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH)
-		{
-			if (random(0, 5) == 0)
-			{
-				SOUND_NOTE_AUTO_UP_ELSE_DOWN = !SOUND_NOTE_AUTO_UP_ELSE_DOWN;
+		// if (SOUND_NOTES_PROGRESSION_MODE != SOUND_NOTE_MODE_MANUAL){
+		// 	SOUND_NOTE_AUTO_UP_ELSE_DOWN = SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_UP;
+
+		// }
+
+		switch(SOUND_NOTES_PROGRESSION_MODE){
+			case SOUND_NOTE_MODE_RANDOM:{
+				note_jumps = random(0, 100);
+				break;
 			}
+			case SOUND_NOTE_MODE_ARPEGGIO_SAWTOOTH:{
+
+				if (random(0, 5) == 0)
+				{
+					SOUND_NOTE_AUTO_UP_ELSE_DOWN = !SOUND_NOTE_AUTO_UP_ELSE_DOWN;
+				}
+				break;
+			}
+			case SOUND_NOTE_MODE_ARPEGGIO_UP:{
+
+				SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
+				break;
+			}
+			case SOUND_NOTE_MODE_ARPEGGIO_DOWN:{
+
+				SOUND_NOTE_AUTO_UP_ELSE_DOWN = false;
+				break;
+			}
+			case SOUND_NOTE_MODE_RANDOM_ERRATIC:{
+				// this is the more clear version, but takes 12bytes of memory more:
+				// SOUND_NOTE_AUTO_UP_ELSE_DOWN = (bool)random(0, 2);
+				// note_jumps = random(0, 3);
+
+				// less memory intensive:
+				uint8_t tmp = random(0, 6);
+				SOUND_NOTE_AUTO_UP_ELSE_DOWN = tmp > 2;
+				note_jumps = tmp / 2;
+
+				break;
+			}
+		
 		}
-
-		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_UP)
-		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = true;
-		}
-
-		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_ARPEGGIO_DOWN)
-		{
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = false;
-		}
-
-		if (SOUND_NOTES_PROGRESSION_MODE == SOUND_NOTE_MODE_RANDOM_ERRATIC)
-		{
-			// this is the more clear version, but takes 12bytes of memory more:
-			// SOUND_NOTE_AUTO_UP_ELSE_DOWN = (bool)random(0, 2);
-			// note_jumps = random(0, 3);
-
-			// less memory intensive:
-			uint8_t tmp = random(0, 7);
-			SOUND_NOTE_AUTO_UP_ELSE_DOWN = tmp > 2;
-			note_jumps = tmp / 2;
-		}
-
+		
 		// every jump is one step on the scale.
 		for (uint8_t note_jump = 0; note_jump < note_jumps; note_jump++)
 		{
@@ -2121,7 +2135,7 @@ void Apps::modeMovie()
 	if (this->app_init_edge)
 	{
 		// MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
-		initiateCountDowntimerWith500Millis(&MOVIE_MODE_FRAME_INTERVAL_TIMER);
+		// initiateCountDowntimerWith500Millis(&MOVIE_MODE_FRAME_INTERVAL_TIMER);
 		loadNextMovie();
 		MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START = true;
 	}
@@ -2133,7 +2147,7 @@ void Apps::modeMovie()
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
 	{
 		// sound settings
-		reload_soundtrack = modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_SOUNDTRACK_INDEX, 1);
+		reload_soundtrack = modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_SOUNDTRACK_INDEX);
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
@@ -2153,7 +2167,7 @@ void Apps::modeMovie()
 			MOVIE_MODE_FLASH_FRAME_INDEX += encoder_dial->getDelta();
 
 			// step mode
-			modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_FLASH_FRAME_INDEX, 1);
+			modifyValueUpDownWithMomentary2And3(&MOVIE_MODE_FLASH_FRAME_INDEX);
 		}
 		else
 		{
@@ -2632,7 +2646,7 @@ void Apps::modeHackTime()
 	}
 	
 	// address changing
-	address_changed = modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS, 1);
+	address_changed = modifyValueUpDownWithMomentary2And3(&HACKTIME_ADDRESS);
 
 	// read mode 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -2690,7 +2704,7 @@ void Apps::modeHackTime()
 	}
 	
 	// convert memory to sounds... Be prepared for post-modernist masterpieces
-	if ( (address_changed ))
+	// if ( (address_changed ))
 	if ( (address_changed || (HACK_TIME_ACTIVE_VALUE != array_8_bytes[0])))
 	{
 		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
@@ -2706,20 +2720,25 @@ void Apps::modeHackTime()
 	HACK_TIME_ACTIVE_VALUE = array_8_bytes[0];
 }
 
-bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount)
+bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value)
 {
-	int16_t value_memory = *value;
-
+	// int16_t value_memory = *value;
+	int8_t amount = 0;
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
-		*value -= amount;
+		// *value -= amount;
+		amount = -1;
 	}
 
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
-		*value += amount;
+		// *value += amount;
+		amount = 1;
 	}
-	return value_memory != *value;
+	*value += amount;
+
+	return amount != 0;
+	// return value_memory != *value;
 }
 
 void Apps::dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer)
@@ -2863,7 +2882,7 @@ void Apps::draw()
 			this->displayChangeGlobal(&displayAllSegments);
 
 			//scroll through drawings.
-			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX, 1);
+			modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX);
 		}
 	}
 
@@ -3003,7 +3022,7 @@ void Apps::modeGeiger()
 		// note mode
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
-			// //lower
+			//lower
 			dialMultiplyValueAndDisplay(&GEIGER_TONE_FREQUENY_LOWEST, 10, 5000);
 		}
 		else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
@@ -3354,12 +3373,9 @@ void Apps::modeSimon()
 	if (this->app_init_edge)
 	{
 		SIMON_BLINK_TIMER.setInitTimeMillis(-250);
-		// SIMON_STEP_TIMER.setInitTimeMillis(-500);
-		// initiateCountDowntimerWith500Millis(&SIMON_STEP_TIMER);
 
 		SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
 		SIMON_PLAYERS_COUNT = 1;
-		// SIMON_LEVEL = 1; // levels don't look that appealing. I choose one speed and you'll have to stick with it.
 	}
 
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))

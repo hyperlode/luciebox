@@ -121,6 +121,7 @@
 #define HACKTIME_DISPLAY_CHARS 3
 
 #define SOUND_NOTE_DISPLAY_NOTE 0
+
 #define SOUND_NOTE_MODE_MANUAL 0
 #define SOUND_NOTE_MODE_ARPEGGIO_UP 1
 #define SOUND_NOTE_MODE_ARPEGGIO_DOWN 2
@@ -210,6 +211,7 @@
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
+#define SETTINGS_MODE_ANALOG_VALUE  general_int16_t_4
 
 #define REACTION_GAME_TARGET general_uint16_t_1
 #define GEIGER_INCREASE_CHANCE general_uint16_t_1
@@ -890,7 +892,7 @@ private:
     void flashPictureToDisplayAllSegments(const uint8_t *progmemAddress);
     bool loadMovieFrame(int16_t address);
     void displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet);
-    bool modifyValueUpDownWithMomentary2And3(int16_t *value, uint8_t amount);
+    bool modifyValueUpDownWithMomentary2And3(int16_t *value);
     uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
 
     // general methods
@@ -1006,6 +1008,7 @@ private:
     uint8_t lights;
     bool splash_screen_playing; // actual flash screen app
     bool app_init_edge;         // one cycle
+    uint8_t selected_app;
 #ifdef ENABLE_MULTITIMER_INTEGRATED
     SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
     uint8_t multitimer_activeTimer;

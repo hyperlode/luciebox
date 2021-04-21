@@ -16,6 +16,7 @@ www.ameije.com
 # Versions
 - F301: 2021-03-19: Version uploaded before sending boxes home
 - F302: 2021-04-20 For the v3 startburst pcb. 
+-F303: 2021-04-21: Small bugfixes, easier debug of selector dial in settings app . 
 
 
 # Manual
