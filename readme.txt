@@ -1,3 +1,7 @@
+update F302 2021-04-20 For the v3 startburst pcb. 
+Manual online at https://docs.google.com/document/d/1WturQFRmZjFw0ZYRagNDqMO8tlJvhG8SyK8Gmxv2Aj4/edit#
+
+
 Made as a birth day gift for Lucie Ameije  2019-04
 
 A busy box is the official word for a sensory exploratory platform for babies. 
