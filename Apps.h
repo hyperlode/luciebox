@@ -41,10 +41,10 @@
 
 #define APP_SELECTOR_SETTING 0
 #define APP_SELECTOR_SETTING_TOO 1
-#define APP_SELECTOR_LETTERS_AND_CHARS 2
-#define APP_SELECTOR_POMODORO 3
-#define APP_SELECTOR_STOPWATCH 4
-#define APP_SELECTOR_MULTITIMER 5
+#define APP_SELECTOR_TOTAL_TIME 2
+#define APP_SELECTOR_STOPWATCH 3
+#define APP_SELECTOR_MULTITIMER 4
+#define APP_SELECTOR_POMODORO 5
 #define APP_SELECTOR_RANDOMWORLD 6
 #define APP_SELECTOR_TALLY_KEEPER 7
 #define APP_SELECTOR_SIMON 8
@@ -65,7 +65,7 @@
 #ifdef ENABLE_TILT_APP
 #define APP_SELECTOR_TILT 23
 #else
-#define APP_SELECTOR_ZEN 23
+#define APP_SELECTOR_LETTERS_AND_CHARS 23
 #endif
 
 #define INACTIVITY_TIME_BEEP_INDEX 61  // this is just an index, needs to be converted to seconds with the lookup table
@@ -462,8 +462,10 @@ const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
 const uint8_t app_splash_screens[] PROGMEM = {
     //sorted by selector number
     0x0F, 0x40, 0x40, 0x39, //wrench
-    0xc4, 0x88, 0x50, 0x00, // student koala
+    // 0x61, 0xc5, 0x51, 0x43, // balancing beam .(tilt)
     0x00, 0xd0, 0xab, 0x44, // stopwatch
+    0x63, 0x58, 0x4C, 0x63, // beast face
+    // 0x63, 0x44, 0x50, 0x63, // abstract battle ground (table with two people on it's side)
     0x5C, 0x63, 0x5c, 0x63, // dice
     0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
     0x3d, 0x41, 0x43, 0x02, // gun
@@ -472,7 +474,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
     0x5e, 0x01, 0x5f, 0x00, // music notes
     0x00, 0x02, 0x6b, 0x20, // radioactive sign
-    0x61, 0xc5, 0x51, 0x43, // balancing beam .(tilt)
+    0xc4, 0x88, 0x50, 0x00, // student koala
 
     // 0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
     //0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
@@ -816,7 +818,7 @@ private:
 #ifdef ENABLE_QUIZ_MASTER
     void quiz();
 #endif
-    void modeZen();
+    void modeTotalTime();
     void modeCountingLettersAndChars();
     void modeSoundSong();
     void modeComposeSong();

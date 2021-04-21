@@ -159,8 +159,8 @@ void Apps::appSelector()
 			this->tiltSwitchTest();
 			break;
 #else
-		case APP_SELECTOR_ZEN:
-			this->modeZen();
+		case APP_SELECTOR_TOTAL_TIME:
+			this->modeTotalTime();
 			break;
 #endif
 
@@ -332,7 +332,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 //		ACTUAL APPS
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void Apps::modeZen()
+void Apps::modeTotalTime()
 {
 	// a wiff of tranquility in the overstimulated Luciebox world
 	// will do nothing except for beeping the inactivity timer
