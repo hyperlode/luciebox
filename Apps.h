@@ -571,7 +571,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x7F, 0x7F, 0x7F, 0x00,
     0x7F, 0x7F, 0x7F, 0x21,
     0x7F, 0x7F, 0x7F, 0x71,
-    0xFF, 0x7F, 0x7F, 0x7B,
+    0x7F, 0x7F, 0x7F, 0x7B,
     0x7F, 0x7F, 0x7F, 0x7F, // horizonal sweep.sweep out
     0x5E, 0x7F, 0x7F, 0x7F,
     0x0E, 0x7F, 0x7F, 0x7F,
@@ -880,6 +880,7 @@ private:
     void geigerToneHelper();
     void loadNextMovie();
 
+    uint16_t* reactionGameLevelToEepromAddress();
     void resetStopwatch(SuperTimer *pTimer);
     unsigned int indexToTimeSeconds(int16_t index);
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);

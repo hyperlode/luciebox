@@ -499,7 +499,8 @@ void Apps::pomodoroTimer()
 					// random has 0 included. as we have to take into account the double ticking,
 					// calculate the probability in half a seconds. i.e.  one every minute: (0,120)
 					// addNoteToBuzzer(C5_1);
-					buzzerPlayApproval();
+					// buzzerPlayApproval();
+					buzzerPlayDisappointment();
 				};
 			}
 
@@ -601,7 +602,7 @@ void Apps::pomodoroTimer()
 		// }
 		// this->displayAllSegments &= ~(1UL << 15); // keep seconds blinker spot clear
 		// setBlankDisplay();
-		flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + POMODORO_VISUAL_TIMER_PROGRESS * 4);
+		flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + (POMODORO_VISUAL_TIMER_PROGRESS) * 4);
 #endif
 	}
 	break;
@@ -1108,7 +1109,6 @@ void Apps::randomModeTrigger(bool forReal)
 
 void Apps::modeSettings()
 {
-	// lights = 0b00000000; //reset before switch enquiry
 	const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
 
 	if (this->app_init_edge)
@@ -1124,9 +1124,6 @@ void Apps::modeSettings()
 	{
 		SETTINGS_MODE_SELECTOR++;
 	}
-
-	// bool change = encoder_dial->getDelta()!= 0 &&  ((-1 * (encoder_dial->getDelta() - 1)) /2) ^ SETTINGS_MODE_SELECTOR % 2;
-	// stepChange(&SETTINGS_MODE_SELECTOR,change,0,255,true);
 
 	setStandardTextToTextBuf(TEXT_SPACES);
 
@@ -3559,7 +3556,8 @@ void Apps::modeSimon()
 
 		SIMON_BLINK_TIMER.start();
 
-		addNoteToBuzzer(A3_8);
+		// addNoteToBuzzer(A3_8);
+		buzzerPlayApproval();
 		++SIMON_INDEX;
 		break;
 	}
@@ -3600,7 +3598,8 @@ void Apps::modeSimon()
 		}
 
 		// player pressed correct button
-		addNoteToBuzzer(A3_8);
+		//addNoteToBuzzer(A3_8);
+		buzzerPlayApproval();
 
 		++SIMON_INDEX;
 
@@ -3667,6 +3666,14 @@ void Apps::modeSimon()
 }
 #endif //ENABLE_SIMON_APP
 
+uint16_t* Apps::reactionGameLevelToEepromAddress(){
+	return (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
+					REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
+					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
+					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
+					REACTION_GAME_LEVEL *2) ;
+}
+
 void Apps::modeReactionGame()
 {
 #ifdef ENABLE_REACTION_APP
@@ -3721,12 +3728,8 @@ void Apps::modeReactionGame()
 		{
 			lights |= 1 << LIGHT_LATCHING_3;
 			ledDisp->setNumberToDisplayAsDecimal(
-				eeprom_read_word(
-					(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
-					REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
-					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
-					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
-					REACTION_GAME_LEVEL));
+				eeprom_read_word(reactionGameLevelToEepromAddress())
+				);
 		}
 		else
 		{
@@ -4150,21 +4153,20 @@ void Apps::modeReactionGame()
 		addNoteToBuzzerRepeated(F4_1, 3);
 #ifdef ENABLE_EEPROM
 		//check for new high score and save
+		// Serial.println("---");
+		// Serial.println(EEPROM_REACTION_GAME_START_ADDRESS);
+		// Serial.println(REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48);
+		// Serial.println(REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24);
+		// Serial.println(REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12);
+		// Serial.println(REACTION_GAME_LEVEL);
+
 		if (REACTION_GAME_SCORE > (int16_t)
-									  eeprom_read_word(
-										  (uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
-										  REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
-										  REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
-										  REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
-										  REACTION_GAME_LEVEL))
+									  eeprom_read_word(reactionGameLevelToEepromAddress()
+										  ))
 		{
 			eeprom_update_word(
-
-				(uint16_t *)EEPROM_REACTION_GAME_START_ADDRESS +
-					REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
-					REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
-					REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
-					REACTION_GAME_LEVEL,
+				reactionGameLevelToEepromAddress()
+				,
 				REACTION_GAME_SCORE);
 
 			loadBuzzerTrack(SONG_ATTACK);
