@@ -1536,7 +1536,7 @@ void Apps::quiz()
 			QUIZ_ANALOG_VALUES_CHECK[4 + i] = abs(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE - QUIZ_ANALOG_VALUES_CHECK[i]);
 		}
 
-		// uint8_t winnerIndex = 0;
+		
 		QUIZ_MOST_RECENT_ROUND_WINNER_INDEX = 0;
 		uint8_t smallestDiff = 255;
 
@@ -1564,34 +1564,29 @@ void Apps::quiz()
 
 	case quizRoundAfterMath:
 	{
-		int16_t scoreChange = 0;
+		// in case of normal quizmaster, this is the moment to assign scores with the dial
+		// will keep on looping through this state to adjust score when in normal mode.
 		encoder_dial->setSensitivity(2);
-		stepChange(&scoreChange, encoder_dial->getDelta(), -1 , 1, false);
-
-		uint8_t new_score = QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] + scoreChange;
-		if (new_score < QUIZ_SCORE_MEMORY - 1)
-		{
-		} else if (new_score > QUIZ_SCORE_MEMORY + 1)
-		{
-		}else{
-			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = new_score;
-		}
-
-		if (QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] > 9)
-		{
-			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
-			playSongHappyDryer();
-		}
+		int16_t score = (int16_t) QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
+		stepChange(&score, encoder_dial->getDelta(), 0 , 10, false);
+		
 
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
 			// QUIZ_RANDOM_WAIT_TIME.start(-500);
 			initiateCountDowntimerWith500Millis(&QUIZ_RANDOM_WAIT_TIME);
-			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX]++;
+			score++;
 			quizState = quizWaitSomeTimeForNextRound;
 		}
 		else if (! (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
 		{
 			quizState = quizWaitForQuizMaster;
+		}
+		
+		QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t) score;
+		if (score > 9)
+		{
+			QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
+			playSongHappyDryer();
 		}
 	}
 	break;
@@ -1605,15 +1600,15 @@ void Apps::quiz()
 	}
 	break;
 	}
-
-	int16_t scoreToDisplay = 0;
+	
+	int16_t scoreToDisplay = 10000; // 10000 to make sure there will always be zeros for all digits
 	int16_t multiplier = 1000;
 	for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
 	{
 		scoreToDisplay += multiplier * (QUIZ_SCORE[i]);
 		multiplier /= 10;
 	}
-	ledDisp->setNumberToDisplayAsDecimal(10000 + scoreToDisplay); // 10000 to make sure there will always be zero's for all digits
+	ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay); 
 
 	ledDisp->setDecimalPointsToDisplay(B00001111);
 }

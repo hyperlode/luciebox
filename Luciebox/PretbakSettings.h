@@ -1,10 +1,11 @@
 
-#define SOFTWARE_VERSION 303
+#define SOFTWARE_VERSION 304
 // started at v2.00: 200
 // v300 : pcb v3 burst implemented. change in button sequence...
 // v301 : sending out to Belgium 2021-03-19
 // v302 : development since 2021-03-19. Numerous small bugfixes and additional functionality.
 // v303 : settings debug selector dial. Make sure values are not too erratic. small bugfixes.
+// v304 : quizmaster scoring bugfix and optimization
 
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES
