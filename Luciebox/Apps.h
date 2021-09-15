@@ -41,7 +41,10 @@
 
 #define APP_SELECTOR_SETTING 0
 #define APP_SELECTOR_SETTING_TOO 1
-#define APP_SELECTOR_TOTAL_TIME 2
+//#define APP_SELECTOR_TOTAL_TIME 2
+#define APP_SELECTOR_LETTERS_AND_CHARS 2
+
+
 #define APP_SELECTOR_STOPWATCH 3
 #define APP_SELECTOR_MULTITIMER 4
 #define APP_SELECTOR_POMODORO 5
@@ -65,7 +68,7 @@
 #ifdef ENABLE_TILT_APP
 #define APP_SELECTOR_TILT 23
 #else
-#define APP_SELECTOR_LETTERS_AND_CHARS 23
+#define APP_SELECTOR_DREAMTIME_TOO 23
 #endif
 
 #define INACTIVITY_TIME_BEEP_INDEX 61  // this is just an index, needs to be converted to seconds with the lookup table

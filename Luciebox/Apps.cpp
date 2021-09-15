@@ -151,17 +151,17 @@ void Apps::appSelector()
 #endif
 			break;
 
+#ifdef ENABLE_TILT_APP
 		case APP_SELECTOR_DREAMTIME:
 			this->modeDreamtime();
 			break;
-
-#ifdef ENABLE_TILT_APP
 		case APP_SELECTOR_TILT:
 			this->tiltSwitchTest();
 			break;
 #else
-		case APP_SELECTOR_TOTAL_TIME:
-			this->modeTotalTime();
+		case APP_SELECTOR_DREAMTIME:
+		case APP_SELECTOR_DREAMTIME_TOO:
+			this->modeDreamtime();
 			break;
 #endif
 
@@ -333,26 +333,17 @@ bool Apps::init_app(bool init, uint8_t selector)
 //		ACTUAL APPS
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void Apps::modeTotalTime()
-{
-	// a wiff of tranquility in the overstimulated Luciebox world
-	// will do nothing except for beeping the inactivity timer
-	lights = 0x00;
-	always_on_timer.getTimeString(textHandle);
-	displayTimerSecondsBlinker(&always_on_timer);
-}
-
 void Apps::modeDreamtime()
 {
-	// fade in and out of all segments on screen.
+	// baby activity for those who can not yet rotate the selector dial. (the shift button makes it stay in the same app).
 
 	if (this->app_init_edge)
 	{
-		// initiateCountDowntimerWith500Millis(&TIMER_DREAMTIME);
 		MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT = true;
+		MODE_DREAMTIME_STEP = random(3,31); // let's not start with an empty screen
 	}
-
-	bool allow_note_offset_change = true;
+		
+	modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP);
 	
 	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
 	{
@@ -362,11 +353,9 @@ void Apps::modeDreamtime()
 		}
 
 		dialOnEdgeChangeInitTimerPercentage(&TIMER_DREAMTIME);
-		allow_note_offset_change = false;
 	}
 	else
 	{
-		modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP);
 		MODE_DREAMTIME_STEP += encoder_dial->getDelta();
 	}
 
@@ -376,28 +365,42 @@ void Apps::modeDreamtime()
 		randomSequence(MODE_DREAMTIME_RANDOM_LIST, 32);
 	}
 
-	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
+	{
+		loadBuzzerTrack(SONG_ALPHABET);
+	}
+	if (binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_1))
+	{
+		playSongHappyDryer();
+	}
+	
+	if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
 	{
 		if (MODE_DREAMTIME_STEP_MEMORY != MODE_DREAMTIME_STEP)
 		{
-			buzzerOffAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP] + MODE_DREAMTIME_NOTE_OFFSET); //60
-		}
-
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1) && allow_note_offset_change)
-		{
-			MODE_DREAMTIME_NOTE_OFFSET += encoder_dial->getDelta();
+			buzzerOffAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
 		}
 	}
 
-	uint32_t tmp = fadeInList(MODE_DREAMTIME_STEP, 32, 0, MODE_DREAMTIME_RANDOM_LIST);
+	uint32_t display_binary = fadeInList(MODE_DREAMTIME_STEP, 32, 0, MODE_DREAMTIME_RANDOM_LIST);
 
 	MODE_DREAMTIME_STEP_MEMORY = MODE_DREAMTIME_STEP;
 
 	if (!MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT)
 	{
-		tmp = ~tmp;
+		display_binary = ~display_binary;
 	}
-	ledDisp->setBinaryToDisplay(tmp);
+	
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)){
+		display_binary = 0xFFFFFFFF;
+		buzzerPlayApproval();
+	}
+	
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)){
+		display_binary = 0x795E3F38; // self glorification time.
+	}
+	
+	ledDisp->setBinaryToDisplay(display_binary);
 }
 
 #ifdef ENABLE_POMODORO
@@ -736,8 +739,14 @@ void Apps::stopwatch()
 	{
 		// STOPWATCH_LAP_MEMORY_2 = 0;
 
-		resetStopwatch(&STOPWATCH_CHRONO_1);
 		resetStopwatch(&STOPWATCH_CHRONO_2);
+		//resetStopwatch(&STOPWATCH_CHRONO_2);
+
+		STOPWATCH_CHRONO_1.setInitTimeMillis(always_on_timer.getTimeMillis());
+		STOPWATCH_CHRONO_1.start();
+		
+		//always_on_timer.getTimeString(textHandle);
+		//displayTimerSecondsBlinker(&always_on_timer);
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -762,6 +771,7 @@ void Apps::stopwatch()
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 	{
 		// set chronometer to zero
+		pSsuperTimer->setInitTimeMillis(0);
 		pSsuperTimer->startPaused(paused);
 	}
 
@@ -947,10 +957,8 @@ void Apps::modeRandomWorld()
 	{
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
-			// randomWorldState = randomWorldRollingEnd;
 			if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
 			{
-				// addNoteToBuzzer(C7_8);
 				buzzerPlayApproval();
 				randomModeTrigger(false);
 
@@ -970,7 +978,6 @@ void Apps::modeRandomWorld()
 			#endif
 
 			randomWorldState = randomWorldShowResult;
-			// buzzerOffAndAddNote(D4_8);
 			buzzerPlayApproval();
 		}
 	}
@@ -1099,7 +1106,7 @@ void Apps::randomModeTrigger(bool forReal)
 	break;
 
 	case RANDOMWORLD_HEADSORTAILS:
-	// no break, we will overflow to yes no, but change the text. DAngereous I know. But, we need the extra bytes.
+	// NO BREAK HERE, we will overflow to yes no, but change the text. DAngereous I know. But, we need the extra bytes.
 	case RANDOMWORLD_YESORNO:
 	{
 		setStandardTextToTextBuf(60 + RANDOMWORLD_RANDOM_NUMBER * 4 + (RANDOMWORLD_RANDOM_TYPE - 3) * 2);
@@ -2582,11 +2589,9 @@ void Apps::modeHackTime()
 			ledDisp->setNumberToDisplay(HACKTIME_ADDRESS, true); // show address as hex, to fit all addresses on 4 chars display
 		}
 	
-	}else 	{
+	}else{
 		
 		// read and write
-
-
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
 			// change value in address location (left char on display)
@@ -3389,9 +3394,6 @@ void Apps::modeSimon()
 		lights |= 1 << LIGHT_LATCHING_1;
 	}
 
-	//byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
-	// uint8_t pressed_momentary_button = binaryInputsEdgeUp & momentary_buttons_mask;
-
 	// check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
 	uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
 	for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
@@ -3777,13 +3779,14 @@ void Apps::modeReactionGame()
 		// show button light at tone sound
 		if (TIMER_REACTION_END_OF_GAME_DELAY.getCountDownTimerElapsedAndRestart()){
 			if (REACTION_WHACK_A_BIRD_SHOW_NOTES >=4 ){
+				addNoteToBuzzer(rest_1);
 				reactionGameState = reactionNewGame;
 			}else{
 		 	 	addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_WHACK_A_BIRD_SHOW_NOTES]);
 				REACTION_WHACK_A_BIRD_SHOW_NOTES++;
 			}
 		}
-		lights |=   1<< lights_indexed[REACTION_WHACK_A_BIRD_SHOW_NOTES-1];
+		lights |= 1<< lights_indexed[REACTION_WHACK_A_BIRD_SHOW_NOTES-1];
 		break;
 	}
 
@@ -3816,6 +3819,7 @@ void Apps::modeReactionGame()
 			// whack a mole mode
 			if (buzzer->getBuzzerRollEmpty())
 			{ // in sound mode, wait till demo is done
+				
 				reactionGameState = reactionNewTurn;
 
 				if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
@@ -4129,6 +4133,7 @@ void Apps::modeReactionGame()
 				{
 					//right button
 					REACTION_GAME_SCORE++;
+					
 
 					if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 					{
@@ -4138,6 +4143,8 @@ void Apps::modeReactionGame()
 					}
 					else
 					{
+						addNoteToBuzzer(C4_8);
+						//addNoteToBuzzer(103 + i);
 						reactionGameState = reactionNewTurn;
 					}
 				}
