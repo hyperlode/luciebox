@@ -42,12 +42,12 @@
 #define APP_SELECTOR_SETTING 0
 #define APP_SELECTOR_SETTING_TOO 1
 //#define APP_SELECTOR_TOTAL_TIME 2
-#define APP_SELECTOR_LETTERS_AND_CHARS 2
+#define APP_SELECTOR_STOPWATCH 2
+#define APP_SELECTOR_MULTITIMER 3
 
-
-#define APP_SELECTOR_STOPWATCH 3
-#define APP_SELECTOR_MULTITIMER 4
+#define APP_SELECTOR_LETTERS_AND_CHARS 4
 #define APP_SELECTOR_POMODORO 5
+
 #define APP_SELECTOR_RANDOMWORLD 6
 #define APP_SELECTOR_TALLY_KEEPER 7
 #define APP_SELECTOR_SIMON 8
@@ -469,7 +469,8 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x0F, 0x40, 0x40, 0x39, //wrench
     // 0x61, 0xc5, 0x51, 0x43, // balancing beam .(tilt)
     0x00, 0xd0, 0xab, 0x44, // stopwatch
-    0x63, 0x58, 0x4C, 0x63, // beast face
+    0xc4, 0x88, 0x50, 0x00, // student koala
+	
     // 0x63, 0x44, 0x50, 0x63, // abstract battle ground (table with two people on it's side)
     0x5C, 0x63, 0x5c, 0x63, // dice
     0x00, 0x63, 0xDA, 0x63, // abstract face 0x63, 0xDA, 0x6C, 0x63
@@ -478,9 +479,8 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x7F, 0x39, 0x0f, 0x7f, // media player. film roll
     0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
     0x5e, 0x01, 0x5f, 0x00, // music notes
-    0x00, 0x02, 0x6b, 0x20, // radioactive sign
-    0xc4, 0x88, 0x50, 0x00, // student koala
-
+    0x00, 0x02, 0x6b, 0x20, // radioactive sign    
+	0x63, 0x58, 0x4C, 0x63, // beast face
     // 0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
     //0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
     // 0x39, 0x09, 0x09, 0x0F, // abstractbig circle
