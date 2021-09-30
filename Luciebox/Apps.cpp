@@ -1660,7 +1660,6 @@ void Apps::modeCountingLettersAndChars()
 	{
 		if (!NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
 		{
-			//buzzer->setSpeedRatio(4);
 			loadBuzzerTrack(SONG_ALPHABET);
 		}
 	}

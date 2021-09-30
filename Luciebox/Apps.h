@@ -615,7 +615,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_DRYER_UNHAPPY 13
 #define LEN_SONG_KINDEKE_DOUWEN 49
 #define LEN_SONG_RETREAT 14
-#define LEN_SONG_ALPHABET 112
+#define LEN_SONG_ALPHABET 124 //112
 
 // #define INDEX_SONG_DRYER_HAPPY 0
 // #define INDEX_LANG_ZAL_ZE_LEVEN     LEN_SONG_DRYER_HAPPY
@@ -647,7 +647,7 @@ const uint8_t song_lengths [] PROGMEM = {
     LEN_SONG_DRYER_UNHAPPY,
     LEN_SONG_KINDEKE_DOUWEN,
     LEN_SONG_RETREAT,
-    LEN_SONG_ALPHABET,
+    LEN_SONG_ALPHABET
 };
  
 // one big library. song lengths in separate array. This is the easiest option.

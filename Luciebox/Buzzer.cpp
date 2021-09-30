@@ -94,7 +94,7 @@ void Buzzer::doBuzzerRoll()
 
             {
                 // convert note to freq
-                for (uint8_t i = 1; i < (current_note % 64) + this->transpose; i++)
+                for (uint8_t i = 1; i < (current_note % NOTES_COUNT) + this->transpose; i++)
                 {
                     //same result as: (but 2K less memory!!)
                     //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63);
@@ -103,17 +103,17 @@ void Buzzer::doBuzzerRoll()
             }
 
             // check if no "rest"
-            // if (current_note % 64 != 0 && current_note != fill_rest_till_full_note)
-            if (current_note % 64 != 0)
+            // if (current_note % NOTES_COUNT != 0 && current_note != fill_rest_till_full_note)
+            if (current_note % NOTES_COUNT != 0)
             {
                 freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
             }
 
-            uint8_t eight_notes_length_multiplier = (1 << current_note / 64);
+            uint8_t eight_notes_length_multiplier = (1 << (current_note / NOTES_COUNT)); 
 
             unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
 
-            // uint8_t previous_note_length_multiplier = previous_note / 64;
+            // uint8_t previous_note_length_multiplier = previous_note / NOTES_COUNT;
 
             // if (current_note == fill_rest_till_full_note){
             //     freq = 1;
@@ -221,7 +221,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     // assume 4 chars textBuf (empty at arrival (4 spaces))
     // assumme value of decimalPoints at start is 0x00
 
-    uint8_t noteVal = (note) % 64;
+    uint8_t noteVal = (note) % NOTES_COUNT;
 
     if (noteVal == 0)
     {
@@ -251,7 +251,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         }
         else
         {
-            textBuf[1] = ((note % 64) - 4) / 12 + 4 + 48;
+            textBuf[1] = ((note % NOTES_COUNT) - 4) / 12 + 4 + 48;
         }
     }
 
@@ -263,18 +263,18 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
 
 // uint8_t Buzzer::numberOfEightNotesToFillToFullNote(uint8_t note){
 
-//     return  8 - 0x01 << (note / 64);
+//     return  8 - 0x01 << (note / NOTES_COUNT);
 // }
 
 uint8_t Buzzer::getLength(uint8_t note)
 {
-    return 0x01 << (3 - (note / 64)); // 2^(3 -x) --> note length is 8,4,2,1
+    return 0x01 << (3 - (note / NOTES_COUNT)); // 2^(3 -x) --> note length is 8,4,2,1
 }
 
 void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
 {
-    // stayInSameLength: at every length changes, the octaves don't line up. Adjust manually.
-    int16_t note_without_length = *note % 64;
+    // stayInSameLength: four note lenghts in total a fourth of the byte space is for each length
+    int16_t note_without_length = *note % NOTES_COUNT;
 
     if (upElseDown)
     {
@@ -300,7 +300,7 @@ void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
     }
     else
     {
-        // check boundaries within note length (and allow overflow)
+        // check boundaries within note length (and allow overflow to next length)
         if (note_without_length > 63)
         {
             *note += 4;
@@ -325,20 +325,15 @@ void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
 // uint8_t Buzzer::changeNoteToLength(uint8_t note, uint8_t desiredLength ){
 //     // desired length 0,1,2,3 for 1,2,4,8th of a full note
 
-//     // while (note >= 64 ){
-//     //     note-=64;
+//     // while (note >= NOTES_COUNT ){
+//     //     note-=NOTES_COUNT;
 //     // }
 
-//     note %= 64;
-//     return note + desiredLength * 64;
+//     note %= NOTES_COUNT;
+//     return note + desiredLength * NOTES_COUNT;
 
 // }
 void Buzzer::changeNoteToNextLength(int16_t *note)
 {
-    *note += 64;
-
-    if (*note > 254)
-    {
-        note -= 4 * 64;
-    }
+    *note += NOTES_COUNT;
 }

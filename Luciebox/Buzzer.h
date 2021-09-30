@@ -289,6 +289,8 @@
 #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 15
 #define BUZZER_ROLL_BASE_FREQUENCY 220
 
+#define NOTES_COUNT 64
+
 class Buzzer
 {
 public:
