@@ -17,6 +17,10 @@
 // input: 4 momentary buttons, 4 latching buttons, an encoder dial, a selector dial, and optionally four mercury switches.
 // output: lights on buttons (one light per button), 7seg display (4 digits), buzzer
 
+// compiling: optimizations --> erratum: it's already optimized as a default.....
+// https://forum.arduino.cc/t/code-size-with-different-versions-and-flto-optimization/253140
+// link time optimizations (LTO)
+
 uint16_t setValues_1[BUTTONS_MOMENTARY_COUNT] = BUTTONS_MOMENTARY_VALUES;
 uint16_t setValues_2[BUTTONS_LATCHING_COUNT] = BUTTONS_LATCHING_VALUES;
 
@@ -115,7 +119,7 @@ void processInput()
     {
         binaryInputs[i].refresh();
     }
-
+	  
     selectorDial.refresh();
     buttonsMomentary.refresh();
     buttonsLatching.refresh();
@@ -237,9 +241,16 @@ void setup()
 #ifdef ENABLE_APPS
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
 #endif
+
+#ifdef ENABLE_BATTERY_STATUS
+ // readVcc();
+#endif 
+
 }
 
 void loop()
 {
     lucieboxLoop();
+	
 }
+

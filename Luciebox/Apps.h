@@ -2,7 +2,7 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-// #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
+// // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
@@ -274,6 +274,7 @@
 #define TALLY_KEEPER_DELTA general_long_1
 #define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
 #define ZEN_APP_NEXT_ALARM general_long_1
+#define SETTINGS_APP_BATTERY_VOLTAGE general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
@@ -614,7 +615,7 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_DRYER_UNHAPPY 13
 #define LEN_SONG_KINDEKE_DOUWEN 49
 #define LEN_SONG_RETREAT 14
-#define LEN_SONG_ALPHABET 100
+#define LEN_SONG_ALPHABET 112
 
 // #define INDEX_SONG_DRYER_HAPPY 0
 // #define INDEX_LANG_ZAL_ZE_LEVEN     LEN_SONG_DRYER_HAPPY
@@ -758,17 +759,17 @@ const uint8_t songs [] PROGMEM = {
     Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
     
     // alphabet song
-    C7_4, rest_4, rest_2, 
-    C7_4, rest_4, rest_2, 
-    G7_4, rest_4, rest_2, 
-    G7_4, rest_4, rest_2, 
-    A7_4, rest_4, rest_2, 
-    A7_4, rest_4, rest_2, 
-    G7_1, rest_1,
-    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, D7_4, rest_4, C7_1, rest_1,
-    G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_1, rest_1, C7_4, rest_4, rest_2,
-    C7_4, rest_4, rest_2, G7_4, rest_4, rest_2, G7_4, rest_4, rest_2, A7_1, rest_1, G7_4, rest_4, rest_2, rest_1,
-    F7_4, rest_4, rest_2, F7_4, rest_4, rest_2, E7_4, rest_4, rest_2, E7_4, rest_4, rest_2, D7_4, rest_4, rest_2, G7_4, rest_4, rest_2, C7_1, C7_1,
+    C7_2, rest_2, rest_1, 
+    C7_2, rest_2, rest_1, 
+    G7_2, rest_2, rest_1, 
+    G7_2, rest_2, rest_1, 
+    A7_2, rest_2, rest_1, 
+    A7_2, rest_2, rest_1, 
+    G7_1, G7_1, rest_1,rest_1,
+    F7_2, rest_2, rest_1, F7_2, rest_2, rest_1, E7_2, rest_2, rest_1, E7_2, rest_2, rest_1, D7_2, rest_2, D7_2, rest_2, D7_2, rest_2, D7_2, rest_2, C7_1, C7_1, rest_1, rest_1,
+    G7_2, rest_2, rest_1, G7_2, rest_2, rest_1, F7_2, rest_2, rest_1, F7_2, rest_2, rest_1, E7_2, rest_2, rest_1, E7_2, rest_2, rest_1, D7_1, D7_1, rest_1, rest_1, C7_2, rest_2, rest_1,
+    C7_2, rest_2, rest_1, G7_2, rest_2, rest_1, G7_2, rest_2, rest_1, A7_1, A7_1, rest_1, rest_1, G7_2, rest_2, rest_1, rest_1, rest_1,
+    F7_2, rest_2, rest_1, F7_2, rest_2, rest_1, E7_2, rest_2, rest_1, E7_2, rest_2, rest_1, D7_2, rest_2, rest_1, G7_2, rest_2, rest_1, C7_1, C7_1,C7_1, C7_1
 };
 
 
@@ -896,7 +897,7 @@ private:
     bool loadMovieFrame(int16_t address);
     void displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet);
     bool modifyValueUpDownWithMomentary2And3(int16_t *value);
-    uint32_t fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence);
+    uint32_t fadeInList(uint8_t step, uint32_t startScreen, uint8_t *shuffledSequence);
 
     // general methods
 

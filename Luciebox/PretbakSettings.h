@@ -1,13 +1,14 @@
 
-#define SOFTWARE_VERSION 304
+#define SOFTWARE_VERSION 305
 // started at v2.00: 200
 // v300 : pcb v3 burst implemented. change in button sequence...
 // v301 : sending out to Belgium 2021-03-19
 // v302 : development since 2021-03-19. Numerous small bugfixes and additional functionality.
 // v303 : settings debug selector dial. Make sure values are not too erratic. small bugfixes.
-// v304 : quizmaster scoring bugfix and optimization / baby dreamtime mode change behaviour + shift button keeps it in dreamtime mode (all button mash apps should have the shift button included). / total time timer is now set to a timer of the chrono app. 
+// v304 : quizmaster scoring bugfix and optimization / baby dreamtime mode change behaviour + shift button keeps it in dreamtime mode (all button mash apps should have the shift button included). / total time timer is now set to a timer of the chrono app.
+// v305 : add battery voltage indicator 
 
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 
@@ -16,6 +17,7 @@
 #define V3_PCB_BURST
 
 #define ENABLE_APPS 
+// #define ENABLE_BATTERY_STATUS
 
 #ifdef ENABLE_SERIAL
 //#define DEBUG_ENCODER_DIAL

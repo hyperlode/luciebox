@@ -304,7 +304,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 	else if (INIT_SPLASH_ANIMATION_STEP < 55)
 	{
 		// fade out
-		ledDisp->setBinaryToDisplay(~this->fadeInList(INIT_SPLASH_ANIMATION_STEP - 24, 32, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
+		ledDisp->setBinaryToDisplay(~this->fadeInList(INIT_SPLASH_ANIMATION_STEP - 24, ~this->displayAllSegments, this->FADE_IN_RANDOM_LIST));
 		INIT_APP_LIGHTS_COUNTER = ((32 - (INIT_SPLASH_ANIMATION_STEP - 22)) / 4);
 		for (uint8_t i = 0; i <= INIT_APP_LIGHTS_COUNTER; i++)
 		{
@@ -341,6 +341,7 @@ void Apps::modeDreamtime()
 	{
 		MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT = true;
 		MODE_DREAMTIME_STEP = random(3,31); // let's not start with an empty screen
+		
 	}
 		
 	modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP);
@@ -382,7 +383,7 @@ void Apps::modeDreamtime()
 		}
 	}
 
-	uint32_t display_binary = fadeInList(MODE_DREAMTIME_STEP, 32, 0, MODE_DREAMTIME_RANDOM_LIST);
+	uint32_t display_binary = fadeInList(MODE_DREAMTIME_STEP, 0, MODE_DREAMTIME_RANDOM_LIST);
 
 	MODE_DREAMTIME_STEP_MEMORY = MODE_DREAMTIME_STEP;
 
@@ -1121,6 +1122,9 @@ void Apps::modeSettings()
 
 	if (this->app_init_edge)
 	{
+		#ifdef ENABLE_BATTERY_STATUS
+		SETTINGS_APP_BATTERY_VOLTAGE = readVcc();
+		#endif
 	}
 
 	// back and forth motion required of the potentio to count up modes
@@ -1270,6 +1274,17 @@ void Apps::modeSettings()
 			setStandardTextToTextBuf(TEXT_RESET);
 		}
 	}
+#ifdef ENABLE_BATTERY_STATUS
+	else if (SETTINGS_MODE_SELECTOR < 26)
+	{
+		#ifdef ENABLE_SERIAL
+	
+		//Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
+		#endif
+		ledDisp->setNumberToDisplayAsDecimal((int16_t)SETTINGS_APP_BATTERY_VOLTAGE);
+		
+	}
+#endif
 	else
 	{
 		ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
@@ -1645,7 +1660,7 @@ void Apps::modeCountingLettersAndChars()
 	{
 		if (!NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
 		{
-			buzzer->setSpeedRatio(4);
+			//buzzer->setSpeedRatio(4);
 			loadBuzzerTrack(SONG_ALPHABET);
 		}
 	}
@@ -4326,7 +4341,7 @@ uint8_t Apps::weightedRandomLetter(){
 	}
 }
 
-uint32_t Apps::fadeInList(uint8_t step, uint8_t length, uint32_t startScreen, uint8_t *shuffledSequence)
+uint32_t Apps::fadeInList(uint8_t step, uint32_t startScreen, uint8_t *shuffledSequence)
 {
 	uint32_t fullScreen = startScreen;
 
