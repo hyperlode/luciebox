@@ -918,6 +918,7 @@ private:
     bool checkBoundaries(int16_t *counter, int16_t maxValue, int16_t minValue, bool rotate);
     
     void latching_3_blink();
+    bool millis_second_period();
     bool millis_half_second_period();
     bool millis_quarter_second_period();
     bool millis_blink_250_750ms();

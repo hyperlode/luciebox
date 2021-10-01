@@ -22,33 +22,6 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 	inactivity_timer.start();
 	always_on_timer.start();
 	
-	#ifdef ENABLE_BATTERY_STATUS
-	// atmega328p
-	ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-	//  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
-	//delay(2); // Wait for Vref to settle
-	// playSongHappyDryer();
-	// playSongHappyDryer();
-	loadBuzzerTrack(SONG_ALPHABET);
-	buzzerOff();
-	//fill8BytesArrayWithZero();
-	buzzerChangeSpeedRatioWithEncoderDial();
-	//dialGetIndexedtime();
-	
-	//Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
-	ADCSRA |= _BV(ADSC); // Start conversion
-	while (bit_is_set(ADCSRA,ADSC)); // measuring
-
-	uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH  
-	uint8_t high = ADCH; // unlocks both
-
-	long result = (high << 8) | low;
-
-	result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
-
-	batteryVoltage = result;
-
-	#endif
 }
 
 void Apps::appSelector()
@@ -76,142 +49,147 @@ void Apps::appSelector()
 		// set to init state before a new app starts
 		splash_screen_playing = true;
 	}
+	
+	
+	
+		
+		if (splash_screen_playing)
+		{
+			// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
+			splash_screen_playing = this->init_app(init_app_init, selector_dial_value);
+			if (!splash_screen_playing)
+			{
+				this->initializeAppDataToDefault();
+				this->app_init_edge = true;
+				selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
+			}
+		}
 
-	if (splash_screen_playing)
-	{
-		// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
-		splash_screen_playing = this->init_app(init_app_init, selector_dial_value);
+		// not as else statement, to have the init properly transferred after app beginning screen.
 		if (!splash_screen_playing)
 		{
-			this->initializeAppDataToDefault();
-			this->app_init_edge = true;
-			selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
+			//#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
+
+			switch (selected_app)
+			{
+			case APP_SELECTOR_LETTERS_AND_CHARS:
+
+				this->modeCountingLettersAndChars();
+				break;
+
+			case APP_SELECTOR_SIMON:
+	#ifdef ENABLE_SIMON_APP
+				this->modeSimon();
+	#endif
+				break;
+
+			case APP_SELECTOR_SOUND_NOTES:
+				this->modeSoundNotes();
+				break;
+
+			case APP_SELECTOR_SOUND_COMPOSER:
+				this->modeComposeSong();
+				break;
+
+			case APP_SELECTOR_STOPWATCH:
+				stopwatch();
+				break;
+
+			case APP_SELECTOR_POMODORO:
+	#ifdef ENABLE_POMODORO
+				pomodoroTimer();
+	#endif
+				break;
+
+			case APP_SELECTOR_RANDOMWORLD:
+				this->modeRandomWorld();
+				break;
+
+			case APP_SELECTOR_TALLY_KEEPER:
+	#ifdef ENABLE_TALLY_KEEPER
+				this->modeTallyKeeper();
+	#endif
+				break;
+
+			case APP_SELECTOR_GEIGER:
+				this->modeGeiger();
+				break;
+
+			case APP_SELECTOR_HACK_TIME:
+				this->modeHackTime();
+				break;
+
+			case APP_SELECTOR_SOUND_SONG:
+				this->modeSoundSong();
+				break;
+
+			case APP_SELECTOR_DRAW:
+				this->draw();
+				break;
+
+			case APP_SELECTOR_DRAW_GAME:
+				this->drawGame();
+				break;
+
+			case APP_SELECTOR_MOVIE_MODE:
+				this->modeMovie();
+				break;
+
+			case APP_SELECTOR_SETTING:
+			case APP_SELECTOR_SETTING_TOO:
+				this->modeSettings();
+				break;
+
+			case APP_SELECTOR_SOUND_METRONOME:
+				this->modeMetronome();
+				break;
+
+			case APP_SELECTOR_SOUND_SEQUENCER:
+				this->modeSequencer();
+				break;
+
+			case APP_SELECTOR_REACTION_GAME:
+			case APP_SELECTOR_GUITAR_HERO:
+	#ifdef ENABLE_REACTION_APP
+				this->modeReactionGame();
+	#endif
+				break;
+
+	#ifdef ENABLE_TILT_APP
+			case APP_SELECTOR_DREAMTIME:
+				this->modeDreamtime();
+				break;
+			case APP_SELECTOR_TILT:
+				this->tiltSwitchTest();
+				break;
+	#else
+			case APP_SELECTOR_DREAMTIME:
+			case APP_SELECTOR_DREAMTIME_TOO:
+				this->modeDreamtime();
+				break;
+	#endif
+
+	#ifdef ENABLE_QUIZ_MASTER
+			case APP_SELECTOR_QUIZ_MASTER:
+				this->quiz();
+				break;
+	#endif
+
+			case APP_SELECTOR_MULTITIMER:
+	#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
+				this->miniMultiTimer();
+	#elif defined ENABLE_MULTITIMER_INTEGRATED
+				this->multitimer_integrated();
+	#endif
+				break;
+
+			default:
+				break;
+			}
 		}
-	}
-
-	// not as else statement, to have the init properly transferred after app beginning screen.
-	if (!splash_screen_playing)
-	{
-		//#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
-
-		switch (selected_app)
-		{
-		case APP_SELECTOR_LETTERS_AND_CHARS:
-
-			this->modeCountingLettersAndChars();
-			break;
-
-		case APP_SELECTOR_SIMON:
-#ifdef ENABLE_SIMON_APP
-			this->modeSimon();
-#endif
-			break;
-
-		case APP_SELECTOR_SOUND_NOTES:
-			this->modeSoundNotes();
-			break;
-
-		case APP_SELECTOR_SOUND_COMPOSER:
-			this->modeComposeSong();
-			break;
-
-		case APP_SELECTOR_STOPWATCH:
-			stopwatch();
-			break;
-
-		case APP_SELECTOR_POMODORO:
-#ifdef ENABLE_POMODORO
-			pomodoroTimer();
-#endif
-			break;
-
-		case APP_SELECTOR_RANDOMWORLD:
-			this->modeRandomWorld();
-			break;
-
-		case APP_SELECTOR_TALLY_KEEPER:
-#ifdef ENABLE_TALLY_KEEPER
-			this->modeTallyKeeper();
-#endif
-			break;
-
-		case APP_SELECTOR_GEIGER:
-			this->modeGeiger();
-			break;
-
-		case APP_SELECTOR_HACK_TIME:
-			this->modeHackTime();
-			break;
-
-		case APP_SELECTOR_SOUND_SONG:
-			this->modeSoundSong();
-			break;
-
-		case APP_SELECTOR_DRAW:
-			this->draw();
-			break;
-
-		case APP_SELECTOR_DRAW_GAME:
-			this->drawGame();
-			break;
-
-		case APP_SELECTOR_MOVIE_MODE:
-			this->modeMovie();
-			break;
-
-		case APP_SELECTOR_SETTING:
-		case APP_SELECTOR_SETTING_TOO:
-			this->modeSettings();
-			break;
-
-		case APP_SELECTOR_SOUND_METRONOME:
-			this->modeMetronome();
-			break;
-
-		case APP_SELECTOR_SOUND_SEQUENCER:
-			this->modeSequencer();
-			break;
-
-		case APP_SELECTOR_REACTION_GAME:
-		case APP_SELECTOR_GUITAR_HERO:
-#ifdef ENABLE_REACTION_APP
-			this->modeReactionGame();
-#endif
-			break;
-
-#ifdef ENABLE_TILT_APP
-		case APP_SELECTOR_DREAMTIME:
-			this->modeDreamtime();
-			break;
-		case APP_SELECTOR_TILT:
-			this->tiltSwitchTest();
-			break;
-#else
-		case APP_SELECTOR_DREAMTIME:
-		case APP_SELECTOR_DREAMTIME_TOO:
-			this->modeDreamtime();
-			break;
-#endif
-
-#ifdef ENABLE_QUIZ_MASTER
-		case APP_SELECTOR_QUIZ_MASTER:
-			this->quiz();
-			break;
-#endif
-
-		case APP_SELECTOR_MULTITIMER:
-#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
-			this->miniMultiTimer();
-#elif defined ENABLE_MULTITIMER_INTEGRATED
-			this->multitimer_integrated();
-#endif
-			break;
-
-		default:
-			break;
-		}
-	}
-
+	
+	
+	
 	if (binaryInputsEdgeUp){
 		inactivity_timer.start();
 	}
@@ -317,6 +295,7 @@ bool Apps::init_app(bool init, uint8_t selector)
 		INIT_SPLASH_ANIMATION_STEP++;
 	}
 
+
 	if (INIT_SPLASH_ANIMATION_STEP < 5)
 	{
 		lights = 0xff;
@@ -327,6 +306,10 @@ bool Apps::init_app(bool init, uint8_t selector)
 	{
 		// show app splash screen
 		ledDisp->setBinaryToDisplay(this->displayAllSegments);
+		
+		//ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
+		//textBufToDisplay();
+		
 		lights = 0xff;
 	}
 	else if (INIT_SPLASH_ANIMATION_STEP < 55)
@@ -1244,21 +1227,32 @@ void Apps::modeSettings()
 		}
 		setStandardTextToTextHANDLE(text);
 	}
-	else if (SETTINGS_MODE_SELECTOR < 18)
+	else if (SETTINGS_MODE_SELECTOR < 10)
+	{
+		#ifdef ENABLE_BATTERY_STATUS
+	
+		ledDisp->setNumberToDisplayAsDecimal((int16_t)batteryVoltage);
+		// menu title
+		setStandardTextToTextBuf(TEXT_BATTERY);
+		
+		#endif
+	}
+
+	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
 		// menu title
 		textBuf[2] = 'A';
-		uint8_t index = (SETTINGS_MODE_SELECTOR - 8) / 2;
+		uint8_t index = (SETTINGS_MODE_SELECTOR - 10) / 2;
 		textBuf[3] = 48 + index;
 
 		// Value
-		if (millis_half_second_period()){
-			// be stable when shown.
+		if (millis_blink_250_750ms()){
+			// be stable when shown (only measure when menu text is shown)
 			SETTINGS_MODE_ANALOG_VALUE = (int16_t)analogRead(analog_input_pins[index]);
 		}
 		ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
 	}
-	else if (SETTINGS_MODE_SELECTOR < 20)
+	else if (SETTINGS_MODE_SELECTOR < 22)
 	{
 		// show luciebox firmware version number
 		// menu title
@@ -1267,7 +1261,7 @@ void Apps::modeSettings()
 		ledDisp->setNumberToDisplayAsDecimal(SOFTWARE_VERSION);
 		textHandle[0] = 'F'; // v doesn't work. So, F from Firmware version it is.
 	}
-	else if (SETTINGS_MODE_SELECTOR < 22)
+	else if (SETTINGS_MODE_SELECTOR < 24)
 	{
 		// display amount of times the luciebox was used
 		// menu value
@@ -1279,7 +1273,7 @@ void Apps::modeSettings()
 		// menu title
 		setStandardTextToTextBuf(TEXT_QUANTITY);
 	}
-	else if (SETTINGS_MODE_SELECTOR < 24)
+	else if (SETTINGS_MODE_SELECTOR < 26)
 	{
 		lights |= 1 << LIGHT_MOMENTARY_0;
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -1301,39 +1295,8 @@ void Apps::modeSettings()
 		{
 			setStandardTextToTextBuf(TEXT_RESET);
 		}
-		//#ifdef ENABLE_BATTERY_STATUS
-			//SETTINGS_APP_BATTERY_VOLTAGE = readVcc();
-			
-			 //https://provideyourown.com/2012/secret-arduino-voltmeter-measure-battery-voltage/
-		  
-		  //(https://www.gammon.com.au/adc)
-		  // Read 1.1V reference against AVcc
-		  // set the reference to Vcc and the measurement to the internal 1.1V reference
-		  
-		 
-			// atmega328p
-			//ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-			//  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
-		 
-		  //delay(2); // Wait for Vref to settle
-		  
-			
-			
-		//#endif
-		
 		
 	}
-#ifdef ENABLE_BATTERY_STATUS
-	else if (SETTINGS_MODE_SELECTOR < 26)
-	{
-		// if (SETTINGS_APP_BATTERY_VOLTAGE == 0){
-			
-			
-		// }
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)batteryVoltage);
-		
-	}
-#endif
 	else
 	{
 		ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
@@ -1341,13 +1304,43 @@ void Apps::modeSettings()
 
 	if (SETTINGS_MODE_SELECTOR >= 6)
 	{
-		// show values one seconds, menu items half a second
-		// in real settings mode
-		if (millis_half_second_period())
-		// if ( millis_blink_250_750ms()) 
+		// originally: show values one seconds, menu items half a second
+		// in luciebox settings mode
+		if (millis_blink_250_750ms())
 		{
 			textBufToDisplay();
+			
+			#ifdef ENABLE_BATTERY_STATUS
+			// atmega328p
+			ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+			//  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
+			//delay(2); // Wait for Vref to settle
+			// playSongHappyDryer();
+			// playSongHappyDryer();
+			loadBuzzerTrack(SONG_ALPHABET);
+			buzzerOff();
+			//fill8BytesArrayWithZero();
+			buzzerChangeSpeedRatioWithEncoderDial();
+			//dialGetIndexedtime();
+			
+			//Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
+			ADCSRA |= _BV(ADSC); // Start conversion
+			while (bit_is_set(ADCSRA,ADSC)); // measuring
+
+			uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH  
+			uint8_t high = ADCH; // unlocks both
+
+			long result = (high << 8) | low;
+
+			result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
+
+			batteryVoltage = result;
+
+			#endif
 		}
+			
+	
+		
 	}
 }
 
@@ -4548,9 +4541,9 @@ void Apps::eepromPictureToDisplayAllSegments(int16_t pictureIndex)
 // 			lights |= 1 << LIGHT_LATCHING_3;
 // 		}
 // }
-// bool Apps::millis_second_period(){
-// 	return millis() % 1000 > 500;
-// }
+bool Apps::millis_second_period(){
+	return millis() % 1000 > 500;
+}
 
 bool Apps::millis_quarter_second_period()
 {
