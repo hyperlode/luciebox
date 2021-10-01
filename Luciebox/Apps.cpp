@@ -21,6 +21,34 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 	inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
 	inactivity_timer.start();
 	always_on_timer.start();
+	
+	#ifdef ENABLE_BATTERY_STATUS
+	// atmega328p
+	ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+	//  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
+	//delay(2); // Wait for Vref to settle
+	// playSongHappyDryer();
+	// playSongHappyDryer();
+	loadBuzzerTrack(SONG_ALPHABET);
+	buzzerOff();
+	//fill8BytesArrayWithZero();
+	buzzerChangeSpeedRatioWithEncoderDial();
+	//dialGetIndexedtime();
+	
+	//Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
+	ADCSRA |= _BV(ADSC); // Start conversion
+	while (bit_is_set(ADCSRA,ADSC)); // measuring
+
+	uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH  
+	uint8_t high = ADCH; // unlocks both
+
+	long result = (high << 8) | low;
+
+	result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
+
+	batteryVoltage = result;
+
+	#endif
 }
 
 void Apps::appSelector()
@@ -1122,9 +1150,9 @@ void Apps::modeSettings()
 
 	if (this->app_init_edge)
 	{
-		#ifdef ENABLE_BATTERY_STATUS
-		SETTINGS_APP_BATTERY_VOLTAGE = readVcc();
-		#endif
+		
+	  
+	
 	}
 
 	// back and forth motion required of the potentio to count up modes
@@ -1273,15 +1301,36 @@ void Apps::modeSettings()
 		{
 			setStandardTextToTextBuf(TEXT_RESET);
 		}
+		//#ifdef ENABLE_BATTERY_STATUS
+			//SETTINGS_APP_BATTERY_VOLTAGE = readVcc();
+			
+			 //https://provideyourown.com/2012/secret-arduino-voltmeter-measure-battery-voltage/
+		  
+		  //(https://www.gammon.com.au/adc)
+		  // Read 1.1V reference against AVcc
+		  // set the reference to Vcc and the measurement to the internal 1.1V reference
+		  
+		 
+			// atmega328p
+			//ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+			//  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
+		 
+		  //delay(2); // Wait for Vref to settle
+		  
+			
+			
+		//#endif
+		
+		
 	}
 #ifdef ENABLE_BATTERY_STATUS
 	else if (SETTINGS_MODE_SELECTOR < 26)
 	{
-		#ifdef ENABLE_SERIAL
-	
-		//Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
-		#endif
-		ledDisp->setNumberToDisplayAsDecimal((int16_t)SETTINGS_APP_BATTERY_VOLTAGE);
+		// if (SETTINGS_APP_BATTERY_VOLTAGE == 0){
+			
+			
+		// }
+		ledDisp->setNumberToDisplayAsDecimal((int16_t)batteryVoltage);
 		
 	}
 #endif

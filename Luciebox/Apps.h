@@ -608,14 +608,14 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define SONG_RETREAT 6
 #define SONG_ALPHABET 7
 
-#define LEN_SONG_DRYER_HAPPY 18
-#define LEN_LANG_ZAL_ZE_LEVEN 84
-#define LEN_SONG_ATTACK 14
-#define LEN_SONG_STARGOOSE 52
-#define LEN_SONG_DRYER_UNHAPPY 13
-#define LEN_SONG_KINDEKE_DOUWEN 49
+#define LEN_SONG_DRYER_HAPPY 12
+#define LEN_LANG_ZAL_ZE_LEVEN 73
+#define LEN_SONG_ATTACK 13
+#define LEN_SONG_STARGOOSE 51
+#define LEN_SONG_DRYER_UNHAPPY 11
+#define LEN_SONG_KINDEKE_DOUWEN 38
 #define LEN_SONG_RETREAT 14
-#define LEN_SONG_ALPHABET 124 //112
+#define LEN_SONG_ALPHABET 79 //112
 
 // #define INDEX_SONG_DRYER_HAPPY 0
 // #define INDEX_LANG_ZAL_ZE_LEVEN     LEN_SONG_DRYER_HAPPY
@@ -653,40 +653,40 @@ const uint8_t song_lengths [] PROGMEM = {
 // one big library. song lengths in separate array. This is the easiest option.
 const uint8_t songs [] PROGMEM = {
     //happy dryer
-    A6_2, REST_2_8, REST_4_8,
-    Cs7_2, REST_2_8, REST_4_8,
-    E7_4, REST_1_8, REST_2_8,
-    Cs7_4, REST_1_8, REST_2_8,
-    E7_4, REST_1_8, REST_2_8,
+    A6_2, REST_6_8,
+    Cs7_2, REST_6_8,
+    E7_4, REST_3_8,
+    Cs7_4, REST_3_8,
+    E7_4, REST_3_8,
     A7_1, A7_1,
-    REST_4_8 ,
+ 
     
     // lang zal ze leven
-    C7_4, REST_2_8, REST_4_8,
+    C7_4, REST_6_8,
     C7_4, REST_4_8, C7_8, REST_1_8,
-    C7_4, REST_2_8, REST_4_8,
+    C7_4, REST_6_8,
     G6_2, G6_4, REST_4_8,
 
-    E7_4, REST_2_8, REST_4_8,
+    E7_4, REST_6_8,
     E7_4, REST_4_8, E7_8, REST_1_8,
-    E7_4, REST_2_8, REST_4_8,
+    E7_4, REST_6_8,
     C7_2, C7_4, REST_4_8,
 
-    G7_4, REST_2_8, REST_4_8,
+    G7_4, REST_6_8,
     G7_4, REST_4_8, G7_8, REST_1_8,
 
-    A7_8, REST_1_8, REST_2_8,
-    G7_8, REST_1_8, REST_2_8,
+    A7_8, REST_3_8,
+    G7_8, REST_3_8,
 
-    F7_8, REST_1_8, REST_2_8,
-    E7_8, REST_1_8, REST_2_8,
+    F7_8, REST_3_8,
+    E7_8, REST_3_8,
 
     D7_2, D7_4, REST_2_8,
     D7_2, D7_4, REST_2_8,
     D7_2, D7_4, REST_2_8,
     REST_2_8,
-    G7_8, REST_1_8, REST_2_8,
-    F7_8, REST_1_8, REST_2_8,
+    G7_8, REST_3_8,
+    F7_8, REST_3_8,
 
     E7_1, E7_2, REST_4_8,
     F7_1, F7_2, REST_4_8,
@@ -700,7 +700,7 @@ const uint8_t songs [] PROGMEM = {
     C7_1, C7_1,
     
     // aaanvallueeeeee!
-    Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_2_8, Cs7_2, REST_4_8, REST_4_8, Gs6_2, REST_2_8, Cs7_1, Cs7_1, Cs7_1, 
+    Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_2_8, Cs7_2, REST_8_8, Gs6_2, REST_2_8, Cs7_1, Cs7_1, Cs7_1, 
     
     // star goose
     C6_2, REST_4_8,
@@ -714,7 +714,7 @@ const uint8_t songs [] PROGMEM = {
     
     C6_2, REST_4_8,
     A6_1, REST_4_8,
-    G6_4, REST_2_8, REST_4_8,
+    G6_4, REST_6_8,
     G6_1, REST_2_8,
 
     C6_2, REST_4_8,
@@ -730,46 +730,46 @@ const uint8_t songs [] PROGMEM = {
     C6_1,
     
     // unhappy dryer
-    A6_1, REST_4_8, Cs7_1, REST_4_8, E7_2, REST_2_8, Cs7_2, REST_2_8, B6_2, REST_2_8, A6_1, REST_4_8, REST_4_8, 
+    A6_1, REST_4_8, Cs7_1, REST_4_8, E7_2, REST_2_8, Cs7_2, REST_2_8, B6_2, REST_2_8, A6_1,
     
     // kindeke douwen
-    B7_4, REST_2_8, REST_4_8,       // wie
+    B7_4, REST_6_8,       // wie
     B7_1,                       //zal
     REST_4_8, A7_4, REST_2_8,       //er
-    G6_4, REST_2_8, REST_4_8,       //ons
+    G6_4, REST_6_8,       //ons
     B7_1,                       //kind-
     B7_4, REST_2_8, A7_4, REST_2_8, //-de
-    G6_4, REST_2_8, REST_4_8,       //-ke
+    G6_4, REST_6_8,       //-ke
     A7_1,                       //dou
-    A7_4, REST_2_8, REST_4_8,
-    C7_4, REST_2_8, REST_4_8,
+    A7_4, REST_6_8,
+    C7_4, REST_6_8,
     C7_1, //wen
     REST_8_8,
-    C7_4, REST_2_8, REST_4_8, // dat
+    C7_4, REST_6_8, // dat
     B7_1,                 // schaars
     B7_4, REST_2_8, B7_4, REST_2_8,
-    B7_4, REST_2_8, REST_4_8,
+    B7_4, REST_6_8,
 
-    E7_4, REST_2_8, REST_4_8, //
+    E7_4, REST_6_8, //
     E7_1,
     E7_4, REST_2_8, E7_4, REST_2_8,
-    A7_4, REST_2_8, REST_4_8,
+    A7_4,
     
     // retreat song
     Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_4_8, REST_4_8, Gs6_2, REST_2_8, Cs6_1, Cs6_1, Cs6_1,
     
     // alphabet song
-    C7_2, REST_4_8, REST_8_8, 
-    C7_2, REST_4_8, REST_8_8, 
-    G7_2, REST_4_8, REST_8_8, 
-    G7_2, REST_4_8, REST_8_8, 
-    A7_2, REST_4_8, REST_8_8, 
-    A7_2, REST_4_8, REST_8_8, 
-    G7_1, G7_1, REST_8_8,REST_8_8,
-    F7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, C7_1, C7_1, REST_8_8, REST_8_8,
-    G7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, D7_1, D7_1, REST_8_8, REST_8_8, C7_2, REST_4_8, REST_8_8,
-    C7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, A7_1, A7_1, REST_8_8, REST_8_8, G7_2, REST_4_8, REST_8_8, REST_8_8, REST_8_8,
-    F7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, D7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, C7_1, C7_1,C7_1, C7_1
+    C7_2, REST_12_8, 
+    C7_2, REST_12_8, 
+    G7_2, REST_12_8, 
+    G7_2, REST_12_8, 
+    A7_2, REST_12_8, 
+    A7_2, REST_12_8, 
+    G7_1, G7_1, REST_15_8,
+    F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, C7_1, C7_1, REST_15_8,
+    G7_2, REST_12_8, G7_2, REST_12_8, F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_1, D7_1, REST_15_8, C7_2, REST_12_8,
+    C7_2, REST_12_8, G7_2, REST_12_8, G7_2, REST_12_8, A7_1, A7_1, REST_15_8, G7_2, REST_13_8, REST_15_8,
+    F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_2, REST_12_8, G7_2, REST_12_8, C7_1, C7_1,C7_1, C7_1
 };
 
 
@@ -956,6 +956,8 @@ private:
     void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
     void playSongHappyDryer();
+	long readVcc();
+	
 
     //reused variables per app
     SuperTimer general_timer;
@@ -995,7 +997,7 @@ private:
 #ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
     MiniMultiTimer multiTimer;
 #endif
-
+	long batteryVoltage;
     long* pLongValue;
     long blink_offset;
     SuperTimer* pSsuperTimer;

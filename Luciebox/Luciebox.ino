@@ -241,16 +241,10 @@ void setup()
 #ifdef ENABLE_APPS
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
 #endif
-
-#ifdef ENABLE_BATTERY_STATUS
- // readVcc();
-#endif 
-
 }
 
 void loop()
 {
     lucieboxLoop();
-	
 }
 
