@@ -653,123 +653,123 @@ const uint8_t song_lengths [] PROGMEM = {
 // one big library. song lengths in separate array. This is the easiest option.
 const uint8_t songs [] PROGMEM = {
     //happy dryer
-    A6_2, rest_4, rest_2,
-    Cs7_2, rest_4, rest_2,
-    E7_4, rest_8, rest_4,
-    Cs7_4, rest_8, rest_4,
-    E7_4, rest_8, rest_4,
+    A6_2, REST_2_8, REST_4_8,
+    Cs7_2, REST_2_8, REST_4_8,
+    E7_4, REST_1_8, REST_2_8,
+    Cs7_4, REST_1_8, REST_2_8,
+    E7_4, REST_1_8, REST_2_8,
     A7_1, A7_1,
-    rest_2 ,
+    REST_4_8 ,
     
     // lang zal ze leven
-    C7_4, rest_4, rest_2,
-    C7_4, rest_2, C7_8, rest_8,
-    C7_4, rest_4, rest_2,
-    G6_2, G6_4, rest_2,
+    C7_4, REST_2_8, REST_4_8,
+    C7_4, REST_4_8, C7_8, REST_1_8,
+    C7_4, REST_2_8, REST_4_8,
+    G6_2, G6_4, REST_4_8,
 
-    E7_4, rest_4, rest_2,
-    E7_4, rest_2, E7_8, rest_8,
-    E7_4, rest_4, rest_2,
-    C7_2, C7_4, rest_2,
+    E7_4, REST_2_8, REST_4_8,
+    E7_4, REST_4_8, E7_8, REST_1_8,
+    E7_4, REST_2_8, REST_4_8,
+    C7_2, C7_4, REST_4_8,
 
-    G7_4, rest_4, rest_2,
-    G7_4, rest_2, G7_8, rest_8,
+    G7_4, REST_2_8, REST_4_8,
+    G7_4, REST_4_8, G7_8, REST_1_8,
 
-    A7_8, rest_8, rest_4,
-    G7_8, rest_8, rest_4,
+    A7_8, REST_1_8, REST_2_8,
+    G7_8, REST_1_8, REST_2_8,
 
-    F7_8, rest_8, rest_4,
-    E7_8, rest_8, rest_4,
+    F7_8, REST_1_8, REST_2_8,
+    E7_8, REST_1_8, REST_2_8,
 
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    D7_2, D7_4, rest_4,
-    rest_4,
-    G7_8, rest_8, rest_4,
-    F7_8, rest_8, rest_4,
+    D7_2, D7_4, REST_2_8,
+    D7_2, D7_4, REST_2_8,
+    D7_2, D7_4, REST_2_8,
+    REST_2_8,
+    G7_8, REST_1_8, REST_2_8,
+    F7_8, REST_1_8, REST_2_8,
 
-    E7_1, E7_2, rest_2,
-    F7_1, F7_2, rest_2,
+    E7_1, E7_2, REST_4_8,
+    F7_1, F7_2, REST_4_8,
 
-    G7_1, G7_2, rest_2,
-    A7_2, A7_4, rest_4,
-    F7_2, F7_4, rest_4,
+    G7_1, G7_2, REST_4_8,
+    A7_2, A7_4, REST_2_8,
+    F7_2, F7_4, REST_2_8,
 
-    E7_1, E7_2, rest_2,
-    D7_1, D7_2, rest_2,
+    E7_1, E7_2, REST_4_8,
+    D7_1, D7_2, REST_4_8,
     C7_1, C7_1,
     
     // aaanvallueeeeee!
-    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Cs7_2, rest_2, rest_2, Gs6_2, rest_4, Cs7_1, Cs7_1, Cs7_1, 
+    Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_2_8, Cs7_2, REST_4_8, REST_4_8, Gs6_2, REST_2_8, Cs7_1, Cs7_1, Cs7_1, 
     
     // star goose
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4,  rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
+    C6_2, REST_4_8,
+    E6_2, E6_4, REST_2_8,
+    C6_2, REST_4_8,
+    E6_2, E6_4, REST_2_8,
+    C6_2, REST_4_8,
+    E6_2, E6_4,  REST_2_8,
+    C6_2, REST_4_8,
+    E6_2, E6_4, REST_2_8,
     
-    C6_2, rest_2,
-    A6_1, rest_2,
-    G6_4, rest_4, rest_2,
-    G6_1, rest_4,
+    C6_2, REST_4_8,
+    A6_1, REST_4_8,
+    G6_4, REST_2_8, REST_4_8,
+    G6_1, REST_2_8,
 
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
-    C6_2, rest_2,
-    E6_2, E6_4, rest_4,
+    C6_2, REST_4_8,
+    E6_2, E6_4, REST_2_8,
+    C6_2, REST_4_8,
+    E6_2, E6_4, REST_2_8,
 
-    C6_2, rest_2,
-    F6_2, F6_4, rest_4,
-    E6_2, rest_2,
-    C6_2, C6_4, rest_2,
-    D6_4,rest_4,
+    C6_2, REST_4_8,
+    F6_2, F6_4, REST_2_8,
+    E6_2, REST_4_8,
+    C6_2, C6_4, REST_4_8,
+    D6_4,REST_2_8,
     C6_1,
     
     // unhappy dryer
-    A6_1, rest_2, Cs7_1, rest_2, E7_2, rest_4, Cs7_2, rest_4, B6_2, rest_4, A6_1, rest_2, rest_2, 
+    A6_1, REST_4_8, Cs7_1, REST_4_8, E7_2, REST_2_8, Cs7_2, REST_2_8, B6_2, REST_2_8, A6_1, REST_4_8, REST_4_8, 
     
     // kindeke douwen
-    B7_4, rest_4, rest_2,       // wie
+    B7_4, REST_2_8, REST_4_8,       // wie
     B7_1,                       //zal
-    rest_2, A7_4, rest_4,       //er
-    G6_4, rest_4, rest_2,       //ons
+    REST_4_8, A7_4, REST_2_8,       //er
+    G6_4, REST_2_8, REST_4_8,       //ons
     B7_1,                       //kind-
-    B7_4, rest_4, A7_4, rest_4, //-de
-    G6_4, rest_4, rest_2,       //-ke
+    B7_4, REST_2_8, A7_4, REST_2_8, //-de
+    G6_4, REST_2_8, REST_4_8,       //-ke
     A7_1,                       //dou
-    A7_4, rest_4, rest_2,
-    C7_4, rest_4, rest_2,
+    A7_4, REST_2_8, REST_4_8,
+    C7_4, REST_2_8, REST_4_8,
     C7_1, //wen
-    rest_1,
-    C7_4, rest_4, rest_2, // dat
+    REST_8_8,
+    C7_4, REST_2_8, REST_4_8, // dat
     B7_1,                 // schaars
-    B7_4, rest_4, B7_4, rest_4,
-    B7_4, rest_4, rest_2,
+    B7_4, REST_2_8, B7_4, REST_2_8,
+    B7_4, REST_2_8, REST_4_8,
 
-    E7_4, rest_4, rest_2, //
+    E7_4, REST_2_8, REST_4_8, //
     E7_1,
-    E7_4, rest_4, E7_4, rest_4,
-    A7_4, rest_4, rest_2,
+    E7_4, REST_2_8, E7_4, REST_2_8,
+    A7_4, REST_2_8, REST_4_8,
     
     // retreat song
-    Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_4, Gs6_2, rest_2, rest_2, Gs6_2, rest_4, Cs6_1, Cs6_1, Cs6_1,
+    Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_2_8, Gs6_2, REST_4_8, REST_4_8, Gs6_2, REST_2_8, Cs6_1, Cs6_1, Cs6_1,
     
     // alphabet song
-    C7_2, rest_2, rest_1, 
-    C7_2, rest_2, rest_1, 
-    G7_2, rest_2, rest_1, 
-    G7_2, rest_2, rest_1, 
-    A7_2, rest_2, rest_1, 
-    A7_2, rest_2, rest_1, 
-    G7_1, G7_1, rest_1,rest_1,
-    F7_2, rest_2, rest_1, F7_2, rest_2, rest_1, E7_2, rest_2, rest_1, E7_2, rest_2, rest_1, D7_2, rest_2, D7_2, rest_2, D7_2, rest_2, D7_2, rest_2, C7_1, C7_1, rest_1, rest_1,
-    G7_2, rest_2, rest_1, G7_2, rest_2, rest_1, F7_2, rest_2, rest_1, F7_2, rest_2, rest_1, E7_2, rest_2, rest_1, E7_2, rest_2, rest_1, D7_1, D7_1, rest_1, rest_1, C7_2, rest_2, rest_1,
-    C7_2, rest_2, rest_1, G7_2, rest_2, rest_1, G7_2, rest_2, rest_1, A7_1, A7_1, rest_1, rest_1, G7_2, rest_2, rest_1, rest_1, rest_1,
-    F7_2, rest_2, rest_1, F7_2, rest_2, rest_1, E7_2, rest_2, rest_1, E7_2, rest_2, rest_1, D7_2, rest_2, rest_1, G7_2, rest_2, rest_1, C7_1, C7_1,C7_1, C7_1
+    C7_2, REST_4_8, REST_8_8, 
+    C7_2, REST_4_8, REST_8_8, 
+    G7_2, REST_4_8, REST_8_8, 
+    G7_2, REST_4_8, REST_8_8, 
+    A7_2, REST_4_8, REST_8_8, 
+    A7_2, REST_4_8, REST_8_8, 
+    G7_1, G7_1, REST_8_8,REST_8_8,
+    F7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, C7_1, C7_1, REST_8_8, REST_8_8,
+    G7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, D7_1, D7_1, REST_8_8, REST_8_8, C7_2, REST_4_8, REST_8_8,
+    C7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, A7_1, A7_1, REST_8_8, REST_8_8, G7_2, REST_4_8, REST_8_8, REST_8_8, REST_8_8,
+    F7_2, REST_4_8, REST_8_8, F7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, E7_2, REST_4_8, REST_8_8, D7_2, REST_4_8, REST_8_8, G7_2, REST_4_8, REST_8_8, C7_1, C7_1,C7_1, C7_1
 };
 
 

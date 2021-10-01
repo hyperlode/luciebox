@@ -1754,7 +1754,7 @@ void Apps::modeComposeSong()
 			COMPOSER_SONG[i] = BUZZER_ROLL_SONG_STOPVALUE;
 		}
 		COMPOSER_SONG_LENGTH = 1;
-		COMPOSER_SONG[0] = rest_1; //default note
+		COMPOSER_SONG[0] = REST_8_8; //default note
 		COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
 	}
 
@@ -1822,7 +1822,7 @@ void Apps::modeComposeSong()
 					{
 						COMPOSER_SONG[i + 1] = COMPOSER_SONG[i];
 					}
-					COMPOSER_SONG[COMPOSER_STEP + 1] = rest_1;
+					COMPOSER_SONG[COMPOSER_STEP + 1] = REST_8_8;
 					COMPOSER_SONG_LENGTH++;
 					step = 1; // move to new position
 				}
@@ -1853,7 +1853,7 @@ void Apps::modeComposeSong()
 					if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
 					{
 						COMPOSER_SONG_LENGTH++;
-						COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = rest_1; //default note
+						COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = REST_8_8; //default note
 					}
 				}
 			}
@@ -2962,7 +2962,7 @@ void Apps::tiltSwitchTest()
 		{
 			TILT_CYCLE_COUNTER++;
 			TILT_EXPECTED_SWITCH_INDEX = 0;
-			addNoteToBuzzer(rest_2); // would you believe it, it sounds like a chicken. this is the kedeeeeet  in the tok tok tok kedeeet (the ke is also a tok sound)
+			addNoteToBuzzer(REST_4_8); // would you believe it, it sounds like a chicken. this is the kedeeeeet  in the tok tok tok kedeeet (the ke is also a tok sound)
 			addNoteToBuzzer(C7_1);
 		}
 	}
@@ -3134,7 +3134,7 @@ void Apps::modeSequencer()
 				for (uint8_t j = 0; j < 4; j++)
 				{
 					// all notes blank to start
-					this->SEQUENCER_SONG[i + (8 * j)] = rest_8;
+					this->SEQUENCER_SONG[i + (8 * j)] = REST_1_8;
 
 					// some base notes as a beat
 					if (random(0, 3))
@@ -3643,7 +3643,7 @@ void Apps::modeSimon()
 	{
 		// sequence done!
 		addNoteToBuzzer(E5_4);
-		addNoteToBuzzer(rest_1);
+		addNoteToBuzzer(REST_8_8);
 		addNoteToBuzzer(B6_1);
 
 		// check next alive player (assume there is always a player alive.)
@@ -3793,7 +3793,7 @@ void Apps::modeReactionGame()
 		// show button light at tone sound
 		if (TIMER_REACTION_END_OF_GAME_DELAY.getCountDownTimerElapsedAndRestart()){
 			if (REACTION_WHACK_A_BIRD_SHOW_NOTES >=4 ){
-				addNoteToBuzzer(rest_1);
+				addNoteToBuzzer(REST_8_8);
 				reactionGameState = reactionNewGame;
 			}else{
 		 	 	addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_WHACK_A_BIRD_SHOW_NOTES]);
@@ -4152,7 +4152,7 @@ void Apps::modeReactionGame()
 					if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
 					{
 						// a small pause must be implemented after the button press before the new turn as off not to confuse the player
-						addNoteToBuzzerRepeated(rest_1, 4);
+						addNoteToBuzzerRepeated(REST_8_8, 4);
 						reactionGameState = reactionWaitBeforeNewTurn;
 					}
 					else
@@ -4706,7 +4706,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 		while (i > 0)
 		{
 			this->bytes_list[i * 2] = this->bytes_list[i] % 64; // we have to introduce a hack here. All notes to the same timing. Otherwise, the rythm is off. Theoretically, I should add rests until all notes are filled up to the same length, but, it didn't happen, as the buffe is simply not big enough for the worst case scenario. i.e. 1/8th of a note --> add 7 times 1/8th rest.  times 32 = 256notes in buffer . buffer is not long enough.
-			this->bytes_list[i * 2 - 1] = rest_4;
+			this->bytes_list[i * 2 - 1] = REST_2_8;
 			i--;
 		}
 	}
@@ -5084,7 +5084,7 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 			{
 				addNoteToBuzzer(tmp);
 
-				addNoteToBuzzer(rest_4);
+				addNoteToBuzzer(REST_2_8);
 			}
 		}
 

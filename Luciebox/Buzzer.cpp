@@ -8,6 +8,9 @@ Buzzer::Buzzer()
     this->soundFinishedTimeMillis = 0;
     this->speedScale = 1;
     this->transpose = 0;
+	
+	
+	
 }
 
 void Buzzer::changeTranspose(int8_t delta)
@@ -94,7 +97,7 @@ void Buzzer::doBuzzerRoll()
 
             {
                 // convert note to freq
-                for (uint8_t i = 1; i < (current_note % NOTES_COUNT) + this->transpose; i++)
+                for (uint8_t i = 0; i < (current_note % NOTES_COUNT) + this->transpose; i++)
                 {
                     //same result as: (but 2K less memory!!)
                     //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63);
@@ -104,34 +107,23 @@ void Buzzer::doBuzzerRoll()
 
             // check if no "rest"
             // if (current_note % NOTES_COUNT != 0 && current_note != fill_rest_till_full_note)
-            if (current_note % NOTES_COUNT != 0)
+            
+			uint8_t eight_notes_length_multiplier; 
+			
+			
+		
+			if (current_note <= LAST_NOTE)
             {
                 freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
-            }
-
-            uint8_t eight_notes_length_multiplier = (1 << (current_note / NOTES_COUNT)); 
-
-            unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
-
-            // uint8_t previous_note_length_multiplier = previous_note / NOTES_COUNT;
-
-            // if (current_note == fill_rest_till_full_note){
-            //     freq = 1;
-            //     eight_notes_length_multiplier = 8 - (1<< previous_note_length_multiplier);
-            // }
-
-            // if (current_note == fill_rest_till_half_note){
-            //     freq = 1;
-
-            //     eight_notes_length_multiplier = 0;
-
-            //     if (previous_note_length_multiplier == 0){
-            //         eight_notes_length_multiplier = 3;
-            //     }
-            //     if (previous_note_length_multiplier == 1){
-            //         eight_notes_length_multiplier = 2;
-            //     }
-            // }
+				eight_notes_length_multiplier = (1 << (current_note / NOTES_COUNT)); 
+				
+            }else{
+				eight_notes_length_multiplier = current_note - LAST_NOTE; // rests are situated behind the last notes in the .h file
+				
+			}
+			
+			unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
+           
 
             tone(this->pin, (unsigned int)freq, toneLength); //duration, number is exponent of 2.
 
@@ -166,6 +158,9 @@ uint8_t Buzzer::getNextBuzzerRollSlot(bool getNextEmptySlot)
 
 void Buzzer::cleanBuzzerRoll()
 {
+	// uint8_t playSlotCounter;
+    // uint8_t programSlotCounter;
+	
     //all slots empty
     for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
     {
@@ -221,9 +216,9 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     // assume 4 chars textBuf (empty at arrival (4 spaces))
     // assumme value of decimalPoints at start is 0x00
 
-    uint8_t noteVal = (note) % NOTES_COUNT;
+    uint8_t noteVal = note % NOTES_COUNT;
 
-    if (noteVal == 0)
+    if (note > LAST_NOTE)
     {
         // rest
         textBuf[0] = 59; // ONLY_MIDDLE_SEGMENT_FAKE_ASCII '-';;
@@ -233,8 +228,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     {
 
         bool sharps[12] = {false, true, false, false, true, false, true, false, false, true, false, true};
-        char notes_chars[12] = {'A', 'A', 'B', 'C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G'};
-        noteVal--;
+        char notes_chars[12] = {'A', 'A', 'B', 'C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G'};       
         noteVal %= 12;
 
         // sharp indicated by a decimal point
@@ -251,24 +245,24 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
         }
         else
         {
-            textBuf[1] = ((note % NOTES_COUNT) - 4) / 12 + 4 + 48;
+            textBuf[1] = (noteVal - 4) / 12 + 4 + 48;
         }
     }
 
     textBuf[2] = 62; // SPACE_FAKE_ASCII = 62 optimized: assume empty at start
 
     // note length
-    textBuf[3] = this->getLength(note) + 48; // 2^(3 -x) --> note length is 8,4,2,1
+    textBuf[3] = this->getLength(note) + 48;
 }
-
-// uint8_t Buzzer::numberOfEightNotesToFillToFullNote(uint8_t note){
-
-//     return  8 - 0x01 << (note / NOTES_COUNT);
-// }
 
 uint8_t Buzzer::getLength(uint8_t note)
 {
-    return 0x01 << (3 - (note / NOTES_COUNT)); // 2^(3 -x) --> note length is 8,4,2,1
+    if (note > LAST_NOTE){
+		return note - LAST_NOTE; // lenght in multiple of 1/8.
+	}else{
+		
+		return 0x01 << (3 - (note / NOTES_COUNT)); // 2^(3 -x) --> note length is 8,4,2,1	
+	}
 }
 
 void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
@@ -289,35 +283,25 @@ void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
 
     if (stayInSameLength)
     {
-        if (note_without_length > 60)
+        if (note_without_length > NOTES_COUNT)
         {
-            *note -= 60;
+            *note -= NOTES_COUNT ;
         }
-        else if (note_without_length <= 0)
+        else if (note_without_length < 0)
         {
-            *note += 60;
+            *note += NOTES_COUNT ;
         }
     }
     else
     {
-        // check boundaries within note length (and allow overflow to next length)
-        if (note_without_length > 63)
-        {
-            *note += 4;
-        }
-        else if (note_without_length <= 0)
-        {
-            *note -= 4;
-        }
-
         // check boundaries over overall range
         if (*note <= 0)
         {
-            *note = 252;
+            *note = LAST_NOTE;
         }
-        if (*note > 254)
+        if (*note > LAST_NOTE)
         {
-            *note = 3;
+            *note = 0;
         }
     }
 }
@@ -336,4 +320,7 @@ void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
 void Buzzer::changeNoteToNextLength(int16_t *note)
 {
     *note += NOTES_COUNT;
+	if (*note > LAST_NOTE){
+		*note -= 4*NOTES_COUNT;
+	}
 }
