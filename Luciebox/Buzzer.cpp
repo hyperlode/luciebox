@@ -13,6 +13,12 @@ Buzzer::Buzzer()
 	
 }
 
+void Buzzer::cleanBuzzerRoll()
+{
+	playSlotCounter = 0;
+    programSlotCounter = 0;
+}
+
 void Buzzer::changeTranspose(int8_t delta)
 {
     this->setTranspose(this->transpose + delta);
@@ -58,7 +64,10 @@ void Buzzer::addNoteToRoll(uint8_t note)
     //A0sharp 1/2 = 191
     //1/8 stop = 63
 
-    this->programSlotCounter = getNextBuzzerRollSlot(true);
+    //this->programSlotCounter = getNextBuzzerRollSlot(true);
+	this->programSlotCounter = getNextProgramSlot();
+	
+	
     this->buzzerRoll[this->programSlotCounter] = note;
 
     //http://members.efn.org/~qehn/global/building/cents.htm
@@ -83,14 +92,16 @@ void Buzzer::doBuzzerRoll()
         // Lucie, this code contains the remnants of an attempt to optimize the memory footprint for songs. As it seemed smart to have a specific value for filling notespaces i.e. instead of 1/8note + 1/8rest + 1/4rest + 1/2rest for a full note. Just do 1/8note + 7/8s(aka all the space needed to fill a full note duration). But, in reality, it's not worth it. AT ALL.
         //erase previous slot
         // uint8_t previous_note = this->buzzerRoll[this->playSlotCounter];
-        this->buzzerRoll[this->playSlotCounter] = BUZZER_ROLL_EMPTY_SLOT;
+        //this->buzzerRoll[this->playSlotCounter] = BUZZER_ROLL_EMPTY_SLOT;
 
-        //move active slot
-        this->playSlotCounter = getNextBuzzerRollSlot(false);
-        uint8_t current_note = this->buzzerRoll[this->playSlotCounter];
+		if (this->getNextPlaySlot() <= this->programSlotCounter)
+		{	
+			
+			
+			uint8_t current_note = this->buzzerRoll[this->playSlotCounter];
 
-        if (current_note != BUZZER_ROLL_EMPTY_SLOT)
-        {
+        // if (current_note != BUZZER_ROLL_EMPTY_SLOT)
+        // {
             //uint8_t noteNumber = buzzerRoll[this->playSlotCounter]%63;
             //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
             float freq = 1;
@@ -109,8 +120,6 @@ void Buzzer::doBuzzerRoll()
             // if (current_note % NOTES_COUNT != 0 && current_note != fill_rest_till_full_note)
             
 			uint8_t eight_notes_length_multiplier; 
-			
-			
 		
 			if (current_note <= LAST_NOTE)
             {
@@ -123,12 +132,15 @@ void Buzzer::doBuzzerRoll()
 			}
 			
 			unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
-           
 
             tone(this->pin, (unsigned int)freq, toneLength); //duration, number is exponent of 2.
 
             this->soundFinishedTimeMillis = millis() + toneLength;
-        }
+        // }
+		
+			//move active slot
+			this->playSlotCounter = this->getNextPlaySlot();
+		}
     }
 }
 
@@ -144,28 +156,25 @@ void Buzzer::setSpeedRatio(float speedMultiplier)
     this->speedScale = speedMultiplier;
 }
 
-uint8_t Buzzer::getNextBuzzerRollSlot(bool getNextEmptySlot)
+uint8_t Buzzer::getNextProgramSlot()
 {
     //returns value of next slot
-    //if argument true, will search for next free slot. If no free slots, returns current slot.
-    uint8_t slot = this->playSlotCounter;
-    do
-    {
-        slot >= BUZZER_ROLL_LENGTH - 1 ? slot = 0 : slot++;
-    } while (getNextEmptySlot && buzzerRoll[slot] != BUZZER_ROLL_EMPTY_SLOT && this->playSlotCounter != slot);
-    return slot;
-}
-
-void Buzzer::cleanBuzzerRoll()
-{
-	// uint8_t playSlotCounter;
-    // uint8_t programSlotCounter;
+	uint8_t index = this->programSlotCounter;
+	index++;
+	if (index >= BUZZER_ROLL_LENGTH){
+		index = 0;
+	}
+	return index;
 	
-    //all slots empty
-    for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
-    {
-        buzzerRoll[i] = BUZZER_ROLL_EMPTY_SLOT;
-    }
+}uint8_t Buzzer::getNextPlaySlot()
+{
+    //returns value of next slot
+	uint8_t index = this->playSlotCounter;
+	index++;
+	if (index >= BUZZER_ROLL_LENGTH){
+		index = 0;
+	}
+	return index;
 }
 
 void Buzzer::buzzerOff()
@@ -190,20 +199,27 @@ void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
     }
 }
 
-uint8_t Buzzer::getBuzzerRollFull()
-{
-    //check if there are free slots.
-    return (getNextBuzzerRollSlot(true) == this->playSlotCounter);
-}
+// uint8_t Buzzer::getBuzzerRollFull()
+// {
+    // //check if there are free slots.
+    // //return (getNextBuzzerRollSlot(true) == this->playSlotCounter);
+	// uint8_t programSlotIndex = getNextProgramSlot();
+	
+	// if (programSlotIndex == this->playSlotCounter){
+		// return true;
+	// }
+	// return false;
+// }
 
 uint8_t Buzzer::getBuzzerRollEmpty()
 {
-    int sum = 0;
-    for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
-    {
-        sum += buzzerRoll[i];
-    }
-    return sum == BUZZER_ROLL_LENGTH * BUZZER_ROLL_EMPTY_SLOT;
+    // int sum = 0;
+    // for (uint8_t i = 0; i < BUZZER_ROLL_LENGTH; i++)
+    // {
+        // sum += buzzerRoll[i];
+    // }
+    // return sum == BUZZER_ROLL_LENGTH * BUZZER_ROLL_EMPTY_SLOT;
+	return this->programSlotCounter == this->playSlotCounter;
 }
 
 void Buzzer::lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints)

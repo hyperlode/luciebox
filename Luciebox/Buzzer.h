@@ -276,8 +276,8 @@
 #define BUZZER_ROLLVALUE_STARTGAME
 #define BUZZER_ROLLVALUE_ENDGAME
 
-#define BUZZER_ROLL_LENGTH 100 // accomodate for "the longest songs..." or find another way to split songs in half.
-#define BUZZER_ROLL_EMPTY_SLOT 255
+#define BUZZER_ROLL_LENGTH 150 // accomodate for "the longest songs..." or find another way to split songs in half.
+
 #define BUZZER_ROLL_SONG_STOPVALUE 255
 
 // #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 63
@@ -296,8 +296,9 @@ public:
     void addNoteToRoll(uint8_t note);
     uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);
     void doBuzzerRoll();
-    uint8_t getNextBuzzerRollSlot(bool getNextEmptySlot);
-    uint8_t getBuzzerRollFull();
+    uint8_t getNextProgramSlot();
+    uint8_t getNextPlaySlot();
+    // uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty();
 
     void changeTranspose(int8_t delta);
