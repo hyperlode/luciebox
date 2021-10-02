@@ -184,6 +184,7 @@ public:
 
     void refresh();
 
+	void digitValueToChar(char* charBuf, int16_t value);
     void numberToBufAsDecimal(char *textBuf, int16_t number);
     void numberToBuf(char *textBuf, int16_t number, bool asHexadecimal);
     void blanksToBuf(char *textBuf);

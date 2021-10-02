@@ -252,6 +252,7 @@
 #define RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
 #define DRAW_ACTIVE_SEGMENT general_uint8_t_2
+#define MODE_SETTINGS_CYCLE_TIMING_INDEX general_uint8_t_2
 
 #define TALLY_KEEPER_TEST general_uint8_t_3
 #define DRAW_CURSOR_SEGMENT general_uint8_t_3
@@ -275,9 +276,11 @@
 #define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
 #define ZEN_APP_NEXT_ALARM general_long_1
 #define SETTINGS_APP_BATTERY_VOLTAGE general_long_1
+#define MODE_SETTINGS_CYCLE_TIMING_MILLIS general_long_1
 
 #define STOPWATCH_LAP_MEMORY_2 general_long_2
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
+#define MODE_SETTINGS_CYCLE_TIMING_MILLIS_2 general_long_2
 
 #define REACTION_HEX_GUESSED_CORRECTLY general_boolean
 #define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
@@ -613,9 +616,9 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
 #define LEN_SONG_ATTACK 13
 #define LEN_SONG_STARGOOSE 51
 #define LEN_SONG_DRYER_UNHAPPY 11
-#define LEN_SONG_KINDEKE_DOUWEN 38
+#define LEN_SONG_KINDEKE_DOUWEN 39
 #define LEN_SONG_RETREAT 14
-#define LEN_SONG_ALPHABET 79 //112
+#define LEN_SONG_ALPHABET 77
 
 // #define INDEX_SONG_DRYER_HAPPY 0
 // #define INDEX_LANG_ZAL_ZE_LEVEN     LEN_SONG_DRYER_HAPPY
@@ -769,7 +772,7 @@ const uint8_t songs [] PROGMEM = {
     F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, D7_2, REST_4_8, C7_1, C7_1, REST_15_8,
     G7_2, REST_12_8, G7_2, REST_12_8, F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_1, D7_1, REST_15_8, C7_2, REST_12_8,
     C7_2, REST_12_8, G7_2, REST_12_8, G7_2, REST_12_8, A7_1, A7_1, REST_15_8, G7_2, REST_13_8, REST_15_8,
-    F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_2, REST_12_8, G7_2, REST_12_8, C7_1, C7_1,C7_1, C7_1
+    F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_2, REST_12_8, G7_2, REST_12_8, C7_1, C7_1
 };
 
 

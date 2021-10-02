@@ -8,7 +8,7 @@
 // v304 : quizmaster scoring bugfix and optimization / baby dreamtime mode change behaviour + shift button keeps it in dreamtime mode (all button mash apps should have the shift button included). / total time timer is now set to a timer of the chrono app.
 // v305 : add battery voltage indicator 
 
-//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 

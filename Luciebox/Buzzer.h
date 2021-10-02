@@ -270,13 +270,15 @@
 #define BUZZER_NEXTPLAYER_DURATION_MILLIS 20
 #define BUZZER_NEXTPLAYER_MULTIPLEBEEP_INTERVAL_MILLIS 100
 
+#define BUZZER_OVERLAP_TO_PREVENT_GAP_BETWEEN_EQUAL_NOTES_MILLIS 5 // 
+
 #define BUZZER_ROLLVALUE_BUTTONPRESS
 #define BUZZER_ROLLVALUE_PAUSE
 #define BUZZER_ROLLVALUE_UNPAUSE
 #define BUZZER_ROLLVALUE_STARTGAME
 #define BUZZER_ROLLVALUE_ENDGAME
 
-#define BUZZER_ROLL_LENGTH 150 // accomodate for "the longest songs..." or find another way to split songs in half.
+#define BUZZER_ROLL_LENGTH 103 // accomodate for "the longest songs..." or find another way to split songs in half.
 
 #define BUZZER_ROLL_SONG_STOPVALUE 255
 
@@ -298,7 +300,6 @@ public:
     void doBuzzerRoll();
     uint8_t getNextProgramSlot();
     uint8_t getNextPlaySlot();
-    // uint8_t getBuzzerRollFull();
     uint8_t getBuzzerRollEmpty();
 
     void changeTranspose(int8_t delta);
@@ -309,12 +310,12 @@ public:
     void cleanBuzzerRoll();
     void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerOff();
+	void buzzerSilent();
+	
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
     void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
 
-    // uint8_t numberOfEightNotesToFillToFullNote(uint8_t note);
     uint8_t getLength(uint8_t note);
-    // uint8_t changeNoteToLength(uint8_t note, uint8_t desiredLength );
     void changeNoteToNextLength(int16_t *note);
     void nextNote(int16_t *note, bool upElseDown, bool stayInSameLength);
 
@@ -326,6 +327,7 @@ private:
     uint8_t playSlotCounter;
     uint8_t programSlotCounter;
     unsigned long soundFinishedTimeMillis;
+	
+	bool noteFinishedEdge;
 };
 #endif
-

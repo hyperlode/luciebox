@@ -523,7 +523,7 @@ void Apps::pomodoroTimer()
 			// no sound when zero
 			if (buzzer->getBuzzerRollEmpty()) // if end of clock signal sounds, no ticking! erase to optimize memory
 			{
-				buzzer->playTone(500, 1+ (unsigned long)POMODORO_SOUND % 40); // works well
+				buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
 			}
 		}
 
@@ -1243,8 +1243,8 @@ void Apps::modeSettings()
 		// menu title
 		textBuf[2] = 'A';
 		uint8_t index = (SETTINGS_MODE_SELECTOR - 10) / 2;
-		textBuf[3] = 48 + index;
-
+		ledDisp->digitValueToChar(&textBuf[3], index);
+		
 		// Value
 		if (millis_blink_250_750ms()){
 			// be stable when shown (only measure when menu text is shown)
@@ -1295,6 +1295,30 @@ void Apps::modeSettings()
 		{
 			setStandardTextToTextBuf(TEXT_RESET);
 		}
+		
+	}
+	else if (SETTINGS_MODE_SELECTOR < 28)
+	{
+		// measure cycle time.
+		// 2021-10-02: between 800 and 1200 millis per cycle.
+		// if (MODE_SETTINGS_CYCLE_TIMING_INDEX == 0){
+			// MODE_SETTINGS_CYCLE_TIMING_INDEX ++;
+			// MODE_SETTINGS_CYCLE_TIMING_MILLIS = micros();
+			
+		// }else if (MODE_SETTINGS_CYCLE_TIMING_INDEX == 1){
+			// MODE_SETTINGS_CYCLE_TIMING_INDEX ++;
+			// MODE_SETTINGS_CYCLE_TIMING_MILLIS_2 = micros();
+			
+		// }else{
+			// MODE_SETTINGS_CYCLE_TIMING_INDEX = 0;
+			// #ifdef ENABLE_SERIAL
+			// Serial.println("---");
+			// Serial.println(MODE_SETTINGS_CYCLE_TIMING_MILLIS);
+			
+			// Serial.println(MODE_SETTINGS_CYCLE_TIMING_MILLIS_2);
+			// Serial.println(MODE_SETTINGS_CYCLE_TIMING_MILLIS_2 - MODE_SETTINGS_CYCLE_TIMING_MILLIS);
+			// #endif
+		// }
 		
 	}
 	else
@@ -1379,9 +1403,11 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 {
 	if (letterValueAlphabet > 8)
 	{
-		textBuf[0] = (letterValueAlphabet + 1) / 10 + 48;
+		ledDisp->digitValueToChar (&textBuf[0],  (letterValueAlphabet + 1) / 10 );
+		
 	}
-	textBuf[1] = (letterValueAlphabet + 1) % 10 + 48;
+	ledDisp->digitValueToChar (&textBuf[1],  (letterValueAlphabet + 1) % 10 );
+	
 	textBuf[3] = letterValueAlphabet + 65; // show letters alphabet.
 }
 
@@ -3921,12 +3947,14 @@ void Apps::modeReactionGame()
 
 		REACTION_GAME_HEX_MEMORY[0] = random(1 - complementRequired, 16 - complementRequired); // do not include numbers that don't require button presses 
 
-		uint8_t value_to_hex_char = (REACTION_GAME_HEX_MEMORY[0]) + 48;
+		// uint8_t value_to_hex_char = (REACTION_GAME_HEX_MEMORY[0]) + 48;
 
-		if ( value_to_hex_char > 57){
-			value_to_hex_char += 7; // there are 7 ascii positions between 9 and A
-		}
-		textBuf[0] = value_to_hex_char; // 0-9, A-F
+		// if ( value_to_hex_char > 57){
+			// value_to_hex_char += 7; // there are 7 ascii positions between 9 and A
+		// }
+		// textBuf[0] = value_to_hex_char; // 0-9, A-F
+
+		ledDisp->digitValueToChar (&textBuf[0], REACTION_GAME_HEX_MEMORY[0]);
 
 		// prepare next move
 		reactionGameState = reactionHexPlaying;
@@ -4729,6 +4757,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 		}
 		progmemToBuffer(songs + song_start_index, length);
 	}
+	
 	#ifdef ENABLE_EEPROM
 	else if (songIndex - SONGS_FLASH_COUNT < 4)
 	{

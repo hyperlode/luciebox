@@ -175,6 +175,20 @@ void DisplayManagement::numberToBufAsDecimal(char *textBuf, int16_t number)
 	numberToBuf(textBuf, number, false);
 }
 
+void DisplayManagement::digitValueToChar(char* charBuf, int16_t value)
+{
+	// convert a value to its char representation. 48 = 0
+	// for ONE char.
+	if (value > 9)
+	{
+		// in ascii table, there is a gap of 7 positions between the numbers and letters.
+		value += 7;
+	}
+
+	*charBuf = 48 + value; //ascii 48 = 0
+}
+
+
 void DisplayManagement::numberToBuf(char *textBuf, int16_t number, bool asHexadecimal)
 {
 	// negative numbers made absolute!
@@ -187,15 +201,17 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number, bool asHexade
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		byte digit;
-		digit = c % (10 + asHexadecimal * 6);
-		if (digit > 9)
-		{
-			// in ascii table, there is a gap of 7 positions between the numbers and letters.
-			digit += 7;
-		}
+		byte digitValue;
+		digitValue = c % (10 + asHexadecimal * 6);
+		// if (digitValue > 9)
+		// {
+			// // in ascii table, there is a gap of 7 positions between the numbers and letters.
+			// digitValue += 7;
+		// }
 
-		textBuf[3 - i] = 48 + digit; //ascii 48 = 0
+		// textBuf[3 - i] = 48 + digitValue; //ascii 48 = 0
+		digitValueToChar(&textBuf[3 - i], digitValue);
+		
 		c /= 10 + asHexadecimal * 6;
 
 		if (c == 0)
