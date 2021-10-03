@@ -34,7 +34,7 @@ void Apps::appSelector()
 	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 	// uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 
-	bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 8)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
+	bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
 	this->app_init_edge = false;
 
 	if (init_app_init)
@@ -1127,9 +1127,6 @@ void Apps::modeSettings()
 
 	if (this->app_init_edge)
 	{
-		
-	  
-	
 	}
 
 	// back and forth motion required of the potentio to count up modes
@@ -1234,6 +1231,8 @@ void Apps::modeSettings()
 
 	else if (SETTINGS_MODE_SELECTOR < 20)
 	{
+		
+		// A0 handles the selector button analog input. It will not change apps when the selector knob is rotated in this menu. 
 		// menu title
 		textBuf[2] = 'A';
 		uint8_t index = (SETTINGS_MODE_SELECTOR - 10) / 2;
@@ -1335,6 +1334,7 @@ void Apps::modeSettings()
 			//delay(2); // Wait for Vref to settle
 			// playSongHappyDryer();
 			// playSongHappyDryer();
+			
 			loadBuzzerTrack(SONG_ALPHABET);
 			buzzerSilentClearBuffer();
 			//fill8BytesArrayWithZero();
@@ -1994,7 +1994,7 @@ void Apps::modeSoundNotes()
 		SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
 		
 		// initiateCountDowntimerWith500Millis(&SOUND_NOTE_AUTO_TIMER);
-		SOUND_NOTES_SCALE_ROOT = C4_4;
+		SOUND_NOTES_SCALE_ROOT = C5_4;
 		modeSoundNotesInitScale();
 
 		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
@@ -2024,6 +2024,12 @@ void Apps::modeSoundNotes()
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
 	{
 		// advanced
+		
+		// mute button to silently change notes.
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		{
+			SOUND_NOTE_MUTE = true;
+		}
 
 		//  change scale
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -2045,9 +2051,9 @@ void Apps::modeSoundNotes()
 			if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT)
 			{
 				SOUND_NOTES_SCALE_ROOT++;
-				if (SOUND_NOTES_SCALE_ROOT > B5_4)
+				if (SOUND_NOTES_SCALE_ROOT > B6_4)
 				{
-					SOUND_NOTES_SCALE_ROOT = SOUND_NOTES_SCALE_ROOT;
+					SOUND_NOTES_SCALE_ROOT = C5_4;
 				}
 			}
 			modeSoundNotesInitScale();
@@ -2068,23 +2074,19 @@ void Apps::modeSoundNotes()
 			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
 		}
 
+		
+	}
+	else
+	{
+		// easy
+		
 		// change note length
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
 			buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
 			SOUND_NOTE_PLAY_NOTE = true;
 		}
-	}
-	else
-	{
-		// easy
-
-		// mute button to silently change notes.
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
-		{
-			SOUND_NOTE_MUTE = true;
-		}
-
+		
 		// just play the active note
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
@@ -3251,12 +3253,13 @@ void Apps::modeSequencer()
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
+			// play sequencer note at active index
 			addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
 		{
-			// if button continuously pressed, show notes.
+			// if button continuously pressed, show sequencer note at active index
 
 			noteToDisplay(SEQUENCER_TEMP_NOTE);
 			showNote = true;
@@ -3265,39 +3268,40 @@ void Apps::modeSequencer()
 			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getDelta();
 		}
 
-		// just listen to the potentio note
-		SEQUENCER_TEMP_NOTE = encoder_dial->getValueLimited(255, true);
-
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
-			buzzerSilentClearBufferAndAddNote(SEQUENCER_TEMP_NOTE);
+			buzzerSilentClearBufferAndAddNote(SEQUENCER_CHOSEN_NOTE);
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
+			// just listen to the potentio note
+			SEQUENCER_CHOSEN_NOTE += encoder_dial->getDelta();
+			
 			// if button continuously pressed, listen to notes as they are chosen
-			buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
-			noteToDisplay(SEQUENCER_TEMP_NOTE);
+			buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(SEQUENCER_CHOSEN_NOTE);
+			noteToDisplay(SEQUENCER_CHOSEN_NOTE);
 			showNote = true;
 		}
-
+		
 		// program note to song
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			buzzerSilentClearBufferAndAddNote(SEQUENCER_TEMP_NOTE);
+			buzzerSilentClearBufferAndAddNote(SEQUENCER_CHOSEN_NOTE);
 
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 			{
 				//copy to all measures
 				for (uint8_t i = 0; i < 4; i++)
 				{
-					this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = SEQUENCER_TEMP_NOTE;
+					this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = SEQUENCER_CHOSEN_NOTE;
 				}
 			}
 			else
 			{
-				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = SEQUENCER_TEMP_NOTE;
+				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = SEQUENCER_CHOSEN_NOTE;
 			}
+			
 		}
 
 		// song progression

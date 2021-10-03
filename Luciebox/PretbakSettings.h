@@ -6,7 +6,7 @@
 // v302 : development since 2021-03-19. Numerous small bugfixes and additional functionality.
 // v303 : settings debug selector dial. Make sure values are not too erratic. small bugfixes.
 // v304 : quizmaster scoring bugfix and optimization / baby dreamtime mode change behaviour + shift button keeps it in dreamtime mode (all button mash apps should have the shift button included). / total time timer is now set to a timer of the chrono app.
-// v305 : add battery voltage indicator / buzzer rework (note scheme, buzzer buffer)
+// v305 : add battery voltage indicator / buzzer rework (note scheme, buzzer buffer) / sequencer rework
 
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES

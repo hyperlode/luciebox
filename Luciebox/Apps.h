@@ -253,6 +253,7 @@
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
 #define DRAW_ACTIVE_SEGMENT general_uint8_t_2
 #define MODE_SETTINGS_CYCLE_TIMING_INDEX general_uint8_t_2
+#define SEQUENCER_CHOSEN_NOTE general_uint8_t_2
 
 #define TALLY_KEEPER_TEST general_uint8_t_3
 #define DRAW_CURSOR_SEGMENT general_uint8_t_3
