@@ -954,10 +954,10 @@ private:
     void buzzerPlayDisappointment();
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
-    void buzzerOff();
-    void buzzerOffAndAddNote(uint8_t note);
+    void buzzerSilentClearBuffer();
+    void buzzerSilentClearBufferAndAddNote(uint8_t note);
     void buzzerChangeSpeedRatioWithEncoderDial();
-    void buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note);
+    void buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(uint8_t note);
     void loadBuzzerTrack(uint8_t songIndex);
     void playSongHappyDryer();
 	long readVcc();

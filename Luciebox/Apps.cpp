@@ -44,7 +44,7 @@ void Apps::appSelector()
 		Serial.println(selected_app);
 #endif
 
-		buzzerOff(); // The moment we switch apps, the sound goes off immediatly.
+		buzzerSilentClearBuffer(); // The moment we switch apps, the sound goes off immediatly.
 
 		// set to init state before a new app starts
 		splash_screen_playing = true;
@@ -390,7 +390,7 @@ void Apps::modeDreamtime()
 	{
 		if (MODE_DREAMTIME_STEP_MEMORY != MODE_DREAMTIME_STEP)
 		{
-			buzzerOffAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
+			buzzerSilentClearBufferAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
 		}
 	}
 
@@ -521,7 +521,7 @@ void Apps::pomodoroTimer()
 			}
 
 			// no sound when zero
-			if (buzzer->getBuzzerRollEmpty()) // if end of clock signal sounds, no ticking! erase to optimize memory
+			if (buzzer->getBuzzerNotesBufferEmpty()) // if end of clock signal sounds, no ticking! erase to optimize memory
 			{
 				buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
 			}
@@ -650,12 +650,6 @@ void Apps::pomodoroTimer()
 	}
 	break;
 
-	// case POMODORO_DISPLAY_SHOW_TALLY:
-	// {
-		
-
-	// }
-	// break;
 	case POMODORO_DISPLAY_SHOW_GOOD:
 	{
 		setStandardTextToTextBuf(TEXT_YES);
@@ -1342,7 +1336,7 @@ void Apps::modeSettings()
 			// playSongHappyDryer();
 			// playSongHappyDryer();
 			loadBuzzerTrack(SONG_ALPHABET);
-			buzzerOff();
+			buzzerSilentClearBuffer();
 			//fill8BytesArrayWithZero();
 			buzzerChangeSpeedRatioWithEncoderDial();
 			//dialGetIndexedtime();
@@ -1438,7 +1432,7 @@ void Apps::modeTallyKeeper()
 			}
 			else
 			{
-				// buzzerOffAndAddNote(C5_2);
+				// buzzerSilentClearBufferAndAddNote(C5_2);
 				buzzerPlayApproval();
 			}
 		}
@@ -1819,7 +1813,7 @@ void Apps::modeComposeSong()
 	{
 		for (uint8_t i = 0; i < bytes_list_bufsize; i++)
 		{
-			COMPOSER_SONG[i] = BUZZER_ROLL_SONG_STOPVALUE;
+			COMPOSER_SONG[i] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE;
 		}
 		COMPOSER_SONG_LENGTH = 1;
 		COMPOSER_SONG[0] = REST_8_8; //default note
@@ -1836,11 +1830,11 @@ void Apps::modeComposeSong()
 		{
 			COMPOSER_STEP = 0;
 			// search for the last note in the composed song.
-			// assume last note of longest possible song is always BUZZER_ROLL_SONG_STOPVALUE
+			// assume last note of longest possible song is always BUZZER_NOTES_BUFFER_SONG_STOPVALUE
 			for (uint8_t i = bytes_list_bufsize - 2; i > 0; i--)
 			{
 				COMPOSER_SONG_LENGTH = i + 1;
-				if (COMPOSER_SONG[i] != BUZZER_ROLL_SONG_STOPVALUE)
+				if (COMPOSER_SONG[i] != BUZZER_NOTES_BUFFER_SONG_STOPVALUE)
 				{
 					break;
 				}
@@ -1869,7 +1863,7 @@ void Apps::modeComposeSong()
 						COMPOSER_SONG[i] = COMPOSER_SONG[i + 1];
 					}
 					// deleted space should be a song stop note.
-					COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_ROLL_SONG_STOPVALUE;
+					COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE;
 
 					//adjust length
 					COMPOSER_SONG_LENGTH--;
@@ -1885,7 +1879,7 @@ void Apps::modeComposeSong()
 				}
 				else
 				{
-					// remember, last note of longest song possible MUST be BUZZER_ROLL_SONG_STOPVALUE, don't copy a note to it.
+					// remember, last note of longest song possible MUST be BUZZER_NOTES_BUFFER_SONG_STOPVALUE, don't copy a note to it.
 					for (uint8_t i = bytes_list_bufsize - 3; i > COMPOSER_STEP; i--)
 					{
 						COMPOSER_SONG[i + 1] = COMPOSER_SONG[i];
@@ -1908,14 +1902,14 @@ void Apps::modeComposeSong()
 				change = stepChange(&COMPOSER_STAGED_NOTE,encoder_dial->getDelta(),0,255,true);
 				if (change)
 				{
-					buzzerOffAndAddNote((uint8_t)COMPOSER_STAGED_NOTE);
+					buzzerSilentClearBufferAndAddNote((uint8_t)COMPOSER_STAGED_NOTE);
 				}
 
 				// program note in song when the combination of the two buttons is pressed.
 				if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0) )
 				{
 					COMPOSER_SONG[COMPOSER_STEP] = (uint8_t)COMPOSER_STAGED_NOTE;
-					// buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
+					// buzzerSilentClearBufferAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 
 					// if note added to end, expand song length and add default note
 					if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
@@ -1930,7 +1924,7 @@ void Apps::modeComposeSong()
 			{
 				// just listen to note on index in song
 				// will also sound when just being programmed
-				buzzerOffAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
+				buzzerSilentClearBufferAndAddNote(COMPOSER_SONG[COMPOSER_STEP]);
 			}
 		}
 
@@ -2176,11 +2170,19 @@ void Apps::modeSoundNotes()
 			// take number of steps on the chromatic scale to go to desired note
 			for (uint8_t i = 0; i < distance_to_next_note_on_scale; i++)
 			{
-				buzzer->nextNote(
-					&SOUND_NOTES_NOTE_INDEX,
-					SOUND_NOTE_AUTO_UP_ELSE_DOWN,
-					true);
+				// buzzer->nextNote(
+					// &SOUND_NOTES_NOTE_INDEX,
+					// SOUND_NOTE_AUTO_UP_ELSE_DOWN,
+					// true);
+					int16_t limit = (SOUND_NOTES_NOTE_INDEX / NOTES_COUNT) * NOTES_COUNT;
+					// nextStepRotate(&SOUND_NOTES_NOTE_INDEX,SOUND_NOTE_AUTO_UP_ELSE_DOWN, limit,limit+NOTES_COUNT);
+					
+					nextStepRotate(&SOUND_NOTES_NOTE_INDEX,SOUND_NOTE_AUTO_UP_ELSE_DOWN, limit, limit + NOTES_COUNT-1);
+					
+					
+					// //(SOUND_NOTES_NOTE_INDEX % NOTES_COUNT) * NOTES_COUNT, (SOUND_NOTES_NOTE_INDEX % NOTES_COUNT) + 1) * NOTES_COUNT);
 			}
+			
 		}
 
 		SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
@@ -2191,7 +2193,7 @@ void Apps::modeSoundNotes()
 	{
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
-			buzzerOff();
+			buzzerSilentClearBuffer();
 		}
 		addNoteToBuzzer(SOUND_NOTES_NOTE_INDEX);
 	}
@@ -2309,7 +2311,7 @@ void Apps::modeMovie()
 	{
 		reload_soundtrack = reload_soundtrack || movie_restart;
 	}
-	else if (buzzer->getBuzzerRollEmpty())
+	else if (buzzer->getBuzzerNotesBufferEmpty())
 	{
 		reload_soundtrack = true;
 	}
@@ -2317,7 +2319,7 @@ void Apps::modeMovie()
 	// soundtrack
 	if (reload_soundtrack && sound_on)
 	{
-		// buzzerOff();
+		// buzzerSilentClearBuffer();
 		loadBuzzerTrack(MOVIE_MODE_SOUNDTRACK_INDEX);
 	}
 
@@ -2792,7 +2794,7 @@ void Apps::modeHackTime()
 		if (!(binaryInputsValue & (1<<BUTTON_INDEXED_MOMENTARY_0)))
 		{
 			if (binaryInputsValue & (1<<BUTTON_INDEXED_LATCHING_2)){
-				buzzerOffAndAddNote(array_8_bytes[0]);
+				buzzerSilentClearBufferAndAddNote(array_8_bytes[0]);
 			}
 			set_blink_offset();
 		}
@@ -3268,13 +3270,13 @@ void Apps::modeSequencer()
 
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 		{
-			buzzerOffAndAddNote(SEQUENCER_TEMP_NOTE);
+			buzzerSilentClearBufferAndAddNote(SEQUENCER_TEMP_NOTE);
 		}
 
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 		{
 			// if button continuously pressed, listen to notes as they are chosen
-			buzzerOffAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
+			buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(SEQUENCER_TEMP_NOTE);
 			noteToDisplay(SEQUENCER_TEMP_NOTE);
 			showNote = true;
 		}
@@ -3282,7 +3284,7 @@ void Apps::modeSequencer()
 		// program note to song
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
 		{
-			buzzerOffAndAddNote(SEQUENCER_TEMP_NOTE);
+			buzzerSilentClearBufferAndAddNote(SEQUENCER_TEMP_NOTE);
 
 			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 			{
@@ -3383,7 +3385,7 @@ void Apps::modeMetronome()
 	else if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3))
 	{
 		buzzerChangeSpeedRatioWithEncoderDial();
-		buzzerOffAndAddNoteAtEncoderDialChange(C6_4);
+		buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(C6_4);
 	}
 	else
 	{
@@ -3583,7 +3585,7 @@ void Apps::modeSimon()
 		SIMON_INDEX = -1; // negative index allows for lead-in time
 		SIMON_STEP_TIMER.start();
 
-		if (buzzer->getBuzzerRollEmpty())
+		if (buzzer->getBuzzerNotesBufferEmpty())
 		{ // at start, wait for the beginning song to be over.
 			simonState = simonPlaySequence;
 		}
@@ -3899,7 +3901,7 @@ void Apps::modeReactionGame()
 		else
 		{
 			// whack a mole mode
-			if (buzzer->getBuzzerRollEmpty())
+			if (buzzer->getBuzzerNotesBufferEmpty())
 			{ // in sound mode, wait till demo is done
 				
 				reactionGameState = reactionNewTurn;
@@ -4015,7 +4017,7 @@ void Apps::modeReactionGame()
 		// check of button press pattern is the sought pattern
 		if (!diff_between_needed_and_pressed)
 		{
-			// buzzerOffAndAddNote(C5_4);
+			// buzzerSilentClearBufferAndAddNote(C5_4);
 			buzzerPlayApproval();
 			reactionGameState = reactionHexWaitForButtonsRelease;
 			REACTION_HEX_GUESSED_CORRECTLY = true;
@@ -4104,7 +4106,7 @@ void Apps::modeReactionGame()
 				if (displayAllSegments & (0x80UL << 8 * i))
 				{
 					// DP is on, set to zero.
-					// buzzer->addRandomSoundToRoll(190, 198);
+					// buzzer->addRandomSoundToNotesBuffer(190, 198);
 					addNoteToBuzzer(103 + i);
 					displayAllSegments &= ~(0x80UL << 8 * i);
 					REACTION_GAME_SCORE++;
@@ -4140,7 +4142,7 @@ void Apps::modeReactionGame()
 
 	case reactionWaitBeforeNewTurn:
 	{
-		if (buzzer->getBuzzerRollEmpty())
+		if (buzzer->getBuzzerNotesBufferEmpty())
 		{
 			reactionGameState = reactionNewTurn;
 		}
@@ -4601,30 +4603,30 @@ void Apps::textBufToDisplay()
 }
 
 void Apps::buzzerPlayApproval(){
-	this->buzzerOffAndAddNote(C7_8);
+	this->buzzerSilentClearBufferAndAddNote(C7_8);
 }
 
 void Apps::buzzerPlayDisappointment(){
-	this->buzzerOffAndAddNote(C4_1);
+	this->buzzerSilentClearBufferAndAddNote(C4_1);
 }
 
-void Apps::buzzerOffAndAddNoteAtEncoderDialChange(uint8_t note)
+void Apps::buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(uint8_t note)
 {
 	if (encoder_dial->getDelta())
 	{
-		buzzerOffAndAddNote(note);
+		buzzerSilentClearBufferAndAddNote(note);
 	}
 }
 
-void Apps::buzzerOffAndAddNote(uint8_t note)
+void Apps::buzzerSilentClearBufferAndAddNote(uint8_t note)
 {
-	buzzerOff();
+	buzzerSilentClearBuffer();
 	addNoteToBuzzer(note);
 }
 
 void Apps::addNoteToBuzzer(uint8_t note)
 {
-	buzzer->addNoteToRoll(note);
+	buzzer->addNoteToNotesBuffer(note);
 }
 
 void Apps::addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater)
@@ -4676,9 +4678,9 @@ void Apps::textBufToDisplayAllSegments()
 {
 	ledDisp->convert_text4Bytes_to_32bits(textBuf, &displayAllSegments);
 }
-void Apps::buzzerOff()
+void Apps::buzzerSilentClearBuffer()
 {
-	buzzer->buzzerOff(); // stop all sounds that were playing in an app.
+	buzzer->buzzerSilentClearBuffer(); // stop all sounds that were playing in an app.
 }
 
 void Apps::buzzerChangeSpeedRatioWithEncoderDial()
@@ -4743,7 +4745,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 	uint8_t length = 0;
 	uint8_t song_start_index = 0;
 
-	buzzerOff();
+	buzzerSilentClearBuffer();
 
 	if (songIndex < SONGS_FLASH_COUNT)
 	{
@@ -4785,7 +4787,7 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 
 	for (uint8_t i = 0; i < length; i++)
 	{
-		buzzer->addNoteToRoll(this->bytes_list[i]);
+		buzzer->addNoteToNotesBuffer(this->bytes_list[i]);
 	}
 }
 
@@ -5065,19 +5067,19 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 		if (this->multitimer_activeTimer == index)
 		{
 			this->multitimer_next(false);
-			// buzzerOffAndAddNote(35);
+			// buzzerSilentClearBufferAndAddNote(35);
 			buzzerPlayApproval();
 		}
 		else if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
 		{
-			// buzzerOffAndAddNote(129);
+			// buzzerSilentClearBufferAndAddNote(129);
 			buzzerPlayDisappointment(); // althought, good to check time, it also acts as a warning that this is not your button to press
 			this->multitimer_timerDisplayed = index; //display time of pressed timer button
 		}
 	}
 	else if (this->multitimer_state == paused)
 	{
-		buzzerOffAndAddNote(230);
+		buzzerSilentClearBufferAndAddNote(230);
 		this->multitimer_timerDisplayed = index; //display time of pressed timer button
 	}
 }

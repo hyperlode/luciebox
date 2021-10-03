@@ -177,7 +177,7 @@ void processInput()
 
 void processOuput()
 {
-    buzzer.doBuzzerRoll();
+    buzzer.checkAndPlayNotesBuffer();
     visualsManager.refresh();
     ledDisplay.refresh();
 }

@@ -272,19 +272,19 @@
 
 #define BUZZER_OVERLAP_TO_PREVENT_GAP_BETWEEN_EQUAL_NOTES_MILLIS 5 // 
 
-#define BUZZER_ROLLVALUE_BUTTONPRESS
-#define BUZZER_ROLLVALUE_PAUSE
-#define BUZZER_ROLLVALUE_UNPAUSE
-#define BUZZER_ROLLVALUE_STARTGAME
-#define BUZZER_ROLLVALUE_ENDGAME
+#define BUZZER_NOTES_BUFFERVALUE_BUTTONPRESS
+#define BUZZER_NOTES_BUFFERVALUE_PAUSE
+#define BUZZER_NOTES_BUFFERVALUE_UNPAUSE
+#define BUZZER_NOTES_BUFFERVALUE_STARTGAME
+#define BUZZER_NOTES_BUFFERVALUE_ENDGAME
 
-#define BUZZER_ROLL_LENGTH 103 // accomodate for "the longest songs..." or find another way to split songs in half.
+#define BUZZER_NOTES_BUFFER_LENGTH 103 // accomodate for "the longest songs..." or find another way to split songs in half.
 
-#define BUZZER_ROLL_SONG_STOPVALUE 255
+#define BUZZER_NOTES_BUFFER_SONG_STOPVALUE 255
 
-// #define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 63
-#define BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS 15
-#define BUZZER_ROLL_BASE_FREQUENCY 220
+// #define BUZZER_NOTES_BUFFER_EIGHTNOTE_DURATION_MILLIS 63
+#define BUZZER_NOTES_BUFFER_EIGHTNOTE_DURATION_MILLIS 15
+#define BUZZER_NOTES_BUFFER_BASE_FREQUENCY 220
 
 #define NOTES_COUNT 60  // spans 5 octaves
 
@@ -295,21 +295,21 @@ public:
 
     void setPin(uint8_t pin);
     uint8_t getPin();
-    void addNoteToRoll(uint8_t note);
-    uint8_t addRandomSoundToRoll(uint8_t lowest, uint8_t highest);
-    void doBuzzerRoll();
-    uint8_t getNextProgramSlot();
-    uint8_t getNextPlaySlot();
-    uint8_t getBuzzerRollEmpty();
+    void addNoteToNotesBuffer(uint8_t note);
+    uint8_t addRandomSoundToNotesBuffer(uint8_t lowest, uint8_t highest);
+    void checkAndPlayNotesBuffer();
+    uint8_t getNextProgramIndex();
+    uint8_t getNextPlayIndex();
+    uint8_t getBuzzerNotesBufferEmpty();
 
     void changeTranspose(int8_t delta);
     void setTranspose(int8_t offset);
     void changeSpeedRatio(int8_t delta);
     void setSpeedRatio(float speedMultiplier);
 
-    void cleanBuzzerRoll();
+    void clearBuzzerNotesBuffer();
     void playTone(unsigned int freq, unsigned long duration_millis);
-    void buzzerOff();
+    void buzzerSilentClearBuffer();
 	void buzzerSilent();
 	
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
@@ -317,15 +317,14 @@ public:
 
     uint8_t getLength(uint8_t note);
     void changeNoteToNextLength(int16_t *note);
-    void nextNote(int16_t *note, bool upElseDown, bool stayInSameLength);
 
 private:
     float speedScale;
     int8_t transpose;
     uint8_t pin;
-    uint8_t buzzerRoll[BUZZER_ROLL_LENGTH];
-    uint8_t playSlotCounter;
-    uint8_t programSlotCounter;
+    uint8_t buzzerNotesBuffer[BUZZER_NOTES_BUFFER_LENGTH];
+    uint8_t bufferPlayIndex;
+    uint8_t bufferProgramIndex;
     unsigned long soundFinishedTimeMillis;
 	
 	bool noteFinishedEdge;

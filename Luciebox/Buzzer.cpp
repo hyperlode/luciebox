@@ -1,19 +1,23 @@
 #include "Buzzer.h"
 #include "Arduino.h"
 
+
+// buffer has two indeces: for adding new notes (programSlotcounter) and for playing bufferPlayIndex. 
+
+
 Buzzer::Buzzer()
 {
     //constructor
-    cleanBuzzerRoll();
+    clearBuzzerNotesBuffer();
     this->soundFinishedTimeMillis = 0;
     this->speedScale = 1;
     this->transpose = 0;
 }
 
-void Buzzer::cleanBuzzerRoll()
+void Buzzer::clearBuzzerNotesBuffer()
 {
-	playSlotCounter = 1;
-    programSlotCounter = 0;
+	bufferPlayIndex = 1;
+    bufferProgramIndex = 0;
 }
 
 void Buzzer::changeTranspose(int8_t delta)
@@ -48,54 +52,47 @@ uint8_t Buzzer::getPin()
     return this->pin;
 }
 
-void Buzzer::addNoteToRoll(uint8_t note)
+void Buzzer::addNoteToNotesBuffer(uint8_t note)
 {
-    //load one note to next slot in roll
+    //load one note to next slot in notesBuffer
 
     //sound:
     //0 = empty slot
     //+ 1-62 = note (1 = 110Hz A , and going up 1/12 of an octave each number
     //+ 63, 126, 189, 252 = duration = 1/8, 1/4, 1/2, 1
-    //program in next available slot AFTER playSlotCounter
+    //program in next available slot AFTER bufferPlayIndex
 
     //A0sharp 1/2 = 191
     //1/8 stop = 63
 
-    //this->programSlotCounter = getNextBuzzerRollSlot(true);
-	this->programSlotCounter = getNextProgramSlot();
+    //this->bufferProgramIndex = getNextBuzzerNotesBufferSlot(true);
+	this->bufferProgramIndex = getNextProgramIndex();
 	
 	
-    this->buzzerRoll[this->programSlotCounter] = note;
+    this->buzzerNotesBuffer[this->bufferProgramIndex] = note;
 
     //http://members.efn.org/~qehn/global/building/cents.htm
     //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
 }
 
-uint8_t Buzzer::addRandomSoundToRoll(uint8_t lowest, uint8_t highest)
+uint8_t Buzzer::addRandomSoundToNotesBuffer(uint8_t lowest, uint8_t highest)
 {
     uint8_t r = random(lowest, highest);
-    addNoteToRoll(r);
+    addNoteToNotesBuffer(r);
     return r;
 }
 
-void Buzzer::doBuzzerRoll()
+void Buzzer::checkAndPlayNotesBuffer()
 {
-    //play all the sounds in the roll (buffer)
+    //play all the sounds in the notesBuffer (buffer)
     //0 stands for free and programmable
-    //one playSlotCounter
+    //one bufferPlayIndex
 	//delay(100);
     if (millis() > this->soundFinishedTimeMillis)
     {
-		
-        // Lucie, this code contains the remnants of an attempt to optimize the memory footprint for songs. As it seemed smart to have a specific value for filling notespaces i.e. instead of 1/8note + 1/8rest + 1/4rest + 1/2rest for a full note. Just do 1/8note + 7/8s(aka all the space needed to fill a full note duration). But, in reality, it's not worth it. AT ALL.
-        //erase previous slot
-        // uint8_t previous_note = this->buzzerRoll[this->playSlotCounter];
-        //this->buzzerRoll[this->playSlotCounter] = BUZZER_ROLL_EMPTY_SLOT;
-
-		if (this->getNextProgramSlot() != this->playSlotCounter)
+		if (this->getNextProgramIndex() != this->bufferPlayIndex)
 		{	
-			uint8_t current_note = this->buzzerRoll[this->playSlotCounter];
-
+			uint8_t current_note = this->buzzerNotesBuffer[this->bufferPlayIndex];
        
             //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
             float freq = 1;
@@ -105,7 +102,7 @@ void Buzzer::doBuzzerRoll()
                 for (uint8_t i = 0; i < (current_note % NOTES_COUNT) + this->transpose; i++)
                 {
                     //same result as: (but 2K less memory!!)
-                    //freq = pow(1.059463,(buzzerRoll[this->playSlotCounter])-1 % 63);
+                    //freq = pow(1.059463,(buzzerNotesBuffer[this->bufferPlayIndex])-1 % 63);
                     freq *= 1.059463;
                 }
             }
@@ -114,7 +111,7 @@ void Buzzer::doBuzzerRoll()
 		
 			if (current_note <= LAST_NOTE)
             {
-                freq *= BUZZER_ROLL_BASE_FREQUENCY; //frequency
+                freq *= BUZZER_NOTES_BUFFER_BASE_FREQUENCY; //frequency
 				eight_notes_length_multiplier = (1 << (current_note / NOTES_COUNT)); 
 				tone(this->pin, (unsigned int)freq); //duration, number is exponent of 2.
 				noteFinishedEdge = true;
@@ -124,19 +121,18 @@ void Buzzer::doBuzzerRoll()
 				this->buzzerSilent();
 			}
 			
-			unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_ROLL_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
+			unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_NOTES_BUFFER_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
 			
             this->soundFinishedTimeMillis = millis() + toneLength ;
 		
 			//move active slot
-			this->playSlotCounter = this->getNextPlaySlot();
+			this->bufferPlayIndex = this->getNextPlayIndex();
 			
 		}else{
 			if (noteFinishedEdge){
 				noteFinishedEdge = false;
 				this->buzzerSilent();
 			}
-			//soundFinishedTimeMillis = 10000000;
 		}
     }
 }
@@ -153,24 +149,23 @@ void Buzzer::setSpeedRatio(float speedMultiplier)
     this->speedScale = speedMultiplier;
 }
 
-uint8_t Buzzer::getNextProgramSlot()
+uint8_t Buzzer::getNextProgramIndex()
 {
     //returns value of next slot
-	uint8_t index = this->programSlotCounter;
+	uint8_t index = this->bufferProgramIndex;
 	index++;
-	if (index >= BUZZER_ROLL_LENGTH){
+	if (index >= BUZZER_NOTES_BUFFER_LENGTH){
 		index = 0;
 	}
 	return index;
-	
 }
 
-uint8_t Buzzer::getNextPlaySlot()
+uint8_t Buzzer::getNextPlayIndex()
 {
     //returns value of next slot
-	uint8_t index = this->playSlotCounter;
+	uint8_t index = this->bufferPlayIndex;
 	index++;
-	if (index >= BUZZER_ROLL_LENGTH){
+	if (index >= BUZZER_NOTES_BUFFER_LENGTH){
 		index = 0;
 	}
 	return index;
@@ -180,10 +175,10 @@ void Buzzer::buzzerSilent(){
 	 noTone(this->pin);	
 }
 
-void Buzzer::buzzerOff()
+void Buzzer::buzzerSilentClearBuffer()
 {
-    //erase contents of buzzerRoll and switch off.
-    this->cleanBuzzerRoll();
+    //erase contents of buzzerNotesBuffer and switch off.
+    this->clearBuzzerNotesBuffer();
     this->buzzerSilent();
 }
 
@@ -191,7 +186,7 @@ void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
 {
     // set 0 to duration_millis for indefinite length (will sound until notone or another tone command is given. )
 
-    //this->buzzerOff();
+    //this->buzzerSilentClearBuffer();
     if (duration_millis == 0)
     {
         tone(this->pin, freq);
@@ -202,14 +197,14 @@ void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
     }
 }
 
-uint8_t Buzzer::getBuzzerRollEmpty()
+uint8_t Buzzer::getBuzzerNotesBufferEmpty()
 {
-	 return getNextProgramSlot() == this->playSlotCounter;
+	 return getNextProgramIndex() == this->bufferPlayIndex;
 }
 
 void Buzzer::lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints)
 {
-    noteToDisplay(textBuf, decimalPoints, this->buzzerRoll[this->playSlotCounter]);
+    noteToDisplay(textBuf, decimalPoints, this->buzzerNotesBuffer[this->bufferPlayIndex]);
 }
 
 void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
@@ -241,8 +236,14 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
 
     textBuf[2] = 62; // SPACE_FAKE_ASCII = 62 optimized: assume empty at start
 
-    // note length
-    textBuf[3] = this->getLength(note) + 48;
+	uint8_t length = this->getLength(note);
+	if (length > 9)
+	{
+		// in ascii table, there is a gap of 7 positions between the numbers and letters. (for the rests, we need hex values.)
+		length += 7;
+	}
+    textBuf[3] = length + 48;
+	
 }
 
 uint8_t Buzzer::getLength(uint8_t note)
@@ -253,47 +254,6 @@ uint8_t Buzzer::getLength(uint8_t note)
 	}else{
 		return 0x01 << (3 - (note / NOTES_COUNT)); // 2^(3 -x) --> note length is 8,4,2,1	
 	}
-}
-
-void Buzzer::nextNote(int16_t *note, bool upElseDown, bool stayInSameLength)
-{
-    // stayInSameLength: four note lenghts in total a fourth of the byte space is for each length
-    int16_t note_without_length = *note % NOTES_COUNT;
-
-    if (upElseDown)
-    {
-        note_without_length++;
-        *note += 1;
-    }
-    else
-    {
-        note_without_length--;
-        *note -= 1;
-    }
-
-    if (stayInSameLength)
-    {
-        if (note_without_length > NOTES_COUNT)
-        {
-            *note -= NOTES_COUNT ;
-        }
-        else if (note_without_length < 0)
-        {
-            *note += NOTES_COUNT ;
-        }
-    }
-    else
-    {
-        // check boundaries over overall range
-        if (*note <= 0)
-        {
-            *note = LAST_NOTE;
-        }
-        if (*note > LAST_NOTE)
-        {
-            *note = 0;
-        }
-    }
 }
 
 void Buzzer::changeNoteToNextLength(int16_t *note)

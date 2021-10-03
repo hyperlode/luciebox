@@ -1,0 +1,535 @@
+#include "MiniMultiTimer.h"
+
+MiniMultiTimer::MiniMultiTimer()
+{
+	// this->multiTimer.setDefaults();
+	setDefaults();
+}
+
+void MiniMultiTimer::setDefaults()
+{
+	// general init
+	//this->fisherTimer = DEFAULT_FISHER_TIMER;
+	this->fischerSecs = DEFAULT_FISCHER_TIMER_SECS;
+	this->timers_count = DEFAULT_TIMERS_COUNT;
+	this->setAllInitCountDownTimeSecs(DEFAULT_INIT_TIME_SECS);
+
+	this->state = initialized;
+	this->activeTimer = 0;
+	this->timerDisplayed = this->activeTimer;
+}
+void MiniMultiTimer::setBuzzer(Buzzer *buzzer)
+{
+	this->buzzer = buzzer;
+	this->initTimeSecs = DEFAULT_INIT_TIME_SECS;
+}
+// state MiniMultiTimer::getState(){
+// return this->state;
+// }
+
+void MiniMultiTimer::setTimersCount(uint8_t timers_count)
+{
+	if (this->state == setTimers)
+	{
+		this->timers_count = timers_count;
+		this->activeTimer = 0;
+		this->timerDisplayed = this->activeTimer;
+	}
+}
+
+void MiniMultiTimer::setStateTimersCount(bool set)
+{
+	if (!set && this->state == setTimers)
+	{
+		this->state = initialized;
+	}
+	else if (set && this->state == initialized)
+	{
+		this->state = setTimers;
+	}
+}
+
+void MiniMultiTimer::setFischerTimer(uint16_t seconds)
+{
+	if (this->state == setFischer)
+	{
+		this->fischerSecs = seconds;
+	}
+}
+
+void MiniMultiTimer::setStateFischerTimer(bool set)
+{
+	if (!set && this->state == setFischer)
+	{
+		this->state = initialized;
+	}
+	else if (set && this->state == initialized)
+	{
+		this->state = setFischer;
+	}
+}
+
+uint16_t MiniMultiTimer::getIndexedTime(uint8_t index)
+{
+	// instead of all seconds, only
+	//index max = length of timeDialDiscreteSeconds
+	return timeDialDiscreteSeconds[index];
+}
+
+void MiniMultiTimer::setAllInitCountDownTimeSecs(uint16_t initTimeSecs)
+{
+	if (this->state == initialized)
+	{
+		this->initTimeSecs = initTimeSecs;
+		for (uint8_t i = 0; i < MAX_TIMERS_COUNT; i++)
+		{
+			this->setTimerInitCountTimeSecs(i, this->initTimeSecs);
+		}
+	}
+}
+
+void MiniMultiTimer::setTimerInitCountTimeSecs(uint8_t timer, uint16_t initTimeSecs)
+{
+	if (this->state == initialized)
+	{
+		this->timers[timer].setInitCountDownTimeSecs(initTimeSecs);
+	}
+}
+
+void MiniMultiTimer::init()
+{
+	for (uint8_t i = 0; i < MAX_TIMERS_COUNT; i++)
+	{
+		this->timers[i].reset();
+		//this->timers[i].setInitCountDownTimeSecs(this->initTimeSecs);
+		//this->timers[i].startPaused(true);
+	}
+	this->state = initialized;
+
+	// specific
+	this->activeTimer = 0;
+}
+
+void MiniMultiTimer::playerButtonPressEdgeDown(uint8_t index)
+{
+	// if button released, always display active Timer time.
+	// if (index +1) <= this->timers_count){
+	this->timerDisplayed = this->activeTimer;
+	// }
+}
+
+void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index)
+{
+	// every timer index is linked to a button index.
+
+	if (this->state == initialized)
+	{
+		if ((index + 1) <= this->timers_count)
+		{
+			this->activeTimer = index;
+			this->timerDisplayed = this->activeTimer;
+		}
+	}
+	else if (this->state == playing)
+	{
+		if (this->activeTimer == index)
+		{
+			this->next();
+			(*this->buzzer).addNoteToRoll(35);
+		}
+		else if ((index + 1) <= this->timers_count)
+		{
+			(*this->buzzer).addNoteToRoll(129);
+			this->timerDisplayed = index; //display time of pressed timer button
+		}
+	}
+	else if (this->state == paused)
+	{
+		(*this->buzzer).addNoteToRoll(230);
+		this->timerDisplayed = index; //display time of pressed timer button
+	}
+}
+
+void MiniMultiTimer::setStatePause(bool set)
+{
+	// pause button is latching
+
+	if (this->state == initialized)
+	{
+		this->randomStarter = set;
+	}
+	else if (set && this->state == playing)
+	{
+		this->pause();
+	}
+	else if (!set && this->state == paused)
+	{
+		this->continu();
+	}
+}
+
+void MiniMultiTimer::start()
+{
+
+	//start and pause all timers.
+	for (uint8_t i = 0; i < this->timers_count; i++)
+	{
+		this->timers[i].start();
+		this->timers[i].pause();
+	}
+
+	// this is the moment we chose a random starting timer if enabled.
+	if (this->randomStarter)
+	{
+		randomSeed(millis());
+		this->activeTimer = (uint8_t)random(0, (long)this->timers_count);
+	}
+
+	// activate the starting timer
+	this->timers[this->activeTimer].continu();
+	this->state = playing;
+	this->timerDisplayed = this->activeTimer;
+}
+
+void MiniMultiTimer::pause()
+{
+	this->state = paused;
+	this->timers[this->activeTimer].pause();
+}
+
+void MiniMultiTimer::continu()
+{
+	this->state = playing;
+	this->timers[this->activeTimer].continu();
+}
+
+void MiniMultiTimer::buzzerRefresh(bool alarm)
+{
+	if (this->timers[this->activeTimer].getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(100, true, false))
+	{
+		if (alarm)
+		{
+
+			uint8_t tmp = random(20, 50);
+			for (uint8_t i = 0; i < 5; i++)
+			{
+				(*this->buzzer).addNoteToRoll(tmp);
+
+				(*this->buzzer).addNoteToRoll(rest_4);
+			}
+			//(*this->buzzer).addRandomSoundToRoll(20,80 );
+		}
+
+		if (this->timers[this->activeTimer].getTimeSecondsAbsolute() < 11 && this->timers[this->activeTimer].getTimeIsNegative())
+		{
+			// check for last ten seconds of countdown timer
+			(*this->buzzer).addNoteToRoll(34 + this->timers[this->activeTimer].getTimeSecondsAbsolute());
+			// (*this->buzzer).addNoteToRoll(63);
+		}
+
+		if (this->timers[this->activeTimer].getTimeSecondsAbsolute() % 60 == 0)
+		{
+			(*this->buzzer).addNoteToRoll(44);
+			// (*this->buzzer).addNoteToRoll(63);
+		}
+	}
+}
+
+void MiniMultiTimer::refresh()
+{
+
+	if (this->state == playing)
+	{
+
+		//check all timers elapsed
+		if (this->checkAllTimersFinished())
+		{
+
+			this->state = finished;
+		}
+		else
+		{
+
+			buzzerRefresh(false);
+
+			//check active timer time elapsed
+			if (getTimerFinished(this->activeTimer))
+			{
+				this->next();
+			}
+		}
+	}
+	// else if (this->state == initialized)
+	// {
+	// }
+	// else if (this->state == paused)
+	// {
+	// }
+	else if (this->state == finished)
+	{
+		buzzerRefresh(this->timers_count == 1); // alarm will sound if it was only one player.
+	}
+	// else if (this->state == setTimers)
+	// {
+	// }
+}
+
+void MiniMultiTimer::getDisplay(char *disp, uint8_t *playerLights, uint8_t *settingsLights)
+{
+	//what should be showing on the display right now?
+	*playerLights = 0b00000000;   //lsb is timer 0, 2nd bit is timer 1, ....
+	*settingsLights = 0b00000000; //settings lights are other lights then timer button lights.
+
+	disp[0] = ' ';
+	disp[1] = ' ';
+	disp[2] = ' ';
+	disp[3] = ' ';
+
+	if (this->state == initialized)
+	{
+		this->timers[this->activeTimer].getTimeString(disp);
+
+		for (uint8_t i = 0; i < this->timers_count; i++)
+		{
+			if (this->randomStarter)
+			{
+				if (millis() % 250 > 125)
+				{
+					// at random starter, all lights blinking
+					*playerLights |= 1 << i;
+				}
+			}
+			else if (i != this->activeTimer || millis() % 250 > 125)
+			{
+				// active timer is blinking. others are solid on.
+				*playerLights |= 1 << i;
+			}
+		}
+
+		if (this->randomStarter)
+		{
+
+			// pause light blinking.
+			if (millis() % 250 > 125)
+			{
+				*settingsLights |= LIGHT_PAUSE; //pause light on.
+			}
+		}
+		*settingsLights |= LIGHT_SECONDS_BLINKER;
+	}
+	else if (this->state == playing)
+	{
+
+		// displayed timer is not always the active timer (i.e. non active player wants to check his time).
+		this->timers[this->timerDisplayed].getTimeString(disp);
+
+		// run through all timers to set lights
+		for (uint8_t i = 0; i < this->timers_count; i++)
+		{
+
+			if (i == activeTimer)
+			{
+				// active timer seconds blink
+				if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500))
+				{
+					*playerLights |= 1 << i;
+
+					// blinking behaviour of decimal point
+					*settingsLights |= LIGHT_SECONDS_BLINKER;
+				}
+			}
+			else if (i == timerDisplayed)
+			{
+				// displayed timer is not always the active timer (i.e. non active player wants to check his time).
+				if (millis() % 250 > 125)
+				{
+					*playerLights |= 1 << i;
+				}
+
+				// solid seconds blinker when displaying other timer
+				*settingsLights |= LIGHT_SECONDS_BLINKER;
+			}
+			else if (i != this->activeTimer && !this->getTimerFinished(i))
+			{
+				//other lights solid on if still alive.
+				*playerLights |= 1 << i;
+			}
+		}
+
+		// //decimal point blinker
+
+		// if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500)){
+
+		// }
+
+		*settingsLights |= LIGHT_PLAYING; //when in timers running mode, solid on.
+	}
+	else if (this->state == finished)
+	{
+
+		// last surviving timer is now a chrono for displaying time since end.
+
+		if (this->timers[this->activeTimer].getInFirstGivenHundredsPartOfSecond(500))
+		{
+			this->timers[this->activeTimer].getTimeString(disp);
+			*settingsLights |= LIGHT_SECONDS_BLINKER;
+		}
+		else
+		{
+
+			// disp[0] = ' ';
+			disp[1] = 'E';
+			disp[2] = 'N';
+			disp[3] = 'D';
+		}
+		//fast blink last surviving timer light.
+		if (millis() % 250 > 125)
+		{
+			*playerLights |= 1 << this->activeTimer;
+		}
+	}
+	else if (this->state == paused)
+	{
+		if (millis() % 1000 > 500 || this->timerDisplayed != this->activeTimer)
+		{
+			// if other timer than the active timer, show always.
+			this->timers[this->timerDisplayed].getTimeString(disp);
+		}
+		else
+		{
+			disp[0] = 'P';
+			disp[1] = 'A';
+			disp[2] = 'U';
+			disp[3] = 'S';
+		}
+
+		// timer lights
+		for (uint8_t i = 0; i < this->timers_count; i++)
+		{
+			//other lights solid on if still alive.
+			if (i == this->activeTimer)
+			{
+				if (millis() % 250 > 125)
+				{
+					*playerLights |= 1 << i;
+				}
+			}
+			else if (i == timerDisplayed)
+			{
+				// displayed timer is not always the active timer (i.e. non active player wants to check his time).
+				if (millis() % 250 > 125)
+				{
+					*playerLights |= 1 << i;
+				}
+			}
+			else if (!this->getTimerFinished(i))
+			{
+				*playerLights |= 1 << i;
+			}
+		}
+		// settings lights
+		// pause light blinking.
+		if (millis() % 250 > 125)
+		{
+			*settingsLights |= LIGHT_PAUSE; //pause light on.
+		}
+		// playing light on.
+		*settingsLights |= LIGHT_PLAYING; //when in timers running mode, solid on.
+
+		*settingsLights |= LIGHT_SECONDS_BLINKER;
+	}
+	else if (this->state == setFischer)
+	{
+		if (millis() % 1000 > 650)
+		{
+			disp[0] = 'F';
+			disp[1] = 'I';
+			disp[2] = 'S';
+			disp[3] = 'H';
+		}
+		else
+		{
+			intToDigitsString(disp, (unsigned int)this->fischerSecs, false); // utilities lode
+		}
+		if (millis() % 250 > 125)
+		{
+			*settingsLights |= LIGHT_FISCHER;
+		}
+	}
+	else if (this->state == setTimers)
+	{
+		// Serial.println("setStateTimersCount");
+		if (millis() % 1000 > 650)
+		{
+			disp[0] = 'Q';
+			disp[1] = 'T';
+			disp[2] = 'Y';
+			//disp[3] = ' ';
+		}
+		else
+		{
+			intToDigitsString(disp, (unsigned int)this->timers_count, false); // utilities lode
+		}
+
+		// all active timers lights on
+		for (uint8_t i = 0; i < this->timers_count; i++)
+		{
+			*playerLights |= 1 << i;
+		}
+
+		if (millis() % 250 > 125)
+		{
+			*settingsLights |= LIGHT_SET_TIMERS_COUNT;
+		}
+	}
+
+	// settings lights exceptions
+	if (this->state != setFischer && this->fischerSecs != 0)
+	{
+		// fischer light always solid on when not zero seconds added. (except during setting, then blinking).
+		*settingsLights |= LIGHT_FISCHER;
+	}
+
+	//hour:seconds divider
+}
+
+bool MiniMultiTimer::getTimerFinished(uint8_t timerIndex)
+{
+	return !this->timers[timerIndex].getTimeIsNegative();
+}
+
+bool MiniMultiTimer::checkAllTimersFinished()
+{
+	uint8_t count = 0;
+	for (uint8_t i = 0; i < this->timers_count; i++)
+	{
+		this->getTimerFinished(i) ? count++ : count += 0;
+	}
+
+	return count == this->timers_count;
+}
+
+void MiniMultiTimer::next()
+{
+	// don't check for everybody dead here, check at refresh where next is called.
+
+	if (this->state == playing)
+	{
+		this->timers[this->activeTimer].pause();
+
+		// add fischer timer (disabled just means: zero seconds).
+		this->timers[this->activeTimer].setOffsetInitTimeMillis(-1000 * long(this->fischerSecs));
+
+		int tmp = 0;
+		do
+		{
+			this->activeTimer >= (this->timers_count - 1) ? this->activeTimer = 0 : this->activeTimer++;
+			tmp++;
+		} while (this->getTimerFinished(this->activeTimer) //if finished go to next timer.
+			|| tmp > 100
+		);
+
+		this->timers[this->activeTimer].continu();
+		this->timerDisplayed = this->activeTimer;
+	}
+}
