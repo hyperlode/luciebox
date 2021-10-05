@@ -18,6 +18,7 @@ void Buzzer::clearBuzzerNotesBuffer()
 {
 	bufferPlayIndex = 1;
     bufferProgramIndex = 0;
+	this->soundFinishedTimeMillis = millis(); //ready to right away detect new sounds from buffer
 }
 
 void Buzzer::changeTranspose(int8_t delta)
@@ -178,8 +179,9 @@ void Buzzer::buzzerSilent(){
 void Buzzer::buzzerSilentClearBuffer()
 {
     //erase contents of buzzerNotesBuffer and switch off.
-    this->clearBuzzerNotesBuffer();
     this->buzzerSilent();
+	this->clearBuzzerNotesBuffer();
+    
 }
 
 void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)

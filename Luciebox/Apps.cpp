@@ -1384,9 +1384,15 @@ void Apps::eraseEepromRangeLimited(uint8_t setting)
 
 	for (uint16_t i = first; i <= last; i++)
 	{
+		uint8_t erase_value = 0;
+		
+		if (i >= EEPROM_SEQUENCER_SONGS_START_ADDRESS && i < EEPROM_PICTURES_START_ADDRESS){
+			erase_value = 0xff;
+		}
+		
 		eeprom_update_byte(
 			(uint8_t *)i,
-			0);
+			erase_value);
 	}
 	playSongHappyDryer();
 
@@ -1816,12 +1822,13 @@ void Apps::modeComposeSong()
 			COMPOSER_SONG[i] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE;
 		}
 		COMPOSER_SONG_LENGTH = 1;
-		COMPOSER_SONG[0] = REST_8_8; //default note
+		COMPOSER_SONG[0] = SOUND_SONG_COMPOSER_DEFAULT_NOTE; //default note
 		COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
 	}
 
 	if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
 	{
+		// eeprom load / save 
 #ifdef ENABLE_EEPROM
 		bool loaded;
 		loaded = saveLoadMenu(COMPOSER_SONG, 4, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS);
@@ -1844,9 +1851,11 @@ void Apps::modeComposeSong()
 	}
 	else
 	{
+		// not in eeprom mode
+		
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
 		{
-			// display song notes indeces + enable insert delete position
+			// display song notes indeces + enable insert and delete position
 
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
@@ -1884,7 +1893,7 @@ void Apps::modeComposeSong()
 					{
 						COMPOSER_SONG[i + 1] = COMPOSER_SONG[i];
 					}
-					COMPOSER_SONG[COMPOSER_STEP + 1] = REST_8_8;
+					COMPOSER_SONG[COMPOSER_STEP + 1] = SOUND_SONG_COMPOSER_DEFAULT_NOTE;
 					COMPOSER_SONG_LENGTH++;
 					step = 1; // move to new position
 				}
@@ -1894,6 +1903,8 @@ void Apps::modeComposeSong()
 		else
 		{
 			// display song notes + enable programming and listening to notes
+			
+			// select a note
 			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
 			{
 				displayStagedNote = true;
@@ -1903,6 +1914,12 @@ void Apps::modeComposeSong()
 				if (change)
 				{
 					buzzerSilentClearBufferAndAddNote((uint8_t)COMPOSER_STAGED_NOTE);
+				}
+				
+				// let the program button blink to invite it for being pressed.
+				if (millis_half_second_period())
+				{
+					lights |= 1 << LIGHT_MOMENTARY_0;
 				}
 
 				// program note in song when the combination of the two buttons is pressed.
@@ -1915,11 +1932,18 @@ void Apps::modeComposeSong()
 					if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
 					{
 						COMPOSER_SONG_LENGTH++;
-						COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = REST_8_8; //default note
+						//COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = SOUND_SONG_COMPOSER_DEFAULT_NOTE; //default note
+						COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE; //default note
 					}
 				}
 			}
-
+			
+			// display song notes + enable programming and listening to notes
+			if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+			{
+				buzzerSilentClearBufferAndAddNote((uint8_t)COMPOSER_STAGED_NOTE);
+			}
+			
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 			{
 				// just listen to note on index in song
@@ -1929,7 +1953,7 @@ void Apps::modeComposeSong()
 		}
 
 		modifyValueUpDownWithMomentary2And3(&step);
-
+		
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
@@ -2073,8 +2097,6 @@ void Apps::modeSoundNotes()
 		{
 			SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
 		}
-
-		
 	}
 	else
 	{
@@ -3246,19 +3268,109 @@ void Apps::modeSequencer()
 	}
 	else
 	{
-		// manipulate the sequencer
-
-		// visualize programmed note
+		
+		// note at active sequencer step
 		SEQUENCER_TEMP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
-
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		
+		// autoplay
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
-			// play sequencer note at active index
-			addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
+			// byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+			
+			// if ((binaryInputsValue & momentary_buttons_mask) == 0) // no button pressed
+			// {
+				// change speed is default behaviour of dial
+				dialOnEdgeChangeInitTimerPercentage(&SEQUENCER_SPEED);
+			// }
+
+			if (SEQUENCER_SPEED.getCountDownTimerElapsedAndRestart())
+			{
+				step = 1;
+			}
+		}else{
+			// manipulate the sequencer
+
+
+			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+			{
+				buzzerSilentClearBufferAndAddNote(SEQUENCER_CHOSEN_NOTE);
+			}
+
+			if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+			{
+				// just listen to the potentio note
+				SEQUENCER_CHOSEN_NOTE += encoder_dial->getDelta();
+				
+				// if button continuously pressed, listen to notes as they are chosen
+				buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(SEQUENCER_CHOSEN_NOTE);
+				noteToDisplay(SEQUENCER_CHOSEN_NOTE);
+				showNote = true;
+				
+				// let the program button blink to invite it for being pressed.
+				if (millis_half_second_period())
+				{
+					lights |= 1 << LIGHT_MOMENTARY_0;
+				}
+				
+				// program note to song
+				if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+				{
+					buzzerSilentClearBufferAndAddNote(SEQUENCER_CHOSEN_NOTE);
+
+					if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+					{
+						//copy to all measures
+						for (uint8_t i = 0; i < 4; i++)
+						{
+							this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = SEQUENCER_CHOSEN_NOTE;
+						}
+					}
+					else
+					{
+						this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = SEQUENCER_CHOSEN_NOTE;
+					}
+				}
+				
+			}else 
+				if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+				{
+					// play sequencer note at active index
+					addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
+			}else{
+				step += encoder_dial->getDelta();
+			}
+			
+			
+			
+
+			// if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+			// {
+				
+			// }
+
+			if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_3))
+			{
+				// reset transpose when stop autoplay.
+				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
+			}
+
 		}
 
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
+
+		//modifyValueUpDownWithMomentary2And3(&step);
+		// song progression
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
+			step = 1;
+		}
+		
+		// song progression
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+		{
+			step = -1;
+		}
+		
+		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))){
 			// if button continuously pressed, show sequencer note at active index
 
 			noteToDisplay(SEQUENCER_TEMP_NOTE);
@@ -3267,89 +3379,18 @@ void Apps::modeSequencer()
 			// bonus effect: TRANSPOSE!
 			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET += encoder_dial->getDelta();
 		}
-
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
-		{
-			buzzerSilentClearBufferAndAddNote(SEQUENCER_CHOSEN_NOTE);
-		}
-
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
-		{
-			// just listen to the potentio note
-			SEQUENCER_CHOSEN_NOTE += encoder_dial->getDelta();
 			
-			// if button continuously pressed, listen to notes as they are chosen
-			buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(SEQUENCER_CHOSEN_NOTE);
-			noteToDisplay(SEQUENCER_CHOSEN_NOTE);
-			showNote = true;
-		}
-		
-		// program note to song
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-		{
-			buzzerSilentClearBufferAndAddNote(SEQUENCER_CHOSEN_NOTE);
-
-			if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
-			{
-				//copy to all measures
-				for (uint8_t i = 0; i < 4; i++)
-				{
-					this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = SEQUENCER_CHOSEN_NOTE;
-				}
-			}
-			else
-			{
-				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] = SEQUENCER_CHOSEN_NOTE;
-			}
-			
-		}
-
-		// song progression
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
-		{
-			step = 1;
-		}
-
-		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
-		{
-			step += encoder_dial->getDelta();
-		}
-
-		if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_3))
-		{
-			// reset transpose when stop autoplay.
-			SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
-		}
-
-		// autoplay
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
-		{
-			byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
-			if ((binaryInputsValue & momentary_buttons_mask) == 0) // no button pressed
-
-			// change speed is default behaviour of dial
-			{
-				dialOnEdgeChangeInitTimerPercentage(&SEQUENCER_SPEED);
-			}
-
-			if (SEQUENCER_SPEED.getCountDownTimerElapsedAndRestart())
-			{
-				step = 1;
-			}
-		}
-
 		// handle step change
 		if (step != 0 || this->app_init_edge)
 		{
-			nextStepRotate(&SEQUENCER_STEP_COUNTER, true, 0, 31);
+			nextStepRotate(&SEQUENCER_STEP_COUNTER, step>0, 0, 31);
 
-			addNoteToBuzzer(
+			buzzerSilentClearBufferAndAddNote(
 				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] +
 				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) > 0));
 
 			displayAllSegments = 0;
 
-			// experimental
 			flashPictureToDisplayAllSegments(disp_4digits_animations + ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE + (SEQUENCER_STEP_COUNTER % 8) * 4);
 			flashPictureToDisplayAllSegments(disp_4digits_animations + ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR + (SEQUENCER_STEP_COUNTER / 8) * 4);
 		}
