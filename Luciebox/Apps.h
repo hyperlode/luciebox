@@ -233,7 +233,7 @@
 #define POMODORO_VISUAL_TIMER_PROGRESS general_uint8_t_1
 #define REACTION_GAME_LEVEL general_uint8_t_1
 #define HACK_TIME_ACTIVE_VALUE general_uint8_t_1
-#define SEQUENCER_TEMP_NOTE general_uint8_t_1
+#define SEQUENCER_ACTIVE_STEP_NOTE general_uint8_t_1
 #define RANDOMWORLD_RANDOM_TYPE general_uint8_t_1
 #define COMPOSER_SONG_LENGTH general_uint8_t_1
 #define SIMON_PLAYERS_ALIVE_COUNT general_uint8_t_1
@@ -295,6 +295,9 @@
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 #define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
+// #define showNote general_boolean
+
+//ik begrijp dat ik in fout was, maar ik hoop dat er  bij een verlichting van de sanctioneren in het licht van de omstandigheden.
 
 #define STOPWATCH_PAUSED_2 general_boolean2
 // #define HACKTIME_VALUE_TO_SOUND general_boolean2
@@ -945,6 +948,7 @@ private:
     void numberToBufAsDecimal(int16_t number);
     void noteToDisplay(uint8_t note);
     void setStandardTextToTextBuf(uint8_t textPosition);
+    // void setStandardTextToTextBufAndDisplayIt(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
 
     //void decimalPointClockPositionOn();
@@ -1016,7 +1020,8 @@ private:
     char textBuf[4];
     // char textBuf2[4];
     char *textHandle;        // contains the text for the display. (4 chars)
-    uint8_t decimalPoints;   // segment 4 = bit 3, ....   00043210 (segment number)
+    
+	uint8_t decimalPoints;   // segment 4 = bit 3, ....   00043210 (segment number)
     byte *decimalDotsHandle; // segment 4 = bit 3, ....   00043210 (segment number)
     uint8_t lights;
     bool splash_screen_playing; // actual flash screen app

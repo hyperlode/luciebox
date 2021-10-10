@@ -1,5 +1,5 @@
 
-#define SOFTWARE_VERSION 305
+#define SOFTWARE_VERSION 306
 // started at v2.00: 200
 // v300 : pcb v3 burst implemented. change in button sequence...
 // v301 : sending out to Belgium 2021-03-19

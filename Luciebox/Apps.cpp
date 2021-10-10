@@ -632,7 +632,6 @@ void Apps::pomodoroTimer()
 		}else{
 			POMODORO_TIMER.getTimeString(textBuf);
 		}
-		
 	}
 	break;
 
@@ -2049,10 +2048,11 @@ void Apps::modeSoundNotes()
 	{
 		// advanced
 		
-		// mute button to silently change notes.
-		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
+		// change note length
+		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			SOUND_NOTE_MUTE = true;
+			buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
+			SOUND_NOTE_PLAY_NOTE = true;
 		}
 
 		//  change scale
@@ -2100,13 +2100,12 @@ void Apps::modeSoundNotes()
 	}
 	else
 	{
-		// easy
-		
-		// change note length
-		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+				
+		// mute button to silently change notes.
+		// this allows the box to be used as a primitive piano.
+		if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
 		{
-			buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
-			SOUND_NOTE_PLAY_NOTE = true;
+			SOUND_NOTE_MUTE = true;
 		}
 		
 		// just play the active note
@@ -2122,7 +2121,6 @@ void Apps::modeSoundNotes()
 			SOUND_NOTE_AUTO_UP_ELSE_DOWN = (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3));
 			update_note = true;
 		}
-		// update_note = update_note || modifyValueUpDownWithMomentary2And3(&SOUND_NOTE_AUTO_UP_ELSE_DOWN);
 	}
 
 	if (update_note)
@@ -3183,8 +3181,8 @@ void Apps::modeGeiger()
 		if (r > GEIGER_PROBABILITY_THRESHOLD)
 		{
 			buzzer->playTone((unsigned int)50, 10);
-			setStandardTextToTextBuf(TEXT_RANDOM_SEGMENTS);
-			textBufToDisplay();
+			setStandardTextToTextHANDLE(TEXT_RANDOM_SEGMENTS);
+			// textBufToDisplay();
 			COUNTER_GEIGER++;
 		}
 	}
@@ -3268,28 +3266,21 @@ void Apps::modeSequencer()
 	}
 	else
 	{
-		
 		// note at active sequencer step
-		SEQUENCER_TEMP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
+		SEQUENCER_ACTIVE_STEP_NOTE = SEQUENCER_SONG[SEQUENCER_STEP_COUNTER];
 		
 		// autoplay
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
-			// byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
-			
-			// if ((binaryInputsValue & momentary_buttons_mask) == 0) // no button pressed
-			// {
-				// change speed is default behaviour of dial
-				dialOnEdgeChangeInitTimerPercentage(&SEQUENCER_SPEED);
-			// }
+			dialOnEdgeChangeInitTimerPercentage(&SEQUENCER_SPEED);
 
 			if (SEQUENCER_SPEED.getCountDownTimerElapsedAndRestart())
 			{
 				step = 1;
 			}
+			
 		}else{
 			// manipulate the sequencer
-
 
 			if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
 			{
@@ -3335,29 +3326,18 @@ void Apps::modeSequencer()
 				if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 				{
 					// play sequencer note at active index
-					addNoteToBuzzer(SEQUENCER_TEMP_NOTE);
+					addNoteToBuzzer(SEQUENCER_ACTIVE_STEP_NOTE);
 			}else{
 				step += encoder_dial->getDelta();
 			}
 			
-			
-			
-
-			// if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
-			// {
-				
-			// }
-
 			if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_3))
 			{
 				// reset transpose when stop autoplay.
 				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET = 0;
 			}
-
 		}
 
-
-		//modifyValueUpDownWithMomentary2And3(&step);
 		// song progression
 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
 		{
@@ -3369,11 +3349,15 @@ void Apps::modeSequencer()
 		{
 			step = -1;
 		}
+
+		// int16_t step_16 = (int16_t) step;
+		// modifyValueUpDownWithMomentary2And3(&step_16);
+		// step = (int8_t) step_16;
 		
 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))){
 			// if button continuously pressed, show sequencer note at active index
 
-			noteToDisplay(SEQUENCER_TEMP_NOTE);
+			noteToDisplay(SEQUENCER_ACTIVE_STEP_NOTE);
 			showNote = true;
 
 			// bonus effect: TRANSPOSE!
@@ -3387,7 +3371,8 @@ void Apps::modeSequencer()
 
 			buzzerSilentClearBufferAndAddNote(
 				this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] +
-				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) > 0));
+				SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET * ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) > 0)
+				);
 
 			displayAllSegments = 0;
 
@@ -3759,7 +3744,7 @@ void Apps::modeSimon()
 		// sequence done!
 		addNoteToBuzzer(E5_4);
 		addNoteToBuzzer(REST_8_8);
-		addNoteToBuzzer(B6_1);
+		buzzerPlayApproval();// addNoteToBuzzer(B6_1);
 
 		// check next alive player (assume there is always a player alive.)
 
@@ -4274,7 +4259,8 @@ void Apps::modeReactionGame()
 					}
 					else
 					{
-						addNoteToBuzzer(C4_8);
+						// addNoteToBuzzer(C4_8);
+						buzzerPlayApproval();
 						//addNoteToBuzzer(103 + i);
 						reactionGameState = reactionNewTurn;
 					}
@@ -4532,25 +4518,32 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
 		lights |= 1 << LIGHT_LATCHING_3;
 		if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
 		{
-			setStandardTextToTextBuf(TEXT_SAVE);
+			setStandardTextToTextHANDLE(TEXT_SAVE);
 		}
 		else
 		{
-			setStandardTextToTextBuf(TEXT_LOAD);
+			setStandardTextToTextHANDLE(TEXT_LOAD);
 		}
-		textBufToDisplay();
+		// textBufToDisplay();
 	}
 	else
 	{
 		ledDisp->setNumberToDisplayAsDecimal(slot_number);
 	}
 
+	if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)){
+		setStandardTextToTextHANDLE(TEXT_DONE);
+		
+	}
+	
 	if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
 	{
 		bool loadElseSave = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3));
 		saveLoadFromEepromSlot(data, slot_number, eepromSlotLength, eepromStartAddress, loadElseSave);
 		return loadElseSave;
 	}
+	
+	
 	return false;
 }
 
@@ -4759,11 +4752,13 @@ unsigned int Apps::indexToTimeSeconds(int16_t index)
 
 void Apps::setStandardTextToTextBuf(uint8_t textPosition)
 {
+	// set text to a buffer, to be called later onwards.
 	ledDisp->setStandardTextToTextBuf(textBuf, textPosition);
 }
 
 void Apps::setStandardTextToTextHANDLE(uint8_t textPosition)
 {
+	// display text on display instantly.
 	ledDisp->setStandardTextToTextBuf(textHandle, textPosition);
 }
 
