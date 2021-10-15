@@ -3742,12 +3742,16 @@ void Apps::modeSimon()
 	case simonNextPlayer:
 	{
 		// sequence done!
-		addNoteToBuzzer(E5_4);
-		addNoteToBuzzer(REST_8_8);
-		buzzerPlayApproval();// addNoteToBuzzer(B6_1);
+		// addNoteToBuzzer(E5_4);
+		// addNoteToBuzzer(REST_8_8);
+		// buzzerPlayApproval();// addNoteToBuzzer(B6_1);
 
 		// check next alive player (assume there is always a player alive.)
-
+		
+		//playSongHappyDryer();
+		// addNoteToBuzzerRepeated(C4_8,SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX]);
+		//addNoteToBuzzerRepeated(C4_8,3);
+		
 		SIMON_PLAYER_PLAYING_INDEX++;
 		if (SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
 		{
