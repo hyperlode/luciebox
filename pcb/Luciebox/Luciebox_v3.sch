@@ -69,7 +69,7 @@ Shield for Arduino that uses\nthe same pin disposition\nlike "Uno" board Rev 3.
 Text Label 8650 1800 0    60   ~ 0
 Reset
 $Comp
-L power:+3.3V #PWR020
+L Luciebox_components:+3.3V-power #PWR020
 U 1 1 56D70538
 P 9150 1450
 F 0 "#PWR020" H 9150 1300 50  0001 C CNN
@@ -80,7 +80,7 @@ F 3 "" H 9150 1450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR019
+L Luciebox_components:VCC-power #PWR019
 U 1 1 56D707BB
 P 9050 1350
 F 0 "#PWR019" H 9050 1200 50  0001 C CNN
@@ -91,7 +91,7 @@ F 3 "" H 9050 1350 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR021
+L Luciebox_components:GND-power #PWR021
 U 1 1 56D70CC2
 P 9300 3150
 F 0 "#PWR021" H 9300 2900 50  0001 C CNN
@@ -102,7 +102,7 @@ F 3 "" H 9300 3150 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR023
+L Luciebox_components:GND-power #PWR023
 U 1 1 56D70CFF
 P 10300 3150
 F 0 "#PWR023" H 10300 2900 50  0001 C CNN
@@ -301,7 +301,7 @@ Wire Wire Line
 Wire Wire Line
 	850  4900 800  4900
 $Comp
-L power:GND #PWR01
+L Luciebox_components:GND-power #PWR01
 U 1 1 5D7F94C7
 P 700 4900
 F 0 "#PWR01" H 700 4650 50  0001 C CNN
@@ -427,7 +427,7 @@ Wire Wire Line
 Text Label 2000 4000 2    50   ~ 0
 A0
 $Comp
-L power:GND #PWR03
+L Luciebox_components:GND-power #PWR03
 U 1 1 5D90E4DE
 P 1100 6200
 F 0 "#PWR03" H 1100 5950 50  0001 C CNN
@@ -442,7 +442,7 @@ Wire Wire Line
 Wire Wire Line
 	1500 6850 2000 6850
 $Comp
-L power:GND #PWR05
+L Luciebox_components:GND-power #PWR05
 U 1 1 5D974320
 P 2000 6850
 F 0 "#PWR05" H 2000 6600 50  0001 C CNN
@@ -455,7 +455,7 @@ $EndComp
 Text Label 1150 6850 2    50   ~ 0
 A5(SCL)
 $Comp
-L power:GND #PWR017
+L Luciebox_components:GND-power #PWR017
 U 1 1 5D988298
 P 7900 6450
 F 0 "#PWR017" H 7900 6200 50  0001 C CNN
@@ -506,7 +506,7 @@ Text Label 8500 6050 0    50   ~ 0
 Text Label 8500 6150 0    50   ~ 0
 7
 $Comp
-L power:VCC #PWR016
+L Luciebox_components:VCC-power #PWR016
 U 1 1 5D991DF2
 P 7900 3450
 F 0 "#PWR016" H 7900 3300 50  0001 C CNN
@@ -517,7 +517,7 @@ F 3 "" H 7900 3450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR018
+L Luciebox_components:VCC-power #PWR018
 U 1 1 5D992AD7
 P 8000 3450
 F 0 "#PWR018" H 8000 3300 50  0001 C CNN
@@ -528,7 +528,7 @@ F 3 "" H 8000 3450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR015
+L Luciebox_components:VCC-power #PWR015
 U 1 1 5D993297
 P 7300 3750
 F 0 "#PWR015" H 7300 3600 50  0001 C CNN
@@ -569,11 +569,11 @@ Wire Wire Line
 Wire Wire Line
 	10500 4700 10350 4700
 $Comp
-L power:GND #PWR024
+L Luciebox_components:GND-power #PWR024
 U 1 1 5DA1D313
 P 10700 4500
 F 0 "#PWR024" H 10700 4250 50  0001 C CNN
-F 1 "GND" H 10700 4350 50  0000 C CNN
+F 1 "GND-power" H 10700 4350 50  0000 C CNN
 F 2 "" H 10700 4500 50  0000 C CNN
 F 3 "" H 10700 4500 50  0000 C CNN
 	1    10700 4500
@@ -590,7 +590,7 @@ Wire Wire Line
 	7050 3450 7050 3400
 Connection ~ 7900 3450
 $Comp
-L power:GND #PWR014
+L Luciebox_components:GND-power #PWR014
 U 1 1 5DA38582
 P 6700 3400
 F 0 "#PWR014" H 6700 3150 50  0001 C CNN
@@ -605,7 +605,7 @@ Wire Wire Line
 Wire Wire Line
 	9400 5250 9250 5250
 $Comp
-L power:VCC #PWR022
+L Luciebox_components:VCC-power #PWR022
 U 1 1 5DA5FE62
 P 9900 5250
 F 0 "#PWR022" H 9900 5100 50  0001 C CNN
@@ -642,7 +642,7 @@ Connection ~ 3100 6900
 Text Label 3100 6500 0    50   ~ 0
 A4(SDA)
 $Comp
-L power:GND #PWR09
+L Luciebox_components:GND-power #PWR09
 U 1 1 5D70EC69
 P 3950 6400
 F 0 "#PWR09" H 3950 6150 50  0001 C CNN
@@ -676,7 +676,7 @@ Wire Wire Line
 Wire Wire Line
 	5700 7250 5150 7250
 $Comp
-L power:VCC #PWR011
+L Luciebox_components:VCC-power #PWR011
 U 1 1 5D7FF3DB
 P 5000 7150
 F 0 "#PWR011" H 5000 7000 50  0001 C CNN
@@ -819,7 +819,7 @@ Wire Wire Line
 Wire Wire Line
 	6300 4500 6300 4400
 $Comp
-L power:GND #PWR013
+L Luciebox_components:GND-power #PWR013
 U 1 1 5DCBF971
 P 6450 4700
 F 0 "#PWR013" H 6450 4450 50  0001 C CNN
@@ -830,7 +830,7 @@ F 3 "" H 6450 4700 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR012
+L Luciebox_components:VCC-power #PWR012
 U 1 1 5DCC8327
 P 5400 4000
 F 0 "#PWR012" H 5400 3850 50  0001 C CNN
@@ -843,7 +843,7 @@ $EndComp
 Connection ~ 5400 4000
 Connection ~ 6450 4700
 $Comp
-L power:VCC #PWR04
+L Luciebox_components:VCC-power #PWR04
 U 1 1 5E19FB8B
 P 1550 2400
 F 0 "#PWR04" H 1550 2250 50  0001 C CNN
@@ -963,7 +963,7 @@ Text Label 2450 2950 0    50   ~ 0
 A2
 Connection ~ 5000 2300
 $Comp
-L power:GND #PWR07
+L Luciebox_components:GND-power #PWR07
 U 1 1 5FFAF02F
 P 3150 1750
 F 0 "#PWR07" H 3150 1500 50  0001 C CNN
@@ -974,7 +974,7 @@ F 3 "" H 3150 1750 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR08
+L Luciebox_components:GND-power #PWR08
 U 1 1 5FFAF53B
 P 3150 2750
 F 0 "#PWR08" H 3150 2500 50  0001 C CNN
@@ -1233,7 +1233,7 @@ F 3 "~" H 4050 6000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R_vcc_protected1
+L Luciebox_components:R_Small-Device R_vcc_protected1
 U 1 1 5E1772EF
 P 1450 2400
 F 0 "R_vcc_protected1" H 1509 2446 50  0000 L CNN
@@ -1332,7 +1332,7 @@ F 3 "~" H 5750 5600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R10
+L Luciebox_components:R_Small-Device R10
 U 1 1 5D6C3ACD
 P 3100 7000
 F 0 "R10" H 3159 7046 50  0000 L CNN
@@ -1343,7 +1343,7 @@ F 3 "~" H 3100 7000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R9
+L Luciebox_components:R_Small-Device R9
 U 1 1 5D6C3437
 P 3100 6600
 F 0 "R9" H 3159 6646 50  0000 L CNN
@@ -1365,7 +1365,7 @@ F 3 "https://www.onsemi.com/pub/Collateral/FQP30N06L-D.pdf" V 3700 6900 50  0001
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R_reset_pullup1
+L Luciebox_components:R_Small-Device R_reset_pullup1
 U 1 1 5DA45BE6
 P 9500 5250
 F 0 "R_reset_pullup1" H 9559 5296 50  0000 L CNN
@@ -1376,7 +1376,7 @@ F 3 "~" H 9500 5250 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:C_Small C1
+L Luciebox_components:C_Small-Device C1
 U 1 1 5DA2A1AC
 P 6950 3400
 F 0 "C1" V 6721 3400 50  0000 C CNN
@@ -1387,7 +1387,7 @@ F 3 "~" H 6950 3400 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:C_Small C3
+L Luciebox_components:C_Small-Device C3
 U 1 1 5D9EAF46
 P 10250 4700
 F 0 "C3" V 10021 4700 50  0000 C CNN
@@ -1398,7 +1398,7 @@ F 3 "~" H 10250 4700 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:C_Small C2
+L Luciebox_components:C_Small-Device C2
 U 1 1 5D9EA27E
 P 10250 4350
 F 0 "C2" V 10021 4350 50  0000 C CNN
@@ -1409,7 +1409,7 @@ F 3 "~" H 10250 4350 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R20
+L Luciebox_components:R_Small-Device R20
 U 1 1 5D9BA081
 P 9300 4450
 F 0 "R20" H 9359 4496 50  0000 L CNN
@@ -1420,7 +1420,7 @@ F 3 "~" H 9300 4450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Crystal Y1
+L Luciebox_components:Crystal-Device Y1
 U 1 1 5D9962E4
 P 9750 4500
 F 0 "Y1" V 9659 4631 50  0000 L CNN
@@ -1431,7 +1431,7 @@ F 3 "~" H 9750 4500 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:Buzzer BZ1
+L Luciebox_components:Buzzer-Device BZ1
 U 1 1 5D93C6F4
 P 1400 6750
 F 0 "BZ1" V 1451 6563 50  0000 R CNN
@@ -1442,7 +1442,7 @@ F 3 "~" V 1375 6850 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Device:R_Small R14
+L Luciebox_components:R_Small-Device R14
 U 1 1 5D7D8CC8
 P 4250 4900
 F 0 "R14" H 4309 4946 50  0000 L CNN
@@ -1453,7 +1453,7 @@ F 3 "~" H 4250 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R13
+L Luciebox_components:R_Small-Device R13
 U 1 1 5D7D8CBE
 P 3950 4900
 F 0 "R13" H 4009 4946 50  0000 L CNN
@@ -1464,7 +1464,7 @@ F 3 "~" H 3950 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R12
+L Luciebox_components:R_Small-Device R12
 U 1 1 5D7D8CB3
 P 3650 4900
 F 0 "R12" H 3709 4946 50  0000 L CNN
@@ -1475,7 +1475,7 @@ F 3 "~" H 3650 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R11
+L Luciebox_components:R_Small-Device R11
 U 1 1 5D7D8CA9
 P 3350 4900
 F 0 "R11" H 3409 4946 50  0000 L CNN
@@ -1486,7 +1486,7 @@ F 3 "~" H 3350 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R8
+L Luciebox_components:R_Small-Device R8
 U 1 1 5D7CF8D8
 P 3050 4900
 F 0 "R8" H 3109 4946 50  0000 L CNN
@@ -1497,7 +1497,7 @@ F 3 "~" H 3050 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R7
+L Luciebox_components:R_Small-Device R7
 U 1 1 5D7CF8CE
 P 2750 4900
 F 0 "R7" H 2809 4946 50  0000 L CNN
@@ -1508,7 +1508,7 @@ F 3 "~" H 2750 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R6
+L Luciebox_components:R_Small-Device R6
 U 1 1 5D7CF8C3
 P 2450 4900
 F 0 "R6" H 2509 4946 50  0000 L CNN
@@ -1519,7 +1519,7 @@ F 3 "~" H 2450 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R5
+L Luciebox_components:R_Small-Device R5
 U 1 1 5D7CF8B9
 P 2150 4900
 F 0 "R5" H 2209 4946 50  0000 L CNN
@@ -1530,7 +1530,7 @@ F 3 "~" H 2150 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R4
+L Luciebox_components:R_Small-Device R4
 U 1 1 5D7B59FE
 P 1850 4900
 F 0 "R4" H 1909 4946 50  0000 L CNN
@@ -1541,7 +1541,7 @@ F 3 "~" H 1850 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R3
+L Luciebox_components:R_Small-Device R3
 U 1 1 5D7B59F4
 P 1550 4900
 F 0 "R3" H 1609 4946 50  0000 L CNN
@@ -1552,7 +1552,7 @@ F 3 "~" H 1550 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R2
+L Luciebox_components:R_Small-Device R2
 U 1 1 5D79CF90
 P 1250 4900
 F 0 "R2" H 1309 4946 50  0000 L CNN
@@ -1563,7 +1563,7 @@ F 3 "~" H 1250 4900 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Device:R_Small R1
+L Luciebox_components:R_Small-Device R1
 U 1 1 5D798401
 P 950 4900
 F 0 "R1" H 1009 4946 50  0000 L CNN
@@ -1585,7 +1585,7 @@ F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20w
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R15
+L Luciebox_components:R_Small-Device R15
 U 1 1 5D4E6F2F
 P 6500 2400
 F 0 "R15" H 6559 2446 50  0000 L CNN
@@ -1596,7 +1596,7 @@ F 3 "~" H 6500 2400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R16
+L Luciebox_components:R_Small-Device R16
 U 1 1 5D496C09
 P 6750 2400
 F 0 "R16" H 6809 2446 50  0000 L CNN
@@ -1607,7 +1607,7 @@ F 3 "~" H 6750 2400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R19
+L Luciebox_components:R_Small-Device R19
 U 1 1 5D49796F
 P 7500 2400
 F 0 "R19" H 7559 2446 50  0000 L CNN
@@ -1618,7 +1618,7 @@ F 3 "~" H 7500 2400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R18
+L Luciebox_components:R_Small-Device R18
 U 1 1 5D497707
 P 7250 2400
 F 0 "R18" H 7309 2446 50  0000 L CNN
@@ -1629,7 +1629,7 @@ F 3 "~" H 7250 2400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small R17
+L Luciebox_components:R_Small-Device R17
 U 1 1 5D49734E
 P 7000 2400
 F 0 "R17" H 7059 2446 50  0000 L CNN
@@ -1651,7 +1651,7 @@ F 3 "http://www.kingbrightusa.com/images/catalog/SPEC/CA56-12SRWA.pdf" H 4520 13
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x10 P3
+L Luciebox_components:Conn_01x10-Connector_Generic P3
 U 1 1 56D721E0
 P 10000 1600
 F 0 "P3" H 10000 2150 50  0000 C CNN
@@ -1662,7 +1662,7 @@ F 3 "" H 10000 1600 50  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x08 P4
+L Luciebox_components:Conn_01x08-Connector_Generic P4
 U 1 1 56D7164F
 P 10000 2600
 F 0 "P4" H 10000 2100 50  0000 C CNN
@@ -1673,7 +1673,7 @@ F 3 "" H 10000 2600 50  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x01 P8
+L Luciebox_components:Conn_01x01-Connector_Generic P8
 U 1 1 56D712DB
 P 11100 650
 F 0 "P8" V 11200 650 50  0000 C CNN
@@ -1684,7 +1684,7 @@ F 3 "" H 11100 650 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x01 P7
+L Luciebox_components:Conn_01x01-Connector_Generic P7
 U 1 1 56D712A8
 P 11000 650
 F 0 "P7" V 11100 650 50  0000 C CNN
@@ -1695,7 +1695,7 @@ F 3 "" H 11000 650 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x01 P6
+L Luciebox_components:Conn_01x01-Connector_Generic P6
 U 1 1 56D71274
 P 10900 650
 F 0 "P6" V 11000 650 50  0000 C CNN
@@ -1706,7 +1706,7 @@ F 3 "" H 10900 650 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x01 P5
+L Luciebox_components:Conn_01x01-Connector_Generic P5
 U 1 1 56D71177
 P 10800 650
 F 0 "P5" V 10900 650 50  0000 C CNN
@@ -1717,7 +1717,7 @@ F 3 "" H 10800 650 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x06 P2
+L Luciebox_components:Conn_01x06-Connector_Generic P2
 U 1 1 56D70DD8
 P 9600 2700
 F 0 "P2" H 9600 2300 50  0000 C CNN
@@ -1728,7 +1728,7 @@ F 3 "" H 9600 2700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector_Generic:Conn_01x08 P1
+L Luciebox_components:Conn_01x08-Connector_Generic P1
 U 1 1 56D70129
 P 9600 1900
 F 0 "P1" H 9600 2350 50  0000 C CNN
@@ -1934,7 +1934,7 @@ Wire Wire Line
 Wire Wire Line
 	4800 5350 5350 5350
 $Comp
-L Device:R_Small R_0_if_no_touch1
+L Luciebox_components:R_Small-Device R_0_if_no_touch1
 U 1 1 5FE57FC5
 P 5150 6500
 F 0 "R_0_if_no_touch1" V 5050 5850 50  0000 L CNN
@@ -1974,7 +1974,7 @@ Connection ~ 5100 7150
 Wire Wire Line
 	5100 7150 5700 7150
 $Comp
-L Device:R_Small R_0_if_no_usb_switch1
+L Luciebox_components:R_Small-Device R_0_if_no_usb_switch1
 U 1 1 5FF3108A
 P 5250 7550
 F 0 "R_0_if_no_usb_switch1" V 5400 7200 50  0000 L CNN

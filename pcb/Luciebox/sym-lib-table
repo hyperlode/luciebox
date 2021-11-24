@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name Luciebox_components)(type Legacy)(uri ${KIPRJMOD}/Luciebox_components/Luciebox_components.lib)(options "")(descr ""))
+  (lib (name Luciebox_v3-rescue)(type Legacy)(uri ${KIPRJMOD}/Luciebox_v3-rescue.lib)(options "")(descr ""))
 )

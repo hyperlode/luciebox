@@ -14,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Device:R_Small R26
+L Luciebox_v3-rescue:R_Small-Device-Luciebox_v3-rescue R26
 U 1 1 5D7526DB
 P 3750 2400
 AR Path="/5D74964C/5D7526DB" Ref="R26"  Part="1" 
@@ -30,7 +30,7 @@ F 3 "~" H 3750 2400 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Device:R_Small R25
+L Luciebox_v3-rescue:R_Small-Device-Luciebox_v3-rescue R25
 U 1 1 5D7526E1
 P 3750 1950
 AR Path="/5D74964C/5D7526E1" Ref="R25"  Part="1" 
@@ -62,7 +62,7 @@ F 3 "https://www.bourns.com/docs/Product-Datasheets/R2R.pdf" H 2450 3700 50  000
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR021
+L Luciebox_v3-rescue:GND-power-Luciebox_v3-rescue #PWR021
 U 1 1 5E6454E3
 P 3600 3550
 AR Path="/5D74964C/5E6454E3" Ref="#PWR021"  Part="1" 
@@ -70,6 +70,7 @@ AR Path="/5D761BCA/5E6454E3" Ref="#PWR024"  Part="1"
 AR Path="/5D9307E8/5E6454E3" Ref="#PWR027"  Part="1" 
 AR Path="/5EB37636/5E6454E3" Ref="#PWR?"  Part="1" 
 AR Path="/5EBCF42E/5E6454E3" Ref="#PWR?"  Part="1" 
+AR Path="/5E6454E3" Ref="#PWR027"  Part="1" 
 F 0 "#PWR027" H 3600 3300 50  0001 C CNN
 F 1 "GND" H 3605 3377 50  0000 C CNN
 F 2 "" H 3600 3550 50  0001 C CNN
@@ -179,7 +180,7 @@ Wire Wire Line
 Connection ~ 5750 2400
 Connection ~ 5750 1500
 $Comp
-L Device:R_Small R27
+L Luciebox_v3-rescue:R_Small-Device-Luciebox_v3-rescue R27
 U 1 1 5E6454DE
 P 3750 2850
 AR Path="/5D74964C/5E6454DE" Ref="R27"  Part="1" 
@@ -195,7 +196,7 @@ F 3 "~" H 3750 2850 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Device:R_Small R24
+L Luciebox_v3-rescue:R_Small-Device-Luciebox_v3-rescue R24
 U 1 1 5D7526E7
 P 3750 1500
 AR Path="/5D74964C/5D7526E7" Ref="R24"  Part="1" 
@@ -227,7 +228,7 @@ Wire Wire Line
 	3550 2850 3550 2400
 Connection ~ 3550 2400
 $Comp
-L power:GND #PWR0106
+L Luciebox_v3-rescue:GND-power-Luciebox_v3-rescue #PWR0106
 U 1 1 5E3AEBC9
 P 3550 3000
 AR Path="/5D9307E8/5E3AEBC9" Ref="#PWR0106"  Part="1" 
@@ -235,6 +236,7 @@ AR Path="/5D74964C/5E3AEBC9" Ref="#PWR0104"  Part="1"
 AR Path="/5D761BCA/5E3AEBC9" Ref="#PWR0105"  Part="1" 
 AR Path="/5EB37636/5E3AEBC9" Ref="#PWR?"  Part="1" 
 AR Path="/5EBCF42E/5E3AEBC9" Ref="#PWR?"  Part="1" 
+AR Path="/5E3AEBC9" Ref="#PWR0106"  Part="1" 
 F 0 "#PWR0106" H 3550 2750 50  0001 C CNN
 F 1 "GND" H 3555 2827 50  0000 C CNN
 F 2 "" H 3550 3000 50  0001 C CNN

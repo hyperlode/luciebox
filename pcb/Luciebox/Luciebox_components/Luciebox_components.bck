@@ -796,10 +796,22 @@ K dual-cool-powertrench MOSFET fairchild
 F https://www.fairchildsemi.com/datasheets/FD/FDMT80080DC.pdf
 $ENDCMP
 #
+$CMP MountingHole
+D Mounting Hole without connection
+K mounting hole
+F ~
+$ENDCMP
+#
 $CMP N-Channel_Mosfet
 D N-channel 60V 32A
 K NexFET Power MOSFET N-MOS
 F https://www.onsemi.com/pub/Collateral/FQP30N06L-D.pdf
+$ENDCMP
+#
+$CMP R_Small
+D Resistor, small symbol
+K R resistor
+F ~
 $ENDCMP
 #
 $CMP Screw_Terminal_01x07
@@ -850,16 +862,18 @@ K darlington transistor array
 F http://www.ti.com/lit/ds/symlink/uln2003a.pdf
 $ENDCMP
 #
+$CMP USB_B_Mini
+D USB Micro Type B connector
+K connector USB micro
+F ~
+$ENDCMP
+#
 $CMP VCC_minimalCurrent
 D Power flag, VCC
 K power-flag
 $ENDCMP
 #
 $CMP button_laz16-11
-D button momentary or latching with LED
-$ENDCMP
-#
-$CMP laz16-11
 D button momentary or latching with LED
 $ENDCMP
 #
