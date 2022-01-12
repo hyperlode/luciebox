@@ -789,6 +789,9 @@ const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MO
 const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_MOMENTARY_0,
                                                LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, LIGHT_LATCHING_3};
 
+#elif defined V4_PCB_MINI
+const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
+                                               LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
 #elif defined V3_PCB_BURST
 const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
                                                LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
@@ -809,7 +812,7 @@ public:
     Apps();
 
    
-
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     void setPeripherals(
         BinaryInput *binaryInput,
         RotaryEncoderDial *encoder_dial,
@@ -817,6 +820,16 @@ public:
         LedMultiplexer5x8 *allLights,
         Buzzer *buzzer,
         PotentioSelector *selectorDial);
+#else
+    void setPeripherals(
+        BinaryInput *binaryInput,
+        RotaryEncoderDial *encoder_dial,
+        DisplayManagement *ledDisp,
+        LedMultiplexer5x8 *allLights,
+        Buzzer *buzzer
+);
+        #endif
+        
     void eraseEepromRangeLimited(uint8_t setting);
 
     void initializeAppDataToDefault();
@@ -1004,7 +1017,9 @@ private:
     Buzzer *buzzer;
     RotaryEncoderDial *encoder_dial;
     LedMultiplexer5x8 *allLights;
+    #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     PotentioSelector *selectorDial;
+    #endif
 #ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
     MiniMultiTimer multiTimer;
 #endif

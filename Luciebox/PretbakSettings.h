@@ -1,5 +1,5 @@
 
-#define SOFTWARE_VERSION 306
+#define SOFTWARE_VERSION 307
 // started at v2.00: 200
 // v300 : pcb v3 burst implemented. change in button sequence...
 // v301 : sending out to Belgium 2021-03-19
@@ -7,15 +7,18 @@
 // v303 : settings debug selector dial. Make sure values are not too erratic. small bugfixes.
 // v304 : quizmaster scoring bugfix and optimization / baby dreamtime mode change behaviour + shift button keeps it in dreamtime mode (all button mash apps should have the shift button included). / total time timer is now set to a timer of the chrono app.
 // v305 : add battery voltage indicator (note the voltagedrop because of a Schottky diode to differentiate between real battery voltage and Vcc) / buzzer rework (note scheme, buzzer buffer) / sequencer rework
-// v306 : song composer
+// v306 : song composer / change apps sequence. baby app has no shift.
+// v307 : introduce V4 prototype. make app selector dial optional
 
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 
+#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
 
 // #define V2_PCB_CORONA
 #define V3_PCB_BURST
+// #define V4_PCB_MINI
 
 #define ENABLE_APPS 
 #define ENABLE_BATTERY_STATUS
@@ -64,7 +67,9 @@
 
 #endif
 
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 #define PIN_SELECTOR_DIAL A0
+#endif
 
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_B 3
@@ -89,7 +94,40 @@
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
-#if defined V3_PCB_BURST
+#if (defined V4_PCB_MINI)
+#define PIN_BUTTONS_MOMENTARY A2
+    #define PIN_BUTTONS_LATCHING A1
+    #define LIGHT_MOMENTARY_0 5          // old: momentary 0
+    #define LIGHT_MOMENTARY_1 2          // old: momentary 1
+    #define LIGHT_MOMENTARY_2 6          // old: momentary 2
+    #define LIGHT_MOMENTARY_3 1          // old: momentary 3
+    #define LIGHT_LATCHING_3 7           // old: extra latch
+    #define LIGHT_LATCHING_1 4           // old: small latch left
+    #define LIGHT_LATCHING_2 3           // old: small latch right
+    #define LIGHT_LATCHING_0 0           // old: big latch
+
+    #define BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET 4
+    #define BUTTONS_MOMENTARY_COUNT 4
+    #define BUTTONS_MOMENTARY_VALUES      \
+        {                         \
+            512, 256, 128, 64 \
+        }
+
+    #define BUTTONS_LATCHING_COUNT 4
+    #define BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET 0  
+    #define BUTTONS_LATCHING_VALUES \
+        {                    \
+            512, 256, 128, 64    \
+        }
+
+    #define MERCURY_SWITCHES_COUNT 4
+    #define MERCURY_SWITCHES_TO_BINARY_INPUT_OFFSET 8
+    #define MERCURY_SWITCHES_VALUES \
+        {                           \
+            450, 262, 128, 64       \
+        }
+
+#elif (defined V3_PCB_BURST)
     #define PIN_BUTTONS_MOMENTARY A2
     #define PIN_BUTTONS_LATCHING A1
     #define LIGHT_MOMENTARY_0 5          // old: momentary 0

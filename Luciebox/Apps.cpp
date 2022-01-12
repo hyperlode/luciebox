@@ -7,6 +7,7 @@
 
 Apps::Apps(){};
 
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8 *allLights, Buzzer *buzzer, PotentioSelector *selectorDial)
 {
 	this->buzzer = buzzer;
@@ -23,18 +24,53 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 	always_on_timer.start();
 	
 }
+#else
+void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder_dial, DisplayManagement *ledDisp, LedMultiplexer5x8 *allLights, Buzzer *buzzer)
+{
+	this->buzzer = buzzer;
+	this->binaryInputs = binaryInputs;
+	this->encoder_dial = encoder_dial;
+	this->ledDisp = ledDisp;
+	this->allLights = allLights;
+
+	textHandle = ledDisp->getDisplayTextBufHandle();
+	decimalDotsHandle = ledDisp->getDecimalPointsHandle();
+	inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
+	inactivity_timer.start();
+	always_on_timer.start();
+	
+}
+
+#endif
 
 void Apps::appSelector()
 {
 	updateEveryAppCycleBefore();
-
+    #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 	bool selector_changed = selectorDial->getValueChangedEdge();
+	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
+
 	bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
 
-	int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 	// uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 
 	bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
+
+    #else
+    bool selector_changed = 0;
+	
+    bool init_app_init = 0;
+	// bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
+    if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_0)){
+        selected_app++; // TODO SHOULD BE A GLOBAL VARIABLE
+        if (selected_app > 23){
+            selected_app = 0;
+        }
+        init_app_init = true;
+    }
+	
+    #endif
+
 	this->app_init_edge = false;
 
 	if (init_app_init)
@@ -55,7 +91,9 @@ void Apps::appSelector()
 		
 		if (splash_screen_playing)
 		{
-			// do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
+			
+            #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+            // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
 			splash_screen_playing = this->init_app(init_app_init, selector_dial_value);
 			if (!splash_screen_playing)
 			{
@@ -63,6 +101,16 @@ void Apps::appSelector()
 				this->app_init_edge = true;
 				selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 			}
+            #else
+            // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
+			splash_screen_playing = this->init_app(init_app_init, selected_app/2);
+			if (!splash_screen_playing)
+			{
+				this->initializeAppDataToDefault();
+				this->app_init_edge = true;
+				
+			}
+            #endif
 		}
 
 		// not as else statement, to have the init properly transferred after app beginning screen.
@@ -1122,8 +1170,11 @@ void Apps::randomModeTrigger(bool forReal)
 
 void Apps::modeSettings()
 {
+    #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 	const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
-
+    #else
+	const uint8_t analog_input_pins[4] = {PIN_MERCURY_SWITCHES, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
+    #endif
 	if (this->app_init_edge)
 	{
 	}

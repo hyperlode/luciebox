@@ -35,12 +35,15 @@ Apps pretbak_apps;
 
 // INPUT
 BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 PotentioSelector selectorDial;
+#endif
 ButtonsDacR2r buttonsMomentary;
 ButtonsDacR2r buttonsLatching; // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 #ifdef ENABLE_TILT_SWITCHES
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
 #endif
+
 RotaryEncoderDial encoder_dial;
 
 // OUTPUT
@@ -119,8 +122,10 @@ void processInput()
     {
         binaryInputs[i].refresh();
     }
-	  
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     selectorDial.refresh();
+#endif
+
     buttonsMomentary.refresh();
     buttonsLatching.refresh();
 #ifdef ENABLE_TILT_SWITCHES
@@ -202,8 +207,9 @@ void setup()
 #ifdef ENABLE_SERIAL
     Serial.begin(9600);
 #endif
-
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS);
+#endif
     buttonsMomentary.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_MOMENTARY_COUNT, setValues_1);
     buttonsLatching.setPin(PIN_BUTTONS_LATCHING, BUTTONS_LATCHING_COUNT, setValues_2);
     encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
@@ -239,7 +245,12 @@ void setup()
 #endif
 
 #ifdef ENABLE_APPS
+    #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
+    #else
+    pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer);
+    #endif
+
 #endif
 }
 
