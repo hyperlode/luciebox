@@ -71,7 +71,7 @@
 #define APP_SELECTOR_DREAMTIME_TOO 23
 #endif
 
-#define INACTIVITY_TIME_BEEP_INDEX 4 // this is just an index, needs to be converted to seconds with the lookup table
+#define INACTIVITY_TIME_BEEP_INDEX 61 // this is just an index, needs to be converted to seconds with the lookup table
 // #define INACTIVITY_TIME_BEEP_INDEX 61  // this is just an index, needs to be converted to seconds with the lookup table
 
 #define DRAW_GAME_RANDOM 0
