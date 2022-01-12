@@ -71,7 +71,8 @@
 #define APP_SELECTOR_DREAMTIME_TOO 23
 #endif
 
-#define INACTIVITY_TIME_BEEP_INDEX 61  // this is just an index, needs to be converted to seconds with the lookup table
+#define INACTIVITY_TIME_BEEP_INDEX 4 // this is just an index, needs to be converted to seconds with the lookup table
+// #define INACTIVITY_TIME_BEEP_INDEX 61  // this is just an index, needs to be converted to seconds with the lookup table
 
 #define DRAW_GAME_RANDOM 0
 #define DRAW_GAME_WORD 1
@@ -837,7 +838,7 @@ public:
 
 private:
 
-    // all applitcations
+    // all applications
     bool init_app(bool init, uint8_t selector);
     void modeSettings();
 #ifdef ENABLE_TALLY_KEEPER
@@ -922,7 +923,8 @@ private:
     uint32_t fadeInList(uint8_t step, uint32_t startScreen, uint8_t *shuffledSequence);
 
     // general methods
-
+    void resetInactivityTimer();
+    
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
     void encoderDialRefreshTimeIndex(int16_t *indexHolder);
     uint16_t dialGetIndexedtime();

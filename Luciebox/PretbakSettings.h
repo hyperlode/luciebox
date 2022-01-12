@@ -14,7 +14,9 @@
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 
-#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
+//#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
+#define ENABLE_SOFT_POWER_OFF
+
 
 // #define V2_PCB_CORONA
 #define V3_PCB_BURST
@@ -69,14 +71,17 @@
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 #define PIN_SELECTOR_DIAL A0
+#define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
 #endif
 
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_B 3
 
+#ifdef ENABLE_SOFT_POWER_OFF
+#define PIN_POWER_ON_HOLD A4
+#else
 #define PIN_MERCURY_SWITCHES A4
-
-#define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
+#endif 
 
 
 #ifdef ENABLE_TILT_SWITCHES
@@ -284,9 +289,9 @@
 
 #define EEPROM_SETTINGS_OFFSET                          0
 #define EEPROM_SOUND_DISABLED                           EEPROM_SETTINGS_OFFSET + 0
-#define EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER             EEPROM_SETTINGS_OFFSET + 1  // 2bytes
-// #define EEPROM_LUCIEBOX_HOURS                        EEPROM_SETTINGS_OFFSET + 3
-#define EEPROM_SETTINGS_TOTAL_LENGTH                    6  // 8 bytes
+#define EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER             EEPROM_SETTINGS_OFFSET + 1 // 2 bytes
+#define EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED       EEPROM_SETTINGS_OFFSET + 3 // 1 byte
+#define EEPROM_SETTINGS_TOTAL_LENGTH                    6  // 6 bytes
 #define EEPROM_FIRST_ADDRESS_OF_USER_RANGE              EEPROM_SETTINGS_OFFSET + EEPROM_SETTINGS_TOTAL_LENGTH
 
 #define EEPROM_RANDOM_WORLD_START_ADDRESS               EEPROM_FIRST_ADDRESS_OF_USER_RANGE

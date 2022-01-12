@@ -20,7 +20,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
     textHandle = ledDisp->getDisplayTextBufHandle();
     decimalDotsHandle = ledDisp->getDecimalPointsHandle();
     inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
-    inactivity_timer.start();
+    resetInactivityTimer();
     always_on_timer.start();
 }
 #else
@@ -35,7 +35,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
     textHandle = ledDisp->getDisplayTextBufHandle();
     decimalDotsHandle = ledDisp->getDecimalPointsHandle();
     inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
-    inactivity_timer.start();
+    resetInactivityTimer();
     always_on_timer.start();
 }
 
@@ -55,13 +55,13 @@ void Apps::appSelector()
     bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
 
 #else
-    bool selector_changed = 0;
+    // bool selector_changed = 0;
 
     bool init_app_init = 0;
     // bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
-    if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_0))
+    if (binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_0))
     {
-        selected_app++; // TODO SHOULD BE A GLOBAL VARIABLE
+        selected_app++; 
         if (selected_app > 23)
         {
             selected_app = 0;
@@ -234,16 +234,31 @@ void Apps::appSelector()
 
     if (binaryInputsEdgeUp)
     {
-        inactivity_timer.start();
+        resetInactivityTimer();
     }
     if (inactivity_timer.getCountDownTimerElapsedAndRestart())
     {
-        if (selected_app != APP_SELECTOR_MULTITIMER && selected_app != APP_SELECTOR_POMODORO)
-        {
+        //if (selected_app != APP_SELECTOR_MULTITIMER && selected_app != APP_SELECTOR_POMODORO)
+        //{
+#ifdef ENABLE_SOFT_POWER_OFF
+    // auto power off
+    if (!eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED)){
+        digitalWrite(PIN_POWER_ON_HOLD, LOW);
+        // delay(255);
+
+    }else{
+        playSongHappyDryer();
+    }
+#else
             playSongHappyDryer();
-        }
+#endif
+        //}
     }
     updateEveryAppCycleAfter();
+}
+
+void Apps::resetInactivityTimer(){
+    inactivity_timer.start();
 }
 
 void Apps::updateEveryAppCycleBefore()
@@ -494,6 +509,9 @@ void Apps::pomodoroTimer()
 
     if (!in_menu && !app_init_edge)
     {
+        // never auto power off when timer is on
+        resetInactivityTimer();
+
         // pomodoro timer running
 
         if (!POMODORO_FIRST_TICKING_CYCLING_DONE)
@@ -600,7 +618,7 @@ void Apps::pomodoroTimer()
             }
         }
 
-        // inviting lights to press on the buttons
+        // inviting lights to press the buttons
         lights |= 1 << LIGHT_MOMENTARY_2;
         lights |= 1 << LIGHT_MOMENTARY_3;
     }
@@ -819,6 +837,12 @@ void Apps::stopwatch()
     }
 
     bool paused = pSsuperTimer->getIsPaused();
+
+    if (pSsuperTimer->getIsStarted()){
+        // never auto power off when timer is on
+        resetInactivityTimer();
+    }
+
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
     {
         // set chronometer to zero
@@ -1171,7 +1195,7 @@ void Apps::modeSettings()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
 #else
-    const uint8_t analog_input_pins[4] = {PIN_MERCURY_SWITCHES, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
+    const uint8_t analog_input_pins[2] = {PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY};
 #endif
     if (this->app_init_edge)
     {
@@ -1277,9 +1301,40 @@ void Apps::modeSettings()
 #endif
     }
 
+#ifdef ENABLE_SOFT_POWER_OFF
+     else if (SETTINGS_MODE_SELECTOR < 12)
+    {
+        // enable/disable auto power off
+
+        lights |= 1 << LIGHT_MOMENTARY_0;
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+        {
+#ifdef ENABLE_EEPROM
+
+            eeprom_update_byte(
+                (uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED,
+                !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED));
+#endif
+        }
+
+        // menu title
+        setStandardTextToTextBuf(TEXT_AUTO);
+
+        // value text
+        uint8_t text = TEXT_YES;
+        if (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED))
+        {
+            text = TEXT_NO;
+        }
+        setStandardTextToTextHANDLE(text);
+    }
+#endif 
+
+
     else if (SETTINGS_MODE_SELECTOR < 20)
     {
 
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         // A0 handles the selector button analog input. It will not change apps when the selector knob is rotated in this menu.
         // menu title
         textBuf[2] = 'A';
@@ -1293,6 +1348,22 @@ void Apps::modeSettings()
             SETTINGS_MODE_ANALOG_VALUE = (int16_t)analogRead(analog_input_pins[index]);
         }
         ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
+#else
+     
+    // menu title
+    // todo: this does not represent the analog pin. just buttons latching and buttons momentary. Analog input days are almost over...
+    textBuf[2] = 'B';
+    uint8_t index = SETTINGS_MODE_SELECTOR%2;
+    ledDisp->digitValueToChar(&textBuf[3], index);
+
+    // Value
+    if (millis_blink_250_750ms())
+    {
+        // be stable when shown (only measure when menu text is shown)
+        SETTINGS_MODE_ANALOG_VALUE = (int16_t)analogRead(analog_input_pins[index]);
+    }
+    ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
+#endif
     }
     else if (SETTINGS_MODE_SELECTOR < 22)
     {
@@ -5365,6 +5436,9 @@ void Apps::multitimer_refresh()
     }
     else if (this->multitimer_state == playing)
     {
+        // never auto power off when timer is on
+        resetInactivityTimer();
+
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             this->multitimer_pause();

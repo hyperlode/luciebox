@@ -39,7 +39,7 @@ BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
 PotentioSelector selectorDial;
 #endif
 ButtonsDacR2r buttonsMomentary;
-ButtonsDacR2r buttonsLatching; // buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+ButtonsDacR2r buttonsLatching; // v2: buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 #ifdef ENABLE_TILT_SWITCHES
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
 #endif
@@ -143,14 +143,14 @@ void processInput()
 
     if (buttonsMomentary.getValueChangedEdge())
     {
-        #ifdef ENABLE_EEPROM
+#ifdef ENABLE_EEPROM
         if (!aMomentaryButtonIsPressed)
         {
             // add 1 to power cycles tally keeper. It's done a key press to avoid gigantic number in case of multiple brown outs.
             eeprom_update_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER) + 1);
             aMomentaryButtonIsPressed = true;
         }
-        #endif 
+#endif
 
         for (uint8_t i = 0; i < BUTTONS_MOMENTARY_COUNT; i++)
         {
@@ -195,7 +195,8 @@ void setup()
     // for (uint16_t i=1000;i<2048;i++){
     // for (uint16_t i=500;i<2048;i++){ // works, but display is trembling, dial not working
     // for (uint16_t i=750;i<2048;i++){ // works, but dial not working
-    for (uint16_t i=1000;i<2048;i++){ // works, but dial not working
+    for (uint16_t i = 1000; i < 2048; i++)
+    {                         // works, but dial not working
         *((uint8_t *)i) = 63; // 63 is the random value in lucieAscii
     }
 
@@ -210,6 +211,13 @@ void setup()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS);
 #endif
+    
+#ifdef ENABLE_SOFT_POWER_OFF
+    // first thing to do: hold power
+    pinMode(PIN_POWER_ON_HOLD,OUTPUT);
+    digitalWrite(PIN_POWER_ON_HOLD, HIGH);
+#endif
+
     buttonsMomentary.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_MOMENTARY_COUNT, setValues_1);
     buttonsLatching.setPin(PIN_BUTTONS_LATCHING, BUTTONS_LATCHING_COUNT, setValues_2);
     encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
@@ -245,11 +253,11 @@ void setup()
 #endif
 
 #ifdef ENABLE_APPS
-    #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer, &selectorDial);
-    #else
+#else
     pretbak_apps.setPeripherals(binaryInputs, &encoder_dial, &visualsManager, &ledDisplay, &buzzer);
-    #endif
+#endif
 
 #endif
 }
@@ -258,4 +266,3 @@ void loop()
 {
     lucieboxLoop();
 }
-
