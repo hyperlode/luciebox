@@ -37,6 +37,8 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
     inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
     resetInactivityTimer();
     always_on_timer.start();
+
+    this->selected_app = 1; // start with one, which also works for the non selector button setting
 }
 
 #endif
@@ -62,9 +64,9 @@ void Apps::appSelector()
     if (binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_0))
     {
         selected_app++; 
-        if (selected_app > 23)
+        if (selected_app > 22) // avoid the double settings and dreamtime app. (0 and 23)
         {
-            selected_app = 0;
+            selected_app = 1;
         }
         init_app_init = true;
     }
@@ -100,9 +102,10 @@ void Apps::appSelector()
         }
 #else
         // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
-        splash_screen_playing = this->init_app(init_app_init, selected_app / 2);
+        splash_screen_playing = this->init_app(init_app_init, selected_app - 1); // selected app -1 because we start from 1 
         if (!splash_screen_playing)
         {
+            
             this->initializeAppDataToDefault();
             this->app_init_edge = true;
         }
@@ -242,7 +245,12 @@ void Apps::appSelector()
         //{
 #ifdef ENABLE_SOFT_POWER_OFF
     // auto power off
-    if (!eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED)){
+
+uint8_t enable_auto_power_off = true;
+#ifdef ENABLE_EEPROM
+    enable_auto_power_off = !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED);
+#endif 
+    if (enable_auto_power_off){
         digitalWrite(PIN_POWER_ON_HOLD, LOW);
         // delay(255);
 
@@ -1304,11 +1312,13 @@ void Apps::modeSettings()
     }
 
 #ifdef ENABLE_SOFT_POWER_OFF
-     else if (SETTINGS_MODE_SELECTOR < 12)
+    else if (SETTINGS_MODE_SELECTOR < 12)
     {
         // enable/disable auto power off
 
         lights |= 1 << LIGHT_MOMENTARY_0;
+
+        uint8_t auto_power_off_enabled = true;
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
         {
 #ifdef ENABLE_EEPROM
@@ -1316,20 +1326,23 @@ void Apps::modeSettings()
             eeprom_update_byte(
                 (uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED,
                 !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED));
-#endif
         }
+
+        auto_power_off_enabled =  (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED) != 0);
+#endif
 
         // menu title
         setStandardTextToTextBuf(TEXT_AUTO);
 
         // value text
-        uint8_t text = TEXT_YES;
-        if (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED))
+        uint8_t text = TEXT_NO;
+        if (auto_power_off_enabled)
         {
-            text = TEXT_NO;
+            text = TEXT_YES;
         }
         setStandardTextToTextHANDLE(text);
     }
+
 #endif 
 
 
