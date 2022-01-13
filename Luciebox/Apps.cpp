@@ -248,7 +248,9 @@ void Apps::appSelector()
 
     }else{
         playSongHappyDryer();
+
     }
+    
 #else
             playSongHappyDryer();
 #endif
@@ -838,7 +840,7 @@ void Apps::stopwatch()
 
     bool paused = pSsuperTimer->getIsPaused();
 
-    if (pSsuperTimer->getIsStarted()){
+    if (pSsuperTimer->getIsStarted() && !paused ){
         // never auto power off when timer is on
         resetInactivityTimer();
     }
