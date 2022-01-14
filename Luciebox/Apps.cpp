@@ -38,15 +38,15 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
     resetInactivityTimer();
     always_on_timer.start();
 
-    this->selected_app = 1; // start with one, which also works for the non selector button setting
+    appState = appStateInit;
 }
 
 #endif
 
-void Apps::appSelector()
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+void Apps::appStateLoop()
 {
     updateEveryAppCycleBefore();
-#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     bool selector_changed = selectorDial->getValueChangedEdge();
     int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
 
@@ -55,23 +55,6 @@ void Apps::appSelector()
     // uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
 
     bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
-
-#else
-    // bool selector_changed = 0;
-
-    bool init_app_init = 0;
-    // bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
-    if (binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_0))
-    {
-        selected_app++; 
-        if (selected_app > 22) // avoid the double settings and dreamtime app. (0 and 23)
-        {
-            selected_app = 1;
-        }
-        init_app_init = true;
-    }
-
-#endif
 
     this->app_init_edge = false;
 
@@ -90,8 +73,6 @@ void Apps::appSelector()
 
     if (splash_screen_playing)
     {
-
-#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
         splash_screen_playing = this->init_app(init_app_init, selector_dial_value);
         if (!splash_screen_playing)
@@ -100,140 +81,165 @@ void Apps::appSelector()
             this->app_init_edge = true;
             selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
         }
-#else
-        // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
-        splash_screen_playing = this->init_app(init_app_init, selected_app - 1); // selected app -1 because we start from 1 
-        if (!splash_screen_playing)
-        {
-            
-            this->initializeAppDataToDefault();
-            this->app_init_edge = true;
-        }
-#endif
     }
 
     // not as else statement, to have the init properly transferred after app beginning screen.
     if (!splash_screen_playing)
     {
-        //#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
-
-        switch (selected_app)
-        {
-        case APP_SELECTOR_LETTERS_AND_CHARS:
-
-            this->modeCountingLettersAndChars();
-            break;
-
-        case APP_SELECTOR_SIMON:
-#ifdef ENABLE_SIMON_APP
-            this->modeSimon();
-#endif
-            break;
-
-        case APP_SELECTOR_SOUND_NOTES:
-            this->modeSoundNotes();
-            break;
-
-        case APP_SELECTOR_SOUND_COMPOSER:
-            this->modeComposeSong();
-            break;
-
-        case APP_SELECTOR_STOPWATCH:
-            stopwatch();
-            break;
-
-        case APP_SELECTOR_POMODORO:
-#ifdef ENABLE_POMODORO
-            pomodoroTimer();
-#endif
-            break;
-
-        case APP_SELECTOR_RANDOMWORLD:
-            this->modeRandomWorld();
-            break;
-
-        case APP_SELECTOR_TALLY_KEEPER:
-#ifdef ENABLE_TALLY_KEEPER
-            this->modeTallyKeeper();
-#endif
-            break;
-
-        case APP_SELECTOR_GEIGER:
-            this->modeGeiger();
-            break;
-
-        case APP_SELECTOR_HACK_TIME:
-            this->modeHackTime();
-            break;
-
-        case APP_SELECTOR_SOUND_SONG:
-            this->modeSoundSong();
-            break;
-
-        case APP_SELECTOR_DRAW:
-            this->draw();
-            break;
-
-        case APP_SELECTOR_DRAW_GAME:
-            this->drawGame();
-            break;
-
-        case APP_SELECTOR_MOVIE_MODE:
-            this->modeMovie();
-            break;
-
-        case APP_SELECTOR_SETTING:
-        case APP_SELECTOR_SETTING_TOO:
-            this->modeSettings();
-            break;
-
-        case APP_SELECTOR_SOUND_METRONOME:
-            this->modeMetronome();
-            break;
-
-        case APP_SELECTOR_SOUND_SEQUENCER:
-            this->modeSequencer();
-            break;
-
-        case APP_SELECTOR_REACTION_GAME:
-        case APP_SELECTOR_GUITAR_HERO:
-#ifdef ENABLE_REACTION_APP
-            this->modeReactionGame();
-#endif
-            break;
-
-#ifdef ENABLE_TILT_APP
-        case APP_SELECTOR_DREAMTIME:
-            this->modeDreamtime();
-            break;
-        case APP_SELECTOR_TILT:
-            this->tiltSwitchTest();
-            break;
-#else
-        case APP_SELECTOR_DREAMTIME:
-        case APP_SELECTOR_DREAMTIME_TOO:
-            this->modeDreamtime();
-            break;
-#endif
-
-#ifdef ENABLE_QUIZ_MASTER
-        case APP_SELECTOR_QUIZ_MASTER:
-            this->quiz();
-            break;
-#endif
-
-        case APP_SELECTOR_MULTITIMER:
-#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
-            this->miniMultiTimer();
-#elif defined ENABLE_MULTITIMER_INTEGRATED
-            this->multitimer_integrated();
-#endif
-            break;
-
-        default:
-            break;
-        }
+        appSelector();
     }
+
+    inactivityHandler();
+
+    updateEveryAppCycleAfter();
+}
+
+#else
+
+void Apps::appStateLoop()
+{
+    updateEveryAppCycleBefore();
+
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+    bool selector_changed = selectorDial->getValueChangedEdge();
+    int selector_dial_value = selectorDial->getSelectorValue() - 1; // -1 because 13 resistor values for 12 pos knob, gnd is never switchted.
+
+#endif
+    switch (appState)
+    {
+
+    case appStateInit:
+    {
+        this->selected_app = 1; // start with one, which also works for the non selector button setting
+        appState = appSplashInit;
+        selected_app_memory = selected_app;
+        break;
+    }
+
+    case appSplashInit:
+    {
+#ifdef ENABLE_SERIAL
+        Serial.println("app select:");
+        Serial.println(selected_app);
+#endif
+
+        buzzerSilentClearBuffer(); // The moment we switch apps, the sound goes off immediatly.
+
+        this->init_app(true, selected_app - 1); // selected app -1 because we start from 1
+        // set to init state before a new app starts
+        appState = appSplash;
+        break;
+    }
+
+    case appSelection:
+    {
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_0))
+        {
+            if (selected_app == selected_app_memory)
+            {
+                appState = appRunning;
+            }
+            else
+            {
+                appState = appSplashInit;
+            }
+            selected_app_memory = selected_app;
+        }
+
+        modifyValueUpDownWithMomentary2And3(&selected_app);
+        selected_app += encoder_dial->getDelta();
+        checkBoundaries(&selected_app, 1, 22, true);
+
+        this->displayAllSegments = 0;
+        flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
+        displayAllSegmentsToScreen();
+
+        // ledDisp->setNumberToDisplayAsDecimal(selected_app);
+        // textBufToDisplay();
+
+#ifdef ENABLE_SOFT_POWER_OFF
+        // switch off.
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+        {
+            digitalWrite(PIN_POWER_ON_HOLD, LOW);
+        }
+#endif
+        break;
+    }
+    case appSplash:
+    {
+
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+        // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
+        splash_screen_playing = this->init_app(false, selector_dial_value);
+        if (!splash_screen_playing)
+        {
+            this->initializeAppDataToDefault();
+            // this->app_init_edge = true;
+            appState = appRunning;
+            selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
+        }
+#else
+        // do init routine (showing splash screen), if finished,end of init. Then continue to init of the chosen application
+        splash_screen_playing = this->init_app(false, selected_app - 1); // selected app -1 because we start from 1
+        if (!splash_screen_playing)
+        {
+            appState = appInit;
+            this->initializeAppDataToDefault();
+            // this->app_init_edge = true;
+        }
+#endif
+
+        break;
+    }
+
+    case appInit:
+    {
+        this->app_init_edge = true;
+        appState = appRunning;
+        break;
+    }
+
+    case appRunning:
+    {
+        // not as else statement, to have the init properly transferred after app beginning screen.
+        appSelector();
+        this->app_init_edge = false; // global variable (saves memory) true at first run (set in another state )
+
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+
+        bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
+
+        // uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
+
+        bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled OR if we're visualizing the selector switch analog value in the settings app
+
+        if (init_app_init)
+        {
+            appState = appSplashInit;
+        }
+
+#else
+        // bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
+        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)))
+        {
+            appState = appSelection;
+        }
+
+#endif
+
+        break;
+    }
+    }
+    inactivityHandler();
+
+    updateEveryAppCycleAfter();
+}
+
+#endif
+
+void Apps::inactivityHandler()
+{
 
     if (binaryInputsEdgeUp)
     {
@@ -244,30 +250,152 @@ void Apps::appSelector()
         //if (selected_app != APP_SELECTOR_MULTITIMER && selected_app != APP_SELECTOR_POMODORO)
         //{
 #ifdef ENABLE_SOFT_POWER_OFF
-    // auto power off
+        // auto power off
 
-uint8_t enable_auto_power_off = true;
+        uint8_t enable_auto_power_off = true;
 #ifdef ENABLE_EEPROM
-    enable_auto_power_off = !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED);
-#endif 
-    if (enable_auto_power_off){
-        digitalWrite(PIN_POWER_ON_HOLD, LOW);
-        // delay(255);
-
-    }else{
-        playSongHappyDryer();
-
-    }
-    
-#else
+        enable_auto_power_off = !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED);
+#endif
+        if (enable_auto_power_off)
+        {
+            digitalWrite(PIN_POWER_ON_HOLD, LOW);
+        }
+        else
+        {
             playSongHappyDryer();
+        }
+
+#else
+        playSongHappyDryer();
 #endif
         //}
     }
-    updateEveryAppCycleAfter();
 }
 
-void Apps::resetInactivityTimer(){
+void Apps::appSelector()
+{
+    //#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
+
+    switch (selected_app)
+    {
+    case APP_SELECTOR_LETTERS_AND_CHARS:
+
+        this->modeCountingLettersAndChars();
+        break;
+
+    case APP_SELECTOR_SIMON:
+#ifdef ENABLE_SIMON_APP
+        this->modeSimon();
+#endif
+        break;
+
+    case APP_SELECTOR_SOUND_NOTES:
+        this->modeSoundNotes();
+        break;
+
+    case APP_SELECTOR_SOUND_COMPOSER:
+        this->modeComposeSong();
+        break;
+
+    case APP_SELECTOR_STOPWATCH:
+        stopwatch();
+        break;
+
+    case APP_SELECTOR_POMODORO:
+#ifdef ENABLE_POMODORO
+        pomodoroTimer();
+#endif
+        break;
+
+    case APP_SELECTOR_RANDOMWORLD:
+        this->modeRandomWorld();
+        break;
+
+    case APP_SELECTOR_TALLY_KEEPER:
+#ifdef ENABLE_TALLY_KEEPER
+        this->modeTallyKeeper();
+#endif
+        break;
+
+    case APP_SELECTOR_GEIGER:
+        this->modeGeiger();
+        break;
+
+    case APP_SELECTOR_HACK_TIME:
+        this->modeHackTime();
+        break;
+
+    case APP_SELECTOR_SOUND_SONG:
+        this->modeSoundSong();
+        break;
+
+    case APP_SELECTOR_DRAW:
+        this->draw();
+        break;
+
+    case APP_SELECTOR_DRAW_GAME:
+        this->drawGame();
+        break;
+
+    case APP_SELECTOR_MOVIE_MODE:
+        this->modeMovie();
+        break;
+
+    case APP_SELECTOR_SETTING:
+    case APP_SELECTOR_SETTING_TOO:
+        this->modeSettings();
+        break;
+
+    case APP_SELECTOR_SOUND_METRONOME:
+        this->modeMetronome();
+        break;
+
+    case APP_SELECTOR_SOUND_SEQUENCER:
+        this->modeSequencer();
+        break;
+
+    case APP_SELECTOR_REACTION_GAME:
+    case APP_SELECTOR_GUITAR_HERO:
+#ifdef ENABLE_REACTION_APP
+        this->modeReactionGame();
+#endif
+        break;
+
+#ifdef ENABLE_TILT_APP
+    case APP_SELECTOR_DREAMTIME:
+        this->modeDreamtime();
+        break;
+    case APP_SELECTOR_TILT:
+        this->tiltSwitchTest();
+        break;
+#else
+    case APP_SELECTOR_DREAMTIME:
+    case APP_SELECTOR_DREAMTIME_TOO:
+        this->modeDreamtime();
+        break;
+#endif
+
+#ifdef ENABLE_QUIZ_MASTER
+    case APP_SELECTOR_QUIZ_MASTER:
+        this->quiz();
+        break;
+#endif
+
+    case APP_SELECTOR_MULTITIMER:
+#ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
+        this->miniMultiTimer();
+#elif defined ENABLE_MULTITIMER_INTEGRATED
+        this->multitimer_integrated();
+#endif
+        break;
+
+    default:
+        break;
+    }
+}
+
+void Apps::resetInactivityTimer()
+{
     inactivity_timer.start();
 }
 
@@ -365,13 +493,16 @@ bool Apps::init_app(bool init, uint8_t selector)
         INIT_SPLASH_ANIMATION_STEP++;
     }
 
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     if (INIT_SPLASH_ANIMATION_STEP < 5)
     {
         lights = 0xff;
         // all lights on
         ledDisp->setBinaryToDisplay(0xFFFFFFFF); // use fade in as fade out to set text.
     }
-    else if (INIT_SPLASH_ANIMATION_STEP < 23)
+    else
+#endif
+        if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
@@ -396,6 +527,7 @@ bool Apps::init_app(bool init, uint8_t selector)
         return false;
     }
 
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     // hold down momentary button to freeze app splash screen (easier to rotate knob to search for desired app)
     byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
     if ((binaryInputsValue & momentary_buttons_mask) > 0)
@@ -405,6 +537,7 @@ bool Apps::init_app(bool init, uint8_t selector)
         lights |= 0x1 << lights_indexed_as_installed[(INIT_SPLASH_LIGHTS_STEP % 32) / 4];
         // lights	|= 0x1 << lights_indexed_as_installed[((INIT_SPLASH_LIGHTS_STEP+16) %32)/4];
     }
+#endif
 
     return true;
 }
@@ -848,7 +981,8 @@ void Apps::stopwatch()
 
     bool paused = pSsuperTimer->getIsPaused();
 
-    if (pSsuperTimer->getIsStarted() && !paused ){
+    if (pSsuperTimer->getIsStarted() && !paused)
+    {
         // never auto power off when timer is on
         resetInactivityTimer();
     }
@@ -1328,7 +1462,7 @@ void Apps::modeSettings()
                 !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED));
         }
 
-        auto_power_off_enabled =  (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED) != 0);
+        auto_power_off_enabled = (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED) != 0);
 #endif
 
         // menu title
@@ -1343,8 +1477,7 @@ void Apps::modeSettings()
         setStandardTextToTextHANDLE(text);
     }
 
-#endif 
-
+#endif
 
     else if (SETTINGS_MODE_SELECTOR < 20)
     {
@@ -1364,20 +1497,20 @@ void Apps::modeSettings()
         }
         ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
 #else
-     
-    // menu title
-    // todo: this does not represent the analog pin. just buttons latching and buttons momentary. Analog input days are almost over...
-    textBuf[2] = 'B';
-    uint8_t index = SETTINGS_MODE_SELECTOR%2;
-    ledDisp->digitValueToChar(&textBuf[3], index);
 
-    // Value
-    if (millis_blink_250_750ms())
-    {
-        // be stable when shown (only measure when menu text is shown)
-        SETTINGS_MODE_ANALOG_VALUE = (int16_t)analogRead(analog_input_pins[index]);
-    }
-    ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
+        // menu title
+        // todo: this does not represent the analog pin. just buttons latching and buttons momentary. Analog input days are almost over...
+        textBuf[2] = 'B';
+        uint8_t index = SETTINGS_MODE_SELECTOR % 2;
+        ledDisp->digitValueToChar(&textBuf[3], index);
+
+        // Value
+        if (millis_blink_250_750ms())
+        {
+            // be stable when shown (only measure when menu text is shown)
+            SETTINGS_MODE_ANALOG_VALUE = (int16_t)analogRead(analog_input_pins[index]);
+        }
+        ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
 #endif
     }
     else if (SETTINGS_MODE_SELECTOR < 22)
@@ -4009,9 +4142,9 @@ void Apps::modeReactionGame()
             textBufToDisplay();
         }
 #else
-        intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
-        textBuf[0] = 'L';
-        textBufToDisplay();
+            intToDigitsString(textBuf, REACTION_GAME_LEVEL + 1, false); // utilities lode
+            textBuf[0] = 'L';
+            textBufToDisplay();
 #endif
 
         // play game button pressed
@@ -5189,13 +5322,13 @@ void Apps::multitimer_setDefaults()
         this->multitimer_setTimerInitCountTimeByTimeIndex(i, eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i));
     }
 #else
-    MULTITIMER_FISCHER_TIME_INDEX = 0;
-    // general init
-    MULTITIMER_TIMERS_COUNT = 2;
-    for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
-    {
-        this->multitimer_setTimerInitCountTimeByTimeIndex(i, 35);
-    }
+        MULTITIMER_FISCHER_TIME_INDEX = 0;
+        // general init
+        MULTITIMER_TIMERS_COUNT = 2;
+        for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
+        {
+            this->multitimer_setTimerInitCountTimeByTimeIndex(i, 35);
+        }
 #endif
 
     this->multitimer_state = initialized;

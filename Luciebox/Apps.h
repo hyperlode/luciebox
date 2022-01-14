@@ -865,6 +865,8 @@ public:
 
     void initializeAppDataToDefault();
     void appSelector();
+    void appStateLoop();
+    void inactivityHandler();
 
 private:
 
@@ -1073,7 +1075,8 @@ private:
     uint8_t lights;
     bool splash_screen_playing; // actual flash screen app
     bool app_init_edge;         // one cycle
-    uint8_t selected_app;
+    int16_t selected_app;
+    int16_t selected_app_memory;
 #ifdef ENABLE_MULTITIMER_INTEGRATED
     SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
     uint8_t multitimer_activeTimer;
@@ -1131,6 +1134,18 @@ private:
     };
     ReactionGameState reactionGameState;
 #endif
+
+    enum AppState : uint8_t
+    {
+        appStateInit,
+        appSelectionInit,
+        appSelection,
+        appSplashInit,
+        appSplash,
+        appRunning,
+        appInit
+    };
+    AppState appState;
 
     enum QuizState : uint8_t
     {

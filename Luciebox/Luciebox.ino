@@ -109,7 +109,7 @@ void lucieboxLoop()
 #endif
 
 #ifdef ENABLE_APPS
-    pretbak_apps.appSelector();
+    pretbak_apps.appStateLoop();
 #endif
 
     processOuput();
