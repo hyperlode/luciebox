@@ -154,9 +154,8 @@ void Apps::appStateLoop()
         flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
         displayAllSegmentsToScreen();
 
-        // ledDisp->setNumberToDisplayAsDecimal(selected_app);
-        // textBufToDisplay();
-
+        //ledDisp->setNumberToDisplayAsDecimal(selected_app);
+        
 #ifdef ENABLE_SOFT_POWER_OFF
         // switch off.
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -166,6 +165,7 @@ void Apps::appStateLoop()
 #endif
         break;
     }
+
     case appSplash:
     {
 
@@ -232,7 +232,6 @@ void Apps::appStateLoop()
     }
     }
     inactivityHandler();
-
     updateEveryAppCycleAfter();
 }
 
@@ -502,7 +501,7 @@ bool Apps::init_app(bool init, uint8_t selector)
     }
     else
 #endif
-        if (INIT_SPLASH_ANIMATION_STEP < 23)
+    if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
@@ -1337,7 +1336,12 @@ void Apps::randomModeTrigger(bool forReal)
 void Apps::modeSettings()
 {
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+#ifdef ENABLE_SOFT_POWER_OFF
+    const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_POWER_ON_HOLD};
+#else
     const uint8_t analog_input_pins[4] = {PIN_SELECTOR_DIAL, PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY, PIN_MERCURY_SWITCHES};
+
+#endif
 #else
     const uint8_t analog_input_pins[2] = {PIN_BUTTONS_LATCHING, PIN_BUTTONS_MOMENTARY};
 #endif

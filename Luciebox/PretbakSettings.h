@@ -14,13 +14,15 @@
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 
-//#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
-#define ENABLE_SOFT_POWER_OFF
 
 
 // #define V2_PCB_CORONA
 #define V3_PCB_BURST
 // #define V4_PCB_MINI
+
+//#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
+#define ENABLE_SOFT_POWER_OFF
+
 
 #define ENABLE_APPS 
 #define ENABLE_BATTERY_STATUS

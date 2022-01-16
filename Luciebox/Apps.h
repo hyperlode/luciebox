@@ -4,7 +4,7 @@
 #define ENABLE_EEPROM
 // // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
-#define ENABLE_SIMON_APP
+// #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define POMODORO_ENABLE_HOURGLASS
@@ -69,8 +69,6 @@
 #else
 #define APP_SELECTOR_DREAMTIME_TOO 23
 #endif
-
-#define INACTIVITY_TIME_BEEP_INDEX 27 // this is just an index, needs to be converted to seconds with the lookup table
 
 #define DRAW_GAME_RANDOM 0
 #define DRAW_GAME_WORD 1
@@ -296,8 +294,6 @@
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
 // #define showNote general_boolean
 
-//ik begrijp dat ik in fout was, maar ik hoop dat er  bij een verlichting van de sanctioneren in het licht van de omstandigheden.
-
 #define STOPWATCH_PAUSED_2 general_boolean2
 // #define HACKTIME_VALUE_TO_SOUND general_boolean2
 #define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean2
@@ -518,7 +514,7 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x00, 0xd0, 0xab, 0x44, // stopwatch
 	0x74, 0x50, 0x44, 0x56, // table with two chairs. (board game night suggestion)
     0x06, 0x5B, 0x4F, 0x66, // 1234 
-    // 0x08, 0xCE, 0x78, 0x08, // abstract piramid NOK
+    0x08, 0xCE, 0x78, 0x08, // abstract piramid NOK
     0x5C, 0x63, 0x5c, 0x63, // dice
     0x36, 0x36, 0x36, 0x36, // abstract vertical lines  NOK
     0x00, 0x63, 0xDA, 0x63, // face 
@@ -526,16 +522,17 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x00, 0x3F, 0x40, 0x40, // hammer 
     0x40, 0x01, 0x48, 0x41, // guitar hero screenshot
     0x40, 0x49, 0x49, 0x4F, // pencil
-    0x40, 0x4F, 0x79, 0x40, // abstract art deco NOK
-    0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion NOK
+    0x40, 0x4F, 0x79, 0x40, // abstract art deco NOK   --> teambuildign drawing game splash screen.
+    0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion NOK   --> should be more music player 
     0x7F, 0x39, 0x0f, 0x7f, // media player. film roll
-    0x32, 0x26, 0x34, 0x16, // vertical lines short and long NOK
+    0x32, 0x26, 0x34, 0x16, // vertical lines short and long NOK --> for metronome app
     0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
     0x5e, 0x01, 0x5f, 0x00, // music notes
     0x5e, 0x01, 0xdf, 0x5e, // music notes full
     0x00, 0x02, 0x6b, 0x20, // radioactive sign    
     0xc4, 0x88, 0x50, 0x00, // student koala
-	0x63, 0x58, 0x4C, 0x63, // beast face
+	// 0x63, 0x58, 0x4C, 0x63, // beast face
+	0x0C, 0x44, 0x6b, 0x00, // baby crawling
     // 0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
     // 0x60, 0x3a, 0x2e, 0x42, // body builder. gamer.
 };
@@ -545,6 +542,9 @@ const uint8_t app_splash_screens[] PROGMEM = {
 const uint8_t guitar_hero_level_speeds[] PROGMEM = {101, 75, 50, 40, 30, 20};                 // time in ms per step
 const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {250, 41, 21, 8, 4, 3};              // a x10 multiplier is applied. Time in ms per step, twelve steps for total time. 12x10xTIME_MS = total time for a round
 const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50, 33, 16, 8}; //{2min, 1min, 30s, 20s, 10s, 5s} // will have a *50 multiplier per step. and *12 for total countdowntime
+
+#define INACTIVITY_TIME_BEEP_INDEX 35 // this is just an index, needs to be converted to seconds with the lookup table
+
 
 #define MOVIE_INDEX_EMPTY 255
 #define ANIMATE_CIRCLE_OFFSET 4
