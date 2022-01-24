@@ -17,8 +17,8 @@
 
 
 // #define V2_PCB_CORONA
-#define V3_PCB_BURST
-// #define V4_PCB_MINI
+//#define V3_PCB_BURST
+#define V4_PCB_MINI
 
 //#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
 #define ENABLE_SOFT_POWER_OFF
@@ -74,6 +74,10 @@
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 #define PIN_SELECTOR_DIAL A0
 #define SELECTOR_DIAL_POSITIONS 12 //there are only 12 actual positions on the knob, but the resistor bridge has 13 positions on the final version (gnd is never provided, to avoid short circuits at the switch between ground and vcc)
+
+#else
+#define PIN_SELECTOR_BUTTON A0
+
 #endif
 
 #define PIN_ROTARY_ENCODER_DIAL_CHANNEL_A 2
@@ -255,6 +259,18 @@
     #define BUTTON_MOMENTARY_3 7 // most right
 
 #elif defined V3_PCB_BURST
+    // binary input indeces per button
+    #define BUTTON_LATCHING_0 0
+    #define BUTTON_LATCHING_1 1
+    #define BUTTON_LATCHING_2 2
+    #define BUTTON_LATCHING_3 3 
+
+    #define BUTTON_MOMENTARY_0 4 // most left
+    #define BUTTON_MOMENTARY_1 5 // second most left
+    #define BUTTON_MOMENTARY_2 6 // seconds most right
+    #define BUTTON_MOMENTARY_3 7 // most right
+#elif defined V4_PCB_MINI
+
     // binary input indeces per button
     #define BUTTON_LATCHING_0 0
     #define BUTTON_LATCHING_1 1

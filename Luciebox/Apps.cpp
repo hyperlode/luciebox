@@ -133,7 +133,7 @@ void Apps::appStateLoop()
 
     case appSelection:
     {
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_0))
+        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)))
         {
             if (selected_app == selected_app_memory)
             {
@@ -158,9 +158,11 @@ void Apps::appStateLoop()
         
 #ifdef ENABLE_SOFT_POWER_OFF
         // switch off.
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
         {
+            //playSongHappyDryer();
             digitalWrite(PIN_POWER_ON_HOLD, LOW);
+            digitalWrite(PIN_SELECTOR_BUTTON, LOW);
         }
 #endif
         break;
@@ -221,7 +223,7 @@ void Apps::appStateLoop()
 
 #else
         // bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
-        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)))
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
             appState = appSelection;
         }

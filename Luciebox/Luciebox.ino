@@ -34,12 +34,12 @@ Apps pretbak_apps;
 #endif
 
 // INPUT
-BinaryInput binaryInputs[BINARY_INPUTS_COUNT];
+BinaryInput binaryInputs[BINARY_INPUTS_COUNT]; // 0: top left button, 4:bottom left button
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 PotentioSelector selectorDial;
 #endif
 ButtonsDacR2r buttonsMomentary;
-ButtonsDacR2r buttonsLatching; // v2: buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+ButtonsDacR2r buttonsLatching; // for v2: buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 #ifdef ENABLE_TILT_SWITCHES
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
 #endif
@@ -139,7 +139,11 @@ void processInput()
         {
             binaryInputs[BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET + i].setValue(buttonsLatching.getButtonValueByIndex(i));
         }
+
     }
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+    binaryInputs[0].setValue(digitalRead(PIN_SELECTOR_BUTTON));
+#endif
 
     if (buttonsMomentary.getValueChangedEdge())
     {
@@ -189,6 +193,13 @@ void processOuput()
 
 void setup()
 {
+#ifdef ENABLE_SOFT_POWER_OFF
+    // first thing to do: hold power
+    pinMode(PIN_POWER_ON_HOLD,OUTPUT);
+    digitalWrite(PIN_POWER_ON_HOLD, HIGH);
+#endif
+
+
     // fill up the ram with a default value. This is fun to check in HACK mode.
     // by checking how much of the original values are still there, we can see how much RAM is used at its peak
     // test done 20210409 with i=600 at init: dial was not working. But, ram values constant from address: 1075->2047
@@ -210,13 +221,11 @@ void setup()
 #endif
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     selectorDial.initialize(PIN_SELECTOR_DIAL, SELECTOR_DIAL_POSITIONS);
+#else
+    pinMode(PIN_SELECTOR_BUTTON, INPUT);
+    digitalWrite(PIN_SELECTOR_BUTTON, HIGH); // pull high
 #endif
     
-#ifdef ENABLE_SOFT_POWER_OFF
-    // first thing to do: hold power
-    pinMode(PIN_POWER_ON_HOLD,OUTPUT);
-    digitalWrite(PIN_POWER_ON_HOLD, HIGH);
-#endif
 
     buttonsMomentary.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_MOMENTARY_COUNT, setValues_1);
     buttonsLatching.setPin(PIN_BUTTONS_LATCHING, BUTTONS_LATCHING_COUNT, setValues_2);
