@@ -241,15 +241,14 @@ void Apps::appStateLoop()
 
 void Apps::inactivityHandler()
 {
-
+    // for some timing aps, we want this watchdog timer to be disabled. It's easily accomplished by resetting the inactivity timer in those apps continuously.
     if (binaryInputsEdgeUp)
     {
         resetInactivityTimer();
     }
     if (inactivity_timer.getCountDownTimerElapsedAndRestart())
     {
-        //if (selected_app != APP_SELECTOR_MULTITIMER && selected_app != APP_SELECTOR_POMODORO)
-        //{
+     
 #ifdef ENABLE_SOFT_POWER_OFF
         // auto power off
 
@@ -269,7 +268,7 @@ void Apps::inactivityHandler()
 #else
         playSongHappyDryer();
 #endif
-        //}
+     
     }
 }
 
@@ -405,6 +404,7 @@ void Apps::updateEveryAppCycleBefore()
     binaryInputsEdgeUp = 0;
     binaryInputsEdgeDown = 0;
     binaryInputsValue = 0;
+    binaryInputsToggleValue = 0;
 
     // it's important to realize the display is reset before every cycle. Do not forget to update it all the time.
     lights = 0x00;
@@ -415,6 +415,7 @@ void Apps::updateEveryAppCycleBefore()
         binaryInputsEdgeUp |= binaryInputs[buttons_indexed[i]].getEdgeUp() << i;
         binaryInputsEdgeDown |= binaryInputs[buttons_indexed[i]].getEdgeDown() << i;
         binaryInputsValue |= binaryInputs[buttons_indexed[i]].getValue() << i;
+        binaryInputsToggleValue |= binaryInputs[buttons_indexed[i]].getToggleValue() << i;
 
         // by default: button lights on if activated
         lights |= binaryInputs[buttons_indexed[i]].getValue() << lights_indexed[i];
@@ -465,6 +466,13 @@ void Apps::initializeAppDataToDefault()
     general_uint8_t_4 = 0;
     general_long_1 = 0;
     general_long_2 = 0;
+    
+    // simulated latching buttons reset. This is the great advantage of not having latching buttons. The app starts in a truly blank state when initialized.
+    for (uint8_t i = 0; i < 8; i++)
+    {
+        binaryInputs[buttons_indexed[i]].setToggleValue(0);
+    }
+
 }
 
 bool Apps::init_app(bool init, uint8_t selector)
@@ -1375,8 +1383,9 @@ void Apps::modeSettings()
 
         for (uint8_t i = 0; i < 4; i++)
         {
+
             // every momentary button has a matching latching button assigned
-            if (binaryInputsValue & (1 << (i + 4))) //latching
+            if (binaryInputsToggleValue & (1 << (i + 4))) //latching
             {
                 // momentary button pressed while its matching latching button is ON?
 

@@ -1067,6 +1067,8 @@ private:
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
+    byte binaryInputsToggleValue;
+    
     char textBuf[4];
     // char textBuf2[4];
     char *textHandle;        // contains the text for the display. (4 chars)

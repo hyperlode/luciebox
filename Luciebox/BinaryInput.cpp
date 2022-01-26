@@ -1,10 +1,13 @@
 #include "BinaryInput.h"
 
-//BinaryInput::BinaryInput(){
-//}
+BinaryInput::BinaryInput(){
+    setToggleValue(0);
+}
+
 void BinaryInput::setValue(bool value)
 {
     this->value = value;
+   
 }
 
 bool BinaryInput::getValue()
@@ -14,7 +17,17 @@ bool BinaryInput::getValue()
 bool BinaryInput::getValueChanged()
 
 {
+    
     return this->value != this->previousValue;
+}
+
+bool BinaryInput::getToggleValue(){
+    // toggle is used to mimic a latching button with a momentary button
+    return this->toggleValue;
+}
+
+void BinaryInput::setToggleValue(bool value){
+     this->toggleValue = value;
 }
 
 void BinaryInput::refresh()
@@ -36,9 +49,11 @@ bool BinaryInput::getEdgeDown()
 
 bool BinaryInput::getEdgeUp()
 {
-    if (this->getValueChanged())
+    if (this->getValueChanged() && this->value)
     {
-        return this->value;
+        
+        this->toggleValue = !this->toggleValue;
+        return true;
     }
     else
     {
