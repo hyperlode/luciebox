@@ -153,9 +153,17 @@ void Apps::appStateLoop()
         this->displayAllSegments = 0;
         flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
         displayAllSegmentsToScreen();
-
         //ledDisp->setNumberToDisplayAsDecimal(selected_app);
-        
+
+
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+        // latching button lights off at app selection, whatever their toggle state is (but we do not want to lose the toggle state)
+       for (uint8_t i = 5; i < 8; i++)
+        {
+            lights &= ~(1 << lights_indexed[i]);
+        }
+#endif
+
 #ifdef ENABLE_SOFT_POWER_OFF
         // switch off.
         if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
@@ -248,7 +256,7 @@ void Apps::inactivityHandler()
     }
     if (inactivity_timer.getCountDownTimerElapsedAndRestart())
     {
-     
+
 #ifdef ENABLE_SOFT_POWER_OFF
         // auto power off
 
@@ -268,7 +276,6 @@ void Apps::inactivityHandler()
 #else
         playSongHappyDryer();
 #endif
-     
     }
 }
 
@@ -417,10 +424,20 @@ void Apps::updateEveryAppCycleBefore()
         binaryInputsValue |= binaryInputs[buttons_indexed[i]].getValue() << i;
         binaryInputsToggleValue |= binaryInputs[buttons_indexed[i]].getToggleValue() << i;
 
-        // by default: button lights on if activated
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         lights |= binaryInputs[buttons_indexed[i]].getValue() << lights_indexed[i];
-    }
 
+#else
+        // by default: button lights on if activated
+        if (i<5){
+            // 5 instead of 4 because BUTTON_INDEXED_LATCHING_0 is standard also only on if pressed.
+            lights |= binaryInputs[buttons_indexed[i]].getValue() << lights_indexed[i];
+
+        }else{
+            lights |= binaryInputs[buttons_indexed[i]].getToggleValue() << lights_indexed[i];
+        }
+    }
+#endif
     setBlankDisplay();
 }
 
@@ -466,13 +483,12 @@ void Apps::initializeAppDataToDefault()
     general_uint8_t_4 = 0;
     general_long_1 = 0;
     general_long_2 = 0;
-    
+
     // simulated latching buttons reset. This is the great advantage of not having latching buttons. The app starts in a truly blank state when initialized.
     for (uint8_t i = 0; i < 8; i++)
     {
         binaryInputs[buttons_indexed[i]].setToggleValue(0);
     }
-
 }
 
 bool Apps::init_app(bool init, uint8_t selector)
@@ -511,7 +527,7 @@ bool Apps::init_app(bool init, uint8_t selector)
     }
     else
 #endif
-    if (INIT_SPLASH_ANIMATION_STEP < 23)
+        if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
@@ -567,7 +583,7 @@ void Apps::modeDreamtime()
 
     modifyValueUpDownWithMomentary2And3(&MODE_DREAMTIME_STEP);
 
-    if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+    if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
     {
         if (this->TIMER_DREAMTIME.getCountDownTimerElapsedAndRestart())
         {
@@ -589,14 +605,18 @@ void Apps::modeDreamtime()
 
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
     {
-        loadBuzzerTrack(SONG_ALPHABET);
-    }
-    if (binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_1))
-    {
-        playSongHappyDryer();
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+        {
+            loadBuzzerTrack(SONG_ALPHABET);
+        }
+        else
+        {
+
+            playSongHappyDryer();
+        }
     }
 
-    if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
+    if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
     {
         if (MODE_DREAMTIME_STEP_MEMORY != MODE_DREAMTIME_STEP)
         {
@@ -627,7 +647,12 @@ void Apps::modeDreamtime()
     ledDisp->setBinaryToDisplay(display_binary);
 }
 
+
+
+
+
 #ifdef ENABLE_POMODORO
+
 void Apps::pomodoroTimer()
 {
     uint8_t display_mode = POMODORO_DISPLAY_TIMER;
@@ -654,12 +679,14 @@ void Apps::pomodoroTimer()
 #endif
     }
 
-    POMODORO_AUTO_RESTART_ENABLED = binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1);
-    bool in_menu = !(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3));
-
+    POMODORO_AUTO_RESTART_ENABLED = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1);
+//#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+    POMODORO_TIMER_TICKING = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3);
+    
+//#endif
     // in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
 
-    if (!in_menu && !app_init_edge)
+if (POMODORO_TIMER_TICKING && !app_init_edge)
     {
         // never auto power off when timer is on
         resetInactivityTimer();
@@ -756,6 +783,12 @@ void Apps::pomodoroTimer()
                 }
                 else
                 {
+
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+                    // with latching buttons, we need to unlatch the button physically. But, with momentary buttons, we can unlatch the button with software
+                    binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
+    
+#endif
                     POMODORO_TIMER.reset();
                     POMODORO_IN_BREAK = false;
                 }
@@ -776,8 +809,8 @@ void Apps::pomodoroTimer()
     }
     else
     {
-        POMODORO_FIRST_TICKING_CYCLING_DONE = false;
         // in main menu
+        POMODORO_FIRST_TICKING_CYCLING_DONE = false;
         POMODORO_TIMER.reset();
         POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
 
@@ -807,16 +840,18 @@ void Apps::pomodoroTimer()
             display_mode = POMODORO_DISPLAY_SHOW_GOOD;
         }
 
+        // blinking latching button invites user to start 
         if (millis_half_second_period())
         {
             lights |= 1 << LIGHT_LATCHING_3;
         }
     }
-
-    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+#ifdef POMODORO_ENABLE_HOURGLASS
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
     {
         display_mode = POMODORO_DISPLAY_TIMER_HOURGLASS;
     }
+#endif
 
     // display
     switch (display_mode)
@@ -910,31 +945,6 @@ void Apps::pomodoroTimer()
 #endif
 }
 #endif
-
-// void Apps::pomodoroScoreValueManipulator(uint16_t* score, uint8_t buttonIndexIncrease, uint8_t buttonView){
-
-// 		if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
-// 		{
-// 			POMODORO_STATS_WORKING_BAD++;
-// 		}
-
-// 		if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
-// 			(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
-// 		{
-// 			display_mode = POMODORO_DISPLAY_SHOW_BAD;
-// 		}
-
-// 		// if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
-// 		// {
-// 		// 	POMODORO_STATS_WORKING_GOOD++;
-// 		// }
-
-// 		// if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) ||
-// 		// 	(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
-// 		// {
-// 		// 	display_mode = POMODORO_DISPLAY_SHOW_GOOD;
-// 		// }
-// }
 
 void Apps::encoderDialRefreshTimeIndex(int16_t *indexHolder)
 {

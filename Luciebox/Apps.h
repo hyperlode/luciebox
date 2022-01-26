@@ -309,6 +309,7 @@
 #define POMODORO_FIRST_TICKING_CYCLING_DONE general_boolean3
 
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
+#define POMODORO_TIMER_TICKING general_boolean4
 
 #define SIMON_LIST bytes_list
 #define SEQUENCER_SONG bytes_list
@@ -1068,7 +1069,7 @@ private:
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
     byte binaryInputsToggleValue;
-    
+
     char textBuf[4];
     // char textBuf2[4];
     char *textHandle;        // contains the text for the display. (4 chars)
