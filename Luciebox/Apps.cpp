@@ -971,7 +971,6 @@ void Apps::stopwatch()
         // STOPWATCH_LAP_MEMORY_2 = 0;
 
         resetStopwatch(&STOPWATCH_CHRONO_2);
-        //resetStopwatch(&STOPWATCH_CHRONO_2);
 
         STOPWATCH_CHRONO_1.setInitTimeMillis(always_on_timer.getTimeMillis());
         STOPWATCH_CHRONO_1.start();
@@ -980,7 +979,7 @@ void Apps::stopwatch()
         //displayTimerSecondsBlinker(&always_on_timer);
     }
 
-    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
     {
         pSsuperTimer = &STOPWATCH_CHRONO_1;
         pLongValue = &STOPWATCH_LAP_MEMORY_1;
@@ -1025,7 +1024,7 @@ void Apps::stopwatch()
         time_millis = *pLongValue;
     }
 
-    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
     {
         // normal clock with minutes and seconds
         pSsuperTimer->getTimeString(textBuf);
@@ -1050,6 +1049,10 @@ void Apps::stopwatch()
         setDecimalPoint(true, timeDisplayShift);
     }
 
+
+    // latching button without a purpose
+    lights &= ~(1 << LIGHT_LATCHING_1);
+
     textBufToDisplay();
 }
 
@@ -1073,7 +1076,7 @@ void Apps::modeRandomWorld()
     {
     case randomWorldIdle:
     {
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             uint16_t delay_seconds = dialGetIndexedtime();
             // set autoroll time.
@@ -1100,7 +1103,7 @@ void Apps::modeRandomWorld()
         {
             if (binaryInputsEdgeUp & 1 << i)
             {
-                RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
+                RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
                 randomWorldState = randomWorldRolling;
 
                 // set up animation
@@ -1120,7 +1123,7 @@ void Apps::modeRandomWorld()
         bool roll_end = false;
 
         // //if autoroll
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             // autoroll no need for button
             roll_end = true;
@@ -1148,7 +1151,7 @@ void Apps::modeRandomWorld()
         }
 
         // display
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             // animated
             if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
@@ -1193,7 +1196,7 @@ void Apps::modeRandomWorld()
 
     case randomWorldRollingEnd:
     {
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
             {
@@ -1224,7 +1227,7 @@ void Apps::modeRandomWorld()
     case randomWorldShowResult:
     {
         randomModeTrigger(true);
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             // auto roll delay.
             RANDOMWORLD_AUTODRAW_DELAY.start();
@@ -1246,7 +1249,7 @@ void Apps::modeRandomWorld()
 
             randomWorldState = randomWorldRolling;
         }
-        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         {
             randomWorldState = randomWorldIdle;
         }
@@ -1723,7 +1726,7 @@ void Apps::modeTallyKeeper()
         if (binaryInputsEdgeUp & (1 << i))
         {
             TALLY_KEEPER_DISPLAYED_COUNTER = i;
-            if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+            if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
             {
                 TALLY_KEEPER_DELTA = 1;
             }
@@ -1736,7 +1739,7 @@ void Apps::modeTallyKeeper()
     }
 
     TALLY_KEEPER_DELTA_SIGNED = TALLY_KEEPER_DELTA;
-    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
     {
         TALLY_KEEPER_DELTA_SIGNED = -TALLY_KEEPER_DELTA;
     }
@@ -1764,7 +1767,7 @@ void Apps::modeTallyKeeper()
         for (uint8_t i = 0; i < 4; i++)
         {
             // affect all counters if requested.
-            if (i == TALLY_KEEPER_DISPLAYED_COUNTER || (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
+            if (i == TALLY_KEEPER_DISPLAYED_COUNTER || (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
             {
                 int16_t v = (*tally_counters[i]) + TALLY_KEEPER_DELTA_SIGNED;
                 if (v < 0)
@@ -1806,7 +1809,7 @@ void Apps::quiz()
             lights &= ~(1 << LIGHT_LATCHING_3);
         }
 
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
         {
             // QUIZ_MAX_RANDOM_WAIT_TIME = -1000 * dialGetIndexedtime();
             QUIZ_MAX_RANDOM_WAIT_TIME = -20000;
@@ -1820,7 +1823,7 @@ void Apps::quiz()
         // bool quizmasterButtonChanged = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_3);
 
         // if (quizmasterButtonChanged || ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2) && binaryInputsValue &  (1 << BUTTON_INDEXED_LATCHING_3))))
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             quizState = quizWaitRandomTime;
             QUIZ_RANDOM_WAIT_TIME.start(random(QUIZ_MAX_RANDOM_WAIT_TIME, -500));
@@ -1949,17 +1952,24 @@ void Apps::quiz()
         int16_t score = (int16_t)QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
         stepChange(&score, encoder_dial->getDelta(), 0, 10, false);
 
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             // QUIZ_RANDOM_WAIT_TIME.start(-500);
             initiateCountDowntimerWith500Millis(&QUIZ_RANDOM_WAIT_TIME);
             score++;
             quizState = quizWaitSomeTimeForNextRound;
         }
+
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         else if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         {
             quizState = quizWaitForQuizMaster;
         }
+#else
+         else if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))){
+            quizState = quizWaitForQuizMaster;
+        }
+#endif
 
         QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t)score;
         if (score > 9)
