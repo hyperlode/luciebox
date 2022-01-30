@@ -112,8 +112,7 @@ void Apps::appStateLoop()
     {
         this->selected_app = 1; // start with one, which also works for the non selector button setting
 
-
-#ifdef ENABLE_EEPROM  
+#ifdef ENABLE_EEPROM
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
         // memorize active app
         this->selected_app = eeprom_read_byte(
@@ -142,8 +141,22 @@ void Apps::appStateLoop()
 
     case appSelection:
     {
+        
+        // switch off. shut down
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))) 
+        {
+                autoShutdown();
+        }
+
         if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)))
         {
+            // switch off. shut down
+            if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))) 
+            {
+                    autoShutdown();
+                
+            }
+
             if (selected_app == selected_app_memory)
             {
                 appState = appRunning;
@@ -164,33 +177,16 @@ void Apps::appStateLoop()
         displayAllSegmentsToScreen();
         //ledDisp->setNumberToDisplayAsDecimal(selected_app);
 
-
-
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
         // latching button lights off at app selection, whatever their toggle state is (but we do not want to lose the toggle state)
-       for (uint8_t i = 5; i < 8; i++)
+        for (uint8_t i = 5; i < 8; i++)
         {
             lights &= ~(1 << lights_indexed[i]);
         }
 #endif
 
-#ifdef ENABLE_SOFT_POWER_OFF
-        // switch off.
-        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
-        {
+      
 
-#ifdef ENABLE_EEPROM  
-            // memorize active app
-            eeprom_update_byte(
-                (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
-                selected_app
-                );
-#endif
-
-            digitalWrite(PIN_POWER_ON_HOLD, LOW);
-            digitalWrite(PIN_SELECTOR_BUTTON, LOW);
-        }
-#endif
         break;
     }
 
@@ -202,9 +198,8 @@ void Apps::appStateLoop()
         splash_screen_playing = this->init_app(false, selector_dial_value);
         if (!splash_screen_playing)
         {
-            this->initializeAppDataToDefault();
             // this->app_init_edge = true;
-            appState = appRunning;
+            appState = appInit;
             selected_app = selector_dial_value * 2 + ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0);
         }
 #else
@@ -213,8 +208,12 @@ void Apps::appStateLoop()
         if (!splash_screen_playing)
         {
             appState = appInit;
-            this->initializeAppDataToDefault();
-            // this->app_init_edge = true;
+       
+        }
+        
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
+        {
+            appState = appSelection;
         }
 #endif
 
@@ -223,6 +222,7 @@ void Apps::appStateLoop()
 
     case appInit:
     {
+        this->initializeAppDataToDefault();
         this->app_init_edge = true;
         appState = appRunning;
         break;
@@ -248,7 +248,6 @@ void Apps::appStateLoop()
         }
 
 #else
-        // bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
             appState = appSelection;
@@ -267,34 +266,64 @@ void Apps::appStateLoop()
 
 void Apps::inactivityHandler()
 {
-    // for some timing aps, we want this watchdog timer to be disabled. It's easily accomplished by resetting the inactivity timer in those apps continuously.
+
+    // for some timing aps, we want this watchdog timer to be disabled.
+    // It's easily accomplished by resetting the inactivity timer in those apps continuously.
+
+    // for every button press, the watchdog timer is reset
     if (binaryInputsEdgeUp)
     {
         resetInactivityTimer();
     }
+
+    // watchdog timer elapsed
     if (inactivity_timer.getCountDownTimerElapsedAndRestart())
     {
+        autoShutdown();
+    }
+}
+
+void Apps::autoShutdown()
+{
+    // will shutdown if available and play an "I'm still on" sound if not.
 
 #ifdef ENABLE_SOFT_POWER_OFF
-        // auto power off
+    // auto power off
 
-        uint8_t enable_auto_power_off = true;
+    uint8_t enable_auto_power_off = true;
 #ifdef ENABLE_EEPROM
-        enable_auto_power_off = !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED);
+    enable_auto_power_off = !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED);
 #endif
-        if (enable_auto_power_off)
-        {
-            digitalWrite(PIN_POWER_ON_HOLD, LOW);
+    if (enable_auto_power_off)
+    {
+        // memorize active app
+        eeprom_update_byte(
+            (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
+            selected_app);
+
+        digitalWrite(PIN_POWER_ON_HOLD, LOW);
+        digitalWrite(PIN_SELECTOR_BUTTON, LOW); // pull down input to enable transistor base to go low
+
+        //normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.
+
+        for (uint16_t i=0;i<26000;i++){
+            //fadeInList(MODE_DREAMTIME_STEP, 0, MODE_DREAMTIME_RANDOM_LIST);
+            resetInactivityTimer();
+
         }
-        else
-        {
-            playSongHappyDryer();
-        }
+
+        //delay(100);
+        digitalWrite(PIN_POWER_ON_HOLD, HIGH);
+        digitalWrite(PIN_SELECTOR_BUTTON, HIGH);
+    }
+    else
+    {
+        playSongHappyDryer();
+    }
 
 #else
-        playSongHappyDryer();
+    playSongHappyDryer();
 #endif
-    }
 }
 
 void Apps::appSelector()
@@ -447,11 +476,13 @@ void Apps::updateEveryAppCycleBefore()
 
 #else
         // by default: button lights on if activated
-        if (i<5){
+        if (i < 5)
+        {
             // 5 instead of 4 because BUTTON_INDEXED_LATCHING_0 is standard also only on if pressed.
             lights |= binaryInputs[buttons_indexed[i]].getValue() << lights_indexed[i];
-
-        }else{
+        }
+        else
+        {
             lights |= binaryInputs[buttons_indexed[i]].getToggleValue() << lights_indexed[i];
         }
 #endif
@@ -667,10 +698,6 @@ void Apps::modeDreamtime()
     ledDisp->setBinaryToDisplay(display_binary);
 }
 
-
-
-
-
 #ifdef ENABLE_POMODORO
 
 void Apps::pomodoroTimer()
@@ -700,13 +727,13 @@ void Apps::pomodoroTimer()
     }
 
     POMODORO_AUTO_RESTART_ENABLED = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1);
-//#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+    //#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     POMODORO_TIMER_TICKING = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3);
-    
-//#endif
+
+    //#endif
     // in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
 
-if (POMODORO_TIMER_TICKING && !app_init_edge)
+    if (POMODORO_TIMER_TICKING && !app_init_edge)
     {
         // never auto power off when timer is on
         resetInactivityTimer();
@@ -807,7 +834,7 @@ if (POMODORO_TIMER_TICKING && !app_init_edge)
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
                     // with latching buttons, we need to unlatch the button physically. But, with momentary buttons, we can unlatch the button with software
                     binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
-    
+
 #endif
                     POMODORO_TIMER.reset();
                     POMODORO_IN_BREAK = false;
@@ -860,7 +887,7 @@ if (POMODORO_TIMER_TICKING && !app_init_edge)
             display_mode = POMODORO_DISPLAY_SHOW_GOOD;
         }
 
-        // blinking latching button invites user to start 
+        // blinking latching button invites user to start
         if (millis_half_second_period())
         {
             lights |= 1 << LIGHT_LATCHING_3;
@@ -1068,7 +1095,6 @@ void Apps::stopwatch()
 
         setDecimalPoint(true, timeDisplayShift);
     }
-
 
     // latching button without a purpose
     lights &= ~(1 << LIGHT_LATCHING_1);
@@ -1914,9 +1940,10 @@ void Apps::quiz()
             }
         }
 
-         if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))){
-             quizState = quizWaitForQuizMaster;
-         }
+        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+        {
+            quizState = quizWaitForQuizMaster;
+        }
 
         // //TEST SHOW RAW ANALOG VALUES
         // Serial.println("---");
@@ -1990,9 +2017,10 @@ void Apps::quiz()
             quizState = quizWaitForQuizMaster;
         }
 #else
-         else if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))){
-            quizState = quizWaitForQuizMaster;
-        }
+            else if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+            {
+                quizState = quizWaitForQuizMaster;
+            }
 #endif
 
         QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t)score;
@@ -2936,7 +2964,7 @@ void Apps::drawGame()
         }
         if (((binaryInputsEdgeDown | binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detected
 #else
-        if (((binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detected
+        if (((binaryInputsEdgeUp)&option_latching_buttons_mask) != 0) // a button edge detected
 #endif
         {
             drawGameState = drawGameWaitForStart;
@@ -2971,7 +2999,7 @@ void Apps::drawGame()
 
     case drawGameEvaluate:
     {
-        #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         // wait for user input to continue.
         byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
         if ((binaryInputsEdgeUp & momentary_buttons_mask) != 0) // a button pressed
@@ -2987,7 +3015,7 @@ void Apps::drawGame()
         {
             drawGameState = drawGameWaitForStart;
         }
-       
+
 #endif
 
         // show difference result with original drawing
@@ -5374,16 +5402,17 @@ void Apps::multitimer_integrated()
         this->multitimer_init();
     }
 #else
-    if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
-    {
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)){
-            this->multitimer_start();
-
-        }else{
-            this->multitimer_init();
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
+            {
+                this->multitimer_start();
+            }
+            else
+            {
+                this->multitimer_init();
+            }
         }
-    
-    }
 #endif
 
     // PAUSE Switch
@@ -5615,10 +5644,10 @@ void Apps::multitimer_refresh()
             this->multitimer_state = setFischer;
         }
 #else
-    if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
-        {
-            this->multitimer_state = setFischer;
-        }
+            if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
+            {
+                this->multitimer_state = setFischer;
+            }
 
 #endif
 
@@ -5831,10 +5860,10 @@ void Apps::multitimer_refresh()
             this->multitimer_state = initialized;
         }
 #else
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
-        {
-            this->multitimer_state = initialized;
-        }
+            if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
+            {
+                this->multitimer_state = initialized;
+            }
 #endif
 
         // fischer timer
