@@ -231,7 +231,7 @@ void Apps::appStateLoop()
 
 #else
         // bool shift_changed = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_0); // latching button acts as a "shift button" to have two apps per selector location
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_0))
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
             appState = appSelection;
         }
@@ -2841,6 +2841,14 @@ void Apps::drawGame()
         drawGameState = drawGameWaitForStart;
     }
 
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+    lights &= ~(1 << LIGHT_LATCHING_3); // set light for sure off
+    if (millis_half_second_period())
+    {
+        lights |= 1 << LIGHT_LATCHING_3;
+    }
+#endif
+
     switch (drawGameState)
     {
     case drawGameWaitForStart:
@@ -2893,10 +2901,6 @@ void Apps::drawGame()
     case drawGameShowPicture:
     {
         // start game button blinking
-        if (millis_half_second_period())
-        {
-            lights |= 1 << LIGHT_LATCHING_3;
-        }
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
@@ -2905,7 +2909,15 @@ void Apps::drawGame()
             displayAllSegments = 0;
         }
         byte option_latching_buttons_mask = 1 << BUTTON_INDEXED_LATCHING_1 | 1 << BUTTON_INDEXED_LATCHING_2;
-        if (((binaryInputsEdgeDown | binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detecred
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+        if (millis_half_second_period())
+        {
+            lights |= 1 << LIGHT_LATCHING_3;
+        }
+        if (((binaryInputsEdgeDown | binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detected
+#else
+        if (((binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detected
+#endif
         {
             drawGameState = drawGameWaitForStart;
         }
@@ -2916,8 +2928,11 @@ void Apps::drawGame()
     {
         cursorBlinker = modeSingleSegmentManipulation(&displayAllSegments);
         // bug: you can't use this because of same buffer reuse. displayChangeGlobal(&displayAllSegments, false);
-
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if ((binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_3))
+#else
+        if ((binaryInputsEdgeUp) & (1 << BUTTON_INDEXED_LATCHING_3))
+#endif
         {
             drawGameState = drawGameEvaluate;
             DRAW_GAME_DISPLAY_TIMER.start();
@@ -2936,6 +2951,7 @@ void Apps::drawGame()
 
     case drawGameEvaluate:
     {
+        #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         // wait for user input to continue.
         byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
         if ((binaryInputsEdgeUp & momentary_buttons_mask) != 0) // a button pressed
@@ -2946,6 +2962,13 @@ void Apps::drawGame()
         {
             lights |= 1 << LIGHT_MOMENTARY_0;
         }
+#else
+        if ((binaryInputsEdgeUp) & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            drawGameState = drawGameWaitForStart;
+        }
+       
+#endif
 
         // show difference result with original drawing
         if (DRAW_GAME_DISPLAY_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, true))
