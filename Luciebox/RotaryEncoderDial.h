@@ -31,7 +31,7 @@
 class RotaryEncoderDial
 {
 public:
-#define POTENTIO_SENSITIVITY 5
+// #define POTENTIO_SENSITIVITY 5
 	RotaryEncoderDial();
 
 	void setPins(byte pinChannelA, byte pinChannelB);

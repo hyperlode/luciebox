@@ -111,6 +111,15 @@ void Apps::appStateLoop()
     case appStateInit:
     {
         this->selected_app = 1; // start with one, which also works for the non selector button setting
+
+
+#ifdef ENABLE_EEPROM  
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+        // memorize active app
+        this->selected_app = eeprom_read_byte(
+            (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN);
+#endif
+#endif
         appState = appSplashInit;
         selected_app_memory = selected_app;
         break;
@@ -156,6 +165,7 @@ void Apps::appStateLoop()
         //ledDisp->setNumberToDisplayAsDecimal(selected_app);
 
 
+
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
         // latching button lights off at app selection, whatever their toggle state is (but we do not want to lose the toggle state)
        for (uint8_t i = 5; i < 8; i++)
@@ -168,7 +178,15 @@ void Apps::appStateLoop()
         // switch off.
         if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
         {
-            //playSongHappyDryer();
+
+#ifdef ENABLE_EEPROM  
+            // memorize active app
+            eeprom_update_byte(
+                (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
+                selected_app
+                );
+#endif
+
             digitalWrite(PIN_POWER_ON_HOLD, LOW);
             digitalWrite(PIN_SELECTOR_BUTTON, LOW);
         }
@@ -436,8 +454,8 @@ void Apps::updateEveryAppCycleBefore()
         }else{
             lights |= binaryInputs[buttons_indexed[i]].getToggleValue() << lights_indexed[i];
         }
-    }
 #endif
+    }
     setBlankDisplay();
 }
 
@@ -464,6 +482,8 @@ void Apps::initializeAppDataToDefault()
     fill8BytesArrayWithZero();
 
     randomSeed(millis());
+
+    encoder_dial->setSensitivity(4);
 
     // all shared variables to zero or false
 
@@ -1952,7 +1972,7 @@ void Apps::quiz()
     {
         // in case of normal quizmaster, this is the moment to assign scores with the dial
         // will keep on looping through this state to adjust score when in normal mode.
-        encoder_dial->setSensitivity(2);
+        // encoder_dial->setSensitivity(2);
         int16_t score = (int16_t)QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
         stepChange(&score, encoder_dial->getDelta(), 0, 10, false);
 
@@ -2786,7 +2806,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
     uint8_t segmentMoveIndexed[9] = {0x20, 0x10, 0x00, 0x01, 0x40, 0x08, 0x02, 0x04, 0x80}; // 0x00 for empty . It's good to have spots where the cursor is invisible. In order not to pollute the display if you want to really see your drawing, or want to show it to your mother
     uint32_t cursor_position_on_display;
 
-    encoder_dial->setSensitivity(2);
+    // encoder_dial->setSensitivity(2);
 
     int16_t cursor_position = DRAW_CURSOR_ACTIVE_DIGIT * 9 + DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT;
 

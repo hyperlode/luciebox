@@ -20,9 +20,8 @@
 //#define V3_PCB_BURST
 #define V4_PCB_MINI
 
-//#define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
+// #define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
 #define ENABLE_SOFT_POWER_OFF
-
 
 #define ENABLE_APPS 
 #define ENABLE_BATTERY_STATUS
@@ -297,7 +296,7 @@
 
 #endif
 
-#define POTENTIO_SENSITIVITY 5 //value change before value update.
+// #define POTENTIO_SENSITIVITY 5 //value change before value update.
 
 #ifdef ENABLE_EEPROM
 
@@ -308,7 +307,12 @@
 #define EEPROM_SETTINGS_OFFSET                          0
 #define EEPROM_SOUND_DISABLED                           EEPROM_SETTINGS_OFFSET + 0
 #define EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER             EEPROM_SETTINGS_OFFSET + 1 // 2 bytes
-#define EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED       EEPROM_SETTINGS_OFFSET + 3 // 1 byte
+#define EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED         EEPROM_SETTINGS_OFFSET + 3 // 1 byte
+
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+#define EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN          EEPROM_SETTINGS_OFFSET + 4 // 1 byte
+#endif 
+
 #define EEPROM_SETTINGS_TOTAL_LENGTH                    6  // 6 bytes
 #define EEPROM_FIRST_ADDRESS_OF_USER_RANGE              EEPROM_SETTINGS_OFFSET + EEPROM_SETTINGS_TOTAL_LENGTH
 
