@@ -148,7 +148,7 @@ void Apps::appStateLoop()
             autoShutdown();
         }
 
-        // reset app 
+        // reset app
         if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1)))
         {
             appState = appInit;
@@ -164,6 +164,9 @@ void Apps::appStateLoop()
 
             if (selected_app == selected_app_memory)
             {
+                // this->displayAllSegments = this->displayAllSegmentsBuffer;
+                this->displayAllSegments = 0xFF00FF00;
+                displayAllSegmentsToScreen();
                 appState = appRunning;
             }
             else
@@ -176,7 +179,7 @@ void Apps::appStateLoop()
         modifyValueUpDownWithMomentary2And3(&selected_app);
         selected_app += encoder_dial->getDelta();
         checkBoundaries(&selected_app, 1, 22, true);
-
+       
         this->displayAllSegments = 0;
         flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
         displayAllSegmentsToScreen();
@@ -253,6 +256,7 @@ void Apps::appStateLoop()
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
             appState = appSelection;
+            this->displayAllSegmentsBuffer = this->displayAllSegments; // if there is no change of app, the display state needs to be preserved
         }
 
 #endif
@@ -4185,8 +4189,8 @@ void Apps::modeSimon()
 uint16_t *Apps::reactionGameLevelToEepromAddress()
 {
     return (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
-                        REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48 +
-                        REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24 +
+                        REACTION_GUITAR_APP_ELSE_WHACKING_APP * 48 +
+                        REACTION_SPECIALHEXBIRD_ELSE_NORMAL * 24 +
                         REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
                         REACTION_GAME_LEVEL * 2);
 }
@@ -4197,6 +4201,7 @@ void Apps::modeReactionGame()
 
     if (this->app_init_edge)
     {
+       
         reactionGameState = reactionWaitForStart;
         displayAllSegments = 0x00;
 
@@ -4206,28 +4211,31 @@ void Apps::modeReactionGame()
         uint8_t random_range_selector = random(219, 233); // choose notes from a random chosen interval of 12 notes
         for (uint8_t i = 0; i < 12; i++)
         {
-            REACTION_GAME_TEMP_SELECTED_NOTES[i] = random_range_selector + i;
+            REACTION_GAME_SELECTED_NOTES[i] = random_range_selector + i;
         }
-        this->shuffle(REACTION_GAME_TEMP_SELECTED_NOTES, 12);
-
-        for (uint8_t i = 0; i < 4; i++)
-        {
-            REACTION_GAME_SELECTED_NOTES[i] = REACTION_GAME_TEMP_SELECTED_NOTES[i];
-        }
+        this->shuffle(REACTION_GAME_SELECTED_NOTES, 12);
     }
 
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     // at any time, leave game when depressing play button.
     if (this->binaryInputsEdgeDown & (1 << BUTTON_INDEXED_LATCHING_3))
     {
         reactionGameState = reactionWaitForStart;
     }
+#else
+    if ( this->binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+    {
+        reactionGameState = reactionWaitForStart;
+    }
+
+#endif
 
     switch (reactionGameState)
     {
     case reactionWaitForStart:
     {
         // change level
-        REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(80, false) / 16); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+        REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(25, false) / 5); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
         if (encoder_dial->getDelta())
         {
             // for a more pleasant experience (no blinking during knob turning)
@@ -4235,8 +4243,14 @@ void Apps::modeReactionGame()
         }
 
         // check options
-        REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
-        REACTION_OPTION_WHACKABIRD_OR_HEXHERO = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+        REACTION_GUITAR_APP_ELSE_WHACKING_APP = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
+        
+#else
+        REACTION_GUITAR_APP_ELSE_WHACKING_APP = (selected_app == APP_SELECTOR_GUITAR_HERO);
+#endif
+
+        REACTION_SPECIALHEXBIRD_ELSE_NORMAL = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
         REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
 
         // display level and high score
@@ -4260,9 +4274,11 @@ void Apps::modeReactionGame()
 #endif
 
         // play game button pressed
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
+        if (
+        this->binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3) &&
+        binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            if (!REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP && REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
+            if (!REACTION_GUITAR_APP_ELSE_WHACKING_APP && REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
             {
                 reactionGameState = reactionSoundInit;
                 initiateCountDowntimerWith500Millis(&TIMER_REACTION_END_OF_GAME_DELAY);
@@ -4301,14 +4317,14 @@ void Apps::modeReactionGame()
     {
         REACTION_GAME_SCORE = 0;
 
-        if (REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP)
+        if (REACTION_GUITAR_APP_ELSE_WHACKING_APP)
         {
             // guitar hero mode
             REACTION_GAME_STEP_TIME_MILLIS = -10 * pgm_read_byte_near(guitar_hero_level_speeds + REACTION_GAME_LEVEL);
 
             displayAllSegments = 0;
 
-            if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
+            if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
             {
                 // hex geek mode
                 fill8BytesArrayWithZero();
@@ -4323,7 +4339,7 @@ void Apps::modeReactionGame()
         }
         else
         {
-            // whack a mole mode
+            // whacking mode
             if (buzzer->getBuzzerNotesBufferEmpty())
             { // in sound mode, wait till demo is done
 
@@ -4332,14 +4348,12 @@ void Apps::modeReactionGame()
                 if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
                 {
                     // if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-                    // REACTION_GAME_STEP_TIME_MILLIS = (1UL << (REACTION_GAME_LEVEL + 1)) * -4000; // step speed depending on level
-                    REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level 12 steps in total cycle
+                    REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + (5 - REACTION_GAME_LEVEL)); // step speed depending on level 10 steps in total cycle
                     REACTION_GAME_TIMER_STEP = 0;
                 }
                 else
                 {
-                    // REACTION_GAME_STEP_TIME_MILLIS = (1UL << (6 - REACTION_GAME_LEVEL)) * -35; // step speed depending on level
-                    REACTION_GAME_STEP_TIME_MILLIS = -10 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 12 steps in total cycle
+                    REACTION_GAME_STEP_TIME_MILLIS = -10 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 10 steps in total cycle
                 }
             }
         }
@@ -4593,7 +4607,7 @@ void Apps::modeReactionGame()
 
         REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
-        if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
+        if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
         {
             addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_GAME_TARGET]);
         }
@@ -4606,8 +4620,8 @@ void Apps::modeReactionGame()
     {
         if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
         {
-            this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
-            if (REACTION_GAME_TIMER_STEP == 12)
+            this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 10);
+            if (REACTION_GAME_TIMER_STEP == 10)
             {
                 REACTION_GAME_TIMER_STEP = 0;
                 displayAllSegments = 0;
@@ -4627,7 +4641,7 @@ void Apps::modeReactionGame()
         }
         displayAllSegmentsToScreen();
 
-        if (!REACTION_OPTION_WHACKABIRD_OR_HEXHERO || REACTION_GAME_LEVEL == 0)
+        if (!REACTION_SPECIALHEXBIRD_ELSE_NORMAL || REACTION_GAME_LEVEL == 0)
         {
             // in the easy level of sound mode, we show the lights.
 
@@ -4648,7 +4662,7 @@ void Apps::modeReactionGame()
                     //right button
                     REACTION_GAME_SCORE++;
 
-                    if (REACTION_OPTION_WHACKABIRD_OR_HEXHERO)
+                    if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
                     {
                         // a small pause must be implemented after the button press before the new turn as off not to confuse the player
                         addNoteToBuzzerRepeated(REST_8_8, 4);
@@ -4685,12 +4699,6 @@ void Apps::modeReactionGame()
         addNoteToBuzzerRepeated(F4_1, 3);
 #ifdef ENABLE_EEPROM
         //check for new high score and save
-        // Serial.println("---");
-        // Serial.println(EEPROM_REACTION_GAME_START_ADDRESS);
-        // Serial.println(REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP * 48);
-        // Serial.println(REACTION_OPTION_WHACKABIRD_OR_HEXHERO * 24);
-        // Serial.println(REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12);
-        // Serial.println(REACTION_GAME_LEVEL);
 
         if (REACTION_GAME_SCORE > (int16_t)
                                       eeprom_read_word(reactionGameLevelToEepromAddress()))
@@ -4733,14 +4741,8 @@ void Apps::modeReactionGame()
 
     // option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
     // https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
-    // lights ^= (-REACTION_OPTION_WHACKABIRD_OR_HEXHERO ^ lights) & (1UL << LIGHT_LATCHING_1);
-    // lights ^= (-REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT ^ lights) & (1UL << LIGHT_LATCHING_2);
-    setButtonLight(LIGHT_LATCHING_1, REACTION_OPTION_WHACKABIRD_OR_HEXHERO);
+    setButtonLight(LIGHT_LATCHING_1, REACTION_SPECIALHEXBIRD_ELSE_NORMAL);
     setButtonLight(LIGHT_LATCHING_2, REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT);
-    // lights &= ~(1<<lights_indexed[LIGHT_LATCHING_1] );
-    // lights &= ~(1<<lights_indexed[LIGHT_LATCHING_2] );
-    // lights |=  REACTION_OPTION_WHACKABIRD_OR_HEXHERO << lights_indexed[LIGHT_LATCHING_1];
-    // lights |=  REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT << lights_indexed[LIGHT_LATCHING_2];
 
 #endif
 }
@@ -4901,7 +4903,7 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
     // eeprom start address
 
     // load/save data
-    uint8_t slot_number = encoder_dial->getValueLimited((slotCount - 1) * 16, false) / 16;
+    uint8_t slot_number = encoder_dial->getValueLimited((slotCount - 1) * 5, false) / 5;
 
     if (this->encoder_dial->getDelta())
     {

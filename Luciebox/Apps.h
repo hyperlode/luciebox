@@ -297,13 +297,13 @@
 #define STOPWATCH_PAUSED_2 general_boolean2
 // #define HACKTIME_VALUE_TO_SOUND general_boolean2
 #define NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE general_boolean2
-#define REACTION_GUITAR_APP_SELECT_HERO_ELSE_WHACKING_APP general_boolean2
+#define REACTION_GUITAR_APP_ELSE_WHACKING_APP general_boolean2
 #define SIMON_END_OF_GAME general_boolean2
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 #define POMODORO_ENABLE_HOURGLASS_VISUALS general_boolean2
 
-#define REACTION_OPTION_WHACKABIRD_OR_HEXHERO general_boolean3
+#define REACTION_SPECIALHEXBIRD_ELSE_NORMAL general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
 #define POMODORO_FIRST_TICKING_CYCLING_DONE general_boolean3
@@ -319,11 +319,10 @@
 #define MOVIE_MODE_STOPS bytes_list
 #define MODE_SOUND_SONG_BUFFER bytes_list
 #define MODE_DREAMTIME_RANDOM_LIST bytes_list
-#define REACTION_GAME_TEMP_SELECTED_NOTES bytes_list
-#define REACTION_GAME_HEX_COMPLEMENT_WANTED bytes_list
+#define REACTION_GAME_SELECTED_NOTES bytes_list
 #define QUIZ_ANALOG_VALUES_CHECK bytes_list
 
-#define REACTION_GAME_SELECTED_NOTES array_8_bytes
+
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define QUIZ_SCORE array_8_bytes
@@ -550,10 +549,10 @@ const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50
 
 #define MOVIE_INDEX_EMPTY 255
 #define ANIMATE_CIRCLE_OFFSET 4
-#define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 56
-#define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 92
-#define SWEEP_OFFSET 112
-#define FADE_IN_OFFSET 196
+#define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 48
+#define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 84
+#define SWEEP_OFFSET 104
+#define FADE_IN_OFFSET 188
 
 #define MAX_FRAMES_MOVIES_FLASH 84 // important, set the number of total frames (including stop frames)
 const uint8_t disp_4digits_animations[] PROGMEM = {
@@ -563,12 +562,10 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x01, 0x00,
     0x00, 0x00, 0x00, 0x01,
     0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00, 0x00, 0x04,
-    0x00, 0x00, 0x00, 0x08,
-    0x00, 0x00, 0x08, 0x00,
-    0x00, 0x08, 0x00, 0x00,
-    0x08, 0x00, 0x00, 0x00,
-    0x10, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x40,
+    0x00, 0x00, 0x40, 0x00,
+    0x00, 0x40, 0x00, 0x00,
+    0x40, 0x00, 0x00, 0x00,
     0x20, 0x00, 0x00, 0x00,
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x01, 0x00, 0x00, 0x00,  // top circle (for sequencer)
