@@ -120,7 +120,7 @@ void Apps::appStateLoop()
 #endif
 #endif
         appState = appSplashInit;
-        selected_app_memory = selected_app;
+        selected_app_memory = 66;
         break;
     }
 
@@ -141,20 +141,25 @@ void Apps::appStateLoop()
 
     case appSelection:
     {
-        
+
         // switch off. shut down
-        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))) 
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
         {
-                autoShutdown();
+            autoShutdown();
+        }
+
+        // reset app 
+        if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1)))
+        {
+            appState = appInit;
         }
 
         if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)))
         {
             // switch off. shut down
-            if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))) 
+            if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
             {
-                    autoShutdown();
-                
+                autoShutdown();
             }
 
             if (selected_app == selected_app_memory)
@@ -185,8 +190,6 @@ void Apps::appStateLoop()
         }
 #endif
 
-      
-
         break;
     }
 
@@ -208,9 +211,8 @@ void Apps::appStateLoop()
         if (!splash_screen_playing)
         {
             appState = appInit;
-       
         }
-        
+
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
             appState = appSelection;
@@ -306,10 +308,10 @@ void Apps::autoShutdown()
 
         //normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.
 
-        for (uint16_t i=0;i<26000;i++){
+        for (uint16_t i = 0; i < 26000; i++)
+        {
             //fadeInList(MODE_DREAMTIME_STEP, 0, MODE_DREAMTIME_RANDOM_LIST);
             resetInactivityTimer();
-
         }
 
         //delay(100);

@@ -4,7 +4,7 @@
 #define ENABLE_EEPROM
 // // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
-// #define ENABLE_SIMON_APP
+//#define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define POMODORO_ENABLE_HOURGLASS
