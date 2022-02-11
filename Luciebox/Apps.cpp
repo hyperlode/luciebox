@@ -136,17 +136,13 @@ void Apps::appStateLoop()
         this->init_app(true, selected_app - 1); // selected app -1 because we start from 1
         // set to init state before a new app starts
         appState = appSplash;
+        
+        
         break;
     }
 
     case appSelection:
     {
-
-        // switch off. shut down
-        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
-        {
-            autoShutdown();
-        }
 
         // reset app
         if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1)))
@@ -154,19 +150,36 @@ void Apps::appStateLoop()
             appState = appInit;
         }
 
+        modifyValueUpDownWithMomentary2And3(&selected_app);
+        selected_app += encoder_dial->getDelta();
+        checkBoundaries(&selected_app, 1, 22, true);
+
+        if (selected_app_edge != selected_app){
+            // set_blink_offset();
+            blink_offset = millis();
+        }
+        selected_app_edge = selected_app;
+       
+        this->displayAllSegments = 0;
+        flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
+
+        // activate switch off. shut down, will trigger when app selector is at negative edge
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))){
+            switch_off = true;
+        }
+
         if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0)))
         {
             // switch off. shut down
-            if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
+            if (switch_off)
             {
                 autoShutdown();
             }
 
             if (selected_app == selected_app_memory)
             {
-                // this->displayAllSegments = this->displayAllSegmentsBuffer;
-                this->displayAllSegments = 0xFF00FF00;
-                displayAllSegmentsToScreen();
+               // this->displayAllSegments = this->displayAllSegmentsBuffer;
+                // displayAllSegmentsToScreen();
                 appState = appRunning;
             }
             else
@@ -176,14 +189,16 @@ void Apps::appStateLoop()
             selected_app_memory = selected_app;
         }
 
-        modifyValueUpDownWithMomentary2And3(&selected_app);
-        selected_app += encoder_dial->getDelta();
-        checkBoundaries(&selected_app, 1, 22, true);
-       
-        this->displayAllSegments = 0;
-        flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
-        displayAllSegmentsToScreen();
-        //ledDisp->setNumberToDisplayAsDecimal(selected_app);
+        //if (millis_blink_250_750ms()){
+        if ((millis() - blink_offset) > 250){ 
+            ledDisp->setBinaryToDisplay(this->displayAllSegmentsBuffer);
+            displayAllSegmentsToScreen();
+
+        }else{
+            ledDisp->setNumberToDisplayAsDecimal(selected_app);
+
+        }
+
 
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
         // latching button lights off at app selection, whatever their toggle state is (but we do not want to lose the toggle state)
@@ -218,6 +233,7 @@ void Apps::appStateLoop()
 
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
+            switch_off = false;
             appState = appSelection;
         }
 #endif
@@ -255,8 +271,9 @@ void Apps::appStateLoop()
 #else
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_0))
         {
+            switch_off = false;
             appState = appSelection;
-            this->displayAllSegmentsBuffer = this->displayAllSegments; // if there is no change of app, the display state needs to be preserved
+            //this->displayAllSegmentsBuffer = this->displayAllSegments; // if there is no change of app, the display state needs to be preserved
         }
 
 #endif
@@ -394,7 +411,9 @@ void Apps::appSelector()
         break;
 
     case APP_SELECTOR_DRAW_GAME:
+#ifdef ENABLE_DRAW_GAME
         this->drawGame();
+#endif
         break;
 
     case APP_SELECTOR_MOVIE_MODE:
@@ -668,7 +687,6 @@ void Apps::modeDreamtime()
         }
         else
         {
-
             playSongHappyDryer();
         }
     }
@@ -677,7 +695,12 @@ void Apps::modeDreamtime()
     {
         if (MODE_DREAMTIME_STEP_MEMORY != MODE_DREAMTIME_STEP)
         {
+            // PROBLEM: random notes buffer and song buffer are the same bytes list! -->hence the weird behaviour
             buzzerSilentClearBufferAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
+            // if(buzzer->getBuzzerNotesBufferEmpty()){
+            //     addNoteToBuzzer(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
+
+            // }
         }
     }
 
@@ -2883,7 +2906,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
         return 0;
     }
 }
-
+#ifdef ENABLE_DRAW_GAME
 void Apps::drawGame()
 {
     // shows a picture. After it disappears, you have to draw it exactly as it was.
@@ -3044,6 +3067,7 @@ void Apps::drawGame()
 
     ledDisp->setBinaryToDisplay(displayAllSegments ^ cursorBlinker);
 }
+#endif //ENABLE_DRAW_GAME
 
 void Apps::modeHackTime()
 {
@@ -4348,12 +4372,12 @@ void Apps::modeReactionGame()
                 if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
                 {
                     // if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-                    REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + (5 - REACTION_GAME_LEVEL)); // step speed depending on level 10 steps in total cycle
+                    REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + (5 - REACTION_GAME_LEVEL)); // total play time depending on level. It was found out that longer times are a lot harder to stay disciplined!
                     REACTION_GAME_TIMER_STEP = 0;
                 }
                 else
                 {
-                    REACTION_GAME_STEP_TIME_MILLIS = -10 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 10 steps in total cycle
+                    REACTION_GAME_STEP_TIME_MILLIS = -12 * pgm_read_byte_near(whack_a_mole_level_step_speeds + REACTION_GAME_LEVEL); // step speed depending on level, 12 steps in total cycle
                 }
             }
         }
@@ -4620,8 +4644,8 @@ void Apps::modeReactionGame()
     {
         if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
         {
-            this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 10);
-            if (REACTION_GAME_TIMER_STEP == 10)
+            this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
+            if (REACTION_GAME_TIMER_STEP == 12)
             {
                 REACTION_GAME_TIMER_STEP = 0;
                 displayAllSegments = 0;

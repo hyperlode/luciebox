@@ -4,7 +4,8 @@
 #define ENABLE_EEPROM
 // // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
-//#define ENABLE_SIMON_APP
+#define ENABLE_SIMON_APP
+// #define ENABLE_DRAW_GAME
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define POMODORO_ENABLE_HOURGLASS
@@ -549,10 +550,10 @@ const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50
 
 #define MOVIE_INDEX_EMPTY 255
 #define ANIMATE_CIRCLE_OFFSET 4
-#define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 48
-#define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 84
-#define SWEEP_OFFSET 104
-#define FADE_IN_OFFSET 188
+#define ANIMATION_INDEX_SEQUENCER_TOP_CIRCLE 56
+#define ANIMATION_INDEX_SEQUENCER_BOTTOM_BAR 92
+#define SWEEP_OFFSET 112
+#define FADE_IN_OFFSET 196
 
 #define MAX_FRAMES_MOVIES_FLASH 84 // important, set the number of total frames (including stop frames)
 const uint8_t disp_4digits_animations[] PROGMEM = {
@@ -562,10 +563,12 @@ const uint8_t disp_4digits_animations[] PROGMEM = {
     0x00, 0x00, 0x01, 0x00,
     0x00, 0x00, 0x00, 0x01,
     0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00, 0x00, 0x40,
-    0x00, 0x00, 0x40, 0x00,
-    0x00, 0x40, 0x00, 0x00,
-    0x40, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x08,
+    0x00, 0x00, 0x08, 0x00,
+    0x00, 0x08, 0x00, 0x00,
+    0x08, 0x00, 0x00, 0x00,
+    0x10, 0x00, 0x00, 0x00,
     0x20, 0x00, 0x00, 0x00,
     ANIMATION_STOP_CODE_PART_0, ANIMATION_STOP_CODE_PART_1,ANIMATION_STOP_CODE_PART_2, ANIMATION_STOP_CODE_PART_3,
     0x01, 0x00, 0x00, 0x00,  // top circle (for sequencer)
@@ -1053,6 +1056,8 @@ private:
     LedMultiplexer5x8 *allLights;
     #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     PotentioSelector *selectorDial;
+    #else
+    bool switch_off;
     #endif
 #ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
     MiniMultiTimer multiTimer;
@@ -1063,6 +1068,7 @@ private:
     SuperTimer* pSsuperTimer;
     uint32_t displayAllSegments;
     uint32_t displayAllSegmentsBuffer;
+    uint32_t displaySplashScreenAllSegments;
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
@@ -1079,6 +1085,7 @@ private:
     bool app_init_edge;         // one cycle
     int16_t selected_app;
     int16_t selected_app_memory;
+    int16_t selected_app_edge;
 #ifdef ENABLE_MULTITIMER_INTEGRATED
     SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
     uint8_t multitimer_activeTimer;
@@ -1105,7 +1112,7 @@ private:
     uint8_t bytes_list[bytes_list_bufsize];
 
     uint8_t array_8_bytes[8];
-
+#ifdef ENABLE_DRAW_GAME
     enum DrawGameState : uint8_t
     {
         drawGameWaitForStart,
@@ -1114,6 +1121,7 @@ private:
         drawGameEvaluate,
     };
     DrawGameState drawGameState;
+#endif
 
 #ifdef ENABLE_REACTION_APP
     // reaction
