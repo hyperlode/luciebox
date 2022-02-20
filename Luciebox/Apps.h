@@ -132,6 +132,13 @@
 
 #define SOUND_SONG_COMPOSER_DEFAULT_NOTE REST_3_8
 
+#define quizWaitForQuizMaster state0
+#define quizWaitRandomTime state1
+#define quizWaitPlayerPress state2
+#define quizDefineRoundWinner state3
+#define quizWaitSomeTimeForNextRound state4
+#define quizRoundAfterMath state5
+
 // VARIABLE REUSE
 
 #define TIMER_METRONOME general_timer
@@ -1098,7 +1105,7 @@ private:
         initialized = 0,
         playing,
         finished,
-        paused,
+        statePaused,
         setTimers,
         setFischer
     };
@@ -1168,6 +1175,9 @@ private:
         quizRoundAfterMath
     };
     QuizState quizState;
+
+
+
 
     enum RandomWorldState : uint8_t
     {

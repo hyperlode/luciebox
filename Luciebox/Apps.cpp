@@ -729,6 +729,307 @@ void Apps::modeDreamtime()
 
 #ifdef ENABLE_POMODORO
 
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+void Apps::pomodoroTimer()
+{
+    uint8_t display_mode = POMODORO_DISPLAY_TIMER;
+
+#ifdef POMODORO_ENABLE_HOURGLASS
+    this->displayAllSegments = 0;
+#endif
+    
+    lights = 0;
+
+    if (encoder_dial->getDelta() != 0)
+    {
+        set_blink_offset();
+    }
+
+    if (this->app_init_edge)
+    {
+#ifdef ENABLE_EEPROM
+        POMODORO_MAIN_CLOCK_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX);
+        POMODORO_PAUSE_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX);
+        POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = eeprom_read_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX);
+#else
+        POMODORO_MAIN_CLOCK_TIME_INDEX = POMODORO_INIT_DEFAULT_TIME_INDEX;
+        POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
+        POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
+#endif
+
+    }
+
+    // acts as ticking mute on / off
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_MOMENTARY_1))
+    {
+        lights |= 1 << LIGHT_MOMENTARY_1;
+    }
+
+    POMODORO_TIMER_TICKING = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3);
+    // in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
+
+    if (POMODORO_TIMER_TICKING && !app_init_edge)
+    {
+        // never auto power off when timer is on
+        resetInactivityTimer();
+
+        // pomodoro timer running
+
+        if (!POMODORO_FIRST_TICKING_CYCLING_DONE)
+        {
+            POMODORO_FIRST_TICKING_CYCLING_DONE = true;
+            POMODORO_IN_BREAK = false;
+            // just started timing
+            POMODORO_TIMER.start();
+#ifdef ENABLE_EEPROM
+            eeprom_update_byte((uint8_t *)EEPROM_POMODORO_INIT_TIME_INDEX, POMODORO_MAIN_CLOCK_TIME_INDEX);
+            eeprom_update_byte((uint8_t *)EEPROM_POMODORO_PAUSE_TIME_INDEX, POMODORO_PAUSE_TIME_INDEX);
+            eeprom_update_byte((uint8_t *)EEPROM_POMODORO_RND_BEEP_TIME_INDEX, POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX);
+#endif
+        }
+
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
+        {
+            POMODORO_STATS_WORKING_BAD++;
+        }
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
+        {
+            POMODORO_STATS_WORKING_GOOD++;
+        }
+
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
+        {
+            display_mode = POMODORO_DISPLAY_SHOW_BAD;
+        }
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+        {
+            display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+        }
+
+        // ticking sound / random checkup-beep
+        // uint8_t tick_duration = encoder_dial->getValueLimited(160, false) / 2; // was 40, but set to 80 for less sensitivity. do again divide by four to limit options.
+        // tick_duration += encoder
+        stepChange(&POMODORO_SOUND, encoder_dial->getDelta(), 0, 80, false);
+        bool tick_twice_a_second = POMODORO_SOUND > 40;
+        // tick_duration = tick_duration % 40;
+
+        if (POMODORO_TIMER.getEdgeSinceLastCallFirstGivenHundredsPartOfSecond(500, true, tick_twice_a_second))
+        {
+#ifdef POMODORO_ENABLE_HOURGLASS
+            POMODORO_VISUAL_TIMER_PROGRESS =
+                (uint8_t)((
+                    (17 * POMODORO_TIMER.getTimeMillis()) / POMODORO_TIMER.getInitTimeMillis())
+
+                );
+#endif
+
+            if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
+            {
+                if (random(0, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX) * 2) <= 1 - (tick_twice_a_second))
+                {
+                    // random has 0 included. as we have to take into account the double ticking,
+                    // calculate the probability in half a seconds. i.e.  one every minute: (0,120)
+                    // addNoteToBuzzer(C5_1);
+                    // buzzerPlayApproval();
+                    buzzerPlayDisappointment();
+                };
+            }
+
+            // no sound when zero
+            if (buzzer->getBuzzerNotesBufferEmpty() && // if end of clock signal sounds, no ticking! erase to optimize memory
+                !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) // mute on / off
+                ) 
+            {
+                buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
+            }
+        }
+
+        // timer
+        if (getCountDownTimerHasElapsed(&POMODORO_TIMER))
+        {
+            POMODORO_IN_BREAK = !POMODORO_IN_BREAK;
+            if (POMODORO_IN_BREAK)
+            {
+                // finished main pomodoro
+
+                playSongHappyDryer();
+                if (POMODORO_PAUSE_TIME_INDEX > 0)
+                {
+                    POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
+                    POMODORO_TIMER.start();
+                }
+                else
+                {
+
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+                    // with latching buttons, we need to unlatch the button physically. But, with momentary buttons, we can unlatch the button with software
+                    binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
+
+#endif
+                    POMODORO_TIMER.reset();
+                    POMODORO_IN_BREAK = false;
+                }
+            }
+            else
+            {
+                // coming out of break. Not executed at starting Pomodoro by switch.
+
+                loadBuzzerTrack(SONG_ATTACK);
+                POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
+                POMODORO_TIMER.start();
+            }
+        }
+
+        // inviting lights to press the buttons
+        lights |= 1 << LIGHT_MOMENTARY_2;
+        lights |= 1 << LIGHT_MOMENTARY_3;
+#ifdef POMODORO_ENABLE_HOURGLASS
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
+        {
+            display_mode = POMODORO_DISPLAY_TIMER_HOURGLASS;
+        }
+       
+#endif
+
+    }
+    else
+    {
+        // in main menu
+        POMODORO_FIRST_TICKING_CYCLING_DONE = false;
+        POMODORO_TIMER.reset();
+        POMODORO_TIMER.setInitCountDownTimeSecs(indexToTimeSeconds(POMODORO_MAIN_CLOCK_TIME_INDEX));
+
+        // set timer up for change
+        int16_t *active_seconds_modifier = &POMODORO_MAIN_CLOCK_TIME_INDEX; // normal time setting is default option
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
+        {
+            
+            active_seconds_modifier = &POMODORO_PAUSE_TIME_INDEX;
+            display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
+        }
+        else if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
+        {
+            
+            active_seconds_modifier = &POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX;
+            display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
+        }
+
+        // look for value change with encoder dial
+        encoderDialRefreshTimeIndex(active_seconds_modifier);
+
+        // show performance results
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
+        {
+            display_mode = POMODORO_DISPLAY_SHOW_BAD;
+        }
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
+        {
+            display_mode = POMODORO_DISPLAY_SHOW_GOOD;
+        }
+
+        // blinking latching button invites user to start
+        if (millis_half_second_period())
+        {
+            lights |= 1 << LIGHT_LATCHING_3;
+        }
+    }
+
+
+    // display
+    switch (display_mode)
+    {
+    case POMODORO_DISPLAY_TIMER_HOURGLASS:
+    {
+        setStandardTextToTextBuf(TEXT_SPACES);
+#ifdef POMODORO_ENABLE_HOURGLASS
+        // always set to buffer. later on it's decided if it's displayed or not.
+        // for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
+        // {
+        // 	this->displayAllSegments |= 1UL << i;
+        // }
+        // this->displayAllSegments &= ~(1UL << 15); // keep seconds blinker spot clear
+        // setBlankDisplay();
+        lights |= 1 << LIGHT_MOMENTARY_0;
+        flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + (POMODORO_VISUAL_TIMER_PROGRESS)*4);
+#endif
+    }
+    break;
+
+    case POMODORO_DISPLAY_TIMER:
+    {
+        POMODORO_TIMER.getTimeString(textHandle);
+        if (POMODORO_IN_BREAK)
+        {
+            setStandardTextToTextBuf(TEXT_PAUS);
+        }
+        else
+        {
+            POMODORO_TIMER.getTimeString(textBuf);
+        }
+    }
+    break;
+
+    case POMODORO_DISPLAY_PAUSE_INIT_SECS:
+    {
+        timeSecondsToClockString(textHandle, indexToTimeSeconds(POMODORO_PAUSE_TIME_INDEX));
+        setStandardTextToTextBuf(TEXT_PAUS);
+    }
+    break;
+
+    case POMODORO_DISPLAY_BEEP_PROBABILITY:
+    {
+        timeSecondsToClockString(textHandle, indexToTimeSeconds(POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX));
+        setStandardTextToTextBuf(TEXT_RANDOM_BEEP);
+    }
+    break;
+
+    case POMODORO_DISPLAY_SHOW_GOOD:
+    {
+        setStandardTextToTextBuf(TEXT_YES);
+        ledDisp->numberToBufAsDecimal(textHandle, POMODORO_STATS_WORKING_GOOD);
+    }
+    break;
+
+    case POMODORO_DISPLAY_SHOW_BAD:
+    {
+        setStandardTextToTextBuf(TEXT_NO);
+        ledDisp->numberToBufAsDecimal(textHandle, POMODORO_STATS_WORKING_BAD);
+    }
+    break;
+
+    default:
+        break;
+    }
+
+    displayTimerSecondsBlinker(&POMODORO_TIMER);
+
+    // leds
+    if (POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX > 0)
+    {
+        lights |= 1 << LIGHT_LATCHING_1;
+    }
+    if ( POMODORO_PAUSE_TIME_INDEX > 0)
+    {
+        lights |= 1 << LIGHT_LATCHING_2;
+    }
+
+
+#ifdef POMODORO_ENABLE_HOURGLASS
+    displayAllSegmentsToScreen();
+    if (millis_blink_250_750ms())
+    {
+        textBufToDisplay();
+    }
+
+#else
+    if (millis_blink_250_750ms())
+    {
+        textBufToDisplay();
+    }
+#endif
+}
+
+#else  // ENABLE_SELECT_APPS_WITH_SELECTOR
 void Apps::pomodoroTimer()
 {
     uint8_t display_mode = POMODORO_DISPLAY_TIMER;
@@ -1003,7 +1304,7 @@ void Apps::pomodoroTimer()
     }
 
 #ifdef POMODORO_ENABLE_HOURGLASS
-    // if (POMODORO_ENABLE_HOURGLASS_VISUALS){
+    // if (POMODORO_ENABLE_HOURGLASS_VISUALS){ 
     displayAllSegmentsToScreen();
 
     // }else{
@@ -1020,7 +1321,8 @@ void Apps::pomodoroTimer()
     }
 #endif
 }
-#endif
+#endif // #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+#endif // enable pomodoro
 
 void Apps::encoderDialRefreshTimeIndex(int16_t *indexHolder)
 {
@@ -5454,7 +5756,7 @@ void Apps::multitimer_integrated()
     // {
     // 	this->multitimer_pause();
     // }
-    // else if (!set && this->multitimer_state == paused)
+    // else if (!set && this->multitimer_state == statePaused)
     // {
     // this->multitimer_continu();binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2
     // }
@@ -5556,7 +5858,7 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
             this->multitimer_timerDisplayed = index; //display time of pressed timer button
         }
     }
-    else if (this->multitimer_state == paused)
+    else if (this->multitimer_state == statePaused)
     {
         buzzerSilentClearBufferAndAddNote(230);
         this->multitimer_timerDisplayed = index; //display time of pressed timer button
@@ -5575,7 +5877,7 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 // 	{
 // 		this->multitimer_pause();
 // 	}
-// 	else if (!set && this->multitimer_state == paused)
+// 	else if (!set && this->multitimer_state == statePaused)
 // 	{
 // 		this->multitimer_continu();
 // 	}
@@ -5615,7 +5917,7 @@ void Apps::multitimer_start()
 
 void Apps::multitimer_pause()
 {
-    this->multitimer_state = paused;
+    this->multitimer_state = statePaused;
     this->multitimer_timers[this->multitimer_activeTimer].pause();
 }
 
@@ -5827,7 +6129,7 @@ void Apps::multitimer_refresh()
             playerLights |= 1 << this->multitimer_activeTimer;
         }
     }
-    else if (this->multitimer_state == paused)
+    else if (this->multitimer_state == statePaused)
     {
 
         if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
