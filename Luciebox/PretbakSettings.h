@@ -8,7 +8,7 @@
 // v304 : quizmaster scoring bugfix and optimization / baby dreamtime mode change behaviour + shift button keeps it in dreamtime mode (all button mash apps should have the shift button included). / total time timer is now set to a timer of the chrono app.
 // v305 : add battery voltage indicator (note the voltagedrop because of a Schottky diode to differentiate between real battery voltage and Vcc) / buzzer rework (note scheme, buzzer buffer) / sequencer rework
 // v306 : song composer / change apps sequence. baby app has no shift.
-// v307 : introduce V4 prototype. make app selector dial optional
+// v307 : introduce V4 prototype. make app selector dial optional. redo apps (see manual)
 
 // #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES

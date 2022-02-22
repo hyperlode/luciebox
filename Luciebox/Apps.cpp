@@ -190,6 +190,10 @@ void Apps::appStateLoop()
             selected_app_memory = selected_app;
         }
 
+        if(millis_quarter_second_period()){
+            lights |= 1<<LIGHT_MOMENTARY_0 | 1<<LIGHT_MOMENTARY_2 | 1<<LIGHT_MOMENTARY_3; 
+        }
+
         //if (millis_blink_250_750ms()){
         if ((millis() - blink_offset) > 250)
         {
@@ -607,7 +611,7 @@ bool Apps::init_app(bool init, uint8_t selector)
     }
     else
 #endif
-        if (INIT_SPLASH_ANIMATION_STEP < 23)
+    if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
