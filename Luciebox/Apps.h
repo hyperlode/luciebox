@@ -110,7 +110,6 @@
 #define POMODORO_DISPLAY_BEEP_PROBABILITY 4
 #define POMODORO_DISPLAY_TIMER_HOURGLASS 5
 #define POMODORO_DISPLAY_SHOW_TALLY 6
-
 #define POMODORO_NONSENSE_TIME 60001
 
 #define HACKTIME_MEMORY_FLASH 0
@@ -121,8 +120,9 @@
 #define HACKTIME_DISPLAY_BYTES 0
 #define HACKTIME_DISPLAY_CHARS 3
 
-#define SOUND_NOTE_DISPLAY_NOTE 0
+#define QUIZ_DEFAULT_WAIT_TIME_INDEX 3
 
+#define SOUND_NOTE_DISPLAY_NOTE 0
 #define SOUND_NOTE_MODE_MANUAL 0
 #define SOUND_NOTE_MODE_ARPEGGIO_UP 1
 #define SOUND_NOTE_MODE_ARPEGGIO_DOWN 2
@@ -132,12 +132,12 @@
 
 #define SOUND_SONG_COMPOSER_DEFAULT_NOTE REST_3_8
 
-#define quizWaitForQuizMaster state0
-#define quizWaitRandomTime state1
-#define quizWaitPlayerPress state2
-#define quizDefineRoundWinner state3
-#define quizWaitSomeTimeForNextRound state4
-#define quizRoundAfterMath state5
+// #define quizWaitForQuizMaster state0
+// #define quizWaitRandomTime state1
+// #define quizWaitPlayerPress state2
+// #define quizDefineRoundWinner state3
+// #define quizRecoverDelayForAutoNextRound state4
+// #define quizRoundAfterMath state5
 
 // VARIABLE REUSE
 
@@ -217,12 +217,14 @@
 #define TALLY_KEEPER_2 general_int16_t_3
 #define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 #define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
+#define QUIZ_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
 
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
 #define SETTINGS_MODE_ANALOG_VALUE  general_int16_t_4
 
+#define QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS general_uint16_t_1
 #define REACTION_GAME_TARGET general_uint16_t_1
 #define GEIGER_INCREASE_CHANCE general_uint16_t_1
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
@@ -300,6 +302,7 @@
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 #define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
+#define QUIZ_END_GAME_WINNER_DISPLAY general_boolean
 // #define showNote general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
@@ -310,6 +313,7 @@
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 #define POMODORO_ENABLE_HOURGLASS_VISUALS general_boolean2
+#define QUIZ_ELSE_SHOOTOUT_MODE general_boolean2
 
 #define REACTION_SPECIALHEXBIRD_ELSE_NORMAL general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
@@ -966,6 +970,7 @@ private:
     // general methods
     void resetInactivityTimer();
     void autoShutdown();
+    void shutdown();
     
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
     void encoderDialRefreshTimeIndex(int16_t *indexHolder);
@@ -1166,13 +1171,14 @@ private:
 
     enum QuizState : uint8_t
     {
-        // quizInit,
+        quizInitWait,
         quizWaitForQuizMaster,
         quizWaitRandomTime,
         quizWaitPlayerPress,
         quizDefineRoundWinner,
-        quizWaitSomeTimeForNextRound,
-        quizRoundAfterMath
+        quizRecoverDelayForAutoNextRound,
+        quizRoundAfterMath,
+        quizInitRandomTime
     };
     QuizState quizState;
 

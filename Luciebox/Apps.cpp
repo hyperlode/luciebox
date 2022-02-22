@@ -173,7 +173,7 @@ void Apps::appStateLoop()
             // switch off. shut down
             if (switch_off)
             {
-                autoShutdown();
+               shutdown();
             }
 
             if (selected_app == selected_app_memory)
@@ -319,25 +319,10 @@ void Apps::autoShutdown()
 #endif
     if (enable_auto_power_off)
     {
-        // memorize active app
-        eeprom_update_byte(
-            (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
-            selected_app);
+       
 
-        digitalWrite(PIN_POWER_ON_HOLD, LOW);
-        digitalWrite(PIN_SELECTOR_BUTTON, LOW); // pull down input to enable transistor base to go low
-
-        //normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.
-
-        for (uint16_t i = 0; i < 26000; i++)
-        {
-            //fadeInList(MODE_DREAMTIME_STEP, 0, MODE_DREAMTIME_RANDOM_LIST);
-            resetInactivityTimer();
-        }
-
-        //delay(100);
-        digitalWrite(PIN_POWER_ON_HOLD, HIGH);
-        digitalWrite(PIN_SELECTOR_BUTTON, HIGH);
+        shutdown();
+       
     }
     else
     {
@@ -347,6 +332,26 @@ void Apps::autoShutdown()
 #else
     playSongHappyDryer();
 #endif
+}
+
+void Apps::shutdown()
+{
+    // memorize active app
+    eeprom_update_byte(
+        (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
+        selected_app);
+    digitalWrite(PIN_POWER_ON_HOLD, LOW);
+    digitalWrite(PIN_SELECTOR_BUTTON, LOW); // pull down input to enable transistor base to go low
+    //normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.
+
+    for (uint16_t i = 0; i < 26000; i++)
+    {
+        resetInactivityTimer();
+    }
+
+    digitalWrite(PIN_POWER_ON_HOLD, HIGH);
+    digitalWrite(PIN_SELECTOR_BUTTON, HIGH);
+    //buzzerPlayDisappointment();
 }
 
 void Apps::appSelector()
@@ -2169,44 +2174,76 @@ void Apps::quiz()
 {
     if (this->app_init_edge)
     {
-        QUIZ_MAX_RANDOM_WAIT_TIME = -3000;
-        quizState = quizWaitForQuizMaster;
+        
+        QUIZ_RANDOM_WAIT_TIME_MAX_INDEX = 3;
+        quizState = quizInitWait;
+    }
+
+    lights = 0;
+    
+    lights |= 1 << LIGHT_LATCHING_3;
+    
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)){
+
+        lights |= 1 << LIGHT_LATCHING_2;
+    }
+    
+    if (QUIZ_RANDOM_WAIT_TIME_MAX_INDEX != QUIZ_DEFAULT_WAIT_TIME_INDEX){
+        lights |= 1 << LIGHT_LATCHING_1;
     }
 
     switch (quizState)
     {
-    case quizWaitForQuizMaster:
+    case quizInitWait:
     {
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            
+            if (QUIZ_END_GAME_WINNER_DISPLAY ){
+                // start of new game
+                QUIZ_END_GAME_WINNER_DISPLAY = false;
+                for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+                {
+                    QUIZ_SCORE[i] = 0;
+                }
+                loadBuzzerTrack(SONG_ATTACK);
+
+            }
+            quizState = quizInitRandomTime;
+            
+        }
         if (this->millis_half_second_period())
         {
-            lights |= 1 << LIGHT_LATCHING_3;
-        }
-        else
-        {
             lights &= ~(1 << LIGHT_LATCHING_3);
+            // lights |= 1 << LIGHT_LATCHING_3;
         }
-
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
         {
-            // QUIZ_MAX_RANDOM_WAIT_TIME = -1000 * dialGetIndexedtime();
-            QUIZ_MAX_RANDOM_WAIT_TIME = -20000;
-        }
-        else
-        {
-            QUIZ_MAX_RANDOM_WAIT_TIME = -3000;
-        }
+            //QUIZ_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
+            encoderDialRefreshTimeIndex(&QUIZ_RANDOM_WAIT_TIME_MAX_INDEX);
 
-        // bool quizmasterButtonChanged = (binaryInputsEdgeUp ) & (1 << BUTTON_INDEXED_LATCHING_3);
-        // bool quizmasterButtonChanged = (binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_3);
-
-        // if (quizmasterButtonChanged || ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2) && binaryInputsValue &  (1 << BUTTON_INDEXED_LATCHING_3))))
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
-        {
-            quizState = quizWaitRandomTime;
-            QUIZ_RANDOM_WAIT_TIME.start(random(QUIZ_MAX_RANDOM_WAIT_TIME, -500));
         }
+        QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS= indexToTimeSeconds(QUIZ_RANDOM_WAIT_TIME_MAX_INDEX); 
     }
     break;
+    
+    case quizWaitForQuizMaster:
+    {
+
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+        quizState = quizInitWait;
+        }
+
+    }
+    break;
+
+    case quizInitRandomTime:
+    {
+        quizState = quizWaitRandomTime;
+        QUIZ_RANDOM_WAIT_TIME.start(random((long)-1000 * QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS, (long)-500));
+        
+    }
 
     case quizWaitRandomTime:
     {
@@ -2234,6 +2271,8 @@ void Apps::quiz()
                 buzzerPlayDisappointment();
             }
         }
+
+        
     }
     break;
 
@@ -2271,10 +2310,10 @@ void Apps::quiz()
             }
         }
 
-        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
-        {
-            quizState = quizWaitForQuizMaster;
-        }
+        // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+        // {
+        //     quizState = quizWaitForQuizMaster;
+        // }
 
         // //TEST SHOW RAW ANALOG VALUES
         // Serial.println("---");
@@ -2289,6 +2328,13 @@ void Apps::quiz()
         // 	nextStepRotate(&QUIZ_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
         // }
         // //ENDTEST
+
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            quizState = quizInitWait;
+        }
+
+
     }
     break;
 
@@ -2331,15 +2377,16 @@ void Apps::quiz()
         // in case of normal quizmaster, this is the moment to assign scores with the dial
         // will keep on looping through this state to adjust score when in normal mode.
         // encoder_dial->setSensitivity(2);
+
         int16_t score = (int16_t)QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
         stepChange(&score, encoder_dial->getDelta(), 0, 10, false);
 
-        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
+        if ( !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)) )
         {
-            // QUIZ_RANDOM_WAIT_TIME.start(-500);
+            // shoot out mode
             initiateCountDowntimerWith500Millis(&QUIZ_RANDOM_WAIT_TIME);
             score++;
-            quizState = quizWaitSomeTimeForNextRound;
+            quizState = quizRecoverDelayForAutoNextRound;
         }
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
@@ -2348,30 +2395,39 @@ void Apps::quiz()
             quizState = quizWaitForQuizMaster;
         }
 #else
-            else if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
-            {
-                quizState = quizWaitForQuizMaster;
-            }
+        else if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            //this->buzzerSilentClearBufferAndAddNote(A7_2);
+            quizState = quizInitWait;
+           // binaryInputs[BUTTON_LATCHING_3].setToggleValue(1); // will nudge it to the init state. 
+        }
 #endif
 
         QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t)score;
-        if (score > 9)
+        if (score > 3)
         {
-            QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
+            QUIZ_END_GAME_WINNER_DISPLAY = true;
+            //binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // will nudge it to the init state. 
+            
+            
+            //QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
             playSongHappyDryer();
+            quizState = quizInitWait;
         }
     }
     break;
 
-    case quizWaitSomeTimeForNextRound:
+    case quizRecoverDelayForAutoNextRound:
     {
         if (getCountDownTimerHasElapsed(&QUIZ_RANDOM_WAIT_TIME))
         {
-            quizState = quizWaitForQuizMaster;
+            quizState = quizInitRandomTime;
         }
     }
     break;
     }
+
+  
 
     int16_t scoreToDisplay = 10000; // 10000 to make sure there will always be zeros for all digits
     int16_t multiplier = 1000;
@@ -2381,8 +2437,38 @@ void Apps::quiz()
         multiplier /= 10;
     }
     ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
+    
+    if(QUIZ_END_GAME_WINNER_DISPLAY){
+        // setStandardTextToTextBuf(TEXT_SPACES);
+        // textBuf[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
+        // textBufToDisplay();
+        // ledDisp->setCharToDisplay(0, '?');
+        textHandle[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
+        // ledDisp->setCharToDisplay(QUIZ_MOST_RECENT_ROUND_WINNER_INDEX, '?');
 
-    ledDisp->setDecimalPointsToDisplay(B00001111);
+    }
+
+    if (millis_quarter_second_period() && quizState == quizRoundAfterMath){
+
+        textHandle[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = ' ';
+    }
+
+
+    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1) && quizState == quizInitWait) {
+        
+        if (millis_blink_250_750ms())
+        {
+            setStandardTextToTextHANDLE(RANDOM);
+        }
+        else
+        {
+            ledDisp->setNumberToDisplayAsDecimal((int16_t)QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS);
+        }
+    }else{
+        // the decimal points are a dividor between player's scores.
+        ledDisp->setDecimalPointsToDisplay(B00001111);
+
+    }
 }
 
 #endif
@@ -4238,10 +4324,18 @@ void Apps::modeSimon()
     case simonWaitForNewGame:
     {
         setStandardTextToTextBuf(TEXT_SPACES);
+
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             simonState = simonNewGame;
         }
+#else
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            simonState = simonNewGame;
+        }
+#endif
 
         // latching_3_blink();
         if (millis_quarter_second_period())
@@ -4367,10 +4461,14 @@ void Apps::modeSimon()
 
         if (SIMON_INDEX >= SIMON_LENGTH && (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER)))
         {
-            // after last step display, immediatly continue
+            // after playing sequence at game end, immediatly continue
             if (SIMON_END_OF_GAME)
             {
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
                 simonState = simonWaitForNewGame;
+#else
+                binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
+#endif
             }
             else
             {
@@ -5962,7 +6060,7 @@ void Apps::multitimer_refresh()
     //what should be showing on the display right now?
 
     uint8_t playerLights = 0;            //lsb is timer 0, 2nd bit is timer 1, ....
-    uint8_t settingsLights = 0b00000000; //I tried optimizing this away, but memory size increased... Settings lights are other lights then timer button lights.
+    uint8_t settingsLights = 0b00000000; //I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
 
     if (this->multitimer_state == initialized)
     {
@@ -5974,7 +6072,7 @@ void Apps::multitimer_refresh()
             this->multitimer_state = setFischer;
         }
 #else
-            if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
+            if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
             {
                 this->multitimer_state = setFischer;
             }
@@ -6189,11 +6287,17 @@ void Apps::multitimer_refresh()
         {
             this->multitimer_state = initialized;
         }
+         if (millis_quarter_second_period())
+        {
+            settingsLights |= MULTITIMER_LIGHT_FISCHER;
+        }
+
 #else
-            if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_1))
-            {
-                this->multitimer_state = initialized;
-            }
+        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
+        {
+            this->multitimer_state = initialized;
+        }
+        settingsLights |= MULTITIMER_LIGHT_FISCHER;
 #endif
 
         // fischer timer
@@ -6212,10 +6316,7 @@ void Apps::multitimer_refresh()
             timeSecondsToClockString(textHandle, indexToTimeSeconds(MULTITIMER_FISCHER_TIME_INDEX));
         }
 
-        if (millis_quarter_second_period())
-        {
-            settingsLights |= MULTITIMER_LIGHT_FISCHER;
-        }
+       
         settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
     }
 
