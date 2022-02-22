@@ -14,7 +14,7 @@
 #define ENABLE_TILT_APP
 #endif
 
-#define ENABLE_QUIZ_MASTER
+#define ENABLE_SHOOTOUT
 #define ENABLE_TALLY_KEEPER
 
 #include "Arduino.h"
@@ -51,7 +51,7 @@
 #define APP_SELECTOR_RANDOMWORLD 6
 #define APP_SELECTOR_TALLY_KEEPER 7
 #define APP_SELECTOR_SIMON 8
-#define APP_SELECTOR_QUIZ_MASTER 9
+#define APP_SELECTOR_SHOOTOUT 9
 #define APP_SELECTOR_REACTION_GAME 10
 #define APP_SELECTOR_GUITAR_HERO 11
 #define APP_SELECTOR_DRAW 12
@@ -120,7 +120,7 @@
 #define HACKTIME_DISPLAY_BYTES 0
 #define HACKTIME_DISPLAY_CHARS 3
 
-#define QUIZ_DEFAULT_WAIT_TIME_INDEX 3
+#define SHOOTOUT_DEFAULT_WAIT_TIME_INDEX 3
 
 #define SOUND_NOTE_DISPLAY_NOTE 0
 #define SOUND_NOTE_MODE_MANUAL 0
@@ -132,12 +132,12 @@
 
 #define SOUND_SONG_COMPOSER_DEFAULT_NOTE REST_3_8
 
-// #define quizWaitForQuizMaster state0
-// #define quizWaitRandomTime state1
-// #define quizWaitPlayerPress state2
-// #define quizDefineRoundWinner state3
-// #define quizRecoverDelayForAutoNextRound state4
-// #define quizRoundAfterMath state5
+// #define shootoutWaitforquimaster state0
+// #define shootoutWaitRandomTime state1
+// #define shootoutWaitPlayerPress state2
+// #define shootoutDefineRoundWinner state3
+// #define shootoutRecoverDelayForAutoNextRound state4
+// #define shootoutRoundAfterMath state5
 
 // VARIABLE REUSE
 
@@ -154,7 +154,7 @@
 #define HACKTIME_MOVE_TIMER general_timer
 #define COUNTING_LETTERS_AND_CHARS_TIMER general_timer
 #define SOUND_NOTE_AUTO_TIMER general_timer
-#define QUIZ_RANDOM_WAIT_TIME general_timer
+#define SHOOTOUT_RANDOM_WAIT_TIME general_timer
 #define SEQUENCER_SPEED general_timer
 #define TILT_TIMER general_timer
 #define MOVIE_MODE_FRAME_INTERVAL_TIMER general_timer
@@ -181,7 +181,7 @@
 #define COMPOSER_STEP general_int16_t_1
 #define HACKTIME_ADDRESS general_int16_t_1
 #define SOUND_NOTES_NOTE_ON_SCALE_INDEX general_int16_t_1
-#define QUIZ_ROUNDS_INIT general_int16_t_1
+#define SHOOTOUT_ROUNDS_INIT general_int16_t_1
 #define METRONOME_TICKER_3_POSITION general_int16_t_1
 #define TILT_EXPECTED_SWITCH_INDEX general_int16_t_1
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
@@ -204,7 +204,7 @@
 #define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
 #define TALLY_KEEPER_1 general_int16_t_2
-#define QUIZ_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
+#define SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
 #define MULTITIMER_FISCHER_TIME_INDEX general_int16_t_2
 #define COMPOSER_STAGED_NOTE general_int16_t_2
 
@@ -217,14 +217,14 @@
 #define TALLY_KEEPER_2 general_int16_t_3
 #define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 #define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
-#define QUIZ_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
+#define SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
 
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
 #define SETTINGS_MODE_ANALOG_VALUE general_int16_t_4
 
-#define QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS general_uint16_t_1
+#define SHOOTOUT_RANDOM_WAIT_TIME_MAX_SECONDS general_uint16_t_1
 #define REACTION_GAME_TARGET general_uint16_t_1
 #define GEIGER_INCREASE_CHANCE general_uint16_t_1
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
@@ -251,12 +251,12 @@
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
 #define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
-#define QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE general_uint8_t_1
+#define SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
 #define DRAW_SHOW_MODE general_uint8_t_2
-#define QUIZ_MOST_RECENT_ROUND_WINNER_INDEX general_uint8_t_2
+#define SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX general_uint8_t_2
 #define HACKTIME_SOUND general_uint8_t_2
 #define RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
@@ -268,7 +268,7 @@
 #define DRAW_CURSOR_SEGMENT general_uint8_t_3
 #define SIMON_PLAYER_PLAYING_INDEX general_uint8_t_3
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
-#define QUIZ_SCORE_MEMORY general_uint8_t_3
+#define SHOOTOUT_SCORE_MEMORY general_uint8_t_3
 #define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
 
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
@@ -283,7 +283,7 @@
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1
-#define QUIZ_MAX_RANDOM_WAIT_TIME general_long_1
+#define SHOOTOUT_MAX_RANDOM_WAIT_TIME general_long_1
 #define ZEN_APP_NEXT_ALARM general_long_1
 #define SETTINGS_APP_BATTERY_VOLTAGE general_long_1
 #define MODE_SETTINGS_CYCLE_TIMING_MILLIS general_long_1
@@ -302,7 +302,7 @@
 #define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
 #define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
 #define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
-#define QUIZ_END_GAME_WINNER_DISPLAY general_boolean
+#define SHOOTOUT_END_GAME_WINNER_DISPLAY general_boolean
 // #define showNote general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
@@ -313,7 +313,7 @@
 #define MOVIE_MODE_SHOW_NEGATIVE general_boolean2
 #define SOUND_NOTE_PLAY_NOTE general_boolean2
 #define POMODORO_ENABLE_HOURGLASS_VISUALS general_boolean2
-#define QUIZ_ELSE_SHOOTOUT_MODE general_boolean2
+#define SHOOTOUT_ELSE_SHOOTOUT_MODE general_boolean2
 
 #define REACTION_SPECIALHEXBIRD_ELSE_NORMAL general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
@@ -332,11 +332,11 @@
 #define MODE_SOUND_SONG_BUFFER bytes_list
 #define MODE_DREAMTIME_RANDOM_LIST bytes_list
 #define REACTION_GAME_SELECTED_NOTES bytes_list
-#define QUIZ_ANALOG_VALUES_CHECK bytes_list
+#define SHOOTOUT_ANALOG_VALUES_CHECK bytes_list
 
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
-#define QUIZ_SCORE array_8_bytes
+#define SHOOTOUT_SCORE array_8_bytes
 #define MULTITIMER_INIT_TIME_INDECES array_8_bytes
 
 #ifdef ENABLE_MULTITIMER_INTEGRATED
@@ -1126,8 +1126,8 @@ private:
 #ifdef ENABLE_TALLY_KEEPER
     void modeTallyKeeper();
 #endif
-#ifdef ENABLE_QUIZ_MASTER
-    void quiz();
+#ifdef ENABLE_SHOOTOUT
+    void shootout();
 #endif
     void modeTotalTime();
     void modeCountingLettersAndChars();
@@ -1405,18 +1405,18 @@ private:
     };
     AppState appState;
 
-    enum QuizState : uint8_t
+    enum ShootoutState : uint8_t
     {
-        quizInitWait,
-        quizWaitForQuizMaster,
-        quizWaitRandomTime,
-        quizWaitPlayerPress,
-        quizDefineRoundWinner,
-        quizRecoverDelayForAutoNextRound,
-        quizRoundAfterMath,
-        quizInitRandomTime
+        shootoutInitWait,
+        shootoutWaitforquimaster,
+        shootoutWaitRandomTime,
+        shootoutWaitPlayerPress,
+        shootoutDefineRoundWinner,
+        shootoutRecoverDelayForAutoNextRound,
+        shootoutRoundAfterMath,
+        shootoutInitRandomTime
     };
-    QuizState quizState;
+    ShootoutState shootoutState;
 
     enum RandomWorldState : uint8_t
     {

@@ -458,9 +458,9 @@ void Apps::appSelector()
         break;
 #endif
 
-#ifdef ENABLE_QUIZ_MASTER
-    case APP_SELECTOR_QUIZ_MASTER:
-        this->quiz();
+#ifdef ENABLE_SHOOTOUT
+    case APP_SELECTOR_SHOOTOUT:
+        this->shootout();
         break;
 #endif
 
@@ -2164,14 +2164,14 @@ void Apps::modeTallyKeeper()
 }
 #endif
 
-#ifdef ENABLE_QUIZ_MASTER
-void Apps::quiz()
+#ifdef ENABLE_SHOOTOUT
+void Apps::shootout()
 {
     if (this->app_init_edge)
     {
 
-        QUIZ_RANDOM_WAIT_TIME_MAX_INDEX = 3;
-        quizState = quizInitWait;
+        SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX = 3;
+        shootoutState = shootoutInitWait;
     }
 
     lights = 0;
@@ -2184,29 +2184,29 @@ void Apps::quiz()
         lights |= 1 << LIGHT_LATCHING_2;
     }
 
-    if (QUIZ_RANDOM_WAIT_TIME_MAX_INDEX != QUIZ_DEFAULT_WAIT_TIME_INDEX)
+    if (SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX != SHOOTOUT_DEFAULT_WAIT_TIME_INDEX)
     {
         lights |= 1 << LIGHT_LATCHING_1;
     }
 
-    switch (quizState)
+    switch (shootoutState)
     {
-    case quizInitWait:
+    case shootoutInitWait:
     {
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
 
-            if (QUIZ_END_GAME_WINNER_DISPLAY)
+            if (SHOOTOUT_END_GAME_WINNER_DISPLAY)
             {
                 // start of new game
-                QUIZ_END_GAME_WINNER_DISPLAY = false;
+                SHOOTOUT_END_GAME_WINNER_DISPLAY = false;
                 for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
                 {
-                    QUIZ_SCORE[i] = 0;
+                    SHOOTOUT_SCORE[i] = 0;
                 }
                 loadBuzzerTrack(SONG_ATTACK);
             }
-            quizState = quizInitRandomTime;
+            shootoutState = shootoutInitRandomTime;
         }
         if (this->millis_half_second_period())
         {
@@ -2215,43 +2215,43 @@ void Apps::quiz()
         }
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
         {
-            //QUIZ_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
-            encoderDialRefreshTimeIndex(&QUIZ_RANDOM_WAIT_TIME_MAX_INDEX);
+            //SHOOTOUT_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
+            encoderDialRefreshTimeIndex(&SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX);
         }
-        QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS = indexToTimeSeconds(QUIZ_RANDOM_WAIT_TIME_MAX_INDEX);
+        SHOOTOUT_RANDOM_WAIT_TIME_MAX_SECONDS = indexToTimeSeconds(SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX);
     }
     break;
 
-    case quizWaitForQuizMaster:
+    case shootoutWaitforquimaster:
     {
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            quizState = quizInitWait;
+            shootoutState = shootoutInitWait;
         }
     }
     break;
 
-    case quizInitRandomTime:
+    case shootoutInitRandomTime:
     {
-        quizState = quizWaitRandomTime;
-        QUIZ_RANDOM_WAIT_TIME.start(random((long)-1000 * QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS, (long)-500));
+        shootoutState = shootoutWaitRandomTime;
+        SHOOTOUT_RANDOM_WAIT_TIME.start(random((long)-1000 * SHOOTOUT_RANDOM_WAIT_TIME_MAX_SECONDS, (long)-500));
     }
 
-    case quizWaitRandomTime:
+    case shootoutWaitRandomTime:
     {
-        if (getCountDownTimerHasElapsed(&QUIZ_RANDOM_WAIT_TIME))
+        if (getCountDownTimerHasElapsed(&SHOOTOUT_RANDOM_WAIT_TIME))
         {
             // //TEST SHOW RAW ANALOG VALUES
             // //empty analog input buffer
             // for(uint8_t i=0;i<100;i++){
-            // 	QUIZ_ANALOG_VALUES_CHECK[i] = 0;
+            // 	SHOOTOUT_ANALOG_VALUES_CHECK[i] = 0;
             // }
-            // QUIZ_ANALOG_INPUT_SAMPLE_INDEX = 0;
+            // SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX = 0;
             // //ENDTEST
 
-            QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE = 0;
-            quizState = quizWaitPlayerPress;
+            SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE = 0;
+            shootoutState = shootoutWaitPlayerPress;
         }
 
         // check here, any player pressing his button = score to zero.
@@ -2259,7 +2259,7 @@ void Apps::quiz()
         {
             if (binaryInputsEdgeUp & 1 << i)
             {
-                QUIZ_SCORE[i] = 0;
+                SHOOTOUT_SCORE[i] = 0;
                 // addNoteToBuzzer(C4_1);
                 buzzerPlayDisappointment();
             }
@@ -2267,18 +2267,18 @@ void Apps::quiz()
     }
     break;
 
-    case quizWaitPlayerPress:
+    case shootoutWaitPlayerPress:
     {
         // //TEST SHOW RAW ANALOG VALUES
-        // QUIZ_ANALOG_VALUES_CHECK[QUIZ_ANALOG_INPUT_SAMPLE_INDEX] = analogRead(PIN_BUTTONS_MOMENTARY)/4;
-        // nextStepRotate(&QUIZ_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
+        // SHOOTOUT_ANALOG_VALUES_CHECK[SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX] = analogRead(PIN_BUTTONS_MOMENTARY)/4;
+        // nextStepRotate(&SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
         // //ENDTEST
 
         // 16,32,64,128 are the stored values of the individual raw momentary buttons (analog / 4)
         uint8_t momentaryAnalogRaw = analogRead(PIN_BUTTONS_MOMENTARY) / 4;
-        if (momentaryAnalogRaw > 3 && QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE == 0)
+        if (momentaryAnalogRaw > 3 && SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE == 0)
         {
-            QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE = momentaryAnalogRaw;
+            SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE = momentaryAnalogRaw;
         }
 
         byte momentary_buttons_lights = 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_1 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
@@ -2290,126 +2290,119 @@ void Apps::quiz()
         {
             if (binaryInputsEdgeUp & 1 << i)
             {
-                QUIZ_ANALOG_VALUES_CHECK[i] = 0x10 << i; // button 0:16, 1:32, 2:64, 3:128
+                SHOOTOUT_ANALOG_VALUES_CHECK[i] = 0x10 << i; // button 0:16, 1:32, 2:64, 3:128
 
                 // go to next state
-                quizState = quizDefineRoundWinner;
+                shootoutState = shootoutDefineRoundWinner;
             }
             else
             {
-                QUIZ_ANALOG_VALUES_CHECK[i] = 255; // unobtainable value. maximum.
+                SHOOTOUT_ANALOG_VALUES_CHECK[i] = 255; // unobtainable value. maximum.
             }
         }
 
         // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         // {
-        //     quizState = quizWaitForQuizMaster;
+        //     shootoutState = shootoutWaitforquimaster;
         // }
 
         // //TEST SHOW RAW ANALOG VALUES
         // Serial.println("---");
-        // Serial.println(QUIZ_ANALOG_INPUT_SAMPLE_INDEX);
+        // Serial.println(SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX);
         // //display recorded values
         // uint8_t first_non_zero_value = 0;
         // for(uint8_t i=0;i<100;i++){
-        // 	Serial.println(QUIZ_ANALOG_VALUES_CHECK[QUIZ_ANALOG_INPUT_SAMPLE_INDEX]);
+        // 	Serial.println(SHOOTOUT_ANALOG_VALUES_CHECK[SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX]);
         // 	// if (first_non_zero_value == 0){
-        // 	// 	first_non_zero_value = QUIZ_ANALOG_VALUES_CHECK[QUIZ_ANALOG_INPUT_SAMPLE_INDEX];
+        // 	// 	first_non_zero_value = SHOOTOUT_ANALOG_VALUES_CHECK[SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX];
         // 	// }
-        // 	nextStepRotate(&QUIZ_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
+        // 	nextStepRotate(&SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
         // }
         // //ENDTEST
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            quizState = quizInitWait;
+            shootoutState = shootoutInitWait;
         }
     }
     break;
 
-    case quizDefineRoundWinner:
+    case shootoutDefineRoundWinner:
     {
         // Which theoretical button value is the closest to the first detected analog value? That's the winner. It looks pretty sound after some experimentation.
 
         for (uint8_t i = 0; i < 4; i++)
         {
-            QUIZ_ANALOG_VALUES_CHECK[4 + i] = abs(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE - QUIZ_ANALOG_VALUES_CHECK[i]);
+            SHOOTOUT_ANALOG_VALUES_CHECK[4 + i] = abs(SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE - SHOOTOUT_ANALOG_VALUES_CHECK[i]);
         }
 
-        QUIZ_MOST_RECENT_ROUND_WINNER_INDEX = 0;
+        SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX = 0;
         uint8_t smallestDiff = 255;
 
         for (uint8_t i = 0; i < 4; i++)
         {
-            if (QUIZ_ANALOG_VALUES_CHECK[4 + i] < smallestDiff)
+            if (SHOOTOUT_ANALOG_VALUES_CHECK[4 + i] < smallestDiff)
             {
-                QUIZ_MOST_RECENT_ROUND_WINNER_INDEX = i;
-                smallestDiff = QUIZ_ANALOG_VALUES_CHECK[4 + i];
+                SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX = i;
+                smallestDiff = SHOOTOUT_ANALOG_VALUES_CHECK[4 + i];
             }
         }
 
         // //TEST SHOW RAW ANALOG VALUES
         // for(uint8_t i=0;i<8;i++){
-        // 	Serial.println(QUIZ_ANALOG_VALUES_CHECK[i]);
+        // 	Serial.println(SHOOTOUT_ANALOG_VALUES_CHECK[i]);
         // }
-        // Serial.println(QUIZ_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE);
-        // Serial.println(QUIZ_MOST_RECENT_ROUND_WINNER_INDEX);
+        // Serial.println(SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE);
+        // Serial.println(SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX);
         // //ENDTEST
-        QUIZ_SCORE_MEMORY = QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
+        SHOOTOUT_SCORE_MEMORY = SHOOTOUT_SCORE[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX];
 
-        quizState = quizRoundAfterMath;
+        shootoutState = shootoutRoundAfterMath;
     }
     break;
 
-    case quizRoundAfterMath:
+    case shootoutRoundAfterMath:
     {
-        // in case of normal quizmaster, this is the moment to assign scores with the dial
-        // will keep on looping through this state to adjust score when in normal mode.
-        // encoder_dial->setSensitivity(2);
-
-        int16_t score = (int16_t)QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
+        // set score with the dial if in quiz mode (in quiz mode, you might be first to press a button, but not know the answer...)
+        int16_t score = (int16_t)SHOOTOUT_SCORE[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX];
         stepChange(&score, encoder_dial->getDelta(), 0, 10, false);
 
         if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
         {
             // shoot out mode
-            initiateCountDowntimerWith500Millis(&QUIZ_RANDOM_WAIT_TIME);
+            initiateCountDowntimerWith500Millis(&SHOOTOUT_RANDOM_WAIT_TIME);
             score++;
-            quizState = quizRecoverDelayForAutoNextRound;
+            shootoutState = shootoutRecoverDelayForAutoNextRound;
         }
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         else if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         {
-            quizState = quizWaitForQuizMaster;
+            shootoutState = shootoutWaitforquimaster;
         }
 #else
             else if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
             {
-                //this->buzzerSilentClearBufferAndAddNote(A7_2);
-                quizState = quizInitWait;
-                // binaryInputs[BUTTON_LATCHING_3].setToggleValue(1); // will nudge it to the init state.
+                shootoutState = shootoutInitWait;
             }
 #endif
 
-        QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t)score;
-        if (score > 3)
+        SHOOTOUT_SCORE[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t)score;
+        if (score > 9) // magic number, but good number
         {
-            QUIZ_END_GAME_WINNER_DISPLAY = true;
-            //binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // will nudge it to the init state.
-
-            //QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
+            SHOOTOUT_SCORE[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX]--; // let's not show a ten on the display (it messes up the single digit mode.)
+            SHOOTOUT_END_GAME_WINNER_DISPLAY = true;
             playSongHappyDryer();
-            quizState = quizInitWait;
+            shootoutState = shootoutInitWait;
         }
     }
     break;
 
-    case quizRecoverDelayForAutoNextRound:
+    case shootoutRecoverDelayForAutoNextRound:
     {
-        if (getCountDownTimerHasElapsed(&QUIZ_RANDOM_WAIT_TIME))
+        if (getCountDownTimerHasElapsed(&SHOOTOUT_RANDOM_WAIT_TIME))
         {
-            quizState = quizInitRandomTime;
+            shootoutState = shootoutInitRandomTime;
         }
     }
     break;
@@ -2419,28 +2412,22 @@ void Apps::quiz()
     int16_t multiplier = 1000;
     for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
     {
-        scoreToDisplay += multiplier * (QUIZ_SCORE[i]);
+        scoreToDisplay += multiplier * (SHOOTOUT_SCORE[i]);
         multiplier /= 10;
     }
     ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
 
-    if (QUIZ_END_GAME_WINNER_DISPLAY)
+    if (SHOOTOUT_END_GAME_WINNER_DISPLAY)
     {
-        // setStandardTextToTextBuf(TEXT_SPACES);
-        // textBuf[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
-        // textBufToDisplay();
-        // ledDisp->setCharToDisplay(0, '?');
-        textHandle[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
-        // ledDisp->setCharToDisplay(QUIZ_MOST_RECENT_ROUND_WINNER_INDEX, '?');
+        textHandle[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
     }
 
-    if (millis_quarter_second_period() && quizState == quizRoundAfterMath)
+    if (millis_quarter_second_period() && shootoutState == shootoutRoundAfterMath)
     {
-
-        textHandle[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = ' ';
+        textHandle[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX] = ' ';
     }
 
-    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1) && quizState == quizInitWait)
+    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1) && shootoutState == shootoutInitWait)
     {
 
         if (millis_blink_250_750ms())
@@ -2449,7 +2436,7 @@ void Apps::quiz()
         }
         else
         {
-            ledDisp->setNumberToDisplayAsDecimal((int16_t)QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS);
+            ledDisp->setNumberToDisplayAsDecimal((int16_t)SHOOTOUT_RANDOM_WAIT_TIME_MAX_SECONDS);
         }
     }
     else
