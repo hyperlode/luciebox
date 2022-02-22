@@ -12,7 +12,6 @@
 //#include "WProgram.h"
 //#endif
 
-
 class LedMultiplexer5x8
 {
 
@@ -29,7 +28,7 @@ public:
 
     //void Begin(boolean mode_in, byte C1, byte C2, byte C3, byte C4, byte C5, byte LedArrayDigit, byte UC1, byte UC2, byte UC3, byte UC4, byte UC5, byte UC6, byte UC7, byte UC8);
 
-    uint8_t* getDigits();
+    uint8_t *getDigits();
     //void SetSingleDigit(int8_t value, int digit);
     //void setBinaryToDisplay(uint32_t value);
     //void SetDecPointSingle(boolean decDig, int digit);
@@ -37,7 +36,7 @@ public:
 
     void setBrightness(byte value, bool exponential);
     bool getMode();
-    
+
     //Public Variables
     byte segActive;
 
@@ -53,12 +52,10 @@ private:
     byte DigitPins[5];
     byte SegmentPins[8];
     byte digitValues[5];
-    
-     // boolean lights[5][8];
+
+    // boolean lights[5][8];
     //uint8_t lights[5];
-    
-    
-    
+
     //uint8_t ledArrayValues;
     //bool extraLedArray;
     //byte chars[5];

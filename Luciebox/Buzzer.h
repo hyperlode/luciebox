@@ -270,7 +270,7 @@
 #define BUZZER_NEXTPLAYER_DURATION_MILLIS 20
 #define BUZZER_NEXTPLAYER_MULTIPLEBEEP_INTERVAL_MILLIS 100
 
-#define BUZZER_OVERLAP_TO_PREVENT_GAP_BETWEEN_EQUAL_NOTES_MILLIS 5 // 
+#define BUZZER_OVERLAP_TO_PREVENT_GAP_BETWEEN_EQUAL_NOTES_MILLIS 5 //
 
 #define BUZZER_NOTES_BUFFERVALUE_BUTTONPRESS
 #define BUZZER_NOTES_BUFFERVALUE_PAUSE
@@ -286,7 +286,7 @@
 #define BUZZER_NOTES_BUFFER_EIGHTNOTE_DURATION_MILLIS 15
 #define BUZZER_NOTES_BUFFER_BASE_FREQUENCY 220
 
-#define NOTES_COUNT 60  // spans 5 octaves
+#define NOTES_COUNT 60 // spans 5 octaves
 
 class Buzzer
 {
@@ -310,8 +310,8 @@ public:
     void clearBuzzerNotesBuffer();
     void playTone(unsigned int freq, unsigned long duration_millis);
     void buzzerSilentClearBuffer();
-	void buzzerSilent();
-	
+    void buzzerSilent();
+
     void lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints);
     void noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note);
 
@@ -326,7 +326,7 @@ private:
     uint8_t bufferPlayIndex;
     uint8_t bufferProgramIndex;
     unsigned long soundFinishedTimeMillis;
-	
-	bool noteFinishedEdge;
+
+    bool noteFinishedEdge;
 };
 #endif

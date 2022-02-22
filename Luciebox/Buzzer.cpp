@@ -1,9 +1,7 @@
 #include "Buzzer.h"
 #include "Arduino.h"
 
-
-// buffer has two indeces: for adding new notes (programSlotcounter) and for playing bufferPlayIndex. 
-
+// buffer has two indeces: for adding new notes (programSlotcounter) and for playing bufferPlayIndex.
 
 Buzzer::Buzzer()
 {
@@ -16,9 +14,9 @@ Buzzer::Buzzer()
 
 void Buzzer::clearBuzzerNotesBuffer()
 {
-	bufferPlayIndex = 1;
+    bufferPlayIndex = 1;
     bufferProgramIndex = 0;
-	this->soundFinishedTimeMillis = millis(); //ready to right away detect new sounds from buffer
+    this->soundFinishedTimeMillis = millis(); //ready to right away detect new sounds from buffer
 }
 
 void Buzzer::changeTranspose(int8_t delta)
@@ -67,9 +65,8 @@ void Buzzer::addNoteToNotesBuffer(uint8_t note)
     //1/8 stop = 63
 
     //this->bufferProgramIndex = getNextBuzzerNotesBufferSlot(true);
-	this->bufferProgramIndex = getNextProgramIndex();
-	
-	
+    this->bufferProgramIndex = getNextProgramIndex();
+
     this->buzzerNotesBuffer[this->bufferProgramIndex] = note;
 
     //http://members.efn.org/~qehn/global/building/cents.htm
@@ -88,13 +85,13 @@ void Buzzer::checkAndPlayNotesBuffer()
     //play all the sounds in the notesBuffer (buffer)
     //0 stands for free and programmable
     //one bufferPlayIndex
-	//delay(100);
+    //delay(100);
     if (millis() > this->soundFinishedTimeMillis)
     {
-		if (this->getNextProgramIndex() != this->bufferPlayIndex)
-		{	
-			uint8_t current_note = this->buzzerNotesBuffer[this->bufferPlayIndex];
-       
+        if (this->getNextProgramIndex() != this->bufferPlayIndex)
+        {
+            uint8_t current_note = this->buzzerNotesBuffer[this->bufferPlayIndex];
+
             //F = {[(2)^1/12]^n} * 220 Hz //220Hz for A 440 , 880 .... for other octaves
             float freq = 1;
 
@@ -107,34 +104,37 @@ void Buzzer::checkAndPlayNotesBuffer()
                     freq *= 1.059463;
                 }
             }
-           
-			uint8_t eight_notes_length_multiplier; 
-		
-			if (current_note <= LAST_NOTE)
+
+            uint8_t eight_notes_length_multiplier;
+
+            if (current_note <= LAST_NOTE)
             {
                 freq *= BUZZER_NOTES_BUFFER_BASE_FREQUENCY; //frequency
-				eight_notes_length_multiplier = (1 << (current_note / NOTES_COUNT)); 
-				tone(this->pin, (unsigned int)freq); //duration, number is exponent of 2.
-				noteFinishedEdge = true;
-				
-            }else{
-				eight_notes_length_multiplier = current_note - LAST_NOTE; // rests are situated behind the last notes in the .h file
-				this->buzzerSilent();
-			}
-			
-			unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_NOTES_BUFFER_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
-			
-            this->soundFinishedTimeMillis = millis() + toneLength ;
-		
-			//move active slot
-			this->bufferPlayIndex = this->getNextPlayIndex();
-			
-		}else{
-			if (noteFinishedEdge){
-				noteFinishedEdge = false;
-				this->buzzerSilent();
-			}
-		}
+                eight_notes_length_multiplier = (1 << (current_note / NOTES_COUNT));
+                tone(this->pin, (unsigned int)freq); //duration, number is exponent of 2.
+                noteFinishedEdge = true;
+            }
+            else
+            {
+                eight_notes_length_multiplier = current_note - LAST_NOTE; // rests are situated behind the last notes in the .h file
+                this->buzzerSilent();
+            }
+
+            unsigned long toneLength = (unsigned long)(this->speedScale * BUZZER_NOTES_BUFFER_EIGHTNOTE_DURATION_MILLIS * eight_notes_length_multiplier);
+
+            this->soundFinishedTimeMillis = millis() + toneLength;
+
+            //move active slot
+            this->bufferPlayIndex = this->getNextPlayIndex();
+        }
+        else
+        {
+            if (noteFinishedEdge)
+            {
+                noteFinishedEdge = false;
+                this->buzzerSilent();
+            }
+        }
     }
 }
 
@@ -153,35 +153,37 @@ void Buzzer::setSpeedRatio(float speedMultiplier)
 uint8_t Buzzer::getNextProgramIndex()
 {
     //returns value of next slot
-	uint8_t index = this->bufferProgramIndex;
-	index++;
-	if (index >= BUZZER_NOTES_BUFFER_LENGTH){
-		index = 0;
-	}
-	return index;
+    uint8_t index = this->bufferProgramIndex;
+    index++;
+    if (index >= BUZZER_NOTES_BUFFER_LENGTH)
+    {
+        index = 0;
+    }
+    return index;
 }
 
 uint8_t Buzzer::getNextPlayIndex()
 {
     //returns value of next slot
-	uint8_t index = this->bufferPlayIndex;
-	index++;
-	if (index >= BUZZER_NOTES_BUFFER_LENGTH){
-		index = 0;
-	}
-	return index;
+    uint8_t index = this->bufferPlayIndex;
+    index++;
+    if (index >= BUZZER_NOTES_BUFFER_LENGTH)
+    {
+        index = 0;
+    }
+    return index;
 }
 
-void Buzzer::buzzerSilent(){
-	 noTone(this->pin);	
+void Buzzer::buzzerSilent()
+{
+    noTone(this->pin);
 }
 
 void Buzzer::buzzerSilentClearBuffer()
 {
     //erase contents of buzzerNotesBuffer and switch off.
     this->buzzerSilent();
-	this->clearBuzzerNotesBuffer();
-    
+    this->clearBuzzerNotesBuffer();
 }
 
 void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
@@ -201,7 +203,7 @@ void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
 
 uint8_t Buzzer::getBuzzerNotesBufferEmpty()
 {
-	 return getNextProgramIndex() == this->bufferPlayIndex;
+    return getNextProgramIndex() == this->bufferPlayIndex;
 }
 
 void Buzzer::lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints)
@@ -215,7 +217,7 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     // assumme value of decimalPoints at start is 0x00
 
     uint8_t noteVal = note % NOTES_COUNT;
-	
+
     if (note > LAST_NOTE)
     {
         // rest
@@ -224,9 +226,9 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
     }
     else
     {
-		textBuf[1] = (noteVal + 45) / 12 + 48;
+        textBuf[1] = (noteVal + 45) / 12 + 48;
         bool sharps[12] = {false, true, false, false, true, false, true, false, false, true, false, true};
-        char notes_chars[12] = {'A', 'A', 'B', 'C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G'};       
+        char notes_chars[12] = {'A', 'A', 'B', 'C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G'};
         noteVal %= 12;
 
         // sharp indicated by a decimal point
@@ -238,30 +240,32 @@ void Buzzer::noteToDisplay(char *textBuf, uint8_t *decimalPoints, uint8_t note)
 
     textBuf[2] = 62; // SPACE_FAKE_ASCII = 62 optimized: assume empty at start
 
-	uint8_t length = this->getLength(note);
-	if (length > 9)
-	{
-		// in ascii table, there is a gap of 7 positions between the numbers and letters. (for the rests, we need hex values.)
-		length += 7;
-	}
+    uint8_t length = this->getLength(note);
+    if (length > 9)
+    {
+        // in ascii table, there is a gap of 7 positions between the numbers and letters. (for the rests, we need hex values.)
+        length += 7;
+    }
     textBuf[3] = length + 48;
-	
 }
 
 uint8_t Buzzer::getLength(uint8_t note)
 {
-    if (note > LAST_NOTE){
-		return note - LAST_NOTE; // lenght in multiple of 1/8.
-	
-	}else{
-		return 0x01 << (3 - (note / NOTES_COUNT)); // 2^(3 -x) --> note length is 8,4,2,1	
-	}
+    if (note > LAST_NOTE)
+    {
+        return note - LAST_NOTE; // lenght in multiple of 1/8.
+    }
+    else
+    {
+        return 0x01 << (3 - (note / NOTES_COUNT)); // 2^(3 -x) --> note length is 8,4,2,1
+    }
 }
 
 void Buzzer::changeNoteToNextLength(int16_t *note)
 {
     *note += NOTES_COUNT;
-	if (*note > LAST_NOTE){
-		*note -= 4*NOTES_COUNT;
-	}
+    if (*note > LAST_NOTE)
+    {
+        *note -= 4 * NOTES_COUNT;
+    }
 }

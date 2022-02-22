@@ -21,5 +21,4 @@ void setBit(uint8_t *bitContainer, bool value, byte index);
 bool getBit(uint8_t *bitContainer, byte index);
 int freeMemory();
 
-
 #endif

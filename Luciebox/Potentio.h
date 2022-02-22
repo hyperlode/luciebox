@@ -12,25 +12,25 @@ public:
 // #define CYCLES_BEFORE_CONSIDERED_STABLE 3
 // #define NUMBER_OF_KNOB_POSITIONS 12  //provide an equal resistance between each position
 #define POTENTIO_SENSITIVITY 5
-	Potentio();
+    Potentio();
 
-	long getValueMapped(long minimumValue, long maximumValue);
+    long getValueMapped(long minimumValue, long maximumValue);
 
-	void setPin(byte pin);
-	uint16_t getValue();
-	uint16_t getValueStable();
-	void refresh();
+    void setPin(byte pin);
+    uint16_t getValue();
+    uint16_t getValueStable();
+    void refresh();
 
-	bool getValueStableChangedEdge();
-	bool getLastStableValueChangedUp();
+    bool getValueStableChangedEdge();
+    bool getLastStableValueChangedUp();
 
-	bool increaseSubtractAtChange(int16_t *container, uint8_t amount);
+    bool increaseSubtractAtChange(int16_t *container, uint8_t amount);
 
 private:
-	byte analogPin;
-	int16_t potentio_value;
-	int16_t potentio_value_stable;
-	bool potentio_value_stable_changed;
-	bool potentio_value_last_change_up_else_down;
+    byte analogPin;
+    int16_t potentio_value;
+    int16_t potentio_value_stable;
+    bool potentio_value_stable_changed;
+    bool potentio_value_last_change_up_else_down;
 };
 #endif

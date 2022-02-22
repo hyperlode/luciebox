@@ -12,23 +12,23 @@ public:
 //#define CYCLES_BEFORE_CONSIDERED_STABLE 30
 #define DEBOUNCE_MILLIS 90
 
-	//#define NUMBER_OF_KNOB_POSITIONS 12  //provide an equal resistance between each position
-	PotentioSelector();
-	void initialize(byte pin, uint8_t selector_positions_count);
-	uint8_t getSelectorValue();
-	void refresh();
-	bool getValueChangedEdge();
+    //#define NUMBER_OF_KNOB_POSITIONS 12  //provide an equal resistance between each position
+    PotentioSelector();
+    void initialize(byte pin, uint8_t selector_positions_count);
+    uint8_t getSelectorValue();
+    void refresh();
+    bool getValueChangedEdge();
 
 private:
-	uint8_t getSelectorValueRaw();
-	unsigned long debounceMillis;
-	unsigned long buttonEdgeMillis;
-	byte analogPin;
-	uint8_t cyclesValueIsStable;
-	uint8_t selectorPreviousValue;
-	uint8_t selectorPreviousStableValue;
-	uint8_t selectorCurrentStableValue;
+    uint8_t getSelectorValueRaw();
+    unsigned long debounceMillis;
+    unsigned long buttonEdgeMillis;
+    byte analogPin;
+    uint8_t cyclesValueIsStable;
+    uint8_t selectorPreviousValue;
+    uint8_t selectorPreviousStableValue;
+    uint8_t selectorCurrentStableValue;
 
-	float analog_range_per_value;
+    float analog_range_per_value;
 };
 #endif

@@ -136,8 +136,7 @@ void Apps::appStateLoop()
         this->init_app(true, selected_app - 1); // selected app -1 because we start from 1
         // set to init state before a new app starts
         appState = appSplash;
-        
-        
+
         break;
     }
 
@@ -154,17 +153,19 @@ void Apps::appStateLoop()
         selected_app += encoder_dial->getDelta();
         checkBoundaries(&selected_app, 1, 22, true);
 
-        if (selected_app_edge != selected_app){
+        if (selected_app_edge != selected_app)
+        {
             // set_blink_offset();
             blink_offset = millis();
         }
         selected_app_edge = selected_app;
-       
+
         this->displayAllSegments = 0;
         flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
 
         // activate switch off. shut down, will trigger when app selector is at negative edge
-        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))){
+        if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
+        {
             switch_off = true;
         }
 
@@ -173,12 +174,12 @@ void Apps::appStateLoop()
             // switch off. shut down
             if (switch_off)
             {
-               shutdown();
+                shutdown();
             }
 
             if (selected_app == selected_app_memory)
             {
-               // this->displayAllSegments = this->displayAllSegmentsBuffer;
+                // this->displayAllSegments = this->displayAllSegmentsBuffer;
                 // displayAllSegmentsToScreen();
                 appState = appRunning;
             }
@@ -190,15 +191,15 @@ void Apps::appStateLoop()
         }
 
         //if (millis_blink_250_750ms()){
-        if ((millis() - blink_offset) > 250){ 
+        if ((millis() - blink_offset) > 250)
+        {
             ledDisp->setBinaryToDisplay(this->displayAllSegmentsBuffer);
             displayAllSegmentsToScreen();
-
-        }else{
-            ledDisp->setNumberToDisplayAsDecimal(selected_app);
-
         }
-
+        else
+        {
+            ledDisp->setNumberToDisplayAsDecimal(selected_app);
+        }
 
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
         // latching button lights off at app selection, whatever their toggle state is (but we do not want to lose the toggle state)
@@ -319,10 +320,8 @@ void Apps::autoShutdown()
 #endif
     if (enable_auto_power_off)
     {
-       
 
         shutdown();
-       
     }
     else
     {
@@ -742,7 +741,7 @@ void Apps::pomodoroTimer()
 #ifdef POMODORO_ENABLE_HOURGLASS
     this->displayAllSegments = 0;
 #endif
-    
+
     lights = 0;
 
     if (encoder_dial->getDelta() != 0)
@@ -761,7 +760,6 @@ void Apps::pomodoroTimer()
         POMODORO_PAUSE_TIME_INDEX = POMODORO_PAUSE_DEFAULT_TIME_INDEX;
         POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX = POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX;
 #endif
-
     }
 
     // acts as ticking mute on / off
@@ -841,9 +839,9 @@ void Apps::pomodoroTimer()
             }
 
             // no sound when zero
-            if (buzzer->getBuzzerNotesBufferEmpty() && // if end of clock signal sounds, no ticking! erase to optimize memory
+            if (buzzer->getBuzzerNotesBufferEmpty() &&                         // if end of clock signal sounds, no ticking! erase to optimize memory
                 !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) // mute on / off
-                ) 
+            )
             {
                 buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
             }
@@ -893,9 +891,8 @@ void Apps::pomodoroTimer()
         {
             display_mode = POMODORO_DISPLAY_TIMER_HOURGLASS;
         }
-       
-#endif
 
+#endif
     }
     else
     {
@@ -908,13 +905,13 @@ void Apps::pomodoroTimer()
         int16_t *active_seconds_modifier = &POMODORO_MAIN_CLOCK_TIME_INDEX; // normal time setting is default option
         if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)))
         {
-            
+
             active_seconds_modifier = &POMODORO_PAUSE_TIME_INDEX;
             display_mode = POMODORO_DISPLAY_PAUSE_INIT_SECS;
         }
         else if ((binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
         {
-            
+
             active_seconds_modifier = &POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX;
             display_mode = POMODORO_DISPLAY_BEEP_PROBABILITY;
         }
@@ -938,7 +935,6 @@ void Apps::pomodoroTimer()
             lights |= 1 << LIGHT_LATCHING_3;
         }
     }
-
 
     // display
     switch (display_mode)
@@ -1013,11 +1009,10 @@ void Apps::pomodoroTimer()
     {
         lights |= 1 << LIGHT_LATCHING_1;
     }
-    if ( POMODORO_PAUSE_TIME_INDEX > 0)
+    if (POMODORO_PAUSE_TIME_INDEX > 0)
     {
         lights |= 1 << LIGHT_LATCHING_2;
     }
-
 
 #ifdef POMODORO_ENABLE_HOURGLASS
     displayAllSegmentsToScreen();
@@ -1034,7 +1029,7 @@ void Apps::pomodoroTimer()
 #endif
 }
 
-#else  // ENABLE_SELECT_APPS_WITH_SELECTOR
+#else // ENABLE_SELECT_APPS_WITH_SELECTOR
 void Apps::pomodoroTimer()
 {
     uint8_t display_mode = POMODORO_DISPLAY_TIMER;
@@ -1309,7 +1304,7 @@ void Apps::pomodoroTimer()
     }
 
 #ifdef POMODORO_ENABLE_HOURGLASS
-    // if (POMODORO_ENABLE_HOURGLASS_VISUALS){ 
+    // if (POMODORO_ENABLE_HOURGLASS_VISUALS){
     displayAllSegmentsToScreen();
 
     // }else{
@@ -2174,21 +2169,23 @@ void Apps::quiz()
 {
     if (this->app_init_edge)
     {
-        
+
         QUIZ_RANDOM_WAIT_TIME_MAX_INDEX = 3;
         quizState = quizInitWait;
     }
 
     lights = 0;
-    
+
     lights |= 1 << LIGHT_LATCHING_3;
-    
-    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)){
+
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
+    {
 
         lights |= 1 << LIGHT_LATCHING_2;
     }
-    
-    if (QUIZ_RANDOM_WAIT_TIME_MAX_INDEX != QUIZ_DEFAULT_WAIT_TIME_INDEX){
+
+    if (QUIZ_RANDOM_WAIT_TIME_MAX_INDEX != QUIZ_DEFAULT_WAIT_TIME_INDEX)
+    {
         lights |= 1 << LIGHT_LATCHING_1;
     }
 
@@ -2198,8 +2195,9 @@ void Apps::quiz()
     {
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            
-            if (QUIZ_END_GAME_WINNER_DISPLAY ){
+
+            if (QUIZ_END_GAME_WINNER_DISPLAY)
+            {
                 // start of new game
                 QUIZ_END_GAME_WINNER_DISPLAY = false;
                 for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -2207,10 +2205,8 @@ void Apps::quiz()
                     QUIZ_SCORE[i] = 0;
                 }
                 loadBuzzerTrack(SONG_ATTACK);
-
             }
             quizState = quizInitRandomTime;
-            
         }
         if (this->millis_half_second_period())
         {
@@ -2221,20 +2217,18 @@ void Apps::quiz()
         {
             //QUIZ_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
             encoderDialRefreshTimeIndex(&QUIZ_RANDOM_WAIT_TIME_MAX_INDEX);
-
         }
-        QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS= indexToTimeSeconds(QUIZ_RANDOM_WAIT_TIME_MAX_INDEX); 
+        QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS = indexToTimeSeconds(QUIZ_RANDOM_WAIT_TIME_MAX_INDEX);
     }
     break;
-    
+
     case quizWaitForQuizMaster:
     {
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-        quizState = quizInitWait;
+            quizState = quizInitWait;
         }
-
     }
     break;
 
@@ -2242,7 +2236,6 @@ void Apps::quiz()
     {
         quizState = quizWaitRandomTime;
         QUIZ_RANDOM_WAIT_TIME.start(random((long)-1000 * QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS, (long)-500));
-        
     }
 
     case quizWaitRandomTime:
@@ -2271,8 +2264,6 @@ void Apps::quiz()
                 buzzerPlayDisappointment();
             }
         }
-
-        
     }
     break;
 
@@ -2333,8 +2324,6 @@ void Apps::quiz()
         {
             quizState = quizInitWait;
         }
-
-
     }
     break;
 
@@ -2381,7 +2370,7 @@ void Apps::quiz()
         int16_t score = (int16_t)QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX];
         stepChange(&score, encoder_dial->getDelta(), 0, 10, false);
 
-        if ( !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)) )
+        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
         {
             // shoot out mode
             initiateCountDowntimerWith500Millis(&QUIZ_RANDOM_WAIT_TIME);
@@ -2395,21 +2384,20 @@ void Apps::quiz()
             quizState = quizWaitForQuizMaster;
         }
 #else
-        else if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
-        {
-            //this->buzzerSilentClearBufferAndAddNote(A7_2);
-            quizState = quizInitWait;
-           // binaryInputs[BUTTON_LATCHING_3].setToggleValue(1); // will nudge it to the init state. 
-        }
+            else if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+            {
+                //this->buzzerSilentClearBufferAndAddNote(A7_2);
+                quizState = quizInitWait;
+                // binaryInputs[BUTTON_LATCHING_3].setToggleValue(1); // will nudge it to the init state.
+            }
 #endif
 
         QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = (uint8_t)score;
         if (score > 3)
         {
             QUIZ_END_GAME_WINNER_DISPLAY = true;
-            //binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // will nudge it to the init state. 
-            
-            
+            //binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // will nudge it to the init state.
+
             //QUIZ_SCORE[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = 0;
             playSongHappyDryer();
             quizState = quizInitWait;
@@ -2427,8 +2415,6 @@ void Apps::quiz()
     break;
     }
 
-  
-
     int16_t scoreToDisplay = 10000; // 10000 to make sure there will always be zeros for all digits
     int16_t multiplier = 1000;
     for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -2437,25 +2423,26 @@ void Apps::quiz()
         multiplier /= 10;
     }
     ledDisp->setNumberToDisplayAsDecimal(scoreToDisplay);
-    
-    if(QUIZ_END_GAME_WINNER_DISPLAY){
+
+    if (QUIZ_END_GAME_WINNER_DISPLAY)
+    {
         // setStandardTextToTextBuf(TEXT_SPACES);
         // textBuf[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
         // textBufToDisplay();
         // ledDisp->setCharToDisplay(0, '?');
         textHandle[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = '?';
         // ledDisp->setCharToDisplay(QUIZ_MOST_RECENT_ROUND_WINNER_INDEX, '?');
-
     }
 
-    if (millis_quarter_second_period() && quizState == quizRoundAfterMath){
+    if (millis_quarter_second_period() && quizState == quizRoundAfterMath)
+    {
 
         textHandle[QUIZ_MOST_RECENT_ROUND_WINNER_INDEX] = ' ';
     }
 
+    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1) && quizState == quizInitWait)
+    {
 
-    if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1) && quizState == quizInitWait) {
-        
         if (millis_blink_250_750ms())
         {
             setStandardTextToTextHANDLE(RANDOM);
@@ -2464,10 +2451,11 @@ void Apps::quiz()
         {
             ledDisp->setNumberToDisplayAsDecimal((int16_t)QUIZ_RANDOM_WAIT_TIME_MAX_SECONDS);
         }
-    }else{
+    }
+    else
+    {
         // the decimal points are a dividor between player's scores.
         ledDisp->setDecimalPointsToDisplay(B00001111);
-
     }
 }
 
@@ -3381,7 +3369,7 @@ void Apps::drawGame()
         }
         if (((binaryInputsEdgeDown | binaryInputsEdgeUp) & option_latching_buttons_mask) != 0) // a button edge detected
 #else
-        if (((binaryInputsEdgeUp)&option_latching_buttons_mask) != 0) // a button edge detected
+            if (((binaryInputsEdgeUp)&option_latching_buttons_mask) != 0) // a button edge detected
 #endif
         {
             drawGameState = drawGameWaitForStart;
@@ -3396,7 +3384,7 @@ void Apps::drawGame()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if ((binaryInputsEdgeUp | binaryInputsEdgeDown) & (1 << BUTTON_INDEXED_LATCHING_3))
 #else
-        if ((binaryInputsEdgeUp) & (1 << BUTTON_INDEXED_LATCHING_3))
+            if ((binaryInputsEdgeUp) & (1 << BUTTON_INDEXED_LATCHING_3))
 #endif
         {
             drawGameState = drawGameEvaluate;
@@ -3428,10 +3416,10 @@ void Apps::drawGame()
             lights |= 1 << LIGHT_MOMENTARY_0;
         }
 #else
-        if ((binaryInputsEdgeUp) & (1 << BUTTON_INDEXED_LATCHING_3))
-        {
-            drawGameState = drawGameWaitForStart;
-        }
+            if ((binaryInputsEdgeUp) & (1 << BUTTON_INDEXED_LATCHING_3))
+            {
+                drawGameState = drawGameWaitForStart;
+            }
 
 #endif
 
@@ -4331,10 +4319,10 @@ void Apps::modeSimon()
             simonState = simonNewGame;
         }
 #else
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
-        {
-            simonState = simonNewGame;
-        }
+            if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+            {
+                simonState = simonNewGame;
+            }
 #endif
 
         // latching_3_blink();
@@ -4467,7 +4455,7 @@ void Apps::modeSimon()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
                 simonState = simonWaitForNewGame;
 #else
-                binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
+                    binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
 #endif
             }
             else
@@ -4625,7 +4613,7 @@ void Apps::modeReactionGame()
 
     if (this->app_init_edge)
     {
-       
+
         reactionGameState = reactionWaitForStart;
         displayAllSegments = 0x00;
 
@@ -4647,10 +4635,10 @@ void Apps::modeReactionGame()
         reactionGameState = reactionWaitForStart;
     }
 #else
-    if ( this->binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
-    {
-        reactionGameState = reactionWaitForStart;
-    }
+        if (this->binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            reactionGameState = reactionWaitForStart;
+        }
 
 #endif
 
@@ -4669,9 +4657,9 @@ void Apps::modeReactionGame()
         // check options
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         REACTION_GUITAR_APP_ELSE_WHACKING_APP = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_0)) > 0;
-        
+
 #else
-        REACTION_GUITAR_APP_ELSE_WHACKING_APP = (selected_app == APP_SELECTOR_GUITAR_HERO);
+            REACTION_GUITAR_APP_ELSE_WHACKING_APP = (selected_app == APP_SELECTOR_GUITAR_HERO);
 #endif
 
         REACTION_SPECIALHEXBIRD_ELSE_NORMAL = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
@@ -4699,8 +4687,8 @@ void Apps::modeReactionGame()
 
         // play game button pressed
         if (
-        this->binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3) &&
-        binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+            this->binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3) &&
+            binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             if (!REACTION_GUITAR_APP_ELSE_WHACKING_APP && REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
             {
@@ -6287,17 +6275,17 @@ void Apps::multitimer_refresh()
         {
             this->multitimer_state = initialized;
         }
-         if (millis_quarter_second_period())
+        if (millis_quarter_second_period())
         {
             settingsLights |= MULTITIMER_LIGHT_FISCHER;
         }
 
 #else
-        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
-        {
-            this->multitimer_state = initialized;
-        }
-        settingsLights |= MULTITIMER_LIGHT_FISCHER;
+            if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1)))
+            {
+                this->multitimer_state = initialized;
+            }
+            settingsLights |= MULTITIMER_LIGHT_FISCHER;
 #endif
 
         // fischer timer
@@ -6316,7 +6304,6 @@ void Apps::multitimer_refresh()
             timeSecondsToClockString(textHandle, indexToTimeSeconds(MULTITIMER_FISCHER_TIME_INDEX));
         }
 
-       
         settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
     }
 

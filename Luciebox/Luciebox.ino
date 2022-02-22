@@ -139,7 +139,6 @@ void processInput()
         {
             binaryInputs[BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET + i].setValue(buttonsLatching.getButtonValueByIndex(i));
         }
-
     }
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
     binaryInputs[0].setValue(digitalRead(PIN_SELECTOR_BUTTON));
@@ -195,10 +194,9 @@ void setup()
 {
 #ifdef ENABLE_SOFT_POWER_OFF
     // first thing to do: hold power
-    pinMode(PIN_POWER_ON_HOLD,OUTPUT);
+    pinMode(PIN_POWER_ON_HOLD, OUTPUT);
     digitalWrite(PIN_POWER_ON_HOLD, HIGH);
 #endif
-
 
     // fill up the ram with a default value. This is fun to check in HACK mode.
     // by checking how much of the original values are still there, we can see how much RAM is used at its peak
@@ -225,7 +223,6 @@ void setup()
     pinMode(PIN_SELECTOR_BUTTON, INPUT);
     digitalWrite(PIN_SELECTOR_BUTTON, HIGH); // pull high
 #endif
-    
 
     buttonsMomentary.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_MOMENTARY_COUNT, setValues_1);
     buttonsLatching.setPin(PIN_BUTTONS_LATCHING, BUTTONS_LATCHING_COUNT, setValues_2);
