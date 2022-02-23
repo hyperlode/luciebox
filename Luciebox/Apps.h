@@ -40,6 +40,8 @@
 #include "RotaryEncoderDial.h"
 #include "PretbakSettings.h"
 
+#define APP_NUMBER_TO_PICTOGRAM_DELAY_MILLIS 600
+
 #define APP_SELECTOR_SETTING 0
 #define APP_SELECTOR_SETTING_TOO 1
 #define APP_SELECTOR_STOPWATCH 2
@@ -132,7 +134,7 @@
 
 #define SOUND_SONG_COMPOSER_DEFAULT_NOTE REST_3_8
 
-// #define shootoutWaitforquimaster state0
+// #define shootoutWaitForQuizmaster state0
 // #define shootoutWaitRandomTime state1
 // #define shootoutWaitPlayerPress state2
 // #define shootoutDefineRoundWinner state3
@@ -275,6 +277,7 @@
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
 #define POMODORO_TALLY_TYPE general_uint8_t_4
 
+
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
 #define REACTION_GAME_STEP_TIME_MILLIS general_long_1
@@ -319,6 +322,7 @@
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
 #define POMODORO_FIRST_TICKING_CYCLING_DONE general_boolean3
+#define SHOOTOUT_GAME_ALREADY_STARTED general_boolean3
 
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 #define POMODORO_TIMER_TICKING general_boolean4
@@ -1407,8 +1411,9 @@ private:
 
     enum ShootoutState : uint8_t
     {
+        // shootoutStartNewGame,
         shootoutInitWait,
-        shootoutWaitforquimaster,
+        shootoutWaitForQuizmaster,
         shootoutWaitRandomTime,
         shootoutWaitPlayerPress,
         shootoutDefineRoundWinner,

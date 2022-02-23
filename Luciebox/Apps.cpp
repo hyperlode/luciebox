@@ -161,7 +161,15 @@ void Apps::appStateLoop()
         selected_app_edge = selected_app;
 
         this->displayAllSegments = 0;
-        flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
+
+        if (switch_off)
+        {
+            setStandardTextToTextHANDLE(TEXT_OFF);
+        }
+        else
+        {
+            flashPictureToDisplayAllSegments(app_splash_screens + (selected_app - 1) * 4);
+        }
 
         // activate switch off. shut down, will trigger when app selector is at negative edge
         if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
@@ -190,12 +198,13 @@ void Apps::appStateLoop()
             selected_app_memory = selected_app;
         }
 
-        if(millis_quarter_second_period()){
-            lights |= 1<<LIGHT_MOMENTARY_0 | 1<<LIGHT_MOMENTARY_2 | 1<<LIGHT_MOMENTARY_3; 
+        if (millis_quarter_second_period())
+        {
+            lights |= 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
         }
 
         //if (millis_blink_250_750ms()){
-        if ((millis() - blink_offset) > 250)
+        if ((millis() - blink_offset) > APP_NUMBER_TO_PICTOGRAM_DELAY_MILLIS)
         {
             ledDisp->setBinaryToDisplay(this->displayAllSegmentsBuffer);
             displayAllSegmentsToScreen();
@@ -547,7 +556,7 @@ void Apps::initializeAppDataToDefault()
 
     randomSeed(millis());
 
-    encoder_dial->setSensitivity(4);
+    encoder_dial->setSensitivity(8);
 
     // all shared variables to zero or false
 
@@ -611,7 +620,7 @@ bool Apps::init_app(bool init, uint8_t selector)
     }
     else
 #endif
-    if (INIT_SPLASH_ANIMATION_STEP < 23)
+        if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
@@ -2174,7 +2183,7 @@ void Apps::shootout()
     if (this->app_init_edge)
     {
 
-        SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX = 3;
+        SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX = SHOOTOUT_DEFAULT_WAIT_TIME_INDEX;
         shootoutState = shootoutInitWait;
     }
 
@@ -2200,9 +2209,10 @@ void Apps::shootout()
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
 
-            if (SHOOTOUT_END_GAME_WINNER_DISPLAY)
+            if (!SHOOTOUT_GAME_ALREADY_STARTED)
             {
                 // start of new game
+                SHOOTOUT_GAME_ALREADY_STARTED = true;
                 SHOOTOUT_END_GAME_WINNER_DISPLAY = false;
                 for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
                 {
@@ -2226,7 +2236,7 @@ void Apps::shootout()
     }
     break;
 
-    case shootoutWaitforquimaster:
+    case shootoutWaitForQuizmaster:
     {
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -2268,6 +2278,14 @@ void Apps::shootout()
                 buzzerPlayDisappointment();
             }
         }
+
+#ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            SHOOTOUT_GAME_ALREADY_STARTED = false;
+            shootoutState = shootoutInitWait;
+        }
+#endif
     }
     break;
 
@@ -2307,7 +2325,7 @@ void Apps::shootout()
 
         // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         // {
-        //     shootoutState = shootoutWaitforquimaster;
+        //     shootoutState = shootoutWaitForQuizmaster;
         // }
 
         // //TEST SHOW RAW ANALOG VALUES
@@ -2326,6 +2344,7 @@ void Apps::shootout()
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
+            SHOOTOUT_GAME_ALREADY_STARTED = false;
             shootoutState = shootoutInitWait;
         }
     }
@@ -2382,11 +2401,12 @@ void Apps::shootout()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         else if (!(binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         {
-            shootoutState = shootoutWaitforquimaster;
+            shootoutState = shootoutWaitForQuizmaster;
         }
 #else
             else if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
             {
+                //SHOOTOUT_GAME_ALREADY_STARTED = false;
                 shootoutState = shootoutInitWait;
             }
 #endif
@@ -2397,6 +2417,7 @@ void Apps::shootout()
             SHOOTOUT_SCORE[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX]--; // let's not show a ten on the display (it messes up the single digit mode.)
             SHOOTOUT_END_GAME_WINNER_DISPLAY = true;
             playSongHappyDryer();
+            SHOOTOUT_GAME_ALREADY_STARTED = false;
             shootoutState = shootoutInitWait;
         }
     }
