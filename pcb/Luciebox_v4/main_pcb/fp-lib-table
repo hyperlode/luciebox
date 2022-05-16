@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "Luciebox")(type "KiCad")(uri "${KIPRJMOD}/../Luciebox_components/Luciebox.pretty")(options "")(descr ""))
+)
