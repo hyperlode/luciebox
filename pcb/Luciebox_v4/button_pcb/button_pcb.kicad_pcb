@@ -566,7 +566,7 @@
       (net 17 "Net-(S7-Pad5)") (pinfunction "LED_-") (pintype "input") (tstamp 90d8f0c0-0616-4df1-9735-031772137716))
   )
 
-  (footprint "Luciebox_components:Terminal_8x1_100mil" locked (layer "F.Cu")
+  (footprint "Luciebox_components:Terminal_8x1_100mil" (layer "F.Cu")
     (tedit 5FCF9EA0) (tstamp 8269e9fd-85b6-4956-b9ff-6bc28fa3d59b)
     (at 39.37 33.02)
     (property "Sheetfile" "button_pcb.kicad_sch")
@@ -635,7 +635,7 @@
       (clearance 2) (tstamp b207609a-48eb-4c40-956d-c17db0f4bcd3))
   )
 
-  (footprint "Luciebox_components:Terminal_8x1_100mil" locked (layer "F.Cu")
+  (footprint "Luciebox_components:Terminal_8x1_100mil" (layer "F.Cu")
     (tedit 5FCF9EA0) (tstamp 9396dbf5-aa3c-4ba1-a9ae-1945fbb2026c)
     (at 59.69 33.02)
     (property "Sheetfile" "button_pcb.kicad_sch")
@@ -785,7 +785,7 @@
       (net 16 "Net-(S6-Pad5)") (pinfunction "LED_-") (pintype "input") (tstamp 54289e4f-2121-47a5-879a-7924292750ec))
   )
 
-  (footprint "Luciebox_components:Terminal_8x1_100mil" locked (layer "F.Cu")
+  (footprint "Luciebox_components:Terminal_8x1_100mil" (layer "F.Cu")
     (tedit 5FCF9EA0) (tstamp b8dbe2de-283b-405e-95ac-e8f8950e16ea)
     (at 19.05 33.02)
     (property "Sheetfile" "button_pcb.kicad_sch")
@@ -865,7 +865,7 @@
 
   (footprint "Luciebox_components:Terminal_2x1_100mil" (layer "F.Cu")
     (tedit 62866C62) (tstamp d502d112-ecd7-49ca-b07e-5be59e8d7452)
-    (at 66.04 27.94)
+    (at 65 24)
     (property "Sheetfile" "button_pcb.kicad_sch")
     (property "Sheetname" "")
     (path "/722cb8c9-9590-4867-9de3-667f80afb253")
@@ -1345,7 +1345,8 @@
   (via (at 11 57) (size 0.8) (drill 0.4) (layers "F.Cu" "B.Cu") (net 6) (tstamp bc5bc1d7-4407-403d-ae4a-ccd5432298f8))
   (segment (start 11 57) (end 18.5 57) (width 0.25) (layer "B.Cu") (net 6) (tstamp 8dbdbe9e-d8bc-418a-ab4f-ec7cd39b09e9))
   (segment (start 12.5 36.5) (end 8 36.5) (width 0.25) (layer "B.Cu") (net 6) (tstamp bc18fe64-1d45-4bf5-8c96-434f9a929895))
-  (segment (start 66.04 27.94) (end 60.96 33.02) (width 0.25) (layer "B.Cu") (net 7) (tstamp 9cc555be-8762-4778-bd33-6feb7cc17d58))
+  (segment (start 65 28.98) (end 60.96 33.02) (width 0.25) (layer "B.Cu") (net 7) (tstamp c03f5a96-9870-4cd7-ace5-da68a3aa29cf))
+  (segment (start 65 24) (end 65 28.98) (width 0.25) (layer "B.Cu") (net 7) (tstamp ee94cadf-f076-4d4f-b155-63eea51e1793))
   (segment (start 14 36) (end 16.705489 33.294511) (width 0.25) (layer "B.Cu") (net 8) (tstamp 01158329-e919-4a4e-b979-18fc8333c4ec))
   (segment (start 17.334922 31.945489) (end 19.245489 31.945489) (width 0.25) (layer "B.Cu") (net 8) (tstamp 0e2cdfc8-1ca3-4375-8b34-42c522886561))
   (segment (start 14 42.738) (end 14 36) (width 0.25) (layer "B.Cu") (net 8) (tstamp 39be383d-6880-4361-a9d5-5ef69889208e))
@@ -1441,7 +1442,8 @@
   (segment (start 39.651469 39.088531) (end 39.651469 43.552523) (width 0.25) (layer "B.Cu") (net 17) (tstamp b1be41df-9a58-4b46-9d21-bc5cd225eac2))
   (segment (start 39.376478 45.172486) (end 40.026957 45.822965) (width 0.25) (layer "B.Cu") (net 17) (tstamp bb958e34-f28d-4437-8a91-1e1fad604584))
   (segment (start 45.72 33.02) (end 39.651469 39.088531) (width 0.25) (layer "B.Cu") (net 17) (tstamp c6dd80c6-90bb-4ba5-939e-3d312e982fe2))
-  (segment (start 63.5 27.94) (end 58.42 33.02) (width 0.25) (layer "B.Cu") (net 18) (tstamp 14c535e1-128b-49c2-969e-eef4ff75d108))
+  (segment (start 62.46 28.98) (end 58.42 33.02) (width 0.25) (layer "B.Cu") (net 18) (tstamp 0df6aad1-a910-4bdd-b824-34e703d73384))
+  (segment (start 62.46 24) (end 62.46 28.98) (width 0.25) (layer "B.Cu") (net 18) (tstamp 6e462fd2-d79d-4437-9a3e-b8ad494da0cc))
   (segment (start 30.48 33.02) (end 36.624511 39.164511) (width 0.25) (layer "B.Cu") (net 19) (tstamp 00de8839-685b-40e2-bfc0-4fd216452e1f))
   (segment (start 12.627612 54.10098) (end 14.872388 54.10098) (width 0.25) (layer "B.Cu") (net 19) (tstamp 0997b62e-7470-4025-954d-d6f2b06161b8))
   (segment (start 14.872388 54.10098) (end 15.372386 54.600978) (width 0.25) (layer "B.Cu") (net 19) (tstamp 228944cc-9531-4f5c-80f0-d4a00554726f))
@@ -1553,11 +1555,4 @@
   (segment (start 7.444109 56.399022) (end 4.627612 56.39902) (width 0.25) (layer "B.Cu") (net 23) (tstamp 8c2dd2f9-cc12-44cd-bdeb-eb8543a8c935))
   (segment (start 0.476468 52.247876) (end 0.476468 40.387828) (width 0.25) (layer "B.Cu") (net 23) (tstamp f591c0b6-d576-41da-82b1-19a86fdc973f))
 
-  (group "" locked (id d0e64b79-2150-4840-bbf6-44e70b72fc6c)
-    (members
-      8269e9fd-85b6-4956-b9ff-6bc28fa3d59b
-      9396dbf5-aa3c-4ba1-a9ae-1945fbb2026c
-      b8dbe2de-283b-405e-95ac-e8f8950e16ea
-    )
-  )
 )
