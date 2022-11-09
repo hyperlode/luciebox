@@ -2136,7 +2136,7 @@
     (property "Value" "D_Schottky" (id 1) (at 0 -2.54 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "Luciebox:smd_throughhole_2_pins" (id 2) (at 0 0 0)
+    (property "Footprint" "Luciebox:D_SMA" (id 2) (at 0 0 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 0 0 0)
