@@ -5832,14 +5832,20 @@ void Apps::multitimer_integrated()
 #else
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
-            {
-                this->multitimer_start();
-            }
-            else
-            {
-                this->multitimer_init();
-            }
+            	if (this->multitimer_state == initialized)
+	{
+		this->multitimer_start();
+	}
+            // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
+            // {
+            //     // start multitimer
+            //     this->multitimer_start();
+            // }
+            // else
+            // {
+            //     // stop multitimer
+            //     this->multitimer_init();
+            // }
         }
 #endif
 
@@ -6065,6 +6071,7 @@ void Apps::multitimer_refresh()
     if (this->multitimer_state == initialized)
     {
         this->multitimer_randomStarter = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
+        
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
@@ -6072,10 +6079,10 @@ void Apps::multitimer_refresh()
             this->multitimer_state = setFischer;
         }
 #else
-            if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
-            {
-                this->multitimer_state = setFischer;
-            }
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
+        {
+            this->multitimer_state = setFischer;
+        }
 
 #endif
 
@@ -6129,18 +6136,20 @@ void Apps::multitimer_refresh()
             }
         }
 
-        if (millis_half_second_period())
-        {
-            settingsLights |= MULTITIMER_LIGHT_PLAYING;
-        }
         if (this->multitimer_randomStarter)
         {
             // pause light blinking.
             if (millis_quarter_second_period())
             {
-                settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
+                settingsLights |= MULTITIMER_LIGHT_PLAYING; //pause light on.
+                // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
             }
         }
+        else if (millis_half_second_period())
+        {
+            settingsLights |= MULTITIMER_LIGHT_PLAYING;
+        }
+
         settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
     }
     else if (this->multitimer_state == playing)
@@ -6148,7 +6157,9 @@ void Apps::multitimer_refresh()
         // never auto power off when timer is on
         resetInactivityTimer();
 
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
+        // start button becomes pause once timer is going. 
+        // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             this->multitimer_pause();
         }
@@ -6204,8 +6215,8 @@ void Apps::multitimer_refresh()
             }
         }
 
-        // settingsLights |= MULTITIMER_LIGHT_PLAYING; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
-        settingsLights |= MULTITIMER_LIGHT_PAUSE; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
+        settingsLights |= MULTITIMER_LIGHT_PLAYING; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
+        //settingsLights |= MULTITIMER_LIGHT_PAUSE; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
     }
     else if (this->multitimer_state == finished)
     {
@@ -6230,7 +6241,8 @@ void Apps::multitimer_refresh()
     else if (this->multitimer_state == statePaused)
     {
 
-        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
+        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+        // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
         {
             this->multitimer_continu();
         }
@@ -6273,7 +6285,8 @@ void Apps::multitimer_refresh()
         // pause light blinking.
         if (millis_quarter_second_period())
         {
-            settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
+            settingsLights |= MULTITIMER_LIGHT_PLAYING; //pause light on.
+            // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
         }
         // playing light on.
         // settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
@@ -6325,6 +6338,10 @@ void Apps::multitimer_refresh()
         // fischer light always solid on when not zero seconds added. (except during setting, then blinking).
         settingsLights |= MULTITIMER_LIGHT_FISCHER;
     }
+    if (this->multitimer_randomStarter)
+    {
+        settingsLights |= MULTITIMER_LIGHT_RANDOM_STARTER;
+    }
 
     this->lights = 0x0;
     // timer buttons lights to real lights
@@ -6337,7 +6354,8 @@ void Apps::multitimer_refresh()
     }
 
     // settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
-    (MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
+    (MULTITIMER_LIGHT_RANDOM_STARTER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
+    // (MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
     (MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
     (MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 
