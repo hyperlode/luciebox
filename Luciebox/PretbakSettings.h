@@ -10,7 +10,7 @@
 // v306 : song composer / change apps sequence. baby app has no shift.
 // v307 : introduce V4 prototype. make app selector dial optional. redo apps (see manual)
 
-// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 
@@ -332,7 +332,8 @@
 #define EEPROM_MULTITIMER_TIMERS_COUNT EEPROM_MULTITIMER_START_ADDRESS + 0                 // 1 byte
 #define EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX EEPROM_MULTITIMER_START_ADDRESS + 1 // 4* 1 bytes
 #define EEPROM_MULTITIMER_FISHER_TIME_INDEX EEPROM_MULTITIMER_START_ADDRESS + 5            // 1 bytes
-#define EEPROM_MULTITIMER_TOTAL_LENGTH 6                                                   // 6 bytes timers count, timers init time index, fischer time index
+#define EEPROM_MULTITIMER_RANDOM_STARTER EEPROM_MULTITIMER_START_ADDRESS + 6            // 1 bytes
+#define EEPROM_MULTITIMER_TOTAL_LENGTH 7                                                   // 6 bytes timers count, timers init time index, fischer time index
 
 #define EEPROM_POMODORO_START_ADDRESS EEPROM_MULTITIMER_START_ADDRESS + EEPROM_MULTITIMER_TOTAL_LENGTH
 #define EEPROM_POMODORO_INIT_TIME_INDEX EEPROM_POMODORO_START_ADDRESS + 0

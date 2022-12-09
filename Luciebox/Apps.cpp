@@ -5874,6 +5874,7 @@ void Apps::multitimer_setDefaults()
 #ifdef ENABLE_EEPROM
     // no defaults, load eeprom values. at eeprom init, it's all zero...
     MULTITIMER_FISCHER_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX);
+    this->multitimer_randomStarter = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_RANDOM_STARTER);
     // general init
     MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT);
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
@@ -5992,6 +5993,7 @@ void Apps::multitimer_start()
 #ifdef ENABLE_EEPROM
     // it makes sense to store settings into eeprom at start
     eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
+    eeprom_update_byte((uint8_t *)this->multitimer_randomStarter, EEPROM_MULTITIMER_RANDOM_STARTER);
     eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
     {
@@ -6070,8 +6072,12 @@ void Apps::multitimer_refresh()
 
     if (this->multitimer_state == initialized)
     {
-        this->multitimer_randomStarter = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
+        if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2)))
+        {
         
+            // this->multitimer_randomStarter = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
+            this->multitimer_randomStarter = ! this->multitimer_randomStarter;
+        }
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
