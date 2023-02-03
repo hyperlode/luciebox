@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name "Luciebox")(type "KiCad")(uri "${KIPRJMOD}/../Luciebox_components/Luciebox.pretty")(options "")(descr ""))
+  (lib (name "artwork")(type "KiCad")(uri "E:/GIT/Arduino repos/luciebox/pcb/Luciebox/Luciebox_components/artwork.pretty")(options "")(descr ""))
+  (lib (name "artworkv4")(type "KiCad")(uri "E:/GIT/Arduino repos/luciebox/pcb/Luciebox_v4/Luciebox_components/artwork.pretty")(options "")(descr ""))
+)

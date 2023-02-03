@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "Luciebox_components")(type "KiCad")(uri "E:/GIT/Arduino repos/pretbak/pcb/Luciebox_v4/Luciebox_components/Luciebox.pretty")(options "")(descr ""))
+)

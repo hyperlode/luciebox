@@ -1079,8 +1079,10 @@ const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_
                                                LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, LIGHT_LATCHING_3};
 
 #elif defined V4_PCB_MINI
-const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
-                                               LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
+// const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
+//                                                LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
+const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_MOMENTARY_3, LIGHT_LATCHING_3, LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1,
+                                               LIGHT_LATCHING_2, LIGHT_MOMENTARY_2, LIGHT_LATCHING_1};
 #elif defined V3_PCB_BURST
 const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
                                                LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
