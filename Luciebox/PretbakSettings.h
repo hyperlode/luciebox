@@ -104,14 +104,14 @@
 #if (defined V4_PCB_MINI)
 #define PIN_BUTTONS_MOMENTARY A2
 #define PIN_BUTTONS_LATCHING A1
-#define LIGHT_MOMENTARY_0 5 // old: momentary 0
-#define LIGHT_MOMENTARY_1 2 // old: momentary 1
-#define LIGHT_MOMENTARY_2 6 // old: momentary 2
-#define LIGHT_MOMENTARY_3 1 // old: momentary 3
-#define LIGHT_LATCHING_3 7  // old: extra latch
-#define LIGHT_LATCHING_1 4  // old: small latch left
-#define LIGHT_LATCHING_2 3  // old: small latch right
+#define LIGHT_MOMENTARY_0 7 // old: momentary 0
+#define LIGHT_MOMENTARY_1 6 // old: momentary 1
+#define LIGHT_MOMENTARY_2 5 // old: momentary 2
+#define LIGHT_MOMENTARY_3 4 // old: momentary 3
 #define LIGHT_LATCHING_0 0  // old: big latch
+#define LIGHT_LATCHING_1 1  // old: small latch left
+#define LIGHT_LATCHING_2 2  // old: small latch right
+#define LIGHT_LATCHING_3 3  // old: extra latch
 
 #define BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET 4
 #define BUTTONS_MOMENTARY_COUNT 4
