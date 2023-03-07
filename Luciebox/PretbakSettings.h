@@ -16,7 +16,8 @@
 
 // #define V2_PCB_CORONA
 //#define V3_PCB_BURST
-#define V4_PCB_MINI
+// #define V4_PCB_MINI --> abandonned. extremely similar layout of V5 (which is just a debugged V4)
+#define V5_PCB_MINI
 
 // #define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.
 #define ENABLE_SOFT_POWER_OFF
@@ -101,17 +102,17 @@
 
 #define MOMENTARY_BUTTONS_COUNT 4
 
-#if (defined V4_PCB_MINI)
+#if (defined V5_PCB_MINI)
 #define PIN_BUTTONS_MOMENTARY A2
 #define PIN_BUTTONS_LATCHING A1
-#define LIGHT_MOMENTARY_0 7 // old: momentary 0
-#define LIGHT_MOMENTARY_1 6 // old: momentary 1
-#define LIGHT_MOMENTARY_2 5 // old: momentary 2
-#define LIGHT_MOMENTARY_3 4 // old: momentary 3
-#define LIGHT_LATCHING_0 0  // old: big latch
-#define LIGHT_LATCHING_1 1  // old: small latch left
-#define LIGHT_LATCHING_2 2  // old: small latch right
-#define LIGHT_LATCHING_3 3  // old: extra latch
+#define LIGHT_LATCHING_0 0  //old: LIGHT_LATCHING_0 0  // old: big latch
+#define LIGHT_LATCHING_1 1  //old: LIGHT_LATCHING_1 1  // old: small latch left
+#define LIGHT_LATCHING_2 2  //old: LIGHT_LATCHING_2 2  // old: small latch right
+#define LIGHT_LATCHING_3 3  //old: LIGHT_LATCHING_3 3  // old: extra latch
+#define LIGHT_MOMENTARY_0 7  //old: LIGHT_MOMENTARY_0 7 // old: momentary 0
+#define LIGHT_MOMENTARY_1 6  //old: LIGHT_MOMENTARY_1 6 // old: momentary 1
+#define LIGHT_MOMENTARY_2 5  //old: LIGHT_MOMENTARY_2 5 // old: momentary 2
+#define LIGHT_MOMENTARY_3 4  //old: LIGHT_MOMENTARY_3 4 // old: momentary 3
 
 #define BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET 4
 #define BUTTONS_MOMENTARY_COUNT 4
@@ -265,7 +266,7 @@
 #define BUTTON_MOMENTARY_1 5 // second most left
 #define BUTTON_MOMENTARY_2 6 // seconds most right
 #define BUTTON_MOMENTARY_3 7 // most right
-#elif defined V4_PCB_MINI
+#elif defined V5_PCB_MINI
 
 // binary input indeces per button
 #define BUTTON_LATCHING_0 0
