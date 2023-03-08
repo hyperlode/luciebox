@@ -352,6 +352,14 @@ void Apps::shutdown()
     eeprom_update_byte(
         (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
         selected_app);
+
+    // add delay for eeprom to settle down? Fact is, without this delay, it does not save...
+    for (uint16_t i = 0; i < 1000; i++)
+    {
+        resetInactivityTimer();
+    }
+
+
     digitalWrite(PIN_POWER_ON_HOLD, LOW);
     digitalWrite(PIN_SELECTOR_BUTTON, LOW); // pull down input to enable transistor base to go low
     //normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.

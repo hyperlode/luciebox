@@ -1,5 +1,5 @@
 
-#define SOFTWARE_VERSION 307
+#define SOFTWARE_VERSION 308
 // started at v2.00: 200
 // v300 : pcb v3 burst implemented. change in button sequence...
 // v301 : sending out to Belgium 2021-03-19
@@ -9,8 +9,9 @@
 // v305 : add battery voltage indicator (note the voltagedrop because of a Schottky diode to differentiate between real battery voltage and Vcc) / buzzer rework (note scheme, buzzer buffer) / sequencer rework
 // v306 : song composer / change apps sequence. baby app has no shift.
 // v307 : introduce V4 prototype. make app selector dial optional. redo apps (see manual)
+// v308 : V5: bugfixes
 
-//#define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
+// #define ENABLE_SERIAL  //for debugging. if used, pin 0 and 1 cannot be used for other purposes than tx and rx
 //#define ENABLE_TILT_SWITCHES
 //#define ENABLE_ANALOG_PIN_DEBUG  // for debugging at startup (always available in apps anyways.)
 

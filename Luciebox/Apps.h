@@ -5,7 +5,7 @@
 // // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
-// #define ENABLE_DRAW_GAME
+// #define ENABLE_DRAW_GAME // did not survive the hunt for memory... It's a fun app though. Like a memory game!
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define POMODORO_ENABLE_HOURGLASS
