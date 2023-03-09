@@ -358,7 +358,7 @@ const uint16_t timeDialDiscreteSeconds[] = {
     36000};
 
 #define MULTITIMER_MAX_TIMERS_COUNT 4
-#define MULTITIMER_LIGHT_RANDOM_STARTER 0x01
+#define MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT 0x01
 // #define MULTITIMER_LIGHT_PAUSE 0x01
 #define MULTITIMER_LIGHT_PLAYING 0x02
 #define MULTITIMER_LIGHT_FISCHER 0x04
@@ -1177,7 +1177,7 @@ private:
     bool multitimer_getTimerFinished(uint8_t timerIndex);
     bool multitimer_checkAllTimersFinished();
     void multitimer_playerButtonPressEdgeUp(uint8_t index);
-    // void multitimer_playerButtonPressEdgeDown(uint8_t index);
+    // void multitimer_playerButtonPressEdgeUpDown(uint8_t index);
     // void multitimer_setTimersCount(int8_t delta);
     // void multitimer_setStateTimersCount(bool set);
     // void multitimer_setStatePause(bool set);
@@ -1185,7 +1185,7 @@ private:
     void multitimer_buzzerRefresh(bool alarm);
     void multitimer_next(bool activePlayerDied);
     void multitimer_init();
-    void multitimer_start();
+    void multitimer_start(bool isRandomStarter);
     void multitimer_pause();
     void multitimer_continu();
     void multitimer_reset();
@@ -1344,12 +1344,13 @@ private:
     SuperTimer multitimer_timers[MULTITIMER_MAX_TIMERS_COUNT];
     uint8_t multitimer_activeTimer;
     uint8_t multitimer_timerDisplayed;
-    bool multitimer_randomStarter;
+    bool multitimer_surviveAtTimeout;
     bool multitimer_fisherTimer;
     enum multitimer_state : uint8_t
     {
         // enum state{
         initialized = 0,
+        setStartingTimer,
         playing,
         finished,
         statePaused,

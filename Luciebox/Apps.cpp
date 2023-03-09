@@ -5822,7 +5822,6 @@ void Apps::multitimer_integrated()
         }
         if (binaryInputsEdgeDown & (1 << i))
         {
-            // this->multitimer_playerButtonPressEdgeDown(i);
             this->multitimer_timerDisplayed = this->multitimer_activeTimer;
         }
     }
@@ -5839,23 +5838,7 @@ void Apps::multitimer_integrated()
         this->multitimer_init();
     }
 #else
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
-        {
-            if (this->multitimer_state == initialized)
-            {
-                this->multitimer_start();
-            }
-            // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
-            // {
-            //     // start multitimer
-            //     this->multitimer_start();
-            // }
-            // else
-            // {
-            //     // stop multitimer
-            //     this->multitimer_init();
-            // }
-        }
+      
 #endif
 
     // PAUSE Switch
@@ -5863,7 +5846,7 @@ void Apps::multitimer_integrated()
 
     // if (this->multitimer_state == initialized)
     // {
-    // 	this->multitimer_randomStarter = set;
+    // 	this->multitimer_surviveAtTimeout = set;
     // }
     // else if (set && this->multitimer_state == playing)
     // {
@@ -5883,7 +5866,7 @@ void Apps::multitimer_setDefaults()
 #ifdef ENABLE_EEPROM
     // no defaults, load eeprom values. at eeprom init, it's all zero...
     MULTITIMER_FISCHER_TIME_INDEX = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX);
-    this->multitimer_randomStarter = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_RANDOM_STARTER);
+    this->multitimer_surviveAtTimeout = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_SURVIVE_AT_TIMEOUT);
     // general init
     MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT);
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
@@ -5904,17 +5887,6 @@ void Apps::multitimer_setDefaults()
     this->multitimer_activeTimer = 0;
     this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 }
-
-// void Apps::multitimer_setTimersCount(int8_t delta)
-// {
-// 	// delta > 0: increase, else decrease.
-// 	if (this->multitimer_state == initialized)
-// 	{
-// 		nextStepRotate(&MULTITIMER_TIMERS_COUNT, delta > 0, 1, MULTITIMER_MAX_TIMERS_COUNT);
-// 		this->multitimer_activeTimer = 0;
-// 		this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-// 	}
-// }
 
 uint8_t Apps::multitimer_getTimerInitTimeIndex(uint8_t timer)
 {
@@ -5939,17 +5911,16 @@ void Apps::multitimer_init()
     this->multitimer_activeTimer = 0;
 }
 
-// void Apps::multitimer_playerButtonPressEdgeDown(uint8_t index)
-// {
-// 	// if button released, always display active Timer time.
-// 	this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-// }
-
 void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 {
     // every timer index is linked to a button index.
 
-    if (this->multitimer_state == initialized)
+    if (this->multitimer_state == setStartingTimer ){
+            this->multitimer_activeTimer = index;
+            multitimer_start(false);
+
+    }
+    else if (this->multitimer_state == initialized)
     {
         if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
         {
@@ -5985,7 +5956,7 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 
 // 	if (this->multitimer_state == initialized)
 // 	{
-// 		this->multitimer_randomStarter = set;
+// 		this->multitimer_surviveAtTimeout = set;
 // 	}
 // 	else if (set && this->multitimer_state == playing)
 // 	{
@@ -5997,12 +5968,13 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 // 	}
 // }
 
-void Apps::multitimer_start()
+void Apps::multitimer_start(bool isRandomStarter)
 {
+    
 #ifdef ENABLE_EEPROM
     // it makes sense to store settings into eeprom at start
     eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
-    eeprom_update_byte((uint8_t *)this->multitimer_randomStarter, EEPROM_MULTITIMER_RANDOM_STARTER);
+    eeprom_update_byte((uint8_t *)this->multitimer_surviveAtTimeout, EEPROM_MULTITIMER_SURVIVE_AT_TIMEOUT);
     eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
     {
@@ -6018,9 +5990,7 @@ void Apps::multitimer_start()
     }
 
     // this is the moment we chose a random starting timer if enabled.
-    if (this->multitimer_randomStarter)
-    {
-        // randomSeed(millis());
+    if (isRandomStarter){
         this->multitimer_activeTimer = (uint8_t)random(0, (long)MULTITIMER_TIMERS_COUNT);
     }
 
@@ -6081,25 +6051,21 @@ void Apps::multitimer_refresh()
 
     if (this->multitimer_state == initialized)
     {
-        if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2)))
-        {
-
-            // this->multitimer_randomStarter = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
-            this->multitimer_randomStarter = !this->multitimer_randomStarter;
-        }
-
-#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
         {
             this->multitimer_state = setFischer;
         }
-#else
-            if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
-            {
-                this->multitimer_state = setFischer;
-            }
+        
+        if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2)))
+        {
+            this->multitimer_surviveAtTimeout = !this->multitimer_surviveAtTimeout;
+        }
 
-#endif
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+                this->multitimer_state = setStartingTimer;
+        }
+
 
         if (encoder_dial->getDelta() != 0)
         {
@@ -6120,7 +6086,6 @@ void Apps::multitimer_refresh()
             else
             {
                 // set time for each timerbutton pressed
-
                 encoderDialRefreshTimeIndex(&MULTITIMER_DIAL_TIME_INDEX);
                 for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
                 {
@@ -6136,45 +6101,52 @@ void Apps::multitimer_refresh()
 
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
         {
-            if (this->multitimer_randomStarter)
-            {
-                if (millis_quarter_second_period())
-                {
-                    // at random starter, all lights blinking
-                    playerLights |= 1 << i;
-                }
-            }
-            else if (i != this->multitimer_activeTimer || millis_quarter_second_period())
+            if (i != this->multitimer_activeTimer || millis_quarter_second_period())
             {
                 // active timer is blinking. others are solid on.
                 playerLights |= 1 << i;
             }
         }
 
-        if (this->multitimer_randomStarter)
-        {
-            // pause light blinking.
-            if (millis_quarter_second_period())
-            {
-                settingsLights |= MULTITIMER_LIGHT_PLAYING; // pause light on.
-                // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
-            }
-        }
-        else if (millis_half_second_period())
+        if (millis_half_second_period())
         {
             settingsLights |= MULTITIMER_LIGHT_PLAYING;
         }
 
         settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
     }
+    else if (this->multitimer_state == setStartingTimer)
+    {
+        
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+                this->multitimer_start(true);
+           
+        }
+
+        // all player lights blinking
+        for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
+        {
+            if (millis_quarter_second_period())
+            {
+                // at random starter, all lights blinking
+                playerLights |= 1 << i;
+            }
+        }
+
+        if (millis_half_second_period())
+        {
+            settingsLights |= MULTITIMER_LIGHT_PLAYING;
+        }
+
+
+    }
     else if (this->multitimer_state == playing)
     {
         // never auto power off when timer is on
         resetInactivityTimer();
 
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
-        // start button becomes pause once timer is going.
-        // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             this->multitimer_pause();
         }
@@ -6255,9 +6227,10 @@ void Apps::multitimer_refresh()
     }
     else if (this->multitimer_state == statePaused)
     {
+        // never auto power off when timer is on
+        resetInactivityTimer();
 
         if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
-        // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
         {
             this->multitimer_continu();
         }
@@ -6353,9 +6326,9 @@ void Apps::multitimer_refresh()
         // fischer light always solid on when not zero seconds added. (except during setting, then blinking).
         settingsLights |= MULTITIMER_LIGHT_FISCHER;
     }
-    if (this->multitimer_randomStarter)
+    if (this->multitimer_surviveAtTimeout)
     {
-        settingsLights |= MULTITIMER_LIGHT_RANDOM_STARTER;
+        settingsLights |= MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT;
     }
 
     this->lights = 0x0;
@@ -6369,7 +6342,7 @@ void Apps::multitimer_refresh()
     }
 
     // settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
-    (MULTITIMER_LIGHT_RANDOM_STARTER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
+    (MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
     // (MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
     (MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
     (MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
