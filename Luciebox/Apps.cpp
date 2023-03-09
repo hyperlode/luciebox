@@ -6056,7 +6056,7 @@ void Apps::multitimer_refresh()
             this->multitimer_state = setFischer;
         }
         
-        if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2)))
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             this->multitimer_surviveAtTimeout = !this->multitimer_surviveAtTimeout;
         }
@@ -6096,8 +6096,21 @@ void Apps::multitimer_refresh()
                 }
             }
         }
+        
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
+            // display the continue or dead option while button is held
+            if (this->multitimer_surviveAtTimeout){
+                setStandardTextToTextHANDLE(TEXT_CONT);
 
-        this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
+            }else{
+                setStandardTextToTextHANDLE(TEXT_DEAD);
+            }
+        }else{
+            // display active timer time
+            this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
+
+        }
+
 
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
         {
@@ -6343,7 +6356,6 @@ void Apps::multitimer_refresh()
 
     // settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
     (MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
-    // (MULTITIMER_LIGHT_PAUSE & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
     (MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
     (MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 
@@ -6352,7 +6364,10 @@ void Apps::multitimer_refresh()
 
 bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)
 {
-    // return !this->multitimer_timers[timerIndex].getTimeIsNegative();
+    if (this->multitimer_surviveAtTimeout){
+        // if survival enabled, it will never timeout. 
+        return false;
+    }
     return getCountDownTimerHasElapsed(&multitimer_timers[timerIndex]);
 }
 
