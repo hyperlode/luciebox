@@ -220,6 +220,7 @@
 #define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 #define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
 #define SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
+// #define SIMON_PLAYERS_COUNT general_int16_t_3
 
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
@@ -252,7 +253,7 @@
 #define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
-#define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
+// #define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
 #define SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2

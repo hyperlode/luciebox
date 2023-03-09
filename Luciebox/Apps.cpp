@@ -4352,8 +4352,9 @@ void Apps::modeSimon()
         }
 
         // number of players.
-        SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false) / 4 + 1); // start counting from player 0 to display
-
+        //// SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false) / 4 + 1); // start counting from player 0 to display
+        SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) , false) + 1); // start counting from player 0 to display
+        // stepChange(&SIMON_PLAYERS_COUNT-->>>TAKECAREMAKEITINT_16t<<<, this->encoder_dial->getDelta(), 1, SIMON_MAX_PLAYERS, false);
         numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
         textBuf[1] = 'P';
 
@@ -4667,7 +4668,7 @@ void Apps::modeReactionGame()
     case reactionWaitForStart:
     {
         // change level
-        REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(25, false) / 5); // only set the default inittime at selecting the game. If multiple games are played, init time stays the same.
+        REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(5, false) / 1); 
         if (encoder_dial->getDelta())
         {
             // for a more pleasant experience (no blinking during knob turning)
@@ -5335,7 +5336,8 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
     // eeprom start address
 
     // load/save data
-    uint8_t slot_number = encoder_dial->getValueLimited((slotCount - 1) * 5, false) / 5;
+    // uint8_t slot_number = encoder_dial->getValueLimited((slotCount - 1) * 5, false) / 5;
+    uint8_t slot_number = encoder_dial->getValueLimited((slotCount - 1), false);
 
     if (this->encoder_dial->getDelta())
     {
@@ -6106,15 +6108,15 @@ void Apps::multitimer_refresh()
             if ((binaryInputsValue & momentary_buttons_mask) == 0)
             {
                 // set number of timers
-                MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY++; // hack to decrease sensitivity of encoder dial for counter setting only.
-                if (MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY > 10)
-                {
+                // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY++; // hack to decrease sensitivity of encoder dial for counter setting only.
+                // if (MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY > 2)
+                // {
                     stepChange(&MULTITIMER_TIMERS_COUNT, this->encoder_dial->getDelta(), 1, MULTITIMER_MAX_TIMERS_COUNT, false);
                     this->multitimer_activeTimer = 0;
                     this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 
-                    MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
-                }
+                    // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
+                // }
             }
             else
             {
