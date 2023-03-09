@@ -203,7 +203,7 @@ void Apps::appStateLoop()
             lights |= 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
         }
 
-        //if (millis_blink_250_750ms()){
+        // if (millis_blink_250_750ms()){
         if ((millis() - blink_offset) > APP_NUMBER_TO_PICTOGRAM_DELAY_MILLIS)
         {
             ledDisp->setBinaryToDisplay(this->displayAllSegmentsBuffer);
@@ -287,7 +287,7 @@ void Apps::appStateLoop()
         {
             switch_off = false;
             appState = appSelection;
-            //this->displayAllSegmentsBuffer = this->displayAllSegments; // if there is no change of app, the display state needs to be preserved
+            // this->displayAllSegmentsBuffer = this->displayAllSegments; // if there is no change of app, the display state needs to be preserved
         }
 
 #endif
@@ -359,10 +359,9 @@ void Apps::shutdown()
         resetInactivityTimer();
     }
 
-
     digitalWrite(PIN_POWER_ON_HOLD, LOW);
     digitalWrite(PIN_SELECTOR_BUTTON, LOW); // pull down input to enable transistor base to go low
-    //normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.
+    // normally, the device is switched off at this point. IF however, it's powered through an external device bypassing the auto power off mode, it should keep on working.
 
     for (uint16_t i = 0; i < 26000; i++)
     {
@@ -371,12 +370,12 @@ void Apps::shutdown()
 
     digitalWrite(PIN_POWER_ON_HOLD, HIGH);
     digitalWrite(PIN_SELECTOR_BUTTON, HIGH);
-    //buzzerPlayDisappointment();
+    // buzzerPlayDisappointment();
 }
 
 void Apps::appSelector()
 {
-    //#ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
+    // #ifdef FUNCTION_POINTER_APP_SELECTION // problem: takes more memory than switch-case. AND init and initOnBigLatchInitToo not good. The solution would be to have all the apps without advanced init bundled together, and from certain selector value onwards and up, use "init"
 
     switch (selected_app)
     {
@@ -552,11 +551,11 @@ void Apps::initializeAppDataToDefault()
 
     initiateCountDowntimerWith500Millis(&general_timer);
 
-    //buzzer  (buzzer off at init of splash screen)
+    // buzzer  (buzzer off at init of splash screen)
     buzzer->setSpeedRatio(2);
     buzzer->setTranspose(0);
 
-    //encoder
+    // encoder
     encoder_dial->setRange(1023, true); // allow overflow. (this makes it different from the limited potentio.)
     encoder_dial->setValue(0);
 
@@ -633,8 +632,8 @@ bool Apps::init_app(bool init, uint8_t selector)
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
 
-        //ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
-        //textBufToDisplay();
+        // ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
+        // textBufToDisplay();
 
         lights = 0xff;
     }
@@ -721,7 +720,7 @@ void Apps::modeDreamtime()
         if (MODE_DREAMTIME_STEP_MEMORY != MODE_DREAMTIME_STEP)
         {
             // PROBLEM: random notes buffer and song buffer are the same bytes list! -->hence the weird behaviour
-            buzzerSilentClearBufferAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
+            buzzerSilentClearBufferAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); // 60
             // if(buzzer->getBuzzerNotesBufferEmpty()){
             //     addNoteToBuzzer(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
 
@@ -1078,11 +1077,11 @@ void Apps::pomodoroTimer()
     }
 
     POMODORO_AUTO_RESTART_ENABLED = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1);
-    //#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+    // #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
     POMODORO_TIMER_TICKING = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3);
 
-    //#endif
-    // in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
+    // #endif
+    //  in main menu or timing? (run main menu at least once at init. Even when start button started) to initialize variables depending on settings latching buttons
 
     if (POMODORO_TIMER_TICKING && !app_init_edge)
     {
@@ -1374,8 +1373,8 @@ void Apps::stopwatch()
         STOPWATCH_CHRONO_1.setInitTimeMillis(always_on_timer.getTimeMillis());
         STOPWATCH_CHRONO_1.start();
 
-        //always_on_timer.getTimeString(textHandle);
-        //displayTimerSecondsBlinker(&always_on_timer);
+        // always_on_timer.getTimeString(textHandle);
+        // displayTimerSecondsBlinker(&always_on_timer);
     }
 
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -1710,7 +1709,7 @@ void Apps::randomModeTrigger(bool forReal)
 
         RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG, CARDS_DECK, 52);
 
-        //show playing card
+        // show playing card
         if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
         {
             textBuf[1] = RANDOMWORLD_RANDOM_NUMBER % 13 + 49;
@@ -1784,7 +1783,7 @@ void Apps::modeSettings()
 
     if (SETTINGS_MODE_SELECTOR < 6)
     {
-        //normal mode
+        // normal mode
 
         // simple repetitive, predictive mode.
         // each button triggers its corresponding light.
@@ -1796,7 +1795,7 @@ void Apps::modeSettings()
         {
 
             // every momentary button has a matching latching button assigned
-            if (binaryInputsToggleValue & (1 << (i + 4))) //latching
+            if (binaryInputsToggleValue & (1 << (i + 4))) // latching
             {
                 // momentary button pressed while its matching latching button is ON?
 
@@ -1966,7 +1965,7 @@ void Apps::modeSettings()
         if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0))
         {
 #ifdef ENABLE_EEPROM
-            //lights |= 1 << LIGHT_MOMENTARY_2; // will erase all user program memory. Purposly don't advertise
+            // lights |= 1 << LIGHT_MOMENTARY_2; // will erase all user program memory. Purposly don't advertise
             lights |= 1 << LIGHT_MOMENTARY_3; // erases only high scores in games. Which is nice if you want to have a fresh start for a nice gamenight of "Lucieboxes and booz"
             if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
             {
@@ -2023,17 +2022,17 @@ void Apps::modeSettings()
             // atmega328p
             ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
             //  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
-            //delay(2); // Wait for Vref to settle
+            // delay(2); // Wait for Vref to settle
             // playSongHappyDryer();
             // playSongHappyDryer();
 
             loadBuzzerTrack(SONG_ALPHABET);
             buzzerSilentClearBuffer();
-            //fill8BytesArrayWithZero();
+            // fill8BytesArrayWithZero();
             buzzerChangeSpeedRatioWithEncoderDial();
-            //dialGetIndexedtime();
+            // dialGetIndexedtime();
 
-            //Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
+            // Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
             ADCSRA |= _BV(ADSC); // Start conversion
             while (bit_is_set(ADCSRA, ADSC))
                 ; // measuring
@@ -2237,7 +2236,7 @@ void Apps::shootout()
         }
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
         {
-            //SHOOTOUT_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
+            // SHOOTOUT_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
             encoderDialRefreshTimeIndex(&SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX);
         }
         SHOOTOUT_RANDOM_WAIT_TIME_MAX_SECONDS = indexToTimeSeconds(SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX);
@@ -2414,7 +2413,7 @@ void Apps::shootout()
 #else
             else if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
             {
-                //SHOOTOUT_GAME_ALREADY_STARTED = false;
+                // SHOOTOUT_GAME_ALREADY_STARTED = false;
                 shootoutState = shootoutInitWait;
             }
 #endif
@@ -2483,7 +2482,7 @@ void Apps::shootout()
 
 void Apps::modeCountingLettersAndChars()
 {
-    //counting mode: numbers and letters.
+    // counting mode: numbers and letters.
 
     NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE = !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1));
 
@@ -2532,12 +2531,12 @@ void Apps::modeCountingLettersAndChars()
     else
     {
         // show number right away depending on potentio value
-        //LETTERS_AND_CHARS_COUNTER = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
+        // LETTERS_AND_CHARS_COUNTER = (int16_t)(encoder_dial->getValueLimited(25 + NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE * 75, false)); //1024 to 26 letters.
         LETTERS_AND_CHARS_COUNTER += encoder_dial->getDelta();
         modifyValueUpDownWithMomentary2And3(&LETTERS_AND_CHARS_COUNTER);
     }
 
-    //only do the characters of the alphabet in lettermode.
+    // only do the characters of the alphabet in lettermode.
     int16_t maxValue = 9999;
     if (!NUMBERS_AND_LETTERS_NUMBER_ELSE_LETTER_MODE)
     {
@@ -2598,7 +2597,7 @@ void Apps::modeComposeSong()
             COMPOSER_SONG[i] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE;
         }
         COMPOSER_SONG_LENGTH = 1;
-        COMPOSER_SONG[0] = SOUND_SONG_COMPOSER_DEFAULT_NOTE; //default note
+        COMPOSER_SONG[0] = SOUND_SONG_COMPOSER_DEFAULT_NOTE; // default note
         COMPOSER_STEP_TIMER.setInitTimeMillis(-200);
     }
 
@@ -2635,7 +2634,7 @@ void Apps::modeComposeSong()
 
             if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
             {
-                //delete current position
+                // delete current position
                 if (COMPOSER_SONG_LENGTH <= 0)
                 {
                     // empty songs stay empty.
@@ -2650,17 +2649,17 @@ void Apps::modeComposeSong()
                     // deleted space should be a song stop note.
                     COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE;
 
-                    //adjust length
+                    // adjust length
                     COMPOSER_SONG_LENGTH--;
                 }
             }
 
             if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
             {
-                //insert after current index (and move to it)
+                // insert after current index (and move to it)
                 if (COMPOSER_SONG_LENGTH >= bytes_list_bufsize - 2)
                 {
-                    //max length reached
+                    // max length reached
                 }
                 else
                 {
@@ -2708,8 +2707,8 @@ void Apps::modeComposeSong()
                     if (COMPOSER_STEP == COMPOSER_SONG_LENGTH - 1)
                     {
                         COMPOSER_SONG_LENGTH++;
-                        //COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = SOUND_SONG_COMPOSER_DEFAULT_NOTE; //default note
-                        COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE; //default note
+                        // COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = SOUND_SONG_COMPOSER_DEFAULT_NOTE; //default note
+                        COMPOSER_SONG[COMPOSER_SONG_LENGTH - 1] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE; // default note
                     }
                 }
             }
@@ -2739,7 +2738,7 @@ void Apps::modeComposeSong()
             }
         }
 
-        //default potentio behaviour
+        // default potentio behaviour
         byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
         if ((binaryInputsValue & momentary_buttons_mask) == 0) // no buttons pressed
         {
@@ -3019,7 +3018,7 @@ void Apps::modeMovie()
     bool reload_soundtrack = false;
     bool movie_restart = false;
 
-    //reset saved led disp state.
+    // reset saved led disp state.
     if (this->app_init_edge)
     {
         // MOVIE_MODE_FRAME_INTERVAL_TIMER.start(-500);
@@ -3145,12 +3144,12 @@ bool Apps::loadMovieFrame(int16_t frame_index)
 
     if (frame_index < MAX_FRAMES_MOVIES_FLASH)
     {
-        //flash
+        // flash
         flashPictureToDisplayAllSegments(disp_4digits_animations + frame_index * 4);
     }
     else
     {
-        //eeprom
+        // eeprom
         eepromPictureToDisplayAllSegments(frame_index - MAX_FRAMES_MOVIES_FLASH);
     }
 
@@ -3224,28 +3223,28 @@ void Apps::displayChangeGlobal(uint32_t *display_buffer)
         switch (DRAW_SHOW_MODE)
         {
         case 0:
-            //invert
+            // invert
             displayAllSegmentsBuffer = *display_buffer;
             *display_buffer = ~*display_buffer;
             break;
 
         case 1:
-            //blank
+            // blank
             *display_buffer = 0;
             break;
 
         case 2:
-            //special stop frame (for end of animations)
+            // special stop frame (for end of animations)
             *display_buffer = (uint32_t)ANIMATION_STOP_CODE_PART_0 << 0 | (uint32_t)ANIMATION_STOP_CODE_PART_1 << 8 | (uint32_t)ANIMATION_STOP_CODE_PART_2 << 16 | (uint32_t)ANIMATION_STOP_CODE_PART_3 << 24;
             break;
 
         case 3:
-            //full
+            // full
             *display_buffer = 0xFFFFFFFF;
             break;
 
         case 4:
-            //restore
+            // restore
             *display_buffer = displayAllSegmentsBuffer;
         }
     }
@@ -3463,7 +3462,7 @@ void Apps::drawGame()
 
     ledDisp->setBinaryToDisplay(displayAllSegments ^ cursorBlinker);
 }
-#endif //ENABLE_DRAW_GAME
+#endif // ENABLE_DRAW_GAME
 
 void Apps::modeHackTime()
 {
@@ -3629,7 +3628,7 @@ void Apps::modeHackTime()
         }
     }
 
-    //edge for value just changed
+    // edge for value just changed
     HACK_TIME_ACTIVE_VALUE = array_8_bytes[0];
 }
 
@@ -3777,27 +3776,27 @@ void Apps::draw()
         // VIEW / MODIFY drawing
         if ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)) &&
             !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)))
-    {
-        // modify drawing on display in draw mode.
-        // if in save to eeprom mode, always only scroll through drawings.
+        {
+            // modify drawing on display in draw mode.
+            // if in save to eeprom mode, always only scroll through drawings.
 
-        cursorBlinker = this->modeSingleSegmentManipulation(&displayAllSegments);
-    }
-    else
-    {
-        // scroll through drawings
-        DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getDelta();
-
-        if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
-        { // shift function for saving drawings to eeprom.
-
-            //check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
-            this->displayChangeGlobal(&displayAllSegments);
-
-            //scroll through drawings.
-            modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX);
+            cursorBlinker = this->modeSingleSegmentManipulation(&displayAllSegments);
         }
-    }
+        else
+        {
+            // scroll through drawings
+            DRAW_ACTIVE_DRAWING_INDEX += encoder_dial->getDelta();
+
+            if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
+            { // shift function for saving drawings to eeprom.
+
+                // check for global display change. we're not really changing the drawing, just seeing how it would look negative, and stuf..
+                this->displayChangeGlobal(&displayAllSegments);
+
+                // scroll through drawings.
+                modifyValueUpDownWithMomentary2And3(&DRAW_ACTIVE_DRAWING_INDEX);
+            }
+        }
 
 #ifdef ENABLE_EEPROM
     if (DRAW_ACTIVE_DRAWING_INDEX != DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY)
@@ -3856,7 +3855,7 @@ void Apps::tiltSwitchTest()
             TILT_EXPECTED_SWITCH_INDEX++;
         }
 
-        addNoteToBuzzer(1); //not beep but "puck"
+        addNoteToBuzzer(1); // not beep but "puck"
         if (TILT_EXPECTED_SWITCH_INDEX >= 4)
         {
             TILT_CYCLE_COUNTER++;
@@ -3926,8 +3925,8 @@ void Apps::modeGeiger()
         GEIGER_PROBABILITY_THRESHOLD = 950000;
     }
 
-    //play tick.
-    //wait random time.
+    // play tick.
+    // wait random time.
     long r = random(0, 1024) * random(0, 1024);
 
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
@@ -3935,17 +3934,17 @@ void Apps::modeGeiger()
         // note mode
         if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
         {
-            //lower
+            // lower
             dialMultiplyValueAndDisplay(&GEIGER_TONE_FREQUENY_LOWEST, 10, 5000);
         }
         else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
         {
-            //upper
+            // upper
             dialMultiplyValueAndDisplay(&GEIGER_TONE_FREQUENCY_HEIGHEST, 10, 5000);
         }
         else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)))
         {
-            //length
+            // length
             dialMultiplyValueAndDisplay(&GEIGER_TONE_LENGTH, 1, 255);
         }
         else if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_3)))
@@ -4118,7 +4117,7 @@ void Apps::modeSequencer()
 
                     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
                     {
-                        //copy to all measures
+                        // copy to all measures
                         for (uint8_t i = 0; i < 4; i++)
                         {
                             this->SEQUENCER_SONG[(SEQUENCER_STEP_COUNTER % 8) + 8 * i] = SEQUENCER_CHOSEN_NOTE;
@@ -4353,7 +4352,7 @@ void Apps::modeSimon()
 
         // number of players.
         //// SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false) / 4 + 1); // start counting from player 0 to display
-        SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) , false) + 1); // start counting from player 0 to display
+        SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1), false) + 1); // start counting from player 0 to display
         // stepChange(&SIMON_PLAYERS_COUNT-->>>TAKECAREMAKEITINT_16t<<<, this->encoder_dial->getDelta(), 1, SIMON_MAX_PLAYERS, false);
         numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
         textBuf[1] = 'P';
@@ -4547,7 +4546,7 @@ void Apps::modeSimon()
         }
 
         // player pressed correct button
-        //addNoteToBuzzer(A3_8);
+        // addNoteToBuzzer(A3_8);
         buzzerPlayApproval();
 
         ++SIMON_INDEX;
@@ -4570,9 +4569,9 @@ void Apps::modeSimon()
 
         // check next alive player (assume there is always a player alive.)
 
-        //playSongHappyDryer();
-        // addNoteToBuzzerRepeated(C4_8,SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX]);
-        //addNoteToBuzzerRepeated(C4_8,3);
+        // playSongHappyDryer();
+        //  addNoteToBuzzerRepeated(C4_8,SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX]);
+        // addNoteToBuzzerRepeated(C4_8,3);
 
         SIMON_PLAYER_PLAYING_INDEX++;
         if (SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
@@ -4592,7 +4591,7 @@ void Apps::modeSimon()
         SIMON_PLAYERS_ALIVE_COUNT--;
         if (SIMON_PLAYERS_ALIVE_COUNT == 0)
         {
-            //everybody dead
+            // everybody dead
             simonState = simonStartPlaySequence;
             SIMON_END_OF_GAME = true;
             break;
@@ -4617,7 +4616,7 @@ void Apps::modeSimon()
 
     textBufToDisplay();
 }
-#endif //ENABLE_SIMON_APP
+#endif // ENABLE_SIMON_APP
 
 uint16_t *Apps::reactionGameLevelToEepromAddress()
 {
@@ -4668,7 +4667,7 @@ void Apps::modeReactionGame()
     case reactionWaitForStart:
     {
         // change level
-        REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(5, false) / 1); 
+        REACTION_GAME_LEVEL = (encoder_dial->getValueLimited(5, false) / 1);
         if (encoder_dial->getDelta())
         {
             // for a more pleasant experience (no blinking during knob turning)
@@ -4936,13 +4935,13 @@ void Apps::modeReactionGame()
                 new_segment = 0;
                 // get relevant segment
 
-                //mid seg to bottom seg
+                // mid seg to bottom seg
                 new_segment |= ((displayAllSegments >> (8 * i)) & 0b01000000) >> 3; // G segment, move to D segment  0G00D000
 
-                //mid seg to DP seg
+                // mid seg to DP seg
                 new_segment |= ((displayAllSegments >> (8 * i)) & 0b01000000) << 1; // G segment, move to DP segment  DP.G.0.0.0.0.0.0
 
-                //top seg to mid seg
+                // top seg to mid seg
                 new_segment |= ((displayAllSegments >> (8 * i)) & 0b00000001) << 6; // A segment, ON or OFF?, move to G segment
 
                 // random top
@@ -4975,8 +4974,8 @@ void Apps::modeReactionGame()
         {
             if (binaryInputsEdgeUp & (1 << i))
             {
-                //if DP of this button was on, switch it off. else, die!
-                //check if DP of digit "i" is set
+                // if DP of this button was on, switch it off. else, die!
+                // check if DP of digit "i" is set
 
                 if (displayAllSegments & (0x80UL << 8 * i))
                 {
@@ -4988,7 +4987,7 @@ void Apps::modeReactionGame()
                 }
                 else
                 {
-                    //DP is off --> button should not have been pressed --> die!
+                    // DP is off --> button should not have been pressed --> die!
                     reactionGameState = reactionJustDied;
                 }
             }
@@ -5008,7 +5007,7 @@ void Apps::modeReactionGame()
             {
                 // success!
                 reactionGameState = reactionGuitarHeroNewTurn;
-                //REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
+                // REACTION_GAME_SCORE++; // let's not update the score here, because the first two rows also "count" which is silly, let's go for "point per correct button press."
             }
         }
         displayAllSegmentsToScreen();
@@ -5028,7 +5027,7 @@ void Apps::modeReactionGame()
     {
         if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
         {
-            REACTION_GAME_TIMER_STEP = 0; //reset animation step
+            REACTION_GAME_TIMER_STEP = 0; // reset animation step
             if (REACTION_GAME_SCORE % 7 == 0)
             {
                 // after about hunderd steps, speed doubled in 14 steps.
@@ -5036,7 +5035,7 @@ void Apps::modeReactionGame()
             }
             TIMER_REACTION_GAME_SPEED.start(); // only restart if 12 steps time per turn
         }
-        displayAllSegments = 0; //reset animation graphics screen
+        displayAllSegments = 0; // reset animation graphics screen
 
         REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
 
@@ -5092,7 +5091,7 @@ void Apps::modeReactionGame()
             {
                 if (i == REACTION_GAME_TARGET)
                 {
-                    //right button
+                    // right button
                     REACTION_GAME_SCORE++;
 
                     if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
@@ -5105,13 +5104,13 @@ void Apps::modeReactionGame()
                     {
                         // addNoteToBuzzer(C4_8);
                         buzzerPlayApproval();
-                        //addNoteToBuzzer(103 + i);
+                        // addNoteToBuzzer(103 + i);
                         reactionGameState = reactionNewTurn;
                     }
                 }
                 else
                 {
-                    //wrong button
+                    // wrong button
                     reactionGameState = reactionJustDied;
 
                     // zero points if you fail during the timed challenge
@@ -5131,7 +5130,7 @@ void Apps::modeReactionGame()
         // play death song
         addNoteToBuzzerRepeated(F4_1, 3);
 #ifdef ENABLE_EEPROM
-        //check for new high score and save
+        // check for new high score and save
 
         if (REACTION_GAME_SCORE > (int16_t)
                                       eeprom_read_word(reactionGameLevelToEepromAddress()))
@@ -5154,18 +5153,18 @@ void Apps::modeReactionGame()
     {
         if (getCountDownTimerHasElapsed(&TIMER_REACTION_END_OF_GAME_DELAY))
         {
-            //end of display score, next game
+            // end of display score, next game
             reactionGameState = reactionNewGame;
         }
         else
         {
-            //do nothing.  wait for display score is finished.
+            // do nothing.  wait for display score is finished.
             if (TIMER_REACTION_END_OF_GAME_DELAY.getInFirstGivenHundredsPartOfSecond(500))
             {
             }
             else
             {
-                ledDisp->setNumberToDisplayAsDecimal(REACTION_GAME_SCORE); //score display. Leave at beginning, to display high score blinking.
+                ledDisp->setNumberToDisplayAsDecimal(REACTION_GAME_SCORE); // score display. Leave at beginning, to display high score blinking.
             }
         }
     }
@@ -5314,8 +5313,8 @@ void Apps::randomSequence(uint8_t *sequenceList, uint8_t length)
 
 void Apps::shuffle(uint8_t *listToShuffle, uint8_t length)
 {
-    //shuffle the array:
-    //http://www.geeksforgeeks.org/shuffle-a-given-array/
+    // shuffle the array:
+    // http://www.geeksforgeeks.org/shuffle-a-given-array/
     for (int i = 0; i < length; i++)
     {
         uint8_t randomIndex = random(i, length);
@@ -5344,7 +5343,7 @@ bool Apps::saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLeng
         set_blink_offset();
     }
 
-    //blink alternatively song number and "load" or "save"
+    // blink alternatively song number and "load" or "save"
     if (millis_blink_250_750ms())
     {
         lights |= 1 << LIGHT_MOMENTARY_0;
@@ -5391,12 +5390,12 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
 #ifdef ENABLE_EEPROM
         if (loadElseSave)
         {
-            //load
+            // load
             data[i] = eeprom_read_byte(eeprom_address);
         }
         else
         {
-            //save
+            // save
             eeprom_update_byte(eeprom_address, data[i]);
         }
 #else
@@ -5842,10 +5841,10 @@ void Apps::multitimer_integrated()
 #else
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            	if (this->multitimer_state == initialized)
-	{
-		this->multitimer_start();
-	}
+            if (this->multitimer_state == initialized)
+            {
+                this->multitimer_start();
+            }
             // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
             // {
             //     // start multitimer
@@ -5970,13 +5969,13 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
         {
             // buzzerSilentClearBufferAndAddNote(129);
             buzzerPlayDisappointment();              // althought, good to check time, it also acts as a warning that this is not your button to press
-            this->multitimer_timerDisplayed = index; //display time of pressed timer button
+            this->multitimer_timerDisplayed = index; // display time of pressed timer button
         }
     }
     else if (this->multitimer_state == statePaused)
     {
         buzzerSilentClearBufferAndAddNote(230);
-        this->multitimer_timerDisplayed = index; //display time of pressed timer button
+        this->multitimer_timerDisplayed = index; // display time of pressed timer button
     }
 }
 
@@ -6011,7 +6010,7 @@ void Apps::multitimer_start()
     }
 #endif
 
-    //start and pause all timers.
+    // start and pause all timers.
     for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
     {
         this->multitimer_timers[i].start();
@@ -6075,18 +6074,18 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
 
 void Apps::multitimer_refresh()
 {
-    //what should be showing on the display right now?
+    // what should be showing on the display right now?
 
-    uint8_t playerLights = 0;            //lsb is timer 0, 2nd bit is timer 1, ....
-    uint8_t settingsLights = 0b00000000; //I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
+    uint8_t playerLights = 0;            // lsb is timer 0, 2nd bit is timer 1, ....
+    uint8_t settingsLights = 0b00000000; // I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
 
     if (this->multitimer_state == initialized)
     {
         if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2)))
         {
-        
+
             // this->multitimer_randomStarter = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
-            this->multitimer_randomStarter = ! this->multitimer_randomStarter;
+            this->multitimer_randomStarter = !this->multitimer_randomStarter;
         }
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
@@ -6095,10 +6094,10 @@ void Apps::multitimer_refresh()
             this->multitimer_state = setFischer;
         }
 #else
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
-        {
-            this->multitimer_state = setFischer;
-        }
+            if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
+            {
+                this->multitimer_state = setFischer;
+            }
 
 #endif
 
@@ -6111,11 +6110,11 @@ void Apps::multitimer_refresh()
                 // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY++; // hack to decrease sensitivity of encoder dial for counter setting only.
                 // if (MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY > 2)
                 // {
-                    stepChange(&MULTITIMER_TIMERS_COUNT, this->encoder_dial->getDelta(), 1, MULTITIMER_MAX_TIMERS_COUNT, false);
-                    this->multitimer_activeTimer = 0;
-                    this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+                stepChange(&MULTITIMER_TIMERS_COUNT, this->encoder_dial->getDelta(), 1, MULTITIMER_MAX_TIMERS_COUNT, false);
+                this->multitimer_activeTimer = 0;
+                this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 
-                    // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
+                // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
                 // }
             }
             else
@@ -6157,7 +6156,7 @@ void Apps::multitimer_refresh()
             // pause light blinking.
             if (millis_quarter_second_period())
             {
-                settingsLights |= MULTITIMER_LIGHT_PLAYING; //pause light on.
+                settingsLights |= MULTITIMER_LIGHT_PLAYING; // pause light on.
                 // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
             }
         }
@@ -6174,13 +6173,13 @@ void Apps::multitimer_refresh()
         resetInactivityTimer();
 
         if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
-        // start button becomes pause once timer is going. 
+        // start button becomes pause once timer is going.
         // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             this->multitimer_pause();
         }
 
-        //check all timers elapsed
+        // check all timers elapsed
         if (this->multitimer_checkAllTimersFinished())
         {
             this->multitimer_state = finished;
@@ -6189,7 +6188,7 @@ void Apps::multitimer_refresh()
         {
             multitimer_buzzerRefresh(false);
 
-            //check active timer time elapsed
+            // check active timer time elapsed
             if (this->multitimer_getTimerFinished(this->multitimer_activeTimer))
             {
                 this->multitimer_next(true);
@@ -6226,13 +6225,13 @@ void Apps::multitimer_refresh()
             }
             else if (i != this->multitimer_activeTimer && !this->multitimer_getTimerFinished(i))
             {
-                //other lights solid on if still alive.
+                // other lights solid on if still alive.
                 playerLights |= 1 << i;
             }
         }
 
-        settingsLights |= MULTITIMER_LIGHT_PLAYING; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
-        //settingsLights |= MULTITIMER_LIGHT_PAUSE; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
+        settingsLights |= MULTITIMER_LIGHT_PLAYING; // After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
+        // settingsLights |= MULTITIMER_LIGHT_PAUSE; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
     }
     else if (this->multitimer_state == finished)
     {
@@ -6248,7 +6247,7 @@ void Apps::multitimer_refresh()
         {
             setStandardTextToTextHANDLE(TEXT_END);
         }
-        //fast blink last surviving timer light.
+        // fast blink last surviving timer light.
         if (millis_quarter_second_period())
         {
             playerLights |= 1 << this->multitimer_activeTimer;
@@ -6276,7 +6275,7 @@ void Apps::multitimer_refresh()
         // timer lights
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
         {
-            //other lights solid on if still alive.
+            // other lights solid on if still alive.
             if (i == this->multitimer_activeTimer)
             {
                 if (millis_quarter_second_period())
@@ -6301,7 +6300,7 @@ void Apps::multitimer_refresh()
         // pause light blinking.
         if (millis_quarter_second_period())
         {
-            settingsLights |= MULTITIMER_LIGHT_PLAYING; //pause light on.
+            settingsLights |= MULTITIMER_LIGHT_PLAYING; // pause light on.
             // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
         }
         // playing light on.
@@ -6420,7 +6419,7 @@ void Apps::multitimer_next(bool activePlayerDied)
         {
             this->multitimer_activeTimer >= (MULTITIMER_TIMERS_COUNT - 1) ? this->multitimer_activeTimer = 0 : this->multitimer_activeTimer++;
             test_infinite_loop++;
-        } while (this->multitimer_getTimerFinished(this->multitimer_activeTimer) //if finished go to next timer.
+        } while (this->multitimer_getTimerFinished(this->multitimer_activeTimer) // if finished go to next timer.
                  && test_infinite_loop < 6);
 
         this->multitimer_timers[this->multitimer_activeTimer].continu();
