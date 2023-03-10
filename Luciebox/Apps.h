@@ -324,6 +324,7 @@
 #define SOUND_NOTE_MUTE general_boolean3
 #define POMODORO_FIRST_TICKING_CYCLING_DONE general_boolean3
 #define SHOOTOUT_GAME_ALREADY_STARTED general_boolean3
+#define STOPWATCH_SOUND_TICK_EDGE general_boolean3
 
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 #define POMODORO_TIMER_TICKING general_boolean4
