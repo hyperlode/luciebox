@@ -1422,12 +1422,17 @@ void Apps::stopwatch()
         time_millis = *pLongValue;
     }
 
+
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
     {
         // normal clock with minutes and seconds
-        pSsuperTimer->getTimeString(textBuf);
-        // setDecimalPoint(pSsuperTimer->getSecondsBlinker(), 1);
+        // pSsuperTimer->getTimeString(textBuf);
+
         displayTimerSecondsBlinker(pSsuperTimer);
+
+        timeMillisToClockString(textBuf, time_millis);
+
+
     }
     else
     {
@@ -5525,7 +5530,14 @@ bool Apps::getCountDownTimerHasElapsed(SuperTimer *timerToBlink)
 
 void Apps::displayTimerSecondsBlinker(SuperTimer *ptimerToBlink)
 {
-    setDecimalPoint(ptimerToBlink->getSecondsBlinker(), 1);
+    // show decimal point, unless the timer is actually ticking. 
+    if (pSsuperTimer->getIsStarted() && !ptimerToBlink->getIsPaused()){
+        setDecimalPoint(ptimerToBlink->getSecondsBlinker(), 1);
+
+    }else{
+        setDecimalPoint(true, 1);
+
+    }
 }
 
 void Apps::setDecimalPoint(bool onElseOff, uint8_t digit)
@@ -6110,7 +6122,6 @@ void Apps::multitimer_refresh()
             this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
 
         }
-
 
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
         {
