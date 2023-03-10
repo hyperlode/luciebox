@@ -1401,6 +1401,27 @@ void Apps::stopwatch()
     {
         // never auto power off when timer is on
         resetInactivityTimer();
+
+        // noise
+        uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+        {
+            if (mod <2)
+            {
+                buzzer->playTone(1000, 1);
+            }
+
+            // two tones. Nice but a 20bytes memory behemoth
+            //uint8_t mod = (uint8_t)(millis() % (unsigned long)500);
+            // if (mod == 125)
+            // {
+            //     buzzer->playTone(1000, 2);
+            // }
+            // else if (mod == 250)
+            // {
+            //     buzzer->playTone(500, 3);
+            // }
+        }
     }
 
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
@@ -1422,17 +1443,11 @@ void Apps::stopwatch()
         time_millis = *pLongValue;
     }
 
-
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
     {
         // normal clock with minutes and seconds
-        // pSsuperTimer->getTimeString(textBuf);
-
         displayTimerSecondsBlinker(pSsuperTimer);
-
         timeMillisToClockString(textBuf, time_millis);
-
-
     }
     else
     {
@@ -1453,7 +1468,8 @@ void Apps::stopwatch()
     }
 
     // latching button without a purpose
-    lights &= ~(1 << LIGHT_LATCHING_1);
+    // lights &= ~(1 << LIGHT_LATCHING_1);
+    // lights &= ~(1 << LIGHT_LATCHING_2);
 
     textBufToDisplay();
 }
@@ -5530,13 +5546,14 @@ bool Apps::getCountDownTimerHasElapsed(SuperTimer *timerToBlink)
 
 void Apps::displayTimerSecondsBlinker(SuperTimer *ptimerToBlink)
 {
-    // show decimal point, unless the timer is actually ticking. 
-    if (pSsuperTimer->getIsStarted() && !ptimerToBlink->getIsPaused()){
+    // show decimal point, unless the timer is actually ticking.
+    if (pSsuperTimer->getIsStarted() && !ptimerToBlink->getIsPaused())
+    {
         setDecimalPoint(ptimerToBlink->getSecondsBlinker(), 1);
-
-    }else{
+    }
+    else
+    {
         setDecimalPoint(true, 1);
-
     }
 }
 
@@ -5850,7 +5867,7 @@ void Apps::multitimer_integrated()
         this->multitimer_init();
     }
 #else
-      
+
 #endif
 
     // PAUSE Switch
@@ -5927,10 +5944,10 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 {
     // every timer index is linked to a button index.
 
-    if (this->multitimer_state == setStartingTimer ){
-            this->multitimer_activeTimer = index;
-            multitimer_start(false);
-
+    if (this->multitimer_state == setStartingTimer)
+    {
+        this->multitimer_activeTimer = index;
+        multitimer_start(false);
     }
     else if (this->multitimer_state == initialized)
     {
@@ -5982,7 +5999,7 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 
 void Apps::multitimer_start(bool isRandomStarter)
 {
-    
+
 #ifdef ENABLE_EEPROM
     // it makes sense to store settings into eeprom at start
     eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
@@ -6002,7 +6019,8 @@ void Apps::multitimer_start(bool isRandomStarter)
     }
 
     // this is the moment we chose a random starting timer if enabled.
-    if (isRandomStarter){
+    if (isRandomStarter)
+    {
         this->multitimer_activeTimer = (uint8_t)random(0, (long)MULTITIMER_TIMERS_COUNT);
     }
 
@@ -6067,7 +6085,7 @@ void Apps::multitimer_refresh()
         {
             this->multitimer_state = setFischer;
         }
-        
+
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             this->multitimer_surviveAtTimeout = !this->multitimer_surviveAtTimeout;
@@ -6075,9 +6093,8 @@ void Apps::multitimer_refresh()
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-                this->multitimer_state = setStartingTimer;
+            this->multitimer_state = setStartingTimer;
         }
-
 
         if (encoder_dial->getDelta() != 0)
         {
@@ -6108,19 +6125,23 @@ void Apps::multitimer_refresh()
                 }
             }
         }
-        
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2)){
-            // display the continue or dead option while button is held
-            if (this->multitimer_surviveAtTimeout){
-                setStandardTextToTextHANDLE(TEXT_CONT);
 
-            }else{
+        if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
+        {
+            // display the continue or dead option while button is held
+            if (this->multitimer_surviveAtTimeout)
+            {
+                setStandardTextToTextHANDLE(TEXT_CONT);
+            }
+            else
+            {
                 setStandardTextToTextHANDLE(TEXT_DEAD);
             }
-        }else{
+        }
+        else
+        {
             // display active timer time
             this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
-
         }
 
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
@@ -6141,11 +6162,10 @@ void Apps::multitimer_refresh()
     }
     else if (this->multitimer_state == setStartingTimer)
     {
-        
+
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-                this->multitimer_start(true);
-           
+            this->multitimer_start(true);
         }
 
         // all player lights blinking
@@ -6162,8 +6182,6 @@ void Apps::multitimer_refresh()
         {
             settingsLights |= MULTITIMER_LIGHT_PLAYING;
         }
-
-
     }
     else if (this->multitimer_state == playing)
     {
@@ -6375,8 +6393,9 @@ void Apps::multitimer_refresh()
 
 bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)
 {
-    if (this->multitimer_surviveAtTimeout){
-        // if survival enabled, it will never timeout. 
+    if (this->multitimer_surviveAtTimeout)
+    {
+        // if survival enabled, it will never timeout.
         return false;
     }
     return getCountDownTimerHasElapsed(&multitimer_timers[timerIndex]);
