@@ -863,7 +863,8 @@ void Apps::pomodoroTimer()
                 !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) // mute on / off
             )
             {
-                buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
+                // buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
+                buzzerPlayTone(500, 1 + (unsigned long)POMODORO_SOUND % 40);
             }
         }
 
@@ -1397,57 +1398,56 @@ void Apps::stopwatch()
 
     bool paused = pSsuperTimer->getIsPaused();
 
-    if (pSsuperTimer->getIsStarted() && !paused)
-    {
-        // never auto power off when timer is on
-        resetInactivityTimer();
+    // if (pSsuperTimer->getIsStarted() && !paused)
+    // {
+    //     // never auto power off when timer is on
+    //     resetInactivityTimer();
 
-        // sound
-        uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
-        {
-           if (mod <2) // give it a range of two millis so it does not skip a beat
-            {
-                addNoteToBuzzer(F8_8);
-            }
-        }
+    //     // sound
+    //     uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
+    //     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+    //     {
+    //        if (mod <2) // give it a range of two millis so it does not skip a beat
+    //         {
+    //             // addNoteToBuzzer(F8_8);
+    //             buzzerPlayTone(500, 5);
+    //         }
+    //     }
 
-        // the nice solution. but skips a beat at times. No clue why! 
-        // STOPWATCH_SOUND_TICK_EDGE = millis_quarter_second_period();
-        // uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
-        // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
-        // {
-        //     if (millis_quarter_second_period() && !STOPWATCH_SOUND_TICK_EDGE)
-        //     {
-        //         buzzerSilentClearBufferAndAddNote(F8_8);
+    //     // the nice solution. but skips a beat at times. No clue why! 
+    //     // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+    //     // {
+    //     //     if (millis_quarter_second_period() && !STOPWATCH_SOUND_TICK_EDGE)
+    //     //     {
+    //     //         buzzerSilentClearBufferAndAddNote(F8_8);
                 
-        //     }
-        // }
-        // STOPWATCH_SOUND_TICK_EDGE = millis_quarter_second_period();
+    //     //     }
+    //     // }
+    //     // STOPWATCH_SOUND_TICK_EDGE = millis_quarter_second_period();
 
 
 
-        // // sound
-        // uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
-        // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
-        // {
-        //     if (mod <2)
-        //     {
-        //         buzzer->playTone(1000, 1);
-        //     }
+    //     // // sound
+    //     // uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
+    //     // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
+    //     // {
+    //     //     if (mod <2)
+    //     //     {
+    //     //         buzzer->playTone(1000, 1);
+    //     //     }
 
-        //     // two tones. Nice but a 20bytes memory behemoth
-        //     //uint8_t mod = (uint8_t)(millis() % (unsigned long)500);
-        //     // if (mod == 125)
-        //     // {
-        //     //     buzzer->playTone(1000, 2);
-        //     // }
-        //     // else if (mod == 250)
-        //     // {
-        //     //     buzzer->playTone(500, 3);
-        //     // }
-        // }
-    }
+    //     //     // two tones. Nice but a 20bytes memory behemoth
+    //     //     //uint8_t mod = (uint8_t)(millis() % (unsigned long)500);
+    //     //     // if (mod == 125)
+    //     //     // {
+    //     //     //     buzzer->playTone(1000, 2);
+    //     //     // }
+    //     //     // else if (mod == 250)
+    //     //     // {
+    //     //     //     buzzer->playTone(500, 3);
+    //     //     // }
+    //     // }
+    // }
 
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
     {
@@ -1468,7 +1468,7 @@ void Apps::stopwatch()
         time_millis = *pLongValue;
     }
 
-    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2 ) || (time_millis>9999000))
     {
         // normal clock with minutes and seconds
         displayTimerSecondsBlinker(pSsuperTimer);
@@ -4032,7 +4032,8 @@ void Apps::modeGeiger()
         GEIGER_PROBABILITY_THRESHOLD -= encoder_dial->getDelta() * 10 * 1024;
         if (r > GEIGER_PROBABILITY_THRESHOLD)
         {
-            buzzer->playTone((unsigned int)50, 10);
+            // buzzer->playTone((unsigned int)50, 10);
+            buzzerPlayTone(50,10);
             setStandardTextToTextHANDLE(TEXT_RANDOM_SEGMENTS);
             // textBufToDisplay();
             COUNTER_GEIGER++;
@@ -4049,10 +4050,13 @@ void Apps::geigerToneHelper()
 {
     unsigned int random_frequency_within_limits = random(GEIGER_TONE_FREQUENY_LOWEST, GEIGER_TONE_FREQUENCY_HEIGHEST + 1);
 
-    buzzer->playTone(
-        random_frequency_within_limits,
-        (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)) ? 0 : GEIGER_TONE_LENGTH);
+    // buzzer->playTone(
+    //     random_frequency_within_limits,
+    //     (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)) ? 0 : GEIGER_TONE_LENGTH);
 
+    buzzerPlayTone(
+        random_frequency_within_limits, 
+        (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)) ? 0 : GEIGER_TONE_LENGTH);
     ledDisp->setNumberToDisplayAsDecimal(random_frequency_within_limits);
     COUNTER_GEIGER++;
 }
@@ -5540,6 +5544,10 @@ void Apps::buzzerSilentClearBufferAndAddNote(uint8_t note)
 {
     buzzerSilentClearBuffer();
     addNoteToBuzzer(note);
+}
+
+void Apps::buzzerPlayTone(unsigned int freq, unsigned long duration){
+    buzzer->playTone(freq, duration);
 }
 
 void Apps::addNoteToBuzzer(uint8_t note)
