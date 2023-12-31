@@ -5152,10 +5152,17 @@ void Apps::modeReactionGame()
                     }
                     else
                     {
-                        // addNoteToBuzzer(C4_8);
+//#define BLINK_AT_TWICE_THE_SAME_POSITION // add a pause after each button press to ensure all display lights are perceived as off. The idea is, if twice the same button is chosen, it's visible to the player. Although this seems like a good idea, we're solving a non existing problem. There is the beep feedback for each button press. And, we should not introduce artificial pauses to the game. 
+
+#ifndef BLINK_AT_TWICE_THE_SAME_POSITION
                         buzzerPlayApproval();
-                        // addNoteToBuzzer(103 + i);
                         reactionGameState = reactionNewTurn;
+#else
+                        setBlankDisplay();
+                        buzzerPlayApproval();
+                        addNoteToBuzzerRepeated(REST_1_8, 2); //todo delete
+                        reactionGameState = reactionWaitBeforeNewTurn;
+#endif
                     }
                 }
                 else
