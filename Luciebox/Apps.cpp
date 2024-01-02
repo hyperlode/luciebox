@@ -4690,7 +4690,7 @@ void Apps::modeReactionGame()
         // play by sound, only initiate pattern at start of app. This way, players can get used to it. To change pattern, leave and come back to app.
         // fun fact: when box started in this app, it will always have the same pattern. There is a lesson to be learned about random seeding dear Lucie!
         // never twice the same sound. Only first notes of array will be used.
-        uint8_t random_range_selector = random(219, 233); // choose notes from a random chosen interval of 12 notes
+        uint8_t random_range_selector = random(213, 224); // choose notes from a random chosen interval of 12 notes
         for (uint8_t i = 0; i < 12; i++)
         {
             REACTION_GAME_SELECTED_NOTES[i] = random_range_selector + i;
