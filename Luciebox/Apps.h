@@ -340,9 +340,9 @@
 #define REACTION_GAME_SELECTED_NOTES array_100_bytes_1
 #define SHOOTOUT_ANALOG_VALUES_CHECK array_100_bytes_1
 
-#define BUZZERTRACK_NOTES_LIST array_100_bytes_2
-#define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
-#define PROGMEM_TO_BUFFER_LIST array_100_bytes_2
+#define BUZZERTRACK_NOTES_LIST array_100_bytes_2  // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
+// #define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
+// #define PROGMEM_TO_BUFFER_LIST array_100_bytes_2
 
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
@@ -1247,7 +1247,7 @@ private:
     void saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepromSlotLength, uint16_t eepromStartAddress, boolean loadElseSave);
     void eepromCopyValues(uint16_t fromAddress, uint16_t toAddress);
 
-    void progmemToBuffer(const uint8_t *offset, uint8_t length);
+    // void progmemToBuffer(const uint8_t *offset, uint8_t length);
     // uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
 
     void setButtonLight(uint8_t light_index, bool onElseOff);

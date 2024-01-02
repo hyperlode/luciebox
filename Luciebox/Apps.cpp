@@ -4486,7 +4486,7 @@ void Apps::modeSimon()
         { // at start, wait for the beginning song to be over.
             simonState = simonPlaySequence;
         }
-        
+        break; 
     }
 
     case simonPlaySequence:
@@ -5703,7 +5703,11 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
             song_start_index += length;
             length = pgm_read_byte_near(song_lengths + i);
         }
-        progmemToBuffer(songs + song_start_index, length);
+        // progmemToBuffer(songs + song_start_index, length);
+        for (uint8_t i = 0; i < length; i++)
+        {
+            BUZZERTRACK_NOTES_LIST[i] = pgm_read_byte_near(songs + song_start_index + i);
+        }
     }
 
 #ifdef ENABLE_EEPROM
@@ -5754,14 +5758,14 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 //     return i;
 // }
 
-void Apps::progmemToBuffer(const uint8_t *offset, uint8_t length)
-{
-    // move from progmem to universal bytes buffer in ram.
-    for (uint8_t i = 0; i < length; i++)
-    {
-        PROGMEM_TO_BUFFER_LIST[i] = pgm_read_byte_near(offset + i);
-    }
-}
+// void Apps::progmemToBuffer(const uint8_t *offset, uint8_t length)
+// {
+//     // move from progmem to universal bytes buffer in ram.
+//     for (uint8_t i = 0; i < length; i++)
+//     {
+//         PROGMEM_TO_BUFFER_LIST[i] = pgm_read_byte_near(offset + i);
+//     }
+// }
 
 // void Apps::fillArrayWithZero(uint8_t* arr, uint8_t length){
 void Apps::fill8BytesArrayWithZero()
