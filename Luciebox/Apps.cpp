@@ -2638,7 +2638,7 @@ void Apps::modeComposeSong()
 
     if (this->app_init_edge)
     {
-        for (uint8_t i = 0; i < bytes_list_bufsize; i++)
+        for (uint8_t i = 0; i < bytes_array_size; i++)
         {
             COMPOSER_SONG[i] = BUZZER_NOTES_BUFFER_SONG_STOPVALUE;
         }
@@ -2659,7 +2659,7 @@ void Apps::modeComposeSong()
             COMPOSER_STEP = 0;
             // search for the last note in the composed song.
             // assume last note of longest possible song is always BUZZER_NOTES_BUFFER_SONG_STOPVALUE
-            for (uint8_t i = bytes_list_bufsize - 2; i > 0; i--)
+            for (uint8_t i = bytes_array_size - 2; i > 0; i--)
             {
                 COMPOSER_SONG_LENGTH = i + 1;
                 if (COMPOSER_SONG[i] != BUZZER_NOTES_BUFFER_SONG_STOPVALUE)
@@ -2688,7 +2688,7 @@ void Apps::modeComposeSong()
                 else
                 {
                     // move all notes one position down.
-                    for (uint8_t i = COMPOSER_STEP; i < bytes_list_bufsize - 1; i++)
+                    for (uint8_t i = COMPOSER_STEP; i < bytes_array_size - 1; i++)
                     {
                         COMPOSER_SONG[i] = COMPOSER_SONG[i + 1];
                     }
@@ -2703,14 +2703,14 @@ void Apps::modeComposeSong()
             if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
             {
                 // insert after current index (and move to it)
-                if (COMPOSER_SONG_LENGTH >= bytes_list_bufsize - 2)
+                if (COMPOSER_SONG_LENGTH >= bytes_array_size - 2)
                 {
                     // max length reached
                 }
                 else
                 {
                     // remember, last note of longest song possible MUST be BUZZER_NOTES_BUFFER_SONG_STOPVALUE, don't copy a note to it.
-                    for (uint8_t i = bytes_list_bufsize - 3; i > COMPOSER_STEP; i--)
+                    for (uint8_t i = bytes_array_size - 3; i > COMPOSER_STEP; i--)
                     {
                         COMPOSER_SONG[i + 1] = COMPOSER_SONG[i];
                     }
@@ -3553,7 +3553,7 @@ void Apps::modeHackTime()
             // change value in address location (left char on display)
             // will not work for flash memory
 
-            array_8_bytes[0] += encoder_dial->getDelta();
+            HACKTIME_VALUE_BUFFER[0] += encoder_dial->getDelta();
 
             if (encoder_dial->getDelta() != 0)
             {
@@ -3561,13 +3561,13 @@ void Apps::modeHackTime()
                 // change ram
                 if (HACKTIME_MEMORY_SELECT == HACKTIME_MEMORY_RAM)
                 {
-                    *((uint8_t *)HACKTIME_ADDRESS) = array_8_bytes[0];
+                    *((uint8_t *)HACKTIME_ADDRESS) = HACKTIME_VALUE_BUFFER[0];
                 }
 
                 if (HACKTIME_MEMORY_SELECT == HACKTIME_MEMORY_EEPROM)
                 {
 #ifdef ENABLE_EEPROM
-                    eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, array_8_bytes[0]);
+                    eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, HACKTIME_VALUE_BUFFER[0]);
 #endif
                 }
             }
@@ -3584,7 +3584,7 @@ void Apps::modeHackTime()
             // do nothing
             for (uint8_t i = 0; i < 4; i++)
             {
-                textHandle[i] = array_8_bytes[i];
+                textHandle[i] = HACKTIME_VALUE_BUFFER[i];
             }
         }
         else if (HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_BYTES)
@@ -3592,13 +3592,13 @@ void Apps::modeHackTime()
             displayAllSegments = 0;
             for (uint8_t i = 0; i < 4; i++)
             {
-                displayAllSegments |= ((uint32_t)(array_8_bytes[i])) << (8 * i);
+                displayAllSegments |= ((uint32_t)(HACKTIME_VALUE_BUFFER[i])) << (8 * i);
             }
             displayAllSegmentsToScreen();
         }
         else
         {
-            ledDisp->setNumberToDisplay(array_8_bytes[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
+            ledDisp->setNumberToDisplay(HACKTIME_VALUE_BUFFER[0], HACKTIME_DISPLAY_MODE == HACKTIME_DISPLAY_HEX);
         }
     }
 
@@ -3643,18 +3643,18 @@ void Apps::modeHackTime()
         switch (HACKTIME_MEMORY_SELECT)
         {
         case HACKTIME_MEMORY_FLASH:
-            array_8_bytes[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
+            HACKTIME_VALUE_BUFFER[i] = pgm_read_byte(HACKTIME_ADDRESS + i);
             break;
 
         case HACKTIME_MEMORY_RAM:
-            array_8_bytes[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
+            HACKTIME_VALUE_BUFFER[i] = *(((uint8_t *)HACKTIME_ADDRESS) + i);
             break;
 
         case HACKTIME_MEMORY_EEPROM:
 #ifdef ENABLE_EEPROM
-            array_8_bytes[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
+            HACKTIME_VALUE_BUFFER[i] = eeprom_read_byte((uint8_t *)HACKTIME_ADDRESS + i);
 #else
-            array_8_bytes[i] = 111;
+            HACKTIME_VALUE_BUFFER[i] = 111;
 #endif
             break;
         }
@@ -3662,20 +3662,20 @@ void Apps::modeHackTime()
 
     // convert memory to sounds... Be prepared for post-modernist masterpieces
     // if ( (address_changed ))
-    if ((address_changed || (HACK_TIME_ACTIVE_VALUE != array_8_bytes[0])))
+    if ((address_changed || (HACK_TIME_ACTIVE_VALUE != HACKTIME_VALUE_BUFFER[0])))
     {
         if (!(binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)))
         {
             if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2))
             {
-                buzzerSilentClearBufferAndAddNote(array_8_bytes[0]);
+                buzzerSilentClearBufferAndAddNote(HACKTIME_VALUE_BUFFER[0]);
             }
             set_blink_offset();
         }
     }
 
     // edge for value just changed
-    HACK_TIME_ACTIVE_VALUE = array_8_bytes[0];
+    HACK_TIME_ACTIVE_VALUE = HACKTIME_VALUE_BUFFER[0];
 }
 
 bool Apps::modifyValueUpDownWithMomentary2And3(int16_t *value)
@@ -4432,11 +4432,11 @@ void Apps::modeSimon()
         // generate new sequence. if 4 momentary buttons: 0,1,2,3,0,1,2,3,0,1,2,3,...
         // it's easier to save indeces than binary values like 0001, 0010, 0100, 1000 because
         // converting from binary to index needs a loop.
-        for (int k = 0; k < bytes_list_bufsize; ++k)
+        for (int k = 0; k < bytes_array_size; ++k)
         {
             SIMON_LIST[k] = k % MOMENTARY_BUTTONS_COUNT;
         }
-        shuffle(SIMON_LIST, bytes_list_bufsize);
+        shuffle(SIMON_LIST, bytes_array_size);
 
         // set starting parameters
         SIMON_LENGTH = 0;
@@ -4458,7 +4458,7 @@ void Apps::modeSimon()
         numberToBufAsDecimal(SIMON_LENGTH);
 
         // let 'maximum length breach' be a happy crash. I can't afford the bytes!
-        //   if (SIMON_LENGTH >= bytes_list_bufsize) {
+        //   if (SIMON_LENGTH >= bytes_array_size) {
         // 	  // reached maximum length
         // 	  playSongHappyDryer();
         // 	  simonState = simonWaitForNewGame;
@@ -4486,6 +4486,7 @@ void Apps::modeSimon()
         { // at start, wait for the beginning song to be over.
             simonState = simonPlaySequence;
         }
+        
     }
 
     case simonPlaySequence:
@@ -5709,13 +5710,13 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
     else if (songIndex - SONGS_FLASH_COUNT < 4)
     {
         // eeprom composer
-        saveLoadFromEepromSlot(this->bytes_list, songIndex - SONGS_FLASH_COUNT, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS, true);
+        saveLoadFromEepromSlot(BUZZERTRACK_NOTES_LIST, songIndex - SONGS_FLASH_COUNT, EEPROM_COMPOSER_SONG_LENGTH, EEPROM_COMPOSER_SONGS_START_ADDRESS, true);
         length = 20;
     }
     else if (songIndex - SONGS_FLASH_COUNT - EEPROM_COMPOSER_SONG_COUNT < EEPROM_SEQUENCER_SONGS_COUNT)
     {
         // eeprom sequencer
-        saveLoadFromEepromSlot(this->bytes_list, songIndex - SONGS_FLASH_COUNT - EEPROM_COMPOSER_SONG_COUNT, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
+        saveLoadFromEepromSlot(BUZZERTRACK_NOTES_LIST, songIndex - SONGS_FLASH_COUNT - EEPROM_COMPOSER_SONG_COUNT, EEPROM_SEQUENCER_SONG_LENGTH, EEPROM_SEQUENCER_SONGS_START_ADDRESS, true);
 
         length = EEPROM_SEQUENCER_SONG_LENGTH * 2;
 
@@ -5723,8 +5724,8 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 
         while (i > 0)
         {
-            this->bytes_list[i * 2] = this->bytes_list[i] % 64; // we have to introduce a hack here. All notes to the same timing. Otherwise, the rythm is off. Theoretically, I should add rests until all notes are filled up to the same length, but, it didn't happen, as the buffe is simply not big enough for the worst case scenario. i.e. 1/8th of a note --> add 7 times 1/8th rest.  times 32 = 256notes in buffer . buffer is not long enough.
-            this->bytes_list[i * 2 - 1] = REST_2_8;
+            BUZZERTRACK_NOTES_LIST[i * 2] = BUZZERTRACK_NOTES_LIST[i] % 64; // we have to introduce a hack here. All notes to the same timing. Otherwise, the rythm is off. Theoretically, I should add rests until all notes are filled up to the same length, but, it didn't happen, as the buffe is simply not big enough for the worst case scenario. i.e. 1/8th of a note --> add 7 times 1/8th rest.  times 32 = 256notes in buffer . buffer is not long enough.
+            BUZZERTRACK_NOTES_LIST[i * 2 - 1] = REST_2_8;
             i--;
         }
     }
@@ -5732,33 +5733,33 @@ void Apps::loadBuzzerTrack(uint8_t songIndex)
 
     for (uint8_t i = 0; i < length; i++)
     {
-        buzzer->addNoteToNotesBuffer(this->bytes_list[i]);
+        buzzer->addNoteToNotesBuffer(BUZZERTRACK_NOTES_LIST[i]);
     }
 }
 
-uint8_t Apps::progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue)
-{
-    // max length = 255.
-    // move from progmem to universal bytes buffer in ram until a value
-    // warning: MAKE SURE THERE IS A STOP! Or it will continue ~forever~
-    // return length including stopcondition.
-    uint8_t i = 0;
-    do
-    {
-        this->bytes_list[i] = pgm_read_byte_near(offset + i);
-        i++;
+// uint8_t Apps::progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue)
+// {
+//     // max length = 255.
+//     // move from progmem to universal bytes buffer in ram until a value
+//     // warning: MAKE SURE THERE IS A STOP! Or it will continue ~forever~
+//     // return length including stopcondition.
+//     uint8_t i = 0;
+//     do
+//     {
+//         PROGMEM_TO_BUFFER_UNTIL_LIST[i] = pgm_read_byte_near(offset + i);
+//         i++;
 
-    } while (this->bytes_list[i] != stopConditionValue);
+//     } while (PROGMEM_TO_BUFFER_UNTIL_LIST[i] != stopConditionValue);
 
-    return i;
-}
+//     return i;
+// }
 
 void Apps::progmemToBuffer(const uint8_t *offset, uint8_t length)
 {
     // move from progmem to universal bytes buffer in ram.
     for (uint8_t i = 0; i < length; i++)
     {
-        this->bytes_list[i] = pgm_read_byte_near(offset + i);
+        PROGMEM_TO_BUFFER_LIST[i] = pgm_read_byte_near(offset + i);
     }
 }
 

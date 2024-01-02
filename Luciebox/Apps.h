@@ -329,21 +329,26 @@
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 #define POMODORO_TIMER_TICKING general_boolean4
 
-#define SIMON_LIST bytes_list
-#define SEQUENCER_SONG bytes_list
-#define FADE_IN_RANDOM_LIST bytes_list
-#define CARDS_DECK bytes_list
-#define COMPOSER_SONG bytes_list
-#define MOVIE_MODE_STOPS bytes_list
-#define MODE_SOUND_SONG_BUFFER bytes_list
-#define MODE_DREAMTIME_RANDOM_LIST bytes_list
-#define REACTION_GAME_SELECTED_NOTES bytes_list
-#define SHOOTOUT_ANALOG_VALUES_CHECK bytes_list
+#define SIMON_LIST array_100_bytes_1
+#define SEQUENCER_SONG array_100_bytes_1
+#define FADE_IN_RANDOM_LIST array_100_bytes_1
+#define CARDS_DECK array_100_bytes_1
+#define COMPOSER_SONG array_100_bytes_1
+#define MOVIE_MODE_STOPS array_100_bytes_1
+#define MODE_SOUND_SONG_BUFFER array_100_bytes_1
+#define MODE_DREAMTIME_RANDOM_LIST array_100_bytes_1
+#define REACTION_GAME_SELECTED_NOTES array_100_bytes_1
+#define SHOOTOUT_ANALOG_VALUES_CHECK array_100_bytes_1
+
+#define BUZZERTRACK_NOTES_LIST array_100_bytes_2
+#define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
+#define PROGMEM_TO_BUFFER_LIST array_100_bytes_2
 
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
 #define SIMON_PLAYERS array_8_bytes
 #define SHOOTOUT_SCORE array_8_bytes
 #define MULTITIMER_INIT_TIME_INDECES array_8_bytes
+#define HACKTIME_VALUE_BUFFER array_8_bytes
 
 #ifdef ENABLE_MULTITIMER_INTEGRATED
 const uint16_t timeDialDiscreteSeconds[] = {
@@ -1243,7 +1248,7 @@ private:
     void eepromCopyValues(uint16_t fromAddress, uint16_t toAddress);
 
     void progmemToBuffer(const uint8_t *offset, uint8_t length);
-    uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
+    // uint8_t progmemToBufferUntil(const uint8_t *offset, uint8_t stopConditionValue);
 
     void setButtonLight(uint8_t light_index, bool onElseOff);
     void textBufToDisplay();
@@ -1364,11 +1369,12 @@ private:
 
     enum
     {
-        bytes_list_bufsize = 100,
+        bytes_array_size = 100,
     };
-    uint8_t bytes_list[bytes_list_bufsize];
-
+    uint8_t array_100_bytes_2[bytes_array_size];
+    uint8_t array_100_bytes_1[bytes_array_size];
     uint8_t array_8_bytes[8];
+
 #ifdef ENABLE_DRAW_GAME
     enum DrawGameState : uint8_t
     {
