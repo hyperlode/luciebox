@@ -549,7 +549,7 @@ void Apps::initializeAppDataToDefault()
 {
     // allLights->setBrightness(0, false); // disable because it annoys me:)
 
-    initiateCountDowntimerWith500Millis(&general_timer);
+    initiateCountDowntimerWith500Millis(&general_timer_1);
 
     // buzzer  (buzzer off at init of splash screen)
     buzzer->setSpeedRatio(2);
@@ -567,7 +567,7 @@ void Apps::initializeAppDataToDefault()
 
     // all shared variables to zero or false
 
-    general_boolean = 0;
+    general_boolean1 = 0;
     general_boolean2 = 0;
     general_boolean3 = 0;
     general_boolean4 = 0;

@@ -143,25 +143,25 @@
 
 // VARIABLE REUSE
 
-#define TIMER_METRONOME general_timer
-#define TIMER_INIT_APP general_timer
-#define SETTINGS_MODE_DISPLAY_VALUES_BLINK general_timer
-#define RANDOMWORLD_ROLL_SPEED general_timer
-#define COMPOSER_STEP_TIMER general_timer
-#define SIMON_STEP_TIMER general_timer
-#define STOPWATCH_CHRONO_1 general_timer
-// #define POMODORO_MAIN_TIMER general_timer
-#define POMODORO_TIMER general_timer
-#define DRAW_GAME_DISPLAY_TIMER general_timer
-#define HACKTIME_MOVE_TIMER general_timer
-#define COUNTING_LETTERS_AND_CHARS_TIMER general_timer
-#define SOUND_NOTE_AUTO_TIMER general_timer
-#define SHOOTOUT_RANDOM_WAIT_TIME general_timer
-#define SEQUENCER_SPEED general_timer
-#define TILT_TIMER general_timer
-#define MOVIE_MODE_FRAME_INTERVAL_TIMER general_timer
-#define TIMER_DREAMTIME general_timer
-#define TIMER_REACTION_GAME_SPEED general_timer
+#define TIMER_METRONOME general_timer_1
+#define TIMER_INIT_APP general_timer_1
+#define SETTINGS_MODE_DISPLAY_VALUES_BLINK general_timer_1
+#define RANDOMWORLD_ROLL_SPEED general_timer_1
+#define COMPOSER_STEP_TIMER general_timer_1
+#define SIMON_STEP_TIMER general_timer_1
+#define STOPWATCH_CHRONO_1 general_timer_1
+// #define POMODORO_MAIN_TIMER_1 general_timer
+#define POMODORO_TIMER general_timer_1
+#define DRAW_GAME_DISPLAY_TIMER general_timer_1
+#define HACKTIME_MOVE_TIMER general_timer_1
+#define COUNTING_LETTERS_AND_CHARS_TIMER general_timer_1
+#define SOUND_NOTE_AUTO_TIMER general_timer_1
+#define SHOOTOUT_RANDOM_WAIT_TIME general_timer_1
+#define SEQUENCER_SPEED general_timer_1
+#define TILT_TIMER general_timer_1
+#define MOVIE_MODE_FRAME_INTERVAL_TIMER general_timer_1
+#define TIMER_DREAMTIME general_timer_1
+#define TIMER_REACTION_GAME_SPEED general_timer_1
 
 #define TIMER_REACTION_END_OF_GAME_DELAY general_timer_2
 #define SEQUENCER_EEPROM_MODE_BLINK general_timer_2
@@ -296,17 +296,17 @@
 #define TALLY_KEEPER_DELTA_SIGNED general_long_2
 #define MODE_SETTINGS_CYCLE_TIMING_MILLIS_2 general_long_2
 
-#define REACTION_HEX_GUESSED_CORRECTLY general_boolean
-#define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean
-#define SIMON_CUSTOM_BUILD_UP general_boolean
-#define POMODORO_IN_BREAK general_boolean
-#define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean
-#define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean
-#define STOPWATCH_PAUSED_1 general_boolean
-#define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean
-#define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean
-#define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean
-#define SHOOTOUT_END_GAME_WINNER_DISPLAY general_boolean
+#define REACTION_HEX_GUESSED_CORRECTLY general_boolean1
+#define NUMBERS_AND_LETTERS_COUNT_DOWN_ELSE_UP general_boolean1
+#define SIMON_CUSTOM_BUILD_UP general_boolean1
+#define POMODORO_IN_BREAK general_boolean1
+#define HACKTIME_ADDRESS_COUNTER_EDGE general_boolean1
+#define SOUND_NOTE_AUTO_UP_ELSE_DOWN general_boolean1
+#define STOPWATCH_PAUSED_1 general_boolean1
+#define MOVIE_MODE_RESTART_SOUNDTRACK_AT_MOVIE_START general_boolean1
+#define MODE_DREAMTIME_FADE_IN_ELSE_FADE_OUT general_boolean1
+#define METRONOME_ENABLE_FLASH_AT_BEEP general_boolean1
+#define SHOOTOUT_END_GAME_WINNER_DISPLAY general_boolean1
 // #define showNote general_boolean
 
 #define STOPWATCH_PAUSED_2 general_boolean2
@@ -1282,10 +1282,10 @@ private:
     long readVcc();
 
     //reused variables per app
-    SuperTimer general_timer;
+    SuperTimer general_timer_1;
     SuperTimer general_timer_2;
 
-    bool general_boolean;
+    bool general_boolean1;
     bool general_boolean2;
     bool general_boolean3;
     bool general_boolean4;
