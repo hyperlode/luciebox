@@ -8,6 +8,7 @@
 // #define ENABLE_DRAW_GAME // did not survive the hunt for memory... It's a fun app though. Like a memory game!
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
+// #define ENABLE_SCHOOL_APP
 #define POMODORO_ENABLE_HOURGLASS
 
 #ifdef ENABLE_TILT_SWITCHES
@@ -1333,7 +1334,7 @@ private:
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
-    byte binaryInputsToggleValue;
+    byte binaryInputsToggleValue; // mimic a latching button with momentary button. Toggle value is on or off.
 
     char textBuf[4];
     // char textBuf2[4];

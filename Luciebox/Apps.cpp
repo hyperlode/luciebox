@@ -348,7 +348,7 @@ void Apps::autoShutdown()
 
 void Apps::shutdown()
 {
-    // memorize active app
+    // memorize active app to restart after shutdown
     eeprom_update_byte(
         (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
         selected_app);
@@ -380,8 +380,9 @@ void Apps::appSelector()
     switch (selected_app)
     {
     case APP_SELECTOR_LETTERS_AND_CHARS:
-
+#ifdef ENABLE_SCHOOL_APP
         this->modeCountingLettersAndChars();
+#endif
         break;
 
     case APP_SELECTOR_SIMON:
@@ -1367,15 +1368,11 @@ void Apps::stopwatch()
 
     if (this->app_init_edge)
     {
-        // STOPWATCH_LAP_MEMORY_2 = 0;
-
         resetStopwatch(&STOPWATCH_CHRONO_2);
 
+        // chrono 1 contains the always-on timer (counting since box startup) at app init. 
         STOPWATCH_CHRONO_1.setInitTimeMillis(always_on_timer.getTimeMillis());
         STOPWATCH_CHRONO_1.start();
-
-        // always_on_timer.getTimeString(textHandle);
-        // displayTimerSecondsBlinker(&always_on_timer);
     }
 
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -1398,57 +1395,6 @@ void Apps::stopwatch()
 
     bool paused = pSsuperTimer->getIsPaused();
 
-    // if (pSsuperTimer->getIsStarted() && !paused)
-    // {
-    //     // never auto power off when timer is on
-    //     resetInactivityTimer();
-
-    //     // sound
-    //     uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
-    //     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
-    //     {
-    //        if (mod <2) // give it a range of two millis so it does not skip a beat
-    //         {
-    //             // addNoteToBuzzer(F8_8);
-    //             buzzerPlayTone(500, 5);
-    //         }
-    //     }
-
-    //     // the nice solution. but skips a beat at times. No clue why! 
-    //     // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
-    //     // {
-    //     //     if (millis_quarter_second_period() && !STOPWATCH_SOUND_TICK_EDGE)
-    //     //     {
-    //     //         buzzerSilentClearBufferAndAddNote(F8_8);
-                
-    //     //     }
-    //     // }
-    //     // STOPWATCH_SOUND_TICK_EDGE = millis_quarter_second_period();
-
-
-
-    //     // // sound
-    //     // uint8_t mod = (uint8_t)(millis() % (unsigned long)250);
-    //     // if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
-    //     // {
-    //     //     if (mod <2)
-    //     //     {
-    //     //         buzzer->playTone(1000, 1);
-    //     //     }
-
-    //     //     // two tones. Nice but a 20bytes memory behemoth
-    //     //     //uint8_t mod = (uint8_t)(millis() % (unsigned long)500);
-    //     //     // if (mod == 125)
-    //     //     // {
-    //     //     //     buzzer->playTone(1000, 2);
-    //     //     // }
-    //     //     // else if (mod == 250)
-    //     //     // {
-    //     //     //     buzzer->playTone(500, 3);
-    //     //     // }
-    //     // }
-    // }
-
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
     {
         // set chronometer to zero
@@ -1460,6 +1406,9 @@ void Apps::stopwatch()
     {
         pSsuperTimer->paused(!paused);
     }
+
+    // if ((millis_quarter_second_period() && paused) || millis_half_second_period())
+
 
     if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
         (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
@@ -1476,7 +1425,7 @@ void Apps::stopwatch()
     }
     else
     {
-        // stopwatch. Accuracy depending on total time
+        // stopwatch display, with maximum accuracy. (accuracy depending on total time, showing as many decimals as possible)
         timeDisplayShift = 0;
         while (time_millis > 9999)
         {
@@ -1493,12 +1442,20 @@ void Apps::stopwatch()
     }
 
     // latching button without a purpose
-    // lights &= ~(1 << LIGHT_LATCHING_1);
-    // lights &= ~(1 << LIGHT_LATCHING_2);
+    lights &= ~(1 << LIGHT_LATCHING_1);
+
+    // alluring start/stop button blinking
+    if ((millis_quarter_second_period() && paused) || (millis_second_period() && !paused))
+    {
+        lights |=  1 << LIGHT_MOMENTARY_3;
+    }
+    
+    // lap time availablel
+    lights |= (*pLongValue != 0) << LIGHT_MOMENTARY_0;
 
     textBufToDisplay();
 }
-
+ 
 void Apps::modeRandomWorld()
 {
     if (this->app_init_edge)
@@ -5991,8 +5948,10 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 
     if (this->multitimer_state == setStartingTimer)
     {
-        this->multitimer_activeTimer = index;
-        multitimer_start(false);
+        if(index < MULTITIMER_TIMERS_COUNT){
+            this->multitimer_activeTimer = index;
+            multitimer_start(false);
+        }
     }
     else if (this->multitimer_state == initialized)
     {
@@ -6317,7 +6276,7 @@ void Apps::multitimer_refresh()
         // never auto power off when timer is on
         resetInactivityTimer();
 
-        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
             this->multitimer_continu();
         }
