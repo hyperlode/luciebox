@@ -1350,7 +1350,7 @@ void Apps::encoderDialRefreshTimeIndex(int16_t *indexHolder)
 {
     // actually change the set up timer
 
-    stepChange(indexHolder, encoder_dial->getDelta(), 0, 90, false);
+    stepChange(indexHolder, encoder_dial->getDelta(), 0, TIME_INDECES_COUNT, false);
 }
 
 void Apps::resetStopwatch(SuperTimer *pTimer)
@@ -5592,14 +5592,21 @@ void Apps::buzzerChangeSpeedRatioWithEncoderDial()
 uint16_t Apps::dialGetIndexedtime()
 {
 #ifdef ENABLE_MULTITIMER_STANDALONE_DEPRECATED
-    return this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(90, false));
+    return this->multiTimer.getIndexedTime(encoder_dial->getValueLimited(TIME_INDECES_COUNT, false));
 #elif defined ENABLE_MULTITIMER_INTEGRATED
 
-    return indexToTimeSeconds(encoder_dial->getValueLimited(90, false));
+    return indexToTimeSeconds(encoder_dial->getValueLimited(TIME_INDECES_COUNT, false));
 #else
     return encoder_dial->getValueLimited(60, false) * 30;
 #endif
 }
+// int16_t Apps::timeSecondsToNearestIndex(unsigned int timeSeconds ){
+//     int16_t index = TIME_INDECES_COUNT;
+//     while (timeSeconds <  timeDialDiscreteSeconds[index] && index >=0){
+//         index--;
+//     }
+//     return index;
+// }
 
 unsigned int Apps::indexToTimeSeconds(int16_t index)
 {
@@ -5781,7 +5788,7 @@ void Apps::miniMultiTimer()
     if (encoder_dial->getDelta())
     {
         // number of timers
-        int16_t encoder_mapped = encoder_dial->getValueLimited(90, false);
+        int16_t encoder_mapped = encoder_dial->getValueLimited(TIME_INDECES_COUNT, false);
 
         this->multiTimer.setTimersCount((uint8_t)((float)encoder_mapped / 25) + 1);
         // convert value to predefined amount of seconds.
@@ -5840,7 +5847,6 @@ void Apps::multitimer_integrated()
 {
     if (this->app_init_edge)
     {
-        this->multitimer_setDefaults();
         this->multitimer_init();
     }
 
@@ -5900,6 +5906,7 @@ void Apps::multitimer_setDefaults()
     this->multitimer_surviveAtTimeout = eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_SURVIVE_AT_TIMEOUT);
     // general init
     MULTITIMER_TIMERS_COUNT = (int16_t)eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT);
+
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
     {
         this->multitimer_setTimerInitCountTimeByTimeIndex(i, eeprom_read_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i));
@@ -5914,9 +5921,7 @@ void Apps::multitimer_setDefaults()
         }
 #endif
 
-    this->multitimer_state = initialized;
-    this->multitimer_activeTimer = 0;
-    this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+    
 }
 
 uint8_t Apps::multitimer_getTimerInitTimeIndex(uint8_t timer)
@@ -5932,14 +5937,15 @@ void Apps::multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t in
 
 void Apps::multitimer_init()
 {
+    this->multitimer_setDefaults();
+
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
     {
         this->multitimer_timers[i].reset();
     }
     this->multitimer_state = initialized;
-
-    // specific
     this->multitimer_activeTimer = 0;
+    this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 }
 
 void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
@@ -5959,6 +5965,9 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
         {
             this->multitimer_activeTimer = index;
             this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+            //MULTITIMER_DIAL_TIME_INDEX = timeSecondsToNearestIndex();
+            // MULTITIMER_DIAL_TIME_INDEX = MULTITIMER_INIT_TIME_INDECES[index];
+            MULTITIMER_DIAL_TIME_INDEX = multitimer_getTimerInitTimeIndex(index);
         }
     }
     else if (this->multitimer_state == playing)
@@ -5982,24 +5991,6 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
         this->multitimer_timerDisplayed = index; // display time of pressed timer button
     }
 }
-
-// void Apps::multitimer_setStatePause(bool set)
-// {
-// 	// pause button is latching
-
-// 	if (this->multitimer_state == initialized)
-// 	{
-// 		this->multitimer_surviveAtTimeout = set;
-// 	}
-// 	else if (set && this->multitimer_state == playing)
-// 	{
-// 		this->multitimer_pause();
-// 	}
-// 	else if (!set && this->multitimer_state == statePaused)
-// 	{
-// 		this->multitimer_continu();
-// 	}
-// }
 
 void Apps::multitimer_start(bool isRandomStarter)
 {
@@ -6083,6 +6074,13 @@ void Apps::multitimer_refresh()
     uint8_t playerLights = 0;            // lsb is timer 0, 2nd bit is timer 1, ....
     uint8_t settingsLights = 0b00000000; // I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
 
+
+
+    if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2))
+    {
+        this->multitimer_surviveAtTimeout = !this->multitimer_surviveAtTimeout;
+    }
+
     if (this->multitimer_state == initialized)
     {
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
@@ -6090,31 +6088,27 @@ void Apps::multitimer_refresh()
             this->multitimer_state = setFischer;
         }
 
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2))
-        {
-            this->multitimer_surviveAtTimeout = !this->multitimer_surviveAtTimeout;
-        }
-
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            this->multitimer_state = setStartingTimer;
+            if (MULTITIMER_TIMERS_COUNT == 1){
+                // if only one clock, no need to chose a starting timer.
+                this->multitimer_activeTimer = 0;
+                multitimer_start(false);
+            }else{
+                this->multitimer_state = setStartingTimer;
+            }
         }
 
+        byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
         if (encoder_dial->getDelta() != 0)
         {
-            byte momentary_buttons_mask = 1 << BUTTON_INDEXED_MOMENTARY_0 | 1 << BUTTON_INDEXED_MOMENTARY_1 | 1 << BUTTON_INDEXED_MOMENTARY_2 | 1 << BUTTON_INDEXED_MOMENTARY_3;
+            set_blink_offset(); // to disable text blinking during dialing
             if ((binaryInputsValue & momentary_buttons_mask) == 0)
             {
                 // set number of timers
-                // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY++; // hack to decrease sensitivity of encoder dial for counter setting only.
-                // if (MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY > 2)
-                // {
                 stepChange(&MULTITIMER_TIMERS_COUNT, this->encoder_dial->getDelta(), 1, MULTITIMER_MAX_TIMERS_COUNT, false);
                 this->multitimer_activeTimer = 0;
                 this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-
-                // MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY = 0;
-                // }
             }
             else
             {
@@ -6130,6 +6124,10 @@ void Apps::multitimer_refresh()
             }
         }
 
+        // DISPLAY
+
+        // display active timer time as default 
+        this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
             // display the continue or dead option while button is held
@@ -6142,11 +6140,13 @@ void Apps::multitimer_refresh()
                 setStandardTextToTextHANDLE(TEXT_DEAD);
             }
         }
-        else
-        {
-            // display active timer time
-            this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
+        else if ((binaryInputsValue & momentary_buttons_mask) != 0){
+            if( millis_blink_250_750ms()){
+                setStandardTextToTextHANDLE(TEXT_SET);
+            }
         }
+
+        // END DISPLAY
 
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
         {
@@ -6270,6 +6270,11 @@ void Apps::multitimer_refresh()
         {
             playerLights |= 1 << this->multitimer_activeTimer;
         }
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
+        {
+            multitimer_init();
+        }
+
     }
     else if (this->multitimer_state == statePaused)
     {

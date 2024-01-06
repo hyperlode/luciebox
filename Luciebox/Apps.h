@@ -351,6 +351,8 @@
 #define MULTITIMER_INIT_TIME_INDECES array_8_bytes
 #define HACKTIME_VALUE_BUFFER array_8_bytes
 
+#define TIME_INDECES_COUNT 90
+
 #ifdef ENABLE_MULTITIMER_INTEGRATED
 const uint16_t timeDialDiscreteSeconds[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -1208,6 +1210,7 @@ private:
 
     uint16_t *reactionGameLevelToEepromAddress();
     void resetStopwatch(SuperTimer *pTimer);
+    // int16_t timeSecondsToNearestIndex(unsigned int timeSeconds );
     unsigned int indexToTimeSeconds(int16_t index);
     bool saveLoadMenu(uint8_t *data, uint8_t slotCount, uint8_t eepromSlotLength, uint16_t eepromStartAddress);
     void eepromPictureToDisplayAllSegments(int16_t pictureIndex);
