@@ -5973,12 +5973,10 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
         if (this->multitimer_activeTimer == index)
         {
             this->multitimer_next(false);
-            // buzzerSilentClearBufferAndAddNote(35);
             buzzerPlayApproval();
         }
         else if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
         {
-            // buzzerSilentClearBufferAndAddNote(129);
             buzzerPlayDisappointment();              // althought, good to check time, it also acts as a warning that this is not your button to press
             this->multitimer_timerDisplayed = index; // display time of pressed timer button
         }
@@ -6059,8 +6057,10 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
         // at every minute a nice beep plays~
         if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() % 60 == 0)
         {
-            // addNoteToBuzzer(44);
-            buzzerPlayApproval();
+            if (MULTITIMER_TIMERS_COUNT>1){
+                // single timer, no minute beeps (so we can use it as an alarm clock.)
+                buzzerPlayApproval();
+            }
         }
     }
 }
