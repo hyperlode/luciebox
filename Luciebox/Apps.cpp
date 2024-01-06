@@ -2822,7 +2822,7 @@ void Apps::modeSoundNotes()
         }
     }
 
-    // advanced vs manual controls
+    // advanced vs simple controls
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
     {
         // advanced
@@ -2832,6 +2832,24 @@ void Apps::modeSoundNotes()
         {
             buzzer->changeNoteToNextLength(&SOUND_NOTES_NOTE_INDEX);
             SOUND_NOTE_PLAY_NOTE = true;
+            SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
+        }
+
+        // change key
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1)) // set key when changing scale
+        {
+            // first keypress, set note to root. (which is done in modeSoundNotesInitScale(); )
+            // second keypress, change root.
+            if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT)
+            {
+                SOUND_NOTES_SCALE_ROOT++; // transpose to next note on harmonic scale
+                if (SOUND_NOTES_SCALE_ROOT > B5_4)
+                {
+                    SOUND_NOTES_SCALE_ROOT = C5_4;
+                }
+            }
+            modeSoundNotesInitScale();
+            SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
         }
 
         //  change scale
@@ -2839,46 +2857,26 @@ void Apps::modeSoundNotes()
         {
             nextStepRotate(&SOUND_NOTES_SCALE_INDEX, 1, 0, SCALES_COUNT);
             modeSoundNotesInitScale();
-        }
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2))
-        {
-            SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX * 4;
-        }
-
-        // change key
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3)) // set key when changing scale
-
-        {
-            // first keypress, back to root.
-            // second keypress, change root.
-            if (SOUND_NOTES_NOTE_INDEX == SOUND_NOTES_SCALE_ROOT)
-            {
-                SOUND_NOTES_SCALE_ROOT++;
-                if (SOUND_NOTES_SCALE_ROOT > B6_4)
-                {
-                    SOUND_NOTES_SCALE_ROOT = C5_4;
-                }
-            }
-            modeSoundNotesInitScale();
+            SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 76 + SOUND_NOTES_SCALE_INDEX * 4; // set text offset
         }
 
         // change progression mode
-        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_1))
+        if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
         {
             SOUND_NOTES_PROGRESSION_MODE++;
             if (SOUND_NOTES_PROGRESSION_MODE > 5)
             {
                 SOUND_NOTES_PROGRESSION_MODE = SOUND_NOTE_MODE_MANUAL;
             }
-        }
-
-        if (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1))
-        {
             SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
         }
+
     }
     else
     {
+        // simple 
+
+        SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
 
         // mute button to silently change notes.
         // this allows the box to be used as a primitive piano.
@@ -2989,7 +2987,7 @@ void Apps::modeSoundNotes()
             }
         }
 
-        SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
+        //SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE; // don't add here, when in auto play in advance mode, the settings text should stay visible.
         SOUND_NOTE_PLAY_NOTE = true;
     }
 
