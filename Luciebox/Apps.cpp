@@ -528,11 +528,13 @@ void Apps::updateEveryAppCycleBefore()
         // by default: button lights on if activated
         if (i < 5)
         {
+            // momentary buttons (i = 0,1,2,3) and control button (4) (latching_0)
             // 5 instead of 4 because BUTTON_INDEXED_LATCHING_0 is standard also only on if pressed.
             lights |= binaryInputs[buttons_indexed[i]].getValue() << lights_indexed[i];
         }
         else
         {
+            // latching buttons (i=5,6,7)
             lights |= binaryInputs[buttons_indexed[i]].getToggleValue() << lights_indexed[i];
         }
 #endif
@@ -1464,6 +1466,7 @@ void Apps::modeRandomWorld()
         randomModeTrigger(false);
 #ifdef ENABLE_EEPROM
         RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = eeprom_read_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+        encoder_dial->setValue(RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
 #else
         RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = 10;
 #endif
@@ -1471,7 +1474,7 @@ void Apps::modeRandomWorld()
 
     // textbuf contains the actual random generated graphics. Set to display at start, because it might be overriden in this routine.
     textBufToDisplay();
-
+   
     switch (randomWorldState)
     {
     case randomWorldIdle:
@@ -1490,6 +1493,7 @@ void Apps::modeRandomWorld()
             {
                 ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
             }
+        
         }
         else
         {
@@ -1497,12 +1501,22 @@ void Apps::modeRandomWorld()
             {
                 randomWorldState = randomWorldRollingEnd;
             }
+
         }
+
+        #ifdef NICE_BUT_TAKES_MEMORY
+        if (millis_quarter_second_period()){
+            lights |=  1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX] ; 
+        }
+        #endif
 
         for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
         {
             if (binaryInputsEdgeUp & 1 << i)
             {
+                #ifdef NICE_BUT_TAKES_MEMORY
+                RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX = i;
+                #endif
                 RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
                 randomWorldState = randomWorldRolling;
 
@@ -1513,10 +1527,6 @@ void Apps::modeRandomWorld()
     }
     break;
 
-    case randomWorldInstantRoll:
-    {
-    }
-    break;
     case randomWorldRolling:
     {
         // check state
@@ -1556,7 +1566,6 @@ void Apps::modeRandomWorld()
             // animated
             if (RANDOMWORLD_ROLL_SPEED.getCountDownTimerElapsedAndRestart())
             {
-                // addNoteToBuzzer(C7_8);
                 buzzerPlayApproval();
                 randomModeTrigger(false);
             }
@@ -1573,7 +1582,7 @@ void Apps::modeRandomWorld()
 
                 RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW = encoder_dial->getValueLimited(100, false);
 
-                RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG = 0; // reset the tombola.
+                RANDOMWORLD_INDEX_FROM_BINGO = 0; // reset the bingo
 
                 if (encoder_dial->getDelta())
                 {
@@ -1653,6 +1662,9 @@ void Apps::modeRandomWorld()
         {
             randomWorldState = randomWorldIdle;
         }
+        #ifdef NICE_BUT_TAKES_MEMORY
+        lights |=  1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX] ; 
+        #endif
     }
 
     break;
@@ -1663,7 +1675,7 @@ void Apps::randomModeTrigger(bool forReal)
 {
     // set the textBuf.
 
-    // forReal: if false, just for animations. Important for i.e. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
+    // forReal: if false, just for animations. Important for e.g. drawing a card from the deck. During animations, we're not really drawing a card from the deck.
 
     const int16_t randomUpperLimits[8] = {6, 26, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 2, 6, 52, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW, 2};
 
@@ -1710,7 +1722,7 @@ void Apps::randomModeTrigger(bool forReal)
             break;
         }
 
-        RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG, CARDS_DECK, 52);
+        RANDOMWORLD_RANDOM_NUMBER = bingo(&RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG, CARDS_DECK, 52);
 
         // show playing card
         if (RANDOMWORLD_RANDOM_NUMBER % 13 < 9)
@@ -1729,14 +1741,14 @@ void Apps::randomModeTrigger(bool forReal)
 
     break;
 
-    case RANDOMWORLD_TOMBOLA:
+    case RANDOMWORLD_BINGO:
     {
         if (!forReal)
         {
             // dont draw if not for real
             break;
         }
-        RANDOMWORLD_RANDOM_NUMBER = tombola(&RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG, CARDS_DECK, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+        RANDOMWORLD_RANDOM_NUMBER = bingo(&RANDOMWORLD_INDEX_FROM_BINGO, BINGO_NUMBERS_LIST, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
     }
     // NO BREAK HERE we just changed the random number to a part of a raffle draw.
     case RANDOMWORLD_RANDOMNUMBER:
@@ -1750,7 +1762,9 @@ void Apps::randomModeTrigger(bool forReal)
     // NO BREAK HERE, we will overflow to yes no, but change the text. DAngereous I know. But, we need the extra bytes.
     case RANDOMWORLD_YESORNO:
     {
-        setStandardTextToTextBuf(60 + RANDOMWORLD_RANDOM_NUMBER * 4 + (RANDOMWORLD_RANDOM_TYPE - 3) * 2);
+        setStandardTextToTextBuf(60 + // offset in standardtexts
+        RANDOMWORLD_RANDOM_NUMBER * 4 +  // value , 4 chars more or not? yes vs no text, tails vs heads text
+        (RANDOMWORLD_RANDOM_TYPE - 3) * 2); // text type: yes/no or heads/tails
     }
     break;
     }
@@ -5298,7 +5312,7 @@ uint32_t Apps::fadeInList(uint8_t step, uint32_t startScreen, uint8_t *shuffledS
     return fullScreen;
 }
 
-uint8_t Apps::tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length)
+uint8_t Apps::bingo(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length)
 {
     // will populate a list of certain length with unique numbers in random order. At every call, will take a next number until all numbers are depleted. It will then repopulate the list with a new random sequence
     if (*indexVariable == 0)

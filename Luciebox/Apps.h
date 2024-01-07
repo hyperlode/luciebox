@@ -15,6 +15,8 @@
 #define ENABLE_TILT_APP
 #endif
 
+#define NICE_BUT_TAKES_MEMORY  // vanity beautiful features that DO take up quite a bit of memory...
+
 #define ENABLE_SHOOTOUT
 #define ENABLE_TALLY_KEEPER
 
@@ -95,7 +97,7 @@
 #define RANDOMWORLD_HEADSORTAILS 3
 #define RANDOMWORLD_ROLLFOURDICE 4
 #define RANDOMWORLD_TAKERANDOMCARDFROMDECK 5
-#define RANDOMWORLD_TOMBOLA 6
+#define RANDOMWORLD_BINGO 6
 #define RANDOMWORLD_YESORNO 7
 
 #define SIMON_NO_ACTIVE_LIGHT 666
@@ -262,8 +264,8 @@
 #define DRAW_SHOW_MODE general_uint8_t_2
 #define SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX general_uint8_t_2
 #define HACKTIME_SOUND general_uint8_t_2
-#define RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG general_uint8_t_2
 #define REACTION_GAME_HEX_ACTIVE_DIGIT general_uint8_t_2
+#define RANDOMWORLD_INDEX_FROM_RANDOM_IN_A_BAG general_uint8_t_2
 #define DRAW_ACTIVE_SEGMENT general_uint8_t_2
 #define MODE_SETTINGS_CYCLE_TIMING_INDEX general_uint8_t_2
 #define SEQUENCER_CHOSEN_NOTE general_uint8_t_2
@@ -274,11 +276,12 @@
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
 #define SHOOTOUT_SCORE_MEMORY general_uint8_t_3
 #define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
+#define RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX general_uint8_t_3
 
+#define RANDOMWORLD_INDEX_FROM_BINGO general_uint8_t_4
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
 #define POMODORO_TALLY_TYPE general_uint8_t_4
-
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -341,7 +344,9 @@
 #define REACTION_GAME_SELECTED_NOTES array_100_bytes_1
 #define SHOOTOUT_ANALOG_VALUES_CHECK array_100_bytes_1
 
-#define BUZZERTRACK_NOTES_LIST array_100_bytes_2  // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
+#define BINGO_NUMBERS_LIST array_100_bytes_2
+
+#define BUZZERTRACK_NOTES_LIST array_100_bytes_3  // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
 // #define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
 // #define PROGMEM_TO_BUFFER_LIST array_100_bytes_2
 
@@ -1230,7 +1235,7 @@ private:
     uint16_t dialGetIndexedtime();
     void dialMultiplyValueAndDisplay(int16_t *pVariable, uint8_t multiplier, int16_t maxValue);
 
-    uint8_t tombola(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length);
+    uint8_t bingo(uint8_t *indexVariable, uint8_t *sequenceList, uint8_t length);
     void randomSequence(uint8_t *sequenceList, uint8_t length);
     void shuffle(uint8_t *list, uint8_t length);
     void fill8BytesArrayWithZero();
@@ -1375,8 +1380,9 @@ private:
     {
         bytes_array_size = 100,
     };
-    uint8_t array_100_bytes_2[bytes_array_size];
     uint8_t array_100_bytes_1[bytes_array_size];
+    uint8_t array_100_bytes_2[bytes_array_size];
+    uint8_t array_100_bytes_3[bytes_array_size];
     uint8_t array_8_bytes[8];
 
 #ifdef ENABLE_DRAW_GAME
