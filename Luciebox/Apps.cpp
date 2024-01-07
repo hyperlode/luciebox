@@ -1372,7 +1372,7 @@ void Apps::stopwatch()
     {
         resetStopwatch(&STOPWATCH_CHRONO_2);
 
-        // chrono 1 contains the always-on timer (counting since box startup) at app init. 
+        // chrono 1 contains the always-on timer (counting since box startup) at app init.
         STOPWATCH_CHRONO_1.setInitTimeMillis(always_on_timer.getTimeMillis());
         STOPWATCH_CHRONO_1.start();
     }
@@ -1411,7 +1411,6 @@ void Apps::stopwatch()
 
     // if ((millis_quarter_second_period() && paused) || millis_half_second_period())
 
-
     if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_0)) ||
         (binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
     {
@@ -1419,7 +1418,7 @@ void Apps::stopwatch()
         time_millis = *pLongValue;
     }
 
-    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2 ) || (time_millis>9999000))
+    if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2) || (time_millis > 9999000))
     {
         // normal clock with minutes and seconds
         displayTimerSecondsBlinker(pSsuperTimer);
@@ -1449,15 +1448,15 @@ void Apps::stopwatch()
     // alluring start/stop button blinking
     if ((millis_quarter_second_period() && paused) || (millis_second_period() && !paused))
     {
-        lights |=  1 << LIGHT_MOMENTARY_3;
+        lights |= 1 << LIGHT_MOMENTARY_3;
     }
-    
+
     // lap time availablel
     lights |= (*pLongValue != 0) << LIGHT_MOMENTARY_0;
 
     textBufToDisplay();
 }
- 
+
 void Apps::modeRandomWorld()
 {
     if (this->app_init_edge)
@@ -1474,7 +1473,7 @@ void Apps::modeRandomWorld()
 
     // textbuf contains the actual random generated graphics. Set to display at start, because it might be overriden in this routine.
     textBufToDisplay();
-   
+
     switch (randomWorldState)
     {
     case randomWorldIdle:
@@ -1493,7 +1492,6 @@ void Apps::modeRandomWorld()
             {
                 ledDisp->setNumberToDisplayAsDecimal(delay_seconds);
             }
-        
         }
         else
         {
@@ -1501,22 +1499,22 @@ void Apps::modeRandomWorld()
             {
                 randomWorldState = randomWorldRollingEnd;
             }
-
         }
 
-        #ifdef NICE_BUT_TAKES_MEMORY
-        if (millis_quarter_second_period()){
-            lights |=  1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX] ; 
+#ifdef NICE_BUT_TAKES_MEMORY
+        if (millis_quarter_second_period())
+        {
+            lights |= 1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX];
         }
-        #endif
+#endif
 
         for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
         {
             if (binaryInputsEdgeUp & 1 << i)
             {
-                #ifdef NICE_BUT_TAKES_MEMORY
+#ifdef NICE_BUT_TAKES_MEMORY
                 RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX = i;
-                #endif
+#endif
                 RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
                 randomWorldState = randomWorldRolling;
 
@@ -1662,9 +1660,9 @@ void Apps::modeRandomWorld()
         {
             randomWorldState = randomWorldIdle;
         }
-        #ifdef NICE_BUT_TAKES_MEMORY
-        lights |=  1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX] ; 
-        #endif
+#ifdef NICE_BUT_TAKES_MEMORY
+        lights |= 1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX];
+#endif
     }
 
     break;
@@ -1762,9 +1760,9 @@ void Apps::randomModeTrigger(bool forReal)
     // NO BREAK HERE, we will overflow to yes no, but change the text. DAngereous I know. But, we need the extra bytes.
     case RANDOMWORLD_YESORNO:
     {
-        setStandardTextToTextBuf(60 + // offset in standardtexts
-        RANDOMWORLD_RANDOM_NUMBER * 4 +  // value , 4 chars more or not? yes vs no text, tails vs heads text
-        (RANDOMWORLD_RANDOM_TYPE - 3) * 2); // text type: yes/no or heads/tails
+        setStandardTextToTextBuf(60 +                                // offset in standardtexts
+                                 RANDOMWORLD_RANDOM_NUMBER * 4 +     // value , 4 chars more or not? yes vs no text, tails vs heads text
+                                 (RANDOMWORLD_RANDOM_TYPE - 3) * 2); // text type: yes/no or heads/tails
     }
     break;
     }
@@ -2884,11 +2882,10 @@ void Apps::modeSoundNotes()
             }
             SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = 96 + 4 * SOUND_NOTES_PROGRESSION_MODE;
         }
-
     }
     else
     {
-        // simple 
+        // simple
 
         SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE;
 
@@ -3001,7 +2998,7 @@ void Apps::modeSoundNotes()
             }
         }
 
-        //SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE; // don't add here, when in auto play in advance mode, the settings text should stay visible.
+        // SOUND_NOTE_SETTING_TEXT_TO_DISPLAY = SOUND_NOTE_DISPLAY_NOTE; // don't add here, when in auto play in advance mode, the settings text should stay visible.
         SOUND_NOTE_PLAY_NOTE = true;
     }
 
@@ -4002,7 +3999,7 @@ void Apps::modeGeiger()
         if (r > GEIGER_PROBABILITY_THRESHOLD)
         {
             // buzzer->playTone((unsigned int)50, 10);
-            buzzerPlayTone(50,10);
+            buzzerPlayTone(50, 10);
             setStandardTextToTextHANDLE(TEXT_RANDOM_SEGMENTS);
             // textBufToDisplay();
             COUNTER_GEIGER++;
@@ -4024,7 +4021,7 @@ void Apps::geigerToneHelper()
     //     (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)) ? 0 : GEIGER_TONE_LENGTH);
 
     buzzerPlayTone(
-        random_frequency_within_limits, 
+        random_frequency_within_limits,
         (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)) ? 0 : GEIGER_TONE_LENGTH);
     ledDisp->setNumberToDisplayAsDecimal(random_frequency_within_limits);
     COUNTER_GEIGER++;
@@ -4455,7 +4452,7 @@ void Apps::modeSimon()
         { // at start, wait for the beginning song to be over.
             simonState = simonPlaySequence;
         }
-        break; 
+        break;
     }
 
     case simonPlaySequence:
@@ -5122,16 +5119,16 @@ void Apps::modeReactionGame()
                     }
                     else
                     {
-//#define BLINK_AT_TWICE_THE_SAME_POSITION // add a pause after each button press to ensure all display lights are perceived as off. The idea is, if twice the same button is chosen, it's visible to the player. Although this seems like a good idea, we're solving a non existing problem. There is the beep feedback for each button press. And, we should not introduce artificial pauses to the game. 
+                        // #define BLINK_AT_TWICE_THE_SAME_POSITION // add a pause after each button press to ensure all display lights are perceived as off. The idea is, if twice the same button is chosen, it's visible to the player. Although this seems like a good idea, we're solving a non existing problem. There is the beep feedback for each button press. And, we should not introduce artificial pauses to the game.
 
 #ifndef BLINK_AT_TWICE_THE_SAME_POSITION
                         buzzerPlayApproval();
                         reactionGameState = reactionNewTurn;
 #else
-                        setBlankDisplay();
-                        buzzerPlayApproval();
-                        addNoteToBuzzerRepeated(REST_1_8, 2); //todo delete
-                        reactionGameState = reactionWaitBeforeNewTurn;
+                            setBlankDisplay();
+                            buzzerPlayApproval();
+                            addNoteToBuzzerRepeated(REST_1_8, 2); // todo delete
+                            reactionGameState = reactionWaitBeforeNewTurn;
 #endif
                     }
                 }
@@ -5523,7 +5520,8 @@ void Apps::buzzerSilentClearBufferAndAddNote(uint8_t note)
     addNoteToBuzzer(note);
 }
 
-void Apps::buzzerPlayTone(unsigned int freq, unsigned long duration){
+void Apps::buzzerPlayTone(unsigned int freq, unsigned long duration)
+{
     buzzer->playTone(freq, duration);
 }
 
@@ -5932,8 +5930,6 @@ void Apps::multitimer_setDefaults()
             this->multitimer_setTimerInitCountTimeByTimeIndex(i, 35);
         }
 #endif
-
-    
 }
 
 uint8_t Apps::multitimer_getTimerInitTimeIndex(uint8_t timer)
@@ -5966,7 +5962,8 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 
     if (this->multitimer_state == setStartingTimer)
     {
-        if(index < MULTITIMER_TIMERS_COUNT){
+        if (index < MULTITIMER_TIMERS_COUNT)
+        {
             this->multitimer_activeTimer = index;
             multitimer_start(false);
         }
@@ -5977,8 +5974,8 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
         {
             this->multitimer_activeTimer = index;
             this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-            //MULTITIMER_DIAL_TIME_INDEX = timeSecondsToNearestIndex();
-            // MULTITIMER_DIAL_TIME_INDEX = MULTITIMER_INIT_TIME_INDECES[index];
+            // MULTITIMER_DIAL_TIME_INDEX = timeSecondsToNearestIndex();
+            //  MULTITIMER_DIAL_TIME_INDEX = MULTITIMER_INIT_TIME_INDECES[index];
             MULTITIMER_DIAL_TIME_INDEX = multitimer_getTimerInitTimeIndex(index);
         }
     }
@@ -6071,7 +6068,8 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
         // at every minute a nice beep plays~
         if (this->multitimer_timers[this->multitimer_activeTimer].getTimeSecondsAbsolute() % 60 == 0)
         {
-            if (MULTITIMER_TIMERS_COUNT>1){
+            if (MULTITIMER_TIMERS_COUNT > 1)
+            {
                 // single timer, no minute beeps (so we can use it as an alarm clock.)
                 buzzerPlayApproval();
             }
@@ -6085,8 +6083,6 @@ void Apps::multitimer_refresh()
 
     uint8_t playerLights = 0;            // lsb is timer 0, 2nd bit is timer 1, ....
     uint8_t settingsLights = 0b00000000; // I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
-
-
 
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2))
     {
@@ -6102,11 +6098,14 @@ void Apps::multitimer_refresh()
 
         if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            if (MULTITIMER_TIMERS_COUNT == 1){
+            if (MULTITIMER_TIMERS_COUNT == 1)
+            {
                 // if only one clock, no need to chose a starting timer.
                 this->multitimer_activeTimer = 0;
                 multitimer_start(false);
-            }else{
+            }
+            else
+            {
                 this->multitimer_state = setStartingTimer;
             }
         }
@@ -6138,7 +6137,7 @@ void Apps::multitimer_refresh()
 
         // DISPLAY
 
-        // display active timer time as default 
+        // display active timer time as default
         this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_2))
         {
@@ -6152,8 +6151,10 @@ void Apps::multitimer_refresh()
                 setStandardTextToTextHANDLE(TEXT_DEAD);
             }
         }
-        else if ((binaryInputsValue & momentary_buttons_mask) != 0){
-            if( millis_blink_250_750ms()){
+        else if ((binaryInputsValue & momentary_buttons_mask) != 0)
+        {
+            if (millis_blink_250_750ms())
+            {
                 setStandardTextToTextHANDLE(TEXT_SET);
             }
         }
@@ -6286,7 +6287,6 @@ void Apps::multitimer_refresh()
         {
             multitimer_init();
         }
-
     }
     else if (this->multitimer_state == statePaused)
     {

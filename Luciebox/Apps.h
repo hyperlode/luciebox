@@ -15,7 +15,7 @@
 #define ENABLE_TILT_APP
 #endif
 
-#define NICE_BUT_TAKES_MEMORY  // vanity beautiful features that DO take up quite a bit of memory...
+#define NICE_BUT_TAKES_MEMORY // vanity beautiful features that DO take up quite a bit of memory...
 
 #define ENABLE_SHOOTOUT
 #define ENABLE_TALLY_KEEPER
@@ -38,7 +38,7 @@
 #include "MiniMultiTimer.h"
 #endif
 
-//#include "DataPlayer.h"
+// #include "DataPlayer.h"
 #include "DisplayDigitsHandler5Digits.h"
 #include "RotaryEncoderDial.h"
 #include "PretbakSettings.h"
@@ -105,9 +105,9 @@
 #define SIMON_MAX_PLAYERS 8
 #define SIMON_NO_BUTTON_PRESSED 111
 
-#define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      //1500s
-#define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     //300s
-#define POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX 16 //60s
+#define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      // 1500s
+#define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     // 300s
+#define POMODORO_PROBABILITY_BEEP_INTERVAL_DEFAULT_TIME_INDEX 16 // 60s
 #define POMODORO_DISPLAY_TIMER 0
 #define POMODORO_DISPLAY_PAUSE_INIT_SECS 1
 #define POMODORO_DISPLAY_SHOW_GOOD 2
@@ -346,7 +346,7 @@
 
 #define BINGO_NUMBERS_LIST array_100_bytes_2
 
-#define BUZZERTRACK_NOTES_LIST array_100_bytes_3  // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
+#define BUZZERTRACK_NOTES_LIST array_100_bytes_3 // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
 // #define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
 // #define PROGMEM_TO_BUFFER_LIST array_100_bytes_2
 
@@ -444,32 +444,32 @@ const uint8_t scales[] PROGMEM = {
 // };
 // scrabble dutch
 const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
-    6,  //a
-    2,  //b
-    2,  //c
-    5,  //d
-    18, //e
-    2,  //f
-    3,  //g
-    2,  //h
-    4,  //i
-    2,  //j
-    3,  //k
-    3,  //l
-    3,  //m
-    10, //n
-    6,  //o
-    2,  //p
-    1,  //q
-    5,  //r
-    5,  //s
-    5,  //t
-    3,  //u
-    2,  //v
-    2,  //w
-    1,  //x
-    1,  //y
-    2   //z
+    6,  // a
+    2,  // b
+    2,  // c
+    5,  // d
+    18, // e
+    2,  // f
+    3,  // g
+    2,  // h
+    4,  // i
+    2,  // j
+    3,  // k
+    3,  // l
+    3,  // m
+    10, // n
+    6,  // o
+    2,  // p
+    1,  // q
+    5,  // r
+    5,  // s
+    5,  // t
+    3,  // u
+    2,  // v
+    2,  // w
+    1,  // x
+    1,  // y
+    2   // z
 };
 // const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
 //     1, //a
@@ -502,8 +502,8 @@ const uint8_t letter_frequency_table_english_dutch_ish[] PROGMEM = {
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 const uint8_t app_splash_screens[] PROGMEM = {
-    //sorted by selector number
-    0x0F, 0x40, 0x40, 0x39, //wrench
+    // sorted by selector number
+    0x0F, 0x40, 0x40, 0x39, // wrench
     // 0x61, 0xc5, 0x51, 0x43, // balancing beam .(tilt)
     0x00, 0xd0, 0xab, 0x44, // stopwatch
     0xc4, 0x88, 0x50, 0x00, // student koala
@@ -512,36 +512,36 @@ const uint8_t app_splash_screens[] PROGMEM = {
     0x5C, 0x63, 0x5c, 0x63, // dice
     0x00, 0x63, 0xDA, 0x63, // face
     0x3d, 0x41, 0x43, 0x02, // gun
-    0x40, 0x49, 0x49, 0x4F, //pencil
+    0x40, 0x49, 0x49, 0x4F, // pencil
     0x7F, 0x39, 0x0f, 0x7f, // media player. film roll
     0x00, 0x07, 0x5c, 0x31, // sequencer / metronome: drum kit
     0x5e, 0x01, 0x5f, 0x00, // music notes
     0x00, 0x02, 0x6b, 0x20, // radioactive sign
     0x63, 0x58, 0x4C, 0x63, // beast face
     // 0x61, 0x43, 0x58, 0x4C, // abstract two half screen circles.
-    //0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
+    // 0xD8, 0xE9, 0xCB, 0xC4, // abstract turd or tank
     // 0x39, 0x09, 0x09, 0x0F, // abstractbig circle
-    //0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
+    // 0x40, 0x39, 0x0F, 0x40, // abstract. circle with lines
     // 0x5E, 0x7C, 0x67, 0x73, // abstract.  bolletjes with verticallines
-    //0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
+    // 0xB9, 0x40, 0x40, 0x0F, // abstract. [--]
 
     // 0x5e, 0x01, 0xdf, 0x5e, // music notes full
     // 0x32, 0x26, 0x34, 0x16, // vertical lines short and long
-    //0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
-    //0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
+    // 0x5D, 0x6B, 0x5D, 0x5D, // abstract   camion
+    // 0x49, 0x49, 0x49, 0x49, // abstract horizontal lines.
     // 0x08, 0xCE, 0x78, 0x08, // abstract piramid
     // 0x40, 0x4F, 0x79, 0x40, // abstract art deco
     // 0x60, 0x3a, 0x2e, 0x42, // body builder. gamer.
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
     // 0x36, 0x36, 0x36, 0x36, // abstract vertical lines
 
-    //0x5F, 0x79, 0x1C, 0x3D // DBUG
+    // 0x5F, 0x79, 0x1C, 0x3D // DBUG
 };
 
 #else
 const uint8_t app_splash_screens[] PROGMEM = {
-    //sorted by selector number
-    0x0F, 0x40, 0x40, 0x39, //wrench
+    // sorted by selector number
+    0x0F, 0x40, 0x40, 0x39, // wrench
     0x00, 0xd0, 0xab, 0x44, // stopwatch
     0x74, 0x50, 0x44, 0x56, // table with two chairs. (board game night suggestion)
     0x06, 0x5B, 0x4F, 0x66, // 1234
@@ -968,7 +968,7 @@ const uint8_t song_lengths[] PROGMEM = {
 
 // one big library. song lengths in separate array. This is the easiest option.
 const uint8_t songs[] PROGMEM = {
-    //happy dryer
+    // happy dryer
     A6_2, REST_6_8,
     Cs7_2, REST_6_8,
     E7_4, REST_3_8,
@@ -1049,16 +1049,16 @@ const uint8_t songs[] PROGMEM = {
 
     // kindeke douwen
     B7_4, REST_6_8,                 // wie
-    B7_1,                           //zal
-    REST_4_8, A7_4, REST_2_8,       //er
-    G6_4, REST_6_8,                 //ons
-    B7_1,                           //kind-
+    B7_1,                           // zal
+    REST_4_8, A7_4, REST_2_8,       // er
+    G6_4, REST_6_8,                 // ons
+    B7_1,                           // kind-
     B7_4, REST_2_8, A7_4, REST_2_8, //-de
     G6_4, REST_6_8,                 //-ke
-    A7_1,                           //dou
+    A7_1,                           // dou
     A7_4, REST_6_8,
     C7_4, REST_6_8,
-    C7_1, //wen
+    C7_1, // wen
     REST_8_8,
     C7_4, REST_6_8, // dat
     B7_1,           // schaars
@@ -1271,7 +1271,7 @@ private:
     // void setStandardTextToTextBufAndDisplayIt(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
 
-    //void decimalPointClockPositionOn();
+    // void decimalPointClockPositionOn();
     void displayTimerSecondsBlinker(SuperTimer *timerToBlink);
     void setDecimalPoint(bool onElseOff, uint8_t digit);
     bool getCountDownTimerHasElapsed(SuperTimer *timerToBlink);
@@ -1290,7 +1290,7 @@ private:
     void playSongHappyDryer();
     long readVcc();
 
-    //reused variables per app
+    // reused variables per app
     SuperTimer general_timer_1;
     SuperTimer general_timer_2;
 
