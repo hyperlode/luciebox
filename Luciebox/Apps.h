@@ -1247,6 +1247,8 @@ private:
     bool checkBoundaries(int16_t *counter, int16_t maxValue, int16_t minValue, bool rotate);
 
     void latching_3_blink();
+    void button_light_blink_half_second_period(uint8_t button_light_index);
+    void button_light_blink_quarter_second_period(uint8_t button_light_index);
     bool millis_second_period();
     bool millis_half_second_period();
     bool millis_quarter_second_period();

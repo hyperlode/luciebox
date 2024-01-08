@@ -198,10 +198,13 @@ void Apps::appStateLoop()
             selected_app_memory = selected_app;
         }
 
-        if (millis_quarter_second_period())
-        {
-            lights |= 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
-        }
+        // if (millis_quarter_second_period())
+        // {
+        //     lights |= 1 << LIGHT_MOMENTARY_0 | 1 << LIGHT_MOMENTARY_2 | 1 << LIGHT_MOMENTARY_3;
+        // }
+        button_light_blink_quarter_second_period(LIGHT_MOMENTARY_0);
+        button_light_blink_quarter_second_period(LIGHT_MOMENTARY_2);
+        button_light_blink_quarter_second_period(LIGHT_MOMENTARY_3);
 
         // if (millis_blink_250_750ms()){
         if ((millis() - blink_offset) > APP_NUMBER_TO_PICTOGRAM_DELAY_MILLIS)
@@ -954,10 +957,11 @@ void Apps::pomodoroTimer()
         }
 
         // blinking latching button invites user to start
-        if (millis_half_second_period())
-        {
-            lights |= 1 << LIGHT_LATCHING_3;
-        }
+        // if (millis_half_second_period())
+        // {
+        //     lights |= 1 << LIGHT_LATCHING_3;
+        // }
+        button_light_blink_half_second_period(LIGHT_LATCHING_3);
     }
 
     // display
@@ -1502,10 +1506,11 @@ void Apps::modeRandomWorld()
         }
 
 #ifdef NICE_BUT_TAKES_MEMORY
-        if (millis_quarter_second_period())
-        {
-            lights |= 1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX];
-        }
+        // if (millis_quarter_second_period())
+        // {
+        //     lights |= 1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX];
+        // }
+        button_light_blink_quarter_second_period(lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX]);
 #endif
 
         for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
@@ -2244,11 +2249,16 @@ void Apps::shootout()
             }
             shootoutState = shootoutInitRandomTime;
         }
-        if (this->millis_half_second_period())
-        {
-            lights &= ~(1 << LIGHT_LATCHING_3);
-            // lights |= 1 << LIGHT_LATCHING_3;
-        }
+        // if (this->millis_half_second_period())
+        // {
+        //     lights &= ~(1 << LIGHT_LATCHING_3);
+        //     // lights |= 1 << LIGHT_LATCHING_3;
+
+        // }
+
+        lights &= ~(1 << LIGHT_LATCHING_3); // latching 3 on by default, so switch off here.
+        button_light_blink_half_second_period(LIGHT_LATCHING_3);
+
         if (binaryInputsValue & (1 << BUTTON_INDEXED_LATCHING_1))
         {
             // SHOOTOUT_MAX_RANDOM_WAIT_TIME = -20000; // great crazy long time.
@@ -2707,10 +2717,11 @@ void Apps::modeComposeSong()
                 }
 
                 // let the program button blink to invite it for being pressed.
-                if (millis_half_second_period())
-                {
-                    lights |= 1 << LIGHT_MOMENTARY_0;
-                }
+                // if (millis_half_second_period())
+                // {
+                //     lights |= 1 << LIGHT_MOMENTARY_0;
+                // }
+                button_light_blink_half_second_period(LIGHT_MOMENTARY_0);
 
                 // program note in song when the combination of the two buttons is pressed.
                 if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -3717,10 +3728,11 @@ void Apps::draw()
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1))
     {
         // eeprom save mode
-        if (millis_half_second_period())
-        {
-            lights |= 1 << LIGHT_MOMENTARY_0;
-        }
+        // if (millis_half_second_period())
+        // {
+        //     lights |= 1 << LIGHT_MOMENTARY_0;
+        // }
+        button_light_blink_half_second_period(LIGHT_MOMENTARY_0);
         lights |= 1 << LIGHT_MOMENTARY_1;
 
         // SHIFT button to insert or delete drawing slots from eeprom
@@ -3762,11 +3774,14 @@ void Apps::draw()
                 DRAW_ACTIVE_DRAWING_INDEX++;
             }
 
-            if (millis_half_second_period())
-            {
-                lights |= 1 << LIGHT_MOMENTARY_2;
-                lights |= 1 << LIGHT_MOMENTARY_3;
-            }
+            // if (millis_half_second_period())
+            // {
+            //     lights |= 1 << LIGHT_MOMENTARY_2;
+            //     lights |= 1 << LIGHT_MOMENTARY_3;
+            // }
+
+            button_light_blink_half_second_period(LIGHT_MOMENTARY_2);
+            button_light_blink_half_second_period(LIGHT_MOMENTARY_3);
         }
         else
 
@@ -4121,10 +4136,12 @@ void Apps::modeSequencer()
                 showNote = true;
 
                 // let the program button blink to invite it for being pressed.
-                if (millis_half_second_period())
-                {
-                    lights |= 1 << LIGHT_MOMENTARY_0;
-                }
+                // if (millis_half_second_period())
+                // {
+                //     lights |= 1 << LIGHT_MOMENTARY_0;
+                // }
+                button_light_blink_half_second_period(LIGHT_MOMENTARY_0);
+                
 
                 // program note to song
                 if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -4361,10 +4378,11 @@ void Apps::modeSimon()
 #endif
 
         // latching_3_blink();
-        if (millis_quarter_second_period())
-        {
-            lights |= 1 << LIGHT_LATCHING_3;
-        }
+        // if (millis_quarter_second_period())
+        // {
+        //     lights |= 1 << LIGHT_LATCHING_3;
+        // }
+        button_light_blink_quarter_second_period(LIGHT_LATCHING_3);
 
         // number of players.
         //// SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false) / 4 + 1); // start counting from player 0 to display
@@ -5477,6 +5495,17 @@ bool Apps::millis_quarter_second_period()
 bool Apps::millis_half_second_period()
 {
     return millis() % 500 > 250;
+}
+
+void Apps::button_light_blink_half_second_period(uint8_t button_light_index){
+    if (millis_half_second_period()){
+         lights |= 1 << button_light_index;
+    }
+}
+void Apps::button_light_blink_quarter_second_period(uint8_t button_light_index){
+    if (millis_quarter_second_period()){
+         lights |= 1 << button_light_index;
+    }
 }
 
 bool Apps::millis_blink_250_750ms()
