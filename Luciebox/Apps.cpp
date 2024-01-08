@@ -4141,7 +4141,6 @@ void Apps::modeSequencer()
                 //     lights |= 1 << LIGHT_MOMENTARY_0;
                 // }
                 button_light_blink_half_second_period(LIGHT_MOMENTARY_0);
-                
 
                 // program note to song
                 if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_0))
@@ -5497,14 +5496,18 @@ bool Apps::millis_half_second_period()
     return millis() % 500 > 250;
 }
 
-void Apps::button_light_blink_half_second_period(uint8_t button_light_index){
-    if (millis_half_second_period()){
-         lights |= 1 << button_light_index;
+void Apps::button_light_blink_half_second_period(uint8_t button_light_index)
+{
+    if (millis_half_second_period())
+    {
+        lights |= 1 << button_light_index;
     }
 }
-void Apps::button_light_blink_quarter_second_period(uint8_t button_light_index){
-    if (millis_quarter_second_period()){
-         lights |= 1 << button_light_index;
+void Apps::button_light_blink_quarter_second_period(uint8_t button_light_index)
+{
+    if (millis_quarter_second_period())
+    {
+        lights |= 1 << button_light_index;
     }
 }
 
@@ -5989,24 +5992,29 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
 {
     // every timer index is linked to a button index.
 
+    if (index >= MULTITIMER_TIMERS_COUNT)
+    {
+        return; // ignore buttons that are not used.
+    }
+
     if (this->multitimer_state == setStartingTimer)
     {
-        if (index < MULTITIMER_TIMERS_COUNT)
-        {
-            this->multitimer_activeTimer = index;
-            multitimer_start(false);
-        }
+        // if (index < MULTITIMER_TIMERS_COUNT)
+        // {
+        this->multitimer_activeTimer = index;
+        multitimer_start(false);
+        // }
     }
     else if (this->multitimer_state == initialized)
     {
-        if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
-        {
-            this->multitimer_activeTimer = index;
-            this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-            // MULTITIMER_DIAL_TIME_INDEX = timeSecondsToNearestIndex();
-            //  MULTITIMER_DIAL_TIME_INDEX = MULTITIMER_INIT_TIME_INDECES[index];
-            MULTITIMER_DIAL_TIME_INDEX = multitimer_getTimerInitTimeIndex(index);
-        }
+        // if (index < MULTITIMER_TIMERS_COUNT)
+        // {
+        this->multitimer_activeTimer = index;
+        this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+        // MULTITIMER_DIAL_TIME_INDEX = timeSecondsToNearestIndex();
+        //  MULTITIMER_DIAL_TIME_INDEX = MULTITIMER_INIT_TIME_INDECES[index];
+        MULTITIMER_DIAL_TIME_INDEX = multitimer_getTimerInitTimeIndex(index);
+        // }
     }
     else if (this->multitimer_state == playing)
     {
@@ -6015,7 +6023,8 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
             this->multitimer_next(false);
             buzzerPlayApproval();
         }
-        else if ((index + 1) <= MULTITIMER_TIMERS_COUNT)
+        // else if (index < MULTITIMER_TIMERS_COUNT)
+        else
         {
             buzzerPlayDisappointment();              // althought, good to check time, it also acts as a warning that this is not your button to press
             this->multitimer_timerDisplayed = index; // display time of pressed timer button
@@ -6023,8 +6032,11 @@ void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
     }
     else if (this->multitimer_state == statePaused)
     {
+        // if (index < MULTITIMER_TIMERS_COUNT)
+        // {
         buzzerSilentClearBufferAndAddNote(230);
         this->multitimer_timerDisplayed = index; // display time of pressed timer button
+        // }
     }
 }
 
@@ -6202,7 +6214,6 @@ void Apps::multitimer_refresh()
             }
         }
 
-        
         // if (millis_half_second_period())
         // {
         //     settingsLights |= MULTITIMER_LIGHT_PLAYING;
@@ -6229,7 +6240,6 @@ void Apps::multitimer_refresh()
             //     playerLights |= 1 << i;
             // }
             button_light_blink_quarter_second_period(lights_indexed[i]);
-            
         }
 
         // if (millis_half_second_period())
@@ -6277,7 +6287,6 @@ void Apps::multitimer_refresh()
                 {
                     // playerLights |= 1 << i;
                     lights |= 1 << lights_indexed[i];
-
 
                     // blinking behaviour of decimal point
                     // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
@@ -6379,7 +6388,7 @@ void Apps::multitimer_refresh()
             else if (!this->multitimer_getTimerFinished(i))
             {
                 // playerLights |= 1 << i;
-                lights |= 1<< lights_indexed[i];
+                lights |= 1 << lights_indexed[i];
             }
         }
         // settings lights
@@ -6466,7 +6475,7 @@ void Apps::multitimer_refresh()
     // (MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 
     // setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1); // "hour:seconds" divider
-    setDecimalPoint(is_time_divider_blinker_on , 1); // "hour:seconds" divider
+    setDecimalPoint(is_time_divider_blinker_on, 1); // "hour:seconds" divider
 }
 
 bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)
