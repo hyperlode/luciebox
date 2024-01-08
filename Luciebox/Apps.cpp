@@ -3720,8 +3720,8 @@ void Apps::draw()
         if (millis_half_second_period())
         {
             lights |= 1 << LIGHT_MOMENTARY_0;
-            lights |= 1 << LIGHT_MOMENTARY_1;
         }
+        lights |= 1 << LIGHT_MOMENTARY_1;
 
         // SHIFT button to insert or delete drawing slots from eeprom
         if ((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_1)))
