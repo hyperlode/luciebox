@@ -6111,7 +6111,8 @@ void Apps::multitimer_refresh()
     // what should be showing on the display right now?
 
     uint8_t playerLights = 0;            // lsb is timer 0, 2nd bit is timer 1, ....
-    uint8_t settingsLights = 0b00000000; // I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
+    // uint8_t settingsLights = 0b00000000; // I tried optimizing this away, but memory size increased... Settings lights are other lights than timer button lights.
+    bool is_time_divider_blinker_on = false;
 
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_2))
     {
@@ -6199,12 +6200,14 @@ void Apps::multitimer_refresh()
             }
         }
 
-        if (millis_half_second_period())
-        {
-            settingsLights |= MULTITIMER_LIGHT_PLAYING;
-        }
+        // if (millis_half_second_period())
+        // {
+        //     settingsLights |= MULTITIMER_LIGHT_PLAYING;
+        // }
+        button_light_blink_half_second_period(LIGHT_LATCHING_3);
 
-        settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+        // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+        is_time_divider_blinker_on = true;
     }
     else if (this->multitimer_state == setStartingTimer)
     {
@@ -6224,10 +6227,11 @@ void Apps::multitimer_refresh()
             }
         }
 
-        if (millis_half_second_period())
-        {
-            settingsLights |= MULTITIMER_LIGHT_PLAYING;
-        }
+        // if (millis_half_second_period())
+        // {
+        //     settingsLights |= MULTITIMER_LIGHT_PLAYING;
+        // }
+        button_light_blink_half_second_period(LIGHT_LATCHING_3);
     }
     else if (this->multitimer_state == playing)
     {
@@ -6269,7 +6273,8 @@ void Apps::multitimer_refresh()
                     playerLights |= 1 << i;
 
                     // blinking behaviour of decimal point
-                    settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+                    // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+                    is_time_divider_blinker_on = true;
                 }
             }
             else if (i == this->multitimer_timerDisplayed)
@@ -6281,7 +6286,8 @@ void Apps::multitimer_refresh()
                 }
 
                 // solid seconds blinker when displaying other timer
-                settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+                // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+                is_time_divider_blinker_on = true;
             }
             else if (i != this->multitimer_activeTimer && !this->multitimer_getTimerFinished(i))
             {
@@ -6290,7 +6296,8 @@ void Apps::multitimer_refresh()
             }
         }
 
-        settingsLights |= MULTITIMER_LIGHT_PLAYING; // After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
+        lights |= 1 << LIGHT_LATCHING_3; // After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
+        // settingsLights |= MULTITIMER_LIGHT_PLAYING; // After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
         // settingsLights |= MULTITIMER_LIGHT_PAUSE; //After testing: do not switch on while playing. People press it and it screws up the game (reset)when in timers running mode, solid on.
     }
     else if (this->multitimer_state == finished)
@@ -6301,7 +6308,8 @@ void Apps::multitimer_refresh()
         if (this->multitimer_timers[this->multitimer_activeTimer].getInFirstGivenHundredsPartOfSecond(500))
         {
             this->multitimer_timers[this->multitimer_activeTimer].getTimeString(textHandle);
-            settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+            // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+            is_time_divider_blinker_on = true;
         }
         else
         {
@@ -6363,15 +6371,17 @@ void Apps::multitimer_refresh()
         }
         // settings lights
         // pause light blinking.
-        if (millis_quarter_second_period())
-        {
-            settingsLights |= MULTITIMER_LIGHT_PLAYING; // pause light on.
-            // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
-        }
+        // if (millis_quarter_second_period())
+        // {
+        //     settingsLights |= MULTITIMER_LIGHT_PLAYING; // pause light on.
+        //     // settingsLights |= MULTITIMER_LIGHT_PAUSE; //pause light on.
+        // }
+        button_light_blink_quarter_second_period(LIGHT_LATCHING_3);
         // playing light on.
         // settingsLights |= MULTITIMER_LIGHT_PLAYING; //when in timers running mode, solid on.
 
-        settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+        // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+        is_time_divider_blinker_on = true;
     }
     else if (this->multitimer_state == setFischer)
     {
@@ -6390,7 +6400,8 @@ void Apps::multitimer_refresh()
             {
                 this->multitimer_state = initialized;
             }
-            settingsLights |= MULTITIMER_LIGHT_FISCHER;
+            // settingsLights |= MULTITIMER_LIGHT_FISCHER;
+            lights |= LIGHT_LATCHING_1;
 #endif
 
         // fischer timer
@@ -6409,36 +6420,40 @@ void Apps::multitimer_refresh()
             timeSecondsToClockString(textHandle, indexToTimeSeconds(MULTITIMER_FISCHER_TIME_INDEX));
         }
 
-        settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+        // settingsLights |= MULTITIMER_LIGHT_SECONDS_BLINKER;
+        is_time_divider_blinker_on = true;
     }
 
     // settings lights exceptions
     if (this->multitimer_state != setFischer && MULTITIMER_FISCHER_TIME_INDEX != 0)
     {
         // fischer light always solid on when not zero seconds added. (except during setting, then blinking).
-        settingsLights |= MULTITIMER_LIGHT_FISCHER;
+        // settingsLights |= MULTITIMER_LIGHT_FISCHER;
+        lights |= LIGHT_LATCHING_1;
     }
     if (this->multitimer_surviveAtTimeout)
     {
-        settingsLights |= MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT;
+        lights |= LIGHT_LATCHING_2;
+        // settingsLights |= MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT;
     }
 
     this->lights = 0x0;
-    // timer buttons lights to real lights
-    for (uint8_t i = 0; i < 4; i++)
-    {
-        if (1 << i & playerLights)
-        {
-            lights |= 1 << lights_indexed[i];
-        }
-    }
+    // // timer buttons lights to real lights
+    // for (uint8_t i = 0; i < 4; i++)
+    // {
+    //     if (1 << i & playerLights)
+    //     {
+    //         lights |= 1 << lights_indexed[i];
+    //     }
+    // }
 
     // settings light to real lights (it would look like you could optimize this away, but I tried, and it didn't do anything!)
-    (MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
-    (MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
-    (MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
+    // (MULTITIMER_LIGHT_SURVIVE_AT_TIMEOUT & settingsLights) ? lights |= 1 << LIGHT_LATCHING_2 : false;
+    // (MULTITIMER_LIGHT_PLAYING & settingsLights) ? lights |= 1 << LIGHT_LATCHING_3 : false;
+    // (MULTITIMER_LIGHT_FISCHER & settingsLights) ? lights |= 1 << LIGHT_LATCHING_1 : false;
 
-    setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1); // "hour:seconds" divider
+    // setDecimalPoint(MULTITIMER_LIGHT_SECONDS_BLINKER & settingsLights, 1); // "hour:seconds" divider
+    setDecimalPoint(is_time_divider_blinker_on , 1); // "hour:seconds" divider
 }
 
 bool Apps::multitimer_getTimerFinished(uint8_t timerIndex)
