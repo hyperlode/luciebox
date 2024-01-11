@@ -5,20 +5,24 @@
 // // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
-// #define ENABLE_DRAW_GAME // did not survive the hunt for memory... It's a fun app though. Like a memory game!
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
+#define ENABLE_SHOOTOUT
+#define ENABLE_TALLY_KEEPER
+
+#ifdef ENABLE_DITCHED_APPS
 // #define ENABLE_SCHOOL_APP
-#define POMODORO_ENABLE_HOURGLASS
+// #define ENABLE_DRAW_GAME // did not survive the hunt for memory... It's a fun app though. Like a memory game!
+#endif
 
 #ifdef ENABLE_TILT_SWITCHES
 #define ENABLE_TILT_APP
 #endif
 
 #define NICE_BUT_TAKES_MEMORY // vanity beautiful features that DO take up quite a bit of memory...
+#define POMODORO_ENABLE_HOURGLASS
 
-#define ENABLE_SHOOTOUT
-#define ENABLE_TALLY_KEEPER
+
 
 #include "Arduino.h"
 #include "SuperTimer.h"
@@ -197,7 +201,7 @@
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
-#define REACTION_GAME_TIMER_STEP general_int16_t_2
+#define REACTION_GAME_ANIMATION_STEP_INDEX general_int16_t_2
 #define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
 #define SIMON_INDEX general_int16_t_2
 #define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW general_int16_t_2
@@ -213,6 +217,7 @@
 #define MULTITIMER_FISCHER_TIME_INDEX general_int16_t_2
 #define COMPOSER_STAGED_NOTE general_int16_t_2
 
+#define REACTION_WHACKING_ENDURANCE_TARGET_SCORE general_int16_t_3
 #define SOUND_NOTES_NOTE_INDEX general_int16_t_3
 #define GEIGER_TONE_LENGTH general_int16_t_3
 #define METRONOME_TICKER_1_POSITION general_int16_t_3
@@ -225,13 +230,14 @@
 #define SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
 // #define SIMON_PLAYERS_COUNT general_int16_t_3
 
+#define REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP general_int16_t_4
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define TALLY_KEEPER_3 general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
 #define SETTINGS_MODE_ANALOG_VALUE general_int16_t_4
 
 #define SHOOTOUT_RANDOM_WAIT_TIME_MAX_SECONDS general_uint16_t_1
-#define REACTION_GAME_TARGET general_uint16_t_1
+#define REACTION_GAME_TARGET_BUTTON general_uint16_t_1
 #define GEIGER_INCREASE_CHANCE general_uint16_t_1
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
 #define SIMON_ACTIVE_LIGHT general_uint16_t_1
@@ -323,7 +329,7 @@
 #define POMODORO_ENABLE_HOURGLASS_VISUALS general_boolean2
 #define SHOOTOUT_ELSE_SHOOTOUT_MODE general_boolean2
 
-#define REACTION_SPECIALHEXBIRD_ELSE_NORMAL general_boolean3
+#define REACTION_IS_OPTION_BIRD_OR_HEX general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
 #define POMODORO_FIRST_TICKING_CYCLING_DONE general_boolean3
@@ -1276,7 +1282,7 @@ private:
     // void decimalPointClockPositionOn();
     void displayTimerSecondsBlinker(SuperTimer *timerToBlink);
     void setDecimalPoint(bool onElseOff, uint8_t digit);
-    bool getCountDownTimerHasElapsed(SuperTimer *timerToBlink);
+    bool getCountDownTimerHasElapsed(SuperTimer *pTimer);
     void initiateCountDowntimerWith500Millis(SuperTimer *ptimer);
 
     void buzzerPlayApproval();
@@ -1404,9 +1410,9 @@ private:
     {
         reactionWaitForStart,
         reactionNewGame,
-        reactionNewTurn,
+        reactionWhackingNewTurn,
         reactionWaitBeforeNewTurn,
-        reactionPlaying,
+        reactionWhackingPlaying,
         reactionJustDied,
         reactionFinished,
         reactionGuitarHeroNewTurn,

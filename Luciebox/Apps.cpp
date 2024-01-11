@@ -4656,7 +4656,7 @@ uint16_t *Apps::reactionGameLevelToEepromAddress()
 {
     return (uint16_t *)(EEPROM_REACTION_GAME_START_ADDRESS +
                         REACTION_GUITAR_APP_ELSE_WHACKING_APP * 48 +
-                        REACTION_SPECIALHEXBIRD_ELSE_NORMAL * 24 +
+                        REACTION_IS_OPTION_BIRD_OR_HEX * 24 +
                         REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT * 12 +
                         REACTION_GAME_LEVEL * 2);
 }
@@ -4716,7 +4716,7 @@ void Apps::modeReactionGame()
             REACTION_GUITAR_APP_ELSE_WHACKING_APP = (selected_app == APP_SELECTOR_GUITAR_HERO);
 #endif
 
-        REACTION_SPECIALHEXBIRD_ELSE_NORMAL = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
+        REACTION_IS_OPTION_BIRD_OR_HEX = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0;
         REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT = (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0;
 
         // display level and high score
@@ -4744,7 +4744,7 @@ void Apps::modeReactionGame()
             this->binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3) &&
             binaryInputsEdgeUp & (1 << BUTTON_INDEXED_LATCHING_3))
         {
-            if (!REACTION_GUITAR_APP_ELSE_WHACKING_APP && REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
+            if (!REACTION_GUITAR_APP_ELSE_WHACKING_APP && REACTION_IS_OPTION_BIRD_OR_HEX)
             {
                 reactionGameState = reactionSoundInit;
                 initiateCountDowntimerWith500Millis(&TIMER_REACTION_END_OF_GAME_DELAY);
@@ -4790,7 +4790,7 @@ void Apps::modeReactionGame()
 
             displayAllSegments = 0;
 
-            if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
+            if (REACTION_IS_OPTION_BIRD_OR_HEX)
             {
                 // hex geek mode
                 fill8BytesArrayWithZero();
@@ -4809,13 +4809,17 @@ void Apps::modeReactionGame()
             if (buzzer->getBuzzerNotesBufferEmpty())
             { // in sound mode, wait till demo is done
 
-                reactionGameState = reactionNewTurn;
+                reactionGameState = reactionWhackingNewTurn;
 
                 if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
                 {
-                    // if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
-                    REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + (5 - REACTION_GAME_LEVEL)); // total play time depending on level. It was found out that longer times are a lot harder to stay disciplined!
-                    REACTION_GAME_TIMER_STEP = 0;
+
+                    // // if enabled, we go for "as many points in a limited time. --> this to make it more exciting for adults (can be boring after a while if you just have to press the right button in time)
+                    // REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + (5 - REACTION_GAME_LEVEL)); // total play time depending on level. It was found out that longer times are a lot harder to stay disciplined!
+                    REACTION_GAME_STEP_TIME_MILLIS = -99999;
+                    REACTION_GAME_ANIMATION_STEP_INDEX = 0;
+                    REACTION_WHACKING_ENDURANCE_TARGET_SCORE = 24;
+                    REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP = 0;
                 }
                 else
                 {
@@ -4933,9 +4937,9 @@ void Apps::modeReactionGame()
             REACTION_GAME_SCORE++;
         }
 
-        // end of move
         if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
         {
+            // end of move
             reactionGameState = reactionHexNextStep;
             if (REACTION_GAME_HEX_ACTIVE_DIGIT == 3)
             {
@@ -5052,16 +5056,16 @@ void Apps::modeReactionGame()
     {
         if (buzzer->getBuzzerNotesBufferEmpty())
         {
-            reactionGameState = reactionNewTurn;
+            reactionGameState = reactionWhackingNewTurn;
         }
         break;
     }
 
-    case reactionNewTurn:
+    case reactionWhackingNewTurn:
     {
         if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
         {
-            REACTION_GAME_TIMER_STEP = 0; // reset animation step
+            REACTION_GAME_ANIMATION_STEP_INDEX = 0; // reset animation step
             if (REACTION_GAME_SCORE % 7 == 0)
             {
                 // after about hunderd steps, speed doubled in 14 steps.
@@ -5069,52 +5073,98 @@ void Apps::modeReactionGame()
             }
             TIMER_REACTION_GAME_SPEED.start(); // only restart if 12 steps time per turn
         }
+
         displayAllSegments = 0; // reset animation graphics screen
 
-        REACTION_GAME_TARGET = random(0, MOMENTARY_BUTTONS_COUNT);
+        REACTION_GAME_TARGET_BUTTON = random(0, MOMENTARY_BUTTONS_COUNT);
+#ifdef ENABLE_SERIAL
+        REACTION_GAME_TARGET_BUTTON = 3; // HACKHACKHACK
+#endif
 
-        if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
+        if (REACTION_IS_OPTION_BIRD_OR_HEX)
         {
-            addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_GAME_TARGET]);
+            addNoteToBuzzer(REACTION_GAME_SELECTED_NOTES[REACTION_GAME_TARGET_BUTTON]);
         }
 
-        reactionGameState = reactionPlaying;
+        reactionGameState = reactionWhackingPlaying;
         break;
     }
 
-    case reactionPlaying:
+    case reactionWhackingPlaying:
     {
-        if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
+
+        // if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+        // {
+        //     // for whackendurance, we don't think of the timer, but the score
+        //     // if score exceeds preset amount, the game is finished.
+        //     if (REACTION_GAME_SCORE == 7 ){
+        //         reactionGameState = reactionJustDied;
+        //     }
+        // }
+        // else
+        // {
+
+        // if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT){
+        if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
         {
-            this->nextStepRotate(&REACTION_GAME_TIMER_STEP, true, 0, 12);
-            if (REACTION_GAME_TIMER_STEP == 12)
+#ifdef ENABLE_SERIAL
+            Serial.println("endurance time out. ");
+#endif
+            reactionGameState = reactionJustDied;
+            REACTION_GAME_SCORE = 0;
+        }
+        // if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED)                              // timed progression
+        //     || (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && REACTION_GAME_SCORE == REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP) // amount of buttons pressed progression
+        // )
+        if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED)                                                                                                 // timed progression
+            || (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && (REACTION_GAME_SCORE == REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP)) // amount of buttons pressed progression
+        )
+        // if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
+        {
+            REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP += REACTION_WHACKING_ENDURANCE_TARGET_SCORE / 12;
+
+            this->nextStepRotate(&REACTION_GAME_ANIMATION_STEP_INDEX, true, 0, 12);
+            
+            if (REACTION_GAME_ANIMATION_STEP_INDEX == 12)
             {
-                REACTION_GAME_TIMER_STEP = 0;
+                REACTION_GAME_ANIMATION_STEP_INDEX = 0;
                 displayAllSegments = 0;
 
                 reactionGameState = reactionJustDied;
+                if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+                {
+                    REACTION_GAME_SCORE = (int16_t)(-1L * TIMER_REACTION_GAME_SPEED.getTimeMillis() / 10L); // accuracy up to 1/100th of a second
+                }
+#ifdef ENABLE_SERIAL
+                Serial.println("all steps fuuuuulll ");
+#endif
             }
             else
             {
-                TIMER_REACTION_GAME_SPEED.start();
+                if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+                {
+
+                    TIMER_REACTION_GAME_SPEED.start();
+                }
             }
         }
+        // }
 
         // set graphics
-        for (uint8_t step = 0; step <= REACTION_GAME_TIMER_STEP; step++)
+        for (uint8_t step = 0; step <= REACTION_GAME_ANIMATION_STEP_INDEX; step++)
         {
             flashPictureToDisplayAllSegments(disp_4digits_animations + ANIMATE_CIRCLE_OFFSET + step * 4);
         }
         displayAllSegmentsToScreen();
 
-        if (!REACTION_SPECIALHEXBIRD_ELSE_NORMAL || REACTION_GAME_LEVEL == 0)
+        if (!REACTION_IS_OPTION_BIRD_OR_HEX || REACTION_GAME_LEVEL == 0)
         {
             // in the easy level of sound mode, we show the lights.
 
             // show decimal point for digit corresponding with button
-            setDecimalPoint(true, REACTION_GAME_TARGET);
+            setDecimalPoint(true, REACTION_GAME_TARGET_BUTTON);
             // set appropriate led per button
-            lights |= 1 << lights_indexed[REACTION_GAME_TARGET];
+            lights |= 1 << lights_indexed[REACTION_GAME_TARGET_BUTTON];
         }
 
         // check player pressed a button.
@@ -5123,12 +5173,12 @@ void Apps::modeReactionGame()
             // button press
             if (binaryInputsEdgeUp & (1 << i))
             {
-                if (i == REACTION_GAME_TARGET)
+                if (i == REACTION_GAME_TARGET_BUTTON)
                 {
                     // right button
                     REACTION_GAME_SCORE++;
 
-                    if (REACTION_SPECIALHEXBIRD_ELSE_NORMAL)
+                    if (REACTION_IS_OPTION_BIRD_OR_HEX)
                     {
                         // a small pause must be implemented after the button press before the new turn as off not to confuse the player
                         addNoteToBuzzerRepeated(REST_8_8, 4);
@@ -5140,7 +5190,7 @@ void Apps::modeReactionGame()
 
 #ifndef BLINK_AT_TWICE_THE_SAME_POSITION
                         buzzerPlayApproval();
-                        reactionGameState = reactionNewTurn;
+                        reactionGameState = reactionWhackingNewTurn;
 #else
                             setBlankDisplay();
                             buzzerPlayApproval();
@@ -5151,7 +5201,7 @@ void Apps::modeReactionGame()
                 }
                 else
                 {
-                    // wrong button
+                    // wrong button pressed
                     reactionGameState = reactionJustDied;
 
                     // zero points if you fail during the timed challenge
@@ -5171,8 +5221,14 @@ void Apps::modeReactionGame()
         // play death song
         addNoteToBuzzerRepeated(F4_1, 3);
 #ifdef ENABLE_EEPROM
-        // check for new high score and save
 
+#ifdef ENABLE_SERIAL
+        Serial.println("yooooo");
+        // Serial.println((int16_t)(-1L * TIMER_REACTION_GAME_SPEED.getTimeMillis() / 10L));
+        Serial.println(REACTION_GAME_SCORE);
+#endif
+
+        // check for new high score and save
         if (REACTION_GAME_SCORE > (int16_t)
                                       eeprom_read_word(reactionGameLevelToEepromAddress()))
         {
@@ -5214,7 +5270,7 @@ void Apps::modeReactionGame()
 
     // option buttons cannot be changed during the game. So, default lights on at button on is not feasable here for the options.
     // https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
-    setButtonLight(LIGHT_LATCHING_1, REACTION_SPECIALHEXBIRD_ELSE_NORMAL);
+    setButtonLight(LIGHT_LATCHING_1, REACTION_IS_OPTION_BIRD_OR_HEX);
     setButtonLight(LIGHT_LATCHING_2, REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT);
 
 #endif
@@ -5579,9 +5635,9 @@ void Apps::initiateCountDowntimerWith500Millis(SuperTimer *pTimer)
     pTimer->start(-500);
 }
 
-bool Apps::getCountDownTimerHasElapsed(SuperTimer *timerToBlink)
+bool Apps::getCountDownTimerHasElapsed(SuperTimer *pTimer)
 {
-    return !timerToBlink->getTimeIsNegative();
+    return !pTimer->getTimeIsNegative();
 }
 
 void Apps::displayTimerSecondsBlinker(SuperTimer *ptimerToBlink)
