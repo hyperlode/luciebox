@@ -5102,15 +5102,24 @@ void Apps::modeReactionGame()
 
     case reactionWhackingPlaying:
     {
+        bool timeElapsed = getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED);
 
-        if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
+        if (timeElapsed)
         {
-            // endurance timer timed out. This is important to implement, because our scoring options are limited. -99999 is the limit.
-            reactionGameState = reactionJustDied;
-            REACTION_GAME_SCORE = 0;
+            if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+            {
+                // endurance timer timed out. This is important to implement, because our scoring options are limited. -99999 is the limit.
+                reactionGameState = reactionJustDied;
+                REACTION_GAME_SCORE = 0;
+            }
+            else
+            {
+                // don't restart in endurance mode.
+                TIMER_REACTION_GAME_SPEED.start();
+            }
         }
 
-        if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED)                                                                                                 // timed progression
+        if (timeElapsed                                                                                                                                             // timed progression
             || (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && (REACTION_GAME_SCORE == REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP)) // amount of buttons pressed progression
         )
         {
@@ -5128,15 +5137,8 @@ void Apps::modeReactionGame()
                 reactionGameState = reactionJustDied;
                 if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
                 {
-                    // in endurance mode, it's not so much died, as well as 'completed'
+                    // in endurance mode, it's not so much died, as well as 'completed the game'
                     REACTION_GAME_SCORE = (int16_t)(-1L * TIMER_REACTION_GAME_SPEED.getTimeMillis() / 10L); // accuracy up to 1/100th of a second
-                }
-            }
-            else
-            {
-                if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
-                {
-                    TIMER_REACTION_GAME_SPEED.start();
                 }
             }
         }
@@ -5627,6 +5629,15 @@ bool Apps::getCountDownTimerHasElapsed(SuperTimer *pTimer)
 {
     return !pTimer->getTimeIsNegative();
 }
+// static void initiateCountDowntimerWith500Millis(SuperTimer *pTimer)
+// {
+//     pTimer->start(-500);
+// }
+
+// static bool getCountDownTimerHasElapsed(SuperTimer *pTimer)
+// {
+//     return !pTimer->getTimeIsNegative();
+// }
 
 void Apps::displayTimerSecondsBlinker(SuperTimer *ptimerToBlink)
 {

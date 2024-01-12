@@ -1116,6 +1116,8 @@ const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTO
 const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD, SWITCH_TILT_LEFT, SWITCH_TILT_BACKWARD, SWITCH_TILT_RIGHT};
 #endif
 
+// static  bool getCountDownTimerHasElapsed(SuperTimer *pTimer);
+// static void initiateCountDowntimerWith500Millis(SuperTimer *ptimer);
 class Apps
 {
 
@@ -1285,7 +1287,7 @@ private:
     void displayTimerSecondsBlinker(SuperTimer *timerToBlink);
     void setDecimalPoint(bool onElseOff, uint8_t digit);
     bool getCountDownTimerHasElapsed(SuperTimer *pTimer);
-    void initiateCountDowntimerWith500Millis(SuperTimer *ptimer);
+   void initiateCountDowntimerWith500Millis(SuperTimer *ptimer);
 
     void buzzerPlayApproval();
     void buzzerPlayDisappointment();
