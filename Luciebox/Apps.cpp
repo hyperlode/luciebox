@@ -979,7 +979,7 @@ void Apps::pomodoroTimer()
         // this->displayAllSegments &= ~(1UL << 15); // keep seconds blinker spot clear
         // setBlankDisplay();
         lights |= 1 << LIGHT_MOMENTARY_0;
-        flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + (POMODORO_VISUAL_TIMER_PROGRESS)*4);
+        flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + (POMODORO_VISUAL_TIMER_PROGRESS) * 4);
 #endif
     }
     break;
@@ -1272,7 +1272,7 @@ void Apps::pomodoroTimer()
         // }
         // this->displayAllSegments &= ~(1UL << 15); // keep seconds blinker spot clear
         // setBlankDisplay();
-        flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + (POMODORO_VISUAL_TIMER_PROGRESS)*4);
+        flashPictureToDisplayAllSegments(disp_4digits_animations + FADE_IN_OFFSET + (POMODORO_VISUAL_TIMER_PROGRESS) * 4);
 #endif
     }
     break;
@@ -2043,14 +2043,10 @@ void Apps::modeSettings()
             ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
             //  ADMUX = bit (REFS0) | bit (REFS1);  // Internal 1.1V reference
             // delay(2); // Wait for Vref to settle
-            // playSongHappyDryer();
-            // playSongHappyDryer();
 
             loadBuzzerTrack(SONG_ALPHABET);
             buzzerSilentClearBuffer();
-            // fill8BytesArrayWithZero();
             buzzerChangeSpeedRatioWithEncoderDial();
-            // dialGetIndexedtime();
 
             // Serial.println(SETTINGS_APP_BATTERY_VOLTAGE);
             ADCSRA |= _BV(ADSC); // Start conversion
@@ -3302,7 +3298,7 @@ uint32_t Apps::modeSingleSegmentManipulation(uint32_t *display_buffer)
         nextStepRotate(&DRAW_CURSOR_ACTIVE_DIGIT, true, 0, 3);
     }
 
-    cursor_position_on_display = (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT]) << (DRAW_CURSOR_ACTIVE_DIGIT)*8;
+    cursor_position_on_display = (uint32_t)(segmentMoveIndexed[DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT]) << (DRAW_CURSOR_ACTIVE_DIGIT) * 8;
 
     // check for global display change
     this->displayChangeGlobal(&displayAllSegments);
@@ -3743,7 +3739,7 @@ void Apps::draw()
             if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_2))
             {
                 // delete slot. (and shift all drawings.)
-                uint16_t currentIndexPictureEepromAddress = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX)*4;
+                uint16_t currentIndexPictureEepromAddress = EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX) * 4;
                 for (int16_t i = currentIndexPictureEepromAddress;
                      i <= lastPictureEepromAddress;
                      i++)
@@ -3765,7 +3761,7 @@ void Apps::draw()
                 // work with eeprom addresses, not with picture indexes.
                 // each picture is four bytes
                 for (int16_t i = lastPictureEepromAddress;
-                     i >= EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX)*4;
+                     i >= EEPROM_PICTURES_START_ADDRESS + (DRAW_ACTIVE_DRAWING_INDEX) * 4;
                      i--)
                 {
                     // move all pictures one up.
@@ -4008,7 +4004,7 @@ void Apps::modeGeiger()
                 GEIGER_INCREASE_CHANCE -= 1;
             }
         }
-        r += (long)(GEIGER_INCREASE_CHANCE)*1000;
+        r += (long)(GEIGER_INCREASE_CHANCE) * 1000;
 
         GEIGER_PROBABILITY_THRESHOLD -= encoder_dial->getDelta() * 10 * 1024;
         if (r > GEIGER_PROBABILITY_THRESHOLD)
@@ -4661,6 +4657,19 @@ uint16_t *Apps::reactionGameLevelToEepromAddress()
                         REACTION_GAME_LEVEL * 2);
 }
 
+void Apps::modeReactionDisplayScore()
+{
+    REACTION_GAME_INTERMEDIATE_SCORE_HOLDER = REACTION_GAME_SCORE;
+    if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+    {
+        // lower time = better time in endurance mode.
+        setDecimalPoint(true, 1);
+        REACTION_GAME_INTERMEDIATE_SCORE_HOLDER = (int16_t)(9999 - REACTION_GAME_SCORE);
+    }
+
+    ledDisp->setNumberToDisplayAsDecimal(REACTION_GAME_INTERMEDIATE_SCORE_HOLDER);
+}
+
 void Apps::modeReactionGame()
 {
 #ifdef ENABLE_REACTION_APP
@@ -4724,8 +4733,9 @@ void Apps::modeReactionGame()
         if (millis_blink_250_750ms())
         {
             lights |= 1 << LIGHT_LATCHING_3;
-            ledDisp->setNumberToDisplayAsDecimal(
-                eeprom_read_word(reactionGameLevelToEepromAddress()));
+
+            REACTION_GAME_SCORE = eeprom_read_word(reactionGameLevelToEepromAddress());
+            modeReactionDisplayScore();
         }
         else
         {
@@ -4818,8 +4828,8 @@ void Apps::modeReactionGame()
                     // REACTION_GAME_STEP_TIME_MILLIS = -50 * pgm_read_byte_near(whack_a_mole_countdown_level_step_speeds + (5 - REACTION_GAME_LEVEL)); // total play time depending on level. It was found out that longer times are a lot harder to stay disciplined!
                     REACTION_GAME_STEP_TIME_MILLIS = -99999;
                     REACTION_GAME_ANIMATION_STEP_INDEX = 0;
-                    REACTION_WHACKING_ENDURANCE_TARGET_SCORE = 24;
-                    REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP = 0;
+                    REACTION_WHACKING_ENDURANCE_TARGET_SCORE = 12 * (REACTION_GAME_LEVEL + 1);
+                    REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP = REACTION_WHACKING_ENDURANCE_TARGET_SCORE / 12;
                 }
                 else
                 {
@@ -5093,62 +5103,43 @@ void Apps::modeReactionGame()
     case reactionWhackingPlaying:
     {
 
-        // if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
-        // {
-        //     // for whackendurance, we don't think of the timer, but the score
-        //     // if score exceeds preset amount, the game is finished.
-        //     if (REACTION_GAME_SCORE == 7 ){
-        //         reactionGameState = reactionJustDied;
-        //     }
-        // }
-        // else
-        // {
-
-        // if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT){
         if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
         {
-#ifdef ENABLE_SERIAL
-            Serial.println("endurance time out. ");
-#endif
+            // endurance timer timed out. This is important to implement, because our scoring options are limited. -99999 is the limit.
             reactionGameState = reactionJustDied;
             REACTION_GAME_SCORE = 0;
         }
-        // if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED)                              // timed progression
-        //     || (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && REACTION_GAME_SCORE == REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP) // amount of buttons pressed progression
-        // )
+
         if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED)                                                                                                 // timed progression
             || (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT && (REACTION_GAME_SCORE == REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP)) // amount of buttons pressed progression
         )
-        // if (getCountDownTimerHasElapsed(&TIMER_REACTION_GAME_SPEED))
         {
             REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP += REACTION_WHACKING_ENDURANCE_TARGET_SCORE / 12;
 
             this->nextStepRotate(&REACTION_GAME_ANIMATION_STEP_INDEX, true, 0, 12);
-            
+
             if (REACTION_GAME_ANIMATION_STEP_INDEX == 12)
             {
+                // all steps full
+
                 REACTION_GAME_ANIMATION_STEP_INDEX = 0;
                 displayAllSegments = 0;
 
                 reactionGameState = reactionJustDied;
                 if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
                 {
+                    // in endurance mode, it's not so much died, as well as 'completed'
                     REACTION_GAME_SCORE = (int16_t)(-1L * TIMER_REACTION_GAME_SPEED.getTimeMillis() / 10L); // accuracy up to 1/100th of a second
                 }
-#ifdef ENABLE_SERIAL
-                Serial.println("all steps fuuuuulll ");
-#endif
             }
             else
             {
                 if (!REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
                 {
-
                     TIMER_REACTION_GAME_SPEED.start();
                 }
             }
         }
-        // }
 
         // set graphics
         for (uint8_t step = 0; step <= REACTION_GAME_ANIMATION_STEP_INDEX; step++)
@@ -5189,6 +5180,7 @@ void Apps::modeReactionGame()
                         // #define BLINK_AT_TWICE_THE_SAME_POSITION // add a pause after each button press to ensure all display lights are perceived as off. The idea is, if twice the same button is chosen, it's visible to the player. Although this seems like a good idea, we're solving a non existing problem. There is the beep feedback for each button press. And, we should not introduce artificial pauses to the game.
 
 #ifndef BLINK_AT_TWICE_THE_SAME_POSITION
+                        // the most reasonable option
                         buzzerPlayApproval();
                         reactionGameState = reactionWhackingNewTurn;
 #else
@@ -5221,12 +5213,6 @@ void Apps::modeReactionGame()
         // play death song
         addNoteToBuzzerRepeated(F4_1, 3);
 #ifdef ENABLE_EEPROM
-
-#ifdef ENABLE_SERIAL
-        Serial.println("yooooo");
-        // Serial.println((int16_t)(-1L * TIMER_REACTION_GAME_SPEED.getTimeMillis() / 10L));
-        Serial.println(REACTION_GAME_SCORE);
-#endif
 
         // check for new high score and save
         if (REACTION_GAME_SCORE > (int16_t)
@@ -5261,7 +5247,9 @@ void Apps::modeReactionGame()
             }
             else
             {
-                ledDisp->setNumberToDisplayAsDecimal(REACTION_GAME_SCORE); // score display. Leave at beginning, to display high score blinking.
+                modeReactionDisplayScore();
+
+                // ledDisp->setNumberToDisplayAsDecimal(REACTION_GAME_SCORE); // score display. Leave at beginning, to display high score blinking.
             }
         }
     }

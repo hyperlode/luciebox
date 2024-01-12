@@ -248,6 +248,7 @@
 #define SOUND_NOTE_SETTING_TEXT_TO_DISPLAY general_uint16_t_2
 #define COUNTER_GEIGER general_uint16_t_2
 #define POMODORO_STATS_WORKING_GOOD general_uint16_t_2
+#define REACTION_GAME_INTERMEDIATE_SCORE_HOLDER general_uint16_t_2
 
 #define POMODORO_VISUAL_TIMER_PROGRESS general_uint8_t_1
 #define REACTION_GAME_LEVEL general_uint8_t_1
@@ -1220,6 +1221,7 @@ private:
     void loadNextMovie();
 
     uint16_t *reactionGameLevelToEepromAddress();
+    void modeReactionDisplayScore();
     void resetStopwatch(SuperTimer *pTimer);
     // int16_t timeSecondsToNearestIndex(unsigned int timeSeconds );
     unsigned int indexToTimeSeconds(int16_t index);
