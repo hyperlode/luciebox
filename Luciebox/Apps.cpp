@@ -1381,6 +1381,7 @@ void Apps::stopwatch()
         STOPWATCH_CHRONO_1.start();
     }
 
+    // which chrono is loaded? 
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
     {
         pSsuperTimer = &STOPWATCH_CHRONO_1;
@@ -1411,6 +1412,11 @@ void Apps::stopwatch()
     if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_MOMENTARY_3))
     {
         pSsuperTimer->paused(!paused);
+    }
+    if(!paused){
+        // if visible timer is not paused (aka running), the box should not auto power off.
+        // chrono 1 initially contains the always on timer, but that's ok. If it's visible, and running, the box should not auto power off.
+        resetInactivityTimer();
     }
 
     // if ((millis_quarter_second_period() && paused) || millis_half_second_period())
