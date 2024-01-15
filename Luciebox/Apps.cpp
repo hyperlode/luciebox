@@ -542,6 +542,22 @@ void Apps::updateEveryAppCycleBefore()
         }
 #endif
     }
+
+    binaryInputsEdgeUpMomentaryButtonIndex = -1;
+    // get index of pressed button.
+    for (int i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+    {
+        // WARNING: If button presses are pressed in too quick succession (and processed in the same cycle), only one edge is captured.
+        // ONLY USE IN SLOW APPS
+        if (binaryInputsEdgeUp & 1 << i)
+        {
+            // #ifdef ENABLE_SERIAL
+            //             Serial.println(i);
+            // #endif
+            binaryInputsEdgeUpMomentaryButtonIndex = i;
+        }
+    }
+
     setBlankDisplay();
 }
 
@@ -969,7 +985,7 @@ void Apps::pomodoroTimer()
     {
     case POMODORO_DISPLAY_TIMER_HOURGLASS:
     {
-        clearScreen();
+        setStandardTextToTextBuf(TEXT_SPACES);
 #ifdef POMODORO_ENABLE_HOURGLASS
         // always set to buffer. later on it's decided if it's displayed or not.
         // for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
@@ -1263,7 +1279,7 @@ void Apps::pomodoroTimer()
     {
     case POMODORO_DISPLAY_TIMER_HOURGLASS:
     {
-        clearScreen();
+        setStandardTextToTextBuf(TEXT_SPACES);
 #ifdef POMODORO_ENABLE_HOURGLASS
         // always set to buffer. later on it's decided if it's displayed or not.
         // for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
@@ -1513,26 +1529,18 @@ void Apps::modeRandomWorld()
         }
 
 #ifdef NICE_BUT_TAKES_MEMORY
-        // if (millis_quarter_second_period())
-        // {
-        //     lights |= 1 << lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX];
-        // }
         button_light_blink_quarter_second_period(lights_indexed[RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX]);
 #endif
-
-        for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+        if (isMomentaryButtonPressEdgeUpDetected())
         {
-            if (binaryInputsEdgeUp & 1 << i)
-            {
 #ifdef NICE_BUT_TAKES_MEMORY
-                RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX = i;
+            RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX = binaryInputsEdgeUpMomentaryButtonIndex;
 #endif
-                RANDOMWORLD_RANDOM_TYPE = i + 4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
-                randomWorldState = randomWorldRolling;
+            RANDOMWORLD_RANDOM_TYPE = binaryInputsEdgeUpMomentaryButtonIndex + 4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0);
+            randomWorldState = randomWorldRolling;
 
-                // set up animation
-                RANDOMWORLD_ROLL_SPEED.start(-30 - (((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) * 1970)); // special case for upper limit setting for random number.
-            }
+            // set up animation
+            RANDOMWORLD_ROLL_SPEED.start(-30 - (((binaryInputsValue & (1 << BUTTON_INDEXED_MOMENTARY_2)) > 0) * 1970)); // special case for upper limit setting for random number.
         }
     }
     break;
@@ -1806,7 +1814,7 @@ void Apps::modeSettings()
         SETTINGS_MODE_SELECTOR++;
     }
 
-    clearScreen();
+    setStandardTextToTextBuf(TEXT_SPACES);
 
     if (SETTINGS_MODE_SELECTOR < 6)
     {
@@ -2141,20 +2149,17 @@ void Apps::modeTallyKeeper()
     display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER];
 
     // Check for momentary keypress initiated
-    for (uint8_t i = 0; i < 4; i++)
+    if (isMomentaryButtonPressEdgeUpDetected())
     {
-        if (binaryInputsEdgeUp & (1 << i))
+        TALLY_KEEPER_DISPLAYED_COUNTER = binaryInputsEdgeUpMomentaryButtonIndex;
+        if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
         {
-            TALLY_KEEPER_DISPLAYED_COUNTER = i;
-            if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
-            {
-                TALLY_KEEPER_DELTA = 1;
-            }
-            else
-            {
-                // buzzerSilentClearBufferAndAddNote(C5_2);
-                buzzerPlayApproval();
-            }
+            TALLY_KEEPER_DELTA = 1;
+        }
+        else
+        {
+            // buzzerSilentClearBufferAndAddNote(C5_2);
+            buzzerPlayApproval();
         }
     }
 
@@ -2304,14 +2309,11 @@ void Apps::shootout()
         }
 
         // check here, any player pressing his button = score to zero.
-        for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+        if (isMomentaryButtonPressEdgeUpDetected())
         {
-            if (binaryInputsEdgeUp & 1 << i)
-            {
-                SHOOTOUT_SCORE[i] = 0;
-                // addNoteToBuzzer(C4_1);
-                buzzerPlayDisappointment();
-            }
+            SHOOTOUT_SCORE[binaryInputsEdgeUpMomentaryButtonIndex] = 0;
+            // addNoteToBuzzer(C4_1);
+            buzzerPlayDisappointment();
         }
 
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
@@ -2343,19 +2345,17 @@ void Apps::shootout()
 
         // uint8_t compare_values [4];
 
-        for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+        if (isMomentaryButtonPressEdgeUpDetected())
         {
-            if (binaryInputsEdgeUp & 1 << i)
-            {
-                SHOOTOUT_ANALOG_VALUES_CHECK[i] = 0x10 << i; // button 0:16, 1:32, 2:64, 3:128
 
-                // go to next state
-                shootoutState = shootoutDefineRoundWinner;
-            }
-            else
-            {
-                SHOOTOUT_ANALOG_VALUES_CHECK[i] = 255; // unobtainable value. maximum.
-            }
+            SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpMomentaryButtonIndex] = 0x10 << binaryInputsEdgeUpMomentaryButtonIndex; // button 0:16, 1:32, 2:64, 3:128
+
+            // go to next state
+            shootoutState = shootoutDefineRoundWinner;
+        }
+        else
+        {
+            SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpMomentaryButtonIndex] = 255; // unobtainable value. maximum.
         }
 
         // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3)))
@@ -2599,15 +2599,11 @@ void Apps::modeSoundSong()
         buzzerChangeSpeedRatioWithEncoderDial();
     }
 
-    uint8_t shift = (4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0));
-    uint8_t shift_eeprom = (8 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0));
-
-    for (uint8_t index = 0; index < MOMENTARY_BUTTONS_COUNT; index++)
+    if (isMomentaryButtonPressEdgeUpDetected())
     {
-        if (binaryInputsEdgeUp & (1 << index))
-        {
-            loadBuzzerTrack(index + shift + shift_eeprom);
-        }
+        uint8_t shift = (4 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1)) > 0));
+        uint8_t shift_eeprom = (8 * ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2)) > 0));
+        loadBuzzerTrack(binaryInputsEdgeUpMomentaryButtonIndex + shift + shift_eeprom);
     }
 
     buzzer->lastPlayedNoteToDisplay(textHandle, decimalDotsHandle);
@@ -4352,20 +4348,20 @@ void Apps::modeSimon()
     }
 
     // check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
-    uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
-    for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
-    {
-        if (binaryInputsEdgeUp & 1 << k)
-        {
-            pressed_momentary_button = k;
-        }
-    }
+    // uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
+    // for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
+    // {
+    //     if (binaryInputsEdgeUp & 1 << k)
+    //     {
+    //         pressed_momentary_button = k;
+    //     }
+    // }
 
     switch (simonState)
     {
     case simonWaitForNewGame:
     {
-        clearScreen();
+        setStandardTextToTextBuf(TEXT_SPACES);
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -4555,37 +4551,21 @@ void Apps::modeSimon()
 
     case simonUserRepeats:
     {
-        // button lights are on when pressed because of default behaviour (light of button on at button press)
-        // if (millis_half_second_period())
-        // {
-            numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-            textBuf[2] = 'P';
-        // }else{
-        //     clearScreen();
-        // }
+        numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+        textBuf[2] = 'P';
 
-        // if (millis_half_second_period())
-        // {
-
-        //     textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
-        // }else{
-        //     textBuf[0] = SPACE_FAKE_ASCII;
-        // }
-        // textBuf[1] = 'P';
-
-        if (pressed_momentary_button == SIMON_NO_BUTTON_PRESSED)
+        if (binaryInputsEdgeUpMomentaryButtonIndex == -1)
         {
             break;
         }
 
         const int expected = SIMON_LIST[SIMON_INDEX];
-
-        if (pressed_momentary_button != expected)
+        if (binaryInputsEdgeUpMomentaryButtonIndex != expected)
         {
             // if custom build up, last light of the sequence and first player, player gets to choose the next move
             if (SIMON_CUSTOM_BUILD_UP && (SIMON_INDEX + 1) == SIMON_LENGTH && SIMON_PLAYER_PLAYING_INDEX == 0)
             {
-                SIMON_LIST[SIMON_INDEX] = pressed_momentary_button;
+                SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
             }
             else
             {
@@ -4619,11 +4599,6 @@ void Apps::modeSimon()
         // buzzerPlayApproval();// addNoteToBuzzer(B6_1);
 
         // check next alive player (assume there is always a player alive.)
-
-        // playSongHappyDryer();
-        //  addNoteToBuzzerRepeated(C4_8,SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX]);
-        // addNoteToBuzzerRepeated(C4_8,3);
-
         SIMON_PLAYER_PLAYING_INDEX++;
         if (SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
@@ -4649,7 +4624,6 @@ void Apps::modeSimon()
             || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but as it's custom adding, it's the end of the game
         )
         {
-
             simonState = simonStartPlaySequence;
             SIMON_END_OF_GAME = true;
             break;
@@ -4828,7 +4802,7 @@ void Apps::modeReactionGame()
             {
                 // hex geek mode
                 fill8BytesArrayWithZero();
-                clearScreen();
+                setStandardTextToTextBuf(TEXT_SPACES);
                 reactionGameState = reactionHexNextStep;
             }
             else
@@ -5042,6 +5016,9 @@ void Apps::modeReactionGame()
 
     case reactionGuitarHeroPlaying:
     {
+        // WARNING: DO NOT USE
+        // if (isMomentaryButtonPressEdgeUpDetected())
+        // For quick multi button presses, the edge are happening in the same processing cycle which mean that not all edges are captured
         for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
         {
             if (binaryInputsEdgeUp & (1 << i))
@@ -5185,48 +5162,44 @@ void Apps::modeReactionGame()
         }
 
         // check player pressed a button.
-        for (uint8_t i = 0; i < MOMENTARY_BUTTONS_COUNT; i++)
+        if (isMomentaryButtonPressEdgeUpDetected())
         {
-            // button press
-            if (binaryInputsEdgeUp & (1 << i))
+            if (binaryInputsEdgeUpMomentaryButtonIndex == REACTION_GAME_TARGET_BUTTON)
             {
-                if (i == REACTION_GAME_TARGET_BUTTON)
+                // right button
+                REACTION_GAME_SCORE++;
+
+                if (REACTION_IS_OPTION_BIRD_OR_HEX)
                 {
-                    // right button
-                    REACTION_GAME_SCORE++;
-
-                    if (REACTION_IS_OPTION_BIRD_OR_HEX)
-                    {
-                        // a small pause must be implemented after the button press before the new turn as off not to confuse the player
-                        addNoteToBuzzerRepeated(REST_8_8, 4);
-                        reactionGameState = reactionWaitBeforeNewTurn;
-                    }
-                    else
-                    {
-                        // #define BLINK_AT_TWICE_THE_SAME_POSITION // add a pause after each button press to ensure all display lights are perceived as off. The idea is, if twice the same button is chosen, it's visible to the player. Although this seems like a good idea, we're solving a non existing problem. There is the beep feedback for each button press. And, we should not introduce artificial pauses to the game.
-
-#ifndef BLINK_AT_TWICE_THE_SAME_POSITION
-                        // the most reasonable option
-                        buzzerPlayApproval();
-                        reactionGameState = reactionWhackingNewTurn;
-#else
-                            setBlankDisplay();
-                            buzzerPlayApproval();
-                            addNoteToBuzzerRepeated(REST_1_8, 2); // todo delete
-                            reactionGameState = reactionWaitBeforeNewTurn;
-#endif
-                    }
+                    // a small pause must be implemented after the button press before the new turn as off not to confuse the player
+                    addNoteToBuzzerRepeated(REST_8_8, 4);
+                    reactionGameState = reactionWaitBeforeNewTurn;
                 }
                 else
                 {
-                    // wrong button pressed
-                    reactionGameState = reactionJustDied;
+                    // #define BLINK_AT_TWICE_THE_SAME_POSITION // add a pause after each button press to ensure all display lights are perceived as off. The idea is, if twice the same button is chosen, it's visible to the player. Although this seems like a good idea, we're solving a non existing problem. There is the beep feedback for each button press. And, we should not introduce artificial pauses to the game.
 
-                    // zero points if you fail during the timed challenge
-                    if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
-                    {
-                        REACTION_GAME_SCORE = 0;
-                    }
+#ifndef BLINK_AT_TWICE_THE_SAME_POSITION
+                    // the most reasonable option
+                    buzzerPlayApproval();
+                    reactionGameState = reactionWhackingNewTurn;
+#else
+                        setBlankDisplay();
+                        buzzerPlayApproval();
+                        addNoteToBuzzerRepeated(REST_1_8, 2); // todo delete
+                        reactionGameState = reactionWaitBeforeNewTurn;
+#endif
+                }
+            }
+            else
+            {
+                // wrong button pressed
+                reactionGameState = reactionJustDied;
+
+                // zero points if you fail during the timed challenge
+                if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+                {
+                    REACTION_GAME_SCORE = 0;
                 }
             }
         }
@@ -5741,7 +5714,8 @@ unsigned int Apps::indexToTimeSeconds(int16_t index)
 #endif
 }
 
-void Apps::clearScreen(){
+void Apps::clearScreen()
+{
     setStandardTextToTextBuf(TEXT_SPACES);
 }
 
@@ -5974,14 +5948,11 @@ void Apps::multitimer_integrated()
     {
         this->multitimer_init();
     }
+    multitimer_playerButtonPressRefresh();
 
-    // TIMER BUTTONS
+    // TIMER BUTTONS edge down
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
     {
-        if (binaryInputsEdgeUp & (1 << i))
-        {
-            this->multitimer_playerButtonPressEdgeUp(i);
-        }
         if (binaryInputsEdgeDown & (1 << i))
         {
             this->multitimer_timerDisplayed = this->multitimer_activeTimer;
@@ -6071,55 +6042,46 @@ void Apps::multitimer_init()
     this->multitimer_timerDisplayed = this->multitimer_activeTimer;
 }
 
-void Apps::multitimer_playerButtonPressEdgeUp(uint8_t index)
+void Apps::multitimer_playerButtonPressRefresh()
 {
-    // every timer index is linked to a button index.
+    // every timer index is linked to a button index!
 
-    if (index >= MULTITIMER_TIMERS_COUNT)
+    if (isMomentaryButtonPressEdgeUpDetected())
     {
-        return; // ignore buttons that are not used.
-    }
+        if (binaryInputsEdgeUpMomentaryButtonIndex >= MULTITIMER_TIMERS_COUNT)
+        {
+            return; // ignore buttons that are not used.
+        }
 
-    if (this->multitimer_state == setStartingTimer)
-    {
-        // if (index < MULTITIMER_TIMERS_COUNT)
-        // {
-        this->multitimer_activeTimer = index;
-        multitimer_start(false);
-        // }
-    }
-    else if (this->multitimer_state == initialized)
-    {
-        // if (index < MULTITIMER_TIMERS_COUNT)
-        // {
-        this->multitimer_activeTimer = index;
-        this->multitimer_timerDisplayed = this->multitimer_activeTimer;
-        // MULTITIMER_DIAL_TIME_INDEX = timeSecondsToNearestIndex();
-        //  MULTITIMER_DIAL_TIME_INDEX = MULTITIMER_INIT_TIME_INDECES[index];
-        MULTITIMER_DIAL_TIME_INDEX = multitimer_getTimerInitTimeIndex(index);
-        // }
-    }
-    else if (this->multitimer_state == playing)
-    {
-        if (this->multitimer_activeTimer == index)
+        if (this->multitimer_state == setStartingTimer)
         {
-            this->multitimer_next(false);
-            buzzerPlayApproval();
+            this->multitimer_activeTimer = binaryInputsEdgeUpMomentaryButtonIndex;
+            multitimer_start(false);
         }
-        // else if (index < MULTITIMER_TIMERS_COUNT)
-        else
+        else if (this->multitimer_state == initialized)
         {
-            buzzerPlayDisappointment();              // althought, good to check time, it also acts as a warning that this is not your button to press
-            this->multitimer_timerDisplayed = index; // display time of pressed timer button
+            this->multitimer_activeTimer = binaryInputsEdgeUpMomentaryButtonIndex;
+            this->multitimer_timerDisplayed = this->multitimer_activeTimer;
+            MULTITIMER_DIAL_TIME_INDEX = multitimer_getTimerInitTimeIndex(binaryInputsEdgeUpMomentaryButtonIndex);
         }
-    }
-    else if (this->multitimer_state == statePaused)
-    {
-        // if (index < MULTITIMER_TIMERS_COUNT)
-        // {
-        buzzerSilentClearBufferAndAddNote(230);
-        this->multitimer_timerDisplayed = index; // display time of pressed timer button
-        // }
+        else if (this->multitimer_state == playing)
+        {
+            if (this->multitimer_activeTimer == binaryInputsEdgeUpMomentaryButtonIndex)
+            {
+                this->multitimer_next(false);
+                buzzerPlayApproval();
+            }
+            else
+            {
+                buzzerPlayDisappointment();                                               // althought, good to check time, it also acts as a warning that this is not your button to press
+                this->multitimer_timerDisplayed = binaryInputsEdgeUpMomentaryButtonIndex; // display time of pressed timer button
+            }
+        }
+        else if (this->multitimer_state == statePaused)
+        {
+            buzzerSilentClearBufferAndAddNote(230);
+            this->multitimer_timerDisplayed = binaryInputsEdgeUpMomentaryButtonIndex; // display time of pressed timer button
+        }
     }
 }
 
@@ -6317,18 +6279,9 @@ void Apps::multitimer_refresh()
         // all player lights blinking
         for (uint8_t i = 0; i < MULTITIMER_TIMERS_COUNT; i++)
         {
-            // if (millis_quarter_second_period())
-            // {
-            //     // at random starter, all lights blinking
-            //     playerLights |= 1 << i;
-            // }
             button_light_blink_quarter_second_period(lights_indexed[i]);
         }
 
-        // if (millis_half_second_period())
-        // {
-        //     settingsLights |= MULTITIMER_LIGHT_PLAYING;
-        // }
         button_light_blink_half_second_period(LIGHT_LATCHING_3);
     }
     else if (this->multitimer_state == playing)
@@ -6580,6 +6533,12 @@ bool Apps::multitimer_checkAllTimersFinished()
     }
 
     return count == MULTITIMER_TIMERS_COUNT;
+}
+
+bool Apps::isMomentaryButtonPressEdgeUpDetected()
+{
+
+    return binaryInputsEdgeUpMomentaryButtonIndex != -1;
 }
 
 void Apps::multitimer_next(bool activePlayerDied)

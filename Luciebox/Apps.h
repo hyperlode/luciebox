@@ -8,7 +8,7 @@
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define ENABLE_SHOOTOUT
-// #define ENABLE_TALLY_KEEPER
+#define ENABLE_TALLY_KEEPER
 
 #ifdef ENABLE_DITCHED_APPS
 // #define ENABLE_SCHOOL_APP
@@ -1199,7 +1199,7 @@ private:
     void multitimer_getDisplay();
     bool multitimer_getTimerFinished(uint8_t timerIndex);
     bool multitimer_checkAllTimersFinished();
-    void multitimer_playerButtonPressEdgeUp(uint8_t index);
+    void multitimer_playerButtonPressRefresh();
     // void multitimer_playerButtonPressEdgeUpDown(uint8_t index);
     // void multitimer_setTimersCount(int8_t delta);
     // void multitimer_setStateTimersCount(bool set);
@@ -1239,6 +1239,8 @@ private:
     void resetInactivityTimer();
     void autoShutdown();
     void shutdown();
+
+    bool isMomentaryButtonPressEdgeUpDetected();
 
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
     void encoderDialRefreshTimeIndex(int16_t *indexHolder);
@@ -1356,6 +1358,7 @@ private:
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
     byte binaryInputsToggleValue; // mimic a latching button with momentary button. Toggle value is on or off.
+    int8_t binaryInputsEdgeUpMomentaryButtonIndex;
 
     char textBuf[4];
     // char textBuf2[4];
