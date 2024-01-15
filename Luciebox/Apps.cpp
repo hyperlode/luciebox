@@ -4658,7 +4658,7 @@ uint16_t *Apps::reactionGameLevelToEepromAddress()
 void Apps::modeReactionDisplayScore()
 {
     REACTION_GAME_INTERMEDIATE_SCORE_HOLDER = REACTION_GAME_SCORE;
-    if (REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
+    if (!REACTION_GUITAR_APP_ELSE_WHACKING_APP && REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT)
     {
         // lower time = better time in endurance mode.
         setDecimalPoint(true, 1);
