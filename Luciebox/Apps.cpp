@@ -969,7 +969,7 @@ void Apps::pomodoroTimer()
     {
     case POMODORO_DISPLAY_TIMER_HOURGLASS:
     {
-        setStandardTextToTextBuf(TEXT_SPACES);
+        clearScreen();
 #ifdef POMODORO_ENABLE_HOURGLASS
         // always set to buffer. later on it's decided if it's displayed or not.
         // for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
@@ -1263,7 +1263,7 @@ void Apps::pomodoroTimer()
     {
     case POMODORO_DISPLAY_TIMER_HOURGLASS:
     {
-        setStandardTextToTextBuf(TEXT_SPACES);
+        clearScreen();
 #ifdef POMODORO_ENABLE_HOURGLASS
         // always set to buffer. later on it's decided if it's displayed or not.
         // for (uint8_t i=0;i<POMODORO_VISUAL_TIMER_PROGRESS;i++)
@@ -1381,7 +1381,7 @@ void Apps::stopwatch()
         STOPWATCH_CHRONO_1.start();
     }
 
-    // which chrono is loaded? 
+    // which chrono is loaded?
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
     {
         pSsuperTimer = &STOPWATCH_CHRONO_1;
@@ -1413,7 +1413,8 @@ void Apps::stopwatch()
     {
         pSsuperTimer->paused(!paused);
     }
-    if(!paused){
+    if (!paused)
+    {
         // if visible timer is not paused (aka running), the box should not auto power off.
         // chrono 1 initially contains the always on timer, but that's ok. If it's visible, and running, the box should not auto power off.
         resetInactivityTimer();
@@ -1805,7 +1806,7 @@ void Apps::modeSettings()
         SETTINGS_MODE_SELECTOR++;
     }
 
-    setStandardTextToTextBuf(TEXT_SPACES);
+    clearScreen();
 
     if (SETTINGS_MODE_SELECTOR < 6)
     {
@@ -4364,7 +4365,7 @@ void Apps::modeSimon()
     {
     case simonWaitForNewGame:
     {
-        setStandardTextToTextBuf(TEXT_SPACES);
+        clearScreen();
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_3))
@@ -4378,19 +4379,12 @@ void Apps::modeSimon()
             }
 #endif
 
-        // latching_3_blink();
-        // if (millis_quarter_second_period())
-        // {
-        //     lights |= 1 << LIGHT_LATCHING_3;
-        // }
         button_light_blink_quarter_second_period(LIGHT_LATCHING_3);
 
         // number of players.
-        //// SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1) * 4, false) / 4 + 1); // start counting from player 0 to display
         SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1), false) + 1); // start counting from player 0 to display
-        // stepChange(&SIMON_PLAYERS_COUNT-->>>TAKECAREMAKEITINT_16t<<<, this->encoder_dial->getDelta(), 1, SIMON_MAX_PLAYERS, false);
         numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
-        textBuf[1] = 'P';
+        textBuf[2] = 'P';
 
         // Instead of computer, user choses the next light in simon sequence.
         SIMON_CUSTOM_BUILD_UP = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1);
@@ -4440,7 +4434,8 @@ void Apps::modeSimon()
         // set first player
 
         SIMON_PLAYER_PLAYING_INDEX = 0; // this is just the index.
-        numberToBufAsDecimal(SIMON_LENGTH);
+        // numberToBufAsDecimal(SIMON_LENGTH);
+        // textBuf[0] = SIMON_LENGTH + 48;
 
         // let 'maximum length breach' be a happy crash. I can't afford the bytes!
         //   if (SIMON_LENGTH >= bytes_array_size) {
@@ -4480,18 +4475,23 @@ void Apps::modeSimon()
         {
             if (millis_blink_250_750ms())
             {
-                numberToBufAsDecimal(SIMON_LENGTH);
-                textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
-                textBuf[1] = 'P';
+                setStandardTextToTextBuf(TEXT_END);
             }
             else
             {
-                setStandardTextToTextBuf(TEXT_END);
+                numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1); // at textBuf[3]
+
+                textBuf[0] = SIMON_LENGTH + 48;
+                textBuf[2] = 'P';
+                // numberToBufAsDecimal(SIMON_LENGTH);
+                // textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
+                // textBuf[1] = 'P';
             }
         }
         else
         {
-            textBuf[1] = 'S';
+            numberToBufAsDecimal(SIMON_LENGTH);
+            textBuf[2] = 'L';
         }
 
         if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
@@ -4555,9 +4555,24 @@ void Apps::modeSimon()
 
     case simonUserRepeats:
     {
-        // button lights are on when pressed because of default behaviour (light of button  on at button press)
-        textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
-        textBuf[1] = 'P';
+        // button lights are on when pressed because of default behaviour (light of button on at button press)
+        // if (millis_half_second_period())
+        // {
+            numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+            textBuf[2] = 'P';
+        // }else{
+        //     clearScreen();
+        // }
+
+        // if (millis_half_second_period())
+        // {
+
+        //     textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
+        // }else{
+        //     textBuf[0] = SPACE_FAKE_ASCII;
+        // }
+        // textBuf[1] = 'P';
+
         if (pressed_momentary_button == SIMON_NO_BUTTON_PRESSED)
         {
             break;
@@ -4625,9 +4640,16 @@ void Apps::modeSimon()
     case simonPlayerDead:
     {
         SIMON_PLAYERS_ALIVE_COUNT--;
-        if (SIMON_PLAYERS_ALIVE_COUNT == 0)
+        // swap the current (dead) player with the last player in the list that needs to play.
+        // remember: we already decrease alive_count by 1
+        // no need to go to next player, as the new current player didnt play yet
+        SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] = SIMON_PLAYERS[SIMON_PLAYERS_ALIVE_COUNT];
+
+        if (SIMON_PLAYERS_ALIVE_COUNT == 0                               // everybody dead
+            || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but as it's custom adding, it's the end of the game
+        )
         {
-            // everybody dead
+
             simonState = simonStartPlaySequence;
             SIMON_END_OF_GAME = true;
             break;
@@ -4635,15 +4657,11 @@ void Apps::modeSimon()
 
         if (SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
-            // if last player in the sequence was playing. not much needs to be done.
+            // player index was last player playing in this round, so, its dead does not affect the array of players (also, last player was swapped with itself, which is ok)
             simonState = simonNewLevel;
             break;
         }
 
-        // replace the current (dead) player by the last player in the list that needs to play.
-        // remember: we already decrease alive_count by 1
-        // no need to go to next player, as the new current player didnt play yet
-        SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] = SIMON_PLAYERS[SIMON_PLAYERS_ALIVE_COUNT];
         simonState = simonStartUserRepeats;
     }
     break;
@@ -4810,7 +4828,7 @@ void Apps::modeReactionGame()
             {
                 // hex geek mode
                 fill8BytesArrayWithZero();
-                setStandardTextToTextBuf(TEXT_SPACES);
+                clearScreen();
                 reactionGameState = reactionHexNextStep;
             }
             else
@@ -5721,6 +5739,10 @@ unsigned int Apps::indexToTimeSeconds(int16_t index)
 #else
     return index * index; // untested
 #endif
+}
+
+void Apps::clearScreen(){
+    setStandardTextToTextBuf(TEXT_SPACES);
 }
 
 void Apps::setStandardTextToTextBuf(uint8_t textPosition)

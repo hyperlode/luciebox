@@ -8,7 +8,7 @@
 #define ENABLE_REACTION_APP
 #define ENABLE_POMODORO
 #define ENABLE_SHOOTOUT
-#define ENABLE_TALLY_KEEPER
+// #define ENABLE_TALLY_KEEPER
 
 #ifdef ENABLE_DITCHED_APPS
 // #define ENABLE_SCHOOL_APP
@@ -1279,6 +1279,7 @@ private:
     // void setLedArray();
     void numberToBufAsDecimal(int16_t number);
     void noteToDisplay(uint8_t note);
+    void clearScreen();
     void setStandardTextToTextBuf(uint8_t textPosition);
     // void setStandardTextToTextBufAndDisplayIt(uint8_t textPosition);
     void setStandardTextToTextHANDLE(uint8_t textPosition);
