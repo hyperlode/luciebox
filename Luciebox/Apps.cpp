@@ -19,7 +19,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 
     textHandle = ledDisp->getDisplayTextBufHandle();
     decimalDotsHandle = ledDisp->getDecimalPointsHandle();
-    inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
+    inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_INDEX));
     resetInactivityTimer();
     always_on_timer.start();
 }
@@ -34,7 +34,7 @@ void Apps::setPeripherals(BinaryInput binaryInputs[], RotaryEncoderDial *encoder
 
     textHandle = ledDisp->getDisplayTextBufHandle();
     decimalDotsHandle = ledDisp->getDecimalPointsHandle();
-    inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_BEEP_INDEX));
+    inactivity_timer.setInitCountDownTimeSecs(indexToTimeSeconds(INACTIVITY_TIME_INDEX));
     resetInactivityTimer();
     always_on_timer.start();
 

@@ -581,8 +581,7 @@ const uint8_t guitar_hero_level_speeds[] PROGMEM = {101, 75, 50, 40, 30, 20};   
 const uint8_t whack_a_mole_level_step_speeds[] PROGMEM = {250, 41, 21, 8, 4, 3};              // a x10 multiplier is applied. Time in ms per step, twelve steps for total time. 12x10xTIME_MS = total time for a round
 const uint8_t whack_a_mole_countdown_level_step_speeds[] PROGMEM = {200, 100, 50, 33, 16, 8}; //{2min, 1min, 30s, 20s, 10s, 5s} // will have a *50 multiplier per step. and *12 for total countdowntime
 
-// #define INACTIVITY_TIME_BEEP_INDEX 5 // this is just an index, needs to be converted to seconds with the lookup table
-#define INACTIVITY_TIME_BEEP_INDEX 35 // this is just an index, needs to be converted to seconds with the lookup table
+#define INACTIVITY_TIME_INDEX 35 // this is just an index, needs to be converted to seconds with the lookup table
 
 #define MOVIE_INDEX_EMPTY 255
 #define ANIMATE_CIRCLE_OFFSET 4
