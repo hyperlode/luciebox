@@ -4347,16 +4347,6 @@ void Apps::modeSimon()
         lights |= 1 << LIGHT_LATCHING_1;
     }
 
-    // check if a momentary button was pressed, and create byte with status: 0000 is no button pressed.  0001, 0010, 0100, 1000
-    // uint8_t pressed_momentary_button = SIMON_NO_BUTTON_PRESSED;
-    // for (int k = 0; k < MOMENTARY_BUTTONS_COUNT; ++k)
-    // {
-    //     if (binaryInputsEdgeUp & 1 << k)
-    //     {
-    //         pressed_momentary_button = k;
-    //     }
-    // }
-
     switch (simonState)
     {
     case simonWaitForNewGame:
@@ -4379,8 +4369,10 @@ void Apps::modeSimon()
 
         // number of players.
         SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1), false) + 1); // start counting from player 0 to display
+        
+        // display number of players
         numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
-        textBuf[2] = 'P';
+        textBuf[1] = 'P';
 
         // Instead of computer, user choses the next light in simon sequence.
         SIMON_CUSTOM_BUILD_UP = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1);
@@ -4480,10 +4472,19 @@ void Apps::modeSimon()
             }
             else
             {
-                numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1); // at textBuf[3]
-
-                textBuf[0] = SIMON_LENGTH + 48;
-                textBuf[2] = 'P';
+                if (SIMON_DISPLAY_PLAYER_ELSE_LEVEL)
+                {
+                    numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+                    textBuf[1] = 'P';
+                }
+                else
+                {
+                    numberToBufAsDecimal(SIMON_LENGTH);
+                    textBuf[1] = 'L';
+                }
+                // numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1); // at textBuf[3]
+                // textBuf[0] = SIMON_LENGTH + 48;
+                // textBuf[2] = 'P';
                 // numberToBufAsDecimal(SIMON_LENGTH);
                 // textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
                 // textBuf[1] = 'P';
@@ -4492,7 +4493,7 @@ void Apps::modeSimon()
         else
         {
             numberToBufAsDecimal(SIMON_LENGTH);
-            textBuf[2] = 'L';
+            textBuf[1] = 'L';
         }
 
         if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
@@ -4501,6 +4502,7 @@ void Apps::modeSimon()
             if (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER))
             {
                 SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
+                SIMON_DISPLAY_PLAYER_ELSE_LEVEL = !SIMON_DISPLAY_PLAYER_ELSE_LEVEL;
             }
         }
 
@@ -4557,7 +4559,7 @@ void Apps::modeSimon()
     case simonUserRepeats:
     {
         numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-        textBuf[2] = 'P';
+        textBuf[1] = 'P';
 
         if (binaryInputsEdgeUpMomentaryButtonIndex == -1)
         {

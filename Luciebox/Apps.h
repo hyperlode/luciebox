@@ -106,8 +106,7 @@
 
 #define SIMON_NO_ACTIVE_LIGHT 666
 #define SIMON_DEAD_PLAYER 666
-#define SIMON_MAX_PLAYERS 8
-#define SIMON_NO_BUTTON_PRESSED 111
+#define SIMON_MAX_PLAYERS 9
 
 #define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      // 1500s
 #define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     // 300s
@@ -330,6 +329,7 @@
 #define POMODORO_ENABLE_HOURGLASS_VISUALS general_boolean2
 #define SHOOTOUT_ELSE_SHOOTOUT_MODE general_boolean2
 
+#define SIMON_DISPLAY_PLAYER_ELSE_LEVEL general_boolean3
 #define REACTION_IS_OPTION_BIRD_OR_HEX general_boolean3
 #define MOVIE_MODE_AUTO_BACKWARDS general_boolean3
 #define SOUND_NOTE_MUTE general_boolean3
@@ -352,13 +352,13 @@
 #define SHOOTOUT_ANALOG_VALUES_CHECK array_100_bytes_1
 
 #define BINGO_NUMBERS_LIST array_100_bytes_2
+#define SIMON_PLAYERS array_100_bytes_2
 
 #define BUZZERTRACK_NOTES_LIST array_100_bytes_3 // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
 // #define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
 // #define PROGMEM_TO_BUFFER_LIST array_100_bytes_2
 
 #define REACTION_GAME_HEX_MEMORY array_8_bytes
-#define SIMON_PLAYERS array_8_bytes
 #define SHOOTOUT_SCORE array_8_bytes
 #define MULTITIMER_INIT_TIME_INDECES array_8_bytes
 #define HACKTIME_VALUE_BUFFER array_8_bytes
