@@ -4423,9 +4423,14 @@ void Apps::modeSimon()
     case simonNewLevel:
     {
         ++SIMON_LENGTH;
+        uint8_t previous_level_first_player_playing = SIMON_PLAYERS[0];
 
-        // shuffle alive players.
-        shuffle(SIMON_PLAYERS, SIMON_PLAYERS_ALIVE_COUNT);
+        // have never twice the same starting player (especially important in two player game where there is only one player per level)
+        while (previous_level_first_player_playing == SIMON_PLAYERS[0])
+        {
+            // shuffle alive players.
+            shuffle(SIMON_PLAYERS, SIMON_PLAYERS_ALIVE_COUNT);
+        }
 
         // set first player
 
