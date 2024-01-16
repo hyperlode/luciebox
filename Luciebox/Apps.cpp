@@ -4369,7 +4369,7 @@ void Apps::modeSimon()
 
         // number of players.
         SIMON_PLAYERS_COUNT = (encoder_dial->getValueLimited((SIMON_MAX_PLAYERS - 1), false) + 1); // start counting from player 0 to display
-        
+
         // display number of players
         numberToBufAsDecimal(SIMON_PLAYERS_COUNT);
         textBuf[1] = 'P';
@@ -4469,9 +4469,16 @@ void Apps::modeSimon()
             if (millis_blink_250_750ms())
             {
                 setStandardTextToTextBuf(TEXT_END);
+
+                if (!SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY)
+                {
+                    SIMON_DISPLAY_PLAYER_ELSE_LEVEL = !SIMON_DISPLAY_PLAYER_ELSE_LEVEL;
+                }
+                SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY = true;
             }
             else
             {
+                SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY = false;
                 if (SIMON_DISPLAY_PLAYER_ELSE_LEVEL)
                 {
                     numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
@@ -4502,7 +4509,6 @@ void Apps::modeSimon()
             if (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER))
             {
                 SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
-                SIMON_DISPLAY_PLAYER_ELSE_LEVEL = !SIMON_DISPLAY_PLAYER_ELSE_LEVEL;
             }
         }
 
@@ -4558,8 +4564,17 @@ void Apps::modeSimon()
 
     case simonUserRepeats:
     {
-        numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-        textBuf[1] = 'P';
+        if (millis_blink_250_750ms())
+        {
+            numberToBufAsDecimal(SIMON_LENGTH);
+            textBuf[1] = 'L';
+        }
+        else
+        {
+
+            numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+            textBuf[1] = 'P';
+        }
 
         if (binaryInputsEdgeUpMomentaryButtonIndex == -1)
         {

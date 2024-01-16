@@ -106,7 +106,7 @@
 
 #define SIMON_NO_ACTIVE_LIGHT 666
 #define SIMON_DEAD_PLAYER 666
-#define SIMON_MAX_PLAYERS 9
+#define SIMON_MAX_PLAYERS 99
 
 #define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      // 1500s
 #define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     // 300s
@@ -339,6 +339,7 @@
 
 #define REACTION_OPTION_WHACKENDURANCE_OR_HEROPAUSE_OR_HEXCOMPLEMENT general_boolean4
 #define POMODORO_TIMER_TICKING general_boolean4
+#define SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY general_boolean4
 
 #define SIMON_LIST array_100_bytes_1
 #define SEQUENCER_SONG array_100_bytes_1
