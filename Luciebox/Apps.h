@@ -107,6 +107,7 @@
 #define SIMON_NO_ACTIVE_LIGHT 666
 #define SIMON_DEAD_PLAYER 666
 #define SIMON_MAX_PLAYERS 99
+#define SIMON_BLINK_TIME -250
 
 #define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      // 1500s
 #define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     // 300s
@@ -149,6 +150,8 @@
 
 // VARIABLE REUSE
 
+// 
+// IMPORTANT WARNING: general_timer_1 is set to 500ms and started at app load defaults
 #define TIMER_METRONOME general_timer_1
 #define TIMER_INIT_APP general_timer_1
 #define SETTINGS_MODE_DISPLAY_VALUES_BLINK general_timer_1
@@ -156,7 +159,6 @@
 #define COMPOSER_STEP_TIMER general_timer_1
 #define SIMON_STEP_TIMER general_timer_1
 #define STOPWATCH_CHRONO_1 general_timer_1
-// #define POMODORO_MAIN_TIMER_1 general_timer
 #define POMODORO_TIMER general_timer_1
 #define DRAW_GAME_DISPLAY_TIMER general_timer_1
 #define HACKTIME_MOVE_TIMER general_timer_1
@@ -168,6 +170,7 @@
 #define MOVIE_MODE_FRAME_INTERVAL_TIMER general_timer_1
 #define TIMER_DREAMTIME general_timer_1
 #define TIMER_REACTION_GAME_SPEED general_timer_1
+// IMPORTANT WARNING: general_timer_1 is set to 500ms and started at app load defaults
 
 #define TIMER_REACTION_END_OF_GAME_DELAY general_timer_2
 #define SEQUENCER_EEPROM_MODE_BLINK general_timer_2
@@ -293,7 +296,7 @@
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
 #define REACTION_GAME_STEP_TIME_MILLIS general_long_1
 #define RANDOMWORLD_ANIMATION_DELAY general_long_1
-#define SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL general_long_1
+#define SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL general_long_1
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
 #define TALLY_KEEPER_DELTA general_long_1

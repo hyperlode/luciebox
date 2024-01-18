@@ -571,7 +571,7 @@ void Apps::initializeAppDataToDefault()
 {
     // allLights->setBrightness(0, false); // disable because it annoys me:)
 
-    initiateCountDowntimerWith500Millis(&general_timer_1);
+    initiateCountDowntimerWith500Millis(&general_timer_1); //
 
     // buzzer  (buzzer off at init of splash screen)
     buzzer->setSpeedRatio(2);
@@ -4325,7 +4325,8 @@ void Apps::modeSimon()
 
     if (this->app_init_edge)
     {
-        SIMON_BLINK_TIMER.setInitTimeMillis(-250);
+        SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_BLINK_TIME);
+        // SIMON_STEP_TIMER.setInitTimeMillis(-500);  // set in default app setting !!!
 
         SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
         SIMON_PLAYERS_COUNT = 1;
@@ -4338,7 +4339,7 @@ void Apps::modeSimon()
     }
 
     // keep settings lights on, even when buttons are toggled during the game
-    if (SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL)
+    if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL)
     {
         lights |= 1 << LIGHT_LATCHING_2;
     }
@@ -4377,8 +4378,8 @@ void Apps::modeSimon()
         // Instead of computer, user choses the next light in simon sequence.
         SIMON_CUSTOM_BUILD_UP = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_1);
 
-        // random player sequence during game if multiplayer
-        SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
+        // Normally, all players play each level, if enabled, only one random player is playing per level before moving to the next level
+        SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL = binaryInputsToggleValue & (1 << BUTTON_INDEXED_LATCHING_2);
 
         break;
     }
@@ -4457,6 +4458,7 @@ void Apps::modeSimon()
 
         if (buzzer->getBuzzerNotesBufferEmpty())
         { // at start, wait for the beginning song to be over.
+            // set_blink_offset();
             simonState = simonPlaySequence;
         }
         break;
@@ -4511,6 +4513,7 @@ void Apps::modeSimon()
                 SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
             }
         }
+        // button_light_blink_half_second_period(lights_indexed[SIMON_ACTIVE_LIGHT]);
 
         if (SIMON_INDEX >= SIMON_LENGTH && (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER)))
         {
@@ -4564,17 +4567,17 @@ void Apps::modeSimon()
 
     case simonUserRepeats:
     {
-        if (millis_blink_250_750ms())
-        {
-            numberToBufAsDecimal(SIMON_LENGTH);
-            textBuf[1] = 'L';
-        }
-        else
-        {
+        // if (millis_blink_250_750ms())
+        // {
+        //     numberToBufAsDecimal(SIMON_LENGTH);
+        //     textBuf[1] = 'L';
+        // }
+        // else
+        // {
 
-            numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-            textBuf[1] = 'P';
-        }
+        numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+        textBuf[1] = 'P';
+        // }
 
         if (binaryInputsEdgeUpMomentaryButtonIndex == -1)
         {
@@ -4607,7 +4610,12 @@ void Apps::modeSimon()
         if (SIMON_INDEX >= SIMON_LENGTH)
         {
             simonState = simonNextPlayer;
-            break;
+            // addNoteToBuzzer(REST_8_8);
+            // addNoteToBuzzer(E5_4);
+            addNoteToBuzzerRepeated(E5_4,10);
+            // buzzerPlayApproval(); // addNoteToBuzzer(B6_1);
+            playSongHappyDryer();
+            SIMON_STEP_TIMER.start();
         }
 
         break;
@@ -4616,13 +4624,15 @@ void Apps::modeSimon()
     case simonNextPlayer:
     {
         // sequence done!
-        // addNoteToBuzzer(E5_4);
-        // addNoteToBuzzer(REST_8_8);
-        // buzzerPlayApproval();// addNoteToBuzzer(B6_1);
+        if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
+        {
+            // still in step.
+            break;
+        }
 
         // check next alive player (assume there is always a player alive.)
         SIMON_PLAYER_PLAYING_INDEX++;
-        if (SIMON_ALL_PLAYERS_PLAY_IN_EACH_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
+        if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
             simonState = simonNewLevel;
         }
@@ -5558,7 +5568,7 @@ bool Apps::millis_quarter_second_period()
 
 bool Apps::millis_half_second_period()
 {
-    return millis() % 500 > 250;
+    return (millis()- blink_offset) % 500 > 250;
 }
 
 void Apps::button_light_blink_half_second_period(uint8_t button_light_index)
