@@ -4328,7 +4328,7 @@ void Apps::modeSimon()
         SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_BLINK_TIME);
         // SIMON_STEP_TIMER.setInitTimeMillis(-500);  // set in default app setting !!!
 
-        SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
+        // SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
         SIMON_PLAYERS_COUNT = 1;
     }
 
@@ -4418,6 +4418,11 @@ void Apps::modeSimon()
         ++SIMON_LENGTH;
         uint8_t previous_level_first_player_playing = SIMON_PLAYERS[0];
 
+        if (SIMON_PLAYERS_COUNT == 1)
+        {
+            previous_level_first_player_playing = 66; // hack, if only one player, we'd have and endless loop if not set to another number first.
+        }
+
         // have never twice the same starting player (especially important in two player game where there is only one player per level)
         while (previous_level_first_player_playing == SIMON_PLAYERS[0])
         {
@@ -4453,12 +4458,12 @@ void Apps::modeSimon()
 
     case simonStartPlaySequence:
     {
-        SIMON_INDEX = -1; // negative index allows for lead-in time
+        SIMON_INDEX = -2; // negative index allows for lead-in time
         SIMON_STEP_TIMER.start();
 
         if (buzzer->getBuzzerNotesBufferEmpty())
         { // at start, wait for the beginning song to be over.
-            // set_blink_offset();
+            set_blink_offset();
             simonState = simonPlaySequence;
         }
         break;
@@ -4491,12 +4496,6 @@ void Apps::modeSimon()
                     numberToBufAsDecimal(SIMON_LENGTH);
                     textBuf[1] = 'L';
                 }
-                // numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1); // at textBuf[3]
-                // textBuf[0] = SIMON_LENGTH + 48;
-                // textBuf[2] = 'P';
-                // numberToBufAsDecimal(SIMON_LENGTH);
-                // textBuf[0] = SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 49;
-                // textBuf[1] = 'P';
             }
         }
         else
@@ -4505,17 +4504,16 @@ void Apps::modeSimon()
             textBuf[1] = 'L';
         }
 
-        if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
-        {
-            lights |= 1 << lights_indexed[SIMON_ACTIVE_LIGHT];
-            if (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER))
-            {
-                SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
-            }
-        }
-        // button_light_blink_half_second_period(lights_indexed[SIMON_ACTIVE_LIGHT]);
+        // if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
+        // {
+        //     lights |= 1 << lights_indexed[SIMON_ACTIVE_LIGHT];
+        //     if (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER))
+        //     {
+        //         SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
+        //     }
+        // }
 
-        if (SIMON_INDEX >= SIMON_LENGTH && (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER)))
+        if (SIMON_INDEX >= (SIMON_LENGTH - 1) && (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER)))
         {
             // after playing sequence at game end, immediatly continue
             if (SIMON_END_OF_GAME)
@@ -4533,6 +4531,10 @@ void Apps::modeSimon()
             }
             break;
         }
+        if (SIMON_INDEX >= 0)
+        {
+            button_light_blink_half_second_period(lights_indexed[SIMON_ACTIVE_LIGHT]);
+        }
 
         if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
         {
@@ -4541,20 +4543,20 @@ void Apps::modeSimon()
         }
 
         SIMON_STEP_TIMER.start();
+        ++SIMON_INDEX;
         if (SIMON_INDEX < 0)
         {
-            ++SIMON_INDEX; // do-nothing lead in time
+            // ++SIMON_INDEX; // do-nothing lead in time
             break;
         }
 
-        // show one light from the sequence
         SIMON_ACTIVE_LIGHT = SIMON_LIST[SIMON_INDEX];
+        // show one light from the sequence
 
         SIMON_BLINK_TIMER.start();
 
         // addNoteToBuzzer(A3_8);
         buzzerPlayApproval();
-        ++SIMON_INDEX;
         break;
     }
 
@@ -4612,7 +4614,7 @@ void Apps::modeSimon()
             simonState = simonNextPlayer;
             // addNoteToBuzzer(REST_8_8);
             // addNoteToBuzzer(E5_4);
-            addNoteToBuzzerRepeated(E5_4,10);
+            addNoteToBuzzerRepeated(E5_4, 10);
             // buzzerPlayApproval(); // addNoteToBuzzer(B6_1);
             playSongHappyDryer();
             SIMON_STEP_TIMER.start();
@@ -5568,12 +5570,12 @@ bool Apps::millis_quarter_second_period()
 
 bool Apps::millis_half_second_period()
 {
-    return (millis()- blink_offset) % 500 > 250;
+    return (millis() - blink_offset) % 500 > 250;
 }
 
 void Apps::button_light_blink_half_second_period(uint8_t button_light_index)
 {
-    if (millis_half_second_period())
+    if (!millis_half_second_period())
     {
         lights |= 1 << button_light_index;
     }
