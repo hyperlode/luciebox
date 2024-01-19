@@ -104,10 +104,10 @@
 #define RANDOMWORLD_BINGO 6
 #define RANDOMWORLD_YESORNO 7
 
-#define SIMON_NO_ACTIVE_LIGHT 666
 #define SIMON_DEAD_PLAYER 666
 #define SIMON_MAX_PLAYERS 99
-#define SIMON_BLINK_TIME -250
+#define SIMON_FAKE_PLAYER 66
+// #define SIMON_BLINK_TIME -250
 
 #define POMODORO_INIT_DEFAULT_TIME_INDEX 50                      // 1500s
 #define POMODORO_PAUSE_DEFAULT_TIME_INDEX 25                     // 300s
@@ -175,7 +175,7 @@
 #define TIMER_REACTION_END_OF_GAME_DELAY general_timer_2
 #define SEQUENCER_EEPROM_MODE_BLINK general_timer_2
 #define RANDOMWORLD_AUTODRAW_DELAY general_timer_2
-#define SIMON_BLINK_TIMER general_timer_2
+ #define SIMON_LEVEL_DELAY general_timer_2
 #define STOPWATCH_CHRONO_2 general_timer_2
 #define POMODORO_PAUSE_TIMER general_timer_2
 
@@ -186,7 +186,7 @@
 #define REACTION_GAME_SCORE general_int16_t_1
 #define GEIGER_TONE_FREQUENY_LOWEST general_int16_t_1
 #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
-#define SIMON_LENGTH general_int16_t_1
+#define SIMON_LEVEL_LENGTH general_int16_t_1
 #define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
 #define SEQUENCER_STEP_COUNTER general_int16_t_1
 #define COMPOSER_STEP general_int16_t_1
@@ -287,6 +287,7 @@
 #define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
 #define RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX general_uint8_t_3
 
+#define SIMON_FORBIDDEN_PLAYER general_uint8_t_4
 #define RANDOMWORLD_INDEX_FROM_BINGO general_uint8_t_4
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
@@ -1493,6 +1494,7 @@ private:
     {
         simonWaitForNewGame,
         simonNewGame,
+        simonNewLevelInit,
         simonNewLevel,
         simonStartPlaySequence,
         simonPlaySequence,

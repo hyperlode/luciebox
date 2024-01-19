@@ -4321,14 +4321,12 @@ void Apps::modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_
 #ifdef ENABLE_SIMON_APP
 void Apps::modeSimon()
 {
-    uint8_t lights = 0b00000000;
+    // uint8_t lights = 0b00000000;
 
     if (this->app_init_edge)
     {
-        SIMON_BLINK_TIMER.setInitTimeMillis(SIMON_BLINK_TIME);
         // SIMON_STEP_TIMER.setInitTimeMillis(-500);  // set in default app setting !!!
-
-        // SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
+        SIMON_LEVEL_DELAY.setInitTimeMillis(-2000);  // set in default app setting !!!
         SIMON_PLAYERS_COUNT = 1;
     }
 
@@ -4339,13 +4337,13 @@ void Apps::modeSimon()
     }
 
     // keep settings lights on, even when buttons are toggled during the game
-    if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL)
-    {
-        lights |= 1 << LIGHT_LATCHING_2;
-    }
     if (SIMON_CUSTOM_BUILD_UP)
     {
         lights |= 1 << LIGHT_LATCHING_1;
+    }
+    if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL)
+    {
+        lights |= 1 << LIGHT_LATCHING_2;
     }
 
     switch (simonState)
@@ -4390,6 +4388,7 @@ void Apps::modeSimon()
 
         SIMON_END_OF_GAME = false;
         SIMON_PLAYERS_ALIVE_COUNT = SIMON_PLAYERS_COUNT;
+        SIMON_LEVEL_LENGTH = 0;
 
         // set all players arranged in array. don't bother about real player count.
         for (uint8_t i = 0; i < SIMON_MAX_PLAYERS; i++)
@@ -4397,53 +4396,83 @@ void Apps::modeSimon()
             SIMON_PLAYERS[i] = i;
         }
 
-        // generate new sequence. if 4 momentary buttons: 0,1,2,3,0,1,2,3,0,1,2,3,...
-        // it's easier to save indeces than binary values like 0001, 0010, 0100, 1000 because
-        // converting from binary to index needs a loop.
+        // generate new max length simon sequence. with four options.
+        // step 1: just fill the array like: 0,1,2,3,0,1,2,3,0,1,2,3,...
         for (int k = 0; k < bytes_array_size; ++k)
         {
             SIMON_LIST[k] = k % MOMENTARY_BUTTONS_COUNT;
+#ifdef ENABLE_SERIAL
+            SIMON_LIST[k] = 3;
+#endif
         }
+        // step 2:
         shuffle(SIMON_LIST, bytes_array_size);
-
-        // set starting parameters
-        SIMON_LENGTH = 0;
-
-        simonState = simonNewLevel;
+        simonState = simonNewLevelInit;
         break;
     }
 
+    case simonNewLevelInit:
+    {
+        SIMON_LEVEL_LENGTH++; // no check for maximum length. Let 'maximum length breach' be a happy crash. I can't afford the bytes!
+        SIMON_PLAYER_PLAYING_INDEX = 0;
+        SIMON_LEVEL_DELAY.start();
+
+        simonState = simonNewLevel;
+    }
+    break;
+
     case simonNewLevel:
     {
-        ++SIMON_LENGTH;
-        uint8_t previous_level_first_player_playing = SIMON_PLAYERS[0];
-
-        if (SIMON_PLAYERS_COUNT == 1)
-        {
-            previous_level_first_player_playing = 66; // hack, if only one player, we'd have and endless loop if not set to another number first.
+        if (SIMON_LEVEL_LENGTH  > 1){
+            lights |= 1 << lights_indexed[SIMON_LIST[SIMON_LEVEL_LENGTH - 2]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
         }
 
-        // have never twice the same starting player (especially important in two player game where there is only one player per level)
-        while (previous_level_first_player_playing == SIMON_PLAYERS[0])
+        numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
+        textBuf[1] = 'L';
+
+        if ((!getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY) && SIMON_CUSTOM_BUILD_UP))
+        {
+            // still in step.
+            break;
+        }
+
+#ifdef ENABLE_SERIAL
+
+        Serial.println(SIMON_LIST[SIMON_LEVEL_LENGTH - 1]);
+        Serial.println("new level. players shuffle");
+        Serial.println(SIMON_LEVEL_LENGTH);
+        Serial.println(SIMON_PLAYERS_COUNT);
+
+        for (int i = 0; i < SIMON_PLAYERS_COUNT; i++)
+        {
+            Serial.println(SIMON_PLAYERS[i]);
+        }
+#endif
+        if (SIMON_LEVEL_LENGTH > 1 && SIMON_PLAYERS_COUNT > 1)
+        {
+            // have never twice the same starting player in a level.
+            // * only if there is more than one player.
+            // * first level, could be any player starting
+            SIMON_FORBIDDEN_PLAYER = SIMON_PLAYERS[0]; // this is just the index of the first player
+        }
+        else
+        {
+            SIMON_FORBIDDEN_PLAYER = SIMON_FAKE_PLAYER;
+        }
+
+        do
         {
             // shuffle alive players.
             shuffle(SIMON_PLAYERS, SIMON_PLAYERS_ALIVE_COUNT);
+        } while (SIMON_PLAYERS[0] == SIMON_FORBIDDEN_PLAYER);
+#ifdef ENABLE_SERIAL
+        Serial.println("before ^ and after V shuffle.");
+        for (int i = 0; i < SIMON_PLAYERS_COUNT; i++)
+        {
+            Serial.println(SIMON_PLAYERS[i]);
         }
-
-        // set first player
-
-        SIMON_PLAYER_PLAYING_INDEX = 0; // this is just the index.
-        // numberToBufAsDecimal(SIMON_LENGTH);
-        // textBuf[0] = SIMON_LENGTH + 48;
-
-        // let 'maximum length breach' be a happy crash. I can't afford the bytes!
-        //   if (SIMON_LENGTH >= bytes_array_size) {
-        // 	  // reached maximum length
-        // 	  playSongHappyDryer();
-        // 	  simonState = simonWaitForNewGame;
-        // 	  break;
-        //   }
-
+        Serial.println("----- ");
+#endif
         if (SIMON_CUSTOM_BUILD_UP)
         {
             // for custom sequence games, there is nothing to be replayed.
@@ -4493,27 +4522,18 @@ void Apps::modeSimon()
                 }
                 else
                 {
-                    numberToBufAsDecimal(SIMON_LENGTH);
+                    numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
                     textBuf[1] = 'L';
                 }
             }
         }
         else
         {
-            numberToBufAsDecimal(SIMON_LENGTH);
+            numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
             textBuf[1] = 'L';
         }
 
-        // if (SIMON_ACTIVE_LIGHT != SIMON_NO_ACTIVE_LIGHT)
-        // {
-        //     lights |= 1 << lights_indexed[SIMON_ACTIVE_LIGHT];
-        //     if (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER))
-        //     {
-        //         SIMON_ACTIVE_LIGHT = SIMON_NO_ACTIVE_LIGHT;
-        //     }
-        // }
-
-        if (SIMON_INDEX >= (SIMON_LENGTH - 1) && (getCountDownTimerHasElapsed(&SIMON_BLINK_TIMER)))
+        if (SIMON_INDEX >= (SIMON_LEVEL_LENGTH - 1) && (getCountDownTimerHasElapsed(&SIMON_STEP_TIMER)))
         {
             // after playing sequence at game end, immediatly continue
             if (SIMON_END_OF_GAME)
@@ -4521,7 +4541,7 @@ void Apps::modeSimon()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
                 simonState = simonWaitForNewGame;
 #else
-                    binaryInputs[BUTTON_LATCHING_3].setToggleValue(0);
+                    binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // important to reset the button itself too.
 #endif
             }
             else
@@ -4531,6 +4551,8 @@ void Apps::modeSimon()
             }
             break;
         }
+
+        // show one light from the sequence
         if (SIMON_INDEX >= 0)
         {
             button_light_blink_half_second_period(lights_indexed[SIMON_ACTIVE_LIGHT]);
@@ -4542,20 +4564,18 @@ void Apps::modeSimon()
             break;
         }
 
+        // Next step handling
         SIMON_STEP_TIMER.start();
         ++SIMON_INDEX;
+
         if (SIMON_INDEX < 0)
         {
-            // ++SIMON_INDEX; // do-nothing lead in time
+            // do-nothing lead in time
             break;
         }
 
         SIMON_ACTIVE_LIGHT = SIMON_LIST[SIMON_INDEX];
-        // show one light from the sequence
 
-        SIMON_BLINK_TIMER.start();
-
-        // addNoteToBuzzer(A3_8);
         buzzerPlayApproval();
         break;
     }
@@ -4569,17 +4589,8 @@ void Apps::modeSimon()
 
     case simonUserRepeats:
     {
-        // if (millis_blink_250_750ms())
-        // {
-        //     numberToBufAsDecimal(SIMON_LENGTH);
-        //     textBuf[1] = 'L';
-        // }
-        // else
-        // {
-
         numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
         textBuf[1] = 'P';
-        // }
 
         if (binaryInputsEdgeUpMomentaryButtonIndex == -1)
         {
@@ -4587,37 +4598,40 @@ void Apps::modeSimon()
         }
 
         const int expected = SIMON_LIST[SIMON_INDEX];
-        if (binaryInputsEdgeUpMomentaryButtonIndex != expected)
+
+        if (SIMON_CUSTOM_BUILD_UP &&
+            (SIMON_INDEX == SIMON_LEVEL_LENGTH - 1) &&
+            SIMON_PLAYER_PLAYING_INDEX == 0)
         {
-            // if custom build up, last light of the sequence and first player, player gets to choose the next move
-            if (SIMON_CUSTOM_BUILD_UP && (SIMON_INDEX + 1) == SIMON_LENGTH && SIMON_PLAYER_PLAYING_INDEX == 0)
-            {
-                SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
-            }
-            else
-            {
-                // player made mistake, player dies
-                this->addNoteToBuzzerRepeated(C4_1, 4);
-                simonState = simonPlayerDead;
-                break;
-            }
-        }
+            // in custom build up, last light of the sequence, the first player in this level gets to choose the move
 
-        // player pressed correct button
-        // addNoteToBuzzer(A3_8);
-        buzzerPlayApproval();
+#ifdef ENABLE_SERIAL
+            Serial.println("player chose new key to add.");
 
-        ++SIMON_INDEX;
+            Serial.println(binaryInputsEdgeUpMomentaryButtonIndex);
+            Serial.println("---------");
 
-        if (SIMON_INDEX >= SIMON_LENGTH)
-        {
+#endif
+            SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
+            addNoteToBuzzer(C8_1); // special beep.
             simonState = simonNextPlayer;
-            // addNoteToBuzzer(REST_8_8);
-            // addNoteToBuzzer(E5_4);
-            addNoteToBuzzerRepeated(E5_4, 10);
-            // buzzerPlayApproval(); // addNoteToBuzzer(B6_1);
-            playSongHappyDryer();
-            SIMON_STEP_TIMER.start();
+        }
+        else if (binaryInputsEdgeUpMomentaryButtonIndex != expected)
+        {
+            // player made mistake, player dies
+            this->addNoteToBuzzerRepeated(C4_1, 4);
+            simonState = simonPlayerDead;
+        }
+        else
+        {
+            // player pressed correct button
+            buzzerPlayApproval();
+
+            ++SIMON_INDEX;
+            if (SIMON_INDEX >= SIMON_LEVEL_LENGTH)
+            {
+                simonState = simonNextPlayer;
+            }
         }
 
         break;
@@ -4625,18 +4639,20 @@ void Apps::modeSimon()
 
     case simonNextPlayer:
     {
-        // sequence done!
-        if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
-        {
-            // still in step.
-            break;
-        }
 
         // check next alive player (assume there is always a player alive.)
         SIMON_PLAYER_PLAYING_INDEX++;
+
+#ifdef ENABLE_SERIAL
+        Serial.println("nextplayer : ");
+        Serial.println(SIMON_PLAYER_PLAYING_INDEX);
+        Serial.println(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX]);
+        Serial.println("----- ");
+#endif
+
         if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
-            simonState = simonNewLevel;
+            simonState = simonNewLevelInit;
         }
         else
         {
@@ -4666,7 +4682,7 @@ void Apps::modeSimon()
         if (SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
             // player index was last player playing in this round, so, its dead does not affect the array of players (also, last player was swapped with itself, which is ok)
-            simonState = simonNewLevel;
+            simonState = simonNewLevelInit;
             break;
         }
 
