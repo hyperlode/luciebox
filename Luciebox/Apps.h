@@ -242,7 +242,6 @@
 #define REACTION_GAME_TARGET_BUTTON general_uint16_t_1
 #define GEIGER_INCREASE_CHANCE general_uint16_t_1
 #define SEQUENCER_TEMPORARY_TRANSPOSE_OFFSET general_uint16_t_1
-#define SIMON_ACTIVE_LIGHT general_uint16_t_1
 #define SOUND_MODE_SCALE_RANGE_LENGTH general_uint16_t_1
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_START general_uint16_t_1
 #define POMODORO_STATS_WORKING_BAD general_uint16_t_1

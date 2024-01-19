@@ -4326,7 +4326,7 @@ void Apps::modeSimon()
     if (this->app_init_edge)
     {
         // SIMON_STEP_TIMER.setInitTimeMillis(-500);  // set in default app setting !!!
-        SIMON_LEVEL_DELAY.setInitTimeMillis(-2000);  // set in default app setting !!!
+        SIMON_LEVEL_DELAY.setInitTimeMillis(-1700); // set in default app setting !!!
         SIMON_PLAYERS_COUNT = 1;
     }
 
@@ -4423,14 +4423,15 @@ void Apps::modeSimon()
 
     case simonNewLevel:
     {
-        if (SIMON_LEVEL_LENGTH  > 1){
+        if (SIMON_LEVEL_LENGTH > 1 && SIMON_CUSTOM_BUILD_UP)
+        {
             lights |= 1 << lights_indexed[SIMON_LIST[SIMON_LEVEL_LENGTH - 2]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
         }
 
         numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
         textBuf[1] = 'L';
 
-        if ((!getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY) && SIMON_CUSTOM_BUILD_UP))
+        if ((!getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY)))
         {
             // still in step.
             break;
@@ -4487,13 +4488,12 @@ void Apps::modeSimon()
 
     case simonStartPlaySequence:
     {
-        SIMON_INDEX = -2; // negative index allows for lead-in time
-        SIMON_STEP_TIMER.start();
-
         if (buzzer->getBuzzerNotesBufferEmpty())
         { // at start, wait for the beginning song to be over.
-            set_blink_offset();
             simonState = simonPlaySequence;
+            //SIMON_STEP_TIMER.start();
+            //buzzerPlayApproval();
+            SIMON_INDEX = -1; // negative index allows for lead-in time
         }
         break;
     }
@@ -4553,9 +4553,10 @@ void Apps::modeSimon()
         }
 
         // show one light from the sequence
-        if (SIMON_INDEX >= 0)
+        // if (SIMON_STEP_TIMER.getInFirstGivenHundredsPartOfSecond(750) && SIMON_INDEX> 0) // should do a check (for the init) but no space, and works too like this...
+        if (SIMON_STEP_TIMER.getInFirstGivenHundredsPartOfSecond(750) )
         {
-            button_light_blink_half_second_period(lights_indexed[SIMON_ACTIVE_LIGHT]);
+            lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]];
         }
 
         if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
@@ -4567,16 +4568,8 @@ void Apps::modeSimon()
         // Next step handling
         SIMON_STEP_TIMER.start();
         ++SIMON_INDEX;
-
-        if (SIMON_INDEX < 0)
-        {
-            // do-nothing lead in time
-            break;
-        }
-
-        SIMON_ACTIVE_LIGHT = SIMON_LIST[SIMON_INDEX];
-
         buzzerPlayApproval();
+
         break;
     }
 
