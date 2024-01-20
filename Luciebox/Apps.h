@@ -6,7 +6,7 @@
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-#define ENABLE_POMODORO
+// #define ENABLE_POMODORO
 #define ENABLE_SHOOTOUT
 #define ENABLE_TALLY_KEEPER
 
@@ -1500,6 +1500,7 @@ private:
         simonStartUserRepeats,
         simonUserRepeats,
         simonNextPlayer,
+        simonShowAddedStep,
         simonPlayerDead,
     };
     SimonState simonState;

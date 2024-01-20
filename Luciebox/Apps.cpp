@@ -4423,10 +4423,10 @@ void Apps::modeSimon()
 
     case simonNewLevel:
     {
-        if (SIMON_LEVEL_LENGTH > 1 && SIMON_CUSTOM_BUILD_UP)
-        {
-            lights |= 1 << lights_indexed[SIMON_LIST[SIMON_LEVEL_LENGTH - 2]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
-        }
+        // if (SIMON_LEVEL_LENGTH > 1 && SIMON_CUSTOM_BUILD_UP)
+        // {
+        //     lights |= 1 << lights_indexed[SIMON_LIST[SIMON_LEVEL_LENGTH - 2]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
+        // }
 
         numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
         textBuf[1] = 'L';
@@ -4449,10 +4449,10 @@ void Apps::modeSimon()
             Serial.println(SIMON_PLAYERS[i]);
         }
 #endif
-        if (SIMON_LEVEL_LENGTH > 1 && SIMON_PLAYERS_COUNT > 1)
+        if (SIMON_LEVEL_LENGTH > 1 && SIMON_PLAYERS_ALIVE_COUNT > 1)
         {
             // have never twice the same starting player in a level.
-            // * only if there is more than one player.
+            // * only if there is more than one player alive
             // * first level, could be any player starting
             SIMON_FORBIDDEN_PLAYER = SIMON_PLAYERS[0]; // this is just the index of the first player
         }
@@ -4491,9 +4491,9 @@ void Apps::modeSimon()
         if (buzzer->getBuzzerNotesBufferEmpty())
         { // at start, wait for the beginning song to be over.
             simonState = simonPlaySequence;
-            //SIMON_STEP_TIMER.start();
-            //buzzerPlayApproval();
-            SIMON_INDEX = -1; // negative index allows for lead-in time
+            SIMON_STEP_TIMER.start();
+            buzzerPlayApproval();
+            SIMON_INDEX = 0; // negative index allows for lead-in time
         }
         break;
     }
@@ -4554,7 +4554,7 @@ void Apps::modeSimon()
 
         // show one light from the sequence
         // if (SIMON_STEP_TIMER.getInFirstGivenHundredsPartOfSecond(750) && SIMON_INDEX> 0) // should do a check (for the init) but no space, and works too like this...
-        if (SIMON_STEP_TIMER.getInFirstGivenHundredsPartOfSecond(750) )
+        if (SIMON_STEP_TIMER.getInFirstGivenHundredsPartOfSecond(750))
         {
             lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]];
         }
@@ -4596,18 +4596,16 @@ void Apps::modeSimon()
             (SIMON_INDEX == SIMON_LEVEL_LENGTH - 1) &&
             SIMON_PLAYER_PLAYING_INDEX == 0)
         {
-            // in custom build up, last light of the sequence, the first player in this level gets to choose the move
+            // in custom build up, last light of the sequence, the first player in this level gets to choose the move(in one player per level games, that's the only player. In multiple players per level games: that's the first player.)
 
 #ifdef ENABLE_SERIAL
-            Serial.println("player chose new key to add.");
-
             Serial.println(binaryInputsEdgeUpMomentaryButtonIndex);
-            Serial.println("---------");
-
 #endif
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
             addNoteToBuzzer(C8_1); // special beep.
-            simonState = simonNextPlayer;
+
+            simonState = simonShowAddedStep;
+            SIMON_LEVEL_DELAY.start();
         }
         else if (binaryInputsEdgeUpMomentaryButtonIndex != expected)
         {
@@ -4630,9 +4628,19 @@ void Apps::modeSimon()
         break;
     }
 
+    case simonShowAddedStep:
+    {
+        lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
+
+        // if ((getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY)))
+        if (SIMON_LEVEL_DELAY.getTimeIsNegative())
+        {
+            simonState = simonNextPlayer;
+        }
+    }
+    break;
     case simonNextPlayer:
     {
-
         // check next alive player (assume there is always a player alive.)
         SIMON_PLAYER_PLAYING_INDEX++;
 
