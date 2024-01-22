@@ -4326,7 +4326,7 @@ void Apps::modeSimon()
     if (this->app_init_edge)
     {
         // SIMON_STEP_TIMER.setInitTimeMillis(-500);  // set in default app setting !!!
-        SIMON_LEVEL_DELAY.setInitTimeMillis(-1700); // set in default app setting !!!
+        SIMON_LEVEL_DELAY.setInitTimeMillis(-800); // set in default app setting !!!
         SIMON_PLAYERS_COUNT = 1;
     }
 
@@ -4384,7 +4384,6 @@ void Apps::modeSimon()
 
     case simonNewGame:
     {
-        playSongHappyDryer();
 
         SIMON_END_OF_GAME = false;
         SIMON_PLAYERS_ALIVE_COUNT = SIMON_PLAYERS_COUNT;
@@ -4400,24 +4399,38 @@ void Apps::modeSimon()
         // step 1: just fill the array like: 0,1,2,3,0,1,2,3,0,1,2,3,...
         for (int k = 0; k < bytes_array_size; ++k)
         {
-            SIMON_LIST[k] = k % MOMENTARY_BUTTONS_COUNT;
-#ifdef ENABLE_SERIAL
-            SIMON_LIST[k] = 3;
-#endif
+            SIMON_LIST[k] = random(0, MOMENTARY_BUTTONS_COUNT);
         }
-        // step 2:
-        shuffle(SIMON_LIST, bytes_array_size);
+       
+//         // generate new max length simon sequence. with four options.
+//         // step 1: just fill the array like: 0,1,2,3,0,1,2,3,0,1,2,3,...
+//         for (int k = 0; k < bytes_array_size; ++k)
+//         {
+//             SIMON_LIST[k] = k % MOMENTARY_BUTTONS_COUNT;
+// #ifdef ENABLE_SERIAL
+//             SIMON_LIST[k] = 3;
+// #endif
+//         }
+//         // step 2:
+//         shuffle(SIMON_LIST, bytes_array_size);
+        playSongHappyDryer();
+        addNoteToBuzzerRepeated(REST_15_8,2);
         simonState = simonNewLevelInit;
         break;
     }
 
     case simonNewLevelInit:
     {
-        SIMON_LEVEL_LENGTH++; // no check for maximum length. Let 'maximum length breach' be a happy crash. I can't afford the bytes!
-        SIMON_PLAYER_PLAYING_INDEX = 0;
-        SIMON_LEVEL_DELAY.start();
+        // SIMON_LEVEL_DELAY.start();
+        numberToBufAsDecimal(SIMON_LEVEL_LENGTH + 1);
+        textBuf[1] = 'L';
 
-        simonState = simonNewLevel;
+        if (buzzer->getBuzzerNotesBufferEmpty())
+        {                         // at start, wait for the beginning song to be over.
+            SIMON_LEVEL_LENGTH++; // no check for maximum length. Let 'maximum length breach' be a happy crash. I can't afford the bytes!
+            SIMON_PLAYER_PLAYING_INDEX = 0;
+            simonState = simonNewLevel;
+        }
     }
     break;
 
@@ -4428,14 +4441,14 @@ void Apps::modeSimon()
         //     lights |= 1 << lights_indexed[SIMON_LIST[SIMON_LEVEL_LENGTH - 2]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
         // }
 
-        numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
-        textBuf[1] = 'L';
+        // numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
+        // textBuf[1] = 'L';
 
-        if ((!getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY)))
-        {
-            // still in step.
-            break;
-        }
+        // if ((!getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY)))
+        // {
+        //     // still in step.
+        //     break;
+        // }
 
 #ifdef ENABLE_SERIAL
 
@@ -4488,13 +4501,12 @@ void Apps::modeSimon()
 
     case simonStartPlaySequence:
     {
-        if (buzzer->getBuzzerNotesBufferEmpty())
-        { // at start, wait for the beginning song to be over.
-            simonState = simonPlaySequence;
-            SIMON_STEP_TIMER.start();
-            buzzerPlayApproval();
-            SIMON_INDEX = 0; // negative index allows for lead-in time
-        }
+
+        simonState = simonPlaySequence;
+        SIMON_STEP_TIMER.start();
+        buzzerPlayApproval();
+        SIMON_INDEX = 0; // negative index allows for lead-in time
+        // }
         break;
     }
 
