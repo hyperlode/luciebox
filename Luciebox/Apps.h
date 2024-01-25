@@ -6,7 +6,7 @@
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
-// #define ENABLE_POMODORO
+#define ENABLE_POMODORO
 #define ENABLE_SHOOTOUT
 #define ENABLE_TALLY_KEEPER
 
@@ -1493,7 +1493,7 @@ private:
     {
         simonWaitForNewGame,
         simonNewGame,
-        simonNewLevelInit,
+        // simonNewLevelInit,
         simonNewLevel,
         simonStartPlaySequence,
         simonPlaySequence,

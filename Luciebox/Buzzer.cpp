@@ -80,14 +80,18 @@ uint8_t Buzzer::addRandomSoundToNotesBuffer(uint8_t lowest, uint8_t highest)
     return r;
 }
 
+bool Buzzer::isSoundFinished(){
+    return millis() > this->soundFinishedTimeMillis;
+    
+}
+
 void Buzzer::checkAndPlayNotesBuffer()
 {
     //play all the sounds in the notesBuffer (buffer)
     //0 stands for free and programmable
     //one bufferPlayIndex
     //delay(100);
-    if (millis() > this->soundFinishedTimeMillis)
-    {
+    if (isSoundFinished()){
         if (this->getNextProgramIndex() != this->bufferPlayIndex)
         {
             uint8_t current_note = this->buzzerNotesBuffer[this->bufferPlayIndex];
@@ -201,7 +205,7 @@ void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
     }
 }
 
-uint8_t Buzzer::getBuzzerNotesBufferEmpty()
+bool Buzzer::getBuzzerNotesBufferEmpty()
 {
     return getNextProgramIndex() == this->bufferPlayIndex;
 }

@@ -300,7 +300,7 @@ public:
     void checkAndPlayNotesBuffer();
     uint8_t getNextProgramIndex();
     uint8_t getNextPlayIndex();
-    uint8_t getBuzzerNotesBufferEmpty();
+    bool getBuzzerNotesBufferEmpty();
 
     void changeTranspose(int8_t delta);
     void setTranspose(int8_t offset);
@@ -317,6 +317,7 @@ public:
 
     uint8_t getLength(uint8_t note);
     void changeNoteToNextLength(int16_t *note);
+    bool isSoundFinished();
 
 private:
     float speedScale;
