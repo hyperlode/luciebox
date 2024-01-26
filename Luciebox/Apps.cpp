@@ -4425,10 +4425,10 @@ void Apps::modeSimon()
         textBuf[1] = 'L';
 
         if (buzzer->buzzerBufferDonePlaying())
-        {                         // at start, wait for the beginning song to be over.
+        {                         
+            // at start, wait for the beginning song to be over.
             SIMON_LEVEL_LENGTH++; // no check for maximum length. Let 'maximum length breach' be a happy crash. I can't afford the bytes!
             SIMON_PLAYER_PLAYING_INDEX = 0;
-            // simonState = simonNewLevel;
         }
         else
         {
@@ -4468,13 +4468,6 @@ void Apps::modeSimon()
         }
         break;
     }
-
-    // case simonStartPlaySequence:
-    // {
-    //         SIMON_INDEX = -1; // negative index allows for lead-in time
-    //         simonState = simonPlaySequence;
-    // }
-    // break;
 
     case simonPlaySequence:
     {
@@ -4523,17 +4516,6 @@ void Apps::modeSimon()
                 }
             }
         }
-
-
-        // if (SIMON_END_OF_GAME){
-            // if (SIMON_INDEX%2){
-            //     numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-            //     textBuf[1] = 'P';
-            // }
-        //      setStandardTextToTextBuf(TEXT_END);
-        // }
-
-
 
         // works great, but no memory left:
         // if (SIMON_END_OF_GAME)
@@ -4596,13 +4578,9 @@ void Apps::modeSimon()
             SIMON_PLAYER_PLAYING_INDEX == 0)
         {
             // in custom build up, last light of the sequence, the first player in this level gets to choose the move(in one player per level games, that's the only player. In multiple players per level games: that's the first player.)
-
-#ifdef ENABLE_SERIAL
-            Serial.println(binaryInputsEdgeUpMomentaryButtonIndex);
-#endif
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
             addNoteToBuzzer(C8_1); // special beep.
-            addNoteToBuzzerRepeated(REST_15_8, 4);
+            addNoteToBuzzerRepeated(REST_15_8, 3);
 
             simonState = simonShowAddedStep;
         }
@@ -4651,7 +4629,7 @@ void Apps::modeSimon()
 
         if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
-            addNoteToBuzzerRepeated(REST_15_8, 4);
+            addNoteToBuzzerRepeated(REST_15_8, 2);
             simonState = simonNewLevel;
         }
         else
