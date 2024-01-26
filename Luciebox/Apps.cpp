@@ -743,7 +743,7 @@ void Apps::modeDreamtime()
         {
             // PROBLEM: random notes buffer and song buffer are the same bytes list! -->hence the weird behaviour
             buzzerSilentClearBufferAndAddNote(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); // 60
-            // if(buzzer->getBuzzerNotesBufferEmpty()){
+            // if(buzzer->buzzerBufferDonePlaying()){
             //     addNoteToBuzzer(MODE_DREAMTIME_RANDOM_LIST[MODE_DREAMTIME_STEP]); //60
 
             // }
@@ -881,7 +881,7 @@ void Apps::pomodoroTimer()
             }
 
             // no sound when zero
-            if (buzzer->getBuzzerNotesBufferEmpty() &&                         // if end of clock signal sounds, no ticking! erase to optimize memory
+            if (buzzer->buzzerBufferDonePlaying() &&                         // if end of clock signal sounds, no ticking! erase to optimize memory
                 !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_MOMENTARY_1)) // mute on / off
             )
             {
@@ -1182,7 +1182,7 @@ void Apps::pomodoroTimer()
             }
 
             // no sound when zero
-            if (buzzer->getBuzzerNotesBufferEmpty()) // if end of clock signal sounds, no ticking! erase to optimize memory
+            if (buzzer->buzzerBufferDonePlaying()) // if end of clock signal sounds, no ticking! erase to optimize memory
             {
                 buzzer->playTone(500, 1 + (unsigned long)POMODORO_SOUND % 40); // works well
             }
@@ -3134,7 +3134,7 @@ void Apps::modeMovie()
     {
         reload_soundtrack = reload_soundtrack || movie_restart;
     }
-    else if (buzzer->getBuzzerNotesBufferEmpty())
+    else if (buzzer->buzzerBufferDonePlaying())
     {
         reload_soundtrack = true;
     }
@@ -4426,7 +4426,7 @@ void Apps::modeSimon()
         numberToBufAsDecimal(SIMON_LEVEL_LENGTH + 1);
         textBuf[1] = 'L';
 
-        if (buzzer->getBuzzerNotesBufferEmpty())
+        if (buzzer->buzzerBufferDonePlaying())
         {                         // at start, wait for the beginning song to be over.
             SIMON_LEVEL_LENGTH++; // no check for maximum length. Let 'maximum length breach' be a happy crash. I can't afford the bytes!
             SIMON_PLAYER_PLAYING_INDEX = 0;
@@ -4472,17 +4472,14 @@ void Apps::modeSimon()
 
     case simonStartPlaySequence:
     {
-        // if (buzzer->getBuzzerNotesBufferEmpty() && buzzer->isSoundFinished())
-        // {
             SIMON_INDEX = -1; // negative index allows for lead-in time
             simonState = simonPlaySequence;
-        // }
     }
     break;
 
     case simonPlaySequence:
     {
-        if (buzzer->getBuzzerNotesBufferEmpty() && buzzer->isSoundFinished()    ADJUST FOR OTHER PROGRAMS!!!)
+        if (buzzer->buzzerBufferDonePlaying())
         {
             ++SIMON_INDEX;
             if (SIMON_INDEX >= SIMON_LEVEL_LENGTH)
@@ -4856,7 +4853,7 @@ void Apps::modeReactionGame()
         else
         {
             // whacking mode
-            if (buzzer->getBuzzerNotesBufferEmpty())
+            if (buzzer->buzzerBufferDonePlaying())
             { // in sound mode, wait till demo is done
 
                 reactionGameState = reactionWhackingNewTurn;
@@ -5107,7 +5104,7 @@ void Apps::modeReactionGame()
 
     case reactionWaitBeforeNewTurn:
     {
-        if (buzzer->getBuzzerNotesBufferEmpty())
+        if (buzzer->buzzerBufferDonePlaying())
         {
             reactionGameState = reactionWhackingNewTurn;
         }

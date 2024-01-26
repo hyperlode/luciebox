@@ -300,7 +300,7 @@ public:
     void checkAndPlayNotesBuffer();
     uint8_t getNextProgramIndex();
     uint8_t getNextPlayIndex();
-    bool getBuzzerNotesBufferEmpty();
+    bool buzzerBufferDonePlaying();
 
     void changeTranspose(int8_t delta);
     void setTranspose(int8_t offset);
