@@ -4326,7 +4326,7 @@ void Apps::modeSimon()
     if (this->app_init_edge)
     {
         // SIMON_STEP_TIMER.setInitTimeMillis(-900); // set in default app setting !!!
-        SIMON_STEP_TIMER.setInitTimeMillis(-500);  // set in default app setting !!!
+        SIMON_STEP_TIMER.setInitTimeMillis(-250);  // set in default app setting !!!
         SIMON_LEVEL_DELAY.setInitTimeMillis(-800); // set in default app setting !!!
         SIMON_PLAYERS_COUNT = 1;
     }
@@ -4465,17 +4465,18 @@ void Apps::modeSimon()
         }
         else
         {
-            simonState = simonStartPlaySequence;
+            SIMON_INDEX = -1; // negative index allows for lead-in time
+            simonState = simonPlaySequence;
         }
         break;
     }
 
-    case simonStartPlaySequence:
-    {
-            SIMON_INDEX = -1; // negative index allows for lead-in time
-            simonState = simonPlaySequence;
-    }
-    break;
+    // case simonStartPlaySequence:
+    // {
+    //         SIMON_INDEX = -1; // negative index allows for lead-in time
+    //         simonState = simonPlaySequence;
+    // }
+    // break;
 
     case simonPlaySequence:
     {
@@ -4490,7 +4491,7 @@ void Apps::modeSimon()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
                     simonState = simonWaitForNewGame;
 #else
-                        binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // important to reset the button itself too.
+                    binaryInputs[BUTTON_LATCHING_3].setToggleValue(0); // important to reset the button itself too.
 #endif
                 }
                 else
@@ -4511,49 +4512,63 @@ void Apps::modeSimon()
         }
         else
         {
+            numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
+            textBuf[1] = 'L';
             if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
             {
                 lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]];
-            }
-        }
+            }else{
+                if (SIMON_END_OF_GAME){
+                numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+                textBuf[1] = 'P';
 
-        if (SIMON_END_OF_GAME)
-        {
-            if (millis_blink_250_750ms())
-            {
-                setStandardTextToTextBuf(TEXT_END);
-
-                if (!SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY)
-                {
-                    SIMON_DISPLAY_PLAYER_ELSE_LEVEL = !SIMON_DISPLAY_PLAYER_ELSE_LEVEL;
-                }
-                SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY = true;
-            }
-            else
-            {
-                SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY = false;
-                if (SIMON_DISPLAY_PLAYER_ELSE_LEVEL)
-                {
-                    numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-                    textBuf[1] = 'P';
-                }
-                else
-                {
-                    numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
-                    textBuf[1] = 'L';
                 }
             }
         }
-        else
-        {
-            numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
-            textBuf[1] = 'L';
-        }
 
-        // show one light from the sequence
-        // if (SIMON_STEP_TIMER.getInFirstGivenHundredsPartOfSecond(750))
+
+        // if (SIMON_END_OF_GAME){
+            // if (SIMON_INDEX%2){
+            //     numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+            //     textBuf[1] = 'P';
+            // }
+        //      setStandardTextToTextBuf(TEXT_END);
+        // }
+
+
+
+        // works great, but no memory left:
+        // if (SIMON_END_OF_GAME)
         // {
+        //     if (millis_blink_250_750ms())
+        //     {
+        //         setStandardTextToTextBuf(TEXT_END);
 
+        //         if (!SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY)
+        //         {
+        //             SIMON_DISPLAY_PLAYER_ELSE_LEVEL = !SIMON_DISPLAY_PLAYER_ELSE_LEVEL;
+        //         }
+        //         SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY = true;
+        //     }
+        //     else
+        //     {
+        //         SIMON_DISPLAY_PLAYER_ELSE_LEVEL_EDGE_MEMORY = false;
+        //         if (SIMON_DISPLAY_PLAYER_ELSE_LEVEL)
+        //         {
+        //             numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+        //             textBuf[1] = 'P';
+        //         }
+        //         else
+        //         {
+        //             numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
+        //             textBuf[1] = 'L';
+        //         }
+        //     }
+        // }
+        // else
+        // {
+        //     numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
+        //     textBuf[1] = 'L';
         // }
     }
 
@@ -4590,8 +4605,8 @@ void Apps::modeSimon()
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
             addNoteToBuzzer(C8_1); // special beep.
 
-            simonState = simonShowAddedStep;
             SIMON_LEVEL_DELAY.start();
+            simonState = simonShowAddedStep;
         }
         else if (binaryInputsEdgeUpMomentaryButtonIndex != expected)
         {
@@ -4619,7 +4634,7 @@ void Apps::modeSimon()
         lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
 
         // if ((getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY)))
-        if (SIMON_LEVEL_DELAY.getTimeIsNegative())
+        if (!SIMON_LEVEL_DELAY.getTimeIsNegative())
         {
             simonState = simonNextPlayer;
         }
@@ -4662,8 +4677,9 @@ void Apps::modeSimon()
             || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom adding, that's the end of the game
         )
         {
-            simonState = simonStartPlaySequence;
+            SIMON_INDEX = -1; // negative index allows for lead-in time
             SIMON_END_OF_GAME = true;
+            simonState = simonPlaySequence;
             break;
         }
 

@@ -207,7 +207,7 @@ void Buzzer::playTone(unsigned int freq, unsigned long duration_millis)
 
 bool Buzzer::buzzerBufferDonePlaying()
 {
-    return ( getNextProgramIndex() == this->bufferPlayIndex  && isSoundFinished());
+    return ( getNextProgramIndex() == this->bufferPlayIndex ) && isSoundFinished();
 }
 
 void Buzzer::lastPlayedNoteToDisplay(char *textBuf, uint8_t *decimalPoints)

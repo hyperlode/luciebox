@@ -1495,7 +1495,7 @@ private:
         simonNewGame,
         // simonNewLevelInit,
         simonNewLevel,
-        simonStartPlaySequence,
+        // simonStartPlaySequence,
         simonPlaySequence,
         simonStartUserRepeats,
         simonUserRepeats,
