@@ -4327,7 +4327,6 @@ void Apps::modeSimon()
     {
         // SIMON_STEP_TIMER.setInitTimeMillis(-900); // set in default app setting !!!
         SIMON_STEP_TIMER.setInitTimeMillis(-250);  // set in default app setting !!!
-        SIMON_LEVEL_DELAY.setInitTimeMillis(-800); // set in default app setting !!!
         SIMON_PLAYERS_COUNT = 1;
     }
 
@@ -4422,7 +4421,6 @@ void Apps::modeSimon()
 
     case simonNewLevel:
     {
-        // SIMON_LEVEL_DELAY.start();
         numberToBufAsDecimal(SIMON_LEVEL_LENGTH + 1);
         textBuf[1] = 'L';
 
@@ -4604,8 +4602,8 @@ void Apps::modeSimon()
 #endif
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpMomentaryButtonIndex;
             addNoteToBuzzer(C8_1); // special beep.
+            addNoteToBuzzerRepeated(REST_15_8, 4);
 
-            SIMON_LEVEL_DELAY.start();
             simonState = simonShowAddedStep;
         }
         else if (binaryInputsEdgeUpMomentaryButtonIndex != expected)
@@ -4633,8 +4631,7 @@ void Apps::modeSimon()
     {
         lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
 
-        // if ((getCountDownTimerHasElapsed(&SIMON_LEVEL_DELAY)))
-        if (!SIMON_LEVEL_DELAY.getTimeIsNegative())
+        if(buzzer->buzzerBufferDonePlaying())
         {
             simonState = simonNextPlayer;
         }
@@ -4679,6 +4676,9 @@ void Apps::modeSimon()
         {
             SIMON_INDEX = -1; // negative index allows for lead-in time
             SIMON_END_OF_GAME = true;
+            if(SIMON_CUSTOM_BUILD_UP){
+                SIMON_LEVEL_LENGTH--;
+            }
             simonState = simonPlaySequence;
             break;
         }

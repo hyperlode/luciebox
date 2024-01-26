@@ -175,7 +175,7 @@
 #define TIMER_REACTION_END_OF_GAME_DELAY general_timer_2
 #define SEQUENCER_EEPROM_MODE_BLINK general_timer_2
 #define RANDOMWORLD_AUTODRAW_DELAY general_timer_2
- #define SIMON_LEVEL_DELAY general_timer_2
+//  #define SIMON_LEVEL_DELAY general_timer_2
 #define STOPWATCH_CHRONO_2 general_timer_2
 #define POMODORO_PAUSE_TIMER general_timer_2
 
