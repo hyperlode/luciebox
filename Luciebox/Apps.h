@@ -265,7 +265,7 @@
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
 // #define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
-#define SHOOTOUT_FIRST_ANALOG_MOMENTARY_BUTTON_NON_ZERO_VALUE general_uint8_t_1
+#define SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE general_uint8_t_1
 
 #define SIMON_PLAYERS_COUNT general_uint8_t_2
 #define POMODORO_AUTO_RESTART_ENABLED general_uint8_t_2
@@ -284,7 +284,7 @@
 #define POMODORO_RANDOM_BEEP_FOR_PERFORMANCE_TRACKING_ENABLED general_uint8_t_3
 #define SHOOTOUT_SCORE_MEMORY general_uint8_t_3
 #define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
-#define RANDOM_WORLD_ACTIVE_MOMENTARY_INDEX general_uint8_t_3
+#define RANDOM_WORLD_ACTIVE_BIG_BUTTON_INDEX general_uint8_t_3
 
 #define SIMON_FORBIDDEN_PLAYER general_uint8_t_4
 #define RANDOMWORLD_INDEX_FROM_BINGO general_uint8_t_4
@@ -1096,24 +1096,24 @@ const uint8_t songs[] PROGMEM = {
     C7_2, REST_12_8, G7_2, REST_12_8, G7_2, REST_12_8, A7_1, A7_1, REST_15_8, G7_2, REST_13_8, REST_15_8,
     F7_2, REST_12_8, F7_2, REST_12_8, E7_2, REST_12_8, E7_2, REST_12_8, D7_2, REST_12_8, G7_2, REST_12_8, C7_1, C7_1};
 
-const uint8_t lights_indexed[] = {LIGHT_MOMENTARY_0, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3,
-                                  LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3};
+const uint8_t lights_indexed[] = {LIGHT_BUTTON_BIG_0, LIGHT_BUTTON_BIG_1, LIGHT_BUTTON_BIG_2, LIGHT_BUTTON_BIG_3,
+                                  LIGHT_BUTTON_SMALL_0, LIGHT_BUTTON_SMALL_1, LIGHT_BUTTON_SMALL_2, LIGHT_BUTTON_SMALL_3};
 
 #ifdef V2_PCB_CORONA
-const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_MOMENTARY_0,
-                                               LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_3, LIGHT_LATCHING_3};
+const uint8_t lights_indexed_as_installed[] = {LIGHT_BUTTON_SMALL_0, LIGHT_BUTTON_SMALL_1, LIGHT_BUTTON_SMALL_2, LIGHT_BUTTON_BIG_0,
+                                               LIGHT_BUTTON_BIG_1, LIGHT_BUTTON_BIG_2, LIGHT_BUTTON_BIG_3, LIGHT_BUTTON_SMALL_3};
 
 #elif defined V5_PCB_MINI
-const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
-                                               LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
+const uint8_t lights_indexed_as_installed[] = {LIGHT_BUTTON_SMALL_0, LIGHT_BUTTON_SMALL_1, LIGHT_BUTTON_SMALL_2, LIGHT_BUTTON_SMALL_3, LIGHT_BUTTON_BIG_3,
+                                               LIGHT_BUTTON_BIG_2, LIGHT_BUTTON_BIG_1, LIGHT_BUTTON_BIG_0};
 #elif defined V3_PCB_BURST
-const uint8_t lights_indexed_as_installed[] = {LIGHT_LATCHING_0, LIGHT_LATCHING_1, LIGHT_LATCHING_2, LIGHT_LATCHING_3, LIGHT_MOMENTARY_3,
-                                               LIGHT_MOMENTARY_2, LIGHT_MOMENTARY_1, LIGHT_MOMENTARY_0};
+const uint8_t lights_indexed_as_installed[] = {LIGHT_BUTTON_SMALL_0, LIGHT_BUTTON_SMALL_1, LIGHT_BUTTON_SMALL_2, LIGHT_BUTTON_SMALL_3, LIGHT_BUTTON_BIG_3,
+                                               LIGHT_BUTTON_BIG_2, LIGHT_BUTTON_BIG_1, LIGHT_BUTTON_BIG_0};
 
 #endif
 
-const uint8_t buttons_indexed[] = {BUTTON_MOMENTARY_0, BUTTON_MOMENTARY_1, BUTTON_MOMENTARY_2, BUTTON_MOMENTARY_3,
-                                   BUTTON_LATCHING_0, BUTTON_LATCHING_1, BUTTON_LATCHING_2, BUTTON_LATCHING_3};
+const uint8_t buttons_indexed[] = {BUTTON_BIG_0, BUTTON_BIG_1, BUTTON_BIG_2, BUTTON_BIG_3,
+                                   BUTTON_SMALL_0, BUTTON_SMALL_1, BUTTON_SMALL_2, BUTTON_SMALL_3};
 
 #ifdef ENABLE_TILT_SWITCHES
 const uint8_t mercury_switches_indexed[] = {SWITCH_TILT_FORWARD, SWITCH_TILT_LEFT, SWITCH_TILT_BACKWARD, SWITCH_TILT_RIGHT};
@@ -1194,7 +1194,7 @@ private:
 
     // application helper methods
     // void pomodoroScoreValueManipulator(uint16_t* score, uint8_t buttonIndexIncrease, uint8_t buttonView);
-    void modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t momentary_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
+    void modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t big_button_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
 #ifdef ENABLE_MULTITIMER_INTEGRATED
     void multitimer_setDefaults();
     void multitimer_setTimerInitCountTimeByTimeIndex(uint8_t timer, uint8_t index);
@@ -1235,7 +1235,7 @@ private:
     void flashPictureToDisplayAllSegments(const uint8_t *progmemAddress);
     bool loadMovieFrame(int16_t address);
     void displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValueAlphabet);
-    bool modifyValueUpDownWithMomentary2And3(int16_t *value);
+    bool modifyValueUpDownWithButtonsBig2And3(int16_t *value);
     uint32_t fadeInList(uint8_t step, uint32_t startScreen, uint8_t *shuffledSequence);
 
     // general methods
@@ -1243,7 +1243,7 @@ private:
     void autoShutdown();
     void shutdown();
 
-    bool isMomentaryButtonPressEdgeUpDetected();
+    bool isBigButtonPressEdgeUpDetected();
 
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
     void encoderDialRefreshTimeIndex(int16_t *indexHolder);
@@ -1261,7 +1261,7 @@ private:
     bool stepChange(int16_t *counter, int8_t increment, int16_t minValue, int16_t maxValue, bool wrapAround);
     bool checkBoundaries(int16_t *counter, int16_t maxValue, int16_t minValue, bool rotate);
 
-    void latching_3_blink();
+    // void small_button_3_blink();
     void button_light_blink_half_second_period(uint8_t button_light_index);
     void button_light_blink_quarter_second_period(uint8_t button_light_index);
     bool millis_second_period();
@@ -1360,8 +1360,8 @@ private:
     byte binaryInputsValue;
     byte binaryInputsEdgeUp;
     byte binaryInputsEdgeDown;
-    byte binaryInputsToggleValue; // mimic a latching button with momentary button. Toggle value is on or off.
-    int8_t binaryInputsEdgeUpMomentaryButtonIndex;
+    byte binaryInputsToggleValue; // mimic a l atching button with m omentary button. Toggle value is on or off.
+    int8_t binaryInputsEdgeUpBigButtonIndex;
 
     char textBuf[4];
     // char textBuf2[4];

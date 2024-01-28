@@ -14,15 +14,15 @@
 // Lode Ameije 2019-05
 // Pretbak is a busy box for my newly born niece
 // The hardware is a box with:
-// input: 4 momentary buttons, 4 latching buttons, an encoder dial, a selector dial, and optionally four mercury switches.
+// input: 4 big buttons, 4 small buttons, an encoder dial, a selector dial, and optionally four mercury switches.
 // output: lights on buttons (one light per button), 7seg display (4 digits), buzzer
 
 // compiling: optimizations --> erratum: it's already optimized as a default.....
 // https://forum.arduino.cc/t/code-size-with-different-versions-and-flto-optimization/253140
 // link time optimizations (LTO)
 
-uint16_t setValues_1[BUTTONS_MOMENTARY_COUNT] = BUTTONS_MOMENTARY_VALUES;
-uint16_t setValues_2[BUTTONS_LATCHING_COUNT] = BUTTONS_LATCHING_VALUES;
+uint16_t setValues_1[BUTTONS_BIG_COUNT] = BUTTONS_BIG_VALUES;
+uint16_t setValues_2[BUTTONS_SMALL_COUNT] = BUTTONS_SMALL_VALUES;
 
 #ifdef ENABLE_TILT_SWITCHES
 uint16_t setValues_mercury[MERCURY_SWITCHES_COUNT] = MERCURY_SWITCHES_VALUES;
@@ -38,8 +38,8 @@ BinaryInput binaryInputs[BINARY_INPUTS_COUNT]; // 0: top left button, 4:bottom l
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
 PotentioSelector selectorDial;
 #endif
-ButtonsDacR2r buttonsMomentary;
-ButtonsDacR2r buttonsLatching; // for v2: buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
+ButtonsDacR2r g_big_buttons;
+ButtonsDacR2r g_small_buttons; // for v2: buttons without normally closed. this is a problem for the R-2R ladder. instead, I used a pull down resistor to ground at the switch. so: ON = 5V, OFF = GND over 1Kohm. 10K, 20K R2Rladder.  will only work for limited number of buttons.
 #ifdef ENABLE_TILT_SWITCHES
 ButtonsDacR2r mercurySwitches; // mercury switches go on or off depending on the position. Works with R-2R ladder. No NC in mercury switch, so, pulldown resistor (0.1R)to ground. R=10K
 #endif
@@ -52,7 +52,7 @@ LedMultiplexer5x8 ledDisplay;
 Buzzer buzzer;
 
 #ifdef ENABLE_EEPROM
-bool aMomentaryButtonIsPressed = false;
+bool aBigButtonIsPressed = false;
 #endif
 
 // hack to get interrupts nicely going without too much magic.
@@ -79,18 +79,18 @@ void lucieboxLoop()
         {
             Serial.println("{{{-------PRESS:-------:");
             Serial.println(i);
-            Serial.println((analogRead(PIN_BUTTONS_MOMENTARY)));
-            Serial.println((analogRead(PIN_BUTTONS_LATCHING)));
-            //Serial.println(buttonsMomentary.getButtonsValueRaw(),BIN);
-            //Serial.println(buttonsLatching.getButtonsValueRaw(),BIN);
+            Serial.println((analogRead(PIN_BUTTONS_BIG)));
+            Serial.println((analogRead(PIN_BUTTONS_SMALL)));
+            //Serial.println(g_big_buttons.getButtonsValueRaw(),BIN);
+            //Serial.println(g_small_buttons.getButtonsValueRaw(),BIN);
         }
 
         if (binaryInputs[i].getEdgeDown())
         {
             Serial.println("-----RELEASE:");
             Serial.println(i);
-            //Serial.println( (analogRead(PIN_BUTTONS_MOMENTARY)));
-            //Serial.println(buttonsMomentary.getButtonsValueRaw(),BIN);
+            //Serial.println( (analogRead(PIN_BUTTONS_BIG)));
+            //Serial.println(g_big_buttons.getButtonsValueRaw(),BIN);
         }
     }
 #endif
@@ -126,38 +126,38 @@ void processInput()
     selectorDial.refresh();
 #endif
 
-    buttonsMomentary.refresh();
-    buttonsLatching.refresh();
+    g_big_buttons.refresh();
+    g_small_buttons.refresh();
 #ifdef ENABLE_TILT_SWITCHES
     mercurySwitches.refresh();
 #endif
     encoder_dial.refresh();
 
-    if (buttonsLatching.getValueChangedEdge())
+    if (g_small_buttons.getValueChangedEdge())
     {
-        for (uint8_t i = 0; i < BUTTONS_LATCHING_COUNT; i++)
+        for (uint8_t i = 0; i < BUTTONS_SMALL_COUNT; i++)
         {
-            binaryInputs[BUTTONS_LATCHING_TO_BINARY_INPUT_OFFSET + i].setValue(buttonsLatching.getButtonValueByIndex(i));
+            binaryInputs[BUTTONS_SMALL_TO_BINARY_INPUT_OFFSET + i].setValue(g_small_buttons.getButtonValueByIndex(i));
         }
     }
 #ifndef ENABLE_SELECT_APPS_WITH_SELECTOR
     binaryInputs[0].setValue(digitalRead(PIN_SELECTOR_BUTTON));
 #endif
 
-    if (buttonsMomentary.getValueChangedEdge())
+    if (g_big_buttons.getValueChangedEdge())
     {
 #ifdef ENABLE_EEPROM
-        if (!aMomentaryButtonIsPressed)
+        if (!aBigButtonIsPressed)
         {
             // add 1 to power cycles tally keeper. It's done a key press to avoid gigantic number in case of multiple brown outs.
             eeprom_update_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER) + 1);
-            aMomentaryButtonIsPressed = true;
+            aBigButtonIsPressed = true;
         }
 #endif
 
-        for (uint8_t i = 0; i < BUTTONS_MOMENTARY_COUNT; i++)
+        for (uint8_t i = 0; i < BUTTONS_BIG_COUNT; i++)
         {
-            binaryInputs[BUTTONS_MOMENTARY_TO_BINARY_INPUT_OFFSET + i].setValue(buttonsMomentary.getButtonValueByIndex(i));
+            binaryInputs[BUTTONS_BIG_TO_BINARY_INPUT_OFFSET + i].setValue(g_big_buttons.getButtonValueByIndex(i));
         }
     }
 
@@ -224,8 +224,8 @@ void setup()
     digitalWrite(PIN_SELECTOR_BUTTON, HIGH); // pull high
 #endif
 
-    buttonsMomentary.setPin(PIN_BUTTONS_MOMENTARY, BUTTONS_MOMENTARY_COUNT, setValues_1);
-    buttonsLatching.setPin(PIN_BUTTONS_LATCHING, BUTTONS_LATCHING_COUNT, setValues_2);
+    g_big_buttons.setPin(PIN_BUTTONS_BIG, BUTTONS_BIG_COUNT, setValues_1);
+    g_small_buttons.setPin(PIN_BUTTONS_SMALL, BUTTONS_SMALL_COUNT, setValues_2);
     encoder_dial.setPins(PIN_ROTARY_ENCODER_DIAL_CHANNEL_A, PIN_ROTARY_ENCODER_DIAL_CHANNEL_B);
     ledDisplay.Begin(DISPLAY_IS_COMMON_ANODE, PIN_DISPLAY_DIGIT_0, PIN_DISPLAY_DIGIT_1, PIN_DISPLAY_DIGIT_2, PIN_DISPLAY_DIGIT_3, PIN_DISPLAY_DIGIT_BUTTON_LIGHTS, PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, PIN_DISPLAY_SEGMENT_G, PIN_DISPLAY_SEGMENT_DP);
     visualsManager.setMultiplexerBuffer(ledDisplay.getDigits());

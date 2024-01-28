@@ -23,7 +23,7 @@ bool BinaryInput::getValueChanged()
 
 bool BinaryInput::getToggleValue()
 {
-    // toggle is used to mimic a latching button with a momentary button
+    // toggle is used to mimic a l atching button with a m omentary button
     // its toggle value is set at a certain state.
     return this->toggleValue;
 }

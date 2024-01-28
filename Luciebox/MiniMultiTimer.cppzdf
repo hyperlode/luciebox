@@ -152,7 +152,7 @@ void MiniMultiTimer::playerButtonPressEdgeUp(uint8_t index)
 
 void MiniMultiTimer::setStatePause(bool set)
 {
-	// pause button is latching
+	// pause button is l atching
 
 	if (this->state == initialized)
 	{
