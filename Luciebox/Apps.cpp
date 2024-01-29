@@ -4578,11 +4578,19 @@ void Apps::modeSimon()
             SIMON_PLAYER_PLAYING_INDEX == 0)
         {
             // in custom build up, last light of the sequence, the first player in this level gets to choose the move(in one player per level games, that's the only player. In multiple players per level games: that's the first player.)
-            SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpBigButtonIndex;
-            addNoteToBuzzer(C8_1); // special beep.
-            addNoteToBuzzerRepeated(REST_15_8, 3);
+            if (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom 
+            {
+                playSongHappyDryer();
+                simonState = simonWaitForNewGame;
+            }else{
 
+            addNoteToBuzzerRepeated(REST_15_8, 3);
+            addNoteToBuzzer(C8_1); // special beep.
+            SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpBigButtonIndex;
             simonState = simonShowAddedStep;
+            }
+
+
         }
         else if (binaryInputsEdgeUpBigButtonIndex != expected)
         {
@@ -4649,14 +4657,14 @@ void Apps::modeSimon()
         SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] = SIMON_PLAYERS[SIMON_PLAYERS_ALIVE_COUNT];
 
         if (SIMON_PLAYERS_ALIVE_COUNT == 0                               // everybody dead
-            || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom adding, that's the end of the game
+            // || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom adding, that's the end of the game // --> erratum: not true! last player standing should still prove itself! 
         )
         {
-            SIMON_INDEX = -1; // negative index allows for lead-in time
             SIMON_END_OF_GAME = true;
-            if(SIMON_CUSTOM_BUILD_UP){
-                SIMON_LEVEL_LENGTH--;
-            }
+            // if(SIMON_CUSTOM_BUILD_UP){
+            //     SIMON_LEVEL_LENGTH--;
+            // }
+            SIMON_INDEX = -1; // negative index allows for lead-in time
             simonState = simonPlaySequence;
             break;
         }
