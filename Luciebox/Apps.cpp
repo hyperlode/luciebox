@@ -2137,8 +2137,8 @@ void Apps::displayLetterAndPositionInAlphabet(char *textBuf, int16_t letterValue
 
 void Apps::modeTallyKeeper()
 {
-    int16_t *tally_counters[] = {&TALLY_KEEPER_0, &TALLY_KEEPER_1, &TALLY_KEEPER_2, &TALLY_KEEPER_3};
-    int16_t display_value;
+    // int16_t *tally_counters[] = {&TALLY_KEEPER_0, &TALLY_KEEPER_1, &TALLY_KEEPER_2, &TALLY_KEEPER_3};
+    
 
     if (this->app_init_edge)
     {
@@ -2146,7 +2146,8 @@ void Apps::modeTallyKeeper()
 
     byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
 
-    display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER];
+    // display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER];
+    int16_t display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_DISPLAYED_COUNTER];
     
     resetInactivityTimer(); // don't switch box off when displaying score!! --> controversial. Maybe it should sound every ten minutes?!
 
@@ -2178,7 +2179,8 @@ void Apps::modeTallyKeeper()
             TALLY_KEEPER_DELTA += encoder_dial->getDelta();
         }
 
-        display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] + TALLY_KEEPER_DELTA_SIGNED;
+        // display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER] + TALLY_KEEPER_DELTA_SIGNED;
+        display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_DISPLAYED_COUNTER] + TALLY_KEEPER_DELTA_SIGNED;
         if (TALLY_KEEPER_DELTA > 1)
         {
             display_value = TALLY_KEEPER_DELTA;
@@ -2196,13 +2198,16 @@ void Apps::modeTallyKeeper()
             // affect all counters if requested.
             if (i == TALLY_KEEPER_DISPLAYED_COUNTER || (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_2)))
             {
-                int16_t v = (*tally_counters[i]) + TALLY_KEEPER_DELTA_SIGNED;
+                int16_t v = TALLY_KEEPER_SCORES[i] + TALLY_KEEPER_DELTA_SIGNED;
+                // int16_t v = (*tally_counters[i]) + TALLY_KEEPER_DELTA_SIGNED;
                 if (v < 0)
                 {
                     v = 0;
                 }
 
-                (*tally_counters[i]) = v;
+                // (*tally_counters[i]) = v;
+                TALLY_KEEPER_SCORES[i] = v;
+
             }
         }
 

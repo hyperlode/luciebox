@@ -367,6 +367,8 @@
 #define MULTITIMER_INIT_TIME_INDECES array_8_bytes
 #define HACKTIME_VALUE_BUFFER array_8_bytes
 
+#define TALLY_KEEPER_SCORES array_4_int16t
+
 #define TIME_INDECES_COUNT 90
 
 #ifdef ENABLE_MULTITIMER_INTEGRATED
@@ -1403,6 +1405,7 @@ private:
     uint8_t array_100_bytes_2[bytes_array_size];
     uint8_t array_100_bytes_3[bytes_array_size];
     uint8_t array_8_bytes[8];
+    int16_t array_4_int16t[4];
 
 #ifdef ENABLE_DRAW_GAME
     enum DrawGameState : uint8_t
