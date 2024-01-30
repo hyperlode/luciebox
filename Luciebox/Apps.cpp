@@ -881,7 +881,7 @@ void Apps::pomodoroTimer()
             }
 
             // no sound when zero
-            if (buzzer->buzzerBufferDonePlaying() &&                         // if end of clock signal sounds, no ticking! erase to optimize memory
+            if (buzzer->buzzerBufferDonePlaying() &&                     // if end of clock signal sounds, no ticking! erase to optimize memory
                 !(binaryInputsToggleValue & (1 << BUTTON_INDEXED_BIG_1)) // mute on / off
             )
             {
@@ -2147,6 +2147,8 @@ void Apps::modeTallyKeeper()
     byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
 
     display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER];
+    
+    resetInactivityTimer(); // don't switch box off when displaying score!! --> controversial. Maybe it should sound every ten minutes?!
 
     // Check for big  keypress initiated
     if (isBigButtonPressEdgeUpDetected())
@@ -4326,7 +4328,7 @@ void Apps::modeSimon()
     if (this->app_init_edge)
     {
         // SIMON_STEP_TIMER.setInitTimeMillis(-900); // set in default app setting !!!
-        SIMON_STEP_TIMER.setInitTimeMillis(-250);  // set in default app setting !!!
+        SIMON_STEP_TIMER.setInitTimeMillis(-250); // set in default app setting !!!
         SIMON_PLAYERS_COUNT = 1;
     }
 
@@ -4422,10 +4424,27 @@ void Apps::modeSimon()
     case simonNewLevel:
     {
         numberToBufAsDecimal(SIMON_LEVEL_LENGTH + 1);
-        textBuf[1] = 'L';
+        textBuf[0] = 'L';
+    
+
+        if (SIMON_CUSTOM_BUILD_UP )
+        {
+            if (SIMON_PLAYERS_ALIVE_COUNT == 1){
+            // if in multiplayer custom, only one player left, and it got the sequence right, player is the winner.
+            playSongHappyDryer();
+#ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
+            simonState = simonWaitForNewGame;
+#else
+                binaryInputs[BUTTON_SMALL_3].setToggleValue(0); // important to reset the button itself too.
+
+#endif
+            }else{
+                lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
+            }
+        }
 
         if (buzzer->buzzerBufferDonePlaying())
-        {                         
+        {
             // at start, wait for the beginning song to be over.
             SIMON_LEVEL_LENGTH++; // no check for maximum length. Let 'maximum length breach' be a happy crash. I can't afford the bytes!
             SIMON_PLAYER_PLAYING_INDEX = 0;
@@ -4482,7 +4501,7 @@ void Apps::modeSimon()
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
                     simonState = simonWaitForNewGame;
 #else
-                    binaryInputs[BUTTON_SMALL_3].setToggleValue(0); // important to reset the button itself too.
+                        binaryInputs[BUTTON_SMALL_3].setToggleValue(0); // important to reset the button itself too.
 #endif
                 }
                 else
@@ -4504,15 +4523,17 @@ void Apps::modeSimon()
         else
         {
             numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
-            textBuf[1] = 'L';
+            textBuf[0] = 'L';
             if (!getCountDownTimerHasElapsed(&SIMON_STEP_TIMER))
             {
                 lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]];
-            }else{
-                if (SIMON_END_OF_GAME){
-                numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
-                textBuf[1] = 'P';
-
+            }
+            else
+            {
+                if (SIMON_END_OF_GAME)
+                {
+                    numberToBufAsDecimal(SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] + 1);
+                    textBuf[1] = 'P';
                 }
             }
         }
@@ -4541,14 +4562,14 @@ void Apps::modeSimon()
         //         else
         //         {
         //             numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
-        //             textBuf[1] = 'L';
+        //             textBuf[0] = 'L';
         //         }
         //     }
         // }
         // else
         // {
         //     numberToBufAsDecimal(SIMON_LEVEL_LENGTH);
-        //     textBuf[1] = 'L';
+        //     textBuf[0] = 'L';
         // }
     }
 
@@ -4573,24 +4594,26 @@ void Apps::modeSimon()
 
         const int expected = SIMON_LIST[SIMON_INDEX];
 
-        if (SIMON_CUSTOM_BUILD_UP &&
-            (SIMON_INDEX == SIMON_LEVEL_LENGTH - 1) &&
-            SIMON_PLAYER_PLAYING_INDEX == 0)
+        if ((SIMON_INDEX == SIMON_LEVEL_LENGTH - 2) && SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1)
+        {
+            // end of the build up game at this point. last player has done sequence. No need for new input key.  will be settled in simonNewLevel.
+            simonState = simonNewLevel;
+        }
+        else if (SIMON_CUSTOM_BUILD_UP &&
+                 (SIMON_INDEX == SIMON_LEVEL_LENGTH - 1) &&
+                 SIMON_PLAYER_PLAYING_INDEX == 0)
         {
             // in custom build up, last light of the sequence, the first player in this level gets to choose the move(in one player per level games, that's the only player. In multiple players per level games: that's the first player.)
-            if (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom 
-            {
-                playSongHappyDryer();
-                simonState = simonWaitForNewGame;
-            }else{
 
-            addNoteToBuzzerRepeated(REST_15_8, 3);
             addNoteToBuzzer(C8_1); // special beep.
+            addNoteToBuzzerRepeated(REST_15_8, 3);
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpBigButtonIndex;
-            simonState = simonShowAddedStep;
-            }
+            // simonState = simonShowAddedStep;
 
-
+            
+        
+            simonState = simonNextPlayer;
+        
         }
         else if (binaryInputsEdgeUpBigButtonIndex != expected)
         {
@@ -4609,20 +4632,19 @@ void Apps::modeSimon()
                 simonState = simonNextPlayer;
             }
         }
-
         break;
     }
 
-    case simonShowAddedStep:
-    {
-        lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
+    // case simonShowAddedStep:
+    // {
+    //     lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
 
-        if(buzzer->buzzerBufferDonePlaying())
-        {
-            simonState = simonNextPlayer;
-        }
-    }
-    break;
+    //     if (buzzer->buzzerBufferDonePlaying())
+    //     {
+    //         simonState = simonNextPlayer;
+    //     }
+    // }
+    // break;
     case simonNextPlayer:
     {
         // check next alive player (assume there is always a player alive.)
@@ -4656,8 +4678,8 @@ void Apps::modeSimon()
         // no need to go to next player, as the new current player didnt play yet
         SIMON_PLAYERS[SIMON_PLAYER_PLAYING_INDEX] = SIMON_PLAYERS[SIMON_PLAYERS_ALIVE_COUNT];
 
-        if (SIMON_PLAYERS_ALIVE_COUNT == 0                               // everybody dead
-            // || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom adding, that's the end of the game // --> erratum: not true! last player standing should still prove itself! 
+        if (SIMON_PLAYERS_ALIVE_COUNT == 0 // everybody dead
+                                           // || (SIMON_CUSTOM_BUILD_UP && SIMON_PLAYERS_ALIVE_COUNT == 1) // one player left, but for custom adding, that's the end of the game // --> erratum: not true! last player standing should still prove itself!
         )
         {
             SIMON_END_OF_GAME = true;
@@ -5327,6 +5349,21 @@ void Apps::nextStepRotate(int16_t *counter, bool countUpElseDown, int16_t minVal
 
 bool Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue, bool rotate)
 {
+
+    // if (*counter < minValue){
+    //     //int16_t tmp = minValue;
+    //     minValue = maxValue ;
+    //     // maxValue = tmp;
+    // }
+
+    // if (*counter > maxValue || *counter < minValue)
+    // {
+    //     *counter = rotate ? minValue : maxValue;
+
+    //     return false;
+    // }
+    // return true;
+    // THE ORIGINAL SIMPLE VERSION
     if (*counter > maxValue)
     {
         if (rotate)
@@ -5352,6 +5389,9 @@ bool Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue,
         return false;
     }
     return true;
+
+
+
 }
 
 // uint8_t Apps::weightedRandomLetter(){
@@ -6090,7 +6130,7 @@ void Apps::multitimer_playerButtonPressRefresh()
             }
             else
             {
-                buzzerPlayDisappointment();                                               // althought, good to check time, it also acts as a warning that this is not your button to press
+                buzzerPlayDisappointment();                                         // althought, good to check time, it also acts as a warning that this is not your button to press
                 this->multitimer_timerDisplayed = binaryInputsEdgeUpBigButtonIndex; // display time of pressed timer button
             }
         }

@@ -1500,7 +1500,7 @@ private:
         simonStartUserRepeats,
         simonUserRepeats,
         simonNextPlayer,
-        simonShowAddedStep,
+        // simonShowAddedStep,
         simonPlayerDead,
     };
     SimonState simonState;
