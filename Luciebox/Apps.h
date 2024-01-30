@@ -47,6 +47,8 @@
 #include "RotaryEncoderDial.h"
 #include "PretbakSettings.h"
 
+#define BIG_BUTTON_MASK  (1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3)
+
 #define APP_NUMBER_TO_PICTOGRAM_DELAY_MILLIS 600
 
 #define APP_SELECTOR_SETTING 0
@@ -1246,6 +1248,8 @@ private:
     void shutdown();
 
     bool isBigButtonPressEdgeUpDetected();
+    bool isABigButtonPressed();
+    bool isABigButtonEdgeDownPressed();
 
     void dialOnEdgeChangeInitTimerPercentage(SuperTimer *aTimer);
     void encoderDialRefreshTimeIndex(int16_t *indexHolder);
@@ -1443,7 +1447,7 @@ private:
     enum AppState : uint8_t
     {
         appStateInit,
-        appSelectionInit,
+        // appSelectionInit,
         appSelection,
         appSplashInit,
         appSplash,
@@ -1471,7 +1475,7 @@ private:
         randomWorldIdle,
         randomWorldShowResult,
         randomWorldRolling,
-        randomWorldInstantRoll,
+        // randomWorldInstantRoll,
         randomWorldRollingEnd,
         randomWorldAutoRollDelay,
     };

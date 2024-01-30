@@ -543,6 +543,9 @@ void Apps::updateEveryAppCycleBefore()
 #endif
     }
 
+    // big_buttons_mask = 
+    // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+
     binaryInputsEdgeUpBigButtonIndex = -1;
     // get index of pressed button.
     for (int i = 0; i < BIG_BUTTONS_COUNT; i++)
@@ -1561,13 +1564,15 @@ void Apps::modeRandomWorld()
             // wait for button release
 
             // the following build up of the mask looks cumbersome, but, it's all done at precompiler time. , so it's just one byte of flash memory.
-            byte big_buttons_mask =
-                1 << BUTTON_INDEXED_BIG_0 |
-                1 << BUTTON_INDEXED_BIG_1 |
-                1 << BUTTON_INDEXED_BIG_2 |
-                1 << BUTTON_INDEXED_BIG_3;
+            // byte big_buttons_mask =
+            //     1 << BUTTON_INDEXED_BIG_0 |
+            //     1 << BUTTON_INDEXED_BIG_1 |
+            //     1 << BUTTON_INDEXED_BIG_2 |
+            //     1 << BUTTON_INDEXED_BIG_3;
 
-            if ((binaryInputsEdgeDown & big_buttons_mask) > 0)
+            // if ((binaryInputsEdgeDown & big_buttons_mask) > 0)
+            if ((binaryInputsEdgeDown & BIG_BUTTON_MASK) > 0)
+            // if ((binaryInputsEdgeDown & (1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3)) > 0)
             {
                 roll_end = true;
             }
@@ -2144,7 +2149,7 @@ void Apps::modeTallyKeeper()
     {
     }
 
-    byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+    // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
 
     // display_value = *tally_counters[TALLY_KEEPER_DISPLAYED_COUNTER];
     int16_t display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_DISPLAYED_COUNTER];
@@ -2172,7 +2177,8 @@ void Apps::modeTallyKeeper()
         TALLY_KEEPER_DELTA_SIGNED = -TALLY_KEEPER_DELTA;
     }
 
-    if ((binaryInputsValue & big_buttons_mask) != 0) // a button is being held
+    // if (isABigButtonPressed() != 0) // a button is being held
+    if (isABigButtonPressed()) // a button is being held
     {
         if (TALLY_KEEPER_DELTA >= 1)
         { // little trick to do checking of limit AND l atching_extra
@@ -2186,7 +2192,7 @@ void Apps::modeTallyKeeper()
             display_value = TALLY_KEEPER_DELTA;
         }
     }
-    else if ((binaryInputsEdgeDown & big_buttons_mask) != 0) // a button unpressed
+    else if ((binaryInputsEdgeDown & BIG_BUTTON_MASK) != 0) // a button unpressed
     {
         // --- Story time ---
         // (*tally_counters[i])++;
@@ -2771,8 +2777,9 @@ void Apps::modeComposeSong()
         }
 
         // default potentio behaviour
-        byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
-        if ((binaryInputsValue & big_buttons_mask) == 0) // no buttons pressed
+        // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+        // if (isABigButtonPressed() == 0) // no buttons pressed
+        if (!isABigButtonPressed()) // no buttons pressed
         {
             if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_3))
             {
@@ -3454,8 +3461,8 @@ void Apps::drawGame()
     {
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         // wait for user input to continue.
-        byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
-        if ((binaryInputsEdgeUp & big_buttons_mask) != 0) // a button pressed
+        // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+        if ((binaryInputsEdgeUp & BIG_BUTTON_MASK) != 0) // a button pressed
         {
             drawGameState = drawGameWaitForStart;
         }
@@ -4954,8 +4961,9 @@ void Apps::modeReactionGame()
     case reactionHexWaitForButtonsRelease:
     {
         // all buttons need to be release before we can check for a new press.
-        byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
-        if ((binaryInputsValue & big_buttons_mask) == 0) // no buttons pressed
+        // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+        if (!isABigButtonPressed()) // no buttons pressed
+        // if (isABigButtonPressed() == 0) // no buttons pressed
         {
             reactionGameState = reactionHexPlaying;
         }
@@ -4982,8 +4990,8 @@ void Apps::modeReactionGame()
 
             binary_pattern_to_find = 0x0F & ~binary_pattern_to_find;
         }
-        byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
-        uint8_t big_buttons_pressed_binary_pattern = big_buttons_mask & binaryInputsValue; // big buttons as binary pattern
+        // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+        uint8_t big_buttons_pressed_binary_pattern = BIG_BUTTON_MASK & binaryInputsValue; // big buttons as binary pattern
 
         // reverse the pattern.
         uint8_t tmp = 0;
@@ -6260,11 +6268,12 @@ void Apps::multitimer_refresh()
             }
         }
 
-        byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
+        // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
         if (encoder_dial->getDelta() != 0)
         {
             set_blink_offset(); // to disable text blinking during dialing
-            if ((binaryInputsValue & big_buttons_mask) == 0)
+            if (!isABigButtonPressed())
+            // if (isABigButtonPressed() == 0)
             {
                 // set number of timers
                 stepChange(&MULTITIMER_TIMERS_COUNT, this->encoder_dial->getDelta(), 1, MULTITIMER_MAX_TIMERS_COUNT, false);
@@ -6301,7 +6310,8 @@ void Apps::multitimer_refresh()
                 setStandardTextToTextHANDLE(TEXT_DEAD);
             }
         }
-        else if ((binaryInputsValue & big_buttons_mask) != 0)
+        // else if (isABigButtonPressed() != 0)
+        else if (isABigButtonPressed())
         {
             if (millis_blink_250_750ms())
             {
@@ -6595,6 +6605,13 @@ bool Apps::multitimer_checkAllTimersFinished()
     }
 
     return count == MULTITIMER_TIMERS_COUNT;
+}
+bool Apps::isABigButtonEdgeDownPressed(){
+    return (binaryInputsEdgeDown & BIG_BUTTON_MASK) > 0;
+}
+bool Apps::isABigButtonPressed(){
+
+    return (binaryInputsValue & BIG_BUTTON_MASK) != 0;
 }
 
 bool Apps::isBigButtonPressEdgeUpDetected()
