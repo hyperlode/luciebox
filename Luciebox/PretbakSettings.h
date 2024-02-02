@@ -17,7 +17,7 @@
 
 // #define V2_PCB_CORONA
 //#define V3_PCB_BURST
-// #define V4_PCB_MINI --> abandonned. extremely similar layout of V5 (which is just a debugged V4)
+// #define V4_PCB_MINI --> abandoned. extremely similar layout of V5 (which is just a debugged V4)
 #define V5_PCB_MINI
 
 // #define ENABLE_SELECT_APPS_WITH_SELECTOR  // up to version 3 a big selector dial is used to change apps.

@@ -2,7 +2,6 @@
 #define APPS_H
 
 #define ENABLE_EEPROM
-// // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 #define ENABLE_MULTITIMER_INTEGRATED
 #define ENABLE_SIMON_APP
 #define ENABLE_REACTION_APP
@@ -11,6 +10,7 @@
 #define ENABLE_TALLY_KEEPER
 
 #ifdef ENABLE_DITCHED_APPS
+// // // #define ENABLE_MULTITIMER_STANDALONE_DEPRECATED // DO NOT USE app as a class (most elegant, but takes most memory)
 // #define ENABLE_SCHOOL_APP
 // #define ENABLE_DRAW_GAME // did not survive the hunt for memory... It's a fun app though. Like a memory game!
 #endif
@@ -263,7 +263,7 @@
 #define DRAW_CURSOR_DIGIT general_uint8_t_1
 #define SOUND_NOTES_PROGRESSION_MODE general_uint8_t_1
 #define MODE_DREAMTIME_NOTE_OFFSET general_uint8_t_1
-#define TALLY_KEEPER_DISPLAYED_COUNTER general_uint8_t_1
+#define TALLY_KEEPER_ACTIVE_SCORE_INDEX general_uint8_t_1
 #define INIT_APP_LIGHTS_COUNTER general_uint8_t_1
 #define MODE_SETTINGS_DECIMAL_POINT_COUNTER general_uint8_t_1
 // #define MODE_MULTITIMER_SET_COUNTER_COUNT_SENSITIVITY general_uint8_t_1
