@@ -200,8 +200,9 @@
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
 #define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
 #define MODE_DREAMTIME_STEP general_int16_t_1
-#define TALLY_KEEPER_0 general_int16_t_1
+// #define TALLY_KEEPER_0 general_int16_t_1
 #define MULTITIMER_TIMERS_COUNT general_int16_t_1
+#define TALLY_KEEPER_DELTA general_int16_t_1
 
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
@@ -216,7 +217,7 @@
 #define TILT_CYCLE_COUNTER general_int16_t_2
 #define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
-#define TALLY_KEEPER_1 general_int16_t_2
+// #define TALLY_KEEPER_1 general_int16_t_2
 #define SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
 #define MULTITIMER_FISCHER_TIME_INDEX general_int16_t_2
 #define COMPOSER_STAGED_NOTE general_int16_t_2
@@ -228,7 +229,7 @@
 #define HACKTIME_MEMORY_SELECT general_int16_t_3 // was 5
 #define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
 #define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
-#define TALLY_KEEPER_2 general_int16_t_3
+// #define TALLY_KEEPER_2 general_int16_t_3
 #define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 #define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
 #define SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
@@ -236,7 +237,7 @@
 
 #define REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP general_int16_t_4
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
-#define TALLY_KEEPER_3 general_int16_t_4
+// #define TALLY_KEEPER_3 general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
 #define SETTINGS_MODE_ANALOG_VALUE general_int16_t_4
 
@@ -301,7 +302,7 @@
 #define SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL general_long_1
 #define STOPWATCH_LAP_MEMORY_1 general_long_1
 #define SOUND_NOTES_SCALE_ROOT general_long_1
-#define TALLY_KEEPER_DELTA general_long_1
+// #define TALLY_KEEPER_DELTA general_long_1
 #define SHOOTOUT_MAX_RANDOM_WAIT_TIME general_long_1
 #define ZEN_APP_NEXT_ALARM general_long_1
 #define SETTINGS_APP_BATTERY_VOLTAGE general_long_1

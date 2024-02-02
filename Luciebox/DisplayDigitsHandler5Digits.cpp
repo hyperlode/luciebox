@@ -198,18 +198,15 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number, bool asHexade
 	c = abs(number);
 
 	blanksToBuf(textBuf);
+    
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
+        if (number<0 && i<3){
+            textBuf[2-i] = ONLY_MIDDLE_SEGMENT;
+        }
 		byte digitValue;
 		digitValue = c % (10 + asHexadecimal * 6);
-		// if (digitValue > 9)
-		// {
-			// // in ascii table, there is a gap of 7 positions between the numbers and letters.
-			// digitValue += 7;
-		// }
-
-		// textBuf[3 - i] = 48 + digitValue; //ascii 48 = 0
 		digitValueToChar(&textBuf[3 - i], digitValue);
 		
 		c /= 10 + asHexadecimal * 6;

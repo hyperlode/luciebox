@@ -2144,80 +2144,69 @@ void Apps::modeTallyKeeper()
 {
     if (this->app_init_edge)
     {
+        for (int8_t i=0;i<4;i++){
+            TALLY_KEEPER_SCORES[i]=0;
+        }
     }
     
     resetInactivityTimer(); // don't switch box off when displaying score!! --> controversial. Maybe it should then just beep every ten minutes?!
     int16_t display_value;
     // Check for big keypress initiated
-    if (isBigButtonPressEdgeUpDetected())
-    {
-        TALLY_KEEPER_ACTIVE_SCORE_INDEX = binaryInputsEdgeUpBigButtonIndex;
-        display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
-        // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_3)))
-        // {
-        //     TALLY_KEEPER_DELTA = 1;
-        // }
-        // else
-        // {
-        //     buzzerPlayApproval();
-        // }
-    }
 
     // TALLY_KEEPER_DELTA_SIGNED = TALLY_KEEPER_DELTA;
-    if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_2))
+    if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_2)))
     {
         TALLY_KEEPER_DELTA--;
         display_value = TALLY_KEEPER_DELTA;
+        set_blink_offset();
     }
-    if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_3))
+    if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_3)))
     {
         TALLY_KEEPER_DELTA++;
         display_value = TALLY_KEEPER_DELTA;
+        set_blink_offset();
     }
-    
-    uint8_t step = encoder_dial->getDelta();
+    int8_t step =encoder_dial->getDelta();
     if (step){
-        display_value = TALLY_KEEPER_DELTA;
         TALLY_KEEPER_DELTA += step;
+        display_value = TALLY_KEEPER_DELTA;
+        set_blink_offset();
     }
 
-
-    if (isABigButtonPressed()) // a button is being held
+    if (isBigButtonPressEdgeUpDetected())
     {
-        if (TALLY_KEEPER_DELTA >= 1)
-        { // little trick to do checking of limit AND l atching_extra
-            TALLY_KEEPER_DELTA += encoder_dial->getDelta();
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_1) &&TALLY_KEEPER_DELTA ==0 ){
+            TALLY_KEEPER_DELTA = 1;
         }
 
-        display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] + TALLY_KEEPER_DELTA_SIGNED;
-        if (TALLY_KEEPER_DELTA > 1)
-        {
-            display_value = TALLY_KEEPER_DELTA;
-        }
-    }
-    else if ((binaryInputsEdgeDown & BIG_BUTTON_MASK) != 0) // a button unpressed
-    {
-        for (uint8_t i = 0; i < 4; i++)
-        {
-            // adjust displayed counter or affect all counters if requested.
-            if (i == TALLY_KEEPER_ACTIVE_SCORE_INDEX || (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_2)))
-            {
-                int16_t v = TALLY_KEEPER_SCORES[i] + TALLY_KEEPER_DELTA_SIGNED;
-                if (v < 0)
-                {
-                    v = 0;
-                }
-
-                TALLY_KEEPER_SCORES[i] = v;
-
-            }
-        }
-
+        TALLY_KEEPER_ACTIVE_SCORE_INDEX = binaryInputsEdgeUpBigButtonIndex;
+        TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] += TALLY_KEEPER_DELTA;
         TALLY_KEEPER_DELTA = 0;
+        display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
+            
+        buzzerPlayApproval();
+        
     }
 
-    ledDisp->setNumberToDisplayAsDecimal(display_value);
-    lights |= 1 << lights_indexed[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
+    if (TALLY_KEEPER_DELTA != 0 ){
+        // if(button_light_blink_quarter_second_period())
+        if (millis_blink_250_750ms()){
+            setStandardTextToTextBuf(TEXT_SET);
+            lights |= 1<<LIGHT_BUTTON_BIG_0 | 1<<LIGHT_BUTTON_BIG_1 | 1<<LIGHT_BUTTON_BIG_2 | 1<<LIGHT_BUTTON_BIG_3; // big button lights on
+        }else{
+            display_value = TALLY_KEEPER_DELTA;
+            ledDisp->setNumberToDisplayAsDecimal(display_value);
+        }
+        lights |= 1<<LIGHT_BUTTON_SMALL_2 | 1<<LIGHT_BUTTON_SMALL_3;
+        // lights &= ~BIG_BUTTON_MASK; // big button lights off.
+        // button_light_blink_quarter_second_period(LIGHT_BUTTON_SMALL_3);
+        // button_light_blink_quarter_second_period(LIGHT_BUTTON_SMALL_2);
+    }else{
+        ledDisp->setNumberToDisplayAsDecimal(display_value);
+        lights |= 1 << lights_indexed[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
+        lights &= ~(1<<LIGHT_BUTTON_SMALL_2 | 1<<LIGHT_BUTTON_SMALL_3);
+
+    }
 }
 
 
