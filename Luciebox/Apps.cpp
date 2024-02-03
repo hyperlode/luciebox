@@ -543,7 +543,7 @@ void Apps::updateEveryAppCycleBefore()
 #endif
     }
 
-    // big_buttons_mask = 
+    // big_buttons_mask =
     // byte big_buttons_mask = 1 << BUTTON_INDEXED_BIG_0 | 1 << BUTTON_INDEXED_BIG_1 | 1 << BUTTON_INDEXED_BIG_2 | 1 << BUTTON_INDEXED_BIG_3;
 
     binaryInputsEdgeUpBigButtonIndex = -1;
@@ -2149,7 +2149,7 @@ void Apps::modeTallyKeeper()
         // }
         // TALLY_RESET_SCORES_TIMER.setInitTimeMillis(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
-    
+
     // resetInactivityTimer(); // don't switch box off when displaying score!! --> controversial. Maybe it should then just beep every ten minutes?!
     int16_t display_value;
     // Check for big keypress initiated
@@ -2167,8 +2167,9 @@ void Apps::modeTallyKeeper()
         display_value = TALLY_KEEPER_DELTA;
         set_blink_offset();
     }
-    int8_t step =encoder_dial->getDelta();
-    if (step){
+    int8_t step = encoder_dial->getDelta();
+    if (step)
+    {
         TALLY_KEEPER_DELTA += step;
         display_value = TALLY_KEEPER_DELTA;
         set_blink_offset();
@@ -2176,7 +2177,8 @@ void Apps::modeTallyKeeper()
 
     if (isBigButtonPressEdgeUpDetected())
     {
-        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_1) &&TALLY_KEEPER_DELTA ==0 ){
+        if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_1) && TALLY_KEEPER_DELTA == 0)
+        {
             TALLY_KEEPER_DELTA = 1;
         }
 
@@ -2184,48 +2186,52 @@ void Apps::modeTallyKeeper()
         TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] += TALLY_KEEPER_DELTA;
         TALLY_KEEPER_DELTA = 0;
         display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
-            
+
         buzzerPlayApproval();
 
         TALLY_RESET_SCORES_TIMER.start(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
-        
     }
 
-    if ( getCountDownTimerHasElapsed(&TALLY_RESET_SCORES_TIMER)){
-        if (binaryInputsValue & (1 << TALLY_KEEPER_ACTIVE_SCORE_INDEX)) {
+    if (getCountDownTimerHasElapsed(&TALLY_RESET_SCORES_TIMER))
+    {
+        if (binaryInputsValue & (1 << TALLY_KEEPER_ACTIVE_SCORE_INDEX))
+        {
 
-         TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX]=0;
-         buzzerPlayDisappointment();
-         display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
+            TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] = 0;
+            buzzerPlayDisappointment();
+            display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
         }
     }
 
-    if (TALLY_KEEPER_DELTA != 0 ){
+    if (TALLY_KEEPER_DELTA != 0)
+    {
         // if(button_light_blink_quarter_second_period())
-        if (millis_blink_250_750ms()){
+        if (millis_blink_250_750ms())
+        {
             setStandardTextToTextBuf(TEXT_SET);
-            lights |= 1<<LIGHT_BUTTON_BIG_0 | 1<<LIGHT_BUTTON_BIG_1 | 1<<LIGHT_BUTTON_BIG_2 | 1<<LIGHT_BUTTON_BIG_3; // big button lights on
-        }else{
+            lights |= 1 << LIGHT_BUTTON_BIG_0 | 1 << LIGHT_BUTTON_BIG_1 | 1 << LIGHT_BUTTON_BIG_2 | 1 << LIGHT_BUTTON_BIG_3; // big button lights on
+        }
+        else
+        {
             display_value = TALLY_KEEPER_DELTA;
             ledDisp->setNumberToDisplayAsDecimal(display_value);
         }
-        lights |= 1<<LIGHT_BUTTON_SMALL_2 | 1<<LIGHT_BUTTON_SMALL_3;
+        lights |= 1 << LIGHT_BUTTON_SMALL_2 | 1 << LIGHT_BUTTON_SMALL_3;
         // lights &= ~BIG_BUTTON_MASK; // big button lights off.
         // button_light_blink_quarter_second_period(LIGHT_BUTTON_SMALL_3);
         // button_light_blink_quarter_second_period(LIGHT_BUTTON_SMALL_2);
-    }else{
+    }
+    else
+    {
         ledDisp->setNumberToDisplayAsDecimal(display_value);
         lights |= 1 << lights_indexed[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
-        lights &= ~(1<<LIGHT_BUTTON_SMALL_2 | 1<<LIGHT_BUTTON_SMALL_3);
-
+        lights &= ~(1 << LIGHT_BUTTON_SMALL_2 | 1 << LIGHT_BUTTON_SMALL_3);
     }
 }
-
 
 // void Apps::modeTallyKeeper()
 // {
 //     // int16_t *tally_counters[] = {&TALLY_KEEPER_0, &TALLY_KEEPER_1, &TALLY_KEEPER_2, &TALLY_KEEPER_3};
-    
 
 //     if (this->app_init_edge)
 //     {
@@ -2235,7 +2241,7 @@ void Apps::modeTallyKeeper()
 
 //     // display_value = *tally_counters[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
 //     int16_t display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
-    
+
 //     resetInactivityTimer(); // don't switch box off when displaying score!! --> controversial. Maybe it should then just beep every ten minutes?!
 
 //     // Check for big keypress initiated
@@ -4517,20 +4523,22 @@ void Apps::modeSimon()
     {
         numberToBufAsDecimal(SIMON_LEVEL_LENGTH + 1);
         textBuf[0] = 'L';
-    
 
-        if (SIMON_CUSTOM_BUILD_UP )
+        if (SIMON_CUSTOM_BUILD_UP)
         {
-            if (SIMON_PLAYERS_ALIVE_COUNT == 1){
-            // if in multiplayer custom, only one player left, and it got the sequence right, player is the winner.
-            playSongHappyDryer();
+            if (SIMON_PLAYERS_ALIVE_COUNT == 1)
+            {
+                // if in multiplayer custom, only one player left, and it got the sequence right, player is the winner.
+                playSongHappyDryer();
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
-            simonState = simonWaitForNewGame;
+                simonState = simonWaitForNewGame;
 #else
-                binaryInputs[BUTTON_SMALL_3].setToggleValue(0); // important to reset the button itself too.
+                    binaryInputs[BUTTON_SMALL_3].setToggleValue(0); // important to reset the button itself too.
 
 #endif
-            }else{
+            }
+            else
+            {
                 lights |= 1 << lights_indexed[SIMON_LIST[SIMON_INDEX]]; // -2 because it's the last step from the PREVIOUS round. e.g.  index 0 is last step level 1, so for level two, it's 2-2 = 0// shows the last added light for custom build up, it makes sense, especially if only one player per round, the player's fingers or hand might obfuscate the light
             }
         }
@@ -4702,10 +4710,7 @@ void Apps::modeSimon()
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpBigButtonIndex;
             // simonState = simonShowAddedStep;
 
-            
-        
             simonState = simonNextPlayer;
-        
         }
         else if (binaryInputsEdgeUpBigButtonIndex != expected)
         {
@@ -5482,9 +5487,6 @@ bool Apps::checkBoundaries(int16_t *counter, int16_t minValue, int16_t maxValue,
         return false;
     }
     return true;
-
-
-
 }
 
 // uint8_t Apps::weightedRandomLetter(){
@@ -6687,7 +6689,6 @@ bool Apps::multitimer_checkAllTimersFinished()
     return count == MULTITIMER_TIMERS_COUNT;
 }
 
-
 void Apps::multitimer_next(bool activePlayerDied)
 {
     // don't check for everybody dead here, check at refresh where next is called.
@@ -6723,11 +6724,13 @@ void Apps::multitimer_next(bool activePlayerDied)
 
 #endif
 
-bool Apps::isABigButtonEdgeDownPressed(){
+bool Apps::isABigButtonEdgeDownPressed()
+{
     return (binaryInputsEdgeDown & BIG_BUTTON_MASK) > 0;
 }
 
-bool Apps::isABigButtonPressed(){
+bool Apps::isABigButtonPressed()
+{
 
     return (binaryInputsValue & BIG_BUTTON_MASK) != 0;
 }
