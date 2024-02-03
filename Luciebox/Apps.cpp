@@ -4438,7 +4438,8 @@ void Apps::modeSimon()
         //         // step 2:
         //         shuffle(SIMON_LIST, bytes_array_size);
         playSongHappyDryer();
-        addNoteToBuzzer(REST_15_8); // addNoteToBuzzerRepeated(REST_15_8, 2);
+        // addNoteToBuzzer(REST_15_8); // addNoteToBuzzerRepeated(REST_15_8, 2);
+        buzzerAddRest(15);
         simonState = simonNewLevel;
         break;
     }
@@ -4538,7 +4539,8 @@ void Apps::modeSimon()
             else
             {
                 buzzerPlayApproval();
-                addNoteToBuzzerRepeated(REST_9_8, 2);
+                // addNoteToBuzzerRepeated(REST_9_8, 2);
+                buzzerAddRest(18);
 
                 // Next step handling
                 SIMON_STEP_TIMER.start();
@@ -4631,7 +4633,8 @@ void Apps::modeSimon()
 
             
             buzzerPlaySpecial();
-            addNoteToBuzzerRepeated(REST_15_8, 3);
+            // addNoteToBuzzerRepeated(REST_15_8, 3);
+            buzzerAddRest(45);
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpBigButtonIndex;
             // simonState = simonShowAddedStep;
 
@@ -4681,7 +4684,8 @@ void Apps::modeSimon()
 
         if (SIMON_ONLY_ONE_PLAYER_PLAYING_PER_LEVEL || SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
-            addNoteToBuzzerRepeated(REST_15_8, 2);
+            // addNoteToBuzzerRepeated(REST_15_8, 2);
+            buzzerAddRest(30);
             simonState = simonNewLevel;
         }
         else
@@ -4716,7 +4720,8 @@ void Apps::modeSimon()
         if (SIMON_PLAYER_PLAYING_INDEX >= SIMON_PLAYERS_ALIVE_COUNT)
         {
             // player index was last player playing in this round, so, its dead does not affect the array of players (also, last player was swapped with itself, which is ok)
-            addNoteToBuzzerRepeated(REST_15_8, 4);
+            // addNoteToBuzzerRepeated(REST_15_8, 4);
+            buzzerAddRest(60);
             simonState = simonNewLevel;
             break;
         }
@@ -4859,7 +4864,8 @@ void Apps::modeReactionGame()
         {
             if (REACTION_WHACK_A_BIRD_SHOW_NOTES >= 4)
             {
-                addNoteToBuzzer(REST_8_8);
+                // addNoteToBuzzer(REST_8_8);
+                buzzerAddRest(8);
                 reactionGameState = reactionNewGame;
             }
             else
@@ -5258,7 +5264,8 @@ void Apps::modeReactionGame()
                 if (REACTION_IS_OPTION_BIRD_OR_HEX)
                 {
                     // a small pause must be implemented after the button press before the new turn as off not to confuse the player
-                    addNoteToBuzzerRepeated(REST_8_8, 4);
+                    // addNoteToBuzzerRepeated(REST_15_8, 2);
+                    buzzerAddRest(30);
                     reactionGameState = reactionWaitBeforeNewTurn;
                 }
                 else
@@ -5272,7 +5279,8 @@ void Apps::modeReactionGame()
 #else
                         setBlankDisplay();
                         buzzerPlayApproval();
-                        addNoteToBuzzerRepeated(REST_1_8, 2); // todo delete
+                        // addNoteToBuzzerRepeated(REST_1_8, 2); // todo delete
+                        buzzerAddRest(2);
                         reactionGameState = reactionWaitBeforeNewTurn;
 #endif
                 }
@@ -5683,6 +5691,10 @@ void Apps::buzzerPlayApproval()
 void Apps::buzzerPlayDisappointment()
 {
     this->buzzerSilentClearBufferAndAddNote(C4_1);
+}
+
+void Apps::buzzerAddRest(uint8_t amount_of_eights){
+    addNoteToBuzzerRepeated(REST_1_8, amount_of_eights);
 }
 
 void Apps::buzzerPlayDeath()
@@ -6226,7 +6238,8 @@ void Apps::multitimer_buzzerRefresh(bool alarm)
             {
                 addNoteToBuzzer(tmp);
 
-                addNoteToBuzzer(REST_2_8);
+                // addNoteToBuzzer(REST_2_8);
+                buzzerAddRest(2);
             }
         }
 
