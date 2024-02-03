@@ -2139,11 +2139,6 @@ void Apps::modeTallyKeeper()
 {
     if (this->app_init_edge)
     {
-        for (int8_t i = 0; i < 4; i++)
-        {
-            TALLY_KEEPER_SCORES[i] = eeprom_read_word(EEPROM_TALLY_KEEPER_SCORES + 2 * i);
-        }
-        // TALLY_RESET_SCORES_TIMER.setInitTimeMillis(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
 
     // resetInactivityTimer(); // don't switch box off when displaying score!! --> controversial. Maybe it should then just beep every ten minutes?!
@@ -2179,12 +2174,14 @@ void Apps::modeTallyKeeper()
         }
 
         TALLY_KEEPER_ACTIVE_SCORE_INDEX = binaryInputsEdgeUpBigButtonIndex;
-        TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] += TALLY_KEEPER_DELTA;
+        int16_t score = getTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX);
+        
+        score += TALLY_KEEPER_DELTA;
 
-        setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX]);
+        setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, score);
 
         TALLY_KEEPER_DELTA = 0;
-        display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
+        display_value = score;
 
         TALLY_RESET_SCORES_TIMER.start(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
@@ -2194,10 +2191,9 @@ void Apps::modeTallyKeeper()
         if (binaryInputsValue & (1 << TALLY_KEEPER_ACTIVE_SCORE_INDEX))
         {
             // long press resets score.
-            TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] = 0;
-            setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX]);
+            setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, 0);
             buzzerPlayDisappointment();
-            display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
+            display_value = 0;
         }
     }
 
