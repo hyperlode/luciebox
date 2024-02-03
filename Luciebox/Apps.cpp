@@ -354,7 +354,7 @@ void Apps::shutdown()
     // memorize active app to restart after shutdown
     eeprom_update_byte(
         (uint8_t *)EEPROM_LUCIEBOX_ACTIVE_APP_AT_SHUTDOWN,
-        selected_app);
+        selected_app); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 
     // add delay for eeprom to settle down? Fact is, without this delay, it does not save...
     for (uint16_t i = 0; i < 1000; i++)
@@ -1647,7 +1647,7 @@ void Apps::modeRandomWorld()
         {
 #ifdef ENABLE_EEPROM
             // save to eeprom
-            eeprom_update_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW);
+            eeprom_update_word((uint16_t *)EEPROM_RANDOM_WORLD_UPPER_BOUNDARY_NUMBER_DRAW, RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 #endif
 
             randomWorldState = randomWorldShowResult;
@@ -1875,7 +1875,7 @@ void Apps::modeSettings()
 
             eeprom_update_byte(
                 (uint8_t *)EEPROM_SOUND_DISABLED,
-                !eeprom_read_byte((uint8_t *)EEPROM_SOUND_DISABLED));
+                !eeprom_read_byte((uint8_t *)EEPROM_SOUND_DISABLED)); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 #endif
 
             if (buzzer->getPin() == PIN_BUZZER)
@@ -1925,9 +1925,9 @@ void Apps::modeSettings()
             eeprom_update_byte(
                 (uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED,
                 !eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED));
-        }
+        } // eeprom_update_... only writes if different from what's in address, no need to read to check.
 
-        auto_power_off_enabled = (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED) != 0);
+        auto_power_off_enabled = (eeprom_read_byte((uint8_t *)EEPROM_LUCIEBOX_AUTO_POWER_OFF_DISABLED) != 0); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 #endif
 
         // menu title
@@ -2013,7 +2013,7 @@ void Apps::modeSettings()
             }
             if (binaryInputsEdgeUp & (1 << BUTTON_INDEXED_BIG_3))
             {
-                this->eraseEepromRangeLimited(EEPROM_HIGH_SCORES_RESET);
+                this->eraseEepromRangeLimited(EEPROM_APP_SETTINGS_RESET);
             }
 #endif
         }
@@ -2091,25 +2091,20 @@ void Apps::eraseEepromRangeLimited(uint8_t setting)
 {
 #ifdef ENABLE_EEPROM
     uint16_t first = 0;
-    uint16_t last = 0;
-    if (setting == EEPROM_TOTAL_RESET)
+    if (setting == EEPROM_APP_SETTINGS_RESET)
     {
-        first = 0;
-        last = EEPROM_LAST_ADDRESS;
+        first = EEPROM_FIRST_ADDRESS_APP_SETTINGS_RESET;
     }
+
     else if (setting == EEPROM_USER_RESET)
     {
         first = EEPROM_FIRST_ADDRESS_OF_USER_RANGE;
-        last = EEPROM_LAST_ADDRESS;
     }
-    else
-    {
-        // soft erase (only high scores and other app settings)
-        first = EEPROM_FIRST_ADDRESS_OF_USER_RANGE;
-        last = EEPROM_LAST_ADDRESS_OF_EEPROM_SOFT_ERASE;
-    }
+    // else if (setting == EEPROM_TOTAL_RESET) // start from 0 to end
+    // {
+    // }
 
-    for (uint16_t i = first; i <= last; i++)
+    for (uint16_t i = first; i <= EEPROM_LAST_ADDRESS; i++)
     {
         uint8_t erase_value = 0;
 
@@ -2120,9 +2115,9 @@ void Apps::eraseEepromRangeLimited(uint8_t setting)
 
         eeprom_update_byte(
             (uint8_t *)i,
-            erase_value);
+            erase_value); // eeprom_update_... only writes if different from what's in address, no need to read to check.
     }
-    playSongHappyDryer();
+    // playSongHappyDryer(); // do it, but no memory left.
 
 #endif
 }
@@ -2144,9 +2139,10 @@ void Apps::modeTallyKeeper()
 {
     if (this->app_init_edge)
     {
-        // for (int8_t i=0;i<4;i++){
-        //     TALLY_KEEPER_SCORES[i]=0;
-        // }
+        for (int8_t i = 0; i < 4; i++)
+        {
+            TALLY_KEEPER_SCORES[i] = eeprom_read_word(EEPROM_TALLY_KEEPER_SCORES + 2 * i);
+        }
         // TALLY_RESET_SCORES_TIMER.setInitTimeMillis(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
 
@@ -2184,10 +2180,11 @@ void Apps::modeTallyKeeper()
 
         TALLY_KEEPER_ACTIVE_SCORE_INDEX = binaryInputsEdgeUpBigButtonIndex;
         TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] += TALLY_KEEPER_DELTA;
+
+        setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX]);
+
         TALLY_KEEPER_DELTA = 0;
         display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
-
-        buzzerPlayApproval();
 
         TALLY_RESET_SCORES_TIMER.start(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
@@ -2196,8 +2193,9 @@ void Apps::modeTallyKeeper()
     {
         if (binaryInputsValue & (1 << TALLY_KEEPER_ACTIVE_SCORE_INDEX))
         {
-
+            // long press resets score.
             TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX] = 0;
+            setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX]);
             buzzerPlayDisappointment();
             display_value = TALLY_KEEPER_SCORES[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
         }
@@ -2227,6 +2225,19 @@ void Apps::modeTallyKeeper()
         lights |= 1 << lights_indexed[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
         lights &= ~(1 << LIGHT_BUTTON_SMALL_2 | 1 << LIGHT_BUTTON_SMALL_3);
     }
+}
+
+int16_t Apps::getTallyScore(uint8_t tally_index)
+{
+    return (int16_t)eeprom_read_word(EEPROM_TALLY_KEEPER_SCORES + 2 * tally_index);
+}
+
+void Apps::setTallyScore(uint8_t tally_index, int16_t value)
+{
+    eeprom_update_word(
+        EEPROM_TALLY_KEEPER_SCORES + 2 * tally_index,
+        value);
+    buzzerPlayApproval();
 }
 
 // void Apps::modeTallyKeeper()
@@ -3643,7 +3654,7 @@ void Apps::modeHackTime()
                 if (HACKTIME_MEMORY_SELECT == HACKTIME_MEMORY_EEPROM)
                 {
 #ifdef ENABLE_EEPROM
-                    eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, HACKTIME_VALUE_BUFFER[0]);
+                    eeprom_update_byte((uint8_t *)HACKTIME_ADDRESS, HACKTIME_VALUE_BUFFER[0]); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 #endif
                 }
             }
@@ -3802,7 +3813,7 @@ void Apps::eepromCopyValues(uint16_t fromAddress, uint16_t toAddress)
 {
 #ifdef ENABLE_EEPROM
     uint8_t tmp = eeprom_read_byte((uint8_t *)(fromAddress));
-    eeprom_update_byte((uint8_t *)(toAddress), tmp);
+    eeprom_update_byte((uint8_t *)(toAddress), tmp); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 #endif
 }
 
@@ -3892,7 +3903,7 @@ void Apps::draw()
 #ifdef ENABLE_EEPROM
                 eeprom_update_byte(
                     (uint8_t *)(EEPROM_PICTURES_START_ADDRESS + DRAW_ACTIVE_DRAWING_INDEX * 4 + i),
-                    (uint8_t)((displayAllSegments >> (i * 8)) & 0xFF));
+                    (uint8_t)((displayAllSegments >> (i * 8)) & 0xFF)); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 #endif
             }
         }
@@ -5380,7 +5391,7 @@ void Apps::modeReactionGame()
         {
             eeprom_update_word(
                 reactionGameLevelToEepromAddress(),
-                REACTION_GAME_SCORE);
+                REACTION_GAME_SCORE); // eeprom_update_... only writes if different from what's in address, no need to read to check.
 
             loadBuzzerTrack(SONG_ATTACK);
         }
@@ -5656,7 +5667,7 @@ void Apps::saveLoadFromEepromSlot(uint8_t *data, uint8_t slotIndex, uint8_t eepr
         else
         {
             // save
-            eeprom_update_byte(eeprom_address, data[i]);
+            eeprom_update_byte(eeprom_address, data[i]); // eeprom_update_... only writes if different from what's in address, no need to read to check.
         }
 #else
         if (loadElseSave)
@@ -6242,12 +6253,12 @@ void Apps::multitimer_start(bool isRandomStarter)
 
 #ifdef ENABLE_EEPROM
     // it makes sense to store settings into eeprom at start
-    eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);
-    eeprom_update_byte((uint8_t *)this->multitimer_surviveAtTimeout, EEPROM_MULTITIMER_SURVIVE_AT_TIMEOUT);
-    eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);
+    eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_FISHER_TIME_INDEX, MULTITIMER_FISCHER_TIME_INDEX);      // eeprom_update_... only writes if different from what's in address, no need to read to check.
+    eeprom_update_byte((uint8_t *)this->multitimer_surviveAtTimeout, EEPROM_MULTITIMER_SURVIVE_AT_TIMEOUT); // eeprom_update_... only writes if different from what's in address, no need to read to check.
+    eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_COUNT, (uint8_t)MULTITIMER_TIMERS_COUNT);        // eeprom_update_... only writes if different from what's in address, no need to read to check.
     for (uint8_t i = 0; i < MULTITIMER_MAX_TIMERS_COUNT; i++)
     {
-        eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i, this->multitimer_getTimerInitTimeIndex(i));
+        eeprom_update_byte((uint8_t *)EEPROM_MULTITIMER_TIMERS_INIT_TIME_START_INDEX + i, this->multitimer_getTimerInitTimeIndex(i)); // eeprom_update_... only writes if different from what's in address, no need to read to check.
     }
 #endif
 

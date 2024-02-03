@@ -149,7 +149,7 @@ void processInput()
 #ifdef ENABLE_EEPROM
         if (!aBigButtonIsPressed)
         {
-            // add 1 to power cycles tally keeper. It's done a key press to avoid gigantic number in case of multiple brown outs.
+            // add 1 to power cycles tally keeper. It's done at first key press to avoid gigantic number in case of multiple brown outs.
             eeprom_update_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER, eeprom_read_word((uint16_t *)EEPROM_LUCIEBOX_POWER_CYCLE_COUNTER) + 1);
             aBigButtonIsPressed = true;
         }

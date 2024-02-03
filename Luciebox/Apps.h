@@ -1203,6 +1203,8 @@ private:
 
     // application helper methods
     // void pomodoroScoreValueManipulator(uint16_t* score, uint8_t buttonIndexIncrease, uint8_t buttonView);
+    int16_t getTallyScore(uint8_t tally_index);
+    void setTallyScore(uint8_t tally_index, int16_t value);
     void modeMetronomeTickerUpdate(int16_t *ticker_counter, uint8_t big_button_id, bool direction, uint8_t sound_at_zero_pass, boolean force_step);
 #ifdef ENABLE_MULTITIMER_INTEGRATED
     void multitimer_setDefaults();
