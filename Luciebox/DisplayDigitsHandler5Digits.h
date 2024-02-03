@@ -26,11 +26,11 @@
 #define ONLY_TOP_AND_BOTTOM_SEGMENT_FAKE_ASCII 61
 #define SPACE_FAKE_ASCII 62
 
-#define ONLY_TOP_SEGMENT B00000001
-#define ONLY_MIDDLE_SEGMENT B01000000
-#define ONLY_BOTTOM_SEGMENT B00001000
-#define ONLY_TOP_AND_BOTTOM_SEGMENT B00001001
-#define NO_SEGMENTS B00000000
+#define ONLY_TOP_SEGMENT B00000001 // use the FAKE ASCII codes to reference these characters!
+#define ONLY_MIDDLE_SEGMENT B01000000 // use the FAKE ASCII codes to reference these characters!
+#define ONLY_BOTTOM_SEGMENT B00001000 // use the FAKE ASCII codes to reference these characters!
+#define ONLY_TOP_AND_BOTTOM_SEGMENT B00001001 // use the FAKE ASCII codes to reference these characters!
+#define NO_SEGMENTS B00000000 // use the FAKE ASCII codes to reference these characters!
 
 const byte selected_ascii_to_7seg_digit[] PROGMEM = {
     B00111111,                   //'0'

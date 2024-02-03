@@ -143,6 +143,9 @@
 
 #define SOUND_SONG_COMPOSER_DEFAULT_NOTE REST_3_8
 
+#define TALLY_RESET_SCORES_TIMEOUT_MILLIS -1000
+
+
 // #define shootoutWaitForQuizmaster state0
 // #define shootoutWaitRandomTime state1
 // #define shootoutWaitPlayerPress state2
@@ -172,6 +175,7 @@
 #define MOVIE_MODE_FRAME_INTERVAL_TIMER general_timer_1
 #define TIMER_DREAMTIME general_timer_1
 #define TIMER_REACTION_GAME_SPEED general_timer_1
+#define TALLY_RESET_SCORES_TIMER general_timer_1
 // IMPORTANT WARNING: general_timer_1 is set to 500ms and started at app load defaults
 
 #define TIMER_REACTION_END_OF_GAME_DELAY general_timer_2

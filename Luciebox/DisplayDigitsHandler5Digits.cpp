@@ -203,7 +203,7 @@ void DisplayManagement::numberToBuf(char *textBuf, int16_t number, bool asHexade
 	for (uint8_t i = 0; i < 4; i++)
 	{
         if (number<0 && i<3){
-            textBuf[2-i] = ONLY_MIDDLE_SEGMENT;
+            textBuf[2-i] = ONLY_MIDDLE_SEGMENT_FAKE_ASCII;
         }
 		byte digitValue;
 		digitValue = c % (10 + asHexadecimal * 6);
