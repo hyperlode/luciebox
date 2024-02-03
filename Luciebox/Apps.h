@@ -1307,7 +1307,9 @@ private:
    void initiateCountDowntimerWith500Millis(SuperTimer *ptimer);
 
     void buzzerPlayApproval();
+    void buzzerPlaySpecial();
     void buzzerPlayDisappointment();
+    void buzzerPlayDeath();
     void addNoteToBuzzer(uint8_t note);
     void addNoteToBuzzerRepeated(uint8_t note, uint8_t repeater);
     void buzzerPlayTone(unsigned int freq, unsigned long duration);

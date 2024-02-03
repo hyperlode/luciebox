@@ -877,8 +877,6 @@ void Apps::pomodoroTimer()
                 {
                     // random has 0 included. as we have to take into account the double ticking,
                     // calculate the probability in half a seconds. i.e.  one every minute: (0,120)
-                    // addNoteToBuzzer(C5_1);
-                    // buzzerPlayApproval();
                     buzzerPlayDisappointment();
                 };
             }
@@ -1178,8 +1176,6 @@ void Apps::pomodoroTimer()
                 {
                     // random has 0 included. as we have to take into account the double ticking,
                     // calculate the probability in half a seconds. i.e.  one every minute: (0,120)
-                    // addNoteToBuzzer(C5_1);
-                    // buzzerPlayApproval();
                     buzzerPlayDisappointment();
                 };
             }
@@ -2235,7 +2231,8 @@ void Apps::setTallyScore(uint8_t tally_index, int16_t value)
     eeprom_update_word(
         EEPROM_TALLY_KEEPER_SCORES + 2 * tally_index,
         value);
-    buzzerPlayApproval();
+    // buzzerPlayApproval();
+    buzzerPlaySpecial();
 }
 
 #endif
@@ -2339,7 +2336,6 @@ void Apps::shootout()
         if (isBigButtonPressEdgeUpDetected())
         {
             SHOOTOUT_SCORE[binaryInputsEdgeUpBigButtonIndex] = 0;
-            // addNoteToBuzzer(C4_1);
             buzzerPlayDisappointment();
         }
 
@@ -4633,7 +4629,8 @@ void Apps::modeSimon()
         {
             // in custom build up, last light of the sequence, the first player in this level gets to choose the move(in one player per level games, that's the only player. In multiple players per level games: that's the first player.)
 
-            addNoteToBuzzer(C8_1); // special beep.
+            
+            buzzerPlaySpecial();
             addNoteToBuzzerRepeated(REST_15_8, 3);
             SIMON_LIST[SIMON_INDEX] = binaryInputsEdgeUpBigButtonIndex;
             // simonState = simonShowAddedStep;
@@ -5299,7 +5296,7 @@ void Apps::modeReactionGame()
     case reactionJustDied:
     {
         // play death song
-        addNoteToBuzzerRepeated(F4_1, 3);
+        buzzerPlayDeath();
 #ifdef ENABLE_EEPROM
 
         // check for new high score and save
@@ -5675,6 +5672,9 @@ void Apps::textBufToDisplay()
     ledDisp->setTextBufToDisplay(textBuf);
 }
 
+void Apps::buzzerPlaySpecial(){
+    buzzerSilentClearBufferAndAddNote(C8_1); // special beep.
+}
 void Apps::buzzerPlayApproval()
 {
     this->buzzerSilentClearBufferAndAddNote(C7_8);
@@ -5683,6 +5683,11 @@ void Apps::buzzerPlayApproval()
 void Apps::buzzerPlayDisappointment()
 {
     this->buzzerSilentClearBufferAndAddNote(C4_1);
+}
+
+void Apps::buzzerPlayDeath()
+{
+    addNoteToBuzzerRepeated(F4_1, 3);
 }
 
 void Apps::buzzerSilentClearBufferAndAddNoteAtEncoderDialChange(uint8_t note)
