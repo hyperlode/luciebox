@@ -54,7 +54,7 @@ void Apps::appStateLoop()
 
     // uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_0)) > 0);
 
-    bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
+    bool init_app_init = (selector_changed && (MODE_SETTINGS_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled.  //&& (selector_dial_value != 11) and multitimer app
 
     this->app_init_edge = false;
 
@@ -278,7 +278,7 @@ void Apps::appStateLoop()
 
         // uint8_t selected_app = selector_dial_value * 2 + ((binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_0)) > 0);
 
-        bool init_app_init = (selector_changed && (SETTINGS_MODE_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled OR if we're visualizing the selector switch analog value in the settings app
+        bool init_app_init = (selector_changed && (MODE_SETTINGS_SELECTOR != 10)) || (shift_changed && (selector_dial_value != 0)); // settings mode have no dual app available. So, don't init if shift button is toggled OR if we're visualizing the selector switch analog value in the settings app
 
         if (init_app_init)
         {
@@ -630,8 +630,8 @@ bool Apps::init_app(bool init, uint8_t selector)
         // initialize list
         randomSequence(FADE_IN_RANDOM_LIST, 32);
 
-        INIT_SPLASH_ANIMATION_STEP = 0;
-        INIT_SPLASH_LIGHTS_STEP = 0;
+        // INIT_SPLASH_ANIMATION_STEP = 0;
+        // INIT_SPLASH_LIGHTS_STEP = 0;
 
         this->TIMER_INIT_APP.start(-20);
     }
@@ -652,12 +652,12 @@ bool Apps::init_app(bool init, uint8_t selector)
     }
     else
 #endif
-        if (INIT_SPLASH_ANIMATION_STEP < 23)
+    if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
 
-        // ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
+        // ledDisp->setNumberToDisplayAsDecimal(MODE_SETTINGS_SELECTOR);
         // textBufToDisplay();
 
         lights = 0xff;
@@ -1806,18 +1806,18 @@ void Apps::modeSettings()
     }
 
     // back and forth motion required of the potentio to count up modes
-    if ((encoder_dial->getDelta() < 0 && SETTINGS_MODE_SELECTOR % 2 == 0))
+    if ((encoder_dial->getDelta() < 0 && MODE_SETTINGS_SELECTOR % 2 == 0))
     {
-        SETTINGS_MODE_SELECTOR++;
+        MODE_SETTINGS_SELECTOR++;
     }
-    else if (encoder_dial->getDelta() > 0 && SETTINGS_MODE_SELECTOR % 2 != 0)
+    else if (encoder_dial->getDelta() > 0 && MODE_SETTINGS_SELECTOR % 2 != 0)
     {
-        SETTINGS_MODE_SELECTOR++;
+        MODE_SETTINGS_SELECTOR++;
     }
 
     setStandardTextToTextBuf(TEXT_SPACES);
 
-    if (SETTINGS_MODE_SELECTOR < 6)
+    if (MODE_SETTINGS_SELECTOR < 6)
     {
         // normal mode
 
@@ -1860,7 +1860,7 @@ void Apps::modeSettings()
         }
         ledDisp->setDecimalPointsToDisplay(MODE_SETTINGS_DECIMAL_POINT_COUNTER);
     }
-    else if (SETTINGS_MODE_SELECTOR < 8)
+    else if (MODE_SETTINGS_SELECTOR < 8)
     {
         // enable/disable sound
 
@@ -1895,7 +1895,7 @@ void Apps::modeSettings()
         }
         setStandardTextToTextHANDLE(text);
     }
-    else if (SETTINGS_MODE_SELECTOR < 10)
+    else if (MODE_SETTINGS_SELECTOR < 10)
     {
 #ifdef ENABLE_BATTERY_STATUS
 
@@ -1907,7 +1907,7 @@ void Apps::modeSettings()
     }
 
 #ifdef ENABLE_SOFT_POWER_OFF
-    else if (SETTINGS_MODE_SELECTOR < 12)
+    else if (MODE_SETTINGS_SELECTOR < 12)
     {
         // enable/disable auto power off
 
@@ -1940,14 +1940,14 @@ void Apps::modeSettings()
 
 #endif
 
-    else if (SETTINGS_MODE_SELECTOR < 20)
+    else if (MODE_SETTINGS_SELECTOR < 20)
     {
 
 #ifdef ENABLE_SELECT_APPS_WITH_SELECTOR
         // A0 handles the selector button analog input. It will not change apps when the selector knob is rotated in this menu.
         // menu title
         textBuf[2] = 'A';
-        uint8_t index = (SETTINGS_MODE_SELECTOR - 10) / 2;
+        uint8_t index = (MODE_SETTINGS_SELECTOR - 10) / 2;
         ledDisp->digitValueToChar(&textBuf[3], index);
 
         // Value
@@ -1962,7 +1962,7 @@ void Apps::modeSettings()
         // menu title
         // represents the analog value, which stands for which big buttons, or small buttons are pressed.
         textBuf[2] = 'B';
-        uint8_t index = SETTINGS_MODE_SELECTOR % 2;
+        uint8_t index = MODE_SETTINGS_SELECTOR % 2;
         ledDisp->digitValueToChar(&textBuf[3], index);
 
         // Value
@@ -1974,7 +1974,7 @@ void Apps::modeSettings()
         ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_ANALOG_VALUE);
 #endif
     }
-    else if (SETTINGS_MODE_SELECTOR < 22)
+    else if (MODE_SETTINGS_SELECTOR < 22)
     {
         // show luciebox firmware version number
         // menu title
@@ -1983,7 +1983,7 @@ void Apps::modeSettings()
         ledDisp->setNumberToDisplayAsDecimal(SOFTWARE_VERSION);
         textHandle[0] = 'F'; // v doesn't work. So, F from Firmware version it is.
     }
-    else if (SETTINGS_MODE_SELECTOR < 24)
+    else if (MODE_SETTINGS_SELECTOR < 24)
     {
 // display amount of times the luciebox was used
 // menu value
@@ -1995,7 +1995,7 @@ void Apps::modeSettings()
         // menu title
         setStandardTextToTextBuf(TEXT_QUANTITY);
     }
-    else if (SETTINGS_MODE_SELECTOR < 26)
+    else if (MODE_SETTINGS_SELECTOR < 26)
     {
         lights |= 1 << LIGHT_BUTTON_BIG_0;
         if (binaryInputsValue & (1 << BUTTON_INDEXED_BIG_0))
@@ -2018,7 +2018,7 @@ void Apps::modeSettings()
             setStandardTextToTextBuf(TEXT_RESET);
         }
     }
-    else if (SETTINGS_MODE_SELECTOR < 28)
+    else if (MODE_SETTINGS_SELECTOR < 28)
     {
         // measure cycle time.
         // 2021-10-02: between 800 and 1200 millis per cycle.
@@ -2043,10 +2043,10 @@ void Apps::modeSettings()
     }
     else
     {
-        ledDisp->setNumberToDisplayAsDecimal(SETTINGS_MODE_SELECTOR);
+        ledDisp->setNumberToDisplayAsDecimal(MODE_SETTINGS_SELECTOR);
     }
 
-    if (SETTINGS_MODE_SELECTOR >= 6)
+    if (MODE_SETTINGS_SELECTOR >= 6)
     {
         // originally: show values one seconds, menu items half a second
         // in luciebox settings mode
@@ -2138,26 +2138,24 @@ void Apps::modeTallyKeeper()
     }
 
     // resetInactivityTimer(); // all score changes are written in eeprom. No more need to panic if box switches off.  // don't switch box off when displaying score!! --> controversial. Maybe it should then just beep every ten minutes?!
-    int16_t display_value;
+    // int16_t display_value;
+    // display_value = getTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX);
 
     // preset the score in the 'delta'
     if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_2)))
     {
         TALLY_KEEPER_DELTA--;
-        display_value = TALLY_KEEPER_DELTA;
         set_blink_offset();
     }
     if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_3)))
     {
         TALLY_KEEPER_DELTA++;
-        display_value = TALLY_KEEPER_DELTA;
         set_blink_offset();
     }
     int8_t step = encoder_dial->getDelta();
     if (step)
     {
         TALLY_KEEPER_DELTA += step;
-        display_value = TALLY_KEEPER_DELTA;
         set_blink_offset();
     }
 
@@ -2183,7 +2181,7 @@ void Apps::modeTallyKeeper()
         }
 
         TALLY_KEEPER_DELTA = 0;
-        display_value = score;
+        // display_value = score;
 
         TALLY_RESET_SCORES_TIMER.start(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
@@ -2196,7 +2194,8 @@ void Apps::modeTallyKeeper()
             // long press resets score.
             setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, 0);
             buzzerPlayDisappointment();
-            display_value = 0;
+            TALLY_KEEPER_DELTA = 0; // if delta displayed, it can confuse people figuring out how it works. Long press should always mean: set it all to zero!
+            // display_value = 0;
         }
     }
 
@@ -2211,8 +2210,7 @@ void Apps::modeTallyKeeper()
         }
         else
         {
-            display_value = TALLY_KEEPER_DELTA;
-            ledDisp->setNumberToDisplayAsDecimal(display_value);
+            ledDisp->setNumberToDisplayAsDecimal(TALLY_KEEPER_DELTA);
         }
         lights |= 1 << LIGHT_BUTTON_SMALL_2 | 1 << LIGHT_BUTTON_SMALL_3;
         // lights &= ~BIG_BUTTON_MASK; // big button lights off.
@@ -2221,6 +2219,7 @@ void Apps::modeTallyKeeper()
     }
     else
     {
+        int16_t display_value = getTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX);
         ledDisp->setNumberToDisplayAsDecimal(display_value);
         lights |= 1 << lights_indexed[TALLY_KEEPER_ACTIVE_SCORE_INDEX];
         lights &= ~(1 << LIGHT_BUTTON_SMALL_2 | 1 << LIGHT_BUTTON_SMALL_3);

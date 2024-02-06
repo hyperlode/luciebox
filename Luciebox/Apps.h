@@ -185,9 +185,9 @@
 #define STOPWATCH_CHRONO_2 general_timer_2
 #define POMODORO_PAUSE_TIMER general_timer_2
 
-#define SETTINGS_MODE_SELECTOR general_int16_t_1
+// #define MODE_SETTINGS_SELECTOR general_int16_t_1
 #define LETTERS_AND_CHARS_COUNTER general_int16_t_1
-#define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
+// #define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
 // #define SOUND_FUN_NOTE_INDEX general_int16_t_1
 #define REACTION_GAME_SCORE general_int16_t_1
 #define GEIGER_TONE_FREQUENY_LOWEST general_int16_t_1
@@ -235,6 +235,7 @@
 #define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
 #define SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
 
+
 #define REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP general_int16_t_4
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
@@ -279,6 +280,7 @@
 #define DRAW_ACTIVE_SEGMENT general_uint8_t_2
 #define MODE_SETTINGS_CYCLE_TIMING_INDEX general_uint8_t_2
 #define SEQUENCER_CHOSEN_NOTE general_uint8_t_2
+#define INIT_SPLASH_ANIMATION_STEP general_uint8_t_2
 
 #define TALLY_KEEPER_TEST general_uint8_t_3
 #define DRAW_CURSOR_SEGMENT general_uint8_t_3
@@ -287,6 +289,7 @@
 #define SHOOTOUT_SCORE_MEMORY general_uint8_t_3
 #define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
 #define RANDOM_WORLD_ACTIVE_BIG_BUTTON_INDEX general_uint8_t_3
+#define MODE_SETTINGS_SELECTOR general_uint8_t_3
 
 #define SIMON_FORBIDDEN_PLAYER general_uint8_t_4
 #define RANDOMWORLD_INDEX_FROM_BINGO general_uint8_t_4
