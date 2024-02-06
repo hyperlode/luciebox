@@ -188,10 +188,10 @@
 #define SETTINGS_MODE_SELECTOR general_int16_t_1
 #define LETTERS_AND_CHARS_COUNTER general_int16_t_1
 #define INIT_SPLASH_ANIMATION_STEP general_int16_t_1
-#define SOUND_FUN_NOTE_INDEX general_int16_t_1
+// #define SOUND_FUN_NOTE_INDEX general_int16_t_1
 #define REACTION_GAME_SCORE general_int16_t_1
 #define GEIGER_TONE_FREQUENY_LOWEST general_int16_t_1
-#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
+// #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
 #define SIMON_LEVEL_LENGTH general_int16_t_1
 #define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
 #define SEQUENCER_STEP_COUNTER general_int16_t_1
@@ -204,7 +204,6 @@
 #define POMODORO_PROBABILITY_BEEP_INTERVAL_INDEX general_int16_t_1
 #define MOVIE_MODE_FLASH_FRAME_INDEX general_int16_t_1
 #define MODE_DREAMTIME_STEP general_int16_t_1
-// #define TALLY_KEEPER_0 general_int16_t_1
 #define MULTITIMER_TIMERS_COUNT general_int16_t_1
 #define TALLY_KEEPER_DELTA general_int16_t_1
 
@@ -221,7 +220,6 @@
 #define TILT_CYCLE_COUNTER general_int16_t_2
 #define MODE_DREAMTIME_STEP_MEMORY general_int16_t_2
 #define MOVIE_MODE_MOVIE_FRAME_INDEX_END general_int16_t_2
-// #define TALLY_KEEPER_1 general_int16_t_2
 #define SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX general_int16_t_2
 #define MULTITIMER_FISCHER_TIME_INDEX general_int16_t_2
 #define COMPOSER_STAGED_NOTE general_int16_t_2
@@ -233,15 +231,12 @@
 #define HACKTIME_MEMORY_SELECT general_int16_t_3 // was 5
 #define POMODORO_PAUSE_TIME_INDEX general_int16_t_3
 #define MOVIE_MODE_SOUNDTRACK_INDEX general_int16_t_3
-// #define TALLY_KEEPER_2 general_int16_t_3
 #define DRAW_CURSOR_ACTIVE_SEGMENT_IN_ACTIVE_DIGIT general_int16_t_3
 #define MULTITIMER_DIAL_TIME_INDEX general_int16_t_3
 #define SHOOTOUT_RANDOM_WAIT_TIME_MAX_INDEX general_int16_t_3
-// #define SIMON_PLAYERS_COUNT general_int16_t_3
 
 #define REACTION_WHACKING_ENDURANCE_SCORE_FOR_NEXT_ANIMATION_STEP general_int16_t_4
 #define DRAW_CURSOR_ACTIVE_DIGIT general_int16_t_4
-// #define TALLY_KEEPER_3 general_int16_t_4
 #define POMODORO_SOUND general_int16_t_4
 #define SETTINGS_MODE_ANALOG_VALUE general_int16_t_4
 
@@ -298,6 +293,8 @@
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
 #define POMODORO_TALLY_TYPE general_uint8_t_4
+
+#define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_uint8_t_5
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -1343,6 +1340,7 @@ private:
     uint8_t general_uint8_t_2;
     uint8_t general_uint8_t_3;
     uint8_t general_uint8_t_4;
+    uint8_t general_uint8_t_5;
 
     long general_long_1;
     long general_long_2;

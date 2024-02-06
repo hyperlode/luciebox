@@ -2175,6 +2175,12 @@ void Apps::modeTallyKeeper()
         score += TALLY_KEEPER_DELTA;
 
         setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, score);
+        
+        if(TALLY_KEEPER_DELTA){
+            buzzerPlaySpecial();
+        }else{
+            buzzerPlayApproval();
+        }
 
         TALLY_KEEPER_DELTA = 0;
         display_value = score;
@@ -2231,8 +2237,7 @@ void Apps::setTallyScore(uint8_t tally_index, int16_t value)
     eeprom_update_word(
         EEPROM_TALLY_KEEPER_SCORES + 2 * tally_index,
         value);
-    // buzzerPlayApproval();
-    buzzerPlaySpecial();
+    
 }
 
 #endif
