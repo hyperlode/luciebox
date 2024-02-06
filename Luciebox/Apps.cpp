@@ -2138,10 +2138,8 @@ void Apps::modeTallyKeeper()
     }
 
     // resetInactivityTimer(); // all score changes are written in eeprom. No more need to panic if box switches off.  // don't switch box off when displaying score!! --> controversial. Maybe it should then just beep every ten minutes?!
-    // int16_t display_value;
-    // display_value = getTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX);
 
-    // preset the score in the 'delta'
+    // stage the score in the 'delta'
     if ((binaryInputsEdgeUp & (1 << BUTTON_INDEXED_SMALL_2)))
     {
         TALLY_KEEPER_DELTA--;
@@ -2181,8 +2179,6 @@ void Apps::modeTallyKeeper()
         }
 
         TALLY_KEEPER_DELTA = 0;
-        // display_value = score;
-
         TALLY_RESET_SCORES_TIMER.start(TALLY_RESET_SCORES_TIMEOUT_MILLIS);
     }
 
@@ -2195,17 +2191,16 @@ void Apps::modeTallyKeeper()
             setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, 0);
             buzzerPlayDisappointment();
             TALLY_KEEPER_DELTA = 0; // if delta displayed, it can confuse people figuring out how it works. Long press should always mean: set it all to zero!
-            // display_value = 0;
         }
     }
 
     // display functionality
     if (TALLY_KEEPER_DELTA != 0)
     {
-        // if(button_light_blink_quarter_second_period())
+        // if(millis_half_second_period())
         if (millis_blink_250_750ms())
         {
-            setStandardTextToTextBuf(TEXT_SET);
+            setStandardTextToTextHANDLE(TEXT_SET);
             lights |= 1 << LIGHT_BUTTON_BIG_0 | 1 << LIGHT_BUTTON_BIG_1 | 1 << LIGHT_BUTTON_BIG_2 | 1 << LIGHT_BUTTON_BIG_3; // big button lights on
         }
         else

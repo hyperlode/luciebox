@@ -192,8 +192,8 @@
 #define REACTION_GAME_SCORE general_int16_t_1
 #define GEIGER_TONE_FREQUENY_LOWEST general_int16_t_1
 // #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
-#define SIMON_LEVEL_LENGTH general_int16_t_1
-#define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
+// #define SIMON_LEVEL_LENGTH general_int16_t_1
+// #define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
 #define SEQUENCER_STEP_COUNTER general_int16_t_1
 #define COMPOSER_STEP general_int16_t_1
 #define HACKTIME_ADDRESS general_int16_t_1
@@ -298,6 +298,8 @@
 #define POMODORO_TALLY_TYPE general_uint8_t_4
 
 #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_uint8_t_5
+#define SIMON_LEVEL_LENGTH general_uint8_t_5
+#define RANDOMWORLD_RANDOM_NUMBER general_uint8_t_5
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
