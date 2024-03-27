@@ -194,7 +194,7 @@
 // #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_int16_t_1
 // #define SIMON_LEVEL_LENGTH general_int16_t_1
 // #define RANDOMWORLD_RANDOM_NUMBER general_int16_t_1
-#define SEQUENCER_STEP_COUNTER general_int16_t_1
+// #define SEQUENCER_STEP_COUNTER general_int16_t_1
 #define COMPOSER_STEP general_int16_t_1
 #define HACKTIME_ADDRESS general_int16_t_1
 #define SOUND_NOTES_NOTE_ON_SCALE_INDEX general_int16_t_1
@@ -210,7 +210,7 @@
 #define GEIGER_TONE_FREQUENCY_HEIGHEST general_int16_t_2
 #define INIT_SPLASH_LIGHTS_STEP general_int16_t_2
 #define REACTION_GAME_ANIMATION_STEP_INDEX general_int16_t_2
-#define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
+// #define DRAW_ACTIVE_DRAWING_INDEX general_int16_t_2
 #define SIMON_INDEX general_int16_t_2
 #define RANDOMWORLD_UPPER_BOUNDARY_NUMBER_DRAW general_int16_t_2
 #define POMODORO_MAIN_CLOCK_TIME_INDEX general_int16_t_2
@@ -290,8 +290,10 @@
 #define REACTION_WHACK_A_BIRD_SHOW_NOTES general_uint8_t_3
 #define RANDOM_WORLD_ACTIVE_BIG_BUTTON_INDEX general_uint8_t_3
 #define MODE_SETTINGS_SELECTOR general_uint8_t_3
+#define SEQUENCER_STEP_COUNTER general_uint8_t_3
 
 #define SIMON_FORBIDDEN_PLAYER general_uint8_t_4
+#define SHOOTOUT_RECORDING_INDEX general_uint8_t_4
 #define RANDOMWORLD_INDEX_FROM_BINGO general_uint8_t_4
 #define DRAW_GAME_PICTURE_TYPE general_uint8_t_4
 #define REACTION_GAME_DECIMAL_POINTS general_uint8_t_4
@@ -300,6 +302,8 @@
 #define DRAW_ACTIVE_DRAWING_INDEX_EDGE_MEMORY general_uint8_t_5
 #define SIMON_LEVEL_LENGTH general_uint8_t_5
 #define RANDOMWORLD_RANDOM_NUMBER general_uint8_t_5
+
+#define DRAW_ACTIVE_DRAWING_INDEX general_int8_t_1
 
 #define DRAW_CURSOR_INDEX general_long_1
 #define GEIGER_PROBABILITY_THRESHOLD general_long_1
@@ -366,6 +370,7 @@
 
 #define BINGO_NUMBERS_LIST array_100_bytes_2
 #define SIMON_PLAYERS array_100_bytes_2
+#define SHOOTOUT_ANALOG_BUTTONS_RECORDING array_100_bytes_2
 
 #define BUZZERTRACK_NOTES_LIST array_100_bytes_3 // separate array, in whackabird, both arrays are in use at same time (new record song + save notes sequence)
 // #define PROGMEM_TO_BUFFER_UNTIL_LIST array_100_bytes_2
@@ -1346,6 +1351,8 @@ private:
     uint8_t general_uint8_t_3;
     uint8_t general_uint8_t_4;
     uint8_t general_uint8_t_5;
+
+    uint8_t general_int8_t_1;
 
     long general_long_1;
     long general_long_2;

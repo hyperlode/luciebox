@@ -606,6 +606,8 @@ void Apps::initializeAppDataToDefault()
     general_uint8_t_2 = 0;
     general_uint8_t_3 = 0;
     general_uint8_t_4 = 0;
+    general_uint8_t_5 = 0;
+    general_int8_t_1 = 0;
     general_long_1 = 0;
     general_long_2 = 0;
 
@@ -652,7 +654,7 @@ bool Apps::init_app(bool init, uint8_t selector)
     }
     else
 #endif
-    if (INIT_SPLASH_ANIMATION_STEP < 23)
+        if (INIT_SPLASH_ANIMATION_STEP < 23)
     {
         // show app splash screen
         ledDisp->setBinaryToDisplay(this->displayAllSegments);
@@ -2171,10 +2173,13 @@ void Apps::modeTallyKeeper()
         score += TALLY_KEEPER_DELTA;
 
         setTallyScore(TALLY_KEEPER_ACTIVE_SCORE_INDEX, score);
-        
-        if(TALLY_KEEPER_DELTA){
+
+        if (TALLY_KEEPER_DELTA)
+        {
             buzzerPlaySpecial();
-        }else{
+        }
+        else
+        {
             buzzerPlayApproval();
         }
 
@@ -2231,7 +2236,6 @@ void Apps::setTallyScore(uint8_t tally_index, int16_t value)
     eeprom_update_word(
         EEPROM_TALLY_KEEPER_SCORES + 2 * tally_index,
         value);
-    
 }
 
 #endif
@@ -2328,6 +2332,9 @@ void Apps::shootout()
             // //ENDTEST
 
             SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE = 0;
+#ifdef ENABLE_SERIAL
+            SHOOTOUT_RECORDING_INDEX = 0;
+#endif
             shootoutState = shootoutWaitPlayerPress;
         }
 
@@ -2355,12 +2362,21 @@ void Apps::shootout()
         // nextStepRotate(&SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX,true,0,99);
         // //ENDTEST
 
-        // 16,32,64,128 are the stored values of the individual raw big buttons (analog / 4)
+        // 16,32,64,128 are the stored values of the individual raw big buttons (analog / 4)   64, 128, 256, 512
         uint8_t bigButtonAnalogRaw = analogRead(PIN_BUTTONS_BIG) / 4;
         if (bigButtonAnalogRaw > 3 && SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE == 0)
         {
             SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE = bigButtonAnalogRaw;
         }
+
+        // record the first 100 cycles after analog is non zero. Interesting to see how the values fluctuate at the very start.
+#ifdef ENABLE_SERIAL
+        if (SHOOTOUT_RECORDING_INDEX < 100 && SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE != 0)
+        {
+            SHOOTOUT_ANALOG_BUTTONS_RECORDING[SHOOTOUT_RECORDING_INDEX] = bigButtonAnalogRaw;
+            SHOOTOUT_RECORDING_INDEX++;
+        }
+#endif
 
         byte big_buttons_lights = 1 << LIGHT_BUTTON_BIG_0 | 1 << LIGHT_BUTTON_BIG_1 | 1 << LIGHT_BUTTON_BIG_2 | 1 << LIGHT_BUTTON_BIG_3;
         lights |= big_buttons_lights;
@@ -2370,21 +2386,44 @@ void Apps::shootout()
         if (isBigButtonPressEdgeUpDetected())
         {
 
-            SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpBigButtonIndex] = 0x10 << binaryInputsEdgeUpBigButtonIndex; // button 0:16, 1:32, 2:64, 3:128
+            // set the theoretical analog value for the detected button
+            // SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpBigButtonIndex] = 0x10 << binaryInputsEdgeUpBigButtonIndex; // (0x10=16) button 0:16, 1:32, 2:64, 3:128
 
             // go to next state
+
+            // run through the four big buttons.
+            for (int big_button_index = 0; big_button_index < 4; big_button_index++)
+            {
+                // IF the button is indicated as pressed, this button is in the running to be the first press (will then be compared with the first analog value that was detected. If multiple button presses are deteced, we will then check who was pressing first.)
+                if (binaryInputsValue & (1 << big_button_index))
+                {
+                    SHOOTOUT_ANALOG_VALUES_CHECK[big_button_index] = 0x10 << big_button_index; // theoretical value per button. // (0x10=16) button 0:16, 1:32, 2:64, 3:128
+                }
+                else
+                {
+                    SHOOTOUT_ANALOG_VALUES_CHECK[big_button_index] = 255; // biggest number, trying to be unobtainable value to get this button out of the way.
+                }
+            }
+
             shootoutState = shootoutDefineRoundWinner;
         }
-        else
-        {
-            SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpBigButtonIndex] = 255; // unobtainable value. maximum.
-        }
+
+        // if (isBigButtonPressEdgeUpDetected())
+        // {
+        //     SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpBigButtonIndex] = 0x10 << binaryInputsEdgeUpBigButtonIndex; // (0x10=16) button 0:16, 1:32, 2:64, 3:128
+
+        //     // go to next state
+        //     shootoutState = shootoutDefineRoundWinner;
+        // }
+        // else
+        // {
+        //     SHOOTOUT_ANALOG_VALUES_CHECK[binaryInputsEdgeUpBigButtonIndex] = 255; // unobtainable value. maximum.
+        // }
 
         // if (!(binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_3)))
         // {
         //     shootoutState = shootoutWaitForQuizmaster;
         // }
-
         // //TEST SHOW RAW ANALOG VALUES
         // Serial.println("---");
         // Serial.println(SHOOTOUT_ANALOG_INPUT_SAMPLE_INDEX);
@@ -2411,14 +2450,16 @@ void Apps::shootout()
     {
         // Which theoretical button value is the closest to the first detected analog value? That's the winner. It looks pretty sound after some experimentation.
 
+        // calculate diffs and put them a bit further in the array.
         for (uint8_t i = 0; i < 4; i++)
         {
+            // check difference of theoretical value with first detected actual analog value.
             SHOOTOUT_ANALOG_VALUES_CHECK[4 + i] = abs(SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE - SHOOTOUT_ANALOG_VALUES_CHECK[i]);
         }
 
+        // get button index with smallest diff (which is the winner)
         SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX = 0;
         uint8_t smallestDiff = 255;
-
         for (uint8_t i = 0; i < 4; i++)
         {
             if (SHOOTOUT_ANALOG_VALUES_CHECK[4 + i] < smallestDiff)
@@ -2428,12 +2469,23 @@ void Apps::shootout()
             }
         }
 
-        // //TEST SHOW RAW ANALOG VALUES
-        // for(uint8_t i=0;i<8;i++){
-        // 	Serial.println(SHOOTOUT_ANALOG_VALUES_CHECK[i]);
-        // }
-        // Serial.println(SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE);
-        // Serial.println(SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX);
+#ifdef ENABLE_SERIAL
+        // TEST SHOW RAW ANALOG VALUES
+        Serial.println("start");
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            Serial.println(SHOOTOUT_ANALOG_VALUES_CHECK[i]);
+        }
+        Serial.println(SHOOTOUT_FIRST_ANALOG_BIG_BUTTON_NON_ZERO_VALUE);
+        Serial.println(SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX);
+
+        Serial.println("replay:");
+        for (uint8_t i = 0; i < 100; i++)
+        {
+            Serial.println(SHOOTOUT_ANALOG_BUTTONS_RECORDING[i]);
+        }
+        Serial.println("end");
+#endif
         // //ENDTEST
         SHOOTOUT_SCORE_MEMORY = SHOOTOUT_SCORE[SHOOTOUT_MOST_RECENT_ROUND_WINNER_INDEX];
 
@@ -3745,7 +3797,7 @@ void Apps::draw()
 
     // SAVE / LOAD drawings from memory
 #ifdef ENABLE_EEPROM
-    checkBoundaries(&DRAW_ACTIVE_DRAWING_INDEX, 0, EEPROM_NUMBER_OF_DRAWINGS - 1, true);
+    checkBoundaries(reinterpret_cast<int16_t *>(&DRAW_ACTIVE_DRAWING_INDEX), 0, EEPROM_NUMBER_OF_DRAWINGS - 1, true);
 
     if (binaryInputsToggleValue & (1 << BUTTON_INDEXED_SMALL_1))
     {
@@ -3843,7 +3895,7 @@ void Apps::draw()
                 this->displayChangeGlobal(&displayAllSegments);
 
                 // scroll through drawings.
-                modifyValueUpDownWithButtonsBig2And3(&DRAW_ACTIVE_DRAWING_INDEX);
+                modifyValueUpDownWithButtonsBig2And3(reinterpret_cast<int16_t *>(&DRAW_ACTIVE_DRAWING_INDEX));
             }
         }
 
@@ -4230,7 +4282,8 @@ void Apps::modeSequencer()
         // handle step change
         if (step != 0 || this->app_init_edge)
         {
-            nextStepRotate(&SEQUENCER_STEP_COUNTER, step > 0, 0, 31);
+            // nextStepRotate(&SEQUENCER_STEP_COUNTER, step > 0, 0, 31);
+            nextStepRotate(reinterpret_cast<int16_t *>(&SEQUENCER_STEP_COUNTER), step > 0, 0, 31);
 
             buzzerSilentClearBufferAndAddNote(
                 this->SEQUENCER_SONG[SEQUENCER_STEP_COUNTER] +
@@ -4630,7 +4683,6 @@ void Apps::modeSimon()
         {
             // in custom build up, last light of the sequence, the first player in this level gets to choose the move(in one player per level games, that's the only player. In multiple players per level games: that's the first player.)
 
-            
             buzzerPlaySpecial();
             // addNoteToBuzzerRepeated(REST_15_8, 3);
             buzzerAddRest(45);
@@ -5679,7 +5731,8 @@ void Apps::textBufToDisplay()
     ledDisp->setTextBufToDisplay(textBuf);
 }
 
-void Apps::buzzerPlaySpecial(){
+void Apps::buzzerPlaySpecial()
+{
     buzzerSilentClearBufferAndAddNote(C8_1); // special beep.
 }
 void Apps::buzzerPlayApproval()
@@ -5692,7 +5745,8 @@ void Apps::buzzerPlayDisappointment()
     this->buzzerSilentClearBufferAndAddNote(C4_1);
 }
 
-void Apps::buzzerAddRest(uint8_t amount_of_eights){
+void Apps::buzzerAddRest(uint8_t amount_of_eights)
+{
     addNoteToBuzzerRepeated(REST_1_8, amount_of_eights);
 }
 
