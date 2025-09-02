@@ -1,7 +1,8 @@
 # About
 A busy box is the official word for a sensory exploratory platform for babies. 
 This project was made as a birth day gift for Lucie Ameije 2019-04
-With a bit of effort, it's as interesting to adults than it is to babies.
+Turns out, it's as interesting to adults as it is to babies. 
+95% ignores abandos the box after five minutes. 5% gets hooked for days. 
 
 Made by Uncle Sensory Overlode.
 www.ameije.com
